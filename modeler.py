@@ -8,7 +8,7 @@ TODO - Add module docstring
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# /No GitHub page yet
+# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/blob/main/modeler.py
 
 from __future__ import annotations
 from dataclasses import dataclass, field
