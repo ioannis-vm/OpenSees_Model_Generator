@@ -1,25 +1,27 @@
-* My OpenSees 3D building model creation workflow goal!
+* Future plans
 
-** ToDo list
+*** High priority
 
-*** Sooner
-**** TODO Create an opensees 3D model of a fiber-section steel building in the conventional way. It will be used to recreate it with the modeler and verify the results.
+- [ ] Be able to create a 3D OpenSeesPy model of a fiber-section steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. Load case support. Automatic load and mass distribution.
+- [ ] Modal analysis
+- [ ] Gravity load case analysis
+- [ ] NL Pushover analysis
+- [ ] NL time-history analysis
+- [ ]
 
-*** Later
-**** TODO Add github page URL to the beginning of the files once the thing goes out.
+*** Medium priority
 
-
-
-*** The module user should have to do the following
-There is a pdf file written in Notability that outlines what the user should do to define the building.
-
-**** Additional things to implement
+- [ ] Basic modifications of previously defined elements (deletion, splitting etc)
 - [ ] Replicate finished levels upwards
+- [ ] Visualizing deformed shapes
+- [ ] Visualizing element forces
+- [ ]
 
+**** Low priority
 
-*** The module should have functions that automate the following tasks
-- [ ] Use the obtained information to calculate
-  - [ ] Center of mass for each diaphragm
-  - [ ] Proper element connectivity/offsets etc.
-  - [ ] UDL distribution on elements
-- [ ] Generate the commands to create the OpenSees model
+- [ ] Load combination support
+- [ ] Code-based design
+- [ ] Synthetic ground-motion generation
+- [ ] Incremental dynamic analysis support
+- [ ] PBEE integration
+- [ ] 
