@@ -2,6 +2,14 @@
 The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
+#   __                 UC Berkeley
+#   \ \/\   /\/\/\     John Vouvakis Manousakis
+#    \ \ \ / /    \    Dimitrios Konstantinidis
+# /\_/ /\ V / /\/\ \
+# \___/  \_/\/    \/   April 2021
+#
+# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/blob/main/modeler.py
+
 from modeler import Building
 import plotly.graph_objects as go
 import plotly.io as pio
