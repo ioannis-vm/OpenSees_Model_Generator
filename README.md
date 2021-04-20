@@ -1,4 +1,3 @@
-# 2021-04_Office_Building
-Archetype OpenSEES mid-rise steel BRBF office building
+# OpenSeesPy_Modeler
 
 - work in progress
