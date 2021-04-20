@@ -1,0 +1,25 @@
+* My OpenSees 3D building model creation workflow goal!
+
+** ToDo list
+
+*** Sooner
+**** TODO Create an opensees 3D model of a fiber-section steel building in the conventional way. It will be used to recreate it with the modeler and verify the results.
+
+*** Later
+**** TODO Add github page URL to the beginning of the files once the thing goes out.
+
+
+
+*** The module user should have to do the following
+There is a pdf file written in Notability that outlines what the user should do to define the building.
+
+**** Additional things to implement
+- [ ] Replicate finished levels upwards
+
+
+*** The module should have functions that automate the following tasks
+- [ ] Use the obtained information to calculate
+  - [ ] Center of mass for each diaphragm
+  - [ ] Proper element connectivity/offsets etc.
+  - [ ] UDL distribution on elements
+- [ ] Generate the commands to create the OpenSees model
