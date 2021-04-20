@@ -5,7 +5,7 @@
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/blob/main/modeler.py
+# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
 
 import unittest
 from modeler import Building, Level, GridLine, Group, LinearElement, Node
