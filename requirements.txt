@@ -1,0 +1,5 @@
+openseespy >=3.2.2.10
+plotly >=4.14.3
+numpy >=1.20.2
+matplotlib >=3.4.1
+
