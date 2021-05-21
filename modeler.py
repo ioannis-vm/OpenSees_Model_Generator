@@ -639,9 +639,9 @@ class Building:
     levels: Levels = field(default_factory=Levels)
     groups: Groups = field(default_factory=Groups)
 
-    #############################################
-    # Add methods - add objects to the building #
-    #############################################
+    ###############################################
+    # 'Add' methods - add objects to the building #
+    ###############################################
 
     def add_node(self,
                  x: float,
@@ -852,7 +852,6 @@ def to_OpenSeesPy(building: Building):
                 beam.uniq_id + 150,
                 *beam.local_y_axis_vector()
             )
-            # TODO -> map coordinate transforms and use the same
             ops.element(
                 'elasticBeamColumn',
                 beam.uniq_id,
