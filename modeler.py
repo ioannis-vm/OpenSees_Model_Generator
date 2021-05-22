@@ -1,5 +1,5 @@
 """
-TODO - Add module docstring
+Building Modeler for OpenSeesPy
 """
 
 #   __                 UC Berkeley
@@ -19,10 +19,11 @@ import matplotlib.pyplot as plt
 import openseespy.opensees as ops
 import openseespy.postprocessing.ops_vis as opsv
 
-EPSILON = 1.00E-8
+EPSILON = 1.00E-4
 ALPHA = 10000.00
 
 # pylint: disable=unsubscriptable-object
+# pylint: disable=invalid-name
 
 
 def previous_element(lst: list, obj):
@@ -195,7 +196,7 @@ class Element:
     columns, beams etc.
     """
 
-    uniq_id: int = field(init=False)
+    uniq_id: int = field(init=False, repr=False)
 
     def __post_init__(self):
         self.iniq_id = 0
@@ -674,6 +675,35 @@ class Building:
         """
         self.gridsystem.add(GridLine(tag, pi_x, pi_y, pj_x, pj_y))
 
+    def add_gridlines_from_dxf(self,
+                               dxf_file: str):
+        lines = []
+        i = 100000
+        xi = 0.00
+        xj = 0.00
+        yi = 0.00
+        yj = 0.00
+        with open(dxf_file, 'r') as f:
+            while True:
+                ln = f.readline()
+                if ln == "":
+                    break
+                ln = ln.strip()
+                if ln == "AcDbLine":
+                    i = 0
+                if i == 2:
+                    xi = float(ln)
+                if i == 4:
+                    yi = float(ln)
+                if i == 6:
+                    xj = float(ln)
+                if i == 8:
+                    yj = float(ln)
+                    lines.append((xi, yi, xj, yj))
+                i += 1
+        for j, line in enumerate(lines):
+            self.add_gridline(str(j), *line)
+
     def add_group(self, name: str):
         """
         Adds a new group to the building
@@ -688,6 +718,8 @@ class Building:
         TODO - add docstring
         """
         for level in self.levels.active:
+            top_node_exists = False  # initialize
+            bot_node_exists = False
             if level.previous_lvl:  # if previous level exists
                 # check to see if top node exists
                 top_node = level.look_for_node(x, y)
@@ -695,6 +727,8 @@ class Building:
                 if not top_node:
                     top_node = Node(x, y, level.elevation, level.restraint)
                     level.nodes.add(top_node)
+                else:
+                    top_node_exists = True
                 # check to see if bottom node exists
                 bot_node = level.previous_lvl.look_for_node(
                     x, y)
@@ -704,8 +738,11 @@ class Building:
                         x, y, level.previous_lvl.elevation,
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes.add(bot_node)
-                # add the column connecting the two nodes
-                level.columns.add(Column(top_node, bot_node, ang))
+                else:
+                    bot_node_exists = True
+                # add the column connecting the two nodes if it does not exist
+                if ((not top_node_exists) and (not bot_node_exists)):
+                    level.columns.add(Column(top_node, bot_node, ang))
 
     def add_beam_at_points(self,
                            pi_x: float,
@@ -782,9 +819,13 @@ class Building:
                     i += 1
             return i
 
+        # number nodes
         i = 1
         i = assign_numbers([lvl.nodes.node_list
                             for lvl in self.levels.level_list], i)
+        i = 1
+
+        # number elements
         i = assign_numbers([lvl.columns.column_list
                             for lvl in self.levels.level_list], i)
         i = assign_numbers([lvl.beams.beam_list
@@ -800,10 +841,9 @@ class Building:
 # The following functions use the Building
 # class to interact with OpenSeesPy
 
-
 def to_OpenSeesPy(building: Building):
     """
-    Defines the model in OpenSeesPy on the spot
+    Defines the building model in OpenSeesPy on the spot
     """
     # TODO
     A, Iz, Iy, J = 0.04, 0.0010667, 0.0002667, 0.01172
@@ -813,8 +853,8 @@ def to_OpenSeesPy(building: Building):
     ops.wipe()
     ops.model('basic', '-ndm', building.ndm,
               '-ndf', building.ndf)
-    # define the nodes
     for lvl in building.levels.level_list:
+        # define the nodes
         for node in lvl.nodes.node_list:
             ops.node(
                 node.uniq_id,

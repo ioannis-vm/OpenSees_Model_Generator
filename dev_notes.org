@@ -1,3 +1,20 @@
+* Todo List
+
+*** Developing code
+Definition stage
+- [ ] Floor perimeter
+- [ ] UDL
+- [ ] Grids from dxf
+Analysis stage
+- [ ] Distribute UDLs to beams
+- [ ] Loads
+- [ ] Mass
+- [ ] Define in OpenSees
+
+*** Organizing existing code
+- [ ] Change input arguments to include tuples
+- [ ] Consider changing dataclass arguments to dictionaries, to reduce the number of arguments
+
 * Future plans
 
 *** High priority
