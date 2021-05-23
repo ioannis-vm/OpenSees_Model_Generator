@@ -2,14 +2,18 @@
 
 *** Developing code
 Definition stage
-- [ ] Floor perimeter
-- [ ] UDL
-- [ ] Grids from dxf
+- [X] Floor perimeter
+- [X] UDL
+- [X] Grids from dxf
 Analysis stage
 - [ ] Distribute UDLs to beams
 - [ ] Loads
 - [ ] Mass
 - [ ] Define in OpenSees
+
+*** Things to test
+- [ ] Test that two identical UDLs raise an error on a single level
+- [ ] Assert that two identical UDLs on different levels do not cause an error
 
 *** Organizing existing code
 - [ ] Change input arguments to include tuples

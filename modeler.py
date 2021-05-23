@@ -203,6 +203,66 @@ class Element:
 
 
 @dataclass
+class Region:
+    """
+    Closed polygonal region representing perimeters of 2D components and
+    surface UDLs
+    """
+
+    points: list[list[float]] = field()
+
+    def __eq__(self, other):
+        return self.points == other.points
+
+
+@dataclass
+class Load:
+    """
+    General-purpose class representing a load
+    """
+
+    load_value: float = field()
+
+
+@dataclass
+class sUDL(Load):
+    """
+    Surface Uniformly Distributed Load
+    """
+
+    region: Region = field()
+
+    def __eq__(self, other):
+        """
+        Equality is check in terms of both the polygon
+        and the value of the UDL
+        """
+        return (self.load == other.load and
+                self.region == other.region)
+
+
+@dataclass
+class sUDLs:
+    """
+    This class is a collector of
+    surface uniformly distributed loads (sUDLs)
+    """
+
+    sudl_list: list[sUDL] = field(default_factory=list)
+
+    def add(self, sudl: sUDL):
+        """
+        Add a sUDL in the collection,
+        if it does not already exist
+        """
+        if sudl not in self.sudl_list:
+            self.sudl_list.append(sudl)
+        else:
+            raise ValueError('UDL already exists: '
+                             + repr(sudl))
+
+
+@dataclass
 @total_ordering
 class Group:
     """
@@ -330,7 +390,7 @@ class Nodes:
     def add(self, node: Node):
         """
         Add a node in the nodes collection,
-        if it does not exist already
+        if it does not already exit
         """
         if node not in self.node_list:
             self.node_list.append(node)
@@ -417,7 +477,7 @@ class Columns:
     def add(self, column: Column):
         """
         Add a column in the columns collection,
-        if it does not exist already
+        if it does not already exit
         """
         if column not in self.column_list:
             self.column_list.append(column)
@@ -467,7 +527,7 @@ class Beams:
     def add(self, beam: Beam):
         """
         Add a beam in the beams collection,
-        if it does not exist already
+        if it does not already exit
         """
         if beam not in self.beam_list:
             self.beam_list.append(beam)
@@ -495,13 +555,17 @@ class Beams:
 class Level:
     """
     Individual building floor level.
-    All nodes, elements and applied loads must belong to a level.
+    All nodes, elements and applied loads
+    must belong to a single level.
     """
 
     name: str
     elevation: float
     restraint: str = field(default="free")
     previous_lvl: 'Level' = field(default=None)
+    region: 'Region' = field(default=None)
+    self_weight: float = field(default=None)
+    sudls: 'sUDLs' = field(default_factory=sUDLs)
     nodes: Nodes = field(default_factory=Nodes)
     columns: Columns = field(default_factory=Columns)
     beams: Beams = field(default_factory=Beams)
@@ -656,7 +720,8 @@ class Building:
     def add_level(self,
                   name: str,
                   elevation: float,
-                  restraint: str = "free"
+                  restraint: str = "free",
+                  perimeter: Perimeter = None
                   ):
         """
         adds a level to the buildin
@@ -709,6 +774,30 @@ class Building:
         Adds a new group to the building
         """
         self.groups.add(Group(name))
+
+    def add_level_perimeter(self,
+                            list_of_points: List[List[float]]):
+        """
+        Adds the given floor perimeter to the active building levels.
+        Used to calculate the floor center of mass and moment of inertia,
+        self-weight, area of applied uniformly distributed loads, etc.
+        The perimeters are expressed as counter-clock-wise vertices.
+        The first vertex does not have to be repeated at the end.
+        Parameters:
+            [[x1,y1], [x2,y2], ..., [xn, yn]]
+        """
+        perimeter = Perimeter(list_of_points)
+        for level in self.levels.active:
+            level.perimeter = perimeter
+
+    def set_level_self_weight(self, weight_per_area: float):
+        """
+        Assigns the self-weight of the floor material, for the self-weight
+        calculation. Note this is in units of weight (not load).
+        Self weight contributes to mass and the dead load case.
+        """
+        for level in self.levels.active:
+            level.self_weight = weight_per_area
 
     def add_column_at_point(self,
                             x: float,
@@ -834,6 +923,10 @@ class Building:
     def lock(self):
         """
         Lock the building. No further editing beyond this point.
+        This method initiates automated calculations for the following:
+        - Floor center of mass and moment of inertia
+        - Diaphgragm master node definition
+        - Surface load distribution on the beams
         """
         self.number_components()
 
