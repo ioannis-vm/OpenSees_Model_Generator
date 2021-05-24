@@ -22,6 +22,7 @@ NODE_PRIMARY_COLOR = '#7ac4b7'
 COLUMN_COLOR = '#0f24db'
 BEAM_COLOR = '#0f24db'
 FLOOR_COLOR = '#c4994f'
+SUDL_COLOR = '#ab1a28'
 
 
 def draw_level_geometry(building: Building, lvlname: str):
@@ -32,7 +33,7 @@ def draw_level_geometry(building: Building, lvlname: str):
     ax = fig.add_subplot(111)
     ax.set_aspect('equal')
 
-    # retrieved the specified level
+    # retrieve the specified level
     level = building.levels.get(lvlname)
 
     # draw the floor perimeter
@@ -43,7 +44,30 @@ def draw_level_geometry(building: Building, lvlname: str):
         patches, alpha=0.25, facecolors=FLOOR_COLOR, edgecolors=("black",))
     ax.add_collection(collection)
 
-    ax.margins(0.10)
-    fig.show()
+    # draw the surface loads
+    for sudl in level.sudls.sudl_list:
+        xy = np.array(sudl.region.points)
+        polygon = Polygon(xy, True)
+        patches = [polygon]
+        collection = PatchCollection(
+            patches, alpha=0.25, facecolors=SUDL_COLOR, edgecolors=SUDL_COLOR)
+        ax.add_collection(collection)
 
     # draw the beams
+    for bm in level.beams.beam_list:
+        line = [
+            bm.node_i.coordinates[0:2],
+            bm.node_j.coordinates[0:2]
+        ]
+        line_np = np.array(line)
+        ax.plot(line_np[:, 0], line_np[:, 1], color=BEAM_COLOR)
+
+    # draw the nodes
+    points = []
+    for nd in level.nodes.node_list:
+        points.append(nd.coordinates)
+    points_np = np.array(points)
+    ax.scatter(points_np[:, 0], points_np[:, 1], color=NODE_PRIMARY_COLOR)
+
+    ax.margins(0.10)
+    fig.show()

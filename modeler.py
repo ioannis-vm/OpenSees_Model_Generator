@@ -257,11 +257,15 @@ class Mass:
 
 
 @dataclass
-class sUDL(Load):
+class SUDL:
     """
     Surface Uniformly Distributed Load
+    Parameters:
+        load_per_area: float (vertical load)
+        region: Region
     """
 
+    load_per_area: float
     region: Region = field()
 
     def __eq__(self, other):
@@ -269,20 +273,20 @@ class sUDL(Load):
         Equality is check in terms of both the polygon
         and the value of the UDL
         """
-        return (self.value == other.value and
+        return (self.load_per_area == other.load_per_area and
                 self.region == other.region)
 
 
 @dataclass
-class sUDLs:
+class SUDLs:
     """
     This class is a collector of
     surface uniformly distributed loads (sUDLs)
     """
 
-    sudl_list: list[sUDL] = field(default_factory=list)
+    sudl_list: list[SUDL] = field(default_factory=list)
 
-    def add(self, sudl: sUDL):
+    def add(self, sudl: SUDL):
         """
         Add a sUDL in the collection,
         if it does not already exist
@@ -290,7 +294,7 @@ class sUDLs:
         if sudl not in self.sudl_list:
             self.sudl_list.append(sudl)
         else:
-            raise ValueError('UDL already exists: '
+            raise ValueError('SUDL already exists: '
                              + repr(sudl))
 
 
@@ -626,7 +630,7 @@ class Level:
     previous_lvl: 'Level' = field(default=None)
     perimeter: 'Region' = field(default=None)
     self_weight: float = field(default=None)
-    sudls: 'sUDLs' = field(default_factory=sUDLs)
+    sudls: 'SUDLs' = field(default_factory=SUDLs)
     nodes: Nodes = field(default_factory=Nodes)
     columns: Columns = field(default_factory=Columns)
     beams: Beams = field(default_factory=Beams)
@@ -675,6 +679,12 @@ class Level:
         bm_to_add = Beam(node_i, node_j, ang)
         if bm_to_add not in self.beams.beam_list:
             self.beams.add(bm_to_add)
+
+    def add_surface_load(self,
+                         load_per_area: float,
+                         region: Region):
+        sudl = SUDL(load_per_area, region)
+        self.sudls.add(sudl)
 
 
 @ dataclass
@@ -840,29 +850,37 @@ class Building:
         """
         self.groups.add(Group(name))
 
-    def add_level_perimeter(self,
-                            list_of_points: List[List[float]]):
+    def add_floor(self,
+                  weight_per_area: float,
+                  list_of_points: List[List[float]]):
         """
         Adds the given floor perimeter to the active building levels.
         Used to calculate the floor center of mass and moment of inertia,
         self-weight, area of applied uniformly distributed loads, etc.
         The perimeters are expressed as counter-clock-wise vertices.
         The first vertex does not have to be repeated at the end.
+        Also, assigns the self-weight of the floor material, for the
+        self-weight calculation. Note this is in units of weight (not load).
+        Self weight contributes to mass and the dead load case.
+
         Parameters:
+            weight_per_area,
             [[x1,y1], [x2,y2], ..., [xn, yn]]
         """
         region = Region(list_of_points)
         for level in self.levels.active:
+            level.self_weight = weight_per_area
             level.perimeter = region
 
-    def set_level_self_weight(self, weight_per_area: float):
+    def add_surface_load(self,
+                         load_per_area: float,
+                         list_of_points: List[List[float]]):
         """
-        Assigns the self-weight of the floor material, for the self-weight
-        calculation. Note this is in units of weight (not load).
-        Self weight contributes to mass and the dead load case.
+        Assigns surface loads on the active levels
         """
+        region = Region(list_of_points)
         for level in self.levels.active:
-            level.self_weight = weight_per_area
+            level.add_surface_load(load_per_area, region)
 
     def add_column_at_point(self,
                             x: float,
