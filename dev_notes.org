@@ -6,6 +6,8 @@ Definition stage
 - [X] UDL
 - [X] Grids from dxf
 - [X] Test that load and mass classes work as intended
+- [X] Section class
+- [X] Material class
 Visualization
 - [X] Visualize floor regions and UDLs
 - [ ] Visualize element loads and point masses
@@ -21,14 +23,14 @@ Analysis stage
 - [ ] Assert that two identical UDLs on different levels do not cause an error
 
 *** Organizing existing code
-- [ ] Change input arguments to include tuples
-- [ ] Consider changing dataclass arguments to dictionaries, to reduce the number of arguments
+- [X] Change input arguments to include tuples
+- [X] Consider changing dataclass arguments to dictionaries, to reduce the number of arguments
 
 * General Plan
 
 *** High priority
 
-- [ ] Be able to create a 3D OpenSeesPy model of a fiber-section steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. Load case support. Automatic load and mass distribution.
+- [ ] Be able to create a 3D OpenSeesPy model of a fiber-section steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
 - [ ] Modal analysis
 - [ ] Gravity load case analysis
 - [ ] NL Pushover analysis
@@ -37,17 +39,17 @@ Analysis stage
 
 *** Medium priority
 
-- [ ] Basic modifications of previously defined elements (deletion, splitting etc)
-- [ ] Replicate finished levels upwards
 - [ ] Visualizing deformed shapes
 - [ ] Visualizing element forces
+- [ ] Basic modifications of previously defined elements (deletion, splitting etc)
+- [ ] Replicate finished levels upwards
 - [ ]
 
 **** Low priority
 
+- [ ] PBEE integration
 - [ ] Load combination support
 - [ ] Code-based design
 - [ ] Synthetic ground-motion generation
 - [ ] Incremental dynamic analysis support
-- [ ] PBEE integration
-- [ ] 
+- [ ] Read-the-docs-style documentation

@@ -495,6 +495,7 @@ class Sections:
     """
 
     section_list: list[Section] = field(default_factory=list)
+    active: Section = field(default=None)
 
     def add(self, section: Section):
         """
@@ -506,6 +507,21 @@ class Sections:
         else:
             raise ValueError('Section already exists: '
                              + repr(section))
+
+    def set_active(self, name: str):
+        """
+        Assigns the active section.
+        Any elements defined while this section is active
+        will be assigned that seciton.
+        """
+        self.active = None
+        found = False
+        for section in self.section_list:
+            if section.name == name:
+                self.active = section
+                found = True
+        if found is False:
+            raise ValueError("Section " + name + " does not exist")
 
     def __repr__(self):
         out = "Defined sections: " + \
@@ -532,6 +548,7 @@ class Materials:
     """
 
     material_list: list[Material] = field(default_factory=list)
+    active: Material = field(default=None)
 
     def add(self, material: Material):
         """
@@ -543,6 +560,21 @@ class Materials:
         else:
             raise ValueError('Material already exists: '
                              + repr(material))
+
+    def set_active(self, name: str):
+        """
+        Assigns the active material.
+        Any elements defined while this material is active
+        will be assigned that material.
+        """
+        self.active = None
+        found = False
+        for material in self.material_list:
+            if material.name == name:
+                self.active = material
+                found = True
+        if found is False:
+            raise ValueError("Material " + name + " does not exist")
 
     def __repr__(self):
         out = "Defined sections: " + \
@@ -845,11 +877,11 @@ class Building:
     This class manages building objects
     """
 
-    ndm: int = field(default=3)
-    ndf: int = field(default=6)
     gridsystem: GridSystem = field(default_factory=GridSystem)
     levels: Levels = field(default_factory=Levels)
     groups: Groups = field(default_factory=Groups)
+    sections: Sections = field(default_factory=Sections)
+    materials: Materials = field(default_factory=Materials)
 
     ###############################################
     # 'Add' methods - add objects to the building #
@@ -883,6 +915,23 @@ class Building:
         Adds a new gridline to the building
         """
         self.gridsystem.add(GridLine(tag, start, end))
+
+    def add_sections(self,
+                     sec_type: str,
+                     name: str,
+                     parameters: dict):
+        """
+        Adds a new section to the building
+        """
+        self.sections.add(Section(sec_type, name, parameters))
+
+    def add_material(self,
+                     ops_material: str,
+                     density: float,
+                     parameters: dict):
+        """
+        Adds a new material to the building
+        """
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
@@ -1040,6 +1089,18 @@ class Building:
         """
         self.groups.set_active(names)
 
+    def set_active_material(self, name: str):
+        """
+        Sets the active material.
+        """
+        self.materials.set_active(name)
+
+    def set_active_section(self, name: str):
+        """
+        Sets the active section.
+        """
+        self.sections.set_active(name)
+
     ###############################
     # Structural analysis methods #
     ###############################
@@ -1093,8 +1154,8 @@ def to_OpenSeesPy(building: Building):
     G = 9615384.6
 
     ops.wipe()
-    ops.model('basic', '-ndm', building.ndm,
-              '-ndf', building.ndf)
+    ops.model('basic', 3, building.ndm,
+              6, building.ndf)
     for lvl in building.levels.level_list:
         # define the nodes
         for node in lvl.nodes.node_list:
