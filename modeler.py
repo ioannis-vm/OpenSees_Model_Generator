@@ -46,20 +46,18 @@ def previous_element(lst: list, obj):
 @total_ordering
 class GridLine:
     tag: str
-    pi_x: float
-    pi_y: float
-    pj_x: float
-    pj_y: float
-    start: np.ndarray = field(init=False, repr=False)
-    end:   np.ndarray = field(init=False, repr=False)
+    start: List[float]
+    end: List[float]
+    start_np: np.ndarray = field(init=False, repr=False)
+    end_np:   np.ndarray = field(init=False, repr=False)
     length: float = field(init=False, repr=False)
     direction: float = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.start = np.array([self.pi_x, self.pi_y])
-        self.end = np.array([self.pj_x, self.pj_y])
-        self.length = np.linalg.norm(self.end - self.start)
-        self.direction = (self.end - self.start) / self.length
+        self.start_np = np.array(self.start)
+        self.end_np = np.array(self.end)
+        self.length = np.linalg.norm(self.end_np - self.start_np)
+        self.direction = (self.end_np - self.start_np) / self.length
 
     def __eq__(self, other):
         return self.tag == other.tag
@@ -97,8 +95,8 @@ class GridLine:
             # The lines are parallel
             return None
         # Get the origins
-        ra_ori = self.start
-        rb_ori = grd.start
+        ra_ori = self.start_np
+        rb_ori = grd.start_np
         # System left-hand-side
         bvec = np.array(
             [
@@ -120,7 +118,7 @@ class GridLine:
             return None
         # Otherwise the point is valid
         pt = ra_ori + ra_dir * uvvec[0]
-        return [pt[0], pt[1]]
+        return Point([pt[0], pt[1]])
 
 
 @dataclass
@@ -155,13 +153,14 @@ class GridSystem:
         Returns a list of all the points
         defined by gridline intersections
         """
-        pts = []  # intersection points: [ [x1, y1], ... ]
+        pts = []  # intersection points
         for i, grd1 in enumerate(self.grids):
             for j in range(i+1, len(self.grids)):
                 grd2 = self.grids[j]
                 pt = grd1.intersect(grd2)
-                if pt:
-                    pts.append(pt)
+                if pt:  # if an intersection point exists
+                    if pt not in pts:  # and is not already in the list
+                        pts.append(pt)
         return pts
 
     def intersect(self, grd: GridLine):
@@ -171,13 +170,14 @@ class GridSystem:
         gridline with all the other gridlines
         in the gridsystem
         """
-        pts = []  # intersection points: [ [x1, y1], ... ]
-        for i, other_grd in enumerate(self.grids):
+        pts = []  # intersection points
+        for other_grd in self.grids:
             if other_grd == grd:
                 continue
             pt = grd.intersect(other_grd)
-            if pt:
-                pts.append(pt)
+            if pt:  # if there is an intersection
+                if pt not in pts:  # and is not already in the list
+                    pts.append(pt)
         return pts
 
     def __repr__(self):
@@ -218,10 +218,42 @@ class Region:
 @dataclass
 class Load:
     """
-    General-purpose class representing a load
+    General-purpose class representing a load.
+    For point loads, values represent the load, and moments are defined.
+    For uniformly distributed loads, values represent
+    load per unit length, moments are not defined.
+    For surface loads, values represent
+    load per unit area, moments are not defined.
+    Parameters:
+        [x, y, z, (optional): mx, my, mz]
     """
 
-    load_value: float = field()
+    value: List[float] = field()
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __add__(self, other):
+        return [sum(x)
+                for x in zip(self.value, other.value)]
+
+
+@dataclass
+class Mass:
+    """
+    Point mass.
+    Parameters
+        [mx, my, mz, Ix, Iy, Iz]
+    """
+
+    value: List[float] = field()
+
+    def __eq__(self, other):
+        return self.value == other.value
+
+    def __add__(self, other):
+        return [sum(x)
+                for x in zip(self.value, other.value)]
 
 
 @dataclass
@@ -237,7 +269,7 @@ class sUDL(Load):
         Equality is check in terms of both the polygon
         and the value of the UDL
         """
-        return (self.load == other.load and
+        return (self.value == other.value and
                 self.region == other.region)
 
 
@@ -352,29 +384,53 @@ class Groups:
 
 @dataclass
 @total_ordering
-class Node(Element):
+class Point:
     """
-    Node object.
-    It represents a point.
-    Used for element connectivity.
+    2D Point
+    Parameters:
+        [x, y, z] or [x, y] (depending on the case)
     """
-
-    x_coord: float
-    y_coord: float
-    z_coord: float
-    restraint_type: str = field(default="free")
+    coordinates: List[float]
 
     def __eq__(self, other):
         """
         Equality is only checked in terms of (x, y)
         """
-        dist = (self.x_coord - other.x_coord)**2 +\
-            (self.y_coord - other.y_coord)**2
+        dist = (self.coordinates[0] - other.coordinates[0])**2 +\
+            (self.coordinates[1] - other.coordinates[1])**2
         return dist < EPSILON**2
 
     def __le__(self, other):
-        d_self = self.y_coord * ALPHA + self.x_coord
-        d_other = other.y_coord * ALPHA + other.x_coord
+        d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
+        d_other = other.coordinates[1] * ALPHA + other.coordinates[0]
+        return d_self <= d_other
+
+
+@dataclass
+class Node(Element, Point):
+    """
+    Node object.
+    Parameters:
+        [x, y, z]
+        restraint_type: "free" or "pinned" or "fixed"
+    """
+
+    coordinates: List[float]
+    restraint_type: str = field(default="free")
+
+    load: float = field(default=None)  # point load
+
+    def __eq__(self, other):
+        """
+        Equality is only checked in terms of (x, y)
+        """
+        dist = (self.coordinates[0] - other.coordinates[0])**2 +\
+            (self.coordinates[1] - other.coordinates[1])**2
+        return dist < EPSILON**2
+
+    def __le__(self, other):
+        d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
+        d_other = other.coordinates[1] * ALPHA + other.coordinates[0]
         return d_self <= d_other
 
 
@@ -423,11 +479,16 @@ class LinearElement:
     node_j: Node
     ang: float
 
+    load: float = field(default=None)  # UDL
+
     def local_y_axis_vector(self):
+        """
+        Calculates the local y axis of the linear element.
+        """
         x_vec = np.array([
-            self.node_j.x_coord - self.node_i.x_coord,
-            self.node_j.y_coord - self.node_i.y_coord,
-            self.node_j.z_coord - self.node_i.z_coord
+            self.node_j.coordinates[0] - self.node_i.coordinates[0],
+            self.node_j.coordinates[1] - self.node_i.coordinates[1],
+            self.node_j.coordinates[2] - self.node_i.coordinates[2]
         ])
         x_vec = x_vec / np.linalg.norm(x_vec)
         diff = np.abs(
@@ -550,8 +611,8 @@ class Beams:
         return out
 
 
-@ dataclass
-@ total_ordering
+@dataclass
+@total_ordering
 class Level:
     """
     Individual building floor level.
@@ -563,7 +624,7 @@ class Level:
     elevation: float
     restraint: str = field(default="free")
     previous_lvl: 'Level' = field(default=None)
-    region: 'Region' = field(default=None)
+    perimeter: 'Region' = field(default=None)
     self_weight: float = field(default=None)
     sudls: 'sUDLs' = field(default_factory=sUDLs)
     nodes: Nodes = field(default_factory=Nodes)
@@ -584,16 +645,16 @@ class Level:
         """
         Adds a node on that level at a given point
         """
-        self.nodes.add(Node(x_coord, y_coord,
-                            self.elevation, self.restraint))
+        self.nodes.add(Node([x_coord, y_coord,
+                            self.elevation], self.restraint))
 
     def look_for_node(self, x_coord: float, y_coord: float):
         """
         Returns the node that occupies a given point
         at the current level, if it exists
         """
-        candidate_node = Node(x_coord, y_coord,
-                              self.elevation, self.restraint)
+        candidate_node = Node([x_coord, y_coord,
+                              self.elevation], self.restraint)
         for other_node in self.nodes.node_list:
             if other_node == candidate_node:
                 return other_node
@@ -603,13 +664,17 @@ class Level:
         """
         Adds a column on that level with given nodes
         """
-        self.columns.add(Column(node_i, node_j, ang))
+        col_to_add = Column(node_i, node_j, ang)
+        if col_to_add not in self.columns.column_list:
+            self.columns.add(col_to_add)
 
     def add_beam(self, node_i, node_j, ang):
         """
         Adds a beam on that level with given nodes
         """
-        self.beams.add(Beam(node_i, node_j, ang))
+        bm_to_add = Beam(node_i, node_j, ang)
+        if bm_to_add not in self.beams.beam_list:
+            self.beams.add(bm_to_add)
 
 
 @ dataclass
@@ -637,7 +702,7 @@ class Levels:
         if lvl.elevation in [lev.elevation
                              for lev in self.level_list]:
             raise ValueError('Level elevation already exists: ' + repr(lvl))
-        # TODO - Don't accept levels out of order (for now)
+        # TODO Don't accept levels out of order (for now)
         if self.level_list:
             if lvl.elevation < self.level_list[-1].elevation:
                 raise ValueError(
@@ -676,7 +741,7 @@ class Levels:
         if not names:
             # (that means if the list of names is empty)
             # this will be used to indicate "all"
-            self.active = [lvl for lvl in self.level_list]
+            self.active = self.level_list
         for name in names:
             retrieved_level = self.get(name)
             if retrieved_level not in self.active:
@@ -720,8 +785,7 @@ class Building:
     def add_level(self,
                   name: str,
                   elevation: float,
-                  restraint: str = "free",
-                  perimeter: Perimeter = None
+                  restraint: str = "free"
                   ):
         """
         adds a level to the buildin
@@ -730,20 +794,22 @@ class Building:
 
     def add_gridline(self,
                      tag: str,
-                     pi_x: float,
-                     pi_y: float,
-                     pj_x: float,
-                     pj_y: float
+                     start: List[float],
+                     end: List[float]
                      ):
         """
         Adds a new gridline to the building
         """
-        self.gridsystem.add(GridLine(tag, pi_x, pi_y, pj_x, pj_y))
+        self.gridsystem.add(GridLine(tag, start, end))
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
-        lines = []
-        i = 100000
+        """
+        Parses a given DXF file and adds gridlines from
+        all the lines defined in that file.
+        """
+        i = 100000  # > 8 lol
+        j = 0
         xi = 0.00
         xj = 0.00
         yi = 0.00
@@ -764,14 +830,13 @@ class Building:
                     xj = float(ln)
                 if i == 8:
                     yj = float(ln)
-                    lines.append((xi, yi, xj, yj))
+                    self.add_gridline(str(j), [xi, yi], [xj, yj])
+                    j += 1
                 i += 1
-        for j, line in enumerate(lines):
-            self.add_gridline(str(j), *line)
 
     def add_group(self, name: str):
         """
-        Adds a new group to the building
+        Adds a new group to the building.
         """
         self.groups.add(Group(name))
 
@@ -786,9 +851,9 @@ class Building:
         Parameters:
             [[x1,y1], [x2,y2], ..., [xn, yn]]
         """
-        perimeter = Perimeter(list_of_points)
+        region = Region(list_of_points)
         for level in self.levels.active:
-            level.perimeter = perimeter
+            level.perimeter = region
 
     def set_level_self_weight(self, weight_per_area: float):
         """
@@ -807,14 +872,14 @@ class Building:
         TODO - add docstring
         """
         for level in self.levels.active:
-            top_node_exists = False  # initialize
-            bot_node_exists = False
             if level.previous_lvl:  # if previous level exists
+                top_node_exists = False  # initialize
+                bot_node_exists = False
                 # check to see if top node exists
                 top_node = level.look_for_node(x, y)
                 # create it if it does not exist
                 if not top_node:
-                    top_node = Node(x, y, level.elevation, level.restraint)
+                    top_node = Node([x, y, level.elevation], level.restraint)
                     level.nodes.add(top_node)
                 else:
                     top_node_exists = True
@@ -824,7 +889,7 @@ class Building:
                 # create it if it does not exist
                 if not bot_node:
                     bot_node = Node(
-                        x, y, level.previous_lvl.elevation,
+                        [x, y, level.previous_lvl.elevation],
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes.add(bot_node)
                 else:
@@ -834,26 +899,26 @@ class Building:
                     level.columns.add(Column(top_node, bot_node, ang))
 
     def add_beam_at_points(self,
-                           pi_x: float,
-                           pi_y: float,
-                           pj_x: float,
-                           pj_y: float,
+                           start: Point,
+                           end: Point,
                            ang: float):
         """
         TODO - add docstring
         """
         for level in self.levels.active:
             # check to see if start node exists
-            start_node = level.look_for_node(pi_x, pi_y)
+            start_node = level.look_for_node(*start.coordinates)
             # create it if it does not exist
             if not start_node:
-                start_node = Node(pi_x, pi_y, level.elevation, level.restraint)
+                start_node = Node(
+                    [*start.coordinates, level.elevation], level.restraint)
                 level.nodes.add(start_node)
             # check to see if end node exists
-            end_node = level.look_for_node(pj_x, pj_y)
+            end_node = level.look_for_node(*end.coordinates)
             # create it if it does not exist
             if not end_node:
-                end_node = Node(pj_x, pj_y, level.elevation, level.restraint)
+                end_node = Node(
+                    [*end.coordinates, level.elevation], level.restraint)
                 level.nodes.add(end_node)
             # add the beam connecting the two nodes
             level.beams.add(Beam(start_node, end_node, ang))
@@ -861,15 +926,16 @@ class Building:
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
-            self.add_column_at_point(pt[0], pt[1], 0.00)
+            self.add_column_at_point(
+                pt.coordinates[0], pt.coordinates[1], 0.00)
 
     def add_beams_from_grids(self):
         for grid in self.gridsystem.grids:
             isect_pts = self.gridsystem.intersect(grid)
             for i in range(len(isect_pts)-1):
                 self.add_beam_at_points(
-                    *isect_pts[i],
-                    *isect_pts[i+1],
+                    isect_pts[i],
+                    isect_pts[i+1],
                     0.00
                 )
 
