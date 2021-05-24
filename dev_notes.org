@@ -5,9 +5,9 @@ Definition stage
 - [X] Floor perimeter
 - [X] UDL
 - [X] Grids from dxf
-- [ ] Test that load and mass classes work as intended
+- [X] Test that load and mass classes work as intended
 Visualization
-- [ ] Visualize floor regions and UDLs
+- [X] Visualize floor regions and UDLs
 - [ ] Visualize element loads and point masses
 Analysis stage
 - [ ] Distribute UDLs to beams

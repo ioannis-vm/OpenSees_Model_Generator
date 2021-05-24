@@ -474,6 +474,85 @@ class Nodes:
 
 
 @dataclass
+class Section:
+    """
+    Section object. Only a predefined list of sections
+    are supported.
+    Input:
+        sec_type: str
+        name: str
+        parameters: dict
+    """
+    sec_type: str
+    name: str
+    parameters: dict() = field(repr=False)  # depend on the section type
+
+
+@dataclass
+class Sections:
+    """
+    This class is a collector for sections.
+    """
+
+    section_list: list[Section] = field(default_factory=list)
+
+    def add(self, section: Section):
+        """
+        Add a section in the secttion collection,
+        if it does not already exit
+        """
+        if section not in self.section_list:
+            self.section_list.append(section)
+        else:
+            raise ValueError('Section already exists: '
+                             + repr(section))
+
+    def __repr__(self):
+        out = "Defined sections: " + \
+            str(len(self.section_list)) + "\n"
+        for section in self.section_list:
+            out += repr(section) + "\n"
+        return out
+
+
+@dataclass
+class Material:
+    """
+    Material object.
+    """
+    ops_material: str
+    density: float  # mass per unit volume
+    parameters: dict  # parameters, depend on the OpenSees material
+
+
+@dataclass
+class Materials:
+    """
+    This class is a collector for materials.
+    """
+
+    material_list: list[Material] = field(default_factory=list)
+
+    def add(self, material: Material):
+        """
+        Add a material in the materials collection,
+        if it does not already exit
+        """
+        if material not in self.material_list:
+            self.material_list.append(material)
+        else:
+            raise ValueError('Material already exists: '
+                             + repr(material))
+
+    def __repr__(self):
+        out = "Defined sections: " + \
+            str(len(self.material_list)) + "\n"
+        for material in self.material_list:
+            out += repr(material) + "\n"
+        return out
+
+
+@dataclass
 class LinearElement:
     """
     Linear finite element class.
@@ -546,10 +625,7 @@ class Columns:
         """
         if column not in self.column_list:
             self.column_list.append(column)
-        else:
-            raise ValueError('Column already exists: '
-                             + repr(column))
-        self.column_list.sort()
+            self.column_list.sort()
 
     def remove(self, column: Column):
         """
@@ -596,10 +672,7 @@ class Beams:
         """
         if beam not in self.beam_list:
             self.beam_list.append(beam)
-        else:
-            raise ValueError('Beam already exists: '
-                             + repr(beam))
-        self.beam_list.sort()
+            self.beam_list.sort()
 
     def remove(self, beam: Beam):
         """
@@ -748,16 +821,15 @@ class Levels:
 
         """
         self.active = []
-        if not names:
-            # (that means if the list of names is empty)
-            # this will be used to indicate "all"
+        if names == "All":
             self.active = self.level_list
-        for name in names:
-            retrieved_level = self.get(name)
-            if retrieved_level not in self.active:
-                self.active.append(
-                    retrieved_level
-                )
+        else:
+            for name in names:
+                retrieved_level = self.get(name)
+                if retrieved_level not in self.active:
+                    self.active.append(
+                        retrieved_level
+                    )
 
     def __repr__(self):
         out = "The building has " + \
@@ -891,16 +963,12 @@ class Building:
         """
         for level in self.levels.active:
             if level.previous_lvl:  # if previous level exists
-                top_node_exists = False  # initialize
-                bot_node_exists = False
                 # check to see if top node exists
                 top_node = level.look_for_node(x, y)
                 # create it if it does not exist
                 if not top_node:
                     top_node = Node([x, y, level.elevation], level.restraint)
                     level.nodes.add(top_node)
-                else:
-                    top_node_exists = True
                 # check to see if bottom node exists
                 bot_node = level.previous_lvl.look_for_node(
                     x, y)
@@ -910,11 +978,8 @@ class Building:
                         [x, y, level.previous_lvl.elevation],
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes.add(bot_node)
-                else:
-                    bot_node_exists = True
-                # add the column connecting the two nodes if it does not exist
-                if ((not top_node_exists) and (not bot_node_exists)):
-                    level.columns.add(Column(top_node, bot_node, ang))
+                # add the column connecting the two nodes
+                level.columns.add(Column(top_node, bot_node, ang))
 
     def add_beam_at_points(self,
                            start: Point,
