@@ -37,12 +37,13 @@ def draw_level_geometry(building: Building, lvlname: str):
     level = building.levels.get(lvlname)
 
     # draw the floor perimeter
-    xy = np.array(level.perimeter.points)
-    polygon = Polygon(xy, True)
-    patches = [polygon]
-    collection = PatchCollection(
-        patches, alpha=0.25, facecolors=FLOOR_COLOR, edgecolors=("black",))
-    ax.add_collection(collection)
+    if level.perimeter:
+        xy = np.array(level.perimeter.points)
+        polygon = Polygon(xy, True)
+        patches = [polygon]
+        collection = PatchCollection(
+            patches, alpha=0.25, facecolors=FLOOR_COLOR, edgecolors=("black",))
+        ax.add_collection(collection)
 
     # draw the surface loads
     for sudl in level.sudls.sudl_list:
@@ -62,12 +63,22 @@ def draw_level_geometry(building: Building, lvlname: str):
         line_np = np.array(line)
         ax.plot(line_np[:, 0], line_np[:, 1], color=BEAM_COLOR)
 
+    # draw the gridlines
+    for grd in building.gridsystem.grids:
+        line = [
+            grd.start,
+            grd.end
+        ]
+        line_np = np.array(line)
+        ax.plot(line_np[:, 0], line_np[:, 1], color=GRID_COLOR)
+
     # draw the nodes
     points = []
-    for nd in level.nodes.node_list:
-        points.append(nd.coordinates)
-    points_np = np.array(points)
-    ax.scatter(points_np[:, 0], points_np[:, 1], color=NODE_PRIMARY_COLOR)
+    if level.nodes.node_list:
+        for nd in level.nodes.node_list:
+            points.append(nd.coordinates)
+        points_np = np.array(points)
+        ax.scatter(points_np[:, 0], points_np[:, 1], color=NODE_PRIMARY_COLOR)
 
     ax.margins(0.10)
     fig.show()
