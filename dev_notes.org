@@ -11,6 +11,7 @@ Definition stage
 Visualization
 - [X] Visualize floor regions and UDLs
 - [ ] Visualize element loads and point masses
+- [ ] Be able to plot partially defined models (no elements or no floor perimeter for example)
 Analysis stage
 - [ ] Distribute UDLs to beams
 - [ ] Prepare loads to pass to OpenSees

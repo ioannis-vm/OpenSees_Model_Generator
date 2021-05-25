@@ -14,12 +14,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
 from typing import List
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 import openseespy.opensees as ops
 import openseespy.postprocessing.ops_vis as opsv
 
-EPSILON = 1.00E-4
+EPSILON = 1.00E-6
 ALPHA = 10000.00
 
 # pylint: disable=unsubscriptable-object
@@ -508,6 +509,18 @@ class Sections:
             raise ValueError('Section already exists: '
                              + repr(section))
 
+    def add_from_json(self,
+                      filename: str,
+                      labels: List[str]):
+        """
+        Add sections from a section database json file.
+        Only the specified sections (given the labels) are added.
+        """
+        with open(filename, "r") as json_file:
+            section_data = json.load(json_file)
+        for label in labels:
+            self.add(Section('W', label, section_data[label]))
+
     def set_active(self, name: str):
         """
         Assigns the active section.
@@ -524,8 +537,7 @@ class Sections:
             raise ValueError("Section " + name + " does not exist")
 
     def __repr__(self):
-        out = "Defined sections: " + \
-            str(len(self.section_list)) + "\n"
+        out = "Defined sections: " + str(len(self.section_list)) + "\n"
         for section in self.section_list:
             out += repr(section) + "\n"
         return out
@@ -536,6 +548,7 @@ class Material:
     """
     Material object.
     """
+    name: str
     ops_material: str
     density: float  # mass per unit volume
     parameters: dict  # parameters, depend on the OpenSees material
@@ -576,9 +589,24 @@ class Materials:
         if found is False:
             raise ValueError("Material " + name + " does not exist")
 
+    def enable_Steel02(self, system='imperial'):
+        """
+        Adds a predefined A992Fy50 steel material modeled
+        using Steel02.
+        """
+        if system == 'imperial':
+            self.add(Material('steel',
+                              'Steel02',
+                              0.0007344714506172839,
+                              {
+                                  'Fy': 50000,
+                                  'E0': 29000000,
+                                  'b': 0.1
+                              })
+                     )
+
     def __repr__(self):
-        out = "Defined sections: " + \
-            str(len(self.material_list)) + "\n"
+        out = "Defined sections: " + str(len(self.material_list)) + "\n"
         for material in self.material_list:
             out += repr(material) + "\n"
         return out
@@ -626,12 +654,14 @@ class LinearElement:
         return y_vec
 
 
-@ dataclass
-@ total_ordering
+@dataclass
+@total_ordering
 class Column(LinearElement):
     """
     TODO
     """
+    section: Section = field(default=None)
+    material: Material = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -641,7 +671,7 @@ class Column(LinearElement):
         return self.node_i <= other.node_i
 
 
-@ dataclass
+@dataclass
 class Columns:
     """
     This class is a collector for columns, and provides
@@ -666,19 +696,20 @@ class Columns:
         self.column_list.remove(column)
 
     def __repr__(self):
-        out = "The level has " + \
-            str(len(self.column_list)) + " columns\n"
+        out = "The level has " + str(len(self.column_list)) + " columns\n"
         for column in self.column_list:
             out += repr(column) + "\n"
         return out
 
 
-@ dataclass
-@ total_ordering
+@dataclass
+@total_ordering
 class Beam(LinearElement):
     """
     TODO
     """
+    section: Section = field(default=None)
+    material: Material = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -688,7 +719,7 @@ class Beam(LinearElement):
         return self.node_i <= other.node_i
 
 
-@ dataclass
+@dataclass
 class Beams:
     """
     This class is a collector for beams, and provides
@@ -713,8 +744,7 @@ class Beams:
         self.beam_list.remove(beam)
 
     def __repr__(self):
-        out = "The level has " + \
-            str(len(self.beam_list)) + " beams\n"
+        out = "The level has " + str(len(self.beam_list)) + " beams\n"
         for beam in self.beam_list:
             out += repr(beam) + "\n"
         return out
@@ -763,27 +793,25 @@ class Level:
         at the current level, if it exists
         """
         candidate_node = Node([x_coord, y_coord,
-                              self.elevation], self.restraint)
+                               self.elevation], self.restraint)
         for other_node in self.nodes.node_list:
             if other_node == candidate_node:
                 return other_node
         return None
 
-    def add_column(self, node_i, node_j, ang):
+    def add_column(self, node_i, node_j, ang, material, section):
         """
-        Adds a column on that level with given nodes
+        Adds a column on that level with given nodes.
         """
-        col_to_add = Column(node_i, node_j, ang)
-        if col_to_add not in self.columns.column_list:
-            self.columns.add(col_to_add)
+        col_to_add = Column(node_i, node_j, ang, material, section)
+        self.columns.add(col_to_add)
 
-    def add_beam(self, node_i, node_j, ang):
+    def add_beam(self, node_i, node_j, ang, material, section):
         """
-        Adds a beam on that level with given nodes
+        Adds a beam on that level with given nodes.
         """
-        bm_to_add = Beam(node_i, node_j, ang)
-        if bm_to_add not in self.beams.beam_list:
-            self.beams.add(bm_to_add)
+        bm_to_add = Beam(node_i, node_j, ang, material, section)
+        self.beams.add(bm_to_add)
 
     def add_surface_load(self,
                          load_per_area: float,
@@ -792,7 +820,7 @@ class Level:
         self.sudls.add(sudl)
 
 
-@ dataclass
+@dataclass
 class Levels:
     """
     Stores the floor levels of a building.
@@ -871,7 +899,7 @@ class Levels:
         return out
 
 
-@ dataclass
+@dataclass
 class Building:
     """
     This class manages building objects
@@ -916,10 +944,10 @@ class Building:
         """
         self.gridsystem.add(GridLine(tag, start, end))
 
-    def add_sections(self,
-                     sec_type: str,
-                     name: str,
-                     parameters: dict):
+    def add_section(self,
+                    sec_type: str,
+                    name: str,
+                    parameters: dict):
         """
         Adds a new section to the building
         """
@@ -1010,25 +1038,32 @@ class Building:
         """
         TODO - add docstring
         """
-        for level in self.levels.active:
-            if level.previous_lvl:  # if previous level exists
-                # check to see if top node exists
-                top_node = level.look_for_node(x, y)
-                # create it if it does not exist
-                if not top_node:
-                    top_node = Node([x, y, level.elevation], level.restraint)
-                    level.nodes.add(top_node)
-                # check to see if bottom node exists
-                bot_node = level.previous_lvl.look_for_node(
-                    x, y)
-                # create it if it does not exist
-                if not bot_node:
-                    bot_node = Node(
-                        [x, y, level.previous_lvl.elevation],
-                        level.previous_lvl.restraint)
-                    level.previous_lvl.nodes.add(bot_node)
-                # add the column connecting the two nodes
-                level.columns.add(Column(top_node, bot_node, ang))
+        if self.sections.active and self.materials.active:
+            for level in self.levels.active:
+                if level.previous_lvl:  # if previous level exists
+                    # check to see if top node exists
+                    top_node = level.look_for_node(x, y)
+                    # create it if it does not exist
+                    if not top_node:
+                        top_node = Node(
+                            [x, y, level.elevation], level.restraint)
+                        level.nodes.add(top_node)
+                    # check to see if bottom node exists
+                    bot_node = level.previous_lvl.look_for_node(
+                        x, y)
+                    # create it if it does not exist
+                    if not bot_node:
+                        bot_node = Node(
+                            [x, y, level.previous_lvl.elevation],
+                            level.previous_lvl.restraint)
+                        level.previous_lvl.nodes.add(bot_node)
+                    # add the column connecting the two nodes
+                    level.columns.add(
+                        Column(top_node,
+                               bot_node,
+                               ang,
+                               self.sections.active,
+                               self.materials.active))
 
     def add_beam_at_points(self,
                            start: Point,
@@ -1037,23 +1072,28 @@ class Building:
         """
         TODO - add docstring
         """
-        for level in self.levels.active:
-            # check to see if start node exists
-            start_node = level.look_for_node(*start.coordinates)
-            # create it if it does not exist
-            if not start_node:
-                start_node = Node(
-                    [*start.coordinates, level.elevation], level.restraint)
-                level.nodes.add(start_node)
-            # check to see if end node exists
-            end_node = level.look_for_node(*end.coordinates)
-            # create it if it does not exist
-            if not end_node:
-                end_node = Node(
-                    [*end.coordinates, level.elevation], level.restraint)
-                level.nodes.add(end_node)
-            # add the beam connecting the two nodes
-            level.beams.add(Beam(start_node, end_node, ang))
+        if self.sections.active and self.materials.active:
+            for level in self.levels.active:
+                # check to see if start node exists
+                start_node = level.look_for_node(*start.coordinates)
+                # create it if it does not exist
+                if not start_node:
+                    start_node = Node(
+                        [*start.coordinates, level.elevation], level.restraint)
+                    level.nodes.add(start_node)
+                # check to see if end node exists
+                end_node = level.look_for_node(*end.coordinates)
+                # create it if it does not exist
+                if not end_node:
+                    end_node = Node(
+                        [*end.coordinates, level.elevation], level.restraint)
+                    level.nodes.add(end_node)
+                # add the beam connecting the two nodes
+                level.beams.add(Beam(start_node,
+                                     end_node,
+                                     ang,
+                                     self.sections.active,
+                                     self.materials.active))
 
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()
