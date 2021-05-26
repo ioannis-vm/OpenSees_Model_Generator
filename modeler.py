@@ -267,7 +267,7 @@ class SUDL:
     """
 
     load_per_area: float
-    region: Region = field()
+    region: Region = field(repr=False)
 
     def __eq__(self, other):
         """
@@ -420,10 +420,11 @@ class Node(Element, Point):
         restraint_type: "free" or "pinned" or "fixed"
     """
 
-    coordinates: List[float]
+    coordinates: list[float]
     restraint_type: str = field(default="free")
 
-    load: float = field(default=None)  # point load
+    mass: Mass = field(default=None)  # point mass
+    load: float = field(default=None, repr=False)  # point load
 
     def __eq__(self, other):
         """
@@ -475,7 +476,7 @@ class Nodes:
 
 
 @dataclass
-class Section:
+class Section(Element):
     """
     Section object. Only a predefined list of sections
     are supported.
@@ -486,7 +487,12 @@ class Section:
     """
     sec_type: str
     name: str
-    parameters: dict() = field(repr=False)  # depend on the section type
+    parameters: dict() = field(repr=False)
+    material: Material = field(repr=False)
+
+    def __eq__(self, other):
+        return (self.name == other.name and
+                self.parameters == other.parameters)
 
 
 @dataclass
@@ -496,7 +502,7 @@ class Sections:
     """
 
     section_list: list[Section] = field(default_factory=list)
-    active: Section = field(default=None)
+    active: Section = field(default=None, repr=False)
 
     def add(self, section: Section):
         """
@@ -508,18 +514,6 @@ class Sections:
         else:
             raise ValueError('Section already exists: '
                              + repr(section))
-
-    def add_from_json(self,
-                      filename: str,
-                      labels: List[str]):
-        """
-        Add sections from a section database json file.
-        Only the specified sections (given the labels) are added.
-        """
-        with open(filename, "r") as json_file:
-            section_data = json.load(json_file)
-        for label in labels:
-            self.add(Section('W', label, section_data[label]))
 
     def set_active(self, name: str):
         """
@@ -544,14 +538,14 @@ class Sections:
 
 
 @dataclass
-class Material:
+class Material(Element):
     """
     Material object.
     """
     name: str
     ops_material: str
     density: float  # mass per unit volume
-    parameters: dict  # parameters, depend on the OpenSees material
+    parameters: dict = field(repr=False)
 
 
 @dataclass
@@ -594,13 +588,15 @@ class Materials:
         Adds a predefined A992Fy50 steel material modeled
         using Steel02.
         """
+        # units: lb, in
         if system == 'imperial':
             self.add(Material('steel',
                               'Steel02',
-                              0.0007344714506172839,
+                              0.283565,
                               {
                                   'Fy': 50000,
                                   'E0': 29000000,
+                                  'G':   11200000,
                                   'b': 0.1
                               })
                      )
@@ -622,8 +618,6 @@ class LinearElement:
     node_j: Node
     ang: float
 
-    load: float = field(default=None)  # UDL
-
     def local_y_axis_vector(self):
         """
         Calculates the local y axis of the linear element.
@@ -636,7 +630,7 @@ class LinearElement:
         x_vec = x_vec / np.linalg.norm(x_vec)
         diff = np.abs(
             np.linalg.norm(
-                x_vec - np.array([0.00, 0.00, 1.00])
+                x_vec - np.array([0.00, 0.00, -1.00])
             )
         )
         if diff < EPSILON:
@@ -661,7 +655,7 @@ class Column(LinearElement):
     TODO
     """
     section: Section = field(default=None)
-    material: Material = field(default=None)
+    udl: Load = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -709,7 +703,7 @@ class Beam(LinearElement):
     TODO
     """
     section: Section = field(default=None)
-    material: Material = field(default=None)
+    udl: Load = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -785,7 +779,7 @@ class Level:
         Adds a node on that level at a given point
         """
         self.nodes.add(Node([x_coord, y_coord,
-                            self.elevation], self.restraint))
+                             self.elevation], self.restraint))
 
     def look_for_node(self, x_coord: float, y_coord: float):
         """
@@ -799,14 +793,14 @@ class Level:
                 return other_node
         return None
 
-    def add_column(self, node_i, node_j, ang, material, section):
+    def add_column(self, node_i, node_j, ang, section):
         """
         Adds a column on that level with given nodes.
         """
-        col_to_add = Column(node_i, node_j, ang, material, section)
+        col_to_add = Column(node_i, node_j, ang, section)
         self.columns.add(col_to_add)
 
-    def add_beam(self, node_i, node_j, ang, material, section):
+    def add_beam(self, node_i, node_j, ang, section):
         """
         Adds a beam on that level with given nodes.
         """
@@ -930,7 +924,7 @@ class Building:
                   restraint: str = "free"
                   ):
         """
-        adds a level to the buildin
+        adds a level to the building
         """
         self.levels.add(Level(name, elevation, restraint))
 
@@ -944,22 +938,21 @@ class Building:
         """
         self.gridsystem.add(GridLine(tag, start, end))
 
-    def add_section(self,
-                    sec_type: str,
-                    name: str,
-                    parameters: dict):
+    def add_sections_from_json(self,
+                               filename: str,
+                               labels: List[str]):
         """
-        Adds a new section to the building
+        Add sections from a section database json file.
+        Only the specified sections (given the labels) are added.
         """
-        self.sections.add(Section(sec_type, name, parameters))
-
-    def add_material(self,
-                     ops_material: str,
-                     density: float,
-                     parameters: dict):
-        """
-        Adds a new material to the building
-        """
+        with open(filename, "r") as json_file:
+            section_data = json.load(json_file)
+        for label in labels:
+            sec_to_add = Section('W',
+                                 label,
+                                 section_data[label],
+                                 self.materials.active)
+            self.sections.add(sec_to_add)
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
@@ -1062,8 +1055,7 @@ class Building:
                         Column(top_node,
                                bot_node,
                                ang,
-                               self.sections.active,
-                               self.materials.active))
+                               self.sections.active))
 
     def add_beam_at_points(self,
                            start: Point,
@@ -1092,8 +1084,7 @@ class Building:
                 level.beams.add(Beam(start_node,
                                      end_node,
                                      ang,
-                                     self.sections.active,
-                                     self.materials.active))
+                                     self.sections.active))
 
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()
@@ -1158,13 +1149,27 @@ class Building:
                     i += 1
             return i
 
+        def assign_numbers2(list_of_things, i):
+            for thing in list_of_things:
+                thing.uniq_id = i
+                i += 1
+            return i
+
         # number nodes
         i = 1
         i = assign_numbers([lvl.nodes.node_list
                             for lvl in self.levels.level_list], i)
-        i = 1
 
-        # number elements
+        # number sections
+        i = 1
+        i = assign_numbers2(self.sections.section_list, i)
+
+        # number materials
+        i = 1
+        i = assign_numbers2(self.materials.material_list, i)
+
+        # number linear elements
+        i = 1
         i = assign_numbers([lvl.columns.column_list
                             for lvl in self.levels.level_list], i)
         i = assign_numbers([lvl.beams.beam_list
