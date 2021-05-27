@@ -391,7 +391,7 @@ class Groups:
 @total_ordering
 class Point:
     """
-    2D Point
+    2D/3D Point
     Parameters:
         [x, y, z] or [x, y] (depending on the case)
     """
@@ -399,7 +399,7 @@ class Point:
 
     def __eq__(self, other):
         """
-        Equality is only checked in terms of (x, y)
+        Caution: Equality is only checked in terms of (x, y)
         """
         dist = (self.coordinates[0] - other.coordinates[0])**2 +\
             (self.coordinates[1] - other.coordinates[1])**2
@@ -420,7 +420,6 @@ class Node(Element, Point):
         restraint_type: "free" or "pinned" or "fixed"
     """
 
-    coordinates: list[float]
     restraint_type: str = field(default="free")
 
     mass: Mass = field(default=None)  # point mass
@@ -1089,7 +1088,7 @@ class Building:
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
-            self.add_column_at_point(
+            self.add_column_point(
                 pt.coordinates[0], pt.coordinates[1], 0.00)
 
     def add_beams_from_grids(self):

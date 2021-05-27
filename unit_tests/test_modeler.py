@@ -8,9 +8,13 @@
 # https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
 
 import unittest
-from modeler import Building, Level, GridLine, Group, LinearElement, Node
+from modeler import Building, Point, Level, GridLine, Group, LinearElement, Node
 
 # https://docs.python.org/3/library/unittest.html
+
+# to run:
+# from the parent directory,
+# $ python -m unittest unit_tests/test_modeler.py
 
 
 class TestLevelOperations(unittest.TestCase):
@@ -34,12 +38,12 @@ class TestGridLineOperations(unittest.TestCase):
         self.b = Building()
 
     def test_add_some_gridlines(self):
-        self.b.add_gridline("1", 0., 0., 8., 0.)
-        self.b.add_gridline("2", 0., 4., 8., 4.)
-        self.b.add_gridline("3", 0., 8., 8., 8.)
-        self.b.add_gridline("A", 0., 0., 0., 8.)
-        self.b.add_gridline("B", 4., 0., 4., 8.)
-        self.b.add_gridline("C", 8., 0., 8., 8.)
+        self.b.add_gridline("1", [0., 0.], [8., 0.])
+        self.b.add_gridline("2", [0., 4.], [8., 4.])
+        self.b.add_gridline("3", [0., 8.], [8., 8.])
+        self.b.add_gridline("A", [0., 0.], [0., 8.])
+        self.b.add_gridline("B", [4., 0.], [4., 8.])
+        self.b.add_gridline("C", [8., 0.], [8., 8.])
 
     def tearDown(self):
         del(self.b)
@@ -76,8 +80,8 @@ class TestNodeOperations(unittest.TestCase):
 class TestLinearElement1(unittest.TestCase):
 
     def setUp(self):
-        self.n1 = Node(0.00, 0.00, 0.00)
-        self.n2 = Node(5.00, 0.00, 0.00)
+        self.n1 = Node([0.00, 0.00, 0.00])
+        self.n2 = Node([5.00, 0.00, 0.00])
         self.elm = LinearElement(self.n1, self.n2, 0.00)
 
     def test_y_axis(self):
@@ -88,8 +92,8 @@ class TestLinearElement1(unittest.TestCase):
 class TestLinearElement2(unittest.TestCase):
 
     def setUp(self):
-        self.n1 = Node(0.00, 0.00, 3.00)
-        self.n2 = Node(0.00, 0.00, 0.00)
+        self.n1 = Node([0.00, 0.00, 3.00])
+        self.n2 = Node([0.00, 0.00, 0.00])
         self.elm = LinearElement(self.n1, self.n2, 0.00)
 
     def test_y_axis(self):
@@ -124,7 +128,8 @@ class TestBeamOperations(unittest.TestCase):
         self.b.set_active_levels(['1'])
 
     def test_add_a_single_beam(self):
-        self.b.add_beam_at_points(0.50, 0.50, 1.50, 1.50, 0.00)
+        self.b.add_beam_at_points(
+            Point([0.50, 0.50]), Point([1.50, 1.50]), 0.00)
 
     def tearDown(self):
         del(self.b)
