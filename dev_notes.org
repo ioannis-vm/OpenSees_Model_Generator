@@ -1,3 +1,4 @@
+
 * Todo List
 
 *** Developing code
@@ -12,10 +13,26 @@ Visualization
 - [X] Visualize floor regions and UDLs
 - [ ] Visualize element loads and point masses
 - [ ] Be able to plot partially defined models (no elements or no floor perimeter for example)
+
+
 Analysis stage
-- [ ] Distribute UDLs to beams
-- [ ] Prepare loads to pass to OpenSees
-- [ ] Prepare masses to pass to OpenSees
+
+- [ ] Loads
+  - [ ] Distribute sUDLs to supporting beams
+  - [ ] Apply element self-weight as nodal loads
+- [ ] Mass
+  - [ ] For each level:
+    - [ ] Calculate center of mass from the floor perimter
+    - [ ] Calculate center of mass from the rest of the model
+      - [ ] For each element
+	- [ ] Get self weight
+	- [ ] Divide by two, and for each connecting node
+	  - [ ] store the temporary mass value in a dict using node uniq_id
+    - [ ] Combine to get the global center of mass and the mass value
+    - [ ] Calculate the moment of inertia around the center of mass
+    - [ ] Define a master node and assign the mass
+    - [ ] (The rest of the nodes will be modeled as massless)
+
 - [ ] Create an `Analysis` class that handles the interaction with OpenSees given a locked model
 - [ ] Define the model in OpenSees
 
@@ -40,11 +57,17 @@ Analysis stage
 
 *** Medium priority
 
+- [ ] Visualizing frame and floor extrusions
 - [ ] Visualizing deformed shapes
 - [ ] Visualizing element forces
+- [ ] Subasemblies:
+  - [ ] Automated braces: X, Chevron, BRB
+  - [ ] Automated truss (for fun)
+- [ ] Non-supporting beams (that don't take any load from the slab)
 - [ ] Basic modifications of previously defined elements (deletion, splitting etc)
 - [ ] Replicate finished levels upwards
-- [ ]
+- [ ] Speed up code
+  - [ ] Check for identical floors when distributing loads
 
 **** Low priority
 

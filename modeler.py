@@ -874,8 +874,10 @@ class Levels:
 
         """
         self.active = []
-        if names == "All":
+        if names == "all":
             self.active = self.level_list
+        elif names == "all_above_base":
+            self.active = self.level_list[1::]
         else:
             for name in names:
                 retrieved_level = self.get(name)
@@ -1088,7 +1090,7 @@ class Building:
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
-            self.add_column_point(
+            self.add_column_at_point(
                 pt.coordinates[0], pt.coordinates[1], 0.00)
 
     def add_beams_from_grids(self):
