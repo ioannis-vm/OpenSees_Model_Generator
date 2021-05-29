@@ -1,0 +1,3 @@
+conda activate <envname>
+python -m pip install -r requrements.txt
+conda install scikit-geometry -c conda-forge
