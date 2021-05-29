@@ -946,6 +946,8 @@ class Building:
         Add sections from a section database json file.
         Only the specified sections (given the labels) are added.
         """
+        if not self.materials.active:
+            raise ValueError("No active material specified")
         with open(filename, "r") as json_file:
             section_data = json.load(json_file)
         for label in labels:
@@ -1041,27 +1043,29 @@ class Building:
         """
         TODO - add docstring
         """
-        if self.sections.active and self.materials.active:
-            for level in self.levels.active:
-                # check to see if start node exists
-                start_node = level.look_for_node(*start.coordinates)
-                # create it if it does not exist
-                if not start_node:
-                    start_node = Node(
-                        [*start.coordinates, level.elevation], level.restraint)
-                    level.nodes.add(start_node)
-                # check to see if end node exists
-                end_node = level.look_for_node(*end.coordinates)
-                # create it if it does not exist
-                if not end_node:
-                    end_node = Node(
-                        [*end.coordinates, level.elevation], level.restraint)
-                    level.nodes.add(end_node)
-                # add the beam connecting the two nodes
-                level.beams.add(Beam(start_node,
-                                     end_node,
-                                     ang,
-                                     self.sections.active))
+        if not self.sections.active:
+            raise ValueError("No active section specified")
+
+        for level in self.levels.active:
+            # check to see if start node exists
+            start_node = level.look_for_node(*start.coordinates)
+            # create it if it does not exist
+            if not start_node:
+                start_node = Node(
+                    [*start.coordinates, level.elevation], level.restraint)
+                level.nodes.add(start_node)
+            # check to see if end node exists
+            end_node = level.look_for_node(*end.coordinates)
+            # create it if it does not exist
+            if not end_node:
+                end_node = Node(
+                    [*end.coordinates, level.elevation], level.restraint)
+                level.nodes.add(end_node)
+            # add the beam connecting the two nodes
+            level.beams.add(Beam(start_node,
+                                 end_node,
+                                 ang,
+                                 self.sections.active))
 
     def add_columns_from_grids(self):
         isect_pts = self.gridsystem.intersection_points()

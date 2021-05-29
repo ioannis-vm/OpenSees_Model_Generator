@@ -36,23 +36,17 @@ def draw_level_geometry(building: Building, lvlname: str):
     # retrieve the specified level
     level = building.levels.get(lvlname)
 
-    # draw the floor perimeter
-    if level.perimeter:
-        xy = np.array(level.perimeter.points)
-        polygon = Polygon(xy, True)
-        patches = [polygon]
-        collection = PatchCollection(
-            patches, alpha=0.25, facecolors=FLOOR_COLOR, edgecolors=("black",))
-        ax.add_collection(collection)
+    # draw the gridlines
+    for grd in building.gridsystem.grids:
+        line = [
+            grd.start,
+            grd.end
+        ]
+        line_np = np.array(line)
+        ax.plot(line_np[:, 0], line_np[:, 1], color=GRID_COLOR)
 
-    # draw the surface loads
-    for sudl in level.sudls.sudl_list:
-        xy = np.array(sudl.region.points)
-        polygon = Polygon(xy, True)
-        patches = [polygon]
-        collection = PatchCollection(
-            patches, alpha=0.25, facecolors=SUDL_COLOR, edgecolors=SUDL_COLOR)
-        ax.add_collection(collection)
+    # TODO draw the floor slabs and tributary areas
+    # TODO draw floor center of mass
 
     # draw the beams
     for bm in level.beams.beam_list:
@@ -62,15 +56,6 @@ def draw_level_geometry(building: Building, lvlname: str):
         ]
         line_np = np.array(line)
         ax.plot(line_np[:, 0], line_np[:, 1], color=BEAM_COLOR)
-
-    # draw the gridlines
-    for grd in building.gridsystem.grids:
-        line = [
-            grd.start,
-            grd.end
-        ]
-        line_np = np.array(line)
-        ax.plot(line_np[:, 0], line_np[:, 1], color=GRID_COLOR)
 
     # draw the nodes
     points = []

@@ -130,14 +130,6 @@ class Halfedge:
         return np.arctan2(drct[1], drct[0])
 
 
-def ang_reduce(ang):
-    while ang < 0:
-        ang += 2.*np.pi
-    while ang >= 2.*np.pi:
-        ang -= 2.*np.pi
-    return ang
-
-
 def traverse(h_start, v_start, v_current, e_current, h_current):
     """
     This is the heart of the algorithm; a recursive procedure
@@ -146,6 +138,14 @@ def traverse(h_start, v_start, v_current, e_current, h_current):
     next halfedge.
     All the defined halfedges form a number of closed sequences.
     """
+
+    def ang_reduce(ang):
+        while ang < 0:
+            ang += 2.*np.pi
+        while ang >= 2.*np.pi:
+            ang -= 2.*np.pi
+        return ang
+
     v_next = e_current.other_vertex(v_current)
     if v_next == v_start:
         h_current.nxt = h_start
@@ -211,7 +211,8 @@ def define_halfedges(edges):
 def accumulate_areas(areas, index, value):
     """
     Using a dictionary (`areas`) to accumulate the areas
-    associated with each vertex.
+    associated with each vertex for tributary-area load
+    distribution.
     `index` corresponds to the unique id of the vertex.
     `value` is the value to be added at the givn index.
     """
@@ -223,49 +224,14 @@ def accumulate_areas(areas, index, value):
         areas[index] = value
 
 
-def is_in_some_miniloop(halfedge, loops):
-    for loop in loops:
-        for other_halfedge in loop:
-            if (other_halfedge.vertex.point ==
-                halfedge.vertex.point and
-                    other_halfedge.next.vertex.point ==
-                    halfedge.next.vertex.point):
-                return True
-    return False
-
-
-def area_from_vertices(vertices):
-    return sg.Polygon(vertices).area()
-
-
-def is_in_some_loop(halfedge, loops):
-    for loop in loops:
-        if halfedge in loop:
-            return True
-    return False
-
-
-def draw_skeleton(fig, polygon, skeleton, show_time=False):
-
-    for h in skeleton.halfedges:
-        if h.is_bisector:
-            p1 = h.vertex.point
-            p2 = h.opposite.vertex.point
-            plt.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1.5)
-
-    if show_time:
-        for v in skeleton.vertices:
-            plt.gcf().gca().add_artist(plt.Circle(
-                (v.point.x(), v.point.y()),
-                v.time, color='grey', fill=False, lw=0.20))
-
-    coord_array = polygon.coords
-    coord_array = np.vstack((coord_array, coord_array[0, :]))
-
-    plt.plot(coord_array[:, 0], coord_array[:, 1], 'black', lw=2.0)
-
-
 def obtain_closed_loops(halfedges):
+
+    def is_in_some_loop(halfedge, loops):
+        for loop in loops:
+            if halfedge in loop:
+                return True
+        return False
+
     loops = []
     for halfedge in halfedges:
         if loops:
@@ -278,8 +244,7 @@ def obtain_closed_loops(halfedges):
             nxt = nxt.nxt
         loops.append(loop)
     # remove the largest loop (that corresponds to the exterior halfedges)
-    loop_areas = [area_from_vertices([h.vertex.coords
-                                      for h in loop])
+    loop_areas = [sg.Polygon([h.vertex.coords for h in loop]).area()
                   for loop in loops]
     outer = min(loop_areas)
     index = loop_areas.index(outer)
@@ -309,6 +274,26 @@ def print_halfedge_results(halfedges):
 
 
 def plot_tributary_areas(loops):
+
+    def draw_skeleton(fig, polygon, skeleton, show_time=False):
+
+        for h in skeleton.halfedges:
+            if h.is_bisector:
+                p1 = h.vertex.point
+                p2 = h.opposite.vertex.point
+                plt.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1.5)
+
+        if show_time:
+            for v in skeleton.vertices:
+                plt.gcf().gca().add_artist(plt.Circle(
+                    (v.point.x(), v.point.y()),
+                    v.time, color='grey', fill=False, lw=0.20))
+
+        coord_array = polygon.coords
+        coord_array = np.vstack((coord_array, coord_array[0, :]))
+
+        plt.plot(coord_array[:, 0], coord_array[:, 1], 'black', lw=2.0)
+
     fig = plt.figure()
 
     for loop in loops:
@@ -319,6 +304,16 @@ def plot_tributary_areas(loops):
 
 
 def calculate_tributary_areas_from_loops(loops):
+
+    def is_in_some_miniloop(halfedge, loops):
+        for loop in loops:
+            for other_halfedge in loop:
+                if (other_halfedge.vertex.point ==
+                    halfedge.vertex.point and
+                        other_halfedge.next.vertex.point ==
+                        halfedge.next.vertex.point):
+                    return True
+        return False
 
     # accumulate area part
     areas = {}
@@ -340,8 +335,8 @@ def calculate_tributary_areas_from_loops(loops):
                 nxt = nxt.next
             miniloops.append(miniloop)
 
-        miniloop_areas = [area_from_vertices(
-            [h.vertex.point for h in miniloop]) for miniloop in miniloops]
+        miniloop_areas = [sg.Polygon(
+            [h.vertex.point for h in miniloop]).area() for miniloop in miniloops]
         outer = min(miniloop_areas)
         index = miniloop_areas.index(outer)
         del miniloops[index]
@@ -361,68 +356,65 @@ def calculate_tributary_areas_from_loops(loops):
     return areas
 
 
-def calculate_area(coords):
+def calculate_geometric_properties(coords):
     """
-    Calculates the area of a closed polygon
-    """
-    x_coords = coords[:, 0]
-    y_coords = coords[:, 1]
-    return np.sum(x_coords * np.roll(y_coords, -1) -
-                  np.roll(x_coords, -1) * y_coords) / 2.00
-
-
-def calculate_centroid(coords, area):
-    """
-    Calculates the centroid of a closed polygon
-    """
-    x_coords = coords[:, 0]
-    y_coords = coords[:, 1]
-    x_cent = (np.sum((x_coords + np.roll(x_coords, -1)) *
-                     (x_coords*np.roll(y_coords, -1) -
-                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
-    y_cent = (np.sum((y_coords + np.roll(y_coords, -1)) *
-                     (x_coords*np.roll(y_coords, -1) -
-                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
-    return np.array((x_cent, y_cent))
-
-
-def calculate_rot_inertia(coords, centroid):
-    """
-    Calculates the rotational moment of inertia
-    of a closed polygon around its centroid.
-    TODO: Verify that this is correct
-    """
-    coords_centered = coords - centroid
-    x_coords = coords_centered[:, 0]
-    y_coords = coords_centered[:, 1]
-    alpha = x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
-
-    return np.sum(
-        (x_coords * np.roll(y_coords, -1)) -
-        (np.roll(x_coords, -1) * y_coords) *
-        (np.roll(x_coords, -1)**2 +
-         np.roll(x_coords, -1) * x_coords +
-         x_coords**2 +
-         np.roll(y_coords, -1)**2 +
-         np.roll(y_coords, -1) * y_coords +
-         y_coords**2)
-    )/12.00
-
-    return np.sum((x_coords*np.roll(y_coords, -1)
-                   + 2.0*x_coords*y_coords
-                   + 2.0*np.roll(x_coords, -1) * np.roll(y_coords, -1)
-                   + np.roll(x_coords, -1) * y_coords)*alpha)/24.
-
-
-def calculate_geometric_properties(loop):
-    """
-    Given a list of halfedges forming a loop
-    that defines a simple closed polygon,
+    Given an array of coordinates
+    that represents a simple closed polygon,
     calculate the centroid and rotational moment of inertia
     around the centroid.
+    Note: even though the polygon is closed, the last point should
+    not be repeated in the input matrix.
     """
-    # obtain a matrix with the coordinates
-    coords = np.array([h.vertex.coords for h in loop])
+    def calculate_area(coords):
+        """
+        Calculates the area of a closed polygon
+        """
+        x_coords = coords[:, 0]
+        y_coords = coords[:, 1]
+        return np.sum(x_coords * np.roll(y_coords, -1) -
+                      np.roll(x_coords, -1) * y_coords) / 2.00
+
+    def calculate_centroid(coords, area):
+        """
+        Calculates the centroid of a closed polygon
+        """
+        x_coords = coords[:, 0]
+        y_coords = coords[:, 1]
+        x_cent = (np.sum((x_coords + np.roll(x_coords, -1)) *
+                         (x_coords*np.roll(y_coords, -1) -
+                          np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+        y_cent = (np.sum((y_coords + np.roll(y_coords, -1)) *
+                         (x_coords*np.roll(y_coords, -1) -
+                          np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+        return np.array((x_cent, y_cent))
+
+    def calculate_rot_inertia(coords, centroid):
+        """
+        Calculates the rotational moment of inertia
+        of a closed polygon around its centroid.
+        TODO: Verify that this is correct
+        """
+        coords_centered = coords - centroid
+        x_coords = coords_centered[:, 0]
+        y_coords = coords_centered[:, 1]
+        alpha = x_coords * np.roll(y_coords, -1) - \
+            np.roll(x_coords, -1) * y_coords
+
+        return np.sum(
+            (x_coords * np.roll(y_coords, -1)) -
+            (np.roll(x_coords, -1) * y_coords) *
+            (np.roll(x_coords, -1)**2 +
+             np.roll(x_coords, -1) * x_coords +
+             x_coords**2 +
+             np.roll(y_coords, -1)**2 +
+             np.roll(y_coords, -1) * y_coords +
+             y_coords**2)
+        )/12.00
+
+        return np.sum((x_coords*np.roll(y_coords, -1)
+                       + 2.0*x_coords*y_coords
+                       + 2.0*np.roll(x_coords, -1) * np.roll(y_coords, -1)
+                       + np.roll(x_coords, -1) * y_coords)*alpha)/24.
     # repeat the first row at the end to close the shape
     coords = np.vstack((coords, coords[0, :]))
     # reverse the order to make it counterclockwise
@@ -441,7 +433,8 @@ def analyze_level(edges, show_figure=False, print_halfedges=False):
     if show_figure:
         plot_tributary_areas(loops)
     areas = calculate_tributary_areas_from_loops(loops)
-    properties = calculate_geometric_properties(external_loop)
+    coords = np.array([h.vertex.coords for h in external_loop])
+    properties = calculate_geometric_properties(coords)
     return areas, properties
 
 

@@ -29,7 +29,6 @@ def global_layout():
     """
     return go.Layout(
         scene=dict(aspectmode='data',
-                   aspectratio=dict(x=1, y=1, z=1),  # TODO
                    xaxis_visible=False,
                    yaxis_visible=False,
                    zaxis_visible=False,
