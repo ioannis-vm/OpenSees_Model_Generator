@@ -247,11 +247,6 @@ def is_in_some_loop(halfedge, loops):
 
 def draw_skeleton(fig, polygon, skeleton, show_time=False):
 
-    coord_array = polygon.coords
-    coord_array = np.vstack((coord_array, coord_array[0, :]))
-
-    plt.plot(coord_array[:, 0], coord_array[:, 1], 'black', lw=2.0)
-
     for h in skeleton.halfedges:
         if h.is_bisector:
             p1 = h.vertex.point
@@ -263,6 +258,11 @@ def draw_skeleton(fig, polygon, skeleton, show_time=False):
             plt.gcf().gca().add_artist(plt.Circle(
                 (v.point.x(), v.point.y()),
                 v.time, color='grey', fill=False, lw=0.20))
+
+    coord_array = polygon.coords
+    coord_array = np.vstack((coord_array, coord_array[0, :]))
+
+    plt.plot(coord_array[:, 0], coord_array[:, 1], 'black', lw=2.0)
 
 
 def obtain_closed_loops(halfedges):
@@ -283,9 +283,10 @@ def obtain_closed_loops(halfedges):
                   for loop in loops]
     outer = min(loop_areas)
     index = loop_areas.index(outer)
+    external_loop = loops[index]
     del loops[index]
     del loop_areas[index]
-    return loops, loop_areas
+    return external_loop, loops, loop_areas
 
 
 def print_halfedge_results(halfedges):
@@ -360,15 +361,88 @@ def calculate_tributary_areas_from_loops(loops):
     return areas
 
 
-def tributary_areas(edges, show_figure=False, print_halfedges=False):
+def calculate_area(coords):
+    """
+    Calculates the area of a closed polygon
+    """
+    x_coords = coords[:, 0]
+    y_coords = coords[:, 1]
+    return np.sum(x_coords * np.roll(y_coords, -1) -
+                  np.roll(x_coords, -1) * y_coords) / 2.00
+
+
+def calculate_centroid(coords, area):
+    """
+    Calculates the centroid of a closed polygon
+    """
+    x_coords = coords[:, 0]
+    y_coords = coords[:, 1]
+    x_cent = (np.sum((x_coords + np.roll(x_coords, -1)) *
+                     (x_coords*np.roll(y_coords, -1) -
+                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+    y_cent = (np.sum((y_coords + np.roll(y_coords, -1)) *
+                     (x_coords*np.roll(y_coords, -1) -
+                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+    return np.array((x_cent, y_cent))
+
+
+def calculate_rot_inertia(coords, centroid):
+    """
+    Calculates the rotational moment of inertia
+    of a closed polygon around its centroid.
+    TODO: Verify that this is correct
+    """
+    coords_centered = coords - centroid
+    x_coords = coords_centered[:, 0]
+    y_coords = coords_centered[:, 1]
+    alpha = x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
+
+    return np.sum(
+        (x_coords * np.roll(y_coords, -1)) -
+        (np.roll(x_coords, -1) * y_coords) *
+        (np.roll(x_coords, -1)**2 +
+         np.roll(x_coords, -1) * x_coords +
+         x_coords**2 +
+         np.roll(y_coords, -1)**2 +
+         np.roll(y_coords, -1) * y_coords +
+         y_coords**2)
+    )/12.00
+
+    return np.sum((x_coords*np.roll(y_coords, -1)
+                   + 2.0*x_coords*y_coords
+                   + 2.0*np.roll(x_coords, -1) * np.roll(y_coords, -1)
+                   + np.roll(x_coords, -1) * y_coords)*alpha)/24.
+
+
+def calculate_geometric_properties(loop):
+    """
+    Given a list of halfedges forming a loop
+    that defines a simple closed polygon,
+    calculate the centroid and rotational moment of inertia
+    around the centroid.
+    """
+    # obtain a matrix with the coordinates
+    coords = np.array([h.vertex.coords for h in loop])
+    # repeat the first row at the end to close the shape
+    coords = np.vstack((coords, coords[0, :]))
+    # reverse the order to make it counterclockwise
+    coords = np.flip(coords, axis=0)
+    area = calculate_area(coords)
+    centroid = calculate_centroid(coords, area)
+    rot_inertia = calculate_rot_inertia(coords, centroid)
+    return {'area': area, 'centroid': centroid, 'rot_inertia': rot_inertia}
+
+
+def analyze_level(edges, show_figure=False, print_halfedges=False):
     halfedges = define_halfedges(edges)
     if print_halfedges:
         print_halfedge_results(halfedges)
-    loops, loop_areas = obtain_closed_loops(halfedges)
+    external_loop, loops, loop_areas = obtain_closed_loops(halfedges)
     if show_figure:
         plot_tributary_areas(loops)
     areas = calculate_tributary_areas_from_loops(loops)
-    return areas
+    properties = calculate_geometric_properties(external_loop)
+    return areas, properties
 
 
 if __name__ == "__main()__":
