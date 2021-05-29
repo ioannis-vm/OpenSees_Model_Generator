@@ -4,14 +4,9 @@ import pandas as pd
 
 # define the vertices
 vertices = [
+    Vertex((0., 1.)),
     Vertex((0., 0.)),
     Vertex((1., 0.)),
-    Vertex((2., 0.)),
-    Vertex((0., 1.)),
-    Vertex((1., 1.)),
-    Vertex((0., 2.)),
-    Vertex((1., 2.)),
-    Vertex((2., 2.)),
 ]
 
 
@@ -19,17 +14,6 @@ vertices = [
 edges = [
     Edge(vertices[0], vertices[1]),
     Edge(vertices[1], vertices[2]),
-    Edge(vertices[0], vertices[3]),
-    Edge(vertices[0], vertices[4]),
-    Edge(vertices[1], vertices[4]),
-    Edge(vertices[2], vertices[7]),
-    Edge(vertices[3], vertices[4]),
-    Edge(vertices[3], vertices[5]),
-    Edge(vertices[4], vertices[5]),
-    Edge(vertices[4], vertices[6]),
-    Edge(vertices[4], vertices[7]),
-    Edge(vertices[5], vertices[6]),
-    Edge(vertices[6], vertices[7]),
 ]
 
 
