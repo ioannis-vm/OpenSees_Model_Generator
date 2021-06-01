@@ -19,6 +19,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import openseespy.opensees as ops
 import openseespy.postprocessing.ops_vis as opsv
+from utility.lvl_operations import generate_floor_slab_data
+from utility.lvl_operations import distribute_load_on_beams
+from utility.mesher import Mesh, geometric_properties
+from utility.mesher_section_gen import w_mesh
 
 EPSILON = 1.00E-6
 ALPHA = 10000.00
@@ -203,17 +207,6 @@ class Element:
         self.iniq_id = 0
 
 
-# @dataclass
-# class Region:
-#     """
-#     Closed polygonal region representing perimeters of 2D components and
-#     surface UDLs
-#     """
-#     points: list[list[float]] = field()
-#     def __eq__(self, other):
-#         return self.points == other.points
-
-
 @dataclass
 class Load:
     """
@@ -253,48 +246,6 @@ class Mass:
     def __add__(self, other):
         return [sum(x)
                 for x in zip(self.value, other.value)]
-
-
-# @dataclass
-# class SUDL:
-#     """
-#     Surface Uniformly Distributed Load
-#     Parameters:
-#         load_per_area: float (vertical load)
-#         region: Region
-#     """
-
-#     load_per_area: float
-#     region: Region = field(repr=False)
-
-#     def __eq__(self, other):
-#         """
-#         Equality is check in terms of both the polygon
-#         and the value of the UDL
-#         """
-#         return (self.load_per_area == other.load_per_area and
-#                 self.region == other.region)
-
-
-# @dataclass
-# class SUDLs:
-#     """
-#     This class is a collector of
-#     surface uniformly distributed loads (sUDLs)
-#     """
-
-#     sudl_list: list[SUDL] = field(default_factory=list)
-
-#     def add(self, sudl: SUDL):
-#         """
-#         Add a sUDL in the collection,
-#         if it does not already exist
-#         """
-#         if sudl not in self.sudl_list:
-#             self.sudl_list.append(sudl)
-#         else:
-#             raise ValueError('SUDL already exists: '
-#                              + repr(sudl))
 
 
 @dataclass
@@ -475,21 +426,16 @@ class Nodes:
 @dataclass
 class Section(Element):
     """
-    Section object. Only a predefined list of sections
-    are supported.
-    Input:
-        sec_type: str
-        name: str
-        parameters: dict
+    Section object.
     """
     sec_type: str
     name: str
-    parameters: dict() = field(repr=False)
     material: Material = field(repr=False)
+    mesh: Mesh = field(default=None, repr=False)
+    properties: dict = field(default=None, repr=False)
 
     def __eq__(self, other):
-        return (self.name == other.name and
-                self.parameters == other.parameters)
+        return (self.name == other.name)
 
 
 @dataclass
@@ -532,6 +478,26 @@ class Sections:
         for section in self.section_list:
             out += repr(section) + "\n"
         return out
+
+    ####################
+    # Shape generators #
+    ####################
+
+    def generate_W(self,
+                   name: float,
+                   material: Material,
+                   b: float,
+                   h: float,
+                   tw: float,
+                   tf: float):
+        """
+        Generate a W section with specified parameters
+        and add it to the sections list.
+        """
+        mesh = w_mesh(b, h, tw, tf)
+        properties = mesh.geometric_properties()
+        section = Section('W', name, material, mesh, properties)
+        self.add(section)
 
 
 @dataclass
@@ -764,6 +730,7 @@ class Level:
     nodes: Nodes = field(default_factory=Nodes)
     columns: Columns = field(default_factory=Columns)
     beams: Beams = field(default_factory=Beams)
+    slab_data: dict = field(default=None)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -905,10 +872,15 @@ class Building:
     groups: Groups = field(default_factory=Groups)
     sections: Sections = field(default_factory=Sections)
     materials: Materials = field(default_factory=Materials)
+    locked: bool = field(default=False)
 
     ###############################################
     # 'Add' methods - add objects to the building #
     ###############################################
+
+    def check_locked(self):
+        if self.locked:
+            raise ValueError("Attempted to modify a locked building.")
 
     def add_node(self,
                  x: float,
@@ -916,6 +888,7 @@ class Building:
         """
         Adds a node at a particular point in all active levels
         """
+        self.check_locked()
         for level in self.levels.active:
             level.add_node(x, y)
 
@@ -927,6 +900,7 @@ class Building:
         """
         adds a level to the building
         """
+        self.check_locked()
         self.levels.add(Level(name, elevation, restraint))
 
     def add_gridline(self,
@@ -937,25 +911,34 @@ class Building:
         """
         Adds a new gridline to the building
         """
+        self.check_locked()
         self.gridsystem.add(GridLine(tag, start, end))
 
     def add_sections_from_json(self,
                                filename: str,
+                               sec_type: str,
                                labels: List[str]):
         """
         Add sections from a section database json file.
         Only the specified sections (given the labels) are added.
         """
+        self.check_locked()
         if not self.materials.active:
             raise ValueError("No active material specified")
-        with open(filename, "r") as json_file:
-            section_data = json.load(json_file)
-        for label in labels:
-            sec_to_add = Section('W',
-                                 label,
-                                 section_data[label],
-                                 self.materials.active)
-            self.sections.add(sec_to_add)
+        if sec_type == 'W':
+            with open(filename, "r") as json_file:
+                section_data = json.load(json_file)
+            for label in labels:
+                try:
+                    sec_data = section_data[label]
+                except KeyError:
+                    raise KeyError("Section "+label+" not found in file.")
+                self.sections.generate_W(label,
+                                         self.materials.active,
+                                         sec_data['bf'],
+                                         sec_data['d'],
+                                         sec_data['tw'],
+                                         sec_data['tf'])
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
@@ -963,6 +946,7 @@ class Building:
         Parses a given DXF file and adds gridlines from
         all the lines defined in that file.
         """
+        self.check_locked()
         i = 100000  # > 8 lol
         j = 0
         xi = 0.00
@@ -993,6 +977,7 @@ class Building:
         """
         Adds a new group to the building.
         """
+        self.check_locked()
         self.groups.add(Group(name))
 
     def assign_surface_load(self,
@@ -1000,6 +985,7 @@ class Building:
         """
         Assigns surface loads on the active levels
         """
+        self.check_locked()
         for level in self.levels.active:
             level.assign_surface_load(load_per_area)
 
@@ -1010,6 +996,7 @@ class Building:
         """
         TODO - add docstring
         """
+        self.check_locked()
         if self.sections.active and self.materials.active:
             for level in self.levels.active:
                 if level.previous_lvl:  # if previous level exists
@@ -1043,6 +1030,7 @@ class Building:
         """
         TODO - add docstring
         """
+        self.check_locked()
         if not self.sections.active:
             raise ValueError("No active section specified")
 
@@ -1068,12 +1056,20 @@ class Building:
                                  self.sections.active))
 
     def add_columns_from_grids(self):
+        """
+        TODO - add docstring
+        """
+        self.check_locked()
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
             self.add_column_at_point(
                 pt.coordinates[0], pt.coordinates[1], 0.00)
 
     def add_beams_from_grids(self):
+        """
+        TODO - add docstring
+        """
+        self.check_locked()
         for grid in self.gridsystem.grids:
             isect_pts = self.gridsystem.intersect(grid)
             for i in range(len(isect_pts)-1):
@@ -1093,24 +1089,28 @@ class Building:
         An empty `names` list is interpreted as
         activating all levels.
         """
+        self.check_locked()
         self.levels.set_active(names)
 
     def set_active_groups(self, names: List[str]):
         """
         Sets the active groups of the building.
         """
+        self.check_locked()
         self.groups.set_active(names)
 
     def set_active_material(self, name: str):
         """
         Sets the active material.
         """
+        self.check_locked()
         self.materials.set_active(name)
 
     def set_active_section(self, name: str):
         """
         Sets the active section.
         """
+        self.check_locked()
         self.sections.set_active(name)
 
     ###############################
@@ -1159,16 +1159,27 @@ class Building:
     def lock(self):
         """
         Lock the building. No further editing beyond this point.
-        This method initiates automated calculations for the following:
-        - Floor center of mass and moment of inertia
-        - Diaphgragm master node definition
-        - Surface load distribution on the beams
+        This method initiates automated calculations to
+        get things ready for running an analysis.
         """
+        self.levels.active = []
+        self.groups.active = []
+        self.sections.active = None
+        self.materials.active = None
+        self.lock = True
+        #####################
+        # assign unique ids #
+        #####################
         self.number_components()
+        #########################
+        # level-wise operations #
+        #########################
+        for lvl in self.levels.level_list:
+            # generate floor slabs
+            generate_floor_slab_data(lvl)
+            # distribute floor loads on beams
+            distribute_load_on_beams(lvl)
 
-
-# The following functions use the Building
-# class to interact with OpenSeesPy
 
 def to_OpenSeesPy(building: Building):
     """

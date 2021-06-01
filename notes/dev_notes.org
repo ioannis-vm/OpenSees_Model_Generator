@@ -16,9 +16,11 @@ Visualization
 
 
 Analysis stage
-
-- [ ] Loads
-  - [ ] Distribute sUDLs to supporting beams
+- [-] Sections
+  - [X] Read sections data and convert to a mesh
+  - [ ] Obtain geometric properties from the mesh
+- [-] Loads
+  - [X] Distribute sUDLs to supporting beams
   - [ ] Apply element self-weight as nodal loads
 - [ ] Mass
   - [ ] For each level:
@@ -48,12 +50,13 @@ Analysis stage
 
 *** High priority
 
-- [ ] Be able to create a 3D OpenSeesPy model of a fiber-section steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
-- [ ] Modal analysis
-- [ ] Gravity load case analysis
-- [ ] NL Pushover analysis
-- [ ] NL time-history analysis
-- [ ]
+- [ ] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
+  - [ ] Modal analysis
+  - [ ] Gravity load case analysis
+  - [ ] NL Pushover analysis
+  - [ ] NL time-history analysis
+- [ ] Expand to support displacement based fiber section beam-column elements
+- [ ] Add support for automatic element offsets
 
 *** Medium priority
 
@@ -62,7 +65,7 @@ Analysis stage
 - [ ] Visualizing element forces
 - [ ] Subasemblies:
   - [ ] Automated braces: X, Chevron, BRB
-  - [ ] Automated truss (for fun)
+  - [ ] [Optional] Automated truss (for fun)
 - [ ] Non-supporting beams (that don't take any load from the slab)
 - [ ] Basic modifications of previously defined elements (deletion, splitting etc)
 - [ ] Replicate finished levels upwards
