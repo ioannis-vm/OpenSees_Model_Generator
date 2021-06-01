@@ -587,9 +587,10 @@ class LinearElement:
             np.array(self.node_j.coordinates) -
             np.array(self.node_i.coordinates))
 
-    def local_y_axis_vector(self):
+    def local_x_axis_vector(self):
         """
-        Calculates the local y axis of the linear element.
+        Calculates the local x axis of the linear element.
+        This axis is the length-wise axis of the element
         """
         x_vec = np.array([
             self.node_j.coordinates[0] - self.node_i.coordinates[0],
@@ -597,6 +598,15 @@ class LinearElement:
             self.node_j.coordinates[2] - self.node_i.coordinates[2]
         ])
         x_vec = x_vec / np.linalg.norm(x_vec)
+        return x_vec
+
+    def local_y_axis_vector(self):
+        """
+        Calculates the local y axis of the linear element.
+        For horizontal beams, this axis is horizontal
+        (considering the global coordinate system).
+        """
+        x_vec = self.local_x_axis_vector()
         diff = np.abs(
             np.linalg.norm(
                 x_vec - np.array([0.00, 0.00, -1.00])
@@ -613,8 +623,16 @@ class LinearElement:
             # ..and normalize
             z_vec = z_vec / np.linalg.norm(z_vec)
             # determine y vector from the cross-product
-            y_vec = np.cross(x_vec, z_vec)
+            y_vec = np.cross(z_vec, x_vec)
         return y_vec
+
+    def local_z_axis_vector(self):
+        """
+        Calculates the local z axis of the linear element.
+        """
+        x_vec = self.local_x_axis_vector()
+        y_vec = self.local_y_axis_vector()
+        return np.cross(x_vec, y_vec)
 
 
 @dataclass
