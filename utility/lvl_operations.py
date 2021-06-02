@@ -1,11 +1,10 @@
+import skgeom as sg
+import numpy as np
 from utility.mesher import Vertex, Edge
 from utility.mesher import define_halfedges
 from utility.mesher import print_halfedge_results
 from utility.mesher import obtain_closed_loops
 from utility.mesher import geometric_properties
-import matplotlib.pyplot as plt
-import skgeom as sg
-import numpy as np
 
 
 def calculate_tributary_areas_from_loops(loops):
@@ -145,4 +144,5 @@ def distribute_load_on_beams(lvl):
         areas = calculate_tributary_areas_from_loops(loops)
         for beam in lvl.beams.beam_list:
             edge_id = beam_to_edge_map[beam.uniq_id]
-            beam.udl = areas[edge_id] * lvl.surface_load / beam.length
+            udlZ_val = -areas[edge_id] * lvl.surface_load / beam.length()
+            beam.udl.add([0.00, 0.00, udlZ_val])

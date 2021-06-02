@@ -21,7 +21,7 @@ import openseespy.opensees as ops
 import openseespy.postprocessing.ops_vis as opsv
 from utility.lvl_operations import generate_floor_slab_data
 from utility.lvl_operations import distribute_load_on_beams
-from utility.mesher import Mesh, geometric_properties
+from utility.mesher import Mesh
 from utility.mesher_section_gen import w_mesh
 
 EPSILON = 1.00E-6
@@ -226,8 +226,21 @@ class Load:
         return self.value == other.value
 
     def __add__(self, other):
-        return [sum(x)
-                for x in zip(self.value, other.value)]
+        return Load([sum(x)
+                     for x in zip(self.value, other.value)])
+
+    def __mul__(self, x: float):
+        res = []
+        for i in range(len(self.value)):
+            res.append(self.value[i] * x)
+        return Load(res)
+
+    def add(self, x: List[float]):
+        if len(self.value) != len(x):
+            raise ValueError("Dimensions don't match")
+        res = [sum(x)
+               for x in zip(self.value, x)]
+        self.value = res
 
 
 @dataclass
@@ -244,8 +257,8 @@ class Mass:
         return self.value == other.value
 
     def __add__(self, other):
-        return [sum(x)
-                for x in zip(self.value, other.value)]
+        return Mass([sum(x)
+                     for x in zip(self.value, other.value)])
 
 
 @dataclass
@@ -359,6 +372,20 @@ class Point:
         d_other = other.coordinates[1] * ALPHA + other.coordinates[0]
         return d_self <= d_other
 
+    def __add__(self, other):
+        result = []
+        for i in range(len(self.coordinates)):
+            result.append(self.coordinates[i] + other.coordinates[i])
+        return Point(result)
+
+    def __mul__(self, x: float):
+        result = []
+        for i in range(len(self.coordinates)):
+            result.append(self.coordinates[i] * x)
+        return Point(result)
+
+    __rmul__ = __mul__
+
 
 @dataclass
 class Node(Element, Point):
@@ -371,8 +398,8 @@ class Node(Element, Point):
 
     restraint_type: str = field(default="free")
 
-    mass: Mass = field(default=None)  # point mass
-    load: float = field(default=None, repr=False)  # point load
+    mass: Mass = field(default=Mass([0., 0., 0.]), repr=False)
+    load: Load = field(default=Load([0., 0., 0.]), repr=False)
 
     def __eq__(self, other):
         """
@@ -486,16 +513,16 @@ class Sections:
     def generate_W(self,
                    name: float,
                    material: Material,
-                   b: float,
-                   h: float,
-                   tw: float,
-                   tf: float):
+                   properties: dict):
         """
         Generate a W section with specified parameters
         and add it to the sections list.
         """
+        b = properties['bf']
+        h = properties['d']
+        tw = properties['tw']
+        tf = properties['tf']
         mesh = w_mesh(b, h, tw, tf)
-        properties = mesh.geometric_properties()
         section = Section('W', name, material, mesh, properties)
         self.add(section)
 
@@ -546,23 +573,23 @@ class Materials:
         if found is False:
             raise ValueError("Material " + name + " does not exist")
 
-    def enable_Steel02(self, system='imperial'):
+    def enable_Steel02(self):
         """
         Adds a predefined A992Fy50 steel material modeled
         using Steel02.
         """
         # units: lb, in
-        if system == 'imperial':
-            self.add(Material('steel',
-                              'Steel02',
-                              0.283565,
-                              {
-                                  'Fy': 50000,
-                                  'E0': 29000000,
-                                  'G':   11200000,
-                                  'b': 0.1
-                              })
-                     )
+        # TODO make sure that I actually need these parameters
+        self.add(Material('steel',
+                          'Steel02',
+                          0.283565,
+                          {
+                              'Fy': 50000,
+                              'E0': 29000000,
+                              'G':   11153846.15,
+                              'b': 0.1
+                          })
+                 )
 
     def __repr__(self):
         out = "Defined sections: " + str(len(self.material_list)) + "\n"
@@ -579,11 +606,11 @@ class LinearElement:
 
     node_i: Node
     node_j: Node
-    ang: float
-    length: float = field(init=False)
+    ang: float = field(default=0.00)
+    udl: Load = field(default=Load([0.00, 0.00, 0.00]))
 
-    def __post_init__(self):
-        self.length = np.linalg.norm(
+    def length(self):
+        return np.linalg.norm(
             np.array(self.node_j.coordinates) -
             np.array(self.node_i.coordinates))
 
@@ -634,6 +661,25 @@ class LinearElement:
         y_vec = self.local_y_axis_vector()
         return np.cross(x_vec, y_vec)
 
+    def add_udl_from_global_system(self, udl: Load):
+        """
+        Adds a uniformly distributed load defined
+        with respect to the global coordinate system
+        of the building, by first converting it to the
+        local coordinate system of the element.
+        """
+        forces_global = np.array((udl * self.length()).value)
+        local_x = self.local_x_axis_vector()
+        local_y = self.local_y_axis_vector()
+        local_z = self.local_z_axis_vector()
+        forces_local = Load([
+            np.dot(forces_global, local_x),
+            np.dot(forces_global, local_y),
+            np.dot(forces_global, local_z)
+        ])
+        udl_local = forces_local * (1.00/self.length())
+        self.udl += udl_local
+
 
 @dataclass
 @total_ordering
@@ -642,7 +688,6 @@ class Column(LinearElement):
     TODO
     """
     section: Section = field(default=None)
-    udl: Load = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -690,7 +735,6 @@ class Beam(LinearElement):
     TODO
     """
     section: Section = field(default=None)
-    udl: Load = field(default=None)
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -749,6 +793,7 @@ class Level:
     columns: Columns = field(default_factory=Columns)
     beams: Beams = field(default_factory=Beams)
     slab_data: dict = field(default=None)
+    master_node: Node = field(default=None)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -783,14 +828,14 @@ class Level:
         """
         Adds a column on that level with given nodes.
         """
-        col_to_add = Column(node_i, node_j, ang, section)
+        col_to_add = Column(node_i, node_j, ang, section=section)
         self.columns.add(col_to_add)
 
     def add_beam(self, node_i, node_j, ang, section):
         """
         Adds a beam on that level with given nodes.
         """
-        bm_to_add = Beam(node_i, node_j, ang, section)
+        bm_to_add = Beam(node_i, node_j, ang, section=section)
         self.beams.add(bm_to_add)
 
     def assign_surface_load(self,
@@ -945,18 +990,15 @@ class Building:
             raise ValueError("No active material specified")
         if sec_type == 'W':
             with open(filename, "r") as json_file:
-                section_data = json.load(json_file)
+                section_dictionary = json.load(json_file)
             for label in labels:
                 try:
-                    sec_data = section_data[label]
+                    sec_data = section_dictionary[label]
                 except KeyError:
-                    raise KeyError("Section "+label+" not found in file.")
+                    raise KeyError("Section " + label + " not found in file.")
                 self.sections.generate_W(label,
                                          self.materials.active,
-                                         sec_data['bf'],
-                                         sec_data['d'],
-                                         sec_data['tw'],
-                                         sec_data['tf'])
+                                         sec_data)
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
@@ -1036,10 +1078,10 @@ class Building:
                         level.previous_lvl.nodes.add(bot_node)
                     # add the column connecting the two nodes
                     level.columns.add(
-                        Column(top_node,
-                               bot_node,
-                               ang,
-                               self.sections.active))
+                        Column(node_i=top_node,
+                               node_j=bot_node,
+                               ang=ang,
+                               section=self.sections.active))
 
     def add_beam_at_points(self,
                            start: Point,
@@ -1068,10 +1110,10 @@ class Building:
                     [*end.coordinates, level.elevation], level.restraint)
                 level.nodes.add(end_node)
             # add the beam connecting the two nodes
-            level.beams.add(Beam(start_node,
-                                 end_node,
-                                 ang,
-                                 self.sections.active))
+            level.beams.add(Beam(node_i=start_node,
+                                 node_j=end_node,
+                                 ang=ang,
+                                 section=self.sections.active))
 
     def add_columns_from_grids(self):
         """
@@ -1184,7 +1226,7 @@ class Building:
         self.groups.active = []
         self.sections.active = None
         self.materials.active = None
-        self.lock = True
+        self.locked = True
         #####################
         # assign unique ids #
         #####################
@@ -1197,6 +1239,40 @@ class Building:
             generate_floor_slab_data(lvl)
             # distribute floor loads on beams
             distribute_load_on_beams(lvl)
+            # linear element self-weight
+            for elm in lvl.beams.beam_list + lvl.columns.column_list:
+                weight_per_length = elm.section.properties["W"] / 12.0  # lb/in
+                weight = weight_per_length * elm.length()  # lb
+                elm.add_udl_from_global_system(
+                    Load([0., 0., -weight_per_length]))
+                mass = weight / 386.22  # lb/(in/s2)
+                elm.node_i.mass += Mass([mass, mass, mass, 0., 0., 0.])
+                elm.node_j.mass += Mass([mass, mass, mass, 0., 0., 0.])
+            # center of mass -> master node
+            if lvl.restraint == "free":
+                floor_mass = lvl.surface_load / 386.22
+                floor_centroid = lvl.slab_data['properties']['centroid']
+                floor_mass_inertia = \
+                    lvl.slab_data['properties']['inertia']['ir_mass']
+                self_mass_centroid = Point([0.00, 0.00])
+                total_self_mass = 0.00
+                for node in lvl.nodes.node_list:
+                    self_mass_centroid += node * node.mass.value[0]
+                    total_self_mass += node.mass.value[0]
+                self_mass_centroid = self_mass_centroid * \
+                    (1.00/total_self_mass)
+                total_mass = total_self_mass + floor_mass
+                centroid = [
+                    (self_mass_centroid.coordinates[0] * total_self_mass +
+                     floor_centroid[0] * floor_mass) / total_mass,
+                    (self_mass_centroid.coordinates[1] * total_self_mass +
+                     floor_centroid[1] * floor_mass) / total_mass
+                ]
+                master_node = Node(
+                    centroid[0], centroid[1], lvl.elevation, "free")
+                master_node.mass = Mass([total_mass, total_mass, total_mass,
+                                         0.00, 0.00, total_mass *
+                                         floor_mass_inertia])
 
 
 def to_OpenSeesPy(building: Building):
