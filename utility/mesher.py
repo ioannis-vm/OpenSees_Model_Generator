@@ -3,12 +3,15 @@ TODO Module docstring
 """
 
 from __future__ import annotations
+from descartes.patch import PolygonPatch
 from typing import List
 from itertools import count
 import pandas as pd
 import numpy as np
 import skgeom as sg
 import matplotlib.pyplot as plt
+from shapely.ops import triangulate as shapely_triangulate
+from shapely.geometry import Polygon as shapely_Polygon
 
 
 class Vertex:
@@ -330,6 +333,40 @@ def obtain_closed_loops(halfedges):
     del loops[index]
     del loop_areas[index]
     return external_loop, loops, loop_areas
+
+
+def subdivide_polygon(halfedges, n_x=10, n_y=25, plot=False):
+    """
+    TODO - add docstring
+    """
+    section_polygon = shapely_Polygon([h.vertex.coords for h in halfedges])
+    x_min, y_min, x_max, y_max = section_polygon.bounds
+    x_array = np.linspace(x_min, x_max, num=n_x, endpoint=True)
+    y_array = np.linspace(y_min, y_max, num=n_y, endpoint=True)
+    pieces = []
+    for i in range(len(x_array)-1):
+        for j in range(len(y_array)-1):
+            tile = shapely_Polygon([(x_array[i], y_array[j]),
+                                    (x_array[i+1], y_array[j]),
+                                    (x_array[i+1], y_array[j+1]),
+                                    (x_array[i], y_array[j+1])])
+            subregion = section_polygon.intersection(tile)
+            if subregion.area != 0.0:
+                pieces.append(subregion)
+    if plot:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.set_aspect('equal')
+        patch = PolygonPatch(section_polygon, alpha=0.5, zorder=2)
+        ax.add_patch(patch)
+        for subregion in pieces:
+            patch = PolygonPatch(subregion, alpha=0.5, zorder=2)
+            ax.add_patch(patch)
+        for subregion in pieces:
+            ax.scatter(subregion.centroid.x, subregion.centroid.y)
+        ax.margins(0.10)
+        plt.show()
+    return pieces
 
 
 def print_halfedge_results(halfedges):

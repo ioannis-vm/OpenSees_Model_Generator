@@ -16,12 +16,9 @@ from functools import total_ordering
 from typing import List
 import json
 import numpy as np
-import matplotlib.pyplot as plt
-import openseespy.opensees as ops
-import openseespy.postprocessing.ops_vis as opsv
 from utility.lvl_operations import generate_floor_slab_data
 from utility.lvl_operations import distribute_load_on_beams
-from utility.mesher import Mesh
+from utility.mesher import Mesh, subdivide_polygon
 from utility.mesher_section_gen import w_mesh
 
 EPSILON = 1.00E-6
@@ -464,6 +461,9 @@ class Section(Element):
     def __eq__(self, other):
         return (self.name == other.name)
 
+    def subdivide_section(self, n_x=10, n_y=25, plot=False):
+        return subdivide_polygon(self.mesh.halfedges, n_x=10, n_y=25, plot=plot)
+
 
 @dataclass
 class Sections:
@@ -599,7 +599,7 @@ class Materials:
 
 
 @dataclass
-class LinearElement:
+class LinearElement(Element):
     """
     Linear finite element class.
     """
@@ -630,6 +630,14 @@ class LinearElement:
     def local_y_axis_vector(self):
         """
         Calculates the local y axis of the linear element.
+        """
+        x_vec = self.local_x_axis_vector()
+        z_vec = self.local_z_axis_vector()
+        return np.cross(z_vec, x_vec)
+
+    def local_z_axis_vector(self):
+        """
+        Calculates the local z axis of the linear element.
         For horizontal beams, this axis is horizontal
         (considering the global coordinate system).
         """
@@ -641,25 +649,17 @@ class LinearElement:
         )
         if diff < EPSILON:
             # vertical case
-            y_vec = np.array([np.cos(self.ang), np.sin(self.ang), 0.0])
+            z_vec = np.array([np.cos(self.ang), np.sin(self.ang), 0.0])
         else:
             # not vertical case
             up_direction = np.array([0.0, 0.0, 1.0])
             # orthogonalize with respect to x_vec
-            z_vec = up_direction - np.dot(up_direction, x_vec)
+            y_vec = up_direction - np.dot(up_direction, x_vec)
             # ..and normalize
-            z_vec = z_vec / np.linalg.norm(z_vec)
-            # determine y vector from the cross-product
-            y_vec = np.cross(z_vec, x_vec)
-        return y_vec
-
-    def local_z_axis_vector(self):
-        """
-        Calculates the local z axis of the linear element.
-        """
-        x_vec = self.local_x_axis_vector()
-        y_vec = self.local_y_axis_vector()
-        return np.cross(x_vec, y_vec)
+            y_vec = y_vec / np.linalg.norm(y_vec)
+            # determine z vector from the cross-product
+            z_vec = np.cross(x_vec, y_vec)
+        return z_vec
 
     def add_udl_from_global_system(self, udl: Load):
         """
@@ -1216,9 +1216,9 @@ class Building:
         i = assign_numbers([lvl.beams.beam_list
                             for lvl in self.levels.level_list], i)
 
-    def lock(self):
+    def preprocess(self, assume_floor_slabs=True, self_weight=True):
         """
-        Lock the building. No further editing beyond this point.
+        Preprocess the building. No further editing beyond this point.
         This method initiates automated calculations to
         get things ready for running an analysis.
         """
@@ -1235,25 +1235,32 @@ class Building:
         # level-wise operations #
         #########################
         for lvl in self.levels.level_list:
-            # generate floor slabs
-            generate_floor_slab_data(lvl)
-            # distribute floor loads on beams
-            distribute_load_on_beams(lvl)
+            if assume_floor_slabs:
+                # generate floor slabs
+                generate_floor_slab_data(lvl)
+                # distribute floor loads on beams
+                distribute_load_on_beams(lvl)
             # linear element self-weight
             for elm in lvl.beams.beam_list + lvl.columns.column_list:
                 weight_per_length = elm.section.properties["W"] / 12.0  # lb/in
                 weight = weight_per_length * elm.length()  # lb
-                elm.add_udl_from_global_system(
-                    Load([0., 0., -weight_per_length]))
+                if self_weight:
+                    elm.add_udl_from_global_system(
+                        Load([0., 0., -weight_per_length]))
                 mass = weight / 386.22  # lb/(in/s2)
                 elm.node_i.mass += Mass([mass, mass, mass, 0., 0., 0.])
                 elm.node_j.mass += Mass([mass, mass, mass, 0., 0., 0.])
             # center of mass -> master node
             if lvl.restraint == "free":
-                floor_mass = lvl.surface_load / 386.22
-                floor_centroid = lvl.slab_data['properties']['centroid']
-                floor_mass_inertia = \
-                    lvl.slab_data['properties']['inertia']['ir_mass']
+                if assume_floor_slabs:
+                    floor_mass = lvl.surface_load / 386.22
+                    floor_centroid = lvl.slab_data['properties']['centroid']
+                    floor_mass_inertia = \
+                        lvl.slab_data['properties']['inertia']['ir_mass']
+                else:
+                    floor_mass = 0.00
+                    floor_centroid = [0.00, 0.00]
+                    floor_mass_inertia = 0.00
                 self_mass_centroid = Point([0.00, 0.00])
                 total_self_mass = 0.00
                 for node in lvl.nodes.node_list:
@@ -1273,91 +1280,3 @@ class Building:
                 master_node.mass = Mass([total_mass, total_mass, total_mass,
                                          0.00, 0.00, total_mass *
                                          floor_mass_inertia])
-
-
-def to_OpenSeesPy(building: Building):
-    """
-    Defines the building model in OpenSeesPy on the spot
-    """
-    # TODO
-    A, Iz, Iy, J = 0.04, 0.0010667, 0.0002667, 0.01172
-    E = 25.0e6
-    G = 9615384.6
-
-    ops.wipe()
-    ops.model('basic', 3, building.ndm,
-              6, building.ndf)
-    for lvl in building.levels.level_list:
-        # define the nodes
-        for node in lvl.nodes.node_list:
-            ops.node(
-                node.uniq_id,
-                node.x_coord,
-                node.y_coord,
-                lvl.elevation
-            )
-            # check restraints
-            if node.restraint_type == "fixed":
-                ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
-            elif node.restraint_type == "pinned":
-                ops.fix(node.uniq_id, 1, 1, 1, 0, 0, 0)
-            # apply mass
-            # TODO
-            ops.mass(node.uniq_id, 1., 1., 1., 0.001, 0.001, 0.001)
-
-        # define the columns
-        for col in lvl.columns.column_list:
-            ops.geomTransf(
-                'Linear',
-                col.uniq_id,
-                *col.local_y_axis_vector()
-            )
-            ops.element(
-                'elasticBeamColumn',
-                col.uniq_id,
-                col.node_i.uniq_id,
-                col.node_j.uniq_id,
-                A, E, G, J, Iy, Iz, col.uniq_id)
-
-        # define the beams
-        for beam in lvl.beams.beam_list:
-            ops.geomTransf(
-                'Linear',
-                beam.uniq_id + 150,
-                *beam.local_y_axis_vector()
-            )
-            ops.element(
-                'elasticBeamColumn',
-                beam.uniq_id,
-                beam.node_i.uniq_id,
-                beam.node_j.uniq_id,
-                A, E, G, J, Iy, Iz, beam.uniq_id + 150)
-
-    opsv.plot_model()
-    plt.show()
-
-
-def from_OpenSeesPy(building: 'Building'):
-    """
-    Read back the OpenSees results and update the
-    values contained in the Building Object
-    """
-    pass
-
-
-def generate_OpenSeesPy_file(building: 'Building'):
-    """
-    Generates the input model.py file to be used
-    with OpenSeesPy (as if it was manually written)
-    """
-    #  But I don't think I'll be able to read back
-    #  the results this way.
-    pass
-
-
-def generate_OpenSees_file(building: 'Building'):
-    """
-    Generates the input model.tcl file to be used
-    with OpenSees (as if it was manually written)
-    """
-    pass

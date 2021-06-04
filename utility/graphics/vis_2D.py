@@ -1,6 +1,6 @@
-"""
-The following utility functions are used for data visualization
+"""The following utility functions are used for data visualization
 https://plotly.com/python/reference/
+
 """
 #   __                 UC Berkeley
 #   \ \/\   /\/\/\     John Vouvakis Manousakis
@@ -46,27 +46,28 @@ def draw_level_geometry(building: Building, lvlname: str, extrude_frames=False):
         ax.plot(line_np[:, 0], line_np[:, 1], color=GRID_COLOR)
 
     # draw the floor slabs and tributary areas
-    for loop in level.slab_data['loops']:
-        coords = [h.vertex.coords for h in loop]
-        poly = sg.Polygon(coords)
-        skel = sg.skeleton.create_interior_straight_skeleton(poly)
-        for h in skel.halfedges:
-            if h.is_bisector:
-                p1 = h.vertex.point
-                p2 = h.opposite.vertex.point
-                ax.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1)
-        plot_polygon = Polygon(coords, True)
-        patches = [plot_polygon]
-        collection = PatchCollection(patches,
-                                     alpha=0.25,
-                                     facecolors=FLOOR_COLOR,
-                                     edgecolors=FLOOR_COLOR)
-        ax.add_collection(collection)
+    if level.slab_data:
+        for loop in level.slab_data['loops']:
+            coords = [h.vertex.coords for h in loop]
+            poly = sg.Polygon(coords)
+            skel = sg.skeleton.create_interior_straight_skeleton(poly)
+            for h in skel.halfedges:
+                if h.is_bisector:
+                    p1 = h.vertex.point
+                    p2 = h.opposite.vertex.point
+                    ax.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1)
+            plot_polygon = Polygon(coords, True)
+            patches = [plot_polygon]
+            collection = PatchCollection(patches,
+                                         alpha=0.25,
+                                         facecolors=FLOOR_COLOR,
+                                         edgecolors=FLOOR_COLOR)
+            ax.add_collection(collection)
 
-    # draw floor center of mass
-    centroid = level.slab_data['properties']['centroid']
-    ax.scatter(centroid[0], centroid[1], s=150,
-               facecolors='none', edgecolors='black', lw=2)
+        # draw floor center of mass
+        centroid = level.slab_data['properties']['centroid']
+        ax.scatter(centroid[0], centroid[1], s=150,
+                   facecolors='none', edgecolors='black', lw=2)
 
     # draw the beam column elements
     if extrude_frames:
@@ -75,18 +76,24 @@ def draw_level_geometry(building: Building, lvlname: str, extrude_frames=False):
             bbox = bm.section.mesh.bounding_box()
             sec_b = bbox[1, 0] - bbox[0, 0]
             p0 = bm.node_i.coordinates[0:2] + \
-                bm.local_y_axis_vector()[0:2]*sec_b/2
+                bm.local_z_axis_vector()[0:2]*sec_b/2
             p1 = bm.node_j.coordinates[0:2] + \
-                bm.local_y_axis_vector()[0:2]*sec_b/2
+                bm.local_z_axis_vector()[0:2]*sec_b/2
             p2 = bm.node_j.coordinates[0:2] - \
-                bm.local_y_axis_vector()[0:2]*sec_b/2
+                bm.local_z_axis_vector()[0:2]*sec_b/2
             p3 = bm.node_i.coordinates[0:2] - \
-                bm.local_y_axis_vector()[0:2]*sec_b/2
+                bm.local_z_axis_vector()[0:2]*sec_b/2
             coords = np.vstack((p0, p1, p2, p3))
             patches.append(Polygon(coords, True))
         for col in level.columns.column_list:
             coords = np.array(
                 [h.vertex.coords for h in col.section.mesh.halfedges])
+            ang = col.ang
+            rot_mat = np.array([
+                [np.cos(ang), -np.sin(ang)],
+                [np.sin(ang), np.cos(ang)]
+            ])
+            coords = (rot_mat @ coords.T).T
             coords += col.node_i.coordinates[0:2]
             patches.append(Polygon(coords, True))
         collection = PatchCollection(

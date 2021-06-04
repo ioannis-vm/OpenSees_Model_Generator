@@ -59,15 +59,10 @@ def level_geometry(building: Building, lvlname: str, extrude_frames=False):
             }
         })
 
-    if level.restraint == "fixed":
-        mark = "square"
-        size = 10
-    elif level.restraint == "pinned":
-        mark = "circle-open"
-        size = 10
-    else:
-        mark = "circle"
-        size = 5
+    mark = {}
+    mark['fixed'] = ("square", 10)
+    mark['pinned'] = ("circle-open", 10)
+    mark['free'] = ("circle", 5)
 
     # draw the nodes
     dt.append({
@@ -76,13 +71,15 @@ def level_geometry(building: Building, lvlname: str, extrude_frames=False):
         "x": [node.coordinates[0] for node in level.nodes.node_list],
         "y": [node.coordinates[1] for node in level.nodes.node_list],
         "z": [level.elevation]*len(level.nodes.node_list),
-        "hoverinfo": "text",
-        "hovertext": ["node" + str(node.uniq_id)
-                      for node in level.nodes.node_list],
+        # "hoverinfo": "text",
+        # "hovertext": ["node" + str(node.uniq_id)
+        #               for node in level.nodes.node_list],
         "marker": {
-            "symbol": mark,
+            "symbol": [mark[node.restraint_type][0]
+                       for node in level.nodes.node_list],
             "color": NODE_PRIMARY_COLOR,
-            "size": size
+            "size": [mark[node.restraint_type][1]
+                     for node in level.nodes.node_list]
         }
     })
 
@@ -120,14 +117,14 @@ def level_geometry(building: Building, lvlname: str, extrude_frames=False):
             z_vec = elm.local_z_axis_vector()
             loop = elm.section.mesh.halfedges
             for halfedge in loop:
-                loc0 = halfedge.vertex.coords[0]*y_vec + \
-                    halfedge.vertex.coords[1]*z_vec + side_a
-                loc1 = halfedge.vertex.coords[0]*y_vec + \
-                    halfedge.vertex.coords[1]*z_vec + side_b
-                loc2 = halfedge.nxt.vertex.coords[0]*y_vec + \
-                    halfedge.nxt.vertex.coords[1]*z_vec + side_b
-                loc3 = halfedge.nxt.vertex.coords[0]*y_vec + \
-                    halfedge.nxt.vertex.coords[1]*z_vec + side_a
+                loc0 = halfedge.vertex.coords[0]*z_vec + \
+                    halfedge.vertex.coords[1]*y_vec + side_a
+                loc1 = halfedge.vertex.coords[0]*z_vec + \
+                    halfedge.vertex.coords[1]*y_vec + side_b
+                loc2 = halfedge.nxt.vertex.coords[0]*z_vec + \
+                    halfedge.nxt.vertex.coords[1]*y_vec + side_b
+                loc3 = halfedge.nxt.vertex.coords[0]*z_vec + \
+                    halfedge.nxt.vertex.coords[1]*y_vec + side_a
                 x_list.append(loc0[0])
                 y_list.append(loc0[1])
                 z_list.append(loc0[2])

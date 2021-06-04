@@ -54,8 +54,8 @@ def calculate_tributary_areas_from_loops(loops):
                 nxt = nxt.next
             miniloops.append(miniloop)
 
-        miniloop_areas = [sg.Polygon(
-            [h.vertex.point for h in miniloop]).area()
+        miniloop_areas = [float(sg.Polygon(
+            [h.vertex.point for h in miniloop]).area())
             for miniloop in miniloops]
         outer = min(miniloop_areas)
         index = miniloop_areas.index(outer)
@@ -142,7 +142,8 @@ def distribute_load_on_beams(lvl):
         loops = lvl.slab_data['loops']
         beam_to_edge_map = lvl.slab_data['beam_to_edge_map']
         areas = calculate_tributary_areas_from_loops(loops)
-        for beam in lvl.beams.beam_list:
-            edge_id = beam_to_edge_map[beam.uniq_id]
-            udlZ_val = -areas[edge_id] * lvl.surface_load / beam.length()
-            beam.udl.add([0.00, 0.00, udlZ_val])
+        if areas:
+            for beam in lvl.beams.beam_list:
+                edge_id = beam_to_edge_map[beam.uniq_id]
+                udlZ_val = -areas[edge_id] * lvl.surface_load / beam.length()
+                beam.udl.add([0.00, 0.00, udlZ_val])

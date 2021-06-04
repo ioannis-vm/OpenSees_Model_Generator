@@ -5,4 +5,5 @@ matplotlib >=3.4.1
 pandas >= 1.2.4
 xlrd >= 2.0.1
 openpyxl >= 3.0.7
+shapely >= 1.7.1
 
