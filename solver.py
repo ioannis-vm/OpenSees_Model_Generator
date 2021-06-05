@@ -41,9 +41,10 @@ def ops_define_nodes(building):
     for lvl in building.levels.level_list:
         for node in lvl.nodes.node_list:
             ops.node(node.uniq_id,
-                     node.coordinates[0],
-                     node.coordinates[1],
-                     node.coordinates[2])
+                     *node.coordinates)
+        if lvl.master_node:
+            ops.node(lvl.master_node.uniq_id,
+                     *lvl.master_node.coordinates)
 
 
 def ops_define_node_restraints(building):
@@ -53,6 +54,16 @@ def ops_define_node_restraints(building):
                 ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
             elif node.restraint_type == 'pinned':
                 ops.fix(node.uniq_id, 1, 1, 1, 0, 0, 0)
+        if lvl.master_node:
+            ops.fix(lvl.master_node.uniq_id, 0, 0, 1, 1, 1, 0)
+
+
+def ops_define_node_constraints(building):
+    for lvl in building.levels.level_list:
+        if lvl.master_node:
+            ops.rigidDiaphragm(3,
+                               lvl.master_node.uniq_id,
+                               *[node.uniq_id for node in lvl.nodes.node_list])
 
 
 def ops_define_node_mass(building):
@@ -61,9 +72,10 @@ def ops_define_node_mass(building):
             if node.mass:
                 if max(node.mass.value) > EPSILON:
                     ops.mass(node.uniq_id,
-                             node.mass.value[0],
-                             node.mass.value[1],
-                             node.mass.value[2])
+                             *node.mass.value)
+        if lvl.master_node:
+            ops.mass(lvl.master_node.uniq_id,
+                     *lvl.master_node.mass.value)
 
 
 def ops_define_beamcolumn_elements_linear(building):
@@ -123,6 +135,8 @@ def ops_define_dead_load(building):
                         elm.udl.value[1],
                         elm.udl.value[2],
                         elm.udl.value[0])
+        for node in lvl.nodes.node_list:
+            ops.load(node.uniq_id, *node.load.value)
 
 
 def to_OpenSees_domain(building: Building, frame_elem_type='fiber'):
@@ -133,6 +147,7 @@ def to_OpenSees_domain(building: Building, frame_elem_type='fiber'):
     ops_define_materials(building)
     ops_define_nodes(building)
     ops_define_node_restraints(building)
+    ops_define_node_constraints(building)
     ops_define_node_mass(building)
     if frame_elem_type == 'linear':
         ops_define_elastic_sections(building)
@@ -161,8 +176,10 @@ def modal_analysis(building: Building, n_modes=1):
     Runs a modal analysis assuming the building has
     been defined in the OpenSees domain.
     """
-    eigValues = np.array(ops.eigen(n_modes))
-    periods = np.sqrt(2.00*np.pi / np.sqrt(eigValues))
+    eigValues = np.array(ops.eigen(
+        '-fullGenLapack',
+        n_modes))
+    periods = 2.00*np.pi / np.sqrt(eigValues)
     return periods
 
 
@@ -173,3 +190,29 @@ def gravity_analysis(building: Building):
     """
     ops_define_dead_load(building)
     ops_run_gravity_analysis()
+
+
+def global_reactions(building: Building):
+    ops.reactions()
+    global_reactions = np.full(6, 0.00)
+    for lvl in building.levels.level_list:
+        for node in lvl.nodes.node_list:
+            if node.restraint_type != 'free':
+                uid = node.uniq_id
+                x = node.coordinates[0]
+                y = node.coordinates[1]
+                z = node.coordinates[2]
+                local_reaction = np.array(ops.nodeReaction(uid))
+                global_reaction = np.array([
+                    local_reaction[0],
+                    local_reaction[1],
+                    local_reaction[2],
+                    local_reaction[3] + local_reaction[2] * y
+                    - local_reaction[1] * z,
+                    local_reaction[4] + local_reaction[0] * z
+                    - local_reaction[2] * x,
+                    local_reaction[5] + local_reaction[1] * x
+                    - local_reaction[0] * y
+                ])
+                global_reactions += global_reaction
+    return global_reactions
