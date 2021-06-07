@@ -70,7 +70,7 @@ def level_geometry(building: Building, lvlname: str, extrude_frames=False):
         "mode": "markers",
         "x": [node.coordinates[0] for node in level.nodes.node_list],
         "y": [node.coordinates[1] for node in level.nodes.node_list],
-        "z": [level.elevation]*len(level.nodes.node_list),
+        "z": [node.coordinates[2] for node in level.nodes.node_list],
         # "hoverinfo": "text",
         # "hovertext": ["node" + str(node.uniq_id)
         #               for node in level.nodes.node_list],

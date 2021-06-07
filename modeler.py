@@ -663,7 +663,7 @@ class LinearElement(Element):
             # not vertical case
             up_direction = np.array([0.0, 0.0, 1.0])
             # orthogonalize with respect to x_vec
-            y_vec = up_direction - np.dot(up_direction, x_vec)
+            y_vec = up_direction - np.dot(up_direction, x_vec)*x_vec
             # ..and normalize
             y_vec = y_vec / np.linalg.norm(y_vec)
             # determine z vector from the cross-product
