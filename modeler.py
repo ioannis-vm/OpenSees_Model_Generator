@@ -24,7 +24,7 @@ from utility.mesher_section_gen import w_mesh
 
 EPSILON = 1.00E-6
 ALPHA = 10000.00
-g_constant = 386.22  # in/s**2
+G_CONST = 386.22  # in/s**2
 
 _ids = count(0)
 
@@ -387,19 +387,16 @@ class Point:
 
     __rmul__ = __mul__
 
-    def dist2d(self, other):
-        p1 = np.array(self.coordinates[0:2])
-        p2 = np.array(other.coordinates[0:2])
-        return np.linalg.norm(p2-p1)
+    def dist_2D(self, other):
+        dx = other.coordinates[0] - self.coordinates[0]
+        dy = other.coordinates[1] - self.coordinates[1]
+        return np.sqrt(dx*dx + dy*dy)
 
 
 @dataclass
 class Node(Element, Point):
     """
     Node object.
-    Parameters:
-        [x, y, z]
-        restraint_type: "free" or "pinned" or "fixed"
     """
 
     restraint_type: str = field(default="free")
@@ -471,7 +468,8 @@ class Section(Element):
         return (self.name == other.name)
 
     def subdivide_section(self, n_x=10, n_y=25, plot=False):
-        return subdivide_polygon(self.mesh.halfedges, n_x=10, n_y=25, plot=plot)
+        return subdivide_polygon(
+            self.mesh.halfedges, n_x=n_x, n_y=n_y, plot=plot)
 
 
 @dataclass
@@ -496,9 +494,9 @@ class Sections:
 
     def set_active(self, name: str):
         """
-        Assigns the active section.
+        Sets the active section.
         Any elements defined while this section is active
-        will be assigned that seciton.
+        will have that section
         """
         self.active = None
         found = False
@@ -588,7 +586,6 @@ class Materials:
         using Steel02.
         """
         # units: lb, in
-        # TODO make sure that I actually need these parameters
         self.add(Material('steel',
                           'Steel02',
                           0.0007344714506172839,
@@ -694,7 +691,7 @@ class LinearElement(Element):
 @total_ordering
 class Column(LinearElement):
     """
-    TODO
+    Column element.
     """
     section: Section = field(default=None)
 
@@ -741,7 +738,7 @@ class Columns:
 @total_ordering
 class Beam(LinearElement):
     """
-    TODO
+    Beam element
     """
     section: Section = field(default=None)
 
@@ -865,7 +862,7 @@ class Levels:
     def add(self, lvl: Level):
         """
         Adds a new level. The levels must be added in ascending
-        order for now. TODO -> any order
+        elevations.
 
         Parameters:
             lvl (Level): the level to add
@@ -877,7 +874,7 @@ class Levels:
         if lvl.elevation in [lev.elevation
                              for lev in self.level_list]:
             raise ValueError('Level elevation already exists: ' + repr(lvl))
-        # TODO Don't accept levels out of order (for now)
+        # Don't accept levels out of order
         if self.level_list:
             if lvl.elevation < self.level_list[-1].elevation:
                 raise ValueError(
@@ -891,7 +888,6 @@ class Levels:
         # If there's no active level, make
         # the newly added level active
         if not self.active:
-            # (this means "if list is empty")
             self.active.append(lvl)
             self.active.sort()
 
@@ -944,15 +940,10 @@ class Building:
     groups: Groups = field(default_factory=Groups)
     sections: Sections = field(default_factory=Sections)
     materials: Materials = field(default_factory=Materials)
-    locked: bool = field(default=False)
 
     ###############################################
     # 'Add' methods - add objects to the building #
     ###############################################
-
-    def check_locked(self):
-        if self.locked:
-            raise ValueError("Attempted to modify a locked building.")
 
     def add_node(self,
                  x: float,
@@ -960,7 +951,6 @@ class Building:
         """
         Adds a node at a particular point in all active levels
         """
-        self.check_locked()
         for level in self.levels.active:
             level.add_node(x, y)
 
@@ -972,7 +962,6 @@ class Building:
         """
         adds a level to the building
         """
-        self.check_locked()
         self.levels.add(Level(name, elevation, restraint))
 
     def add_gridline(self,
@@ -983,7 +972,6 @@ class Building:
         """
         Adds a new gridline to the building
         """
-        self.check_locked()
         self.gridsystem.add(GridLine(tag, start, end))
 
     def add_sections_from_json(self,
@@ -994,7 +982,6 @@ class Building:
         Add sections from a section database json file.
         Only the specified sections (given the labels) are added.
         """
-        self.check_locked()
         if not self.materials.active:
             raise ValueError("No active material specified")
         if sec_type == 'W':
@@ -1015,7 +1002,6 @@ class Building:
         Parses a given DXF file and adds gridlines from
         all the lines defined in that file.
         """
-        self.check_locked()
         i = 100000  # > 8 lol
         j = 0
         xi = 0.00
@@ -1046,7 +1032,6 @@ class Building:
         """
         Adds a new group to the building.
         """
-        self.check_locked()
         self.groups.add(Group(name))
 
     def assign_surface_load(self,
@@ -1054,7 +1039,6 @@ class Building:
         """
         Assigns surface loads on the active levels
         """
-        self.check_locked()
         for level in self.levels.active:
             level.assign_surface_load(load_per_area)
 
@@ -1063,10 +1047,10 @@ class Building:
                             y: float,
                             ang: float):
         """
-        TODO - add docstring
+        Adds a column at the given X, Y location at all the active levels.
+        Existing nodes are used, otherwise they are created.
         """
-        self.check_locked()
-        if self.sections.active and self.materials.active:
+        if self.sections.active:
             for level in self.levels.active:
                 if level.previous_lvl:  # if previous level exists
                     # check to see if top node exists
@@ -1097,9 +1081,9 @@ class Building:
                            end: Point,
                            ang: float):
         """
-        TODO - add docstring
+        Adds a beam connecting the given points
+        at all the active levels.
         """
-        self.check_locked()
         if not self.sections.active:
             raise ValueError("No active section specified")
 
@@ -1126,9 +1110,10 @@ class Building:
 
     def add_columns_from_grids(self):
         """
-        TODO - add docstring
+        Uses the currently defined gridsystem to obtain all locations
+        where gridlines intersect, and places a column on
+        all such locations.
         """
-        self.check_locked()
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
             self.add_column_at_point(
@@ -1136,9 +1121,11 @@ class Building:
 
     def add_beams_from_grids(self):
         """
-        TODO - add docstring
+        Uses the currently defined gridsystem to obtain all locations
+        where gridlines intersect. For each gridline, beams are placed
+        connecting all the intersection locations of that
+        gridline with all other gridlines.
         """
-        self.check_locked()
         for grid in self.gridsystem.grids:
             isect_pts = self.gridsystem.intersect(grid)
             for i in range(len(isect_pts)-1):
@@ -1158,33 +1145,29 @@ class Building:
         An empty `names` list is interpreted as
         activating all levels.
         """
-        self.check_locked()
         self.levels.set_active(names)
 
     def set_active_groups(self, names: List[str]):
         """
         Sets the active groups of the building.
         """
-        self.check_locked()
         self.groups.set_active(names)
 
     def set_active_material(self, name: str):
         """
         Sets the active material.
         """
-        self.check_locked()
         self.materials.set_active(name)
 
     def set_active_section(self, name: str):
         """
         Sets the active section.
         """
-        self.check_locked()
         self.sections.set_active(name)
 
-    ###############################
-    # Structural analysis methods #
-    ###############################
+    #########################
+    # Preprocessing methods #
+    #########################
 
     def preprocess(self, assume_floor_slabs=True, self_weight=True):
         """
@@ -1196,7 +1179,6 @@ class Building:
         self.groups.active = []
         self.sections.active = None
         self.materials.active = None
-        self.locked = True
         for lvl in self.levels.level_list:
             if assume_floor_slabs:
                 # generate floor slabs
@@ -1208,7 +1190,7 @@ class Building:
                 cross_section_area = elm.section.properties["A"]
                 mass_per_length = cross_section_area * \
                     elm.section.material.density                # lb-s**2/in**2
-                weight_per_length = mass_per_length * g_constant  # lb/in
+                weight_per_length = mass_per_length * G_CONST  # lb/in
                 if self_weight:
                     elm.add_udl_from_global_system(
                         Load([0., 0., -weight_per_length]))
@@ -1219,7 +1201,7 @@ class Building:
             if assume_floor_slabs:
                 # accumulate all the mass at the master nodes
                 if lvl.restraint == "free":
-                    floor_mass = lvl.surface_load / g_constant
+                    floor_mass = lvl.surface_load / G_CONST
                     floor_centroid = lvl.slab_data['properties']['centroid']
                     floor_mass_inertia = \
                         lvl.slab_data['properties']['inertia']['ir_mass']
@@ -1248,5 +1230,5 @@ class Building:
                         floor_mass_inertia
                     for node in lvl.nodes.node_list:
                         lvl.master_node.mass.value[5] += node.mass.value[0] * \
-                            lvl.master_node.dist2d(node)**2
+                            lvl.master_node.dist_2D(node)**2
                         node.mass = Mass([0., 0., 0.])

@@ -194,7 +194,7 @@ def gravity_analysis(building: Building):
 
 def global_reactions(building: Building):
     ops.reactions()
-    global_reactions = np.full(6, 0.00)
+    reactions = np.full(6, 0.00)
     for lvl in building.levels.level_list:
         for node in lvl.nodes.node_list:
             if node.restraint_type != 'free':
@@ -214,5 +214,5 @@ def global_reactions(building: Building):
                     local_reaction[5] + local_reaction[1] * x
                     - local_reaction[0] * y
                 ])
-                global_reactions += global_reaction
+                reactions += global_reaction
     return global_reactions

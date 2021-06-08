@@ -72,9 +72,9 @@ def interp3D(element, num_points, scaling):
     # bending deformation along the local xz plane
     d_z_local = Nyz_mat @ np.array([
         u_i_local[2],
-        r_i_local[1],
+        -r_i_local[1],
         u_j_local[2],
-        r_j_local[1]
+        -r_j_local[1]
     ])
 
     # torsional deformation

@@ -13,7 +13,7 @@ https://plotly.com/python/reference/
 from utility.graphics import common
 import plotly.graph_objects as go
 import plotly.io as pio
-pio.renderers.default = 'browser'
+# pio.renderers.default = 'browser'
 
 node_marker = {
     'fixed': ("square", 10),
