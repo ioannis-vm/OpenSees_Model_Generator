@@ -12,7 +12,6 @@ https://plotly.com/python/reference/
 
 import plotly.graph_objects as go
 import numpy as np
-from modeler import Building
 from utility.graphics import common, common_3D
 
 
@@ -145,7 +144,7 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     })
 
 
-def level_geometry(building: Building, lvlname: str, extrude_frames=False):
+def level_geometry(building: 'Building', lvlname: str, extrude_frames=False):
 
     level = building.levels.get(lvlname)
 
@@ -171,7 +170,7 @@ def level_geometry(building: Building, lvlname: str, extrude_frames=False):
     return dt
 
 
-def draw_level_geometry(building: Building, lvlname: str,
+def draw_level_geometry(building: 'Building', lvlname: str,
                         extrude_frames=False):
 
     dt = level_geometry(building, lvlname, extrude_frames)
@@ -182,7 +181,7 @@ def draw_level_geometry(building: Building, lvlname: str,
     fig.show()
 
 
-def draw_building_geometry(building: Building, extrude_frames=False):
+def draw_building_geometry(building: 'Building', extrude_frames=False):
     layout = common_3D.global_layout()
     dt = []
     for lvl in building.levels.level_list:

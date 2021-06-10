@@ -1,5 +1,5 @@
 """
-Building Modeler for OpenSeesPy
+Building Modeler for OpenSeesPy ~ Modeler module
 """
 
 #   __                 UC Berkeley
@@ -19,6 +19,8 @@ import json
 import numpy as np
 from utility.lvl_operations import generate_floor_slab_data
 from utility.lvl_operations import distribute_load_on_beams
+from utility.graphics import preprocessing_2D
+from utility.graphics import preprocessing_3D
 from utility.mesher import Mesh, subdivide_polygon
 from utility.mesher_section_gen import w_mesh
 
@@ -1232,3 +1234,18 @@ class Building:
                         lvl.master_node.mass.value[5] += node.mass.value[0] * \
                             lvl.master_node.dist_2D(node)**2
                         node.mass = Mass([0., 0., 0.])
+
+    #################
+    # Visualization #
+    #################
+
+    def plot_level_geometry(self, lvlname: str, extrude_frames=False):
+        preprocessing_2D.draw_level_geometry(self, lvlname, extrude_frames)
+
+    def plot_level_geometry_3D(self, lvlname: str, extrude_frames=False):
+        preprocessing_3D.draw_level_geometry(
+            self, lvlname, extrude_frames=extrude_frames)
+
+    def plot_building_geometry(self, extrude_frames=False):
+        preprocessing_3D.draw_building_geometry(
+            self, extrude_frames=extrude_frames)
