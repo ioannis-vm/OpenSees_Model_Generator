@@ -2,34 +2,17 @@
 * Todo List
 
 *** Developing code
-Definition stage
-- [X] Floor perimeter
-- [X] UDL
-- [X] Grids from dxf
-- [X] Test that load and mass classes work as intended
-- [X] Section class
-- [X] Material class
 Visualization
-- [X] Visualize floor regions and UDLs
 - [ ] Visualize element loads and point masses
 - [ ] Be able to plot partially defined models (no elements or no floor perimeter for example)
-
-
-*** Things to test
-- [X] Test that two identical UDLs raise an error on a single level
-- [X] Assert that two identical UDLs on different levels do not cause an error
-
-*** Organizing existing code
-- [X] Change input arguments to include tuples
-- [X] Consider changing dataclass arguments to dictionaries, to reduce the number of arguments
 
 * General Plan
 
 *** High priority
 
-- [ ] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
-  - [ ] Modal analysis
-  - [ ] Gravity load case analysis
+- [-] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
+  - [X] Modal analysis
+  - [X] Gravity load case analysis
   - [ ] NL Pushover analysis
   - [ ] NL time-history analysis
 - [X] Expand to support displacement based fiber section beam-column elements

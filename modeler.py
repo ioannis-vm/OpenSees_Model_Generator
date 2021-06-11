@@ -1189,6 +1189,13 @@ class Building:
                 list_of_nodes.append(node)
         return list_of_nodes
 
+    def list_of_master_nodes(self):
+        list_of_master_nodes = []
+        for lvl in self.levels.level_list:
+            if lvl.master_node:
+                list_of_master_nodes.append(lvl.master_node)
+        return list_of_master_nodes
+
     def preprocess(self, assume_floor_slabs=True, self_weight=True):
         """
         Preprocess the building. No further editing beyond this point.
@@ -1252,6 +1259,20 @@ class Building:
                         lvl.master_node.mass.value[5] += node.mass.value[0] * \
                             lvl.master_node.dist_2D(node)**2
                         node.mass = Mass([0., 0., 0.])
+
+    def level_masses(self):
+        lvls = self.levels.level_list
+        n_lvls = len(lvls)
+        level_masses = np.full(n_lvls, 0.00)
+        for i, lvl in enumerate(lvls):
+            total_mass = 0.00
+            for node in lvl.nodes.node_list:
+                if node.restraint_type == "free":
+                    total_mass += node.mass.value[0]
+            if lvl.master_node:
+                total_mass += lvl.master_node.mass.value[0]
+            level_masses[i] = total_mass
+        return level_masses
 
     #################
     # Visualization #
