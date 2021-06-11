@@ -15,13 +15,21 @@ from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
 from modeler import Building
+from utility.graphics import postprocessing_3D
 
 EPSILON = 1.00E-6
 
 
 class AnalysisResult(TypedDict):
     uniq_id: int
-    results = List[float]
+    results = List
+
+
+def store_result(analysis_result: AnalysisResult, uniq_id: int, result: List):
+    if uniq_id in analysis_result.keys():
+        analysis_result[uniq_id].append(result)
+    else:
+        analysis_result[uniq_id] = [result]
 
 
 @dataclass
@@ -29,6 +37,7 @@ class Analysis:
     building: Building
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)
+    node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
 
     #############################################
     # Methods that send information to OpenSees #
@@ -128,25 +137,41 @@ class Analysis:
     def read_node_displacements(self):
         for lvl in self.building.levels.level_list:
             for node in lvl.nodes.node_list:
-                self.node_displacements[node.uniq_id] = ops.nodeDisp(
-                    node.uniq_id)
+                store_result(self.node_displacements,
+                             node.uniq_id,
+                             ops.nodeDisp(node.uniq_id))
+
+    def read_node_reactions(self):
+        ops.reactions()
+        for lvl in self.building.levels.level_list:
+            for node in lvl.nodes.node_list:
+                if node.restraint_type != 'free':
+                    uid = node.uniq_id
+                    local_reaction = np.array(ops.nodeReaction(uid))
+                    store_result(self.node_reactions,
+                                 uid,
+                                 local_reaction)
 
     def read_OpenSees_results(self):
         """
         Reads back the results from the OpenSeesPy domain
         """
         self.read_node_displacements()
+        self.read_node_reactions()
 
     #########################
     # Visualization methods #
     #########################
-
-    ###################
-    # Numeric Results #
-    ###################
+    def deformed_shape(self, step=0, scaling=0.00, extrude_frames=False):
+        postprocessing_3D.deformed_shape(self,
+                                         step,
+                                         scaling,
+                                         extrude_frames)
+    ##################################
+    # Numeric Result Post-processing #
+    ##################################
 
     def global_reactions(self):
-        ops.reactions()
         reactions = np.full(6, 0.00)
         for lvl in self.building.levels.level_list:
             for node in lvl.nodes.node_list:
@@ -155,7 +180,7 @@ class Analysis:
                     x = node.coordinates[0]
                     y = node.coordinates[1]
                     z = node.coordinates[2]
-                    local_reaction = np.array(ops.nodeReaction(uid))
+                    local_reaction = self.node_reactions[uid][0]
                     global_reaction = np.array([
                         local_reaction[0],
                         local_reaction[1],
@@ -205,6 +230,7 @@ class LinearAnalysis(Analysis):
                             elm.section.uniq_id)
 
     def ops_run_gravity_analysis(self):
+        self.ops_define_dead_load()
         ops.system('BandGeneral')
         ops.constraints('Transformation')
         ops.numberer('RCM')
@@ -213,6 +239,42 @@ class LinearAnalysis(Analysis):
         ops.integrator('LoadControl', 1.0)
         ops.analysis('Static')
         ops.analyze(1)
+
+
+@dataclass
+class ModalAnalysis(LinearAnalysis):
+    """
+    Runs a modal analysis assuming the building has
+    been defined in the OpenSees domain.
+    """
+    num_modes: int = field(default=1)
+    periods: List[float] = field(default_factory=list)
+
+    ####################################################
+    # Methods that read back information from OpenSees #
+    ####################################################
+
+    def read_node_displacements(self):
+        for lvl in self.building.levels.level_list:
+            for node in lvl.nodes.node_list:
+                for i in range(self.num_modes):
+                    store_result(self.node_displacements,
+                                 node.uniq_id,
+                                 ops.nodeEigenvector(
+                                     node.uniq_id,
+                                     i+1)
+                                 )
+
+    def run(self):
+        self.to_OpenSees_domain()
+        eigValues = np.array(ops.eigen(
+            '-fullGenLapack',
+            self.num_modes))
+        self.periods = 2.00*np.pi / np.sqrt(eigValues)
+        self.read_node_displacements()
+
+    def periods(self):
+        return self.periods
 
 
 @dataclass
@@ -273,18 +335,6 @@ class LinearGravityAnalysis(LinearAnalysis):
 #         ops.integrator('LoadControl', 0.1)
 #         ops.analysis('Static')
 #         ops.analyze(10)
-
-
-# def modal_analysis(building: Building, n_modes=1):
-#     """
-#     Runs a modal analysis assuming the building has
-#     been defined in the OpenSees domain.
-#     """
-#     eigValues = np.array(ops.eigen(
-#         '-fullGenLapack',
-#         n_modes))
-#     periods = 2.00*np.pi / np.sqrt(eigValues)
-#     return periods
 
 
 # def gravity_analysis(building: Building):

@@ -12,12 +12,11 @@ https://plotly.com/python/reference/
 
 import plotly.graph_objects as go
 import numpy as np
-from modeler import Building
 from utility.graphics import common, common_3D
 import openseespy.opensees as ops
 
 
-def interp3D(element, num_points, scaling):
+def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     x_vec = element.local_x_axis_vector()
     y_vec = element.local_y_axis_vector()
     z_vec = element.local_z_axis_vector()
@@ -26,10 +25,10 @@ def interp3D(element, num_points, scaling):
     T_global2local = np.vstack((x_vec, y_vec, z_vec))
     T_local2global = T_global2local.T
 
-    u_i_global = ops.nodeDisp(element.node_i.uniq_id)[0:3]
-    r_i_global = ops.nodeDisp(element.node_i.uniq_id)[3:6]
-    u_j_global = ops.nodeDisp(element.node_j.uniq_id)[0:3]
-    r_j_global = ops.nodeDisp(element.node_j.uniq_id)[3:6]
+    u_i_global = u_i
+    r_i_global = r_i
+    u_j_global = u_j
+    r_j_global = r_j
 
     u_i_local = T_global2local @ u_i_global
     r_i_local = T_global2local @ r_i_global
@@ -104,6 +103,11 @@ def interp3D(element, num_points, scaling):
 
     d_global = (T_local2global @ d_local.T).T
 
+    return d_global, r_local
+
+
+def interp3D_points(element, d_global, r_local, num_points, scaling):
+
     element_point_samples = np.column_stack((
         np.linspace(element.node_i.coordinates[0],
                     element.node_j.coordinates[0], num=num_points),
@@ -113,15 +117,15 @@ def interp3D(element, num_points, scaling):
                     element.node_j.coordinates[2], num=num_points),
     ))
 
-    # maximum_d = np.max(np.abs(d_global))
-
     interpolation_points = element_point_samples + d_global * scaling
 
-    return interpolation_points, r_local
+    return interpolation_points
 
 
-def add_data__extruded_frames_deformed_mesh(dt,
+def add_data__extruded_frames_deformed_mesh(analysis,
+                                            dt,
                                             list_of_frames,
+                                            step,
                                             num_points,
                                             scaling):
     if not list_of_frames:
@@ -134,8 +138,16 @@ def add_data__extruded_frames_deformed_mesh(dt,
     k_list = []
     index = 0
     for elm in list_of_frames:
-        interpolation_points, r_local = interp3D(
-            elm, num_points, scaling=scaling)
+        u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
+        r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
+        u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
+        r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
+
+        d_global, r_local = interp3D_deformation(
+            elm, u_i, r_i, u_j, r_j, num_points)
+
+        interpolation_points = interp3D_points(
+            elm, d_global, r_local, num_points, scaling)
         x_vec = elm.local_x_axis_vector()
         y_vec = elm.local_y_axis_vector()
         z_vec = elm.local_z_axis_vector()
@@ -213,16 +225,33 @@ def add_data__extruded_frames_deformed_mesh(dt,
     })
 
 
-def add_data__nodes_deformed(dt, list_of_nodes, scaling):
+def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
+    ids = [node.uniq_id for node in list_of_nodes]
+    location_data = np.full((len(list_of_nodes), 3), 0.00)
+    displacement_data = np.full((len(list_of_nodes), 6), 0.00)
+    for i, node in enumerate(list_of_nodes):
+        location_data[i, :] = node.coordinates
+        displacement_data[i, :] = \
+            analysis.node_displacements[node.uniq_id][step]
+    r = np.sqrt(displacement_data[:, 0]**2 +
+                displacement_data[:, 1]**2 +
+                displacement_data[:, 2]**2)
+    r = np.reshape(r, (-1, 1))
+    ids = np.reshape(np.array(ids), (-1, 1))
+    displacement_data = np.concatenate((displacement_data, r, ids), 1)
     dt.append({
         "type": "scatter3d",
         "mode": "markers",
-        "x": [node.coordinates[0] for node in list_of_nodes],
-        "y": [node.coordinates[1] for node in list_of_nodes],
-        "z": [node.coordinates[2] for node in list_of_nodes],
-        # "hoverinfo": "text",
-        # "hovertext": ["node" + str(node.uniq_id)
-        #               for node in level.nodes.node_list],
+        "x": location_data[:, 0] + displacement_data[:, 0] * scaling,
+        "y": location_data[:, 1] + displacement_data[:, 1] * scaling,
+        "z": location_data[:, 2] + displacement_data[:, 2] * scaling,
+        "customdata": displacement_data,
+        "hovertemplate": 'ux: %{customdata[0]:.6g}<br>' +
+        'uy: %{customdata[1]:.6g}<br>' +
+        'uz: %{customdata[2]:.6g}<br>' +
+        'combined: %{customdata[6]:.6g}<br>' +
+        'rz: %{customdata[5]:.6g} (rad)<br>' +
+        '<extra>Node %{customdata[7]:d}</extra>',
         "marker": {
             "symbol": [common_3D.node_marker[node.restraint_type][0]
                        for node in list_of_nodes],
@@ -233,24 +262,66 @@ def add_data__nodes_deformed(dt, list_of_nodes, scaling):
     })
 
 
-def deformed_shape(building: Building, scaling, extrude_frames=False):
+def get_auto_scaling(analysis, step):
+    """
+    Automatically calculate a scaling value that
+    makes the maximum displacement appear approximately
+    10% of the largest dimention of the building's bounding box
+    """
+    # building's reference length
+    p_min = np.full(3, np.inf)
+    p_max = np.full(3, -np.inf)
+    for lvl in analysis.building.levels.level_list:
+        for node in lvl.nodes.node_list:
+            p = np.array(node.coordinates)
+            p_min = np.minimum(p_min, p)
+            p_max = np.maximum(p_max, p)
+    ref_len = np.max(p_max - p_min)
+    # maximum displacement
+    max_d = 0.00
+    for lvl in analysis.building.levels.level_list:
+        for elm in lvl.beams.beam_list:
+            u_i = analysis.node_displacements[
+                elm.node_i.uniq_id][step][0:3]
+            r_i = analysis.node_displacements[
+                elm.node_i.uniq_id][step][3:6]
+            u_j = analysis.node_displacements[
+                elm.node_j.uniq_id][step][0:3]
+            r_j = analysis.node_displacements[
+                elm.node_j.uniq_id][step][3:6]
+            d_global, r_local = interp3D_deformation(
+                elm, u_i, r_i, u_j, r_j, 3)
+            max_d = np.maximum(max_d, np.max(np.abs(d_global)))
+    # scaling factor: max_d scaled = 10% of the reference length
+    scaling = ref_len / max_d * 0.1
+    return scaling
+
+
+def deformed_shape(analysis: 'Analysis',
+                   step,
+                   scaling,
+                   extrude_frames):
+
+    # calculate a nice scaling factor if 0.00 is passed
+    if scaling == 0:
+        scaling = get_auto_scaling(analysis, step)
+
     layout = common_3D.global_layout()
     dt = []
 
-    list_of_frames = []
-    list_of_nodes = []
-    for lvl in building.levels.level_list:
-        for element in lvl.beams.beam_list + lvl.columns.column_list:
-            list_of_frames.append(element)
-        for node in lvl.nodes.node_list:
-            list_of_nodes.append(node)
+    list_of_frames = analysis.building.list_of_frames()
+    list_of_nodes = analysis.building.list_of_nodes()
+
+    # draw the frames
+    add_data__extruded_frames_deformed_mesh(
+        analysis, dt, list_of_frames, step, 25, scaling)
 
     # draw the nodes
-    add_data__nodes_deformed(dt, list_of_nodes, scaling=scaling)
-
-    add_data__extruded_frames_deformed_mesh(
-        dt, list_of_frames, num_points=25, scaling=scaling)
+    add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
     fig.show()
+
+    metadata = {'scaling': scaling}
+    return metadata

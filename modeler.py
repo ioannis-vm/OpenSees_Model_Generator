@@ -1036,14 +1036,6 @@ class Building:
         """
         self.groups.add(Group(name))
 
-    def assign_surface_load(self,
-                            load_per_area: float):
-        """
-        Assigns surface loads on the active levels
-        """
-        for level in self.levels.active:
-            level.assign_surface_load(load_per_area)
-
     def add_column_at_point(self,
                             x: float,
                             y: float,
@@ -1167,9 +1159,35 @@ class Building:
         """
         self.sections.set_active(name)
 
+    ############################
+    # Methods for adding loads #
+    ############################
+
+    def assign_surface_load(self,
+                            load_per_area: float):
+        """
+        Assigns surface loads on the active levels
+        """
+        for level in self.levels.active:
+            level.assign_surface_load(load_per_area)
+
     #########################
     # Preprocessing methods #
     #########################
+
+    def list_of_frames(self):
+        list_of_frames = []
+        for lvl in self.levels.level_list:
+            for element in lvl.beams.beam_list + lvl.columns.column_list:
+                list_of_frames.append(element)
+        return list_of_frames
+
+    def list_of_nodes(self):
+        list_of_nodes = []
+        for lvl in self.levels.level_list:
+            for node in lvl.nodes.node_list:
+                list_of_nodes.append(node)
+        return list_of_nodes
 
     def preprocess(self, assume_floor_slabs=True, self_weight=True):
         """
