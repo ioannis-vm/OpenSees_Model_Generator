@@ -294,6 +294,11 @@ def get_auto_scaling(analysis, step):
             max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
     scaling = ref_len / max_d * 0.1
+    # never scale things down
+    # (usually when this is required, things have gone bad
+    #  and we should be able to realize that immediately)
+    if scaling < 1.00:
+        scaling = 1.00
     return scaling
 
 

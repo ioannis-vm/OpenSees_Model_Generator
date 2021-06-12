@@ -16,6 +16,7 @@ import openseespy.opensees as ops
 import numpy as np
 from modeler import Building, Node
 from utility.graphics import postprocessing_3D
+from utility.graphics import general_2D
 
 EPSILON = 1.00E-6
 
@@ -124,7 +125,6 @@ class Analysis:
         # are defined in the inherited classes that follow
         self.ops_define_sections()
         self.ops_define_beamcolumn_elements()
-        self.ops_define_dead_load()
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -162,15 +162,15 @@ class Analysis:
     # Visualization methods #
     #########################
     def deformed_shape(self, step=0, scaling=0.00, extrude_frames=False):
-        postprocessing_3D.deformed_shape(self,
-                                         step,
-                                         scaling,
-                                         extrude_frames)
+        return postprocessing_3D.deformed_shape(self,
+                                                step,
+                                                scaling,
+                                                extrude_frames)
     ##################################
     # Numeric Result Post-processing #
     ##################################
 
-    def global_reactions(self):
+    def global_reactions(self, step):
         reactions = np.full(6, 0.00)
         for lvl in self.building.levels.level_list:
             for node in lvl.nodes.node_list:
@@ -179,7 +179,7 @@ class Analysis:
                     x = node.coordinates[0]
                     y = node.coordinates[1]
                     z = node.coordinates[2]
-                    local_reaction = self.node_reactions[uid][0]
+                    local_reaction = self.node_reactions[uid][step]
                     global_reaction = np.array([
                         local_reaction[0],
                         local_reaction[1],
@@ -335,11 +335,11 @@ class NonlinearAnalysis(Analysis):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1.0e-12, 10, 3)
+        ops.test('NormDispIncr', 1.0e-6, 1000, 3)
         ops.algorithm('Newton')
-        ops.integrator('LoadControl', 0.1)
+        ops.integrator('LoadControl', 0.01)
         ops.analysis('Static')
-        ops.analyze(10)
+        ops.analyze(100)
 
 
 @dataclass
@@ -377,7 +377,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                              *(distribution[i]*masses[j]*load_dir))
 
     def run(self, direction, target_displacement,
-            control_node, displ_incr, n_x=10, n_y=25, n_p=10):
+            control_node, displ_incr, displ_output, n_x=10, n_y=25, n_p=10):
         if direction == 'x':
             control_DOF = 0
         elif direction == 'y':
@@ -385,27 +385,62 @@ class PushoverAnalysis(NonlinearAnalysis):
         else:
             raise ValueError("Direction can either be 'x' or 'y'")
         self.to_OpenSees_domain(n_x, n_y, n_p)
-        # self.ops_define_dead_load()
-        # self.ops_run_gravity_analysis()
-        # ops.wipeAnalysis()
+        # TODO add gravity loads
+        self.ops_define_dead_load()
+        self.ops_run_gravity_analysis()
+        ops.wipeAnalysis()
+        ops.loadConst('-time', 0.0)
         self.ops_apply_lateral_load(direction)
         ops.system("BandGeneral")
         ops.numberer('RCM')
         ops.constraints('Transformation')
+        # TODO add refined steps if fails
         ops.test('NormUnbalance', 1e-6, 1000)
         ops.integrator("DisplacementControl",
                        control_node.uniq_id, control_DOF + 1, displ_incr)
         ops.algorithm("Newton")
         ops.analysis("Static")
         curr_displ = 0.00
-        while curr_displ < target_displacement:
+        j_out = 0
+        n_steps_success = 0
+        while curr_displ + EPSILON <= target_displacement:
+            if curr_displ + EPSILON >= displ_output[j_out]:
+                self.read_OpenSees_results()
+                n_steps_success += 1
+                j_out += 1
             check = ops.analyze(1)
             if check != 0:
-                print('Unable to converge')
+                print('Analysis failed to converge')
                 break
-            # self.read_OpenSees_results()
             curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
-            # curr_displ = self.node_displacements[
-            #     control_node.uniq_id][-1][control_DOF]
-            print(curr_displ, end='\r')
+            print('Target displacement: %.2f | Current: %.2f' %
+                  (target_displacement, curr_displ), end='\r')
+
         self.read_OpenSees_results()
+        n_steps_success += 1
+        print('Number of saved analysis steps:', n_steps_success)
+        metadata = {'successful steps': n_steps_success}
+        return metadata
+
+    def plot_pushover_curve(self, direction, node, n_steps_success):
+        if not self.node_displacements:
+            raise ValueError(
+                'No results to plot. Run analysis first.')
+        if direction == 'x':
+            control_DOF = 0
+        elif direction == 'y':
+            control_DOF = 1
+        else:
+            raise ValueError("Direction can either be 'x' or 'y'")
+        base_shear = []
+        displacement = []
+        for step in range(n_steps_success):
+            base_shear.append(self.global_reactions(step)[control_DOF])
+            displacement.append(
+                self.node_displacements[node.uniq_id][step][control_DOF])
+        base_shear = np.abs(np.array(base_shear))
+        displacement = np.abs(np.array(displacement))
+        general_2D.line_plot_interactive(
+            "Pushover Analysis Results<br>" + "Direction: " + direction,
+            "Displacement", "Base Shear", "in", "lb",
+            displacement, base_shear)

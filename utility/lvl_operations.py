@@ -129,21 +129,3 @@ def generate_floor_slab_data(lvl):
         }
     else:
         lvl.slab_data = None
-
-
-def distribute_load_on_beams(lvl):
-    """
-    Given a building level, distribute
-    the surface load of the level on the beams
-    of that level.
-    Floor slab data should have been generated first.
-    """
-    if lvl.slab_data:
-        loops = lvl.slab_data['loops']
-        beam_to_edge_map = lvl.slab_data['beam_to_edge_map']
-        areas = calculate_tributary_areas_from_loops(loops)
-        if areas:
-            for beam in lvl.beams.beam_list:
-                edge_id = beam_to_edge_map[beam.uniq_id]
-                udlZ_val = -areas[edge_id] * lvl.surface_load / beam.length()
-                beam.udl.add([0.00, 0.00, udlZ_val])

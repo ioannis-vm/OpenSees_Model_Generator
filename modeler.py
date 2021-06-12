@@ -18,7 +18,7 @@ from itertools import count
 import json
 import numpy as np
 from utility.lvl_operations import generate_floor_slab_data
-from utility.lvl_operations import distribute_load_on_beams
+from utility.lvl_operations import calculate_tributary_areas_from_loops
 from utility.graphics import preprocessing_2D
 from utility.graphics import preprocessing_3D
 from utility.mesher import Mesh, subdivide_polygon
@@ -223,7 +223,7 @@ class Load:
         [x, y, z, (optional): mx, my, mz]
     """
 
-    value: List[float] = field()
+    value: List[float] = field(default_factory=list)
 
     def __eq__(self, other):
         return self.value == other.value
@@ -595,7 +595,7 @@ class Materials:
                               'Fy': 50000,
                               'E0': 29000000,
                               'G':   11153846.15,
-                              'b': 0.1
+                              'b': 0.01
                           })
                  )
 
@@ -615,7 +615,11 @@ class LinearElement(Element):
     node_i: Node
     node_j: Node
     ang: float = field(default=0.00)
-    udl: Load = field(default=Load([0.00, 0.00, 0.00]))
+    udl: Load = field(default_factory=Load)
+
+    def __post_init__(self):
+        self.uniq_id = next(_ids)
+        self.udl = Load([0., 0., 0.])
 
     def length(self):
         return np.linalg.norm(
@@ -1182,6 +1186,20 @@ class Building:
                 list_of_frames.append(element)
         return list_of_frames
 
+    def list_of_beams(self):
+        list_of_beams = []
+        for lvl in self.levels.level_list:
+            for beam in lvl.beams.beam_list:
+                list_of_beams.append(beam)
+        return list_of_beams
+
+    def list_of_columns(self):
+        list_of_columns = []
+        for lvl in self.levels.level_list:
+            for col in lvl.columns.column_list:
+                list_of_columns.append(col)
+        return list_of_columns
+
     def list_of_nodes(self):
         list_of_nodes = []
         for lvl in self.levels.level_list:
@@ -1202,6 +1220,25 @@ class Building:
         This method initiates automated calculations to
         get things ready for running an analysis.
         """
+        def distribute_load_on_beams(lvl):
+            """
+            Given a building level, distribute
+            the surface load of the level on the beams
+            of that level.
+            Floor slab data should have been generated first.
+            """
+            if lvl.slab_data:
+                loops = lvl.slab_data['loops']
+                beam_to_edge_map = lvl.slab_data['beam_to_edge_map']
+                areas = calculate_tributary_areas_from_loops(loops)
+                if areas:
+                    for beam in lvl.beams.beam_list:
+                        edge_id = beam_to_edge_map[beam.uniq_id]
+                        udlZ_val = -areas[edge_id] * \
+                            lvl.surface_load / beam.length()
+                        beam.add_udl_from_global_system(
+                            Load([0.00, 0.00, udlZ_val]))
+        # ~~~
         self.levels.active = []
         self.groups.active = []
         self.sections.active = None
@@ -1221,44 +1258,45 @@ class Building:
                 if self_weight:
                     elm.add_udl_from_global_system(
                         Load([0., 0., -weight_per_length]))
-                mass = mass_per_length * elm.length() / 2.00      # lb-s**2/in
-                elm.node_i.mass += Mass([mass, mass, mass, 0., 0., 0.])
-                elm.node_j.mass += Mass([mass, mass, mass, 0., 0., 0.])
-        for lvl in self.levels.level_list:
-            if assume_floor_slabs:
+                    mass = mass_per_length * elm.length() / 2.00      # lb-s**2/in
+                    elm.node_i.mass += Mass([mass, mass, mass, 0., 0., 0.])
+                    elm.node_j.mass += Mass([mass, mass, mass, 0., 0., 0.])
+        if assume_floor_slabs:
+            for lvl in self.levels.level_list:
                 # accumulate all the mass at the master nodes
-                if lvl.restraint == "free":
-                    floor_mass = lvl.surface_load / G_CONST
-                    floor_centroid = lvl.slab_data['properties']['centroid']
-                    floor_mass_inertia = \
-                        lvl.slab_data['properties']['inertia']['ir_mass']
-                    self_mass_centroid = Point([0.00, 0.00])  # excluding floor
-                    total_self_mass = 0.00
-                    for node in lvl.nodes.node_list:
-                        self_mass_centroid += node * node.mass.value[0]
-                        total_self_mass += node.mass.value[0]
-                    self_mass_centroid = self_mass_centroid * \
-                        (1.00/total_self_mass)
-                    total_mass = total_self_mass + floor_mass
-                    # combined
-                    centroid = [
-                        (self_mass_centroid.coordinates[0] * total_self_mass +
-                         floor_centroid[0] * floor_mass) / total_mass,
-                        (self_mass_centroid.coordinates[1] * total_self_mass +
-                         floor_centroid[1] * floor_mass) / total_mass
-                    ]
-                    lvl.master_node = Node(
-                        [centroid[0], centroid[1], lvl.elevation], "free")
-                    lvl.master_node.mass = Mass([total_mass,
-                                                 total_mass,
-                                                 total_mass,
-                                                 0., 0., 0.])
-                    lvl.master_node.mass.value[5] = floor_mass * \
-                        floor_mass_inertia
-                    for node in lvl.nodes.node_list:
-                        lvl.master_node.mass.value[5] += node.mass.value[0] * \
-                            lvl.master_node.dist_2D(node)**2
-                        node.mass = Mass([0., 0., 0.])
+                if lvl.restraint != "free":
+                    continue
+                floor_mass = lvl.surface_load / G_CONST
+                floor_centroid = lvl.slab_data['properties']['centroid']
+                floor_mass_inertia = \
+                    lvl.slab_data['properties']['inertia']['ir_mass']
+                self_mass_centroid = Point([0.00, 0.00])  # excluding floor
+                total_self_mass = 0.00
+                for node in lvl.nodes.node_list:
+                    self_mass_centroid += node * node.mass.value[0]
+                    total_self_mass += node.mass.value[0]
+                self_mass_centroid = self_mass_centroid * \
+                    (1.00/total_self_mass)
+                total_mass = total_self_mass + floor_mass
+                # combined
+                centroid = [
+                    (self_mass_centroid.coordinates[0] * total_self_mass +
+                     floor_centroid[0] * floor_mass) / total_mass,
+                    (self_mass_centroid.coordinates[1] * total_self_mass +
+                     floor_centroid[1] * floor_mass) / total_mass
+                ]
+                lvl.master_node = Node(
+                    [centroid[0], centroid[1], lvl.elevation], "free")
+                lvl.master_node.mass = Mass([total_mass,
+                                             total_mass,
+                                             total_mass,
+                                             0., 0., 0.])
+                lvl.master_node.mass.value[5] = floor_mass * \
+                    floor_mass_inertia
+                for node in lvl.nodes.node_list:
+                    lvl.master_node.mass.value[5] += node.mass.value[0] * \
+                        lvl.master_node.dist_2D(node)**2
+                    node.mass = Mass([0., 0., 0.])
 
     def level_masses(self):
         lvls = self.levels.level_list

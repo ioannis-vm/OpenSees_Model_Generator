@@ -1,40 +1,49 @@
-
-* Todo List
-
-*** Developing code
-Visualization
-- [ ] Visualize element loads and point masses
-- [ ] Be able to plot partially defined models (no elements or no floor perimeter for example)
-
-* General Plan
+* Todo List ~ future plans
 
 *** High priority
 
 - [-] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
   - [X] Modal analysis
   - [X] Gravity load case analysis
-  - [ ] NL Pushover analysis
+  - [X] NL Pushover analysis
   - [ ] NL time-history analysis
 - [X] Expand to support displacement based fiber section beam-column elements
-- [ ] Add support for automatic element offsets
+- [ ] Checks
+  - [ ] Preprocessing a building that has already been processed should be possible without any unexpected things happening
 
 *** Medium priority
 
-- [ ] Visualizing frame and floor extrusions
-- [ ] Visualizing deformed shapes
-- [ ] Visualizing element forces
+- [ ] Advanced element treatment by the modeler module
+  - [ ] element offsets
+  - [ ] column placed on existing beam properly splits the beam and adds offests
+  - [ ] ability to `select` elements in order to:
+    - [ ] add UDL
+    - [ ] remove from the model
+  - [ ] show selected elements (preprocessing plot that has them highlighted)
+  - [ ] auto-select all perimeter beams (to easily apply cladding load)
+- [-] Improve visualization
+  - [-] Consider migrating all 2D to plotly
+  - [-] Preprocessing
+    - [ ] ensure ability to plot partially defined models (missing element types)
+    - [X] Visualizing frame extrusions
+    - [ ] Visualizing deformed shapes
+      - [ ] no extruded frames too! (support simply plotting lines)
+    - [ ] Visualize element loads and point masses
+  - [ ] Postprocessing
+    - [ ] Visualizing element basic forces
+    - [ ] analysis-dependent color bar support
+      - [ ] fiber-section stress capacity ratios
+
 - [ ] Subasemblies:
   - [ ] Automated braces: X, Chevron, BRB
   - [ ] [Optional] Automated truss (for fun)
-- [ ] Non-supporting beams (that don't take any load from the slab)
-- [ ] Basic modifications of previously defined elements (deletion, splitting etc)
-- [ ] Replicate finished levels upwards
+- [ ] Non-supporting beams (that don't take any load from the slab i.e. coupling)
 
 **** Low priority
 
-- [ ] PBEE integration
-- [ ] Load combination support
-- [ ] Code-based design
 - [ ] Synthetic ground-motion generation
-- [ ] Incremental dynamic analysis support
+- [ ] PBEE integration
+- [ ] Load pattern/combinations
+- [ ] Code force-based design
+- [ ] Incremental dynamic analysis
 - [ ] Read-the-docs-style documentation
