@@ -10,12 +10,12 @@ Building Modeler for OpenSeesPy ~ Solver module
 #
 # https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
 
-from modeler import G_CONST
 from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
 from modeler import Building
+from modeler import G_CONST
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
 
@@ -36,6 +36,7 @@ def store_result(analysis_result: AnalysisResult, uniq_id: int, result: List):
 
 @dataclass
 class Analysis:
+
     building: Building
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)

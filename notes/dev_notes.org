@@ -26,8 +26,8 @@
     - [X] ensure ability to plot partially defined models (missing element types)
     - [ ] Plotly --> remove plotting a single level, rearrange code
     - [X] Visualizing frame extrusions
-    - [ ] Visualizing deformed shapes
-      - [ ] no extruded frames too! (support simply plotting lines)
+    - [X] Visualizing deformed shapes
+      - [X] no extruded frames too! (support simply plotting lines)
     - [ ] Visualize element loads and point masses
   - [ ] Postprocessing
     - [ ] Visualizing element basic forces

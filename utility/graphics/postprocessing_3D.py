@@ -224,6 +224,51 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     })
 
 
+def add_data__frames_deformed(analysis,
+                              dt,
+                              list_of_frames,
+                              step,
+                              num_points,
+                              scaling):
+    if not list_of_frames:
+        return
+    x = []
+    y = []
+    z = []
+    for elm in list_of_frames:
+        u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
+        r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
+        u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
+        r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
+        d_global, r_local = interp3D_deformation(
+            elm, u_i, r_i, u_j, r_j, num_points)
+        interpolation_points = interp3D_points(
+            elm, d_global, r_local, num_points, scaling)
+        for i in range(len(interpolation_points)-1):
+            x.extend((interpolation_points[i, 0],
+                     interpolation_points[i+1, 0],
+                     None))
+            y.extend((interpolation_points[i, 1],
+                     interpolation_points[i+1, 1],
+                     None))
+            z.extend((interpolation_points[i, 2],
+                     interpolation_points[i+1, 2],
+                     None))
+
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "none",
+        "line": {
+            "width": 5,
+            "color": common.BEAM_MESH_COLOR
+        }
+    })
+
+
 def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
     ids = [node.uniq_id for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
@@ -318,16 +363,21 @@ def deformed_shape(analysis: 'Analysis',
 
     list_of_frames = analysis.building.list_of_frames()
     list_of_nodes = analysis.building.list_of_nodes()
+    list_of_master_nodes = analysis.building.list_of_master_nodes()
 
-    if analysis.building.list_of_master_nodes():
+    if list_of_master_nodes:
         list_of_nodes.extend(analysis.building.list_of_master_nodes())
 
     # draw the nodes
     add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling)
 
     # draw the frames
-    add_data__extruded_frames_deformed_mesh(
-        analysis, dt, list_of_frames, step, 25, scaling)
+    if extrude_frames:
+        add_data__extruded_frames_deformed_mesh(
+            analysis, dt, list_of_frames, step, 25, scaling)
+    else:
+        add_data__frames_deformed(
+            analysis, dt, list_of_frames, step, 25, scaling)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
