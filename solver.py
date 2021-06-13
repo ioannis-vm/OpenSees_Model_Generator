@@ -15,7 +15,7 @@ from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
-from modeler import Building, Node
+from modeler import Building
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
 
@@ -471,6 +471,18 @@ class NLTHAnalysis(NonlinearAnalysis):
         if not self.node_displacements:
             raise ValueError(
                 'No results to plot. Run analysis first.')
+        if dof == 0:
+            direction = "x"
+        elif dof == 1:
+            direction = "y"
+        elif dof == 2:
+            direction = "z"
+        elif dof == 3:
+            direction = "rx"
+        elif dof == 4:
+            direction = "ry"
+        elif dof == 5:
+            direction = "rz"
         displacement = []
         for step in range(self.n_steps_success):
             displacement.append(
@@ -480,7 +492,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             'time - displacement dimensions do not match'
         general_2D.line_plot_interactive(
             "Displacement time-history<br>" +
-            "Node: " + str(node.uniq_id),
+            "Node: " + str(node.uniq_id) +
+            ", direction: " + direction,
             self.time_vector,
             displacement,
             "line",
@@ -495,36 +508,38 @@ class NLTHAnalysis(NonlinearAnalysis):
             file_time_incr,
             damping_ratio):
 
-        # if not (filename_x or filename_y or filename_z):
-        #     raise ValueError(
-        #         'No time-history files specified. ' +
-        #         'A file for at least one direction is required.')
-
         # define damping
         period = float(1./np.sqrt(ops.eigen('-fullGenLapack', 1)))
         ops.rayleigh(0., 0., 0., 2. * damping_ratio / period)
-        # TODO : is this right?
 
-        # TODO add `if` statements depending on input
+        error = True
+        if filename_x:
+            error = False
+            # define X-direction TH
+            ops.timeSeries('Path', 2, '-dt', file_time_incr,
+                           '-filePath', filename_x, '-factor', G_CONST)
+            # pattern, direction, timeseries tag
+            ops.pattern('UniformExcitation', 2, 1, '-accel', 2)
 
-        # define X-direction TH
-        ops.timeSeries('Path', 2, '-dt', file_time_incr,
-                       '-filePath', filename_x, '-factor', G_CONST)
-        # pattern, direction, timeseries tag
-        ops.pattern('UniformExcitation', 2, 1, '-accel', 2)
+        if filename_y:
+            error = False
+            # define Y-direction TH
+            ops.timeSeries('Path', 3, '-dt', file_time_incr,
+                           '-filePath', filename_y, '-factor', G_CONST)
+            # pattern, direction, timeseries tag
+            ops.pattern('UniformExcitation', 3, 2, '-accel', 3)
 
-        # TODO - will this work?
-        # # define Y-direction TH
-        # ops.timeSeries('Path', 3, '-dt', file_time_incr,
-        #                '-filePath', filename_y, '-factor', G_CONST)
-        # # pattern, direction, timeseries tag
-        # ops.pattern('UniformExcitation', 3, 2, '-accel', 3)
+        if filename_z:
+            error = False
+            # define Z-direction TH
+            ops.timeSeries('Path', 4, '-dt', file_time_incr,
+                           '-filePath', filename_z, '-factor', G_CONST)
+            # pattern, direction, timeseries tag
+            ops.pattern('UniformExcitation', 4, 3, '-accel', 4)
 
-        # # define Z-direction TH
-        # ops.timeSeries('Path', 4, '-dt', file_time_incr,
-        #                '-filePath', filename_z, '-factor', G_CONST)
-        # # pattern, direction, timeseries tag
-        # ops.pattern('UniformExcitation', 4, 3, '-accel', 4)
+        if error:
+            raise ValueError(
+                "No input files specified.")
 
     def run(self, target_timestamp, time_increment,
             timestamps_output,

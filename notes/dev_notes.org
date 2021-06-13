@@ -2,11 +2,11 @@
 
 *** High priority
 
-- [-] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
+- [X] Be able to create a 3D OpenSeesPy model of a linear elastic steel building. Direct beam-column connections, no offsets. Rigid diaphragm constraints. No support for modification of the defined elements. No load case support. Automatic load and mass distribution.
   - [X] Modal analysis
   - [X] Gravity load case analysis
   - [X] NL Pushover analysis
-  - [ ] *NL time-history analysis*
+  - [X] NL time-history analysis
 - [X] Expand to support displacement based fiber section beam-column elements
 - [X] Checks
   - [X] Preprocessing a building that has already been processed should be possible without any unexpected things happening
