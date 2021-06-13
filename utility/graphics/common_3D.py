@@ -18,7 +18,8 @@ import plotly.io as pio
 node_marker = {
     'fixed': ("square", 10),
     'pinned': ("circle-open", 10),
-    'free': ("circle", 5)
+    'free': ("circle", 5),
+    'master': ("circle-open", 15)
 }
 
 

@@ -10,6 +10,7 @@ Building Modeler for OpenSeesPy ~ Solver module
 #
 # https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
 
+from modeler import G_CONST
 from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
@@ -44,11 +45,11 @@ class Analysis:
     # Methods that send information to OpenSees #
     #############################################
 
-    def ops_initialize(self):
+    def initialize(self):
         ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
 
-    def ops_define_materials(self):
+    def define_materials(self):
         for material in self.building.materials.material_list:
             if material.ops_material == 'Steel02':
                 ops.uniaxialMaterial('Steel02',
@@ -59,13 +60,13 @@ class Analysis:
             else:
                 raise ValueError("Unsupported material")
 
-    def ops_define_nodes(self):
+    def define_nodes(self):
         for node in self.building.list_of_nodes() + \
                 self.building.list_of_master_nodes():
             ops.node(node.uniq_id,
                      *node.coordinates)
 
-    def ops_define_node_restraints(self):
+    def define_node_restraints(self):
         for node in self.building.list_of_nodes():
             if node.restraint_type == 'fixed':
                 ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
@@ -74,7 +75,7 @@ class Analysis:
         for node in self.building.list_of_master_nodes():
             ops.fix(node.uniq_id, 0, 0, 1, 1, 1, 0)
 
-    def ops_define_node_constraints(self):
+    def define_node_constraints(self):
         for lvl in self.building.levels.level_list:
             if lvl.master_node:
                 ops.rigidDiaphragm(
@@ -83,7 +84,7 @@ class Analysis:
                     *[node.uniq_id
                       for node in lvl.nodes.node_list])
 
-    def ops_define_node_mass(self):
+    def define_node_mass(self):
         for node in self.building.list_of_nodes() + \
                 self.building.list_of_master_nodes():
             if node.mass:
@@ -91,7 +92,7 @@ class Analysis:
                     ops.mass(node.uniq_id,
                              *node.mass.value)
 
-    def ops_define_dead_load(self):
+    def define_dead_load(self):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
 
@@ -105,26 +106,26 @@ class Analysis:
                 self.building.list_of_master_nodes():
             ops.load(node.uniq_id, *node.load.value)
 
-    def ops_define_sections(self):
+    def define_sections(self):
         pass
 
-    def ops_define_beamcolumn_elements(self):
+    def define_beamcolumn_elements(self):
         pass
 
     def to_OpenSees_domain(self):
         """
         Defines the building model in OpenSeesPy
         """
-        self.ops_initialize()
-        self.ops_define_materials()
-        self.ops_define_nodes()
-        self.ops_define_node_restraints()
-        self.ops_define_node_constraints()
-        self.ops_define_node_mass()
+        self.initialize()
+        self.define_materials()
+        self.define_nodes()
+        self.define_node_restraints()
+        self.define_node_constraints()
+        self.define_node_mass()
         # the following two columns use methods that
         # are defined in the inherited classes that follow
-        self.ops_define_sections()
-        self.ops_define_beamcolumn_elements()
+        self.define_sections()
+        self.define_beamcolumn_elements()
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -198,7 +199,7 @@ class Analysis:
 @dataclass
 class LinearAnalysis(Analysis):
 
-    def ops_define_sections(self):
+    def define_sections(self):
         for sec in self.building.sections.section_list:
             ops.section('Elastic',
                         sec.uniq_id,
@@ -214,7 +215,7 @@ class LinearAnalysis(Analysis):
                 sec.uniq_id,
                 10)
 
-    def ops_define_beamcolumn_elements(self):
+    def define_beamcolumn_elements(self):
         for elm in self.building.list_of_frames():
             # geometric transformation
             ops.geomTransf('Linear',
@@ -227,7 +228,7 @@ class LinearAnalysis(Analysis):
                         elm.uniq_id,
                         elm.section.uniq_id)
 
-    def ops_run_gravity_analysis(self):
+    def run_gravity_analysis(self):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -275,15 +276,17 @@ class ModalAnalysis(LinearAnalysis):
 class LinearGravityAnalysis(LinearAnalysis):
     def run(self):
         self.to_OpenSees_domain()
-        self.ops_define_dead_load()
-        self.ops_run_gravity_analysis()
+        self.define_dead_load()
+        self.run_gravity_analysis()
         self.read_OpenSees_results()
 
 
 @dataclass
 class NonlinearAnalysis(Analysis):
 
-    def ops_define_sections(self, n_x, n_y, n_p):
+    n_steps_success: int = field(default=0)
+
+    def define_sections(self, n_x, n_y, n_p):
         for sec in self.building.sections.section_list:
             pieces = sec.subdivide_section(
                 n_x=n_x, n_y=n_y)
@@ -302,7 +305,7 @@ class NonlinearAnalysis(Analysis):
             ops.beamIntegration(
                 'Lobatto', sec.uniq_id, sec.uniq_id, n_p)
 
-    def ops_define_beamcolumn_elements(self):
+    def define_beamcolumn_elements(self):
         for lvl in self.building.levels.level_list:
             for elm in lvl.columns.column_list+lvl.beams.beam_list:
                 # geometric transformation
@@ -320,18 +323,18 @@ class NonlinearAnalysis(Analysis):
         """
         Defines the building model in OpenSeesPy
         """
-        self.ops_initialize()
-        self.ops_define_materials()
-        self.ops_define_nodes()
-        self.ops_define_node_restraints()
-        self.ops_define_node_constraints()
-        self.ops_define_node_mass()
+        self.initialize()
+        self.define_materials()
+        self.define_nodes()
+        self.define_node_restraints()
+        self.define_node_constraints()
+        self.define_node_mass()
         # the following two columns use methods that
         # are defined in the inherited classes that follow
-        self.ops_define_sections(n_x, n_y, n_p)
-        self.ops_define_beamcolumn_elements()
+        self.define_sections(n_x, n_y, n_p)
+        self.define_beamcolumn_elements()
 
-    def ops_run_gravity_analysis(self):
+    def run_gravity_analysis(self):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -345,7 +348,7 @@ class NonlinearAnalysis(Analysis):
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
-    def ops_apply_lateral_load(self, direction):
+    def apply_lateral_load(self, direction):
         distribution = self.building.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
@@ -385,12 +388,11 @@ class PushoverAnalysis(NonlinearAnalysis):
         else:
             raise ValueError("Direction can either be 'x' or 'y'")
         self.to_OpenSees_domain(n_x, n_y, n_p)
-        # TODO add gravity loads
-        self.ops_define_dead_load()
-        self.ops_run_gravity_analysis()
+        self.define_dead_load()
+        self.run_gravity_analysis()
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
-        self.ops_apply_lateral_load(direction)
+        self.apply_lateral_load(direction)
         ops.system("BandGeneral")
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -403,8 +405,8 @@ class PushoverAnalysis(NonlinearAnalysis):
         curr_displ = 0.00
         j_out = 0
         n_steps_success = 0
-        while curr_displ + EPSILON <= target_displacement:
-            if curr_displ + EPSILON >= displ_output[j_out]:
+        while curr_displ + EPSILON < target_displacement:
+            if curr_displ + EPSILON > displ_output[j_out]:
                 self.read_OpenSees_results()
                 n_steps_success += 1
                 j_out += 1
@@ -420,9 +422,10 @@ class PushoverAnalysis(NonlinearAnalysis):
         n_steps_success += 1
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
+        self.n_steps_success = n_steps_success
         return metadata
 
-    def plot_pushover_curve(self, direction, node, n_steps_success):
+    def plot_pushover_curve(self, direction, node):
         if not self.node_displacements:
             raise ValueError(
                 'No results to plot. Run analysis first.')
@@ -434,7 +437,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             raise ValueError("Direction can either be 'x' or 'y'")
         base_shear = []
         displacement = []
-        for step in range(n_steps_success):
+        for step in range(self.n_steps_success):
             base_shear.append(self.global_reactions(step)[control_DOF])
             displacement.append(
                 self.node_displacements[node.uniq_id][step][control_DOF])
@@ -442,5 +445,141 @@ class PushoverAnalysis(NonlinearAnalysis):
         displacement = np.abs(np.array(displacement))
         general_2D.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
-            "Displacement", "Base Shear", "in", "lb",
-            displacement, base_shear)
+            displacement, base_shear, 'spline+markers',
+            "Displacement", "in", ".0f",
+            "Base Shear", "lb", ".0f")
+
+
+@dataclass
+class NLTHAnalysis(NonlinearAnalysis):
+
+    time_vector: List[float] = field(default_factory=list)
+
+    def plot_ground_motion(self, filename, file_time_incr):
+        y = np.loadtxt(filename)
+        n_points = len(y)
+        x = np.arange(0.00, n_points * file_time_incr, file_time_incr)
+        general_2D.line_plot_interactive(
+            "Ground motion record<br>" +
+            filename,
+            x, y,
+            "line",
+            "Time", "s", ".3f",
+            "Absolute Acceleration", "g", ".4f")
+
+    def plot_node_displacement_history(self, node, dof):
+        if not self.node_displacements:
+            raise ValueError(
+                'No results to plot. Run analysis first.')
+        displacement = []
+        for step in range(self.n_steps_success):
+            displacement.append(
+                self.node_displacements[node.uniq_id][step][dof])
+        assert(len(self.time_vector) == len(displacement)), \
+            'Something went wrong: ' + \
+            'time - displacement dimensions do not match'
+        general_2D.line_plot_interactive(
+            "Displacement time-history<br>" +
+            "Node: " + str(node.uniq_id),
+            self.time_vector,
+            displacement,
+            "line",
+            "Time", "s", ".3f",
+            "Displacement", "in", ".1f")
+
+    def define_lateral_load_pattern(
+            self,
+            filename_x,
+            filename_y,
+            filename_z,
+            file_time_incr,
+            damping_ratio):
+
+        # if not (filename_x or filename_y or filename_z):
+        #     raise ValueError(
+        #         'No time-history files specified. ' +
+        #         'A file for at least one direction is required.')
+
+        # define damping
+        period = float(1./np.sqrt(ops.eigen('-fullGenLapack', 1)))
+        ops.rayleigh(0., 0., 0., 2. * damping_ratio / period)
+        # TODO : is this right?
+
+        # TODO add `if` statements depending on input
+
+        # define X-direction TH
+        ops.timeSeries('Path', 2, '-dt', file_time_incr,
+                       '-filePath', filename_x, '-factor', G_CONST)
+        # pattern, direction, timeseries tag
+        ops.pattern('UniformExcitation', 2, 1, '-accel', 2)
+
+        # TODO - will this work?
+        # # define Y-direction TH
+        # ops.timeSeries('Path', 3, '-dt', file_time_incr,
+        #                '-filePath', filename_y, '-factor', G_CONST)
+        # # pattern, direction, timeseries tag
+        # ops.pattern('UniformExcitation', 3, 2, '-accel', 3)
+
+        # # define Z-direction TH
+        # ops.timeSeries('Path', 4, '-dt', file_time_incr,
+        #                '-filePath', filename_z, '-factor', G_CONST)
+        # # pattern, direction, timeseries tag
+        # ops.pattern('UniformExcitation', 4, 3, '-accel', 4)
+
+    def run(self, target_timestamp, time_increment,
+            timestamps_output,
+            filename_x,
+            filename_y,
+            filename_z,
+            file_time_incr,
+            damping_ratio=0.05,
+            n_x=10, n_y=25, n_p=10):
+        self.to_OpenSees_domain(n_x, n_y, n_p)
+        self.define_dead_load()
+        self.run_gravity_analysis()
+        ops.wipeAnalysis()
+        ops.loadConst('-time', 0.0)
+
+        self.define_lateral_load_pattern(
+            filename_x,
+            filename_y,
+            filename_z,
+            file_time_incr,
+            damping_ratio
+        )
+
+        ops.system("BandGeneral")
+        ops.numberer('RCM')
+        ops.constraints('Transformation')
+        # TODO add refined steps if fails
+        ops.test('NormUnbalance', 1e-6, 1000)
+        # Create the integration scheme, the Newmark
+        # with alpha = 0.5 and beta = .25
+        ops.algorithm("Newton")
+        ops.integrator('Newmark',  0.5,  0.25)
+        ops.analysis("Transient")
+
+        curr_time = 0.00
+        j_out = 0
+        n_steps_success = 0
+        while curr_time + EPSILON < target_timestamp:
+            if curr_time + EPSILON > timestamps_output[j_out]:
+                self.read_OpenSees_results()
+                self.time_vector.append(curr_time)
+                n_steps_success += 1
+                j_out += 1
+            check = ops.analyze(1, time_increment)
+            if check != 0:
+                print('Analysis failed to converge')
+                break
+            curr_time = ops.getTime()
+            print('Target timestamp: %.2f s | Current: %.2f s' %
+                  (target_timestamp, curr_time), end='\r')
+
+        self.time_vector.append(curr_time)
+        self.read_OpenSees_results()
+        n_steps_success += 1
+        print('Number of saved analysis steps:', n_steps_success)
+        metadata = {'successful steps': n_steps_success}
+        self.n_steps_success = n_steps_success
+        return metadata

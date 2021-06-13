@@ -30,26 +30,51 @@ C_BACKGROUND = "#FFE6A7"
 C_HOVERLABEL_BG = "#BB9457"
 
 
-def line_plot_interactive(title_text, xlab, ylab, xunit, yunit, x, y):
+def line_plot_interactive(title_text, x, y, mode,
+                          xlab="x", xunit=None, xhoverformat='.0f',
+                          ylab="y", yunit=None, yhoverformat='.0f'):
     assert len(x) == len(y), "Dimensions don't match"
+    assert mode in ['spline+markers', 'line'], \
+        "mode can either be `spline+markers` or `line`"
+
+    if mode == 'line':
+        lshape = 'linear'
+        lmode = 'lines'
+        lwidth = 2
+    elif mode == 'spline+markers':
+        lshape = 'spline'
+        lmode = 'lines+markers'
+        lwidth = 4
+    else:
+        raise ValueError("oops! This should never run. Strange.")
+
+    if xunit:
+        xtitle = xlab + ' (' + xunit + ')'
+    else:
+        xtitle = xlab
+    if yunit:
+        ytitle = ylab + ' (' + yunit + ')'
+    else:
+        ytitle = ylab
+
     num_points = len(x)
     indices = np.array([i for i in range(num_points)])
     fig = go.Figure(
         data=go.Scatter(
             x=x,
             y=y,
-            mode='lines+markers',
-            line_shape='spline',
-            line=dict(color=C_LINE, width=4),
+            mode=lmode,
+            line_shape=lshape,
+            line=dict(color=C_LINE, width=lwidth),
             marker=dict(color=C_BACKGROUND,
                         size=10,
                         line=dict(
                             color=C_LINE,
                             width=4)),
             customdata=indices,
-            hovertemplate='Step: %{customdata:d}<br>' +
-            xlab+' = %{x:.0f} ' + xunit + '<br>' +
-            ylab+' = %{y:.0f} ' + yunit +
+            hovertemplate='XY value pair: %{customdata:d}<br>' +
+            xlab+' = %{x: ' + xhoverformat + '} ' + xunit + '<br>' +
+            ylab+' = %{y:' + yhoverformat + '} ' + yunit +
             '<extra></extra>'
         )
     )
@@ -105,8 +130,8 @@ def line_plot_interactive(title_text, xlab, ylab, xunit, yunit, x, y):
     ]
     fig.update_layout(annotations=annotations)
     fig.update_layout(
-        xaxis_title=xlab + ' (' + xunit + ')',
-        yaxis_title=ylab + ' (' + yunit + ')',
+        xaxis_title=xtitle,
+        yaxis_title=ytitle,
         font=dict(
             family='Cambria',
             size=18,

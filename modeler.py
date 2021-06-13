@@ -1266,10 +1266,15 @@ class Building:
                 # accumulate all the mass at the master nodes
                 if lvl.restraint != "free":
                     continue
-                floor_mass = lvl.surface_load / G_CONST
+                floor_mass = -lvl.surface_load * \
+                    lvl.slab_data['properties']['area'] / G_CONST
+                assert(floor_mass >= 0.00),\
+                    "Error: floor area properties\n" + \
+                    "Overal floor area should be negative (by convention)."
                 floor_centroid = lvl.slab_data['properties']['centroid']
                 floor_mass_inertia = \
-                    lvl.slab_data['properties']['inertia']['ir_mass']
+                    lvl.slab_data['properties']['inertia']['ir_mass']\
+                    * floor_mass
                 self_mass_centroid = Point([0.00, 0.00])  # excluding floor
                 total_self_mass = 0.00
                 for node in lvl.nodes.node_list:
@@ -1286,13 +1291,12 @@ class Building:
                      floor_centroid[1] * floor_mass) / total_mass
                 ]
                 lvl.master_node = Node(
-                    [centroid[0], centroid[1], lvl.elevation], "free")
+                    [centroid[0], centroid[1], lvl.elevation], "master")
                 lvl.master_node.mass = Mass([total_mass,
                                              total_mass,
                                              total_mass,
                                              0., 0., 0.])
-                lvl.master_node.mass.value[5] = floor_mass * \
-                    floor_mass_inertia
+                lvl.master_node.mass.value[5] = floor_mass_inertia
                 for node in lvl.nodes.node_list:
                     lvl.master_node.mass.value[5] += node.mass.value[0] * \
                         lvl.master_node.dist_2D(node)**2

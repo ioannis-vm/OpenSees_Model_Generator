@@ -13,7 +13,6 @@ https://plotly.com/python/reference/
 import plotly.graph_objects as go
 import numpy as np
 from utility.graphics import common, common_3D
-import openseespy.opensees as ops
 
 
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
@@ -257,7 +256,10 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
                        for node in list_of_nodes],
             "color": common.NODE_PRIMARY_COLOR,
             "size": [common_3D.node_marker[node.restraint_type][1]
-                     for node in list_of_nodes]
+                     for node in list_of_nodes],
+            "line": {
+                "color": common.NODE_PRIMARY_COLOR,
+                "width": 4}
         }
     })
 
@@ -317,12 +319,15 @@ def deformed_shape(analysis: 'Analysis',
     list_of_frames = analysis.building.list_of_frames()
     list_of_nodes = analysis.building.list_of_nodes()
 
-    # draw the frames
-    add_data__extruded_frames_deformed_mesh(
-        analysis, dt, list_of_frames, step, 25, scaling)
+    if analysis.building.list_of_master_nodes():
+        list_of_nodes.extend(analysis.building.list_of_master_nodes())
 
     # draw the nodes
     add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling)
+
+    # draw the frames
+    add_data__extruded_frames_deformed_mesh(
+        analysis, dt, list_of_frames, step, 25, scaling)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)

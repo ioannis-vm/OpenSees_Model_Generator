@@ -6,10 +6,10 @@
   - [X] Modal analysis
   - [X] Gravity load case analysis
   - [X] NL Pushover analysis
-  - [ ] NL time-history analysis
+  - [ ] *NL time-history analysis*
 - [X] Expand to support displacement based fiber section beam-column elements
-- [ ] Checks
-  - [ ] Preprocessing a building that has already been processed should be possible without any unexpected things happening
+- [X] Checks
+  - [X] Preprocessing a building that has already been processed should be possible without any unexpected things happening
 
 *** Medium priority
 
@@ -22,9 +22,9 @@
   - [ ] show selected elements (preprocessing plot that has them highlighted)
   - [ ] auto-select all perimeter beams (to easily apply cladding load)
 - [-] Improve visualization
-  - [-] Consider migrating all 2D to plotly
   - [-] Preprocessing
-    - [ ] ensure ability to plot partially defined models (missing element types)
+    - [X] ensure ability to plot partially defined models (missing element types)
+    - [ ] Plotly --> remove plotting a single level, rearrange code
     - [X] Visualizing frame extrusions
     - [ ] Visualizing deformed shapes
       - [ ] no extruded frames too! (support simply plotting lines)
@@ -38,6 +38,12 @@
   - [ ] Automated braces: X, Chevron, BRB
   - [ ] [Optional] Automated truss (for fun)
 - [ ] Non-supporting beams (that don't take any load from the slab i.e. coupling)
+
+- [ ] Global code polishing
+  - [ ] Complete all docstrings
+  - [ ] Replace if statements with assertions wherever appropriate
+  - [ ] Add technical notes with URLS
+  - [ ] Add examples and validation
 
 **** Low priority
 
