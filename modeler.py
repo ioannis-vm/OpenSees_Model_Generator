@@ -1,5 +1,5 @@
-"""
-Building Modeler for OpenSeesPy ~ Modeler module
+"""Building Modeler for OpenSeesPy ~ Modeler module
+
 """
 
 #   __                 UC Berkeley

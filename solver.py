@@ -46,11 +46,11 @@ class Analysis:
     # Methods that send information to OpenSees #
     #############################################
 
-    def initialize(self):
+    def _initialize(self):
         ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
 
-    def define_materials(self):
+    def _define_materials(self):
         for material in self.building.materials.material_list:
             if material.ops_material == 'Steel02':
                 ops.uniaxialMaterial('Steel02',
@@ -61,13 +61,13 @@ class Analysis:
             else:
                 raise ValueError("Unsupported material")
 
-    def define_nodes(self):
+    def _define_nodes(self):
         for node in self.building.list_of_nodes() + \
                 self.building.list_of_master_nodes():
             ops.node(node.uniq_id,
                      *node.coordinates)
 
-    def define_node_restraints(self):
+    def _define_node_restraints(self):
         for node in self.building.list_of_nodes():
             if node.restraint_type == 'fixed':
                 ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
@@ -76,7 +76,7 @@ class Analysis:
         for node in self.building.list_of_master_nodes():
             ops.fix(node.uniq_id, 0, 0, 1, 1, 1, 0)
 
-    def define_node_constraints(self):
+    def _define_node_constraints(self):
         for lvl in self.building.levels.level_list:
             if lvl.master_node:
                 ops.rigidDiaphragm(
@@ -85,7 +85,7 @@ class Analysis:
                     *[node.uniq_id
                       for node in lvl.nodes.node_list])
 
-    def define_node_mass(self):
+    def _define_node_mass(self):
         for node in self.building.list_of_nodes() + \
                 self.building.list_of_master_nodes():
             if node.mass:
@@ -93,7 +93,7 @@ class Analysis:
                     ops.mass(node.uniq_id,
                              *node.mass.value)
 
-    def define_dead_load(self):
+    def _define_dead_load(self):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
 
@@ -107,32 +107,32 @@ class Analysis:
                 self.building.list_of_master_nodes():
             ops.load(node.uniq_id, *node.load.value)
 
-    def define_sections(self):
+    def _define_sections(self):
         pass
 
-    def define_beamcolumn_elements(self):
+    def _define_beamcolumn_elements(self):
         pass
 
-    def to_OpenSees_domain(self):
+    def _to_OpenSees_domain(self):
         """
         Defines the building model in OpenSeesPy
         """
-        self.initialize()
-        self.define_materials()
-        self.define_nodes()
-        self.define_node_restraints()
-        self.define_node_constraints()
-        self.define_node_mass()
-        # the following two columns use methods that
+        self._initialize()
+        self._define_materials()
+        self._define_nodes()
+        self._define_node_restraints()
+        self._define_node_constraints()
+        self._define_node_mass()
+        # the following two calls use methods that
         # are defined in the inherited classes that follow
-        self.define_sections()
-        self.define_beamcolumn_elements()
+        self._define_sections()
+        self._define_beamcolumn_elements()
 
     ####################################################
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def read_node_displacements(self):
+    def _read_node_displacements(self):
         for node in self.building.list_of_nodes():
             store_result(self.node_displacements,
                          node.uniq_id,
@@ -142,7 +142,7 @@ class Analysis:
                          node.uniq_id,
                          ops.nodeDisp(node.uniq_id))
 
-    def read_node_reactions(self):
+    def _read_node_reactions(self):
         ops.reactions()
         for lvl in self.building.levels.level_list:
             for node in lvl.nodes.node_list:
@@ -153,12 +153,12 @@ class Analysis:
                                  uid,
                                  local_reaction)
 
-    def read_OpenSees_results(self):
+    def _read_OpenSees_results(self):
         """
         Reads back the results from the OpenSeesPy domain
         """
-        self.read_node_displacements()
-        self.read_node_reactions()
+        self._read_node_displacements()
+        self._read_node_reactions()
 
     #########################
     # Visualization methods #
@@ -200,7 +200,7 @@ class Analysis:
 @dataclass
 class LinearAnalysis(Analysis):
 
-    def define_sections(self):
+    def _define_sections(self):
         for sec in self.building.sections.section_list:
             ops.section('Elastic',
                         sec.uniq_id,
@@ -216,7 +216,7 @@ class LinearAnalysis(Analysis):
                 sec.uniq_id,
                 10)
 
-    def define_beamcolumn_elements(self):
+    def _define_beamcolumn_elements(self):
         for elm in self.building.list_of_frames():
             # geometric transformation
             ops.geomTransf('Linear',
@@ -229,7 +229,7 @@ class LinearAnalysis(Analysis):
                         elm.uniq_id,
                         elm.section.uniq_id)
 
-    def run_gravity_analysis(self):
+    def _run_gravity_analysis(self):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -253,33 +253,38 @@ class ModalAnalysis(LinearAnalysis):
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def read_node_displacements(self):
-        for lvl in self.building.levels.level_list:
-            for node in lvl.nodes.node_list:
-                for i in range(self.num_modes):
-                    store_result(self.node_displacements,
+    def _read_node_displacements(self):
+        nodes = self.building.list_of_nodes()
+        master_nodes = self.building.list_of_master_nodes()
+        if master_nodes:
+            all_nodes = nodes + master_nodes
+        else:
+            all_nodes = nodes
+        for node in all_nodes:
+            for i in range(self.num_modes):
+                store_result(self.node_displacements,
+                             node.uniq_id,
+                             ops.nodeEigenvector(
                                  node.uniq_id,
-                                 ops.nodeEigenvector(
-                                     node.uniq_id,
-                                     i+1)
-                                 )
+                                 i+1)
+                             )
 
     def run(self):
-        self.to_OpenSees_domain()
+        self._to_OpenSees_domain()
         eigValues = np.array(ops.eigen(
             '-fullGenLapack',
             self.num_modes))
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
-        self.read_node_displacements()
+        self._read_node_displacements()
 
 
 @dataclass
 class LinearGravityAnalysis(LinearAnalysis):
     def run(self):
-        self.to_OpenSees_domain()
-        self.define_dead_load()
-        self.run_gravity_analysis()
-        self.read_OpenSees_results()
+        self._to_OpenSees_domain()
+        self._define_dead_load()
+        self._run_gravity_analysis()
+        self._read_OpenSees_results()
 
 
 @dataclass
@@ -287,7 +292,7 @@ class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
-    def define_sections(self, n_x, n_y, n_p):
+    def _define_sections(self, n_x, n_y, n_p):
         for sec in self.building.sections.section_list:
             pieces = sec.subdivide_section(
                 n_x=n_x, n_y=n_y)
@@ -306,7 +311,7 @@ class NonlinearAnalysis(Analysis):
             ops.beamIntegration(
                 'Lobatto', sec.uniq_id, sec.uniq_id, n_p)
 
-    def define_beamcolumn_elements(self):
+    def _define_beamcolumn_elements(self):
         for lvl in self.building.levels.level_list:
             for elm in lvl.columns.column_list+lvl.beams.beam_list:
                 # geometric transformation
@@ -320,22 +325,22 @@ class NonlinearAnalysis(Analysis):
                             elm.uniq_id,
                             elm.section.uniq_id)
 
-    def to_OpenSees_domain(self, n_x, n_y, n_p):
+    def _to_OpenSees_domain(self, n_x, n_y, n_p):
         """
         Defines the building model in OpenSeesPy
         """
-        self.initialize()
-        self.define_materials()
-        self.define_nodes()
-        self.define_node_restraints()
-        self.define_node_constraints()
-        self.define_node_mass()
+        self._initialize()
+        self._define_materials()
+        self._define_nodes()
+        self._define_node_restraints()
+        self._define_node_constraints()
+        self._define_node_mass()
         # the following two columns use methods that
         # are defined in the inherited classes that follow
-        self.define_sections(n_x, n_y, n_p)
-        self.define_beamcolumn_elements()
+        self._define_sections(n_x, n_y, n_p)
+        self._define_beamcolumn_elements()
 
-    def run_gravity_analysis(self):
+    def _run_gravity_analysis(self):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -349,7 +354,7 @@ class NonlinearAnalysis(Analysis):
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
-    def apply_lateral_load(self, direction):
+    def _apply_lateral_load(self, direction):
         distribution = self.building.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
@@ -388,12 +393,12 @@ class PushoverAnalysis(NonlinearAnalysis):
             control_DOF = 1
         else:
             raise ValueError("Direction can either be 'x' or 'y'")
-        self.to_OpenSees_domain(n_x, n_y, n_p)
-        self.define_dead_load()
-        self.run_gravity_analysis()
+        self._to_OpenSees_domain(n_x, n_y, n_p)
+        self._define_dead_load()
+        self._run_gravity_analysis()
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
-        self.apply_lateral_load(direction)
+        self._apply_lateral_load(direction)
         ops.system("BandGeneral")
         ops.numberer('RCM')
         ops.constraints('Transformation')
@@ -408,7 +413,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         n_steps_success = 0
         while curr_displ + EPSILON < target_displacement:
             if curr_displ + EPSILON > displ_output[j_out]:
-                self.read_OpenSees_results()
+                self._read_OpenSees_results()
                 n_steps_success += 1
                 j_out += 1
             check = ops.analyze(1)
@@ -419,7 +424,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             print('Target displacement: %.2f | Current: %.2f' %
                   (target_displacement, curr_displ), end='\r')
 
-        self.read_OpenSees_results()
+        self._read_OpenSees_results()
         n_steps_success += 1
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
@@ -550,9 +555,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             file_time_incr,
             damping_ratio=0.05,
             n_x=10, n_y=25, n_p=10):
-        self.to_OpenSees_domain(n_x, n_y, n_p)
-        self.define_dead_load()
-        self.run_gravity_analysis()
+        self._to_OpenSees_domain(n_x, n_y, n_p)
+        self._define_dead_load()
+        self._run_gravity_analysis()
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
 
@@ -580,7 +585,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         n_steps_success = 0
         while curr_time + EPSILON < target_timestamp:
             if curr_time + EPSILON > timestamps_output[j_out]:
-                self.read_OpenSees_results()
+                self._read_OpenSees_results()
                 self.time_vector.append(curr_time)
                 n_steps_success += 1
                 j_out += 1
@@ -593,7 +598,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                   (target_timestamp, curr_time), end='\r')
 
         self.time_vector.append(curr_time)
-        self.read_OpenSees_results()
+        self._read_OpenSees_results()
         n_steps_success += 1
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
