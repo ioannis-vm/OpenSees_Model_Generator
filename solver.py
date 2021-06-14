@@ -27,13 +27,6 @@ class AnalysisResult(TypedDict):
     results = List
 
 
-def store_result(analysis_result: AnalysisResult, uniq_id: int, result: List):
-    if uniq_id in analysis_result.keys():
-        analysis_result[uniq_id].append(result)
-    else:
-        analysis_result[uniq_id] = [result]
-
-
 @dataclass
 class Analysis:
 
@@ -41,6 +34,14 @@ class Analysis:
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)
     node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
+    frame_basic_forces: AnalysisResult = field(default_factory=AnalysisResult)
+
+    def _store_result(self, analysis_result: AnalysisResult,
+                      uniq_id: int, result: list):
+        if uniq_id in analysis_result.keys():
+            analysis_result[uniq_id].append(result)
+        else:
+            analysis_result[uniq_id] = [result]
 
     #############################################
     # Methods that send information to OpenSees #
@@ -134,24 +135,31 @@ class Analysis:
 
     def _read_node_displacements(self):
         for node in self.building.list_of_nodes():
-            store_result(self.node_displacements,
-                         node.uniq_id,
-                         ops.nodeDisp(node.uniq_id))
+            self._store_result(self.node_displacements,
+                               node.uniq_id,
+                               ops.nodeDisp(node.uniq_id))
         for node in self.building.list_of_master_nodes():
-            store_result(self.node_displacements,
-                         node.uniq_id,
-                         ops.nodeDisp(node.uniq_id))
+            self._store_result(self.node_displacements,
+                               node.uniq_id,
+                               ops.nodeDisp(node.uniq_id))
 
     def _read_node_reactions(self):
         ops.reactions()
-        for lvl in self.building.levels.level_list:
-            for node in lvl.nodes.node_list:
-                if node.restraint_type != 'free':
-                    uid = node.uniq_id
-                    local_reaction = np.array(ops.nodeReaction(uid))
-                    store_result(self.node_reactions,
-                                 uid,
-                                 local_reaction)
+        for node in self.building.list_of_nodes():
+            if node.restraint_type != 'free':
+                uid = node.uniq_id
+                local_reaction = np.array(ops.nodeReaction(uid))
+                self._store_result(self.node_reactions,
+                                   uid,
+                                   local_reaction)
+
+    def _read_frame_element_forces(self):
+        for elm in self.building.list_of_frames():
+            uid = elm.uniq_id
+            forces = np.array(ops.eleForce(uid))
+            self._store_result(self.frame_basic_forces,
+                               uid,
+                               forces)
 
     def _read_OpenSees_results(self):
         """
@@ -159,6 +167,7 @@ class Analysis:
         """
         self._read_node_displacements()
         self._read_node_reactions()
+        self._read_frame_element_forces()
 
     #########################
     # Visualization methods #
@@ -168,6 +177,13 @@ class Analysis:
                                                 step,
                                                 scaling,
                                                 extrude_frames)
+
+    def basic_forces(self, ftype, step=0, scaling=0.00):
+        return postprocessing_3D.basic_forces(self,
+                                              ftype,
+                                              step,
+                                              scaling)
+
     ##################################
     # Numeric Result Post-processing #
     ##################################
@@ -197,7 +213,7 @@ class Analysis:
         return reactions
 
 
-@dataclass
+@ dataclass
 class LinearAnalysis(Analysis):
 
     def _define_sections(self):
@@ -240,7 +256,7 @@ class LinearAnalysis(Analysis):
         ops.analyze(1)
 
 
-@dataclass
+@ dataclass
 class ModalAnalysis(LinearAnalysis):
     """
     Runs a modal analysis assuming the building has
@@ -262,12 +278,12 @@ class ModalAnalysis(LinearAnalysis):
             all_nodes = nodes
         for node in all_nodes:
             for i in range(self.num_modes):
-                store_result(self.node_displacements,
-                             node.uniq_id,
-                             ops.nodeEigenvector(
-                                 node.uniq_id,
-                                 i+1)
-                             )
+                self._store_result(self.node_displacements,
+                                   node.uniq_id,
+                                   ops.nodeEigenvector(
+                                       node.uniq_id,
+                                       i+1)
+                                   )
 
     def run(self):
         self._to_OpenSees_domain()
@@ -278,7 +294,7 @@ class ModalAnalysis(LinearAnalysis):
         self._read_node_displacements()
 
 
-@dataclass
+@ dataclass
 class LinearGravityAnalysis(LinearAnalysis):
     def run(self):
         self._to_OpenSees_domain()
@@ -287,7 +303,7 @@ class LinearGravityAnalysis(LinearAnalysis):
         self._read_OpenSees_results()
 
 
-@dataclass
+@ dataclass
 class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
@@ -351,7 +367,7 @@ class NonlinearAnalysis(Analysis):
         ops.analyze(100)
 
 
-@dataclass
+@ dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
     def _apply_lateral_load(self, direction):
@@ -456,7 +472,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             "Base Shear", "lb", ".0f")
 
 
-@dataclass
+@ dataclass
 class NLTHAnalysis(NonlinearAnalysis):
 
     time_vector: List[float] = field(default_factory=list)

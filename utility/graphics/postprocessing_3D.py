@@ -12,7 +12,7 @@ https://plotly.com/python/reference/
 
 import plotly.graph_objects as go
 import numpy as np
-from utility.graphics import common, common_3D
+from utility.graphics import common, common_3D, preprocessing_3D
 
 
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
@@ -218,7 +218,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         "i": i_list,
         "j": j_list,
         "k": k_list,
-        "hoverinfo": "none",
+        "hoverinfo": "skip",
         "color": common.BEAM_MESH_COLOR,
         "opacity": 0.65
     })
@@ -246,14 +246,14 @@ def add_data__frames_deformed(analysis,
             elm, d_global, r_local, num_points, scaling)
         for i in range(len(interpolation_points)-1):
             x.extend((interpolation_points[i, 0],
-                     interpolation_points[i+1, 0],
-                     None))
+                      interpolation_points[i+1, 0],
+                      None))
             y.extend((interpolation_points[i, 1],
-                     interpolation_points[i+1, 1],
-                     None))
+                      interpolation_points[i+1, 1],
+                      None))
             z.extend((interpolation_points[i, 2],
-                     interpolation_points[i+1, 2],
-                     None))
+                      interpolation_points[i+1, 2],
+                      None))
 
     dt.append({
         "type": "scatter3d",
@@ -261,12 +261,40 @@ def add_data__frames_deformed(analysis,
         "x": x,
         "y": y,
         "z": z,
-        "hoverinfo": "none",
+        "hoverinfo": "skip",
         "line": {
             "width": 5,
             "color": common.BEAM_MESH_COLOR
         }
     })
+
+
+def add_data__frames_undeformed(dt, list_of_frames):
+    x = []
+    y = []
+    z = []
+    for elm in list_of_frames:
+        x.extend(
+            (elm.node_i.coordinates[0], elm.node_j.coordinates[0], None)
+        )
+        y.extend(
+            (elm.node_i.coordinates[1], elm.node_j.coordinates[1], None)
+        )
+        z.extend(
+            (elm.node_i.coordinates[2], elm.node_j.coordinates[2], None)
+        )
+        dt.append({
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x,
+            "y": y,
+            "z": z,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 5,
+                "color": common.FRAME_COLOR
+            }
+        })
 
 
 def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
@@ -309,21 +337,38 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
     })
 
 
-def get_auto_scaling(analysis, step):
+def add_data__nodes_undeformed(dt, list_of_nodes):
+    x = [node.coordinates[0] for node in list_of_nodes]
+    y = [node.coordinates[1] for node in list_of_nodes]
+    z = [node.coordinates[2] for node in list_of_nodes]
+
+    dt.append({
+        "type": "scatter3d",
+        "mode": "markers",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "marker": {
+            "symbol": [common_3D.node_marker[node.restraint_type][0]
+                       for node in list_of_nodes],
+            "color": common.NODE_PRIMARY_COLOR,
+            "size": [common_3D.node_marker[node.restraint_type][1]
+                     for node in list_of_nodes],
+            "line": {
+                "color": common.NODE_PRIMARY_COLOR,
+                "width": 4}
+        }
+    })
+
+
+def get_auto_scaling_deformation(analysis, step):
     """
     Automatically calculate a scaling value that
     makes the maximum displacement appear approximately
     10% of the largest dimention of the building's bounding box
     """
-    # building's reference length
-    p_min = np.full(3, np.inf)
-    p_max = np.full(3, -np.inf)
-    for lvl in analysis.building.levels.level_list:
-        for node in lvl.nodes.node_list:
-            p = np.array(node.coordinates)
-            p_min = np.minimum(p_min, p)
-            p_max = np.maximum(p_max, p)
-    ref_len = np.max(p_max - p_min)
+    ref_len = analysis.building.reference_length()
     # maximum displacement
     max_d = 0.00
     for lvl in analysis.building.levels.level_list:
@@ -356,7 +401,7 @@ def deformed_shape(analysis: 'Analysis',
 
     # calculate a nice scaling factor if 0.00 is passed
     if scaling == 0:
-        scaling = get_auto_scaling(analysis, step)
+        scaling = get_auto_scaling_deformation(analysis, step)
 
     layout = common_3D.global_layout()
     dt = []
@@ -378,6 +423,152 @@ def deformed_shape(analysis: 'Analysis',
     else:
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 25, scaling)
+
+    fig_datastructure = dict(data=dt, layout=layout)
+    fig = go.Figure(fig_datastructure)
+    fig.show()
+
+    metadata = {'scaling': scaling}
+    return metadata
+
+
+def get_auto_scaling_forces(analysis: 'Analysis',
+                            ftype,
+                            step,
+                            scaling):
+    """
+    Automatically calculate a scaling value that
+    makes the maximum-force trapezoid appear approximately
+    2% of the largest dimention of the building's bounding box
+    """
+    # for each element
+    # for each section?
+    # store all the force values in a large array
+    # take the max of the abs
+    # obtain the building ref length
+    # calculate and return the scaling factor
+    pass
+
+
+def basic_forces(analysis: 'Analysis',
+                 ftype,
+                 step,
+                 scaling,
+                 num_points=10):
+
+    layout = common_3D.global_layout()
+    dt = []
+
+    list_of_frames = analysis.building.list_of_frames()
+    list_of_nodes = analysis.building.list_of_nodes()
+
+    # draw the nodes0
+    add_data__nodes_undeformed(dt, list_of_nodes)
+
+    # draw the frames
+    add_data__frames_undeformed(
+        dt, list_of_frames)
+
+    # For the main lines
+    x1 = []
+    y1 = []
+    z1 = []
+    colors1 = []
+    customdata = []
+    # For the fill lines
+    x2 = []
+    y2 = []
+    z2 = []
+    colors2 = []
+
+    # TODO finish this later to avoid
+    # unneeded computations
+    if ftype == 'axial':
+        switch = [True, False, False,
+                  False, False, False]
+    elif ftype == 'shear':
+        pass
+
+    for element in analysis.building.list_of_frames():
+
+        x_vec = element.local_x_axis_vector()
+        y_vec = element.local_y_axis_vector()
+        z_vec = element.local_z_axis_vector()
+
+        i_pos = np.array(element.node_i.coordinates)
+
+        T_global2local = np.vstack((x_vec, y_vec, z_vec))
+        forces_global = analysis.frame_basic_forces[element.uniq_id][step]
+
+        ni, qyi, qzi = T_global2local @ forces_global[0:3]
+
+        ti, myi, mzi = T_global2local @ forces_global[3:6]
+
+        wx, wy, wz = element.udl.value
+
+        l = element.length()
+        t = np.linspace(0.00, l, num=num_points)
+
+        n_vec = - t * wx - ni
+        qy_vec = t * wy + qyi
+        qz_vec = t * wz + qzi
+        t_vec = np.full(num_points, -ti)
+        mz_vec = t**2 * 0.50 * wy + t * qyi - mzi
+        my_vec = t**2 * 0.50 * wz + t * qzi + myi
+
+        for i in range(num_points - 1):
+
+            p_start = i_pos + t[i] * x_vec
+            p_end = i_pos + t[i+1] * x_vec
+            p_i = p_start + n_vec[i] * y_vec * scaling
+            p_j = p_end + n_vec[i+1] * y_vec * scaling
+
+            x1.extend((p_i[0], p_j[0], None))
+            y1.extend((p_i[1], p_j[1], None))
+            z1.extend((p_i[2], p_j[2], None))
+            customdata.extend(
+                (n_vec[i], n_vec[i+1], None)
+            )
+            x2.extend((p_start[0], p_i[0], None))
+            x2.extend((p_j[0], p_end[0], None))
+            y2.extend((p_start[1], p_i[1], None))
+            y2.extend((p_j[1], p_end[1], None))
+            z2.extend((p_start[2], p_i[2], None))
+            z2.extend((p_j[2], p_end[2], None))
+
+            colors1.extend(["red"]*3)
+            colors2.extend(["red"]*6)
+
+            # Todo - take care of the rest of the forces
+
+            # Todo - take care of hoverinfo
+
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x1,
+        "y": y1,
+        "z": z1,
+        "customdata": customdata,
+        "hovertemplate": ' %{customdata:.3g}<br>'
+        '<extra></extra>',
+        "line": {
+            "width": 3,
+            "color": colors1
+        }
+    })
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x2,
+        "y": y2,
+        "z": z2,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 1,
+            "color": colors2
+        }
+    })
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)

@@ -13,8 +13,7 @@ https://plotly.com/python/reference/
 # https://www.google.com/search?q=color+picker
 GRID_COLOR = '#d1d1d1'
 NODE_PRIMARY_COLOR = '#7ac4b7'
-COLUMN_COLOR = '#0f24db'
-BEAM_COLOR = '#0f24db'
+FRAME_COLOR = '#0f24db'
 BEAM_MESH_COLOR = '#6d7aed'
 
 if __name__ == "__main__":

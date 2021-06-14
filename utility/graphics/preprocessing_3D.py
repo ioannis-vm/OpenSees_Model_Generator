@@ -15,20 +15,22 @@ import numpy as np
 from utility.graphics import common, common_3D
 
 
-def add_data__grids(dt, list_of_grids, elevation):
-    for grid in list_of_grids:
-        dt.append({
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": [grid.start[0], grid.end[0]],
-            "y": [grid.start[1], grid.end[1]],
-            "z": [elevation]*2,
-            "hoverinfo": "skip",
-            "line": {
-                "width": 4,
-                "color": common.GRID_COLOR
-            }
-        })
+def add_data__grids(dt, building):
+    for lvl in building.levels.level_list:
+        elevation = lvl.elevation
+        for grid in building.gridsystem.grids:
+            dt.append({
+                "type": "scatter3d",
+                "mode": "lines",
+                "x": [grid.start[0], grid.end[0]],
+                "y": [grid.start[1], grid.end[1]],
+                "z": [elevation]*2,
+                "hoverinfo": "skip",
+                "line": {
+                    "width": 4,
+                    "color": common.GRID_COLOR
+                }
+            })
 
 
 def add_data__nodes(dt, list_of_nodes):
@@ -75,7 +77,7 @@ def add_data__nodes(dt, list_of_nodes):
     })
 
 
-def add_data__master_node(dt, list_of_nodes):
+def add_data__master_nodes(dt, list_of_nodes):
 
     x = [node.coordinates[0] for node in list_of_nodes]
     y = [node.coordinates[1] for node in list_of_nodes]
@@ -162,7 +164,7 @@ def add_data__frames(dt, list_of_frames):
     customdata = []
     section_names = []
     for elm in list_of_frames:
-        section_names.extend([elm.section.name]*2)
+        section_names.extend([elm.section.name]*3)
         x.extend(
             (elm.node_i.coordinates[0], elm.node_j.coordinates[0], None)
         )
@@ -202,7 +204,48 @@ def add_data__frames(dt, list_of_frames):
         'Node @ this end: %{customdata[4]:d}</extra>',
         "line": {
             "width": 5,
-            "color": common.COLUMN_COLOR
+            "color": common.FRAME_COLOR
+        }
+    })
+
+
+def add_data__frame_axes(dt, list_of_frames, ref_len):
+    if not list_of_frames:
+        return
+    s = ref_len * 0.05
+    x = []
+    y = []
+    z = []
+    colors = []
+    for elm in list_of_frames:
+        x_vec = elm.local_x_axis_vector()
+        y_vec = elm.local_y_axis_vector()
+        z_vec = elm.local_z_axis_vector()
+        l = elm.length()
+        i_pos = np.array(elm.node_i.coordinates)
+        mid_pos = i_pos + x_vec * l/2.00
+        x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+x_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+x_vec[2]*s, None))
+        colors.extend(["red"]*3)
+        x.extend((mid_pos[0], mid_pos[0]+y_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+y_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+y_vec[2]*s, None))
+        colors.extend(["green"]*3)
+        x.extend((mid_pos[0], mid_pos[0]+z_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+z_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+z_vec[2]*s, None))
+        colors.extend(["blue"]*3)
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 8,
+            "color": colors
         }
     })
 
@@ -259,62 +302,38 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
         "i": i_list,
         "j": j_list,
         "k": k_list,
-        "hoverinfo": "none",
+        "hoverinfo": "skip",
         "color": common.BEAM_MESH_COLOR,
         "opacity": 0.65
     })
 
 
-def level_geometry(building: 'Building', lvlname: str, extrude_frames=False):
+def draw_building_geometry(building: 'Building', extrude_frames=False):
 
-    level = building.levels.get(lvlname)
-
+    layout = common_3D.global_layout()
     dt = []
 
     # draw the grids
-    add_data__grids(dt, building.gridsystem.grids, level.elevation)
+    add_data__grids(dt, building)
 
     # draw the diaphgragm-lines
     for lvl in building.levels.level_list:
         add_data__diaphragm_lines(dt, lvl)
 
     # draw the nodes
-    add_data__nodes(dt, level.nodes.node_list)
+    add_data__nodes(dt, building.list_of_nodes())
 
     # draw the master nodes
-    if level.slab_data:
-        add_data__master_node(dt, [level.master_node])
+    add_data__master_nodes(dt, building.list_of_master_nodes())
 
     # draw the columns and beams (if any)
-    list_of_frame_elems = level.beams.beam_list + level.columns.column_list
     if extrude_frames:
-        add_data__extruded_frames_mesh(dt, list_of_frame_elems)
+        add_data__extruded_frames_mesh(dt, building.list_of_frames())
     else:
-        add_data__frames(dt, list_of_frame_elems)
+        add_data__frames(dt, building.list_of_frames())
+        add_data__frame_axes(dt, building.list_of_frames(),
+                             building.reference_length())
 
-    return dt
-
-
-def draw_level_geometry(building: 'Building', lvlname: str,
-                        extrude_frames=False):
-
-    dt = level_geometry(building, lvlname, extrude_frames)
-    layout = common_3D.global_layout()
     fig_datastructure = dict(data=dt, layout=layout)
-    fig = go.Figure(fig_datastructure)
-
-    fig.show()
-
-
-def draw_building_geometry(building: 'Building', extrude_frames=False):
-    layout = common_3D.global_layout()
-    dt = []
-    for lvl in building.levels.level_list:
-        dt.append(
-            level_geometry(building, lvl.name, extrude_frames)
-        )
-
-    def dt_flat(dt): return [item for sublist in dt for item in sublist]
-    fig_datastructure = dict(data=dt_flat(dt), layout=layout)
     fig = go.Figure(fig_datastructure)
     fig.show()

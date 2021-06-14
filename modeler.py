@@ -1214,6 +1214,21 @@ class Building:
                 list_of_master_nodes.append(lvl.master_node)
         return list_of_master_nodes
 
+    def reference_length(self):
+        """
+        Returns the largest dimension of the
+        bounding box of the building
+        (used in graphics)
+        """
+        p_min = np.full(3, np.inf)
+        p_max = np.full(3, -np.inf)
+        for node in self.list_of_nodes():
+            p = np.array(node.coordinates)
+            p_min = np.minimum(p_min, p)
+            p_max = np.maximum(p_max, p)
+        ref_len = np.max(p_max - p_min)
+        return ref_len
+
     def preprocess(self, assume_floor_slabs=True, self_weight=True):
         """
         Preprocess the building. No further editing beyond this point.
