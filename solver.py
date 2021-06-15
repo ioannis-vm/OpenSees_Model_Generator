@@ -178,11 +178,19 @@ class Analysis:
                                                 scaling,
                                                 extrude_frames)
 
-    def basic_forces(self, ftype, step=0, scaling=0.00):
+    def basic_forces(self, step=0,
+                     scaling_n=0.00,
+                     scaling_q=0.00,
+                     scaling_m=0.00,
+                     scaling_t=0.00,
+                     num_points=11):
         return postprocessing_3D.basic_forces(self,
-                                              ftype,
                                               step,
-                                              scaling)
+                                              scaling_n,
+                                              scaling_q,
+                                              scaling_m,
+                                              scaling_t,
+                                              num_points)
 
     ##################################
     # Numeric Result Post-processing #

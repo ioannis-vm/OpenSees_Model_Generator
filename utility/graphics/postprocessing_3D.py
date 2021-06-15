@@ -12,7 +12,7 @@ https://plotly.com/python/reference/
 
 import plotly.graph_objects as go
 import numpy as np
-from utility.graphics import common, common_3D, preprocessing_3D
+from utility.graphics import common, common_3D
 
 
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
@@ -432,29 +432,13 @@ def deformed_shape(analysis: 'Analysis',
     return metadata
 
 
-def get_auto_scaling_forces(analysis: 'Analysis',
-                            ftype,
-                            step,
-                            scaling):
-    """
-    Automatically calculate a scaling value that
-    makes the maximum-force trapezoid appear approximately
-    2% of the largest dimention of the building's bounding box
-    """
-    # for each element
-    # for each section?
-    # store all the force values in a large array
-    # take the max of the abs
-    # obtain the building ref length
-    # calculate and return the scaling factor
-    pass
-
-
 def basic_forces(analysis: 'Analysis',
-                 ftype,
                  step,
-                 scaling,
-                 num_points=10):
+                 scaling_n,
+                 scaling_q,
+                 scaling_m,
+                 scaling_t,
+                 num_points):
 
     layout = common_3D.global_layout()
     dt = []
@@ -464,32 +448,86 @@ def basic_forces(analysis: 'Analysis',
 
     # draw the nodes0
     add_data__nodes_undeformed(dt, list_of_nodes)
-
     # draw the frames
     add_data__frames_undeformed(
         dt, list_of_frames)
 
-    # For the main lines
-    x1 = []
-    y1 = []
-    z1 = []
-    colors1 = []
-    customdata = []
-    # For the fill lines
-    x2 = []
-    y2 = []
-    z2 = []
-    colors2 = []
+    # For the main lines: 1
+    # For the fill lines: 2
+    # Plot options:
+    # a: axial + torsion
+    # b: shear in local Y and Z
+    # c: moment in Y and Z
+    # d: shear combined
+    # e: moment combined
+    x1_a = []
+    y1_a = []
+    z1_a = []
+    colors1_a = []
+    customdata_a = []
+    x2_a = []
+    y2_a = []
+    z2_a = []
+    colors2_a = []
+    x1_b = []
+    y1_b = []
+    z1_b = []
+    colors1_b = []
+    customdata_b = []
+    x2_b = []
+    y2_b = []
+    z2_b = []
+    colors2_b = []
+    x1_c = []
+    y1_c = []
+    z1_c = []
+    colors1_c = []
+    customdata_c = []
+    x2_c = []
+    y2_c = []
+    z2_c = []
+    colors2_c = []
+    x1_d = []
+    y1_d = []
+    z1_d = []
+    colors1_d = []
+    customdata_d = []
+    x2_d = []
+    y2_d = []
+    z2_d = []
+    colors2_d = []
+    x1_e = []
+    y1_e = []
+    z1_e = []
+    colors1_e = []
+    customdata_e = []
+    x2_e = []
+    y2_e = []
+    z2_e = []
+    colors2_e = []
 
-    # TODO finish this later to avoid
-    # unneeded computations
-    if ftype == 'axial':
-        switch = [True, False, False,
-                  False, False, False]
-    elif ftype == 'shear':
-        pass
+    # preallocate memory
+    #
+    # (we do this to determine the internal forces
+    #  for all elements before we even start plotting
+    #  them, to be able to compute a nice scaling factor
+    #  without having to then recalculate the basic forces)
+    # (We store the discretized basic force vectors in a
+    #  linear fashion, element-wise)
+    num_elems = len(analysis.building.list_of_frames())
+    nx_vecs = np.full(num_elems * num_points, 0.00)
+    qy_vecs = np.full(num_elems * num_points, 0.00)
+    qz_vecs = np.full(num_elems * num_points, 0.00)
+    tx_vecs = np.full(num_elems * num_points, 0.00)
+    mz_vecs = np.full(num_elems * num_points, 0.00)
+    my_vecs = np.full(num_elems * num_points, 0.00)
+    x_vecs = np.full(num_elems * 3, 0.00)
+    y_vecs = np.full(num_elems * 3, 0.00)
+    z_vecs = np.full(num_elems * 3, 0.00)
+    i_poss = np.full(num_elems * 3, 0.00)
+    elm_ln = np.full(num_elems, 0.00)
 
-    for element in analysis.building.list_of_frames():
+    for i_elem, element in enumerate(analysis.building.list_of_frames()):
 
         x_vec = element.local_x_axis_vector()
         y_vec = element.local_y_axis_vector()
@@ -509,70 +547,427 @@ def basic_forces(analysis: 'Analysis',
         l = element.length()
         t = np.linspace(0.00, l, num=num_points)
 
-        n_vec = - t * wx - ni
+        nx_vec = - t * wx - ni
         qy_vec = t * wy + qyi
         qz_vec = t * wz + qzi
-        t_vec = np.full(num_points, -ti)
+        tx_vec = np.full(num_points, -ti)
         mz_vec = t**2 * 0.50 * wy + t * qyi - mzi
         my_vec = t**2 * 0.50 * wz + t * qzi + myi
+
+        # store results in the preallocated arrays
+        nx_vecs[i_elem*num_points:i_elem*num_points+num_points] = nx_vec
+        qy_vecs[i_elem*num_points:i_elem*num_points+num_points] = qy_vec
+        qz_vecs[i_elem*num_points:i_elem*num_points+num_points] = qz_vec
+        tx_vecs[i_elem*num_points:i_elem*num_points+num_points] = tx_vec
+        my_vecs[i_elem*num_points:i_elem*num_points+num_points] = my_vec
+        mz_vecs[i_elem*num_points:i_elem*num_points+num_points] = mz_vec
+        x_vecs[i_elem*3: i_elem*3 + 3] = x_vec
+        y_vecs[i_elem*3: i_elem*3 + 3] = y_vec
+        z_vecs[i_elem*3: i_elem*3 + 3] = z_vec
+        i_poss[i_elem*3: i_elem*3 + 3] = i_pos
+        elm_ln[i_elem] = l
+
+    # calculate scaling factors
+    ref_len = analysis.building.reference_length()
+    factor = 0.05
+    if scaling_n == 0.00:
+        nx_max = np.max(np.abs(nx_vecs))
+        scaling_n = ref_len / nx_max * factor
+        if scaling_n > 1.e8:
+            scaling_n = 1.00
+    if scaling_q == 0.00:
+        qy_max = np.max(np.abs(qy_vecs))
+        qz_max = np.max(np.abs(qz_vecs))
+        scaling_q = np.minimum(ref_len / qy_max * factor,
+                               ref_len / qz_max * factor)
+        if scaling_q > 1.e8:
+            scaling_q = 1.00
+    if scaling_m == 0.00:
+        my_max = np.max(np.abs(my_vecs))
+        mz_max = np.max(np.abs(mz_vecs))
+        scaling_m = np.minimum(ref_len / my_max * factor,
+                               ref_len / mz_max * factor)
+        if scaling_m > 1.e8:
+            scaling_m = 1.00
+    if scaling_t == 0.00:
+        tx_max = np.max(np.abs(tx_vecs))
+        scaling_t = ref_len / tx_max * factor
+        if scaling_t > 1.e8:
+            scaling_t = 1.00
+    for i_elem, element in enumerate(analysis.building.list_of_frames()):
+
+        # retrieve results from the preallocated arrays
+        nx_vec = nx_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        qy_vec = qy_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        qz_vec = qz_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        tx_vec = tx_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        my_vec = my_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        mz_vec = mz_vecs[i_elem*num_points:i_elem*num_points+num_points]
+        x_vec = x_vecs[i_elem*3: i_elem*3 + 3]
+        y_vec = y_vecs[i_elem*3: i_elem*3 + 3]
+        z_vec = z_vecs[i_elem*3: i_elem*3 + 3]
+        i_pos = i_poss[i_elem*3: i_elem*3 + 3]
+        l = elm_ln[i_elem]
+        t = np.linspace(0.00, l, num=num_points)
 
         for i in range(num_points - 1):
 
             p_start = i_pos + t[i] * x_vec
             p_end = i_pos + t[i+1] * x_vec
-            p_i = p_start + n_vec[i] * y_vec * scaling
-            p_j = p_end + n_vec[i+1] * y_vec * scaling
 
-            x1.extend((p_i[0], p_j[0], None))
-            y1.extend((p_i[1], p_j[1], None))
-            z1.extend((p_i[2], p_j[2], None))
-            customdata.extend(
-                (n_vec[i], n_vec[i+1], None)
+            # axial load & torsion
+            p_i = p_start + nx_vec[i] * y_vec * scaling_n
+            p_j = p_end + nx_vec[i+1] * y_vec * scaling_n
+            x1_a.extend((p_i[0], p_j[0], None))
+            y1_a.extend((p_i[1], p_j[1], None))
+            z1_a.extend((p_i[2], p_j[2], None))
+            customdata_a.extend(
+                (nx_vec[i], nx_vec[i+1], None))
+            x2_a.extend((p_start[0], p_i[0], None))
+            x2_a.extend((p_j[0], p_end[0], None))
+            y2_a.extend((p_start[1], p_i[1], None))
+            y2_a.extend((p_j[1], p_end[1], None))
+            z2_a.extend((p_start[2], p_i[2], None))
+            z2_a.extend((p_j[2], p_end[2], None))
+            colors1_a.extend(["red"]*3)
+            colors2_a.extend(["red"]*6)
+            p_i = p_start + tx_vec[i] * z_vec * scaling_t
+            p_j = p_end + tx_vec[i+1] * z_vec * scaling_t
+            x1_a.extend((p_i[0], p_j[0], None))
+            y1_a.extend((p_i[1], p_j[1], None))
+            z1_a.extend((p_i[2], p_j[2], None))
+            customdata_a.extend(
+                (tx_vec[i], tx_vec[i+1], None))
+            x2_a.extend((p_start[0], p_i[0], None))
+            x2_a.extend((p_j[0], p_end[0], None))
+            y2_a.extend((p_start[1], p_i[1], None))
+            y2_a.extend((p_j[1], p_end[1], None))
+            z2_a.extend((p_start[2], p_i[2], None))
+            z2_a.extend((p_j[2], p_end[2], None))
+            colors1_a.extend(["orange"]*3)
+            colors2_a.extend(["orange"]*6)
+
+            # shear load on y and z axes
+            p_i = p_start + qy_vec[i] * y_vec * scaling_q
+            p_j = p_end + qy_vec[i+1] * y_vec * scaling_q
+            x1_b.extend((p_i[0], p_j[0], None))
+            y1_b.extend((p_i[1], p_j[1], None))
+            z1_b.extend((p_i[2], p_j[2], None))
+            customdata_b.extend(
+                (qy_vec[i], qy_vec[i+1], None))
+            x2_b.extend((p_start[0], p_i[0], None))
+            x2_b.extend((p_j[0], p_end[0], None))
+            y2_b.extend((p_start[1], p_i[1], None))
+            y2_b.extend((p_j[1], p_end[1], None))
+            z2_b.extend((p_start[2], p_i[2], None))
+            z2_b.extend((p_j[2], p_end[2], None))
+            colors1_b.extend(["green"]*3)
+            colors2_b.extend(["green"]*6)
+            p_i = p_start + qz_vec[i] * z_vec * scaling_q
+            p_j = p_end + qz_vec[i+1] * z_vec * scaling_q
+            x1_b.extend((p_i[0], p_j[0], None))
+            y1_b.extend((p_i[1], p_j[1], None))
+            z1_b.extend((p_i[2], p_j[2], None))
+            customdata_b.extend(
+                (qz_vec[i], qz_vec[i+1], None))
+            x2_b.extend((p_start[0], p_i[0], None))
+            x2_b.extend((p_j[0], p_end[0], None))
+            y2_b.extend((p_start[1], p_i[1], None))
+            y2_b.extend((p_j[1], p_end[1], None))
+            z2_b.extend((p_start[2], p_i[2], None))
+            z2_b.extend((p_j[2], p_end[2], None))
+            colors1_b.extend(["green"]*3)
+            colors2_b.extend(["green"]*6)
+
+            # moment around z and y axes
+            p_i = p_start - mz_vec[i] * y_vec * scaling_m
+            p_j = p_end - mz_vec[i+1] * y_vec * scaling_m
+            # note: moments plotted upside down!
+            x1_c.extend((p_i[0], p_j[0], None))
+            y1_c.extend((p_i[1], p_j[1], None))
+            z1_c.extend((p_i[2], p_j[2], None))
+            customdata_c.extend(
+                (mz_vec[i], mz_vec[i+1], None))
+            x2_c.extend((p_start[0], p_i[0], None))
+            x2_c.extend((p_j[0], p_end[0], None))
+            y2_c.extend((p_start[1], p_i[1], None))
+            y2_c.extend((p_j[1], p_end[1], None))
+            z2_c.extend((p_start[2], p_i[2], None))
+            z2_c.extend((p_j[2], p_end[2], None))
+            colors1_c.extend(["blue"]*3)
+            colors2_c.extend(["blue"]*6)
+            # moment around y axis
+            p_i = p_start - my_vec[i] * z_vec * scaling_m
+            p_j = p_end - my_vec[i+1] * z_vec * scaling_m
+            x1_c.extend((p_i[0], p_j[0], None))
+            y1_c.extend((p_i[1], p_j[1], None))
+            z1_c.extend((p_i[2], p_j[2], None))
+            customdata_c.extend(
+                (my_vec[i], my_vec[i+1], None))
+            x2_c.extend((p_start[0], p_i[0], None))
+            x2_c.extend((p_j[0], p_end[0], None))
+            y2_c.extend((p_start[1], p_i[1], None))
+            y2_c.extend((p_j[1], p_end[1], None))
+            z2_c.extend((p_start[2], p_i[2], None))
+            z2_c.extend((p_j[2], p_end[2], None))
+            colors1_c.extend(["blue"]*3)
+            colors2_c.extend(["blue"]*6)
+
+            # shear load combined
+            p_i = p_start + (qy_vec[i] * y_vec +
+                             qz_vec[i] * z_vec) * scaling_q
+            p_j = p_end + (qy_vec[i+1] * y_vec +
+                           qz_vec[i+1] * z_vec) * scaling_q
+            x1_d.extend((p_i[0], p_j[0], None))
+            y1_d.extend((p_i[1], p_j[1], None))
+            z1_d.extend((p_i[2], p_j[2], None))
+            customdata_d.extend(
+                (np.sqrt(qy_vec[i]**2 + qz_vec[i]**2),
+                 np.sqrt(qy_vec[i+1]**2 + qz_vec[i+1]**2), None))
+            x2_d.extend((p_start[0], p_i[0], None))
+            x2_d.extend((p_j[0], p_end[0], None))
+            y2_d.extend((p_start[1], p_i[1], None))
+            y2_d.extend((p_j[1], p_end[1], None))
+            z2_d.extend((p_start[2], p_i[2], None))
+            z2_d.extend((p_j[2], p_end[2], None))
+            colors1_d.extend(["green"]*3)
+            colors2_d.extend(["green"]*6)
+
+            # both moments combined!
+            p_i = p_start - mz_vec[i] * y_vec * \
+                scaling_m - my_vec[i] * z_vec * scaling_m
+            p_j = p_end - mz_vec[i+1] * y_vec * \
+                scaling_m - my_vec[i+1] * z_vec * scaling_m
+            # note: moments plotted upside down!
+            x1_e.extend((p_i[0], p_j[0], None))
+            y1_e.extend((p_i[1], p_j[1], None))
+            z1_e.extend((p_i[2], p_j[2], None))
+            customdata_e.extend(
+                (np.sqrt(mz_vec[i]**2 + my_vec[i]**2),
+                 np.sqrt(mz_vec[i+1]**2 + my_vec[i+1]**2),
+                 None)
             )
-            x2.extend((p_start[0], p_i[0], None))
-            x2.extend((p_j[0], p_end[0], None))
-            y2.extend((p_start[1], p_i[1], None))
-            y2.extend((p_j[1], p_end[1], None))
-            z2.extend((p_start[2], p_i[2], None))
-            z2.extend((p_j[2], p_end[2], None))
+            x2_e.extend((p_start[0], p_i[0], None))
+            x2_e.extend((p_j[0], p_end[0], None))
+            y2_e.extend((p_start[1], p_i[1], None))
+            y2_e.extend((p_j[1], p_end[1], None))
+            z2_e.extend((p_start[2], p_i[2], None))
+            z2_e.extend((p_j[2], p_end[2], None))
+            colors1_e.extend(["blue"]*3)
+            colors2_e.extend(["blue"]*6)
 
-            colors1.extend(["red"]*3)
-            colors2.extend(["red"]*6)
-
-            # Todo - take care of the rest of the forces
-
-            # Todo - take care of hoverinfo
-
-    dt.append({
-        "type": "scatter3d",
-        "mode": "lines",
-        "x": x1,
-        "y": y1,
-        "z": z1,
-        "customdata": customdata,
-        "hovertemplate": ' %{customdata:.3g}<br>'
-        '<extra></extra>',
-        "line": {
-            "width": 3,
-            "color": colors1
+    # TODO validation: make sure they are pollted correctly
+    dt_a = [
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x1_a,
+            "y": y1_a,
+            "z": z1_a,
+            "visible": False,
+            "customdata": customdata_a,
+            "hovertemplate": ' %{customdata:.3g}<br>'
+            '<extra></extra>',
+            "line": {
+                "width": 3,
+                "color": colors1_a
+            }
+        },
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x2_a,
+            "y": y2_a,
+            "z": z2_a,
+            "visible": False,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 1,
+                "color": colors2_a
+            }
         }
-    })
-    dt.append({
-        "type": "scatter3d",
-        "mode": "lines",
-        "x": x2,
-        "y": y2,
-        "z": z2,
-        "hoverinfo": "skip",
-        "line": {
-            "width": 1,
-            "color": colors2
+    ]
+    dt_b = [
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x1_b,
+            "y": y1_b,
+            "z": z1_b,
+            "visible": False,
+            "customdata": customdata_b,
+            "hovertemplate": ' %{customdata:.3g}<br>'
+            '<extra></extra>',
+            "line": {
+                "width": 3,
+                "color": colors1_b
+            }
+        },
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x2_b,
+            "y": y2_b,
+            "z": z2_b,
+            "visible": False,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 1,
+                "color": colors2_b
+            }
         }
-    })
+    ]
+    dt_c = [
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x1_c,
+            "y": y1_c,
+            "z": z1_c,
+            "visible": False,
+            "customdata": customdata_c,
+            "hovertemplate": ' %{customdata:.3g}<br>'
+            '<extra></extra>',
+            "line": {
+                "width": 3,
+                "color": colors1_c
+            }
+        },
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x2_c,
+            "y": y2_c,
+            "z": z2_c,
+            "visible": False,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 1,
+                "color": colors2_c
+            }
+        }
+    ]
+    dt_d = [
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x1_d,
+            "y": y1_d,
+            "z": z1_d,
+            "visible": False,
+            "customdata": customdata_d,
+            "hovertemplate": ' %{customdata:.3g}<br>'
+            '<extra></extra>',
+            "line": {
+                "width": 3,
+                "color": colors1_d
+            }
+        },
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x2_d,
+            "y": y2_d,
+            "z": z2_d,
+            "visible": False,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 1,
+                "color": colors2_d
+            }
+        }
+    ]
+    dt_e = [
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x1_e,
+            "y": y1_e,
+            "z": z1_e,
+            "visible": False,
+            "customdata": customdata_e,
+            "hovertemplate": ' %{customdata:.3g}<br>'
+            '<extra></extra>',
+            "line": {
+                "width": 3,
+                "color": colors1_e
+            }
+        },
+        {
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x2_e,
+            "y": y2_e,
+            "z": z2_e,
+            "visible": False,
+            "hoverinfo": "skip",
+            "line": {
+                "width": 1,
+                "color": colors2_e
+            }
+        }
+    ]
 
-    fig_datastructure = dict(data=dt, layout=layout)
+    fig_datastructure = dict(data=dt + dt_a +
+                             dt_b + dt_c + dt_d + dt_e,
+                             layout=layout)
     fig = go.Figure(fig_datastructure)
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                type="buttons",
+                buttons=[
+                    dict(
+                        label="None",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[False]*2*5
+                               }]
+                    ),
+                    dict(
+                        label="Axial+Torsion",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[True]*2+[False]*2*4
+                               }]
+                    ),
+                    dict(
+                        label="Shear",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[False]*2+[True]*2+[False]*2*3
+                               }]
+                    ),
+                    dict(
+                        label="Moment",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[False]*2*2+[True]*2+[False]*2*2
+                               }]
+                    ),
+                    dict(
+                        label="Shear (combined)",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[False]*2*3+[True]*2+[False]*2
+                               }]
+                    ),
+                    dict(
+                        label="Moment (combined)",
+                        method="update",
+                        args=[{"visible":
+                               [True]*len(dt)+[False]*2*4+[True]*2
+                               }]
+                    )
+                ]
+            )
+        ]
+    )
+
     fig.show()
 
-    metadata = {'scaling': scaling}
+    metadata = {'scaling_n': scaling_n,
+                'scaling_q': scaling_q,
+                'scaling_m': scaling_m,
+                'scaling_t': scaling_t}
     return metadata

@@ -24,7 +24,7 @@
 - [-] Improve visualization
   - [-] Preprocessing
     - [X] ensure ability to plot partially defined models (missing element types)
-    - [ ] Plotly --> remove plotting a single level, rearrange code
+    - [X] Plotly --> remove plotting a single level, rearrange code
     - [X] Visualizing frame extrusions
     - [X] Visualizing deformed shapes
       - [X] no extruded frames too! (support simply plotting lines)
