@@ -371,19 +371,18 @@ def get_auto_scaling_deformation(analysis, step):
     ref_len = analysis.building.reference_length()
     # maximum displacement
     max_d = 0.00
-    for lvl in analysis.building.levels.level_list:
-        for elm in lvl.beams.beam_list:
-            u_i = analysis.node_displacements[
-                elm.node_i.uniq_id][step][0:3]
-            r_i = analysis.node_displacements[
-                elm.node_i.uniq_id][step][3:6]
-            u_j = analysis.node_displacements[
-                elm.node_j.uniq_id][step][0:3]
-            r_j = analysis.node_displacements[
-                elm.node_j.uniq_id][step][3:6]
-            d_global, r_local = interp3D_deformation(
-                elm, u_i, r_i, u_j, r_j, 3)
-            max_d = np.maximum(max_d, np.max(np.abs(d_global)))
+    for elm in analysis.building.list_of_internal_elems_without_rigid_links():
+        u_i = analysis.node_displacements[
+            elm.node_i.uniq_id][step][0:3]
+        r_i = analysis.node_displacements[
+            elm.node_i.uniq_id][step][3:6]
+        u_j = analysis.node_displacements[
+            elm.node_j.uniq_id][step][0:3]
+        r_j = analysis.node_displacements[
+            elm.node_j.uniq_id][step][3:6]
+        d_global, r_local = interp3D_deformation(
+            elm, u_i, r_i, u_j, r_j, 3)
+        max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
     scaling = ref_len / max_d * 0.1
     # never scale things down
@@ -406,8 +405,10 @@ def deformed_shape(analysis: 'Analysis',
     layout = common_3D.global_layout()
     dt = []
 
-    list_of_frames = analysis.building.list_of_frames()
-    list_of_nodes = analysis.building.list_of_nodes()
+    list_of_frames = \
+        analysis.building.list_of_internal_elems_without_rigid_links()
+    list_of_nodes = analysis.building.list_of_primary_nodes() + \
+        analysis.building.list_of_internal_nodes()
     list_of_master_nodes = analysis.building.list_of_master_nodes()
 
     if list_of_master_nodes:

@@ -63,13 +63,15 @@ class Analysis:
                 raise ValueError("Unsupported material")
 
     def _define_nodes(self):
-        for node in self.building.list_of_nodes() + \
-                self.building.list_of_master_nodes():
+        for node in self.building.list_of_primary_nodes() + \
+                self.building.list_of_master_nodes() + \
+                self.building.list_of_internal_nodes():
             ops.node(node.uniq_id,
                      *node.coordinates)
 
     def _define_node_restraints(self):
-        for node in self.building.list_of_nodes():
+        for node in self.building.list_of_primary_nodes() + \
+                self.building.list_of_internal_nodes():
             if node.restraint_type == 'fixed':
                 ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
             elif node.restraint_type == 'pinned':
@@ -84,11 +86,12 @@ class Analysis:
                     3,
                     lvl.master_node.uniq_id,
                     *[node.uniq_id
-                      for node in lvl.nodes.node_list])
+                      for node in lvl.list_of_primary_nodes()])
 
     def _define_node_mass(self):
-        for node in self.building.list_of_nodes() + \
-                self.building.list_of_master_nodes():
+        for node in self.building.list_of_primary_nodes() + \
+                self.building.list_of_master_nodes() + \
+                self.building.list_of_internal_nodes():
             if node.mass:
                 if max(node.mass.value) > EPSILON:
                     ops.mass(node.uniq_id,
@@ -98,20 +101,25 @@ class Analysis:
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
 
-        for elm in self.building.list_of_frames():
+        for elm in \
+                self.building.list_of_internal_elems_without_rigid_links():
             ops.eleLoad('-ele', elm.uniq_id,
                         '-type', '-beamUniform',
                         elm.udl.value[1],
                         elm.udl.value[2],
                         elm.udl.value[0])
-        for node in self.building.list_of_nodes() + \
+        for node in self.building.list_of_primary_nodes() + \
                 self.building.list_of_master_nodes():
             ops.load(node.uniq_id, *node.load.value)
 
     def _define_sections(self):
+        # will be redefined in the child classes
+        # but is needed for `_to_OpenSees_domain()`
         pass
 
     def _define_beamcolumn_elements(self):
+        # will be redefined in the child classes
+        # but is needed for `_to_OpenSees_domain()`
         pass
 
     def _to_OpenSees_domain(self):
@@ -124,8 +132,6 @@ class Analysis:
         self._define_node_restraints()
         self._define_node_constraints()
         self._define_node_mass()
-        # the following two calls use methods that
-        # are defined in the inherited classes that follow
         self._define_sections()
         self._define_beamcolumn_elements()
 
@@ -134,18 +140,14 @@ class Analysis:
     ####################################################
 
     def _read_node_displacements(self):
-        for node in self.building.list_of_nodes():
-            self._store_result(self.node_displacements,
-                               node.uniq_id,
-                               ops.nodeDisp(node.uniq_id))
-        for node in self.building.list_of_master_nodes():
+        for node in self.building.list_of_all_nodes():
             self._store_result(self.node_displacements,
                                node.uniq_id,
                                ops.nodeDisp(node.uniq_id))
 
     def _read_node_reactions(self):
         ops.reactions()
-        for node in self.building.list_of_nodes():
+        for node in self.building.list_of_primary_nodes():
             if node.restraint_type != 'free':
                 uid = node.uniq_id
                 local_reaction = np.array(ops.nodeReaction(uid))
@@ -154,7 +156,7 @@ class Analysis:
                                    local_reaction)
 
     def _read_frame_element_forces(self):
-        for elm in self.building.list_of_frames():
+        for elm in self.building.list_of_beamcolumn_elems():
             uid = elm.uniq_id
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.frame_basic_forces,
@@ -199,7 +201,7 @@ class Analysis:
     def global_reactions(self, step):
         reactions = np.full(6, 0.00)
         for lvl in self.building.levels.level_list:
-            for node in lvl.nodes.node_list:
+            for node in lvl.list_of_primary_nodes():
                 if node.restraint_type != 'free':
                     uid = node.uniq_id
                     x = node.coordinates[0]
@@ -221,10 +223,11 @@ class Analysis:
         return reactions
 
 
-@ dataclass
+@dataclass
 class LinearAnalysis(Analysis):
 
     def _define_sections(self):
+
         for sec in self.building.sections.section_list:
             ops.section('Elastic',
                         sec.uniq_id,
@@ -241,7 +244,8 @@ class LinearAnalysis(Analysis):
                 10)
 
     def _define_beamcolumn_elements(self):
-        for elm in self.building.list_of_frames():
+        for elm in \
+                self.building.list_of_internal_elems_without_rigid_links():
             # geometric transformation
             ops.geomTransf('Linear',
                            elm.uniq_id,
@@ -264,7 +268,7 @@ class LinearAnalysis(Analysis):
         ops.analyze(1)
 
 
-@ dataclass
+@dataclass
 class ModalAnalysis(LinearAnalysis):
     """
     Runs a modal analysis assuming the building has
@@ -278,7 +282,8 @@ class ModalAnalysis(LinearAnalysis):
     ####################################################
 
     def _read_node_displacements(self):
-        nodes = self.building.list_of_nodes()
+        nodes = self.building.list_of_primary_nodes() + \
+            self.building.list_of_internal_nodes()
         master_nodes = self.building.list_of_master_nodes()
         if master_nodes:
             all_nodes = nodes + master_nodes
@@ -302,7 +307,7 @@ class ModalAnalysis(LinearAnalysis):
         self._read_node_displacements()
 
 
-@ dataclass
+@dataclass
 class LinearGravityAnalysis(LinearAnalysis):
     def run(self):
         self._to_OpenSees_domain()
@@ -311,12 +316,29 @@ class LinearGravityAnalysis(LinearAnalysis):
         self._read_OpenSees_results()
 
 
-@ dataclass
+@dataclass
 class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
     def _define_sections(self, n_x, n_y, n_p):
+
+        # temporary solution, utnil I
+        # manage to get equalDOF to work
+        ops.section('Elastic',
+                    9900990099009900,
+                    1.00,
+                    1.00E8,
+                    1.00E8,
+                    1.00E8,
+                    1.00,
+                    1.00E8)
+        ops.beamIntegration(
+            'Lobatto',
+            9900990099009900,
+            9900990099009900,
+            2)
+
         for sec in self.building.sections.section_list:
             pieces = sec.subdivide_section(
                 n_x=n_x, n_y=n_y)
@@ -335,19 +357,34 @@ class NonlinearAnalysis(Analysis):
             ops.beamIntegration(
                 'Lobatto', sec.uniq_id, sec.uniq_id, n_p)
 
-    def _define_beamcolumn_elements(self):
-        for lvl in self.building.levels.level_list:
-            for elm in lvl.columns.column_list+lvl.beams.beam_list:
-                # geometric transformation
-                ops.geomTransf('Linear',
-                               elm.uniq_id,
-                               *elm.local_z_axis_vector())
-                ops.element('dispBeamColumn',
-                            elm.uniq_id,
-                            elm.node_i.uniq_id,
-                            elm.node_j.uniq_id,
-                            elm.uniq_id,
-                            elm.section.uniq_id)
+    def _beamcolumn_elements(self):
+        for elm in \
+                self.building.list_of_internal_elems_without_rigid_links():
+            # geometric transformation
+            ops.geomTransf('Linear',
+                           elm.uniq_id,
+                           *elm.local_z_axis_vector())
+            ops.element('dispBeamColumn',
+                        elm.uniq_id,
+                        elm.node_i.uniq_id,
+                        elm.node_j.uniq_id,
+                        elm.uniq_id,
+                        elm.section.uniq_id)
+        for elm in self.building.list_of_rigid_links():
+            ops.geomTransf('Linear',
+                           elm.uniq_id,
+                           *elm.local_z_axis_vector())
+            ops.element('dispBeamColumn',
+                        elm.uniq_id,
+                        elm.node_i.uniq_id,
+                        elm.node_j.uniq_id,
+                        elm.uniq_id,
+                        9900990099009900)
+
+            # doesn't work:
+            # n_i = elm.node_i.uniq_id
+            # n_j = elm.node_j.uniq_id
+            # ops.rigidLink("beam", n_i, n_j)
 
     def _to_OpenSees_domain(self, n_x, n_y, n_p):
         """
@@ -375,7 +412,7 @@ class NonlinearAnalysis(Analysis):
         ops.analyze(100)
 
 
-@ dataclass
+@dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
     def _apply_lateral_load(self, direction):
@@ -480,7 +517,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             "Base Shear", "lb", ".0f")
 
 
-@ dataclass
+@dataclass
 class NLTHAnalysis(NonlinearAnalysis):
 
     time_vector: List[float] = field(default_factory=list)

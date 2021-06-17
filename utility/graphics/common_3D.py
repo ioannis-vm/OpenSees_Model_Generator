@@ -19,7 +19,8 @@ node_marker = {
     'fixed': ("square", 10),
     'pinned': ("circle-open", 10),
     'free': ("circle", 5),
-    'master': ("circle-open", 15)
+    'master': ("circle-open", 15),
+    'internal': ("x", 3)
 }
 
 

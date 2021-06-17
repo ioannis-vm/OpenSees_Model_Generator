@@ -113,7 +113,7 @@ def generate_floor_slab_data(lvl):
             beam_to_edge_map[beam.uniq_id] = edge.nid
         return edges, beam_to_edge_map
 
-    beams = lvl.beams.beam_list
+    beams = lvl.beams.element_list
     if beams:
         edges, beam_to_edge_map = convert_list_of_beams_to_mesh_edges(beams)
         halfedges = define_halfedges(edges)

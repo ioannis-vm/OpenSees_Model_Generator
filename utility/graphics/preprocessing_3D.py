@@ -2,7 +2,7 @@
 The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
-#   __                 UC Berkeley
+#   __                 UC eley
 #   \ \/\   /\/\/\     John Vouvakis Manousakis
 #    \ \ \ / /    \    Dimitrios Konstantinidis
 # /\_/ /\ V / /\/\ \
@@ -125,6 +125,45 @@ def add_data__master_nodes(dt, list_of_nodes):
     })
 
 
+def add_data__internal_nodes(dt, list_of_nodes):
+    x = [node.coordinates[0] for node in list_of_nodes]
+    y = [node.coordinates[1] for node in list_of_nodes]
+    z = [node.coordinates[2] for node in list_of_nodes]
+    customdata = []
+    restraint_types = [node.restraint_type for node in list_of_nodes]
+    for node in list_of_nodes:
+        customdata.append(
+            (node.uniq_id,
+             *node.mass.value,
+             *node.load.value
+             )
+        )
+    dt.append({
+        "type": "scatter3d",
+        "mode": "markers",
+        "x": x,
+        "y": y,
+        "z": z,
+        "customdata": customdata,
+        "text": restraint_types,
+        "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+        'Restraint: %{text}<br>' +
+        'Mass: (%{customdata[1]:.3g}, ' +
+        '%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>' +
+        'Load: (%{customdata[4]:.3g}, ' +
+        '%{customdata[5]:.3g}, %{customdata[6]:.3g})' +
+        '<extra>Node: %{customdata[0]:d}</extra>',
+        "marker": {
+            "symbol": common_3D.node_marker['internal'][0],
+            "color": common.NODE_INTERNAL_COLOR,
+            "size": common_3D.node_marker['internal'][1],
+            "line": {
+                "color": common.NODE_INTERNAL_COLOR,
+                "width": 2}
+        }
+    })
+
+
 def add_data__diaphragm_lines(dt, lvl):
     if not lvl.master_node:
         return
@@ -132,7 +171,7 @@ def add_data__diaphragm_lines(dt, lvl):
     x = []
     y = []
     z = []
-    for node in lvl.nodes.node_list:
+    for node in lvl.nodes_primary.node_list:
         x.extend(
             (node.coordinates[0], mnode.coordinates[0], None)
         )
@@ -212,7 +251,7 @@ def add_data__frames(dt, list_of_frames):
 def add_data__frame_axes(dt, list_of_frames, ref_len):
     if not list_of_frames:
         return
-    s = ref_len * 0.05
+    s = ref_len * 0.025
     x = []
     y = []
     z = []
@@ -308,30 +347,35 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     })
 
 
-def draw_building_geometry(building: 'Building', extrude_frames=False):
+def plot_building_geometry(building: 'Building', extrude_frames=False):
 
     layout = common_3D.global_layout()
     dt = []
 
-    # draw the grids
+    # plot the grids
     add_data__grids(dt, building)
 
-    # draw the diaphgragm-lines
+    # plot the diaphgragm-lines
     for lvl in building.levels.level_list:
         add_data__diaphragm_lines(dt, lvl)
 
-    # draw the nodes
-    add_data__nodes(dt, building.list_of_nodes())
+    # plot the internal nodes
+    if not extrude_frames:
+        add_data__internal_nodes(dt, building.list_of_internal_nodes())
 
-    # draw the master nodes
+    # plot the nodes
+    add_data__nodes(dt, building.list_of_primary_nodes())
+
+    # plot the master nodes
     add_data__master_nodes(dt, building.list_of_master_nodes())
 
-    # draw the columns and beams (if any)
+    # plot the columns and beams (if any)
     if extrude_frames:
-        add_data__extruded_frames_mesh(dt, building.list_of_frames())
+        add_data__extruded_frames_mesh(
+            dt, building.list_of_internal_elems_without_rigid_links())
     else:
-        add_data__frames(dt, building.list_of_frames())
-        add_data__frame_axes(dt, building.list_of_frames(),
+        add_data__frames(dt, building.list_of_internal_elems())
+        add_data__frame_axes(dt, building.list_of_internal_elems(),
                              building.reference_length())
 
     fig_datastructure = dict(data=dt, layout=layout)
