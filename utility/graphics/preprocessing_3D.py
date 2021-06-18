@@ -372,7 +372,7 @@ def plot_building_geometry(building: 'Building', extrude_frames=False):
     # plot the columns and beams (if any)
     if extrude_frames:
         add_data__extruded_frames_mesh(
-            dt, building.list_of_internal_elems_without_rigid_links())
+            dt, building.list_of_internal_elems())
     else:
         add_data__frames(dt, building.list_of_internal_elems())
         add_data__frame_axes(dt, building.list_of_internal_elems(),

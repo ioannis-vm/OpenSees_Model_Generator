@@ -395,12 +395,9 @@ class Point:
     coordinates: List[float]
 
     def __eq__(self, other):
-        """
-        Caution: Equality is only checked in terms of(x, y)
-        """
-        dist = (self.coordinates[0] - other.coordinates[0])**2 +\
-            (self.coordinates[1] - other.coordinates[1])**2
-        return dist < EPSILON**2
+        p0 = np.array(self.coordinates)
+        p1 = np.array(other.coordinates)
+        return np.linalg.norm(p0 - p1) < EPSILON
 
     def __le__(self, other):
         d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
@@ -433,7 +430,7 @@ class Point:
         return np.sqrt(dx*dx + dy*dy + dz*dz)
 
 
-@dataclass
+@dataclass(eq=False)
 class Node(Element, Point):
     """
     Node object.
@@ -445,12 +442,9 @@ class Node(Element, Point):
     load: Load = field(default=Load([0., 0., 0., 0., 0., 0.]), repr=False)
 
     def __eq__(self, other):
-        """
-        Equality is only checked in terms of(x, y)
-        """
-        dist = (self.coordinates[0] - other.coordinates[0])**2 +\
-            (self.coordinates[1] - other.coordinates[1])**2
-        return dist < EPSILON**2
+        p0 = np.array(self.coordinates)
+        p1 = np.array(other.coordinates)
+        return np.linalg.norm(p0 - p1) < EPSILON
 
     def __le__(self, other):
         d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
@@ -707,14 +701,10 @@ class LinearElement(Element):
     ang: float = field(default=0.00)
     udl: Load = field(default_factory=Load)
     section: Section = field(default=None)
-    offset_i: list = field(default_factory=list)
-    offset_j: list = field(default_factory=list)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
         self.udl = Load([0., 0., 0.])
-        self.offset_i = [0., 0., 0.]
-        self.offset_j = [0., 0., 0.]
 
     def length(self):
         return np.linalg.norm(
@@ -793,46 +783,48 @@ class LinearElement(Element):
 
 
 @dataclass
-class LengthwiseOffset:
+class Connection:
     """
-    Represents an element offset in the
-    length-wise direction (local x axis)
-    (making it shorter or longer).
-    Used to assist defining BeamColumn elements.
+    Represents connections between the internal ends
+    of BeamColumn elements with the primary nodes.
     """
-    dx_i: float = field(default=0.00)
-    dx_j: float = field(default=0.00)
+    internal_node: Node
+    primary_node: Node
+    c_type: str = field(default='fixed_zerolength')
+
+    def __post_init__(self):
+        if self.c_type not in [
+                'fixed_zerolength',
+                'rigid_link']:
+            raise ValueError("Unsupported connection type")
 
 
 @dataclass
 @total_ordering
 class BeamColumn(Element):
-    """
-    Beam or Column element.
-    While conceptually this represents a single beam or column,
-    it is modeled using three (or more) elements.
-    The beam/column itself, with possible subdivisions, plus
-    two rigid offsets at the ends.
-    While the `BeamColumn` class would intuitively fit for being
-    a child of the `LinearElement` class, it is not. That is
-    because it needs to store information for multiple
-    `LinearElement` instances, which necessitates defining it
-    as a collector of such objects, rather than a child of
-    that class.
-    """
-    node_i: Node
-    node_j: Node
-    ang: float = field(default=0.00)
-    section: Section = field(default=None)
-    n_sub: int = field(default=1)
-    placement: str = field(default="centroid")
-    len_offset: LengthwiseOffset = field(
-        default_factory=LengthwiseOffset)
-    internal_nodes: list[Node] = field(default_factory=list)
-    internal_elems: list[LinearElement] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __init__(self,
+                 node_i: Node,
+                 node_j: Node,
+                 ang: float = 0.00,
+                 section: Section = None,
+                 n_sub: int = 1,
+                 placement="centroid",
+                 dx_i: float = 0.00,
+                 dx_j: float = 0.00,
+                 connection_i_type: str = "fixed",
+                 connection_j_type: str = "fixed"):
         self.uniq_id = next(_ids)
+        self.node_i = node_i
+        self.node_j = node_j
+        self.ang = ang
+        self.section = section
+        self.n_sub = n_sub
+        self.placement = placement
+        self.dx_i = dx_i
+        self.dx_j = dx_j
+        self.internal_nodes = []
+        self.internal_elems = []
         # obtain offset from section
         dz, dy = self.section.retrieve_offset(self.placement)
         # retrieve local coordinate system
@@ -851,56 +843,43 @@ class BeamColumn(Element):
         # vectors that move away from that position,
         # going towards node j...
         lala = np.vstack((np.linspace(
-            self.len_offset.dx_i, l-self.len_offset.dx_j, num=self.n_sub+1),
+            self.dx_i, l-self.dx_j, num=self.n_sub+1),
             np.full(self.n_sub+1, dy),
             np.full(self.n_sub+1, dz)))  # I'm terrible in naming things
         # positions of the points defined by lala
         coords = T @ lala + np.column_stack([p_i]*(self.n_sub+1))
-        # We will not define nodes for the first and last positions.
-        # We will define internal nodes for any intermediate positions
-        # if applicable (if n_sub > 1).
-        # The first and last positions will be used to determine the
-        # offsets for the subelement/s, and they will be connected
-        # to the primary nodes instead.
-
         # define internal nodes at those positions
-        # excluding the first and last points
-        for i_node in range(1, self.n_sub):
+        for i_node in range(self.n_sub+1):
             node = Node(coords[:, i_node])
             self.internal_nodes.append(node)
-        # define internal elements
-        if n_sub == 1:
-            # single sub-element
-            # TODO FIX THIS
-            node_i = self.node_i
-            node_io = Point(*coords[:, n_sub])
-            node_j = self.node_j
-            node_jo = Point(*coords[:, n_sub+1])
-            elm = LinearElement(
-                node_i, node_j,
-                self.ang, section=self.section,
-                offset_i=(node_i + ((-1)*node_io)).coordinates,
-                offset_j=(node_j + ((-1)*node_jo)).coordinates)
-        else:
-            # two or more sub-elements
-            # do a for loop for the intermediate sub-elements
-            # using range(), that will only execute if
-            # the number of intermediate sub-elements is more than 0
-
-            # GOAL: Subelements should be their own thing. They will
-            # contain information about their offsets
-            # to analyze and plot them we should be able to
-            # just deal with them idnidivually without needing
-            # to pass the entire beamcolumn subasemblies
-            pass
-
-        # intermediate internal elements
-        for k in range(2, self.n_sub):
+        # internal elements
+        for k in range(self.n_sub):
             node_i = self.internal_nodes[k]
             node_j = self.internal_nodes[k+1]
             elm = LinearElement(
                 node_i, node_j, self.ang, section=self.section)
             self.internal_elems.append(elm)
+        # connections
+        if connection_i_type == "fixed":
+            if self.node_i == self.internal_nodes[0]:
+                c_type = "fixed_zerolength"
+            else:
+                c_type = "rigid_link"
+            self.connection_i = Connection(self.internal_nodes[0],
+                                           self.node_i,
+                                           c_type)
+        else:
+            raise ValueError("Unsupported connection type")
+        if connection_j_type == "fixed":
+            if self.node_j == self.internal_nodes[-1]:
+                c_type = "fixed_zerolength"
+            else:
+                c_type = "rigid_link"
+            self.connection_j = Connection(self.internal_nodes[-1],
+                                           self.node_j,
+                                           c_type)
+        else:
+            raise ValueError("Unsupported connection type")
 
     def length(self):
         """
@@ -912,18 +891,6 @@ class BeamColumn(Element):
         return np.linalg.norm(
             np.array(self.node_i.coordinates) -
             np.array(self.node_j.coordinates))
-
-    # def global_offset_i(self):
-    #     node_i_external = self.node_i
-    #     node_i_internal = self.internal_nodes[0]
-    #     d = node_i_internal - node_i_external
-    #     return d
-
-    # def global_offset_j(self):
-    #     node_j_external = self.node_j
-    #     node_j_internal = self.internal_nodes[-1]
-    #     d = node_j_internal - node_j_external
-    #     return d
 
     def add_udl_from_global_system(self, udl: Load, include_offsets=True):
         """
@@ -1034,14 +1001,21 @@ class Level:
         Returns the node that occupies a given point
         at the current level, if it exists
         """
-        # TODO fix this function to account for offsets
-        # offset nodes should not be used.
         candidate_node = Node([x_coord, y_coord,
                                self.elevation], self.restraint)
         for other_node in self.nodes_primary.node_list:
             if other_node == candidate_node:
                 return other_node
         return None
+
+    def look_for_column(self, node: Node):
+        """
+        Returns the level's column that is connected
+        to the given node, if it exists.
+        """
+        for col in self.columns.element_list:
+            if col.node_i == node:
+                return col
 
     def add_column(self, node_i, node_j, ang, section):
         """
@@ -1075,11 +1049,7 @@ class Level:
             internal.extend(col.internal_nodes)
         for bm in self.beams.element_list:
             internal.extend(bm.internal_nodes)
-        if internal:
-            all_nodes = primary + internal
-        else:
-            all_nodes = primary
-        return all_nodes
+        return primary + internal
 
 
 @ dataclass
@@ -1271,7 +1241,8 @@ class Building:
     def add_column_at_point(self,
                             x: float,
                             y: float,
-                            ang=0.00):
+                            ang=0.00,
+                            n_sub=1):
         """
         Adds a column at the given X, Y location at all the active levels.
         Existing nodes are used, otherwise they are created.
@@ -1306,7 +1277,7 @@ class Building:
                                node_j=bot_node,
                                ang=ang,
                                section=self.sections.active,
-                               n_sub=4,
+                               n_sub=n_sub,
                                placement=self.active_placement
                                ))
                 # TODO Change n_sub to 1 once it is working
@@ -1314,7 +1285,9 @@ class Building:
     def add_beam_at_points(self,
                            start: Point,
                            end: Point,
-                           angle=0.00):
+                           angle=0.00,
+                           n_sub=1,
+                           connection="naive"):
         """
         Adds a beam connecting the given points
         at all the active levels.
@@ -1327,6 +1300,16 @@ class Building:
         for level in self.levels.active:
             # check to see if start node exists
             start_node = level.look_for_node(*start.coordinates)
+            if start_node:
+                # if it exists, check if a column exists there
+                col = level.look_for_column(start_node)
+                if col:
+                    # if a column exists there, get the offset
+                    p_j = np.array(end.coordinates)
+                    p_i = np.array(start.coordinates)
+                    diff = p_j - p_i
+                    diff = diff / np.linalg.norm(diff)
+
             # create it if it does not exist
             if not start_node:
                 start_node = Node(
@@ -1344,11 +1327,13 @@ class Building:
                                        node_j=end_node,
                                        ang=angle,
                                        section=self.sections.active,
-                                       n_sub=4,
-                                       placement=self.active_placement))
+                                       n_sub=n_sub,
+                                       placement=self.active_placement,
+                                       dx_i=50,
+                                       dx_j=50))
             # TODO Change n_sub to 1 once it is working
 
-    def add_columns_from_grids(self):
+    def add_columns_from_grids(self, n_sub=1):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect, and places a column on
@@ -1357,9 +1342,10 @@ class Building:
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
             self.add_column_at_point(
-                pt.coordinates[0], pt.coordinates[1], ang=self.active_angle)
+                pt.coordinates[0], pt.coordinates[1], ang=self.active_angle,
+                n_sub=n_sub)
 
-    def add_beams_from_grids(self):
+    def add_beams_from_grids(self, n_sub=1, connection='naive'):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect. For each gridline, beams are placed
@@ -1372,7 +1358,9 @@ class Building:
                 self.add_beam_at_points(
                     isect_pts[i],
                     isect_pts[i+1],
-                    angle=self.active_angle
+                    angle=self.active_angle,
+                    n_sub=n_sub,
+                    connection=connection
                 )
 
     #############################################
@@ -1448,22 +1436,6 @@ class Building:
             result.extend(element.internal_elems)
         return result
 
-    def list_of_internal_elems_without_rigid_links(self):
-        list_of_elems = self.list_of_internal_elems()
-        result = []
-        for element in list_of_elems:
-            if element.section.sec_type != 'rigid_link':
-                result.append(element)
-        return result
-
-    def list_of_rigid_links(self):
-        list_of_elems = self.list_of_internal_elems()
-        result = []
-        for element in list_of_elems:
-            if element.section.sec_type == 'rigid_link':
-                result.append(element)
-        return result
-
     def list_of_primary_nodes(self):
         list_of_nodes = []
         for lvl in self.levels.level_list:
@@ -1489,6 +1461,14 @@ class Building:
         return self.list_of_primary_nodes() + \
             self.list_of_internal_nodes() + \
             self.list_of_master_nodes()
+
+    def list_of_connections(self):
+        bc_elems = self.list_of_beamcolumn_elems()
+        result = []
+        for elm in bc_elems:
+            result.extend([elm.connection_i,
+                           elm.connection_j])
+        return result
 
     def reference_length(self):
         """

@@ -269,6 +269,54 @@ def add_data__frames_deformed(analysis,
     })
 
 
+def add_data__frames_offsets_deformed(analysis,
+                                      dt,
+                                      list_of_beamcolumn_elems,
+                                      step,
+                                      scaling):
+    if not list_of_beamcolumn_elems:
+        return
+    x = []
+    y = []
+    z = []
+    for elm in list_of_beamcolumn_elems:
+        p_i = np.array(elm.node_i.coordinates)
+        p_io = np.array(elm.internal_nodes[0].coordinates)
+        p_j = np.array(elm.node_j.coordinates)
+        p_jo = np.array(elm.internal_nodes[-1].coordinates)
+        u_i = np.array(
+            analysis.node_displacements[elm.node_i.uniq_id][step][0:3])
+        u_io = np.array(analysis.node_displacements[
+            elm.internal_nodes[0].uniq_id][step][0:3])
+        u_j = np.array(
+            analysis.node_displacements[elm.node_j.uniq_id][step][0:3])
+        u_jo = np.array(analysis.node_displacements[
+            elm.internal_nodes[-1].uniq_id][step][0:3])
+        x_i = p_i + u_i * scaling
+        x_io = p_io + u_io * scaling
+        x_j = p_j + u_j * scaling
+        x_jo = p_jo + u_jo * scaling
+        x.extend((x_i[0], x_io[0], None))
+        y.extend((x_i[1], x_io[1], None))
+        z.extend((x_i[2], x_io[2], None))
+        x.extend((x_j[0], x_jo[0], None))
+        y.extend((x_j[1], x_jo[1], None))
+        z.extend((x_j[2], x_jo[2], None))
+
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 15,
+            "color": common.BEAM_MESH_COLOR
+        }
+    })
+
+
 def add_data__frames_undeformed(dt, list_of_frames):
     x = []
     y = []
@@ -292,7 +340,7 @@ def add_data__frames_undeformed(dt, list_of_frames):
             "hoverinfo": "skip",
             "line": {
                 "width": 5,
-                "color": common.FRAME_COLOR
+                "color": common.BEAM_MESH_COLOR
             }
         })
 
@@ -371,7 +419,7 @@ def get_auto_scaling_deformation(analysis, step):
     ref_len = analysis.building.reference_length()
     # maximum displacement
     max_d = 0.00
-    for elm in analysis.building.list_of_internal_elems_without_rigid_links():
+    for elm in analysis.building.list_of_internal_elems():
         u_i = analysis.node_displacements[
             elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[
@@ -384,7 +432,12 @@ def get_auto_scaling_deformation(analysis, step):
             elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
-    scaling = ref_len / max_d * 0.1
+    if max_d > 1.00e-14:
+        scaling = ref_len / max_d * 0.1
+    else:
+        # no infinite scaling, thank you
+        scaling = 1.00
+
     # never scale things down
     # (usually when this is required, things have gone bad
     #  and we should be able to realize that immediately)
@@ -406,7 +459,7 @@ def deformed_shape(analysis: 'Analysis',
     dt = []
 
     list_of_frames = \
-        analysis.building.list_of_internal_elems_without_rigid_links()
+        analysis.building.list_of_internal_elems()
     list_of_nodes = analysis.building.list_of_primary_nodes() + \
         analysis.building.list_of_internal_nodes()
     list_of_master_nodes = analysis.building.list_of_master_nodes()
@@ -422,6 +475,9 @@ def deformed_shape(analysis: 'Analysis',
         add_data__extruded_frames_deformed_mesh(
             analysis, dt, list_of_frames, step, 25, scaling)
     else:
+        list_of_beamcolumn_elems = analysis.building.list_of_beamcolumn_elems()
+        add_data__frames_offsets_deformed(
+            analysis, dt, list_of_beamcolumn_elems, step, scaling)
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 25, scaling)
 
@@ -444,8 +500,8 @@ def basic_forces(analysis: 'Analysis',
     layout = common_3D.global_layout()
     dt = []
 
-    list_of_frames = analysis.building.list_of_frames()
-    list_of_nodes = analysis.building.list_of_nodes()
+    list_of_frames = analysis.building.list_of_internal_elems()
+    list_of_nodes = analysis.building.list_of_all_nodes()
 
     # draw the nodes0
     add_data__nodes_undeformed(dt, list_of_nodes)
@@ -515,7 +571,7 @@ def basic_forces(analysis: 'Analysis',
     #  without having to then recalculate the basic forces)
     # (We store the discretized basic force vectors in a
     #  linear fashion, element-wise)
-    num_elems = len(analysis.building.list_of_frames())
+    num_elems = len(analysis.building.list_of_internal_elems())
     nx_vecs = np.full(num_elems * num_points, 0.00)
     qy_vecs = np.full(num_elems * num_points, 0.00)
     qz_vecs = np.full(num_elems * num_points, 0.00)
@@ -528,7 +584,7 @@ def basic_forces(analysis: 'Analysis',
     i_poss = np.full(num_elems * 3, 0.00)
     elm_ln = np.full(num_elems, 0.00)
 
-    for i_elem, element in enumerate(analysis.building.list_of_frames()):
+    for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
 
         x_vec = element.local_x_axis_vector()
         y_vec = element.local_y_axis_vector()
@@ -595,7 +651,7 @@ def basic_forces(analysis: 'Analysis',
         scaling_t = ref_len / tx_max * factor
         if scaling_t > 1.e8:
             scaling_t = 1.00
-    for i_elem, element in enumerate(analysis.building.list_of_frames()):
+    for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
 
         # retrieve results from the preallocated arrays
         nx_vec = nx_vecs[i_elem*num_points:i_elem*num_points+num_points]

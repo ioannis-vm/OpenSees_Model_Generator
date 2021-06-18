@@ -70,8 +70,7 @@ class Analysis:
                      *node.coordinates)
 
     def _define_node_restraints(self):
-        for node in self.building.list_of_primary_nodes() + \
-                self.building.list_of_internal_nodes():
+        for node in self.building.list_of_primary_nodes():
             if node.restraint_type == 'fixed':
                 ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
             elif node.restraint_type == 'pinned':
@@ -80,6 +79,7 @@ class Analysis:
             ops.fix(node.uniq_id, 0, 0, 1, 1, 1, 0)
 
     def _define_node_constraints(self):
+        # Rigid Diaphragms
         for lvl in self.building.levels.level_list:
             if lvl.master_node:
                 ops.rigidDiaphragm(
@@ -87,6 +87,32 @@ class Analysis:
                     lvl.master_node.uniq_id,
                     *[node.uniq_id
                       for node in lvl.list_of_primary_nodes()])
+                # for node in lvl.list_of_primary_nodes():
+                #     ops.equalDOF(
+                #         lvl.master_node.uniq_id,
+                #         node.uniq_id,
+                #         6
+                #     )
+                # ops.rigidLink(
+                #     "beam",
+                #     lvl.master_node.uniq_id,
+                #     lvl.list_of_primary_nodes()[-1].uniq_id
+                # )
+        # connections using mutli-point constraints
+        for connection in self.building.list_of_connections():
+            if connection.c_type == 'fixed_zerolength':
+                ops.equalDOF(
+                    connection.primary_node.uniq_id,
+                    connection.internal_node.uniq_id,
+                    *[1, 2, 3, 4, 5, 6])
+            elif connection.c_type == 'rigid_link':
+                ops.rigidLink(
+                    "beam",
+                    connection.primary_node.uniq_id,
+                    connection.internal_node.uniq_id
+                )
+            else:
+                raise ValueError("Unsupported connection")
 
     def _define_node_mass(self):
         for node in self.building.list_of_primary_nodes() + \
@@ -102,14 +128,15 @@ class Analysis:
         ops.pattern('Plain', 1, 1)
 
         for elm in \
-                self.building.list_of_internal_elems_without_rigid_links():
+                self.building.list_of_internal_elems():
             ops.eleLoad('-ele', elm.uniq_id,
                         '-type', '-beamUniform',
                         elm.udl.value[1],
                         elm.udl.value[2],
                         elm.udl.value[0])
         for node in self.building.list_of_primary_nodes() + \
-                self.building.list_of_master_nodes():
+                self.building.list_of_master_nodes() + \
+                self.building.list_of_internal_nodes():
             ops.load(node.uniq_id, *node.load.value)
 
     def _define_sections(self):
@@ -156,7 +183,7 @@ class Analysis:
                                    local_reaction)
 
     def _read_frame_element_forces(self):
-        for elm in self.building.list_of_beamcolumn_elems():
+        for elm in self.building.list_of_internal_elems():
             uid = elm.uniq_id
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.frame_basic_forces,
@@ -245,7 +272,7 @@ class LinearAnalysis(Analysis):
 
     def _define_beamcolumn_elements(self):
         for elm in \
-                self.building.list_of_internal_elems_without_rigid_links():
+                self.building.list_of_internal_elems():
             # geometric transformation
             ops.geomTransf('Linear',
                            elm.uniq_id,
@@ -261,11 +288,20 @@ class LinearAnalysis(Analysis):
         ops.system('BandGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1.0e-12, 10, 3)
+        ops.test('NormDispIncr', 1.0e-9, 10, 3)
         ops.algorithm('Newton')
         ops.integrator('LoadControl', 1.0)
         ops.analysis('Static')
         ops.analyze(1)
+
+
+@dataclass
+class LinearGravityAnalysis(LinearAnalysis):
+    def run(self):
+        self._to_OpenSees_domain()
+        self._define_dead_load()
+        self._run_gravity_analysis()
+        self._read_OpenSees_results()
 
 
 @dataclass
@@ -305,15 +341,6 @@ class ModalAnalysis(LinearAnalysis):
             self.num_modes))
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
         self._read_node_displacements()
-
-
-@dataclass
-class LinearGravityAnalysis(LinearAnalysis):
-    def run(self):
-        self._to_OpenSees_domain()
-        self._define_dead_load()
-        self._run_gravity_analysis()
-        self._read_OpenSees_results()
 
 
 @dataclass
