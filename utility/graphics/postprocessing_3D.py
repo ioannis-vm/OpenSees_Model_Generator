@@ -13,15 +13,17 @@ https://plotly.com/python/reference/
 import plotly.graph_objects as go
 import numpy as np
 from utility.graphics import common, common_3D
+from utility import transformations
 
 
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
-    x_vec = element.local_x_axis_vector()
-    y_vec = element.local_y_axis_vector()
-    z_vec = element.local_z_axis_vector()
+    x_vec = element.x_axis
+    y_vec = element.y_axis
+    z_vec = element.z_axis
 
     # global -> local transformation matrix
-    T_global2local = np.vstack((x_vec, y_vec, z_vec))
+    T_global2local = \
+        transformations.transformation_matrix(x_vec, y_vec, z_vec)
     T_local2global = T_global2local.T
 
     u_i_global = u_i
@@ -36,7 +38,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # discrete sample location parameter
     t = np.linspace(0.00, 1.00, num=num_points)
-    l = element.length()
+    l = element.length_clear()
 
     # shape function matrices
     Nx_mat = np.column_stack((
@@ -88,9 +90,9 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # bending rotation around the local y axis
     r_y_local = Nyz_derivative_mat @ np.array([
-        u_i_local[2],
+        -u_i_local[2],
         r_i_local[1],
-        u_j_local[2],
+        -u_j_local[2],
         r_j_local[1]
     ]) / l
 
@@ -108,12 +110,12 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
 def interp3D_points(element, d_global, r_local, num_points, scaling):
 
     element_point_samples = np.column_stack((
-        np.linspace(element.node_i.coordinates[0],
-                    element.node_j.coordinates[0], num=num_points),
-        np.linspace(element.node_i.coordinates[1],
-                    element.node_j.coordinates[1], num=num_points),
-        np.linspace(element.node_i.coordinates[2],
-                    element.node_j.coordinates[2], num=num_points),
+        np.linspace(element.internal_pt_i[0],
+                    element.internal_pt_j[0], num=num_points),
+        np.linspace(element.internal_pt_i[1],
+                    element.internal_pt_j[1], num=num_points),
+        np.linspace(element.internal_pt_i[2],
+                    element.internal_pt_j[2], num=num_points),
     ))
 
     interpolation_points = element_point_samples + d_global * scaling
@@ -137,19 +139,27 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     k_list = []
     index = 0
     for elm in list_of_frames:
+
+        # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
         u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
         r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
 
+        # transferring them to the clear element ends
+        offset_i = elm.offset_i
+        offset_j = elm.offset_j
+        u_i_o = transformations.transfer_displacement(offset_i, u_i, r_i)
+        u_j_o = transformations.transfer_displacement(offset_j, u_j, r_j)
+
         d_global, r_local = interp3D_deformation(
-            elm, u_i, r_i, u_j, r_j, num_points)
+            elm, u_i_o, r_i, u_j_o, r_j, num_points)
 
         interpolation_points = interp3D_points(
             elm, d_global, r_local, num_points, scaling)
-        x_vec = elm.local_x_axis_vector()
-        y_vec = elm.local_y_axis_vector()
-        z_vec = elm.local_z_axis_vector()
+        x_vec = elm.x_axis
+        y_vec = elm.y_axis
+        z_vec = elm.z_axis
         for i in range(num_points-1):
             loc_i_global = interpolation_points[i, :]
             loc_j_global = interpolation_points[i+1, :]
@@ -240,8 +250,13 @@ def add_data__frames_deformed(analysis,
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
         u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
         r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
+        # transferring them to the clear element ends
+        offset_i = elm.offset_i
+        offset_j = elm.offset_j
+        u_i_o = transformations.transfer_displacement(offset_i, u_i, r_i)
+        u_j_o = transformations.transfer_displacement(offset_j, u_j, r_j)
         d_global, r_local = interp3D_deformation(
-            elm, u_i, r_i, u_j, r_j, num_points)
+            elm, u_i_o, r_i, u_j_o, r_j, num_points)
         interpolation_points = interp3D_points(
             elm, d_global, r_local, num_points, scaling)
         for i in range(len(interpolation_points)-1):
@@ -280,22 +295,29 @@ def add_data__frames_offsets_deformed(analysis,
     y = []
     z = []
     for elm in list_of_beamcolumn_elems:
-        p_i = np.array(elm.node_i.coordinates)
-        p_io = np.array(elm.internal_nodes[0].coordinates)
-        p_j = np.array(elm.node_j.coordinates)
-        p_jo = np.array(elm.internal_nodes[-1].coordinates)
+        p_i = np.array(elm.node_i.coords)
+        p_io = np.array(elm.internal_pt_i)
+        offset_i = elm.offset_i
         u_i = np.array(
             analysis.node_displacements[elm.node_i.uniq_id][step][0:3])
-        u_io = np.array(analysis.node_displacements[
-            elm.internal_nodes[0].uniq_id][step][0:3])
+        r_i = np.array(
+            analysis.node_displacements[elm.node_i.uniq_id][step][3:6])
+        u_io = transformations.transfer_displacement(offset_i, u_i, r_i)
+
+        p_j = np.array(elm.node_j.coords)
+        p_jo = np.array(elm.internal_pt_j)
+        offset_j = elm.offset_j
         u_j = np.array(
             analysis.node_displacements[elm.node_j.uniq_id][step][0:3])
-        u_jo = np.array(analysis.node_displacements[
-            elm.internal_nodes[-1].uniq_id][step][0:3])
+        r_j = np.array(
+            analysis.node_displacements[elm.node_j.uniq_id][step][3:6])
+        u_jo = transformations.transfer_displacement(offset_j, u_j, r_j)
+
         x_i = p_i + u_i * scaling
         x_io = p_io + u_io * scaling
         x_j = p_j + u_j * scaling
         x_jo = p_jo + u_jo * scaling
+
         x.extend((x_i[0], x_io[0], None))
         y.extend((x_i[1], x_io[1], None))
         z.extend((x_i[2], x_io[2], None))
@@ -311,8 +333,8 @@ def add_data__frames_offsets_deformed(analysis,
         "z": z,
         "hoverinfo": "skip",
         "line": {
-            "width": 15,
-            "color": common.BEAM_MESH_COLOR
+            "width": 8,
+            "color": common.OFFSET_COLOR
         }
     })
 
@@ -323,13 +345,13 @@ def add_data__frames_undeformed(dt, list_of_frames):
     z = []
     for elm in list_of_frames:
         x.extend(
-            (elm.node_i.coordinates[0], elm.node_j.coordinates[0], None)
+            (elm.internal_pt_i[0], elm.internal_pt_j[0], None)
         )
         y.extend(
-            (elm.node_i.coordinates[1], elm.node_j.coordinates[1], None)
+            (elm.internal_pt_i[1], elm.internal_pt_j[1], None)
         )
         z.extend(
-            (elm.node_i.coordinates[2], elm.node_j.coordinates[2], None)
+            (elm.internal_pt_i[2], elm.internal_pt_j[2], None)
         )
         dt.append({
             "type": "scatter3d",
@@ -350,7 +372,7 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
     for i, node in enumerate(list_of_nodes):
-        location_data[i, :] = node.coordinates
+        location_data[i, :] = node.coords
         displacement_data[i, :] = \
             analysis.node_displacements[node.uniq_id][step]
     r = np.sqrt(displacement_data[:, 0]**2 +
@@ -370,6 +392,8 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
         'uy: %{customdata[1]:.6g}<br>' +
         'uz: %{customdata[2]:.6g}<br>' +
         'combined: %{customdata[6]:.6g}<br>' +
+        'rx: %{customdata[3]:.6g} (rad)<br>' +
+        'ry: %{customdata[4]:.6g} (rad)<br>' +
         'rz: %{customdata[5]:.6g} (rad)<br>' +
         '<extra>Node %{customdata[7]:d}</extra>',
         "marker": {
@@ -386,9 +410,9 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
 
 
 def add_data__nodes_undeformed(dt, list_of_nodes):
-    x = [node.coordinates[0] for node in list_of_nodes]
-    y = [node.coordinates[1] for node in list_of_nodes]
-    z = [node.coordinates[2] for node in list_of_nodes]
+    x = [node.coords[0] for node in list_of_nodes]
+    y = [node.coords[1] for node in list_of_nodes]
+    z = [node.coords[2] for node in list_of_nodes]
 
     dt.append({
         "type": "scatter3d",
@@ -462,24 +486,24 @@ def deformed_shape(analysis: 'Analysis',
         analysis.building.list_of_internal_elems()
     list_of_nodes = analysis.building.list_of_primary_nodes() + \
         analysis.building.list_of_internal_nodes()
-    list_of_master_nodes = analysis.building.list_of_master_nodes()
+    list_of_parent_nodes = analysis.building.list_of_parent_nodes()
+    list_of_beamcolumn_elems = analysis.building.list_of_beamcolumn_elems()
 
-    if list_of_master_nodes:
-        list_of_nodes.extend(analysis.building.list_of_master_nodes())
+    if list_of_parent_nodes:
+        list_of_nodes.extend(analysis.building.list_of_parent_nodes())
 
     # draw the nodes
     add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling)
 
     # draw the frames
+    add_data__frames_offsets_deformed(
+        analysis, dt, list_of_frames, step, scaling)
     if extrude_frames:
         add_data__extruded_frames_deformed_mesh(
-            analysis, dt, list_of_frames, step, 25, scaling)
+            analysis, dt, list_of_frames, step, 15, scaling)
     else:
-        list_of_beamcolumn_elems = analysis.building.list_of_beamcolumn_elems()
-        add_data__frames_offsets_deformed(
-            analysis, dt, list_of_beamcolumn_elems, step, scaling)
         add_data__frames_deformed(
-            analysis, dt, list_of_frames, step, 25, scaling)
+            analysis, dt, list_of_frames, step, 15, scaling)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
@@ -586,11 +610,11 @@ def basic_forces(analysis: 'Analysis',
 
     for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
 
-        x_vec = element.local_x_axis_vector()
-        y_vec = element.local_y_axis_vector()
-        z_vec = element.local_z_axis_vector()
+        x_vec = element.x_axis
+        y_vec = element.y_axis
+        z_vec = element.z_axis
 
-        i_pos = np.array(element.node_i.coordinates)
+        i_pos = np.array(element.node_i.coords)
 
         T_global2local = np.vstack((x_vec, y_vec, z_vec))
         forces_global = analysis.frame_basic_forces[element.uniq_id][step]
@@ -599,9 +623,9 @@ def basic_forces(analysis: 'Analysis',
 
         ti, myi, mzi = T_global2local @ forces_global[3:6]
 
-        wx, wy, wz = element.udl.value
+        wx, wy, wz = element.udl
 
-        l = element.length()
+        l = element.length_clear()
         t = np.linspace(0.00, l, num=num_points)
 
         nx_vec = - t * wx - ni

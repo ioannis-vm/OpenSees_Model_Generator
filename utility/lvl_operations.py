@@ -24,7 +24,7 @@ def calculate_tributary_areas_from_loops(loops):
             # create it if it doesn't already exist
             areas[index] = value
 
-    def is_in_some_miniloop(halfedge, loops):
+    def is_in_some_subloop(halfedge, loops):
         for loop in loops:
             for other_halfedge in loop:
                 if (other_halfedge.vertex.point ==
@@ -42,30 +42,30 @@ def calculate_tributary_areas_from_loops(loops):
         poly = sg.Polygon([h.vertex.coords for h in loop])
         skel = sg.skeleton.create_interior_straight_skeleton(poly)
 
-        miniloops = []
+        subloops = []
         for halfedge in skel.halfedges:
-            if miniloops:
-                if is_in_some_miniloop(halfedge, miniloops):
+            if subloops:
+                if is_in_some_subloop(halfedge, subloops):
                     continue
-            miniloop = [halfedge]
+            subloop = [halfedge]
             nxt = halfedge.next
             while(nxt.vertex.point != halfedge.vertex.point):
-                miniloop.append(nxt)
+                subloop.append(nxt)
                 nxt = nxt.next
-            miniloops.append(miniloop)
+            subloops.append(subloop)
 
-        miniloop_areas = [float(sg.Polygon(
-            [h.vertex.point for h in miniloop]).area())
-            for miniloop in miniloops]
-        outer = min(miniloop_areas)
-        index = miniloop_areas.index(outer)
-        del miniloops[index]
-        del miniloop_areas[index]
+        subloop_areas = [float(sg.Polygon(
+            [h.vertex.point for h in subloop]).area())
+            for subloop in subloops]
+        outer = min(subloop_areas)
+        index = subloop_areas.index(outer)
+        del subloops[index]
+        del subloop_areas[index]
 
-        for i, miniloop in enumerate(miniloops):
-            area = miniloop_areas[i]
+        for i, subloop in enumerate(subloops):
+            area = subloop_areas[i]
             loop_edges = [h.edge for h in loop]
-            for halfedge in miniloop:
+            for halfedge in subloop:
                 for edge in loop_edges:
                     v_i = sg.Point2(*edge.v_i.coords)
                     v_j = sg.Point2(*edge.v_j.coords)
@@ -92,10 +92,10 @@ def generate_floor_slab_data(lvl):
         edges = []
         coordinate_list = []
         for beam in beams:
-            i_coords = beam.node_i.coordinates[0:2]
+            i_coords = list(beam.node_i.coords[0:2])
             if i_coords not in coordinate_list:
                 coordinate_list.append(i_coords)
-            j_coords = beam.node_j.coordinates[0:2]
+            j_coords = list(beam.node_j.coords[0:2])
             if j_coords not in coordinate_list:
                 coordinate_list.append(j_coords)
         # define Vertices
@@ -104,9 +104,9 @@ def generate_floor_slab_data(lvl):
         # define edges
         beam_to_edge_map = {}
         for beam in beams:
-            i_coords = beam.node_i.coordinates[0:2]
+            i_coords = list(beam.node_i.coords[0:2])
+            j_coords = list(beam.node_j.coords[0:2])
             i_index = coordinate_list.index(i_coords)
-            j_coords = beam.node_j.coordinates[0:2]
             j_index = coordinate_list.index(j_coords)
             edge = Edge(vertices[i_index], vertices[j_index])
             edges.append(edge)

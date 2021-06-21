@@ -16,6 +16,7 @@ NODE_PRIMARY_COLOR = '#7ac4b7'
 NODE_INTERNAL_COLOR = '#a832a8'
 FRAME_COLOR = '#0f24db'
 BEAM_MESH_COLOR = '#6d7aed'
+OFFSET_COLOR = '#a83256'
 
 if __name__ == "__main__":
     pass

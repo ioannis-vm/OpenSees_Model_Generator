@@ -44,3 +44,30 @@ def w_mesh(b, h, tw, tf):
     halfedges = define_halfedges(edges)
     loop = obtain_closed_loops(halfedges)[1][0]
     return(Mesh(loop))
+
+
+def rect_mesh(b, h):
+    """
+    Defines a loop of counterclockwise halfedges
+    that form the shape of the rectangular section with
+    the specified parameters.
+    The origin coincides with the centroid.
+    Input:
+        b: total width
+        h: total height
+    """
+    vertices = [
+        Vertex((b/2., h/2.)),
+        Vertex((-b/2., h/2.)),
+        Vertex((-b/2., -h/2.)),
+        Vertex((b/2., -h/2.))
+    ]
+    edges = [
+        Edge(vertices[0], vertices[1]),
+        Edge(vertices[1], vertices[2]),
+        Edge(vertices[2], vertices[3]),
+        Edge(vertices[3], vertices[0]),
+    ]
+    halfedges = define_halfedges(edges)
+    loop = obtain_closed_loops(halfedges)[1][0]
+    return(Mesh(loop))

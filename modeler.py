@@ -21,16 +21,12 @@ from typing import List
 from itertools import count
 import json
 import numpy as np
+from utility import transformations, common
 from utility.lvl_operations import generate_floor_slab_data
 from utility.lvl_operations import calculate_tributary_areas_from_loops
 from utility.graphics import preprocessing_3D
 from utility.mesher import Mesh, subdivide_polygon
-from utility.mesher_section_gen import w_mesh
-from pdb import set_trace
-
-EPSILON = 1.00E-6
-ALPHA = 10000.00
-G_CONST = 386.22  # in/s**2
+from utility.mesher_section_gen import w_mesh, rect_mesh
 
 _ids = count(0)
 
@@ -52,22 +48,6 @@ def previous_element(lst: list, obj):
     if idx == 0:
         return None
     return lst[idx - 1]
-
-
-def rotation_matrix(axis, theta):
-    """
-    Return the rotation matrix associated with counterclockwise rotation about
-    the given axis by theta radians.
-    Courtesy of
-    https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
-    """
-    a = np.cos(theta / 2.0)
-    b, c, d = -axis * np.sin(theta / 2.0)
-    aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
 
 @dataclass
@@ -129,7 +109,7 @@ class GridLine:
                 [ra_dir[1], -rb_dir[1]]
             ]
         )
-        if np.abs(np.linalg.det(mat)) <= EPSILON:
+        if np.abs(np.linalg.det(mat)) <= common.EPSILON:
             # The lines are parallel
             return None
         # Get the origins
@@ -146,17 +126,17 @@ class GridLine:
         uvvec = np.linalg.solve(mat, bvec)
         # Terminate if the intersection point
         # does not lie on both lines
-        if uvvec[0] < 0 - EPSILON:
+        if uvvec[0] < 0 - common.EPSILON:
             return None
-        if uvvec[1] < 0 - EPSILON:
+        if uvvec[1] < 0 - common.EPSILON:
             return None
-        if uvvec[0] > self.length + EPSILON:
+        if uvvec[0] > self.length + common.EPSILON:
             return None
-        if uvvec[1] > grd.length + EPSILON:
+        if uvvec[1] > grd.length + common.EPSILON:
             return None
         # Otherwise the point is valid
         pt = ra_ori + ra_dir * uvvec[0]
-        return Point([pt[0], pt[1]])
+        return np.array([pt[0], pt[1]])
 
 
 @dataclass
@@ -196,8 +176,9 @@ class GridSystem:
             for j in range(i+1, len(self.grids)):
                 grd2 = self.grids[j]
                 pt = grd1.intersect(grd2)
-                if pt:  # if an intersection point exists
-                    if pt not in pts:  # and is not already in the list
+                if pt is not None:  # if an intersection point exists
+                    # and is not already in the list
+                    if not any(np.array_equal(pt, x) for x in pts):
                         pts.append(pt)
         return pts
 
@@ -213,8 +194,9 @@ class GridSystem:
             if other_grd == grd:
                 continue
             pt = grd.intersect(other_grd)
-            if pt:  # if there is an intersection
-                if pt not in pts:  # and is not already in the list
+            if pt is not None:  # if there is an intersection
+                # and is not already in the list
+                if not any(np.array_equal(pt, x) for x in pts):
                     pts.append(pt)
         return pts
 
@@ -224,76 +206,6 @@ class GridSystem:
         for grd in self.grids:
             out += repr(grd) + "\n"
         return out
-
-
-@dataclass
-class Element:
-    """
-    This is a generic parent element class from which
-    more specific elements will be inherited, like nodes,
-    columns, beams etc. Basically anything that needs
-    to have a unique identifier will be a child
-    of this class.
-    """
-
-    uniq_id: int = field(init=False)
-
-    def __post_init__(self):
-        self.uniq_id = next(_ids)
-
-
-@dataclass
-class Load:
-    """
-    General-purpose class representing a load.
-    For point loads, values represent the load and moments are defined.
-    For uniformly distributed loads, values represent
-    load per unit length, moments are not defined.
-    For surface loads, values represent
-    load per unit area, moments are not defined.
-    Parameters:
-        [x, y, z, (optional): mx, my, mz]
-    """
-
-    value: List[float] = field(default_factory=list)
-
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def __add__(self, other):
-        return Load([sum(x)
-                     for x in zip(self.value, other.value)])
-
-    def __mul__(self, x: float):
-        res = []
-        for i in range(len(self.value)):
-            res.append(self.value[i] * x)
-        return Load(res)
-
-    def add(self, x: List[float]):
-        if len(self.value) != len(x):
-            raise ValueError("Dimensions don't match")
-        res = [sum(x)
-               for x in zip(self.value, x)]
-        self.value = res
-
-
-@dataclass
-class Mass:
-    """
-    Point mass. Defined similarly to `Load`.
-    Parameters
-        [mx, my, mz, (optional): Ix, Iy, Iz]
-    """
-
-    value: List[float] = field()
-
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def __add__(self, other):
-        return Mass([sum(x)
-                     for x in zip(self.value, other.value)])
 
 
 @dataclass
@@ -386,69 +298,27 @@ class Groups:
 
 @dataclass
 @total_ordering
-class Point:
-    """
-    2D/3D Point
-    Parameters:
-        [x, y, (optional): z]
-    """
-    coordinates: List[float]
-
-    def __eq__(self, other):
-        p0 = np.array(self.coordinates)
-        p1 = np.array(other.coordinates)
-        return np.linalg.norm(p0 - p1) < EPSILON
-
-    def __le__(self, other):
-        d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
-        d_other = other.coordinates[1] * ALPHA + other.coordinates[0]
-        return d_self <= d_other
-
-    def __add__(self, other):
-        result = []
-        for i in range(len(self.coordinates)):
-            result.append(self.coordinates[i] + other.coordinates[i])
-        return Point(result)
-
-    def __mul__(self, x: float):
-        result = []
-        for i in range(len(self.coordinates)):
-            result.append(self.coordinates[i] * x)
-        return Point(result)
-
-    __rmul__ = __mul__
-
-    def dist_2D(self, other):
-        dx = other.coordinates[0] - self.coordinates[0]
-        dy = other.coordinates[1] - self.coordinates[1]
-        return np.sqrt(dx*dx + dy*dy)
-
-    def dist_3D(self, other):
-        dx = other.coordinates[0] - self.coordinates[0]
-        dy = other.coordinates[1] - self.coordinates[1]
-        dz = other.coordinates[2] - self.coordinates[2]
-        return np.sqrt(dx*dx + dy*dy + dz*dz)
-
-
-@dataclass(eq=False)
-class Node(Element, Point):
+class Node:
     """
     Node object.
     """
 
+    coords: np.ndarray
     restraint_type: str = field(default="free")
+    mass: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    load: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
 
-    mass: Mass = field(default=Mass([0., 0., 0.]), repr=False)
-    load: Load = field(default=Load([0., 0., 0., 0., 0., 0.]), repr=False)
+    def __post_init__(self):
+        self.uniq_id = next(_ids)
 
     def __eq__(self, other):
-        p0 = np.array(self.coordinates)
-        p1 = np.array(other.coordinates)
-        return np.linalg.norm(p0 - p1) < EPSILON
+        p0 = np.array(self.coords)
+        p1 = np.array(other.coords)
+        return np.linalg.norm(p0 - p1) < common.EPSILON
 
     def __le__(self, other):
-        d_self = self.coordinates[1] * ALPHA + self.coordinates[0]
-        d_other = other.coordinates[1] * ALPHA + other.coordinates[0]
+        d_self = self.coords[1] * common.ALPHA + self.coords[0]
+        d_other = other.coords[1] * common.ALPHA + other.coords[0]
         return d_self <= d_other
 
 
@@ -473,12 +343,6 @@ class Nodes:
                              + repr(node))
         self.node_list.sort()
 
-    def remove(self, node: Node):
-        """
-        Remove a node from the node system
-        """
-        self.node_list.remove(node)
-
     def __repr__(self):
         out = "The level has " + \
             str(len(self.node_list)) + " nodes\n"
@@ -488,7 +352,7 @@ class Nodes:
 
 
 @dataclass
-class Section(Element):
+class Section:
     """
     Section object.
     The axes are defined in the same way as they are
@@ -512,6 +376,9 @@ class Section(Element):
     mesh: Mesh = field(default=None, repr=False)
     properties: dict = field(default=None, repr=False)
 
+    def __post_init__(self):
+        self.uniq_id = next(_ids)
+
     def __eq__(self, other):
         return (self.name == other.name)
 
@@ -525,6 +392,8 @@ class Section(Element):
         (local system)
         such that the element of that section has
         the specified placement point.
+        The offset is expressed as the vector that moves
+        from the placement point to the centroid.
         """
         bbox = self.mesh.bounding_box()
         z_min, y_min, z_max, y_max = bbox.flatten()
@@ -604,7 +473,7 @@ class Sections:
     ####################
 
     def generate_W(self,
-                   name: float,
+                   name: str,
                    material: Material,
                    properties: dict):
         """
@@ -619,9 +488,29 @@ class Sections:
         section = Section('W', name, material, mesh, properties)
         self.add(section)
 
+    def generate_rect(self,
+                      name: str,
+                      material: Material,
+                      properties: dict):
+        """
+        Generate a rectangular section with specified
+        parameters and add it to the sections list.
+        """
+        b = properties['b']
+        h = properties['h']
+        mesh = rect_mesh(b, h)
+        section = Section('rect', name, material, mesh, properties)
+        self.add(section)
+        temp = mesh.geometric_properties()
+        properties['A'] = temp['area']
+        properties['Ix'] = temp['inertia']['ixx']
+        properties['Iy'] = temp['inertia']['iyy']
+        properties['J'] = h * b**3 * \
+            (16./3. - 3.36 * b/h * (1 - b**4/(12.*h**4)))
+
 
 @dataclass
-class Material(Element):
+class Material:
     """
     Material object.
     """
@@ -629,6 +518,9 @@ class Material(Element):
     ops_material: str
     density: float  # mass per unit volume, specified in lb-s**2/in**4
     parameters: dict = field(repr=False)
+
+    def __post_init__(self):
+        self.uniq_id = next(_ids)
 
 
 @dataclass
@@ -691,241 +583,238 @@ class Materials:
 
 
 @dataclass
-class LinearElement(Element):
+class LinearElement:
     """
     Linear finite element class.
+    This class represents the most primitive linear element,
+    on which more complex classes build upon.
+    Attributes:
+        uniq_id (int): unique identifier
+        node_i (Node): Node if end i
+        node_j (Node): Node of end j
+        section (Section): Section of the element.
+        ang: Parameter that controls the rotation of the
+             section around the x-axis
+        offset_i (np.ndarray): Components of the vector that starts
+                               from the primary node i and goes to
+                               the first internal node at the end i.
+                               Expressed in the global coordinate system.
+        offset_j (np.ndarray): Similarly for node j
+        internal_pt_i (np.ndarray): Coordinates of the internal point i
+        internal_pt_j (np.ndarray): Similarly for node j
+        udl (np.ndarray): Array of size 3 containing components of the
+                          uniformly distributed load that is applied
+                          to the clear length of the element, acting
+                          on the local x, y, and z directions, in the
+                          direction of the axes (see Section).
+                          Values are in units of force per unit length.
+        x_axis: Array of size 3 representing the local x axis vector
+                expressed in the global coordinate system.
+        y_axis: (similar)
+        z_axis: (similar).
+                The axes are defined in the same way as they are
+                defined in OpenSees.
+
+                        y(green)
+                        ^         x(red)
+                        :       .
+                        :     .
+                        :   .
+                       ===
+                        | -------> z (blue)
+                       ===
+
     """
 
     node_i: Node
     node_j: Node
+    section: Section
     ang: float = field(default=0.00)
-    udl: Load = field(default_factory=Load)
-    section: Section = field(default=None)
+    offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    udl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
-        self.udl = Load([0., 0., 0.])
+        # local axes with respect to the global coord system
+        self.internal_pt_i = self.node_i.coords + self.offset_i
+        self.internal_pt_j = self.node_j.coords + self.offset_j
+        self.x_axis, self.y_axis, self.z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                self.internal_pt_i, self.internal_pt_j, self.ang)
 
-    def length(self):
-        return np.linalg.norm(
-            np.array(self.node_j.coordinates) -
-            np.array(self.node_i.coordinates))
+    def length_clear(self):
+        """
+        Computes the clear length of the element, excluding the offsets.
+        Returns:
+            float: distance
+        """
+        p_i = self.node_i.coords + self.offset_i
+        p_j = self.node_j.coords + self.offset_j
+        return np.linalg.norm(p_j - p_i)
 
-    def local_x_axis_vector(self):
+    def add_udl_glob(self, udl: np.ndarray):
         """
-        Calculates the local x axis of the linear element.
-        This axis is the length-wise axis of the element
-        """
-        x_vec = np.array([
-            self.node_j.coordinates[0] - self.node_i.coordinates[0],
-            self.node_j.coordinates[1] - self.node_i.coordinates[1],
-            self.node_j.coordinates[2] - self.node_i.coordinates[2]
-        ])
-        x_vec = x_vec / np.linalg.norm(x_vec)
-        return x_vec
-
-    def local_y_axis_vector(self):
-        """
-        Calculates the local y axis of the linear element.
-        """
-        x_vec = self.local_x_axis_vector()
-        z_vec = self.local_z_axis_vector()
-        return np.cross(z_vec, x_vec)
-
-    def local_z_axis_vector(self):
-        """
-        Calculates the local z axis of the linear element.
-        For horizontal beams, this axis is horizontal
-        (considering the global coordinate system).
-        """
-        x_vec = self.local_x_axis_vector()
-        diff = np.abs(
-            np.linalg.norm(
-                x_vec - np.array([0.00, 0.00, -1.00])
-            )
-        )
-        if diff < EPSILON:
-            # vertical case
-            z_vec = np.array([np.cos(self.ang), np.sin(self.ang), 0.0])
-        else:
-            # not vertical case
-            up_direction = np.array([0.0, 0.0, 1.0])
-            # orthogonalize with respect to x_vec
-            y_vec = up_direction - np.dot(up_direction, x_vec)*x_vec
-            # ..and normalize
-            y_vec = y_vec / np.linalg.norm(y_vec)
-            # determine z vector from the cross-product
-            z_vec = np.cross(x_vec, y_vec)
-            # rotate by `ang` around the x axis
-            z_vec = np.dot(rotation_matrix(x_vec, self.ang), z_vec)
-        return z_vec
-
-    def add_udl_from_global_system(self, udl: Load):
-        """
-        Adds a uniformly distributed load defined
+        Adds a uniformly distributed load
+        to the existing udl of the element.
+        The load is defined
         with respect to the global coordinate system
-        of the building, by first converting it to the
-        local coordinate system of the element.
+        of the building, and it is converted to the
+        local coordinate system prior to adding it.
+        Args:
+            udl (np.ndarray): Array of size 3 containing components of the
+                              uniformly distributed load that is applied
+                              to the clear length of the element, acting
+                              on the global x, y, and z directions, in the
+                              direction of the global axes.
         """
-        if self.length() == 0:
-            return
-        forces_global = np.array((udl * self.length()).value)
-        local_x = self.local_x_axis_vector()
-        local_y = self.local_y_axis_vector()
-        local_z = self.local_z_axis_vector()
-        forces_local = Load([
-            np.dot(forces_global, local_x),
-            np.dot(forces_global, local_y),
-            np.dot(forces_global, local_z)
-        ])
-        udl_local = forces_local * (1.00/self.length())
+        T_mat = transformations.transformation_matrix(
+            self.x_axis, self.y_axis, self.z_axis)
+        udl_local = T_mat @ udl
         self.udl += udl_local
 
 
 @dataclass
-class Connection:
+@total_ordering
+class BeamColumn:
     """
-    Represents connections between the internal ends
-    of BeamColumn elements with the primary nodes.
+    A BeamColumn element here represents a collection
+    of linear elements connected in series.
+    Attributes:
+        uniq_id (int): unique identifier
+        node_i (int): primary node for end i
+        node_j (int): primary node for end j
+        ang: Parameter that controls the rotation of the
+             section around the x-axis
+        section (Section): Section of the element.
+        n_sub (int): Number of linear elements between
+                     the primary nodes node_i and node_j.
+        placement (str): String flag that controls the
+                         placement point of the element relative
+                         to its section.
+        offset_i (list[float]): Components of the vector that starts
+                                from the primary node i and goes to
+                                the first internal node at the end i.
+                                Expressed in the global coordinate system.
+        offset_j (list[float]): Similarly for node j.
+        internal_pt_i (np.ndarray): Coordinates of the internal point i
+        internal_pt_j (np.ndarray): Similarly for node j
+        internal_nodes (list[Node]): Structural nodes needed to connect
+                                     internal elements if more than one
+                                     internal elements are present
+                                     (n_sub > 1).
+        internal_elems (list[LinearElement]): Internal linear elements.
     """
-    internal_node: Node
-    primary_node: Node
-    c_type: str = field(default='fixed_zerolength')
+
+    node_i: Node
+    node_j: Node
+    ang: float
+    section: Section
+    n_sub: int
+    placement: str = field(default="centroid")
+    offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
 
     def __post_init__(self):
-        if self.c_type not in [
-                'fixed_zerolength',
-                'rigid_link']:
-            raise ValueError("Unsupported connection type")
 
-
-@dataclass
-@total_ordering
-class BeamColumn(Element):
-
-    def __init__(self,
-                 node_i: Node,
-                 node_j: Node,
-                 ang: float = 0.00,
-                 section: Section = None,
-                 n_sub: int = 1,
-                 placement="centroid",
-                 dx_i: float = 0.00,
-                 dx_j: float = 0.00,
-                 connection_i_type: str = "fixed",
-                 connection_j_type: str = "fixed"):
         self.uniq_id = next(_ids)
-        self.node_i = node_i
-        self.node_j = node_j
-        self.ang = ang
-        self.section = section
-        self.n_sub = n_sub
-        self.placement = placement
-        self.dx_i = dx_i
-        self.dx_j = dx_j
+
+        p_i = self.node_i.coords + self.offset_i
+        p_j = self.node_j.coords + self.offset_j
+
+        # obtain offset from section (local system)
+        dz, dy = self.section.retrieve_offset(self.placement)
+        sec_offset_local = np.array([0.00, dy, dz])
+        # retrieve local coordinate system
+        x_axis, y_axis, z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                p_i, p_j, self.ang)
+        # add the offset due to the section's placement point
+        # to the user defined offsets
+        t_glob_to_loc = transformations.transformation_matrix(
+            x_axis, y_axis, z_axis)
+        t_loc_to_glob = t_glob_to_loc.T
+        sec_offset_global = t_loc_to_glob @ sec_offset_local
+        p_i += sec_offset_global
+        p_j += sec_offset_global
+        self.offset_i += sec_offset_global
+        self.offset_j += sec_offset_global
+
+        internal_pt_coords = np.linspace(
+            tuple(p_i), tuple(p_j), num=self.n_sub+1)
+        self.internal_pt_i = internal_pt_coords[0]
+        self.internal_pt_j = internal_pt_coords[-1]
         self.internal_nodes = []
         self.internal_elems = []
-        # obtain offset from section
-        dz, dy = self.section.retrieve_offset(self.placement)
-        # retrieve local coordinate system
-        # using a dummy linearelement
-        dummy_elm = LinearElement(
-            self.node_i, self.node_j, self.ang)
-        x_vec = dummy_elm.local_x_axis_vector()
-        y_vec = dummy_elm.local_y_axis_vector()
-        z_vec = dummy_elm.local_z_axis_vector()
-        # length
-        l = dummy_elm.length()
-        # transformation matrix
-        T = np.column_stack((x_vec, y_vec, z_vec))
-        # position of node i
-        p_i = np.array(self.node_i.coordinates)
-        # vectors that move away from that position,
-        # going towards node j...
-        lala = np.vstack((np.linspace(
-            self.dx_i, l-self.dx_j, num=self.n_sub+1),
-            np.full(self.n_sub+1, dy),
-            np.full(self.n_sub+1, dz)))  # I'm terrible in naming things
-        # positions of the points defined by lala
-        coords = T @ lala + np.column_stack([p_i]*(self.n_sub+1))
-        # define internal nodes at those positions
-        for i_node in range(self.n_sub+1):
-            node = Node(coords[:, i_node])
-            self.internal_nodes.append(node)
+        # internal nodes (if required)
+        if self.n_sub > 1:
+            for i in range(1, len(internal_pt_coords)-1):
+                self.internal_nodes.append(Node(internal_pt_coords[i]))
         # internal elements
-        for k in range(self.n_sub):
-            node_i = self.internal_nodes[k]
-            node_j = self.internal_nodes[k+1]
-            elm = LinearElement(
-                node_i, node_j, self.ang, section=self.section)
-            self.internal_elems.append(elm)
-        # connections
-        if connection_i_type == "fixed":
-            if self.node_i == self.internal_nodes[0]:
-                c_type = "fixed_zerolength"
+        for i in range(self.n_sub):
+            if i == 0:
+                node_i = self.node_i
+                ioffset = self.offset_i
             else:
-                c_type = "rigid_link"
-            self.connection_i = Connection(self.internal_nodes[0],
-                                           self.node_i,
-                                           c_type)
-        else:
-            raise ValueError("Unsupported connection type")
-        if connection_j_type == "fixed":
-            if self.node_j == self.internal_nodes[-1]:
-                c_type = "fixed_zerolength"
+                node_i = self.internal_nodes[i-1]
+                ioffset = np.array([0.00, 0.00, 0.00])
+            if i == self.n_sub-1:
+                node_j = self.node_j
+                joffset = self.offset_j
             else:
-                c_type = "rigid_link"
-            self.connection_j = Connection(self.internal_nodes[-1],
-                                           self.node_j,
-                                           c_type)
-        else:
-            raise ValueError("Unsupported connection type")
+                node_j = self.internal_nodes[i]
+                joffset = np.array([0.00, 0.00, 0.00])
+            self.internal_elems.append(
+                LinearElement(node_i, node_j, self.section, self.ang,
+                              ioffset, joffset))
 
-    def length(self):
-        """
-        Returns the length of the element obtained using the
-        primary nodes (including the rigid offsets).
-        This length is used to apply uniformly distributed
-        loads on the element.
-        """
-        return np.linalg.norm(
-            np.array(self.node_i.coordinates) -
-            np.array(self.node_j.coordinates))
+    def length_clear(self):
+        pt_i = self.internal_pt_i
+        pt_j = self.internal_pt_j
+        return np.linalg.norm(pt_j - pt_i)
 
-    def add_udl_from_global_system(self, udl: Load, include_offsets=True):
+    def add_udl_glob(self, udl: np.ndarray):
         """
-        Adds a uniformly distributed load defined
+        Adds a uniformly distributed load
+        to the existing udl of the element.
+        The load is defined
         with respect to the global coordinate system
-        of the building, by first converting it to the
-        local coordinate system of the internal elements.
-        If offsets are included, then
-        the load is applied to all elements
-        as well as the rigid offsets at the ends.
-        This is acomplished by applying a point load
-        on the external connection nodes.
-        For self-weight, the offsets are not included.
+        of the building, and it is converted to the
+        local coordinate system prior to adding it.
+        Args:
+            udl (np.ndarray): Array of size 3 containing components of the
+                              uniformly distributed load that is applied
+                              to the clear length of the element, acting
+                              on the global x, y, and z directions, in the
+                              direction of the global axes.
         """
         for i, elm in enumerate(self.internal_elems):
-            elm.add_udl_from_global_system(udl)
-        # TODO
-        # do we have to account for the UDL that should go directly
-        # to the connected node?
+            elm.add_udl_glob(udl)
 
     def apply_self_weight_and_mass(self, multiplier: float):
+        """
+        Applies self-weight as a and distributes mass
+        by lumping it at the nodes where the ends of the
+        internal elements are connected.
+        Args:
+            multiplier: A parameter that is multiplied to the
+                        automatically obtained self-weight and self-mass.
+        """
         if multiplier == 0.:
             return
         cross_section_area = self.section.properties["A"]
         mass_per_length = cross_section_area * \
             self.section.material.density              # lb-s**2/in**2
-        weight_per_length = mass_per_length * G_CONST  # lb/in
+        weight_per_length = mass_per_length * common.G_CONST  # lb/in
         mass_per_length *= multiplier
         weight_per_length *= multiplier
-        self.add_udl_from_global_system(
-            Load([0., 0., -weight_per_length]), include_offsets=False)
+        self.add_udl_glob(
+            np.array([0., 0., -weight_per_length]))
         for sub_elm in self.internal_elems:
-            mass = mass_per_length * sub_elm.length() / 2.00  # lb-s**2/in
-            sub_elm.node_i.mass += Mass([mass, mass, mass, 0., 0., 0.])
-            sub_elm.node_j.mass += Mass([mass, mass, mass, 0., 0., 0.])
+            mass = mass_per_length * \
+                sub_elm.length_clear() / 2.00  # lb-s**2/in
+            sub_elm.node_i.mass += np.array([mass, mass, mass])
+            sub_elm.node_j.mass += np.array([mass, mass, mass])
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -935,7 +824,7 @@ class BeamColumn(Element):
         return self.node_i <= other.node_i
 
 
-@ dataclass
+@dataclass
 class BeamColumns:
     """
     This class is a collector for columns, and provides
@@ -960,8 +849,8 @@ class BeamColumns:
         return out
 
 
-@ dataclass
-@ total_ordering
+@dataclass
+@total_ordering
 class Level:
     """
     Individual building floor level.
@@ -977,7 +866,7 @@ class Level:
     columns: BeamColumns = field(default_factory=BeamColumns)
     beams: BeamColumns = field(default_factory=BeamColumns)
     slab_data: dict = field(default=None)
-    master_node: Node = field(default=None)
+    parent_node: Node = field(default=None)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -1001,8 +890,8 @@ class Level:
         Returns the node that occupies a given point
         at the current level, if it exists
         """
-        candidate_node = Node([x_coord, y_coord,
-                               self.elevation], self.restraint)
+        candidate_node = Node(np.array([x_coord, y_coord,
+                                        self.elevation]), self.restraint)
         for other_node in self.nodes_primary.node_list:
             if other_node == candidate_node:
                 return other_node
@@ -1052,11 +941,11 @@ class Level:
         return primary + internal
 
 
-@ dataclass
+@dataclass
 class Levels:
     """
     Stores the floor levels of a building.
-    No two floor levels can have the same height (no multi-tower support)
+    No two floor levels can have the same height(no multi-tower support)
     """
 
     level_list: list[Level] = field(default_factory=list)
@@ -1068,7 +957,7 @@ class Levels:
         elevations.
 
         Parameters:
-            lvl (Level): the level to add
+            lvl(Level): the level to add
         """
         # Verify level name is unique
         if lvl in self.level_list:
@@ -1105,7 +994,7 @@ class Levels:
 
     def set_active(self, names: List[str]):
         """
-        Sets the active levels (one or more).
+        Sets the active levels(one or more).
         At least one level must be active when defining elements.
         Any element addition or modification call will
         only affect the active levels.
@@ -1132,7 +1021,7 @@ class Levels:
         return out
 
 
-@ dataclass
+@dataclass
 class Building:
     """
     This class manages building objects
@@ -1184,7 +1073,7 @@ class Building:
                                labels: List[str]):
         """
         Add sections from a section database json file.
-        Only the specified sections (given the labels) are added.
+        Only the specified sections(given the labels) are added.
         """
         if not self.materials.active:
             raise ValueError("No active material specified")
@@ -1241,14 +1130,11 @@ class Building:
     def add_column_at_point(self,
                             x: float,
                             y: float,
-                            ang=0.00,
                             n_sub=1):
         """
         Adds a column at the given X, Y location at all the active levels.
         Existing nodes are used, otherwise they are created.
         """
-        if ang == 0.00:
-            ang = self.active_angle
         if not self.sections.active:
             raise ValueError("No active section")
             # TODO change to using assert, + do the same
@@ -1260,7 +1146,7 @@ class Building:
                 # create it if it does not exist
                 if not top_node:
                     top_node = Node(
-                        [x, y, level.elevation], level.restraint)
+                        np.array([x, y, level.elevation]), level.restraint)
                     level.nodes_primary.add(top_node)
                 # check to see if bottom node exists
                 bot_node = level.previous_lvl.look_for_node(
@@ -1268,70 +1154,61 @@ class Building:
                 # create it if it does not exist
                 if not bot_node:
                     bot_node = Node(
-                        [x, y, level.previous_lvl.elevation],
+                        np.array([x, y, level.previous_lvl.elevation]),
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
                 # add the column connecting the two nodes
                 level.columns.add(
                     BeamColumn(node_i=top_node,
                                node_j=bot_node,
-                               ang=ang,
+                               ang=self.active_angle,
                                section=self.sections.active,
                                n_sub=n_sub,
-                               placement=self.active_placement
+                               placement=self.active_placement,
+                               offset_i=np.array((0., 0., 0.)).copy(),
+                               offset_j=np.array((0., 0., 0.)).copy()
                                ))
-                # TODO Change n_sub to 1 once it is working
 
     def add_beam_at_points(self,
-                           start: Point,
-                           end: Point,
-                           angle=0.00,
+                           start: np.ndarray,
+                           end: np.ndarray,
                            n_sub=1,
-                           connection="naive"):
+                           offset_i=np.zeros(shape=3),
+                           offset_j=np.zeros(shape=3)):
         """
         Adds a beam connecting the given points
         at all the active levels.
         """
-        if angle == 0.00:
-            angle = self.active_angle
         if not self.sections.active:
             raise ValueError("No active section specified")
 
         for level in self.levels.active:
             # check to see if start node exists
-            start_node = level.look_for_node(*start.coordinates)
-            if start_node:
-                # if it exists, check if a column exists there
-                col = level.look_for_column(start_node)
-                if col:
-                    # if a column exists there, get the offset
-                    p_j = np.array(end.coordinates)
-                    p_i = np.array(start.coordinates)
-                    diff = p_j - p_i
-                    diff = diff / np.linalg.norm(diff)
-
+            start_node = level.look_for_node(*start)
             # create it if it does not exist
             if not start_node:
                 start_node = Node(
-                    [*start.coordinates, level.elevation], level.restraint)
+                    np.array([*start, level.elevation]), level.restraint)
                 level.nodes_primary.add(start_node)
             # check to see if end node exists
-            end_node = level.look_for_node(*end.coordinates)
+            end_node = level.look_for_node(*end)
             # create it if it does not exist
             if not end_node:
                 end_node = Node(
-                    [*end.coordinates, level.elevation], level.restraint)
+                    np.array([*end, level.elevation]), level.restraint)
                 level.nodes_primary.add(end_node)
             # add the beam connecting the two nodes
+            # avoid making a reference to the same arrays for all beams
+            offset_i = offset_i.copy()
+            offset_j = offset_j.copy()
             level.beams.add(BeamColumn(node_i=start_node,
                                        node_j=end_node,
-                                       ang=angle,
+                                       ang=self.active_angle,
                                        section=self.sections.active,
                                        n_sub=n_sub,
                                        placement=self.active_placement,
-                                       dx_i=50,
-                                       dx_j=50))
-            # TODO Change n_sub to 1 once it is working
+                                       offset_i=offset_i,
+                                       offset_j=offset_j))
 
     def add_columns_from_grids(self, n_sub=1):
         """
@@ -1342,10 +1219,10 @@ class Building:
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
             self.add_column_at_point(
-                pt.coordinates[0], pt.coordinates[1], ang=self.active_angle,
+                *pt,
                 n_sub=n_sub)
 
-    def add_beams_from_grids(self, n_sub=1, connection='naive'):
+    def add_beams_from_grids(self, n_sub=1):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect. For each gridline, beams are placed
@@ -1358,10 +1235,7 @@ class Building:
                 self.add_beam_at_points(
                     isect_pts[i],
                     isect_pts[i+1],
-                    angle=self.active_angle,
-                    n_sub=n_sub,
-                    connection=connection
-                )
+                    n_sub=n_sub)
 
     #############################################
     # Set active methods - alter active objects #
@@ -1443,12 +1317,12 @@ class Building:
                 list_of_nodes.append(node)
         return list_of_nodes
 
-    def list_of_master_nodes(self):
-        list_of_master_nodes = []
+    def list_of_parent_nodes(self):
+        list_of_parent_nodes = []
         for lvl in self.levels.level_list:
-            if lvl.master_node:
-                list_of_master_nodes.append(lvl.master_node)
-        return list_of_master_nodes
+            if lvl.parent_node:
+                list_of_parent_nodes.append(lvl.parent_node)
+        return list_of_parent_nodes
 
     def list_of_internal_nodes(self):
         list_of_internal_nodes = []
@@ -1460,7 +1334,7 @@ class Building:
     def list_of_all_nodes(self):
         return self.list_of_primary_nodes() + \
             self.list_of_internal_nodes() + \
-            self.list_of_master_nodes()
+            self.list_of_parent_nodes()
 
     def list_of_connections(self):
         bc_elems = self.list_of_beamcolumn_elems()
@@ -1479,7 +1353,7 @@ class Building:
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():
-            p = np.array(node.coordinates)
+            p = np.array(node.coords)
             p_min = np.minimum(p_min, p)
             p_max = np.maximum(p_max, p)
         ref_len = np.max(p_max - p_min)
@@ -1506,9 +1380,9 @@ class Building:
                     for beam in lvl.beams.element_list:
                         edge_id = beam_to_edge_map[beam.uniq_id]
                         udlZ_val = -areas[edge_id] * \
-                            lvl.surface_DL / beam.length()
-                        beam.add_udl_from_global_system(
-                            Load([0.00, 0.00, udlZ_val]))
+                            lvl.surface_DL / beam.length_clear()
+                        beam.add_udl_glob(
+                            np.array([0.00, 0.00, udlZ_val]))
         # ~~~
         self.levels.active = []
         self.groups.active = []
@@ -1523,49 +1397,52 @@ class Building:
                 # distribute floor loads on beams
                 distribute_load_on_beams(lvl)
             # linear element self-weight
-            for elm in lvl.beams.element_list + lvl.columns.element_list:
-                elm.apply_self_weight_and_mass(1.00)
+            if self_weight:
+                for elm in lvl.beams.element_list + lvl.columns.element_list:
+                    elm.apply_self_weight_and_mass(1.00)
         if assume_floor_slabs:
             for lvl in self.levels.level_list:
                 # TODO this should be using a bunch of level methods
-                # accumulate all the mass at the master nodes
+                # accumulate all the mass at the parent nodes
                 if lvl.restraint != "free":
                     continue
                 floor_mass = -lvl.surface_DL * \
-                    lvl.slab_data['properties']['area'] / G_CONST
+                    lvl.slab_data['properties']['area'] / common.G_CONST
                 assert(floor_mass >= 0.00),\
                     "Error: floor area properties\n" + \
                     "Overall floor area should be negative (by convention)."
                 floor_centroid = lvl.slab_data['properties']['centroid']
-                floor_mass_inertia = lvl.slab_data['properties']['inertia']['ir_mass']\
+                floor_mass_inertia = \
+                    lvl.slab_data['properties']['inertia']['ir_mass']\
                     * floor_mass
-                self_mass_centroid = Point([0.00, 0.00])  # excluding floor
+                self_mass_centroid = np.array([0.00, 0.00])  # excluding floor
                 total_self_mass = 0.00
                 for node in lvl.list_of_all_nodes():
-                    self_mass_centroid += node * node.mass.value[0]
-                    total_self_mass += node.mass.value[0]
+                    self_mass_centroid += node.coords[0:2] * node.mass[0]
+                    total_self_mass += node.mass[0]
                 self_mass_centroid = self_mass_centroid * \
                     (1.00/total_self_mass)
                 total_mass = total_self_mass + floor_mass
                 # combined
                 centroid = [
-                    (self_mass_centroid.coordinates[0] * total_self_mass +
+                    (self_mass_centroid[0] * total_self_mass +
                      floor_centroid[0] * floor_mass) / total_mass,
-                    (self_mass_centroid.coordinates[1] * total_self_mass +
+                    (self_mass_centroid[1] * total_self_mass +
                      floor_centroid[1] * floor_mass) / total_mass
                 ]
-                lvl.master_node = Node(
-                    [centroid[0], centroid[1], lvl.elevation], "master")
-                lvl.master_node.mass = Mass([total_mass,
-                                             total_mass,
-                                             0.,
-                                             0., 0., 0.])
-                lvl.master_node.mass.value[5] = floor_mass_inertia
+                lvl.parent_node = Node(
+                    np.array([centroid[0], centroid[1],
+                              lvl.elevation]), "parent")
+                lvl.parent_node.mass = np.array([total_mass,
+                                                 total_mass,
+                                                 0.,
+                                                 0., 0., 0.])
+                lvl.parent_node.mass[5] = floor_mass_inertia
                 for node in lvl.list_of_all_nodes():
-                    lvl.master_node.mass.value[5] += node.mass.value[0] * \
-                        lvl.master_node.dist_2D(node)**2
-                    node.mass.value[0] = 0.
-                    node.mass.value[1] = 0.
+                    lvl.parent_node.mass[5] += node.mass[0] * \
+                        np.linalg.norm(lvl.parent_node.coords - node.coords)**2
+                    node.mass[0] = 0.
+                    node.mass[1] = 0.
 
     def level_masses(self):
         # TODO Fix this
@@ -1576,9 +1453,9 @@ class Building:
             total_mass = 0.00
             for node in lvl.nodes_primary.node_list:
                 if node.restraint_type == "free":
-                    total_mass += node.mass.value[0]
-            if lvl.master_node:
-                total_mass += lvl.master_node.mass.value[0]
+                    total_mass += node.mass[0]
+            if lvl.parent_node:
+                total_mass += lvl.parent_node.mass[0]
             level_masses[i] = total_mass
         return level_masses
 

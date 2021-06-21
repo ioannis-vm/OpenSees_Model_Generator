@@ -34,16 +34,16 @@ def add_data__grids(dt, building):
 
 
 def add_data__nodes(dt, list_of_nodes):
-    x = [node.coordinates[0] for node in list_of_nodes]
-    y = [node.coordinates[1] for node in list_of_nodes]
-    z = [node.coordinates[2] for node in list_of_nodes]
+    x = [node.coords[0] for node in list_of_nodes]
+    y = [node.coords[1] for node in list_of_nodes]
+    z = [node.coords[2] for node in list_of_nodes]
     customdata = []
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
             (node.uniq_id,
-             *node.mass.value,
-             *node.load.value
+             *node.mass,
+             *node.load
              )
         )
 
@@ -77,65 +77,65 @@ def add_data__nodes(dt, list_of_nodes):
     })
 
 
-def add_data__master_nodes(dt, list_of_nodes):
+# def add_data__parent_nodes(dt, list_of_nodes):
 
-    x = [node.coordinates[0] for node in list_of_nodes]
-    y = [node.coordinates[1] for node in list_of_nodes]
-    z = [node.coordinates[2] for node in list_of_nodes]
-    customdata = []
-    restraint_types = [node.restraint_type for node in list_of_nodes]
-    for node in list_of_nodes:
-        customdata.append(
-            (node.uniq_id,
-             *node.mass.value,
-             *node.load.value
-             )
-        )
+#     x = [node.coordinates[0] for node in list_of_nodes]
+#     y = [node.coordinates[1] for node in list_of_nodes]
+#     z = [node.coordinates[2] for node in list_of_nodes]
+#     customdata = []
+#     restraint_types = [node.restraint_type for node in list_of_nodes]
+#     for node in list_of_nodes:
+#         customdata.append(
+#             (node.uniq_id,
+#              *node.mass.value,
+#              *node.load.value
+#              )
+#         )
 
-    customdata = np.array(customdata, dtype='object')
-    dt.append({
-        "type": "scatter3d",
-        "mode": "markers",
-        "x": x,
-        "y": y,
-        "z": z,
-        "customdata": customdata,
-        "text": restraint_types,
-        "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
-        'Restraint: %{text}<br>' +
-        'Mass: (%{customdata[1]:.3g}, ' +
-        '%{customdata[2]:.3g}, %{customdata[3]:.3g}, ' +
-        '%{customdata[4]:.3g}, %{customdata[5]:.3g}, ' +
-        '%{customdata[6]:.3g})<br>' +
-        'Load: (%{customdata[7]:.3g}, ' +
-        '%{customdata[8]:.3g}, %{customdata[9]:.3g}, ' +
-        '%{customdata[10]:.3g}, %{customdata[11]:.3g}, ' +
-        '%{customdata[12]:.3g})' +
-        '<extra>Master Node: %{customdata[0]:d}</extra>',
-        "marker": {
-            "symbol": [common_3D.node_marker[node.restraint_type][0]
-                       for node in list_of_nodes],
-            "color": common.NODE_PRIMARY_COLOR,
-            "size": [common_3D.node_marker[node.restraint_type][1]
-                     for node in list_of_nodes],
-            "line": {
-                "color": common.NODE_PRIMARY_COLOR,
-                "width": 4}
-        }
-    })
+#     customdata = np.array(customdata, dtype='object')
+#     dt.append({
+#         "type": "scatter3d",
+#         "mode": "markers",
+#         "x": x,
+#         "y": y,
+#         "z": z,
+#         "customdata": customdata,
+#         "text": restraint_types,
+#         "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+#         'Restraint: %{text}<br>' +
+#         'Mass: (%{customdata[1]:.3g}, ' +
+#         '%{customdata[2]:.3g}, %{customdata[3]:.3g}, ' +
+#         '%{customdata[4]:.3g}, %{customdata[5]:.3g}, ' +
+#         '%{customdata[6]:.3g})<br>' +
+#         'Load: (%{customdata[7]:.3g}, ' +
+#         '%{customdata[8]:.3g}, %{customdata[9]:.3g}, ' +
+#         '%{customdata[10]:.3g}, %{customdata[11]:.3g}, ' +
+#         '%{customdata[12]:.3g})' +
+#         '<extra>Parent Node: %{customdata[0]:d}</extra>',
+#         "marker": {
+#             "symbol": [common_3D.node_marker[node.restraint_type][0]
+#                        for node in list_of_nodes],
+#             "color": common.NODE_PRIMARY_COLOR,
+#             "size": [common_3D.node_marker[node.restraint_type][1]
+#                      for node in list_of_nodes],
+#             "line": {
+#                 "color": common.NODE_PRIMARY_COLOR,
+#                 "width": 4}
+#         }
+#     })
 
 
 def add_data__internal_nodes(dt, list_of_nodes):
-    x = [node.coordinates[0] for node in list_of_nodes]
-    y = [node.coordinates[1] for node in list_of_nodes]
-    z = [node.coordinates[2] for node in list_of_nodes]
+    x = [node.coords[0] for node in list_of_nodes]
+    y = [node.coords[1] for node in list_of_nodes]
+    z = [node.coords[2] for node in list_of_nodes]
     customdata = []
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
             (node.uniq_id,
-             *node.mass.value,
-             *node.load.value
+             *node.mass,
+             *node.load
              )
         )
     dt.append({
@@ -165,21 +165,21 @@ def add_data__internal_nodes(dt, list_of_nodes):
 
 
 def add_data__diaphragm_lines(dt, lvl):
-    if not lvl.master_node:
+    if not lvl.parent_node:
         return
-    mnode = lvl.master_node
+    mnode = lvl.parent_node
     x = []
     y = []
     z = []
     for node in lvl.nodes_primary.node_list:
         x.extend(
-            (node.coordinates[0], mnode.coordinates[0], None)
+            (node.coords[0], mnode.coords[0], None)
         )
         y.extend(
-            (node.coordinates[1], mnode.coordinates[1], None)
+            (node.coords[1], mnode.coords[1], None)
         )
         z.extend(
-            (node.coordinates[2], mnode.coordinates[2], None)
+            (node.coords[2], mnode.coords[2], None)
         )
     dt.append({
         "type": "scatter3d",
@@ -205,22 +205,22 @@ def add_data__frames(dt, list_of_frames):
     for elm in list_of_frames:
         section_names.extend([elm.section.name]*3)
         x.extend(
-            (elm.node_i.coordinates[0], elm.node_j.coordinates[0], None)
+            (elm.internal_pt_i[0], elm.internal_pt_j[0], None)
         )
         y.extend(
-            (elm.node_i.coordinates[1], elm.node_j.coordinates[1], None)
+            (elm.internal_pt_i[1], elm.internal_pt_j[1], None)
         )
         z.extend(
-            (elm.node_i.coordinates[2], elm.node_j.coordinates[2], None)
+            (elm.internal_pt_i[2], elm.internal_pt_j[2], None)
         )
         customdata.append(
             (elm.uniq_id,
-             *elm.udl.value,
+             *elm.udl,
              elm.node_i.uniq_id)
         )
         customdata.append(
             (elm.uniq_id,
-             *elm.udl.value,
+             *elm.udl,
              elm.node_j.uniq_id)
         )
         customdata.append(
@@ -248,6 +248,41 @@ def add_data__frames(dt, list_of_frames):
     })
 
 
+def add_data__frame_offsets(dt, list_of_elems):
+    if not list_of_elems:
+        return
+
+    x = []
+    y = []
+    z = []
+
+    for elm in list_of_elems:
+        p_i = elm.node_i.coords
+        p_io = elm.internal_pt_i
+        p_j = elm.node_j.coords
+        p_jo = elm.internal_pt_j
+
+        x.extend((p_i[0], p_io[0], None))
+        y.extend((p_i[1], p_io[1], None))
+        z.extend((p_i[2], p_io[2], None))
+        x.extend((p_j[0], p_jo[0], None))
+        y.extend((p_j[1], p_jo[1], None))
+        z.extend((p_j[2], p_jo[2], None))
+
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 8,
+            "color": common.OFFSET_COLOR
+        }
+    })
+
+
 def add_data__frame_axes(dt, list_of_frames, ref_len):
     if not list_of_frames:
         return
@@ -257,12 +292,12 @@ def add_data__frame_axes(dt, list_of_frames, ref_len):
     z = []
     colors = []
     for elm in list_of_frames:
-        x_vec = elm.local_x_axis_vector()
-        y_vec = elm.local_y_axis_vector()
-        z_vec = elm.local_z_axis_vector()
-        l = elm.length()
-        i_pos = np.array(elm.node_i.coordinates)
-        mid_pos = i_pos + x_vec * l/2.00
+        x_vec = elm.x_axis
+        y_vec = elm.y_axis
+        z_vec = elm.z_axis
+        l_clear = elm.length_clear()
+        i_pos = np.array(elm.internal_pt_i)
+        mid_pos = i_pos + x_vec * l_clear/2.00
         x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))
         y.extend((mid_pos[1], mid_pos[1]+x_vec[1]*s, None))
         z.extend((mid_pos[2], mid_pos[2]+x_vec[2]*s, None))
@@ -289,6 +324,43 @@ def add_data__frame_axes(dt, list_of_frames, ref_len):
     })
 
 
+def add_data__global_axes(dt, ref_len):
+
+    s = ref_len
+    x = []
+    y = []
+    z = []
+    colors = []
+    x_vec = np.array([1.00, 0.00, 0.00])
+    y_vec = np.array([0.00, 1.00, 0.00])
+    z_vec = np.array([0.00, 0.00, 1.00])
+
+    x.extend((0.00, x_vec[0]*s, None))
+    y.extend((0.00, x_vec[1]*s, None))
+    z.extend((0.00, x_vec[2]*s, None))
+    x.extend((0.00, y_vec[0]*s, None))
+    y.extend((0.00, y_vec[1]*s, None))
+    z.extend((0.00, y_vec[2]*s, None))
+    x.extend((0.00, z_vec[0]*s, None))
+    y.extend((0.00, z_vec[1]*s, None))
+    z.extend((0.00, z_vec[2]*s, None))
+    colors.extend(["red"]*3)
+    colors.extend(["green"]*3)
+    colors.extend(["blue"]*3)
+    dt.append({
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 3,
+            "color": colors
+        }
+    })
+
+
 def add_data__extruded_frames_mesh(dt, list_of_frames):
     if not list_of_frames:
         return
@@ -300,10 +372,10 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     k_list = []
     index = 0
     for elm in list_of_frames:
-        side_a = np.array(elm.node_i.coordinates)
-        side_b = np.array(elm.node_j.coordinates)
-        y_vec = elm.local_y_axis_vector()
-        z_vec = elm.local_z_axis_vector()
+        side_a = np.array(elm.internal_pt_i)
+        side_b = np.array(elm.internal_pt_j)
+        y_vec = elm.y_axis
+        z_vec = elm.z_axis
         loop = elm.section.mesh.halfedges
         for halfedge in loop:
             loc0 = halfedge.vertex.coords[0]*z_vec +\
@@ -347,17 +419,38 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     })
 
 
-def plot_building_geometry(building: 'Building', extrude_frames=False):
+def plot_building_geometry(building: 'Building',
+                           extrude_frames=False,
+                           tributary_areas=True):
 
     layout = common_3D.global_layout()
     dt = []
 
+    ref_len = building.reference_length()
+
     # plot the grids
     add_data__grids(dt, building)
+
+    # global axes
+    add_data__global_axes(dt, ref_len)
 
     # plot the diaphgragm-lines
     for lvl in building.levels.level_list:
         add_data__diaphragm_lines(dt, lvl)
+
+    # plot the tributary areas
+    if tributary_areas:
+        for lvl in building.levels.level_list:
+            if level.slab_data:
+                for loop in level.slab_data['loops']:
+                    coords = [h.vertex.coords for h in loop]
+                    poly = sg.Polygon(coords)
+                    skel = sg.skeleton.create_interior_straight_skeleton(poly)
+                    for h in skel.halfedges:
+                        if h.is_bisector:
+                            p1 = h.vertex.point
+                            p2 = h.opposite.vertex.point
+                    ax.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1)
 
     # plot the internal nodes
     if not extrude_frames:
@@ -365,15 +458,18 @@ def plot_building_geometry(building: 'Building', extrude_frames=False):
 
     # plot the nodes
     add_data__nodes(dt, building.list_of_primary_nodes())
+    add_data__internal_nodes(dt, building.list_of_internal_nodes())
 
-    # plot the master nodes
-    add_data__master_nodes(dt, building.list_of_master_nodes())
+    # # plot the parent nodes
+    # add_data__parent_nodes(dt, building.list_of_parent_nodes())
 
     # plot the columns and beams (if any)
     if extrude_frames:
+        add_data__frame_offsets(dt, building.list_of_beamcolumn_elems())
         add_data__extruded_frames_mesh(
             dt, building.list_of_internal_elems())
     else:
+        add_data__frame_offsets(dt, building.list_of_beamcolumn_elems())
         add_data__frames(dt, building.list_of_internal_elems())
         add_data__frame_axes(dt, building.list_of_internal_elems(),
                              building.reference_length())
