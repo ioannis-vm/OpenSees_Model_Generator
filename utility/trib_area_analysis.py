@@ -21,6 +21,7 @@ def list_of_beams_to_mesh_edges_external(beams):
     vertices = []
     edges = []
     coordinate_list = []
+
     for beam in beams:
         i_coords = list(beam.node_i.coords[0:2])
         if i_coords not in coordinate_list:
@@ -68,6 +69,7 @@ def closed_beam_sequences(beams):
         return
     edges, edge_to_beam_map = \
         list_of_beams_to_mesh_edges_external(beams)
+
     halfedges = mesher.define_halfedges(edges)
     halfedge_to_beam_map = {}
     for h in halfedges:
@@ -108,10 +110,11 @@ def list_of_beams_to_mesh_edges_internal(beams):
     # unknown. i.e. If we are currently at node
     # j of the current beam, we don't know if
     # that corresponds to node i or node j of the
-    # next beam. We figure that out with the following code.
+    # next beam. (referring to the primary nodes).
+    # We figure that out with the following code.
 
     flip = []
-    for i in range(len(beams)):  # Possibly remove one
+    for i in range(len(beams)):
         current_beam = beams[i]
         if i+1 == len(beams):
             i = -1
@@ -126,6 +129,8 @@ def list_of_beams_to_mesh_edges_internal(beams):
             # By design, this should never happen
             raise ValueError("Beams are not connected")
 
+    # create a list containing the coordinates
+    # of all unique points
     vertices = []
     edges = []
     coordinate_list = []
@@ -141,6 +146,7 @@ def list_of_beams_to_mesh_edges_internal(beams):
     for coord in coordinate_list:
         vertices.append(mesher.Vertex(coord))
     # define edges
+
     edge_to_beam_map = {}
     for i in range(len(beams)):
         if i+1 == len(beams):
@@ -162,14 +168,31 @@ def list_of_beams_to_mesh_edges_internal(beams):
 
         edge_span = mesher.Edge(
             vertices[i_index], vertices[j_index])
-        if flip[i]:
-            edge_offset = mesher.Edge(
-                vertices[i_index], vertices[next_index])
-        else:
-            edge_offset = mesher.Edge(
-                vertices[j_index], vertices[next_index])
         edges.append(edge_span)
-        edges.append(edge_offset)
+
+        # note: it might be the case that the projection of the
+        #       offset to the x-y plane is such that next_coords
+        #       coincides with the previous point, which would
+        #       result in the definition of a trivial edge
+        #       (an edge that is connected to the same
+        #        vertex at both ends). This would break the
+        #       algorithm that defines the halfedges.
+        #       We avoid it by taking care not to define
+        #       such trivial edges.
+        if flip[i]:
+            if i_index != next_index:
+                edge_offset = mesher.Edge(
+                    vertices[i_index], vertices[next_index])
+                edges.append(edge_offset)
+            else:
+                edge_offset = None
+        else:
+            if j_index != next_index:
+                edge_offset = mesher.Edge(
+                    vertices[j_index], vertices[next_index])
+            else:
+                edge_offset = None
+
         # the flags represent what the edge
         #     corresponds to
         # 0 means clear length of a beam
@@ -177,12 +200,13 @@ def list_of_beams_to_mesh_edges_internal(beams):
         # 2 means offset at node j
         edge_to_beam_map[edge_span.uniq_id] = \
             (beams[i], 0)
-        if flip[i]:
-            edge_to_beam_map[edge_offset.uniq_id] = \
-                (beams[i], 1)
-        else:
-            edge_to_beam_map[edge_offset.uniq_id] = \
-                (beams[i], 2)
+        if edge_offset:
+            if flip[i]:
+                edge_to_beam_map[edge_offset.uniq_id] = \
+                    (beams[i], 1)
+            else:
+                edge_to_beam_map[edge_offset.uniq_id] = \
+                    (beams[i], 2)
 
     return edges, edge_to_beam_map
 
@@ -221,9 +245,14 @@ def calculate_tributary_areas(
         # for edge in edges:
         #     p1 = edge.v_i.coords
         #     p2 = edge.v_j.coords
-        #     coords = np.vstack((p1, p2))
-        #     plt.plot(coords[0], coords[1])
+        #     coords = np.row_stack((p1, p2))
+        #     plt.plot(coords[:, 0], coords[:, 1])
         # plt.show()
+
+        # for edge in edges:
+        #     p1 = np.array(edge.v_i.coords)
+        #     p2 = np.array(edge.v_j.coords)
+        #     print(np.linalg.norm(p2-p1))
 
         halfedges = mesher.define_halfedges(edges)
 

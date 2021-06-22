@@ -49,6 +49,15 @@ def previous_element(lst: list, obj):
     return lst[idx - 1]
 
 
+def point_exists_in_list(pt: np.ndarray,
+                         pts: list[np.ndarray]) -> bool:
+    for other in pts:
+        dist = np.linalg.norm(pt - other)
+        if dist < common.EPSILON:
+            return True
+    return False
+
+
 @dataclass
 @total_ordering
 class GridLine:
@@ -177,7 +186,7 @@ class GridSystem:
                 pt = grd1.intersect(grd2)
                 if pt is not None:  # if an intersection point exists
                     # and is not already in the list
-                    if not any(np.array_equal(pt, x) for x in pts):
+                    if not point_exists_in_list(pt, pts):
                         pts.append(pt)
         return pts
 
@@ -190,13 +199,22 @@ class GridSystem:
         """
         pts = []  # intersection points
         for other_grd in self.grids:
+            # ignore current grid
             if other_grd == grd:
                 continue
+            # get the intersection point, if any
             pt = grd.intersect(other_grd)
             if pt is not None:  # if there is an intersection
                 # and is not already in the list
-                if not any(np.array_equal(pt, x) for x in pts):
+                if not point_exists_in_list(pt, pts):
                     pts.append(pt)
+            # We also need to sort the list.
+            # We do this by sorting the instersection points
+            # by their distance from the current gridline's
+            # starting point.
+            distances = [np.linalg.norm(pt-grd.start_np)
+                         for pt in pts]
+            pts = [x for _, x in sorted(zip(distances, pts))]
         return pts
 
     def __repr__(self):
@@ -1411,8 +1429,8 @@ class Building:
             if assume_floor_slabs:
                 beams = lvl.beams.element_list
 
-                coords, bisectors = \
-                    trib_area_analysis.calculate_tributary_areas(beams)
+                coords, bisectors = trib_area_analysis.calculate_tributary_areas(
+                    beams)
                 lvl.floor_coordinates = coords
                 lvl.floor_bisector_lines = bisectors
                 # distribute floor loads on beams and nodes
@@ -1435,8 +1453,7 @@ class Building:
                     "Error: floor area properties\n" + \
                     "Overall floor area should be negative (by convention)."
                 floor_centroid = properties['centroid']
-                floor_mass_inertia = \
-                    properties['inertia']['ir_mass']\
+                floor_mass_inertia = properties['inertia']['ir_mass']\
                     * floor_mass
                 self_mass_centroid = np.array([0.00, 0.00])  # excluding floor
                 total_self_mass = 0.00
