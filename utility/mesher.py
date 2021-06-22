@@ -1,17 +1,15 @@
 """
-TODO Module docstring
+Enables functionality by utilizing the `halfedge`
+data structure.
 """
 
 from __future__ import annotations
-from descartes.patch import PolygonPatch
-from typing import List
 from itertools import count
-import pandas as pd
+from descartes.patch import PolygonPatch
 import numpy as np
-import skgeom as sg
 import matplotlib.pyplot as plt
-from shapely.ops import triangulate as shapely_triangulate
 from shapely.geometry import Polygon as shapely_Polygon
+from utility import common
 
 
 class Vertex:
@@ -25,13 +23,13 @@ class Vertex:
     def __init__(self, coords: tuple[float, float]):
         self.coords = coords
         self.edges = []
-        self.nid = next(self._ids)
+        self.uniq_id = next(self._ids)
 
     def __eq__(self, other):
-        return self.nid == other.nid
+        return self.uniq_id == other.uniq_id
 
     def __repr__(self):
-        return str(self.nid)
+        return str(self.uniq_id)
 
 
 class Edge:
@@ -47,7 +45,7 @@ class Edge:
     def __init__(self, v_i: Vertex, v_j: Vertex):
         self.v_i = v_i
         self.v_j = v_j
-        self.nid = next(self._ids)
+        self.uniq_id = next(self._ids)
         self.h_i = None
         self.h_j = None
         if self not in self.v_i.edges:
@@ -56,7 +54,7 @@ class Edge:
             self.v_j.edges.append(self)
 
     def __repr__(self):
-        return str(self.nid)
+        return str(self.uniq_id)
 
     def define_halfedge(self, vertex: Vertex):
         """
@@ -117,11 +115,14 @@ class Halfedge:
     def __init__(self, vertex: Vertex, edge: Edge):
         self.vertex = vertex
         self.edge = edge
-        self.nid = self.nid = next(self._ids)
+        self.uniq_id = self.uniq_id = next(self._ids)
         self.nxt = None
 
     def __repr__(self):
-        return str(self.nid)
+        return str(self.uniq_id)
+
+    def __lt__(self, other):
+        return self.uniq_id < other.uniq_id
 
     def direction(self):
         """
@@ -141,7 +142,7 @@ class Mesh:
     The mesh is assumed to be flat (2D).
     """
 
-    def __init__(self, halfedges: List[Halfedge]):
+    def __init__(self, halfedges: list[Halfedge]):
         self.halfedges = halfedges
 
     def __repr__(self):
@@ -161,119 +162,81 @@ class Mesh:
         return(np.array([[xmin, ymin], [xmax, ymax]]))
 
 
-def define_halfedges(edges):
+############################################
+# Geometric Properties of Polygonal Shapes #
+############################################
+
+
+def polygon_area(coords: np.ndarray) -> float:
     """
-    Use the specified edges and the `traverse` function
-    to define the halfedges of the mesh.
+    Calculates the area of a polygon.
+    Args:
+        coords: A matrix whose columns represent
+                the coordinates and the rows
+                represent the points of the polygon.
+                The first point should not be repeated
+                at the end, as this is done
+                automatically.
+    Returns:
+        area (float): The area of the polygon.
     """
-
-    def traverse(h_start, v_start, v_current, e_current, h_current):
-        """
-        This is the heart of the algorithm; a recursive procedure
-        that allows traversing through the entire datastructure
-        of vertices and edges to define all the halfedges and their
-        next halfedge.
-        All the defined halfedges form a number of closed sequences.
-        """
-
-        def ang_reduce(ang):
-            while ang < 0:
-                ang += 2.*np.pi
-            while ang >= 2.*np.pi:
-                ang -= 2.*np.pi
-            return ang
-
-        v_next = e_current.other_vertex(v_current)
-        if v_next == v_start:
-            h_current.nxt = h_start
-        else:
-            halfedges = []  # [h.e for h in halfedges]
-            for edge in v_next.edges:
-                halfedges.append(edge.define_halfedge(v_next))
-
-            angles = np.full(len(halfedges), 0.00)
-            for i, h_other in enumerate(halfedges):
-                if h_other.edge == h_current.edge:
-                    angles[i] = 1000.
-                else:
-                    angles[i] = ang_reduce(
-                        (h_current.direction() - np.pi) - h_other.direction())
-
-            h_current.nxt = halfedges[np.argmin(angles)]
-
-            v_current = h_current.nxt.vertex
-            e_current = h_current.nxt.edge
-            h_current = h_current.nxt
-
-            traverse(h_start, v_start, v_current, e_current, h_current)
-
-            del halfedges[np.argmin(angles)]
-
-            halfedges_without_next = []
-            for halfedge in halfedges:
-                if not halfedge.nxt:
-                    halfedges_without_next.append(halfedge)
-            for halfedge in halfedges_without_next:
-                h_start = halfedge
-                v_start = halfedge.vertex
-                v_current = halfedge.vertex
-                e_current = halfedge.edge
-                h_current = halfedge
-
-                traverse(h_start, v_start, v_current, e_current, h_current)
-
-    e_start = edges[0]
-    v_start = e_start.v_i
-
-    h_start = e_start.define_halfedge(v_start)
-
-    v_current = v_start
-    e_current = e_start
-    h_current = h_start
-
-    traverse(h_start, v_start, v_current, e_current, h_current)
-
-    # collect the retrieved halfedges in a list
-    # (add unique halfedges)
-    halfedges = []
-    for edge in edges:
-        if edge.h_i not in halfedges:
-            halfedges.append(edge.h_i)
-        if edge.h_j not in halfedges:
-            halfedges.append(edge.h_j)
-
-    return halfedges
-
-
-def geometric_properties(coords):
-    """
-    Given an array of coordinates
-    that represents a simple closed polygon,
-    calculate the centroid and rotational moment of inertia
-    around the centroid.
-    Note: even though the polygon is closed, the last point should
-    not be repeated in the input matrix.
-    """
-
-    # repeat the first row at the end to close the shape
-    coords = np.vstack((coords, coords[0, :]))
-    # # reverse the order to make it counterclockwise
-    # coords = np.flip(coords, axis=0)
     x = coords[:, 0]
-
     y = coords[:, 1]
-    area = np.sum(x * np.roll(y, -1) -
+    return np.sum(x * np.roll(y, -1) -
                   np.roll(x, -1) * y) / 2.00
+
+
+def polygon_centroid(coords: np.ndarray) -> np.ndarray:
+    """
+    Calculates the centroid of a polygon.
+    Args:
+        coords: A matrix whose columns represent
+                the coordinates and the rows
+                represent the points of the polygon.
+                The first point should not be repeated
+                at the end, as this is done
+                automatically.
+    Returns:
+        centroid (np.ndarray): The centroid of
+                 the polygon.
+    """
+    x = coords[:, 0]
+    y = coords[:, 1]
+    area = polygon_area(coords)
     x_cent = (np.sum((x + np.roll(x, -1)) *
                      (x*np.roll(y, -1) -
                       np.roll(x, -1)*y)))/(6.0*area)
     y_cent = (np.sum((y + np.roll(y, -1)) *
                      (x*np.roll(y, -1) -
                       np.roll(x, -1)*y)))/(6.0*area)
-    centroid = np.array((x_cent, y_cent))
-    coords_centered = coords - centroid
-    x = coords_centered[:, 0]
-    y = coords_centered[:, 1]
+    return np.array((x_cent, y_cent))
+
+
+def polygon_inertia(coords):
+    """
+    Calculates the moments of inertia of a polygon.
+    Args:
+        coords: A matrix whose columns represent
+                the coordinates and the rows
+                represent the points of the polygon.
+                The first point should not be repeated
+                at the end, as this is done
+                automatically.
+    Returns:
+        dictionary, containing:
+        'ixx': (float) - Moment of inertia around
+                         the x axis
+        'iyy': (float) - Moment of inertia around
+                         the y axis
+        'ixy': (float) - Product of inertia
+        'ir': (float)  - Polar moment of inertia
+        'ir_mass': (float) - Mass moment of inertia
+        # TODO
+        # The terms might not be pedantically accurate
+    """
+    x = coords[:, 0]
+    y = coords[:, 1]
+    area = polygon_area(coords)
     alpha = x * np.roll(y, -1) - \
         np.roll(x, -1) * y
     # planar moment of inertia wrt horizontal axis
@@ -292,24 +255,133 @@ def geometric_properties(coords):
     # mass moment of inertia wrt in-plane rotation
     ir_mass = (ixx + iyy) / area
 
-    inertia = {'ixx': ixx, 'iyy': iyy,
-               'ixy': ixy, 'ir': ir, 'ir_mass': ir_mass}
+    return {'ixx': ixx, 'iyy': iyy,
+            'ixy': ixy, 'ir': ir, 'ir_mass': ir_mass}
+
+
+def geometric_properties(coords):
+    """
+    Aggregates the results of the previous functions.
+    """
+
+    # repeat the first row at the end to close the shape
+    coords = np.vstack((coords, coords[0, :]))
+    area = polygon_area(coords)
+    centroid = polygon_centroid(coords)
+    coords_centered = coords - centroid
+    inertia = polygon_inertia(coords_centered)
 
     return {'area': area, 'centroid': centroid, 'inertia': inertia}
 
 
+##################################
+# Defining halfedges given edges #
+##################################
+
+
+def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
+    """
+    Given a list of edges, defines all the halfedges and
+    associates them with their `next`.
+        Each halfedge stores information about its edge, vertex
+        and and next halfedge. Contrary to convention, we don't
+        store the twin (opposite) halfedge.
+    Args:
+        edges (list[Edge]): List of Edge objects
+    Returns:
+        halfedges (list[Halfedge]): List of Halfedge objects
+    """
+
+    def traverse(h_start, v_start, v_current, e_current, h_current):
+        """
+        This is a recursive procedure
+        that allows traversing through the entire datastructure
+        of vertices and edges to define all the halfedges.
+        """
+        def ang_reduce(ang):
+            while ang < 0:
+                ang += 2.*np.pi
+            while ang >= 2.*np.pi:
+                ang -= 2.*np.pi
+            return ang
+        v_next = e_current.other_vertex(v_current)
+        if v_next == v_start:
+            h_current.nxt = h_start
+        else:
+            halfedges = []  # [h.e for h in halfedges]
+            for edge in v_next.edges:
+                halfedges.append(edge.define_halfedge(v_next))
+            angles = np.full(len(halfedges), 0.00)
+            for i, h_other in enumerate(halfedges):
+                if h_other.edge == h_current.edge:
+                    angles[i] = 1000.
+                else:
+                    angles[i] = ang_reduce(
+                        (h_current.direction() - np.pi) - h_other.direction())
+            h_current.nxt = halfedges[np.argmin(angles)]
+            v_current = h_current.nxt.vertex
+            e_current = h_current.nxt.edge
+            h_current = h_current.nxt
+            traverse(h_start, v_start, v_current, e_current, h_current)
+            del halfedges[np.argmin(angles)]
+            halfedges_without_next = []
+            for halfedge in halfedges:
+                if not halfedge.nxt:
+                    halfedges_without_next.append(halfedge)
+            for halfedge in halfedges_without_next:
+                h_start = halfedge
+                v_start = halfedge.vertex
+                v_current = halfedge.vertex
+                e_current = halfedge.edge
+                h_current = halfedge
+                traverse(h_start, v_start, v_current, e_current, h_current)
+    # ~~~
+    # Pick an initial edge
+    e_start = edges[0]
+    # Obtain its vertex
+    v_start = e_start.v_i
+    # Define the first halfedge
+    h_start = e_start.define_halfedge(v_start)
+    # Store the current v, e and h and start recursion
+    v_current = v_start
+    e_current = e_start
+    h_current = h_start
+    # Recursion!
+    traverse(h_start, v_start, v_current, e_current, h_current)
+
+    # At this point, all halfedges have been defined and
+    #     pointed to their next.
+    # Collect the generated halfedges in a list
+    halfedges = []  # We will put them here
+    for edge in edges:
+        halfedges.append(edge.h_i)
+        halfedges.append(edge.h_j)
+    halfedges.sort()
+    return halfedges
+
+
 def obtain_closed_loops(halfedges):
     """
-    Given a list of the unique halfedges of a mesh,
-    determine all the faces of the mesh, represented
-    as lists of halfedge sequences (closed loops).
+    Given a list of halfedges,
+    this function uses their `next` attribute to
+    group them into sequences of closed loops
+    (ordered lists of halfedges of which the
+    `next` halfedge of the last list element
+    points to the first halfedge in the list, and
+    the `next` halfedge of any list element
+    points to the next halfedge in the list.
+    Args:
+        halfedges (list[Halfedge]):
+                  list of halfedges
+    Returns:
+        loops (list[list[Halfedge]]) with the
+              aforementioned property.
     """
     def is_in_some_loop(halfedge, loops):
         for loop in loops:
             if halfedge in loop:
                 return True
         return False
-
     loops = []
     for halfedge in halfedges:
         if loops:
@@ -321,23 +393,55 @@ def obtain_closed_loops(halfedges):
             loop.append(nxt)
             nxt = nxt.nxt
         loops.append(loop)
-    # remove the largest loop (that corresponds to the exterior halfedges)
-    loop_areas = [geometric_properties(
-        np.array([h.vertex.coords for h in loop]))['area']
+    return loops
+
+
+def orient_loops(loops):
+    """
+    Separates loops to internal (counterclockwise)
+    and external (clockwise). Also gathers trivial
+    loops, i.e. halfedge sequences that define polygons
+    that have no area (e.g. h1 -> h2 -> h1).
+    Args:
+        loops (list[list[Halfedge]]) (see `obtain_closed_loops`)
+    Returns:
+        external_loops (list[list[Halfedge]])
+        internal_loops (list[list[Halfedge]])
+        trivial_loops (list[list[Halfedge]])
+    """
+    internal_loops = []
+    external_loops = []
+    trivial_loops = []
+    loop_areas = [polygon_area(
+        np.array([h.vertex.coords for h in loop]))
         for loop in loops]
-    # TODO. CAUTION: This assumes there is only one exterior loop
-    # Maybe it should separate all negative areas instead
-    outer = min(loop_areas)
-    index = loop_areas.index(outer)
-    external_loop = loops[index]
-    del loops[index]
-    del loop_areas[index]
-    return external_loop, loops, loop_areas
+    for i, area in enumerate(loop_areas):
+        if area > common.EPSILON:
+            internal_loops.append(loops[i])
+        elif area < -common.EPSILON:
+            external_loops.append(loops[i])
+        else:
+            trivial_loops.append(loops[i])
+    return external_loops, internal_loops, trivial_loops
+
+
+#######################################
+# Breaking a shape into little pieces #
+#######################################
 
 
 def subdivide_polygon(halfedges, n_x=10, n_y=25, plot=False):
     """
-    TODO - add docstring
+    Used to define the fibers of fiber sections.
+    Args:
+        halfedges (list[Halfedge]): Sequence of halfedges
+                  that defines the shape of a section.
+        n_x (int): Number of spatial partitions in the x direction
+        n_y (int): Number of spatial partitions in the y direction
+        plot (bool): Plots the resulting polygons for debugging 
+    Returns:
+        pieces (list[shapely_Polygon]): shapely_Polygon
+               objects that represent single fibers.
     """
     section_polygon = shapely_Polygon([h.vertex.coords for h in halfedges])
     x_min, y_min, x_max, y_max = section_polygon.bounds
@@ -369,8 +473,17 @@ def subdivide_polygon(halfedges, n_x=10, n_y=25, plot=False):
     return pieces
 
 
-def print_halfedge_results(halfedges):
+#############
+# Debugging #
+#############
 
+
+def print_halfedge_results(halfedges):
+    """
+    Prints the ids of the defined halfedges
+    and their vertex, edge and next, for
+    debugging.
+    """
     results = {
         'halfedge': [],
         'vertex': [],
@@ -384,11 +497,13 @@ def print_halfedge_results(halfedges):
         results['edge'].append(h.edge)
         results['next'].append(h.nxt)
 
-    df = pd.DataFrame(results)
-    print(df)
+    print(results)
 
 
-def plot_mesh(halfedge_loop):
+def plot_loop(halfedge_loop):
+    """
+    Plots the vertices/edges of a list of halfedges.
+    """
     n = len(halfedge_loop)
     coords = np.full((n+1, 2), 0.00)
     for i, h in enumerate(halfedge_loop):
@@ -398,6 +513,28 @@ def plot_mesh(halfedge_loop):
     plt.plot(coords[:, 0], coords[:, 1])
     plt.scatter(coords[:, 0], coords[:, 1])
     fig.show()
+
+
+def sanity_checks(external, trivial):
+    """
+    Perform some checks to make sure
+    assumptions are not violated.
+    """
+    #   We expect no trivial loops
+    if trivial:
+        print("Warning: Found trivial loop")
+        for i, trv in enumerate(trivial):
+            for h in trv:
+                print(h.vertex.coords)
+            plot_loop(trv)
+    #   We expect a single external loop
+    if len(external) > 1:
+        print("Warning: Found multiple external loops")
+        for i, ext in enumerate(external):
+            print(i+1)
+            for h in ext:
+                print(h.vertex.coords)
+            plot_loop(ext)
 
 
 if __name__ == "__main()__":

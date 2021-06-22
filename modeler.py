@@ -22,11 +22,10 @@ from itertools import count
 import json
 import numpy as np
 from utility import transformations, common
-from utility.lvl_operations import generate_floor_slab_data
-from utility.lvl_operations import calculate_tributary_areas_from_loops
+from utility import trib_area_analysis
+from utility import mesher
+from utility import mesher_section_gen
 from utility.graphics import preprocessing_3D
-from utility.mesher import Mesh, subdivide_polygon
-from utility.mesher_section_gen import w_mesh, rect_mesh
 
 _ids = count(0)
 
@@ -217,7 +216,7 @@ class Group:
     """
 
     name: str
-    elements: list[Element] = field(init=False)
+    elements: list = field(init=False)
 
     def __post_init__(self):
         self.elements = []
@@ -228,7 +227,7 @@ class Group:
     def __le__(self, other):
         return self.name <= other.name
 
-    def add(self, element: "Element"):
+    def add(self, element):
         """
         Add an element in the group,
         if it is not already in
@@ -236,7 +235,7 @@ class Group:
         if element not in self.elements:
             self.elements.append(element)
 
-    def remove(self, element: Element):
+    def remove(self, element):
         """
         Remove something from the group
         """
@@ -307,6 +306,7 @@ class Node:
     restraint_type: str = field(default="free")
     mass: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     load: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
+    tributary_area: float = field(default=0.00)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -373,7 +373,7 @@ class Section:
     sec_type: str
     name: str
     material: Material = field(repr=False)
-    mesh: Mesh = field(default=None, repr=False)
+    mesh: mesher.Mesh = field(default=None, repr=False)
     properties: dict = field(default=None, repr=False)
 
     def __post_init__(self):
@@ -383,7 +383,7 @@ class Section:
         return (self.name == other.name)
 
     def subdivide_section(self, n_x=10, n_y=25, plot=False):
-        return subdivide_polygon(
+        return mesher.subdivide_polygon(
             self.mesh.halfedges, n_x=n_x, n_y=n_y, plot=plot)
 
     def retrieve_offset(self, placement: str):
@@ -484,7 +484,7 @@ class Sections:
         h = properties['d']
         tw = properties['tw']
         tf = properties['tf']
-        mesh = w_mesh(b, h, tw, tf)
+        mesh = mesher_section_gen.w_mesh(b, h, tw, tf)
         section = Section('W', name, material, mesh, properties)
         self.add(section)
 
@@ -498,7 +498,7 @@ class Sections:
         """
         b = properties['b']
         h = properties['h']
-        mesh = rect_mesh(b, h)
+        mesh = mesher_section_gen.rect_mesh(b, h)
         section = Section('rect', name, material, mesh, properties)
         self.add(section)
         temp = mesh.geometric_properties()
@@ -704,6 +704,7 @@ class BeamColumn:
                                      internal elements are present
                                      (n_sub > 1).
         internal_elems (list[LinearElement]): Internal linear elements.
+        tributary_area (float): Area of floor that is supported on the element.
     """
 
     node_i: Node
@@ -714,6 +715,7 @@ class BeamColumn:
     placement: str = field(default="centroid")
     offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    tributary_area: float = field(default=0.00)
 
     def __post_init__(self):
 
@@ -737,6 +739,8 @@ class BeamColumn:
         sec_offset_global = t_loc_to_glob @ sec_offset_local
         p_i += sec_offset_global
         p_j += sec_offset_global
+        self.offset_i = self.offset_i.copy()
+        self.offset_j = self.offset_j.copy()
         self.offset_i += sec_offset_global
         self.offset_j += sec_offset_global
 
@@ -757,13 +761,13 @@ class BeamColumn:
                 ioffset = self.offset_i
             else:
                 node_i = self.internal_nodes[i-1]
-                ioffset = np.array([0.00, 0.00, 0.00])
+                ioffset = np.zeros(3).copy()
             if i == self.n_sub-1:
                 node_j = self.node_j
                 joffset = self.offset_j
             else:
                 node_j = self.internal_nodes[i]
-                joffset = np.array([0.00, 0.00, 0.00])
+                joffset = np.zeros(3).copy()
             self.internal_elems.append(
                 LinearElement(node_i, node_j, self.section, self.ang,
                               ioffset, joffset))
@@ -865,8 +869,9 @@ class Level:
     nodes_primary: Nodes = field(default_factory=Nodes)
     columns: BeamColumns = field(default_factory=BeamColumns)
     beams: BeamColumns = field(default_factory=BeamColumns)
-    slab_data: dict = field(default=None)
     parent_node: Node = field(default=None)
+    floor_coordinates: np.ndarray = field(default=None)
+    floor_bisector_lines: list[np.ndarray] = field(default=None)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -1173,8 +1178,8 @@ class Building:
                            start: np.ndarray,
                            end: np.ndarray,
                            n_sub=1,
-                           offset_i=np.zeros(shape=3),
-                           offset_j=np.zeros(shape=3)):
+                           offset_i=np.zeros(shape=3).copy(),
+                           offset_j=np.zeros(shape=3).copy()):
         """
         Adds a beam connecting the given points
         at all the active levels.
@@ -1199,8 +1204,6 @@ class Building:
                 level.nodes_primary.add(end_node)
             # add the beam connecting the two nodes
             # avoid making a reference to the same arrays for all beams
-            offset_i = offset_i.copy()
-            offset_j = offset_j.copy()
             level.beams.add(BeamColumn(node_i=start_node,
                                        node_j=end_node,
                                        ang=self.active_angle,
@@ -1344,6 +1347,18 @@ class Building:
                            elm.connection_j])
         return result
 
+    def retrieve_beam(self, uniq_id: int) -> BeamColumn:
+        beams = self.list_of_beams()
+        for beam in beams:
+            if beam.uniq_id == uniq_id:
+                return beam
+
+    def retrieve_column(self, uniq_id: int) -> BeamColumn:
+        columns = self.list_of_columns()
+        for col in columns:
+            if col.uniq_id == uniq_id:
+                return col
+
     def reference_length(self):
         """
         Returns the largest dimension of the
@@ -1365,24 +1380,24 @@ class Building:
         This method initiates automated calculations to
         get things ready for running an analysis.
         """
-        def distribute_load_on_beams(lvl):
+        def apply_floor_load(lvl):
             """
             Given a building level, distribute
             the surface load of the level on the beams
             of that level.
             Floor slab data should have been generated first.
             """
-            if lvl.slab_data:
-                loops = lvl.slab_data['loops']
-                beam_to_edge_map = lvl.slab_data['beam_to_edge_map']
-                areas = calculate_tributary_areas_from_loops(loops)
-                if areas:
-                    for beam in lvl.beams.element_list:
-                        edge_id = beam_to_edge_map[beam.uniq_id]
-                        udlZ_val = -areas[edge_id] * \
-                            lvl.surface_DL / beam.length_clear()
-                        beam.add_udl_glob(
-                            np.array([0.00, 0.00, udlZ_val]))
+            if lvl.floor_coordinates is not None:
+                for beam in lvl.beams.element_list:
+                    udlZ_val = - beam.tributary_area * \
+                        lvl.surface_DL / beam.length_clear()
+                    beam.add_udl_glob(
+                        np.array([0.00, 0.00, udlZ_val]))
+                for node in lvl.nodes_primary.node_list:
+                    pZ_val = - node.tributary_area * \
+                        lvl.surface_DL
+                    node.load += np.array((0.00, 0.00, -pZ_val,
+                                           0.00, 0.00, 0.00))
         # ~~~
         self.levels.active = []
         self.groups.active = []
@@ -1391,29 +1406,37 @@ class Building:
         # TODO - zero-out everything to allow preprocessing
         # multiple times.
         for lvl in self.levels.level_list:
+            if lvl.restraint != "free":
+                continue
             if assume_floor_slabs:
-                # generate floor slabs
-                generate_floor_slab_data(lvl)
-                # distribute floor loads on beams
-                distribute_load_on_beams(lvl)
-            # linear element self-weight
-            if self_weight:
-                for elm in lvl.beams.element_list + lvl.columns.element_list:
-                    elm.apply_self_weight_and_mass(1.00)
+                beams = lvl.beams.element_list
+
+                coords, bisectors = \
+                    trib_area_analysis.calculate_tributary_areas(beams)
+                lvl.floor_coordinates = coords
+                lvl.floor_bisector_lines = bisectors
+                # distribute floor loads on beams and nodes
+                apply_floor_load(lvl)
+
+        # frame element self-weight
+        if self_weight:
+            for elm in self.list_of_beamcolumn_elems():
+                elm.apply_self_weight_and_mass(1.00)
         if assume_floor_slabs:
             for lvl in self.levels.level_list:
                 # TODO this should be using a bunch of level methods
                 # accumulate all the mass at the parent nodes
                 if lvl.restraint != "free":
                     continue
+                properties = mesher.geometric_properties(lvl.floor_coordinates)
                 floor_mass = -lvl.surface_DL * \
-                    lvl.slab_data['properties']['area'] / common.G_CONST
+                    properties['area'] / common.G_CONST
                 assert(floor_mass >= 0.00),\
                     "Error: floor area properties\n" + \
                     "Overall floor area should be negative (by convention)."
-                floor_centroid = lvl.slab_data['properties']['centroid']
+                floor_centroid = properties['centroid']
                 floor_mass_inertia = \
-                    lvl.slab_data['properties']['inertia']['ir_mass']\
+                    properties['inertia']['ir_mass']\
                     * floor_mass
                 self_mass_centroid = np.array([0.00, 0.00])  # excluding floor
                 total_self_mass = 0.00
