@@ -1045,7 +1045,7 @@ class Levels:
 
 
 @dataclass
-oclass Building:
+class Building:
     """
     This class manages building objects
     """
