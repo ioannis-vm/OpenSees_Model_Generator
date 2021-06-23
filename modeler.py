@@ -10,14 +10,9 @@ Building Modeler for OpenSeesPy ~ Modeler module
 #
 # https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
 
-# TODO fix docstrings in the entire module
-# to include descriptions of the parameters
-# and output if applicable
-
 from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
-from typing import List
 from itertools import count
 import json
 import numpy as np
@@ -52,6 +47,14 @@ def previous_element(lst: list, obj):
 
 def point_exists_in_list(pt: np.ndarray,
                          pts: list[np.ndarray]) -> bool:
+    """
+    Determines whether a given list containing points
+    (represented with numpy arrays) contains a point
+    that is equal (with a fudge factor) to a given point.
+    Args:
+        pt (np.ndarray): A numpy array to look for
+        pts (list[np.ndarray]): A list to search for pt
+    """
     for other in pts:
         dist = np.linalg.norm(pt - other)
         if dist < common.EPSILON:
@@ -71,10 +74,20 @@ class GridLine:
     and used temporarily to define some elements,
     and later be discarded or altered in order
     to define other elements.
+    Attributes:
+        tag (str): Name of the gridline
+        start (list(float]): X,Y coordinates of starting point
+        end ~ similar to start
+        start_np (np.ndarray): Numpy array of starting point
+        end_np ~ similar to start
+        length (float): Length of the gridline
+        direction (float): Direction (angle) measured
+                  using a counterclockwise convention
+                  with the global X axis corresponding to 0.
     """
     tag: str
-    start: List[float]
-    end: List[float]
+    start: list[float]
+    end: list[float]
     start_np: np.ndarray = field(init=False, repr=False)
     end_np:   np.ndarray = field(init=False, repr=False)
     length: float = field(init=False, repr=False)
@@ -95,7 +108,7 @@ class GridLine:
     def intersect(self, grd: GridLine):
         """
         Obtain the intersection with
-        another gridline(if it exists)
+        another gridline (if it exists)
 
         Parameters:
             grd(GridLine): a gridline to intersect
@@ -103,12 +116,12 @@ class GridLine:
             list[float]: Intersection point
 
         Derivation:
-        If the intersection point p exists, we will have
-        p = ra.origin + ra.dir * u
-        p = rb.origin + rb.dir * v
-        We determine u and v(if possible) and check
-        if the intersection point lies on both lines.
-        If it does, the lines intersect.
+            If the intersection point p exists, we will have
+            p = ra.origin + ra.dir * u
+            p = rb.origin + rb.dir * v
+            We determine u and v(if possible) and check
+            if the intersection point lies on both lines.
+            If it does, the lines intersect.
         """
         ra_dir = self.direction
         rb_dir = grd.direction
@@ -287,14 +300,15 @@ class Groups:
         # Sort the element groups in ascending order (name-wise)
         self.group_list.sort()
 
-    def set_active(self, names: List[str]):
+    def set_active(self, names: list[str]):
         """
-        Assigns the active groups(one or more).
+        Specifies the active groups(one or more).
         Adding any element to the building will also
         add that element to the active groups.
         The active groups can also be set to an empty list.
-        In that case, new elements will not be added to groups.
-
+        In that case, new elements will not be added toa any groups.
+        Args:
+            names (list[str]): Names of groups to set as active
         """
         self.active = []
         found = False
@@ -319,18 +333,41 @@ class Groups:
 class Node:
     """
     Node object.
+    Attributes:
+        uniq_id (int): unique identifier
+        coords (np.ndarray): Coordinates of the location of the node
+        restraint_type (str): Can be either "free", "pinned", or "fixed".
+                       It can also be "parent" or "internal", but
+                       this is only specified for nodes that are made
+                       automatically.
+        mass (np.ndarray): Mass with respect to the global coordinate system
+                           (shape = 3 for all nodes except parent nodes, where
+                            inertia terms are also present, and shape = 6).
+        mass_fl ~ similar to mass, coming from a floor
+        load (np.ndarray): Load with respect to the global coordinate system.
+        load_fl (np.ndarray): similar to load, coming from the floors.
+        tributary_area: This attribute holds the results of tributary area
+                        analysis done inside the `preprocess` method of the
+                        `building` objects, and is used to store the floor
+                        area that corresponds to that node (if beams  with
+                        offsets are connected to it)
     """
 
     coords: np.ndarray
     restraint_type: str = field(default="free")
     mass: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     load: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
+    load_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
     tributary_area: float = field(default=0.00)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
 
     def __eq__(self, other):
+        """
+        For nodes, a fudge factor is used to
+        assess equality.
+        """
         p0 = np.array(self.coords)
         p1 = np.array(other.coords)
         return np.linalg.norm(p0 - p1) < common.EPSILON
@@ -339,6 +376,17 @@ class Node:
         d_self = self.coords[1] * common.ALPHA + self.coords[0]
         d_other = other.coords[1] * common.ALPHA + other.coords[0]
         return d_self <= d_other
+
+    def load_total(self):
+        """
+        Returns the total load applied on the node,
+        by summing up the floor's contribution to the
+        generic component.
+        """
+        return self.load + self.load_fl
+
+    def mass_total(self):
+        return self.mass + self.mass_fl
 
 
 @dataclass
@@ -353,7 +401,7 @@ class Nodes:
     def add(self, node: Node):
         """
         Add a node in the nodes collection,
-        if it does not already exit
+        if it does not already exist
         """
         if node not in self.node_list:
             self.node_list.append(node)
@@ -387,7 +435,18 @@ class Section:
            ===
             | -------> z (blue)
            ===
-
+    Attributes:
+        uniq_id (int): unique identifier
+        sec_type (str): Flag representing the type of section
+                  (e.g. W -> steel W section)
+        name (str): Unique name for the section
+        material (Material): Material of the section
+        mesh (mesher.Mesh): Mesh object defining the geometry
+                            of the section
+        properties (dict): Dictionary with geometric properties
+                           needed for structural analysis.
+                           These are:
+                           A, Ix, Iy, J
     """
     sec_type: str
     name: str
@@ -402,6 +461,16 @@ class Section:
         return (self.name == other.name)
 
     def subdivide_section(self, n_x=10, n_y=25, plot=False):
+        """
+        Used to define the fibers of fiber sections.
+        Args:
+            n_x (int): Number of spatial partitions in the x direction
+            n_y (int): Number of spatial partitions in the y direction
+            plot (bool): Plots the resulting polygons for debugging
+        Returns:
+            pieces (list[shapely_Polygon]): shapely_Polygon
+                   objects that represent single fibers.
+        """
         return mesher.subdivide_polygon(
             self.mesh.halfedges, n_x=n_x, n_y=n_y, plot=plot)
 
@@ -413,6 +482,11 @@ class Section:
         the specified placement point.
         The offset is expressed as the vector that moves
         from the placement point to the centroid.
+        Args:
+            placement (str): Can be one of:
+                'centroid', 'top_center', 'top_left', 'top_right',
+                'center_left', 'center_right', 'bottom_center',
+                'bottom_left', 'bottom_right'
         """
         bbox = self.mesh.bounding_box()
         z_min, y_min, z_max, y_max = bbox.flatten()
@@ -458,7 +532,7 @@ class Sections:
     def add(self, section: Section):
         """
         Add a section in the section collection,
-        if it does not already exit
+        if it does not already exist
         """
         if section not in self.section_list:
             self.section_list.append(section)
@@ -470,7 +544,10 @@ class Sections:
         """
         Sets the active section.
         Any elements defined while this section is active
-        will have that section
+        will have that section.
+        Args:
+            name (str): Name of the previously defined
+                 section to set as active.
         """
         self.active = None
         found = False
@@ -532,6 +609,13 @@ class Sections:
 class Material:
     """
     Material object.
+    Attributes:
+        uniq_id (int): unique identifier
+        name (str): Name of the material
+        ops_material (str): Name of the material model to use in OpenSees
+        density (float): Mass per unit volume of the material
+        parameters (dict): Parameters needed to define the material in OpenSees
+                           These depend on the meterial model specified.
     """
     name: str
     ops_material: str
@@ -554,7 +638,7 @@ class Materials:
     def add(self, material: Material):
         """
         Add a material in the materials collection,
-        if it does not already exit
+        if it does not already exist
         """
         if material not in self.material_list:
             self.material_list.append(material)
@@ -565,8 +649,6 @@ class Materials:
     def set_active(self, name: str):
         """
         Assigns the active material.
-        Any elements defined while this material is active
-        will be assigned that material.
         """
         self.active = None
         found = False
@@ -627,6 +709,7 @@ class LinearElement:
                           on the local x, y, and z directions, in the
                           direction of the axes (see Section).
                           Values are in units of force per unit length.
+        udl_fl (np.ndarray): Similar to udl, coming from the floors.
         x_axis: Array of size 3 representing the local x axis vector
                 expressed in the global coordinate system.
         y_axis: (similar)
@@ -652,6 +735,7 @@ class LinearElement:
     offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     udl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    udl_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -672,7 +756,7 @@ class LinearElement:
         p_j = self.node_j.coords + self.offset_j
         return np.linalg.norm(p_j - p_i)
 
-    def add_udl_glob(self, udl: np.ndarray):
+    def add_udl_glob(self, udl: np.ndarray, ltype='generic'):
         """
         Adds a uniformly distributed load
         to the existing udl of the element.
@@ -690,7 +774,20 @@ class LinearElement:
         T_mat = transformations.transformation_matrix(
             self.x_axis, self.y_axis, self.z_axis)
         udl_local = T_mat @ udl
-        self.udl += udl_local
+        if ltype == 'generic':
+            self.udl += udl_local
+        elif ltype == 'floor':
+            self.udl_fl += udl_local
+        else:
+            raise ValueError("Unsupported load type")
+
+    def udl_total(self):
+        """
+        Returns the total udl applied to the element,
+        by summing up the floor's contribution to the
+        generic component.
+        """
+        return self.udl + self.udl_fl
 
 
 @dataclass
@@ -796,7 +893,7 @@ class BeamColumn:
         pt_j = self.internal_pt_j
         return np.linalg.norm(pt_j - pt_i)
 
-    def add_udl_glob(self, udl: np.ndarray):
+    def add_udl_glob(self, udl: np.ndarray, ltype='generic'):
         """
         Adds a uniformly distributed load
         to the existing udl of the element.
@@ -811,8 +908,8 @@ class BeamColumn:
                               on the global x, y, and z directions, in the
                               direction of the global axes.
         """
-        for i, elm in enumerate(self.internal_elems):
-            elm.add_udl_glob(udl)
+        for elm in self.internal_elems:
+            elm.add_udl_glob(udl, ltype=ltype)
 
     def apply_self_weight_and_mass(self, multiplier: float):
         """
@@ -832,7 +929,7 @@ class BeamColumn:
         mass_per_length *= multiplier
         weight_per_length *= multiplier
         self.add_udl_glob(
-            np.array([0., 0., -weight_per_length]))
+            np.array([0., 0., -weight_per_length]), ltype='generic')
         for sub_elm in self.internal_elems:
             mass = mass_per_length * \
                 sub_elm.length_clear() / 2.00  # lb-s**2/in
@@ -859,7 +956,7 @@ class BeamColumns:
     def add(self, elm: BeamColumn):
         """
         Add a column in the columns collection,
-        if it does not already exit
+        if it does not already exist
         """
         if elm not in self.element_list:
             self.element_list.append(elm)
@@ -877,8 +974,42 @@ class BeamColumns:
 class Level:
     """
     Individual building floor level.
-    All nodes, elements and applied loads
-    must belong to a single level.
+    A level contains building components such as nodes, beams and columns.
+    Attributes:
+        name (str): Unique name of the level
+        elevation (float): Elevation of the level
+        restraint (str): Can be any of "free", "pinned" or "fixed".
+                         All nodes defined in that level will have that
+                         restraint.
+        previous_lvl (Level): Points to the level below that level, if
+                              the considered level is not the base..
+        surface_DL (float): Uniformly distributed dead load of the level.
+                            This load can be distributed to the
+                            structural members of the level automatically.
+                            It is also converted and applied as mass.
+        nodes_primary (Nodes): Primary nodes of the level. Primary means
+                               that these nodes are used to connect
+                               components of different elements
+                               to them, contrary to being internal
+                               nodes of a particular
+                               element. A rigid diaphragm constraint can be
+                               optionally assigned to these nodes.
+        columns (BeamColumns): Columns of the level.
+        beams (BeamColumns): Beams of the level.
+        parent_node (Node): If tributary area analysis is done and floors
+                            are assumed, a node is created at the
+                            center of mass of the level, and acts as the
+                            parent node of the rigid diaphragm constraint.
+                            The mass in the X-Y direction of all the nodes
+                            of that level is then accumulated to that
+                            node, together with their contribution in the
+                            rotational inertia of the level.
+        floor_coordinates (np.ndarray): An array of a sequence of
+                          points that define the floor area that is
+                          inferred from the beams if tributary area
+                          analysis is done.
+        floor_bisector_lines (np.ndarray): The lines used to separate
+                             the tributary areas, used for plotting.
     """
     name: str
     elevation: float
@@ -921,15 +1052,6 @@ class Level:
                 return other_node
         return None
 
-    def look_for_column(self, node: Node):
-        """
-        Returns the level's column that is connected
-        to the given node, if it exists.
-        """
-        for col in self.columns.element_list:
-            if col.node_i == node:
-                return col
-
     def add_column(self, node_i, node_j, ang, section):
         """
         Adds a column on that level with given nodes.
@@ -956,20 +1078,38 @@ class Level:
         return self.nodes_primary.node_list
 
     def list_of_all_nodes(self):
+        """
+        Returns a list containing all the nodes
+        of that level *except* the parent node.
+        """
         primary = self.nodes_primary.node_list
         internal = []
         for col in self.columns.element_list:
             internal.extend(col.internal_nodes)
         for bm in self.beams.element_list:
             internal.extend(bm.internal_nodes)
-        return primary + internal
+        result = [i for i in primary + internal if i]
+        # (to remove Nones if they exist)
+        return result
+
+    def list_of_internal_elems(self):
+        result = []
+        for elm in self.beams.element_list + \
+                self.columns.element_list:
+            result.append(elm)
+        return result
 
 
 @dataclass
 class Levels:
     """
     Stores the floor levels of a building.
-    No two floor levels can have the same height(no multi-tower support)
+    No two floor levels can have the same height(no multi-tower support).
+    Levels must be defined in order, from the lower elevation
+    to the highest.
+    Attributes:
+        level_list (list[Level]): list containing unique levels
+        active (list[Level]): list of active levels
     """
 
     level_list: list[Level] = field(default_factory=list)
@@ -1009,20 +1149,21 @@ class Levels:
 
     def get(self, name: str):
         """"
-        Finds a level given the level name
+        Finds a level given its name.
         """
         for lvl in self.level_list:
             if lvl.name == name:
                 return lvl
         raise ValueError("Level " + name + " does not exist")
 
-    def set_active(self, names: List[str]):
+    def set_active(self, names: list[str]):
         """
-        Sets the active levels(one or more).
+        Sets the active levels (one or more).
         At least one level must be active when defining elements.
         Any element addition or modification call will
         only affect the active levels.
-
+        Args:
+            names (list[str]): Names of the levels to set as active
         """
         self.active = []
         if names == "all":
@@ -1048,7 +1189,19 @@ class Levels:
 @dataclass
 class Building:
     """
-    This class manages building objects
+    This class manages building objects.
+    Attributes:
+        gridsystem (GridSystem): Gridsystem used to
+                   define or modify elements.
+        levels (Levels): Levels of the building
+        groups (Groups): Groups of the building
+        sections (Sections): Sections used
+        materials (Materials): Materials used
+        active_placement (str): Placement parameter to use
+                          for newly defined elements
+                          where applicable (see Section).
+        active_angle (float): Angle parameter to use for
+                          newly defined elements.
     """
     gridsystem: GridSystem = field(default_factory=GridSystem)
     levels: Levels = field(default_factory=Levels)
@@ -1083,21 +1236,34 @@ class Building:
 
     def add_gridline(self,
                      tag: str,
-                     start: List[float],
-                     end: List[float]
+                     start: list[float],
+                     end: list[float]
                      ):
         """
-        Adds a new gridline to the building
+        Adds a new gridline to the building.
+        Args:
+           tag (str): Name of the gridline
+           start (list(float]): X,Y coordinates of starting point
+           end ~ similar to start
         """
         self.gridsystem.add(GridLine(tag, start, end))
 
     def add_sections_from_json(self,
                                filename: str,
                                sec_type: str,
-                               labels: List[str]):
+                               labels: list[str]):
         """
         Add sections from a section database json file.
-        Only the specified sections(given the labels) are added.
+        Only the specified sections(given the labels) are added,
+        even if more are present in the file.
+        Args:
+            filename (str): Path of the file
+            sec_type (str): Section type to be assigned
+                            to all the defined sections
+                            (see sections).
+                            I.e. don't import W and HSS
+                            sections at once!
+            labels (list[str]): Names of the sections to add.
         """
         if not self.materials.active:
             raise ValueError("No active material specified")
@@ -1118,6 +1284,8 @@ class Building:
         """
         Parses a given DXF file and adds gridlines from
         all the lines defined in that file.
+        Args:
+            dxf_file (str): Path of the DXF file.
         """
         i = 100000  # anything > 8 works
         j = 0
@@ -1148,6 +1316,8 @@ class Building:
     def add_group(self, name: str):
         """
         Adds a new group to the building.
+        Args:
+            name: Name of the group to be added.
         """
         self.groups.add(Group(name))
 
@@ -1156,13 +1326,16 @@ class Building:
                             y: float,
                             n_sub=1):
         """
-        Adds a column at the given X, Y location at all the active levels.
+        Adds a vertical column at the given X, Y
+        location at all the active levels.
         Existing nodes are used, otherwise they are created.
+        Args:
+            x (float): X coordinate in the global system
+            y (float): Y coordinate in the global system
+            n_sub (int): Number of internal elements to add
         """
         if not self.sections.active:
             raise ValueError("No active section")
-            # TODO change to using assert, + do the same
-            # everywhere else applicable
         for level in self.levels.active:
             if level.previous_lvl:  # if previous level exists
                 # check to see if top node exists
@@ -1202,6 +1375,16 @@ class Building:
         """
         Adds a beam connecting the given points
         at all the active levels.
+        Existing nodes are used, otherwise they are created.
+        Args:
+            start (np.ndarray): X,Y coordinates of point i
+            end (np.ndarray): X,Y coordinates of point j
+            n_sub (int): Number of internal elements to add
+            offset_i (np.ndarray): X,Z,Y components of a
+                      vector that starts at node i and goes
+                      to the internal end of the rigid offset
+                      of the i-side of the beam.
+            offset_j ~ similar to offset i, for the j side.
         """
         if not self.sections.active:
             raise ValueError("No active section specified")
@@ -1237,6 +1420,8 @@ class Building:
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect, and places a column on
         all such locations.
+        Args:
+            n_sub (int): Number of internal elements to add
         """
         isect_pts = self.gridsystem.intersection_points()
         for pt in isect_pts:
@@ -1250,6 +1435,8 @@ class Building:
         where gridlines intersect. For each gridline, beams are placed
         connecting all the intersection locations of that
         gridline with all other gridlines.
+        Args:
+            n_sub (int): Number of internal elements to add
         """
         for grid in self.gridsystem.grids:
             isect_pts = self.gridsystem.intersect(grid)
@@ -1263,7 +1450,7 @@ class Building:
     # Set active methods - alter active objects #
     #############################################
 
-    def set_active_levels(self, names: List[str]):
+    def set_active_levels(self, names: list[str]):
         """
         Sets the active levels of the building.
         An empty `names` list is interpreted as
@@ -1271,7 +1458,7 @@ class Building:
         """
         self.levels.set_active(names)
 
-    def set_active_groups(self, names: List[str]):
+    def set_active_groups(self, names: list[str]):
         """
         Sets the active groups of the building.
         """
@@ -1288,6 +1475,18 @@ class Building:
         Sets the active section.
         """
         self.sections.set_active(name)
+
+    def set_active_placement(self, placement: str):
+        """
+        Sets the active placement
+        """
+        self.active_placement = placement
+
+    def set_active_angle(self, ang: float):
+        """
+        Sets the active angle
+        """
+        self.active_angle = ang
 
     ############################
     # Methods for adding loads #
@@ -1404,34 +1603,43 @@ class Building:
             Given a building level, distribute
             the surface load of the level on the beams
             of that level.
-            Floor slab data should have been generated first.
             """
             if lvl.floor_coordinates is not None:
                 for beam in lvl.beams.element_list:
                     udlZ_val = - beam.tributary_area * \
                         lvl.surface_DL / beam.length_clear()
                     beam.add_udl_glob(
-                        np.array([0.00, 0.00, udlZ_val]))
+                        np.array([0.00, 0.00, udlZ_val]),
+                        ltype='floor')
                 for node in lvl.nodes_primary.node_list:
                     pZ_val = - node.tributary_area * \
                         lvl.surface_DL
-                    node.load += np.array((0.00, 0.00, -pZ_val,
-                                           0.00, 0.00, 0.00))
+                    node.load_fl += np.array((0.00, 0.00, -pZ_val,
+                                              0.00, 0.00, 0.00))
         # ~~~
-        self.levels.active = []
-        self.groups.active = []
-        self.sections.active = None
-        self.materials.active = None
-        # TODO - zero-out everything to allow preprocessing
-        # multiple times.
+
+        for lvl in self.levels.level_list:
+            if lvl.parent_node:
+                # remove parent nodes
+                del(lvl.parent_node)
+                # floor-associated level parameters
+                del(lvl.floor_bisector_lines)
+                del(lvl.floor_coordinates)
+                # zero-out floor load/mass contribution
+                for node in lvl.list_of_primary_nodes():
+                    node.load_fl = np.zeros(6)
+                for elm in lvl.list_of_internal_elems():
+                    for ielm in elm.internal_elems:
+                        ielm.udl_fl = np.zeros(3)
+
         for lvl in self.levels.level_list:
             if lvl.restraint != "free":
                 continue
             if assume_floor_slabs:
                 beams = lvl.beams.element_list
-
-                coords, bisectors = trib_area_analysis.calculate_tributary_areas(
-                    beams)
+                coords, bisectors = \
+                    trib_area_analysis.calculate_tributary_areas(
+                        beams)
                 lvl.floor_coordinates = coords
                 lvl.floor_bisector_lines = bisectors
                 # distribute floor loads on beams and nodes
@@ -1443,7 +1651,6 @@ class Building:
                 elm.apply_self_weight_and_mass(1.00)
         if assume_floor_slabs:
             for lvl in self.levels.level_list:
-                # TODO this should be using a bunch of level methods
                 # accumulate all the mass at the parent nodes
                 if lvl.restraint != "free":
                     continue
@@ -1486,13 +1693,12 @@ class Building:
                     node.mass[1] = 0.
 
     def level_masses(self):
-        # TODO Fix this
         lvls = self.levels.level_list
         n_lvls = len(lvls)
         level_masses = np.full(n_lvls, 0.00)
         for i, lvl in enumerate(lvls):
             total_mass = 0.00
-            for node in lvl.nodes_primary.node_list:
+            for node in lvl.list_of_all_nodes():
                 if node.restraint_type == "free":
                     total_mass += node.mass[0]
             if lvl.parent_node:

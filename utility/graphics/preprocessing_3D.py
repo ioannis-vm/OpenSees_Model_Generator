@@ -43,7 +43,7 @@ def add_data__nodes(dt, list_of_nodes):
         customdata.append(
             (node.uniq_id,
              *node.mass,
-             *node.load
+             *node.load_total()
              )
         )
 
@@ -88,7 +88,7 @@ def add_data__parent_nodes(dt, list_of_nodes):
         customdata.append(
             (node.uniq_id,
              *node.mass,
-             *node.load
+             *node.load_total()
              )
         )
 
@@ -135,7 +135,7 @@ def add_data__internal_nodes(dt, list_of_nodes):
         customdata.append(
             (node.uniq_id,
              *node.mass,
-             *node.load
+             *node.load_total()
              )
         )
     dt.append({
@@ -261,12 +261,12 @@ def add_data__frames(dt, list_of_frames):
         )
         customdata.append(
             (elm.uniq_id,
-             *elm.udl,
+             *elm.udl_total(),
              elm.node_i.uniq_id)
         )
         customdata.append(
             (elm.uniq_id,
-             *elm.udl,
+             *elm.udl_total(),
              elm.node_j.uniq_id)
         )
         customdata.append(

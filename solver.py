@@ -102,13 +102,13 @@ class Analysis:
                 self.building.list_of_internal_elems():
             ops.eleLoad('-ele', elm.uniq_id,
                         '-type', '-beamUniform',
-                        elm.udl[1],
-                        elm.udl[2],
-                        elm.udl[0])
+                        elm.udl_total()[1],
+                        elm.udl_total()[2],
+                        elm.udl_total()[0])
         for node in self.building.list_of_primary_nodes() + \
                 self.building.list_of_parent_nodes() + \
                 self.building.list_of_internal_nodes():
-            ops.load(node.uniq_id, *node.load)
+            ops.load(node.uniq_id, *node.load_total())
 
     def _define_sections(self):
         # will be redefined in the child classes

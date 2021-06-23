@@ -33,9 +33,9 @@ b.set_active_section("W24X94")
 b.set_active_levels("all_above_base")
 
 b.active_placement = 'centroid'
-b.add_columns_from_grids(n_sub=2)
+b.add_columns_from_grids(n_sub=1)
 # b.active_placement = 'top_center'
-b.add_beams_from_grids(n_sub=2)
+b.add_beams_from_grids(n_sub=1)
 
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
@@ -91,10 +91,10 @@ control_node = b.list_of_parent_nodes()[-1]  # top floor
 # control_node = b.list_of_nodes()[-1]  # top floor somewhere
 analysis_metadata = pushover_analysis.run(
     "y",
-    15.,
+    40.,
     control_node,
     1./2.,
-    np.linspace(0., 15., 60))
+    np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
 n_plot_steps = analysis_metadata['successful steps']
 
 # plot the deformed shape for any of the steps
