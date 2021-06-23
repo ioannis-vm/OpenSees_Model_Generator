@@ -329,22 +329,6 @@ class NonlinearAnalysis(Analysis):
 
     def _define_sections(self, n_x, n_y, n_p):
 
-        # temporary solution, utnil I
-        # manage to get equalDOF to work
-        ops.section('Elastic',
-                    9900990099009900,
-                    1.00,
-                    1.00E8,
-                    1.00E8,
-                    1.00E8,
-                    1.00,
-                    1.00E8)
-        ops.beamIntegration(
-            'Lobatto',
-            9900990099009900,
-            9900990099009900,
-            2)
-
         for sec in self.building.sections.section_list:
             pieces = sec.subdivide_section(
                 n_x=n_x, n_y=n_y)
@@ -363,7 +347,7 @@ class NonlinearAnalysis(Analysis):
             ops.beamIntegration(
                 'Lobatto', sec.uniq_id, sec.uniq_id, n_p)
 
-    def _beamcolumn_elements(self):
+    def _define_beamcolumn_elements(self):
         for elm in \
                 self.building.list_of_internal_elems():
             # geometric transformation
@@ -395,7 +379,7 @@ class NonlinearAnalysis(Analysis):
     def _run_gravity_analysis(self):
         ops.system('BandGeneral')
         ops.numberer('RCM')
-        ops.constraints('Penalty', alphaS=1.0E10, alphaM=1.0E10)
+        ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-6, 1000, 3)
         ops.algorithm('Newton')
         ops.integrator('LoadControl', 0.01)
@@ -453,7 +437,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         self._apply_lateral_load(direction)
         ops.system("BandGeneral")
         ops.numberer('RCM')
-        ops.constraints('Penalty', alphaS=1.0E10, alphaM=1.0E10)
+        ops.constraints('Transformation')
         # TODO add refined steps if fails
         ops.test('NormUnbalance', 1e-6, 1000)
         ops.integrator("DisplacementControl",
@@ -623,7 +607,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         ops.system("BandGeneral")
         ops.numberer('RCM')
-        ops.constraints('Penalty', alphaS=1.0E10, alphaM=1.0E10)
+        ops.constraints('Transformation')
         # TODO add refined steps if fails
         ops.test('NormUnbalance', 1e-6, 1000)
         # Create the integration scheme, the Newmark
