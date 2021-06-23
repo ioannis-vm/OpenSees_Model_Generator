@@ -264,7 +264,7 @@ class LinearAnalysis(Analysis):
                         elm.section.uniq_id)
 
     def _run_gravity_analysis(self):
-        ops.system('FullGeneral')
+        ops.system('SuperLU')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-8, 20, 3)
@@ -377,7 +377,7 @@ class NonlinearAnalysis(Analysis):
         self._define_beamcolumn_elements()
 
     def _run_gravity_analysis(self):
-        ops.system('BandGeneral')
+        ops.system('SuperLU')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-6, 1000, 3)
@@ -435,7 +435,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction)
-        ops.system("BandGeneral")
+        ops.system('SuperLU')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
@@ -605,7 +605,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             damping_ratio
         )
 
-        ops.system("BandGeneral")
+        ops.system("SuperLU")
         ops.numberer('RCM')
         ops.constraints('Transformation')
         # TODO add refined steps if fails

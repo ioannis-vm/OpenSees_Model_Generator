@@ -3,8 +3,6 @@ This code is used to test out the building modeler
 """
 
 from modeler import Building
-import solver
-import numpy as np
 
 # Define a building
 b = Building()

@@ -26,6 +26,7 @@ from utility import trib_area_analysis
 from utility import mesher
 from utility import mesher_section_gen
 from utility.graphics import preprocessing_3D
+from utility.graphics import preprocessing_2D
 
 _ids = count(0)
 
@@ -1506,3 +1507,11 @@ class Building:
     def plot_building_geometry(self, extrude_frames=False):
         preprocessing_3D.plot_building_geometry(
             self, extrude_frames=extrude_frames)
+
+    def plot_2D_level_geometry(self,
+                               lvlname: str,
+                               extrude_frames=False):
+        preprocessing_2D.plot_2D_level_geometry(
+            self,
+            lvlname,
+            extrude_frames=extrude_frames)

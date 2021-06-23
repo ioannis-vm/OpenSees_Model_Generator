@@ -1,19 +1,16 @@
-import pdb
 import modeler
 import solver
 import numpy as np
-from pdb import set_trace
 
 # Define a building
 b = modeler.Building()
 
 # Add levels - single-story building
 b.add_level("base", 0.00, "fixed")
-b.add_level("1", 144.00)
+# b.add_level("1", 144.00)
 
-# for i in range(5):
-#     b.add_level(str(i+1), 144.00*(i+1))
-
+for i in range(5):
+    b.add_level(str(i+1), 144.00*(i+1))
 
 # add girdlines
 b.add_gridline("1", [0., 0.], [360.00, 0.])
@@ -53,10 +50,6 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # for node in b.list_of_parent_nodes():
 #     node.load += modeler.Load([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
 
-# node = b.list_of_primary_nodes()[-1]
-# node.restraint_type = 'pinned'
-# node.load += np.array([0.00, 0.00, 0.00, 0.00, 0.00, 0.00])
-
 # performing a linear gravity analysis.
 # linear_gravity_analysis = solver.LinearGravityAnalysis(b)
 # linear_gravity_analysis.run()
@@ -93,24 +86,24 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 # # performing a nonlinear pushover analysis
-# pushover_analysis = solver.PushoverAnalysis(b)
-# control_node = b.list_of_parent_nodes()[-1]  # top floor
-# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
-# analysis_metadata = pushover_analysis.run(
-#     "y",
-#     80.,
-#     control_node,
-#     1./2.,
-#     np.linspace(0., 80., 60))
-# n_plot_steps = analysis_metadata['successful steps']
+pushover_analysis = solver.PushoverAnalysis(b)
+control_node = b.list_of_parent_nodes()[-1]  # top floor
+# control_node = b.list_of_nodes()[-1]  # top floor somewhere
+analysis_metadata = pushover_analysis.run(
+    "y",
+    15.,
+    control_node,
+    1./2.,
+    np.linspace(0., 15., 60))
+n_plot_steps = analysis_metadata['successful steps']
 
-# # plot the deformed shape for any of the steps
-# plot_metadata = pushover_analysis.deformed_shape(
-#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-# print(plot_metadata)
+# plot the deformed shape for any of the steps
+plot_metadata = pushover_analysis.deformed_shape(
+    step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+print(plot_metadata)
 
-# # plot pushover curve
-# pushover_analysis.plot_pushover_curve("y", control_node)
+# plot pushover curve
+pushover_analysis.plot_pushover_curve("y", control_node)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear time-history analysis  #
@@ -118,15 +111,15 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 
 # nlth = solver.NLTHAnalysis(b)
 
-# # nlth.plot_ground_motion('temp/groundmotions/8xa.txt', 0.01)
+# # nlth.plot_ground_motion('groundmotions/x.txt', 0.01)
 
 # nlth.run(10.00, 0.01, np.arange(0.00, 10.00, 0.01),
-#          'temp/groundmotions/8xa.txt',
-#          'temp/groundmotions/8xa.txt',
-#          None, 0.01)
+#          'groundmotions/x.txt',
+#          'groundmotions/y.txt',
+#          'groundmotions/z.txt', 0.01)
 
 # node = b.list_of_parent_nodes()[-1]  # top floor
 
 # nlth.plot_node_displacement_history(node, 1)
-# nlth.deformed_shape(197, scaling=0.00, extrude_frames=True)
+# nlth.deformed_shape(0, scaling=0.00, extrude_frames=True)
 # nlth.global_reactions(0)[3] / 1000
