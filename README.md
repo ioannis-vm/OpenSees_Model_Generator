@@ -11,12 +11,12 @@ Currently, the following functionality is supported:
 
 #### Modeling
 
-- Organizing building components in building `levels`
-- Organizing building components in `groups`
+- Organizing building components in building levels
+- Organizing building components in groups
 - Automated generation of floor tributary areas (based on the closed regions defined by the level's beams), which are used to distribute the floor's UDL on the components
 - Automated element self-weight and mass
-- Using `gridline` objects to define beams and columns
-- Ability to define multiple elements at once on all `active` levels
+- Using gridline objects to define beams and columns
+- Ability to define multiple elements at once on all active levels
 - Support for importing AISC steel sections
 - Fiber sections of any shape
 - Specifying element offsets and placement point relative to the section
