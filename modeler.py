@@ -1063,13 +1063,6 @@ class Level:
     def __le__(self, other):
         return self.elevation <= other.elevation
 
-    def add_node(self, x_coord: float, y_coord: float):
-        """
-        Adds a node on that level at a given point
-        """
-        self.nodes_primary.add(Node([x_coord, y_coord,
-                                     self.elevation], self.restraint))
-
     def look_for_node(self, x_coord: float, y_coord: float):
         """
         Returns the node that occupies a given point
@@ -1247,36 +1240,55 @@ class Building:
 
     def add_node(self,
                  x: float,
-                 y: float):
+                 y: float) -> list[Node]:
         """
-        Adds a node at a particular point in all active levels
+        Adds a node at a particular point in all active levels.
+        Returns all added nodes.
         """
+        added_nodes = []
         for level in self.levels.active:
-            level.add_node(x, y)
+            node = Node([x, y,
+                         level.elevation], level.restraint)
+            level.nodes_primary.add(node)
+            added_nodes.append(node)
+        return added_nodes
 
     def add_level(self,
                   name: str,
                   elevation: float,
                   restraint: str = "free"
-                  ):
+                  ) -> Level:
         """
-        adds a level to the building
+        Adds a level to the building.
+        Levels must be defined in increasing elevations.
+        Args:
+            name (str): Unique name of the level
+            elevation (float): Elevation of the level
+            restraint (str): Can be any of "free", "pinned" or "fixed".
+                             All nodes defined in that level will have that
+                             restraint.
         """
-        self.levels.add(Level(name, elevation, restraint))
+        level = Level(name, elevation, restraint)
+        self.levels.add(level)
+        return level
 
     def add_gridline(self,
                      tag: str,
                      start: list[float],
                      end: list[float]
-                     ):
+                     ) -> GridLine:
         """
         Adds a new gridline to the building.
         Args:
            tag (str): Name of the gridline
            start (list(float]): X,Y coordinates of starting point
            end ~ similar to start
+        Regurns:
+            gridline object
         """
-        self.gridsystem.add(GridLine(tag, start, end))
+        gridline = GridLine(tag, start, end)
+        self.gridsystem.add(gridline)
+        return gridline
 
     def add_sections_from_json(self,
                                filename: str,
@@ -1321,12 +1333,14 @@ class Building:
                                            sec_data)
 
     def add_gridlines_from_dxf(self,
-                               dxf_file: str):
+                               dxf_file: str) -> list[GridLine]:
         """
         Parses a given DXF file and adds gridlines from
         all the lines defined in that file.
         Args:
             dxf_file (str): Path of the DXF file.
+        Returns:
+            grds (list[GridLine]): Added gridlines
         """
         i = 100000  # anything > 8 works
         j = 0
@@ -1334,6 +1348,7 @@ class Building:
         xj = 0.00
         yi = 0.00
         yj = 0.00
+        grds = []
         with open(dxf_file, 'r') as f:
             while True:
                 ln = f.readline()
@@ -1350,22 +1365,28 @@ class Building:
                     xj = float(ln)
                 if i == 8:
                     yj = float(ln)
-                    self.add_gridline(str(j), [xi, yi], [xj, yj])
+                    grd = self.add_gridline(str(j), [xi, yi], [xj, yj])
+                    grds.append(grd)
                     j += 1
                 i += 1
+        return grds
 
-    def add_group(self, name: str):
+    def add_group(self, name: str) -> Group:
         """
         Adds a new group to the building.
         Args:
             name: Name of the group to be added.
+        Returns:
+            group (Group): Added group.
         """
-        self.groups.add(Group(name))
+        group = Group(name)
+        self.groups.add(group)
+        return group
 
     def add_column_at_point(self,
                             x: float,
                             y: float,
-                            n_sub=1):
+                            n_sub=1) -> list[BeamColumn]:
         """
         Adds a vertical column at the given X, Y
         location at all the active levels.
@@ -1374,9 +1395,12 @@ class Building:
             x (float): X coordinate in the global system
             y (float): Y coordinate in the global system
             n_sub (int): Number of internal elements to add
+        Returns:
+            columns (list[BeamColumn]): Added columns.
         """
         if not self.sections.active:
             raise ValueError("No active section")
+        columns = []
         for level in self.levels.active:
             if level.previous_lvl:  # if previous level exists
                 # check to see if top node exists
@@ -1396,16 +1420,19 @@ class Building:
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
                 # add the column connecting the two nodes
-                level.columns.add(
-                    BeamColumn(node_i=top_node,
-                               node_j=bot_node,
-                               ang=self.active_angle,
-                               section=self.sections.active,
-                               n_sub=n_sub,
-                               placement=self.active_placement,
-                               offset_i=np.array((0., 0., 0.)).copy(),
-                               offset_j=np.array((0., 0., 0.)).copy()
-                               ))
+                column = BeamColumn(
+                    node_i=top_node,
+                    node_j=bot_node,
+                    ang=self.active_angle,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    placement=self.active_placement,
+                    offset_i=np.array((0., 0., 0.)).copy(),
+                    offset_j=np.array((0., 0., 0.)).copy()
+                )
+                columns.append(column)
+                level.columns.add(column)
+        return columns
 
     def add_beam_at_points(self,
                            start: np.ndarray,
@@ -1426,10 +1453,12 @@ class Building:
                       to the internal end of the rigid offset
                       of the i-side of the beam.
             offset_j ~ similar to offset i, for the j side.
+        Returns:
+            beams (list[BeamColumn]): added beams.
         """
         if not self.sections.active:
             raise ValueError("No active section specified")
-
+        beams = []
         for level in self.levels.active:
             # check to see if start node exists
             start_node = level.look_for_node(*start)
@@ -1447,14 +1476,17 @@ class Building:
                 level.nodes_primary.add(end_node)
             # add the beam connecting the two nodes
             # avoid making a reference to the same arrays for all beams
-            level.beams.add(BeamColumn(node_i=start_node,
-                                       node_j=end_node,
-                                       ang=self.active_angle,
-                                       section=self.sections.active,
-                                       n_sub=n_sub,
-                                       placement=self.active_placement,
-                                       offset_i=offset_i,
-                                       offset_j=offset_j))
+            beam = BeamColumn(node_i=start_node,
+                              node_j=end_node,
+                              ang=self.active_angle,
+                              section=self.sections.active,
+                              n_sub=n_sub,
+                              placement=self.active_placement,
+                              offset_i=offset_i,
+                              offset_j=offset_j)
+            level.beams.add(beam)
+            beams.append(beam)
+        return beams
 
     def add_columns_from_grids(self, n_sub=1):
         """
@@ -1462,13 +1494,18 @@ class Building:
         where gridlines intersect, and places a column on
         all such locations.
         Args:
-            n_sub (int): Number of internal elements to add
+            n_sub (int): Number of internal elements to add.
+        Returns:
+            columns (list[BeamColumn]): added columns
         """
         isect_pts = self.gridsystem.intersection_points()
+        columns = []
         for pt in isect_pts:
-            self.add_column_at_point(
+            cols = self.add_column_at_point(
                 *pt,
                 n_sub=n_sub)
+            columns.extend(cols)
+        return columns
 
     def add_beams_from_grids(self, n_sub=1):
         """
@@ -1479,13 +1516,16 @@ class Building:
         Args:
             n_sub (int): Number of internal elements to add
         """
+        beams = []
         for grid in self.gridsystem.grids:
             isect_pts = self.gridsystem.intersect(grid)
             for i in range(len(isect_pts)-1):
-                self.add_beam_at_points(
+                bms = self.add_beam_at_points(
                     isect_pts[i],
                     isect_pts[i+1],
                     n_sub=n_sub)
+                beams.extend(bms)
+        return beams
 
     #############################################
     # Set active methods - alter active objects #
@@ -1608,15 +1648,21 @@ class Building:
 
     def retrieve_beam(self, uniq_id: int) -> BeamColumn:
         beams = self.list_of_beams()
+        result = None
         for beam in beams:
             if beam.uniq_id == uniq_id:
-                return beam
+                result = beam
+                break
+        return result
 
     def retrieve_column(self, uniq_id: int) -> BeamColumn:
         columns = self.list_of_columns()
+        result = None
         for col in columns:
             if col.uniq_id == uniq_id:
-                return col
+                result = col
+                break
+        return result
 
     def reference_length(self):
         """
