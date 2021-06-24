@@ -13,9 +13,10 @@ for i in range(5):
     b.add_level(str(i+1), 144.00*(i+1))
 
 # add girdlines
-b.add_gridline("1", [0., 0.], [360.00, 0.])
+# getting variables that reference them is optional
+g1 = b.add_gridline("1", [0., 0.], [360.00, 0.])
 b.add_gridline("2", [0., 288.00], [360.00, 288.00])
-b.add_gridline("A", [0., 0.], [0., 288.00])
+gA = b.add_gridline("A", [0., 0.], [0., 288.00])
 b.add_gridline("B", [360.00, 0.], [360.00, 288.00])
 
 
@@ -33,6 +34,15 @@ b.add_sections_from_json(
     "section_data/sections.json",
     'HSS',
     ["HSS20.000X0.375"])
+
+
+# Modeling procedure:
+# - [ ] Set active {section, placement, angle}
+# - [ ] Set active levels
+# - [ ] Define elements
+# - [ ] Repeat
+# - [ ] In the end, preprocess building
+
 b.set_active_levels("all_above_base")
 
 b.active_placement = 'centroid'
@@ -41,6 +51,11 @@ b.add_columns_from_grids(n_sub=1)
 b.set_active_section("W24X94")
 b.active_placement = 'top_center'
 b.add_beams_from_grids(n_sub=1)
+# for more control (offsets etc.), define elements one by one.
+#     (see example_offsets.py)
+# Primary points can be obtained by intersecting gridlines:
+# pt = g1.intersect(gA)
+
 
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
@@ -56,8 +71,8 @@ b.plot_building_geometry(extrude_frames=True)
 #     node.load += modeler.Load([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
 
 # performing a linear gravity analysis.
-# linear_gravity_analysis = solver.LinearGravityAnalysis(b)
-# linear_gravity_analysis.run()
+linear_gravity_analysis = solver.LinearGravityAnalysis(b)
+linear_gravity_analysis.run()
 
 # retrieving aggregated textual results
 # reactions = linear_gravity_analysis.global_reactions(0)
@@ -73,9 +88,9 @@ b.plot_building_geometry(extrude_frames=True)
 #  modal analysis  #
 # ~~~~~~~~~~~~~~~~ #
 
-# # performing a linear modal analysis
-# modal_analysis = solver.ModalAnalysis(b, num_modes=9)
-# modal_analysis.run()
+# performing a linear modal analysis
+modal_analysis = solver.ModalAnalysis(b, num_modes=9)
+modal_analysis.run()
 
 # # retrieving textual results
 # print(modal_analysis.periods)
@@ -90,16 +105,16 @@ b.plot_building_geometry(extrude_frames=True)
 #  nonlinear pushover analysis  #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-# # performing a nonlinear pushover analysis
-# pushover_analysis = solver.PushoverAnalysis(b)
-# control_node = b.list_of_parent_nodes()[-1]  # top floor
-# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
-# analysis_metadata = pushover_analysis.run(
-#     "y",
-#     40.,
-#     control_node,
-#     1./2.,
-#     np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
+# performing a nonlinear pushover analysis
+pushover_analysis = solver.PushoverAnalysis(b)
+control_node = b.list_of_parent_nodes()[-1]  # top floor
+# control_node = b.list_of_nodes()[-1]  # top floor somewhere
+analysis_metadata = pushover_analysis.run(
+    "y",
+    40.,
+    control_node,
+    1./2.,
+    np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
 # n_plot_steps = analysis_metadata['successful steps']
 
 # # plot the deformed shape for any of the steps

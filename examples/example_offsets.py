@@ -1,6 +1,8 @@
 import modeler
 import numpy as np
 
+# Note: units are lb, in
+
 # Define a building
 b = modeler.Building()
 
@@ -8,10 +10,19 @@ b = modeler.Building()
 b.add_level("base", 0.00, "fixed")
 b.add_level("1", 144.00)
 
-
 # define materials
+
+# Note: Concrete would be more suitable for this model.
+# Concrete hasn't been implemented yet.
 b.materials.enable_Steel02()
 b.set_active_material('steel')
+
+
+# <temporary>
+
+# Note: Normally sections are not supposed to be defined
+# here. They should be precompiled in json files and imported
+# from those. This is temporary, to illustrate offsets.
 
 # define sections
 b.sections.generate_rect(
@@ -54,10 +65,20 @@ b.sections.generate_rect(
         'b': 20.00
     })
 
+# </temporary>
 
 b.set_active_levels('all_above_base')
 
-b.assign_surface_DL(1.20)
+# floor self-weight
+b.assign_surface_DL(1.20)  # lb/in2
+
+
+# Modeling procedure:
+# - [ ] Set active {section, placement, angle}
+# - [ ] Set active levels
+# - [ ] Define elements
+# - [ ] Repeat
+# - [ ] In the end, preprocess building
 
 b.set_active_section('160x40')
 b.active_placement = 'bottom_left'
@@ -82,7 +103,6 @@ bm = b.add_beam_at_points(np.array((0.00, 0.00)), np.array((360.00, 0.00)),
                           snap_i="bottom_right",
                           snap_j="bottom_left")
 
-
 b.add_beam_at_points(np.array((360.00, 0.00)), np.array((360.00, 160.00)),
                      snap_i="top_right")
 b.add_beam_at_points(np.array((360.00, 160.00)), np.array((360.00, 360.00)),
@@ -99,7 +119,7 @@ b.add_beam_at_points(np.array((360.00, 160.00)), np.array((0.00, 0.00)),
 
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
-# b.plot_2D_level_geometry("1", extrude_frames=True)
 
-# b.plot_building_geometry(extrude_frames=True)
+b.plot_2D_level_geometry("1", extrude_frames=True)
+b.plot_building_geometry(extrude_frames=True)
 b.plot_building_geometry(extrude_frames=False)
