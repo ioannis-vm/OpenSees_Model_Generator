@@ -1528,6 +1528,13 @@ class Building:
         return beams
 
     #############################################
+    # Remove methods - remove objects           #
+    #############################################
+
+    def clear_gridlines(self):
+        self.gridsystem.grids = []
+
+    #############################################
     # Set active methods - alter active objects #
     #############################################
 

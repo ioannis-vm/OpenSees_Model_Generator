@@ -59,12 +59,14 @@ b.sections.set_active("W14X90")
 b.active_placement = 'top_center'
 b.add_beams_from_grids()
 
+b.clear_gridlines()
+
 b.preprocess()
 
 b.plot_building_geometry(extrude_frames=True)
 
 
-# # performing a nonlinear pushover analysis
+# performing a nonlinear pushover analysis
 pushover_analysis = solver.PushoverAnalysis(b)
 control_node = b.list_of_parent_nodes()[-1]  # top floor
 # control_node = b.list_of_nodes()[-1]  # top floor somewhere
