@@ -32,7 +32,7 @@ class Analysis:
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)
     node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
-    frame_basic_forces: AnalysisResult = field(default_factory=AnalysisResult)
+    eleForces: AnalysisResult = field(default_factory=AnalysisResult)
 
     def _store_result(self, analysis_result: AnalysisResult,
                       uniq_id: int, result: list):
@@ -158,7 +158,7 @@ class Analysis:
             uid = elm.uniq_id
             # TODO fix, we need the basic forces.
             forces = np.array(ops.eleForce(uid))
-            self._store_result(self.frame_basic_forces,
+            self._store_result(self.eleForces,
                                uid,
                                forces)
 
@@ -264,7 +264,7 @@ class LinearAnalysis(Analysis):
                         elm.section.uniq_id)
 
     def _run_gravity_analysis(self):
-        ops.system('SuperLU')
+        ops.system('FullGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-8, 20, 3)

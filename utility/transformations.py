@@ -91,7 +91,7 @@ def local_axes_from_points_and_angle(point_i: np.ndarray,
     return x_axis, y_axis, z_axis
 
 
-def transfer_displacement(offset: np.ndarray,
+def offset_transformation(offset: np.ndarray,
                           u: np.ndarray,
                           r: np.ndarray) -> np.ndarray:
     """

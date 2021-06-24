@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import numpy as np
-import skgeom as sg
 from utility.graphics import common
 
 
@@ -90,7 +89,7 @@ def plot_2D_level_geometry(building: 'Building',
         ax.add_collection(collection)
 
     else:
-        for bm in level.beams.beam_list:
+        for bm in level.beams.element_list:
             for elm in bm.internal_elems:
                 line = [
                     elm.internal_pt_i[0:2],

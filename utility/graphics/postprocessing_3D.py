@@ -16,6 +16,14 @@ from utility.graphics import common, common_3D
 from utility import transformations
 
 
+def force_scaling_factor(ref_len, fmax, factor):
+    if fmax == 0.00:
+        result = 0.00
+    else:
+        result = ref_len / fmax * factor
+    return result
+
+
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     x_vec = element.x_axis
     y_vec = element.y_axis
@@ -149,8 +157,8 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         # transferring them to the clear element ends
         offset_i = elm.offset_i
         offset_j = elm.offset_j
-        u_i_o = transformations.transfer_displacement(offset_i, u_i, r_i)
-        u_j_o = transformations.transfer_displacement(offset_j, u_j, r_j)
+        u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
+        u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
 
         d_global, r_local = interp3D_deformation(
             elm, u_i_o, r_i, u_j_o, r_j, num_points)
@@ -253,8 +261,8 @@ def add_data__frames_deformed(analysis,
         # transferring them to the clear element ends
         offset_i = elm.offset_i
         offset_j = elm.offset_j
-        u_i_o = transformations.transfer_displacement(offset_i, u_i, r_i)
-        u_j_o = transformations.transfer_displacement(offset_j, u_j, r_j)
+        u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
+        u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
         d_global, r_local = interp3D_deformation(
             elm, u_i_o, r_i, u_j_o, r_j, num_points)
         interpolation_points = interp3D_points(
@@ -302,7 +310,7 @@ def add_data__frames_offsets_deformed(analysis,
             analysis.node_displacements[elm.node_i.uniq_id][step][0:3])
         r_i = np.array(
             analysis.node_displacements[elm.node_i.uniq_id][step][3:6])
-        u_io = transformations.transfer_displacement(offset_i, u_i, r_i)
+        u_io = transformations.offset_transformation(offset_i, u_i, r_i)
 
         p_j = np.array(elm.node_j.coords)
         p_jo = np.array(elm.internal_pt_j)
@@ -311,7 +319,7 @@ def add_data__frames_offsets_deformed(analysis,
             analysis.node_displacements[elm.node_j.uniq_id][step][0:3])
         r_j = np.array(
             analysis.node_displacements[elm.node_j.uniq_id][step][3:6])
-        u_jo = transformations.transfer_displacement(offset_j, u_j, r_j)
+        u_jo = transformations.offset_transformation(offset_j, u_j, r_j)
 
         x_i = p_i + u_i * scaling
         x_io = p_io + u_io * scaling
@@ -487,7 +495,6 @@ def deformed_shape(analysis: 'Analysis',
     list_of_nodes = analysis.building.list_of_primary_nodes() + \
         analysis.building.list_of_internal_nodes()
     list_of_parent_nodes = analysis.building.list_of_parent_nodes()
-    list_of_beamcolumn_elems = analysis.building.list_of_beamcolumn_elems()
 
     if list_of_parent_nodes:
         list_of_nodes.extend(analysis.building.list_of_parent_nodes())
@@ -614,14 +621,20 @@ def basic_forces(analysis: 'Analysis',
         y_vec = element.y_axis
         z_vec = element.z_axis
 
-        i_pos = np.array(element.node_i.coords)
+        i_pos = np.array(element.internal_pt_i)
 
         T_global2local = np.vstack((x_vec, y_vec, z_vec))
-        forces_global = analysis.frame_basic_forces[element.uniq_id][step]
 
-        ni, qyi, qzi = T_global2local @ forces_global[0:3]
+        forces_global = analysis.eleForces[
+            element.uniq_id][step][0:3]
+        moments_global_ends = analysis.eleForces[
+            element.uniq_id][step][3:6]
 
-        ti, myi, mzi = T_global2local @ forces_global[3:6]
+        moments_global_clear = transformations.offset_transformation(
+            element.offset_i, moments_global_ends, forces_global)
+
+        ni, qyi, qzi = T_global2local @ forces_global
+        ti, myi, mzi = T_global2local @ moments_global_clear
 
         wx, wy, wz = element.udl
 
@@ -651,30 +664,39 @@ def basic_forces(analysis: 'Analysis',
     # calculate scaling factors
     ref_len = analysis.building.reference_length()
     factor = 0.05
-    if scaling_n == 0.00:
-        nx_max = np.max(np.abs(nx_vecs))
-        scaling_n = ref_len / nx_max * factor
-        if scaling_n > 1.e8:
-            scaling_n = 1.00
-    if scaling_q == 0.00:
-        qy_max = np.max(np.abs(qy_vecs))
-        qz_max = np.max(np.abs(qz_vecs))
-        scaling_q = np.minimum(ref_len / qy_max * factor,
-                               ref_len / qz_max * factor)
-        if scaling_q > 1.e8:
-            scaling_q = 1.00
-    if scaling_m == 0.00:
-        my_max = np.max(np.abs(my_vecs))
-        mz_max = np.max(np.abs(mz_vecs))
-        scaling_m = np.minimum(ref_len / my_max * factor,
-                               ref_len / mz_max * factor)
-        if scaling_m > 1.e8:
-            scaling_m = 1.00
-    if scaling_t == 0.00:
-        tx_max = np.max(np.abs(tx_vecs))
-        scaling_t = ref_len / tx_max * factor
-        if scaling_t > 1.e8:
-            scaling_t = 1.00
+    nx_max = np.max(np.abs(nx_vecs))
+    scaling_n = force_scaling_factor(ref_len, nx_max, factor)
+    if scaling_n > 1.e8:
+        scaling_t = 1.00
+    qy_max = np.max(np.abs(qy_vecs))
+    qz_max = np.max(np.abs(qz_vecs))
+    scaling_qy = force_scaling_factor(ref_len, qy_max, factor)
+    scaling_qz = force_scaling_factor(ref_len, qz_max, factor)
+    if (scaling_qy > 0.00 and scaling_qz > 0.00):
+        scaling_q = np.minimum(scaling_qy, scaling_qz)
+    elif scaling_qy == 0.00:
+        scaling_q = scaling_qz
+    elif scaling_qz == 0.00:
+        scaling_q = scaling_qy
+    else:
+        scaling_q = 0.00
+    if scaling_q > 1.0e8:
+        scaling_q = 1.00
+    my_max = np.max(np.abs(my_vecs))
+    mz_max = np.max(np.abs(mz_vecs))
+    scaling_my = force_scaling_factor(ref_len, my_max, factor)
+    scaling_mz = force_scaling_factor(ref_len, mz_max, factor)
+    if (scaling_my > 0.00 and scaling_mz > 0.00):
+        scaling_m = np.minimum(scaling_my, scaling_mz)
+    elif scaling_my == 0.00:
+        scaling_m = scaling_mz
+    elif scaling_mz == 0.00:
+        scaling_m = scaling_my
+    else:
+        scaling_m = 0.00
+    if scaling_m > 1.0e8:
+        scaling_m = 1.00
+
     for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
 
         # retrieve results from the preallocated arrays
