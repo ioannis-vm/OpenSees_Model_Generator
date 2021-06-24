@@ -135,3 +135,23 @@ def rect_mesh(b, h):
     ]
     edges = define_edges(vertices)
     return generate(edges)
+
+
+def generic_snap_points(mesh: mesher.Mesh) -> dict:
+    """
+    Generates generic snap poitns
+    for a section object.
+    """
+    bbox = mesh.bounding_box()
+    z_min, y_min, z_max, y_max = bbox.flatten()
+    snap_points = {}
+    snap_points['centroid'] = - np.array([0., 0.])
+    snap_points['top_center'] = - np.array([0., y_max])
+    snap_points['top_left'] = - np.array([z_min, y_max])
+    snap_points['top_right'] = - np.array([z_max, y_max])
+    snap_points['center_left'] = - np.array([z_min, 0.])
+    snap_points['center_right'] = - np.array([z_max, 0.])
+    snap_points['bottom_center'] = - np.array([0., y_min])
+    snap_points['bottom_left'] = - np.array([z_min, y_min])
+    snap_points['bottom_right'] = - np.array([z_max, y_min])
+    return snap_points

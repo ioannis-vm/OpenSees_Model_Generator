@@ -351,6 +351,8 @@ class Node:
                         `building` objects, and is used to store the floor
                         area that corresponds to that node (if beams  with
                         offsets are connected to it)
+        column_above, column_below, beams:
+            Pointers to connected elements (only for primary nodes)
     """
 
     coords: np.ndarray
@@ -359,6 +361,9 @@ class Node:
     load: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
     load_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
     tributary_area: float = field(default=0.00)
+    column_above: BeamColumn = field(default=None)
+    column_below: BeamColumn = field(default=None)
+    beams: list[BeamColumn] = field(default_factory=list)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -877,8 +882,6 @@ class BeamColumn:
         x_axis, y_axis, z_axis = \
             transformations.local_axes_from_points_and_angle(
                 p_i, p_j, self.ang)
-        # add the offset due to the section's placement point
-        # to the user defined offsets
         t_glob_to_loc = transformations.transformation_matrix(
             x_axis, y_axis, z_axis)
         t_loc_to_glob = t_glob_to_loc.T
@@ -917,6 +920,39 @@ class BeamColumn:
             self.internal_elems.append(
                 LinearElement(node_i, node_j, self.section, self.ang,
                               ioffset, joffset))
+
+    def snap_offset(self, tag: str):
+        """
+        Used to easiliy retrieve the required
+        offset to connect a beam's end to the
+        top node of a column.
+        The method is called on the column object.
+        Args:
+            tag (str): Placement tag (see Section)
+        Returns:
+            The offset vector starting from the primary
+            node and pointing to the connection point
+            on the column, expressed in the global
+            coordinate system.
+        """
+        # primary node coordinates
+        p_i = self.node_i.coords
+        p_j = self.node_j.coords
+
+        # obtain offset from section (local system)
+        # given the snap point tag
+        dz, dy = self.section.retrieve_offset(tag)
+        snap_offset = np.array([0.00, dy, dz])
+        # retrieve local coordinate system
+        x_axis, y_axis, z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                p_i, p_j, self.ang)
+        t_glob_to_loc = transformations.transformation_matrix(
+            x_axis, y_axis, z_axis)
+        t_loc_to_glob = t_glob_to_loc.T
+        snap_offset_global = t_loc_to_glob @ snap_offset
+
+        return snap_offset_global
 
     def length_clear(self):
         pt_i = self.internal_pt_i
@@ -1074,24 +1110,6 @@ class Level:
             if other_node == candidate_node:
                 return other_node
         return None
-
-    def add_column(self, node_i, node_j, ang, section):
-        """
-        Adds a column on that level with given nodes.
-        """
-        # create the element
-        col_to_add = BeamColumn(node_i, node_j, ang, section=section)
-        # add the element to the level's columns
-        self.columns.add(col_to_add)
-
-    def add_beam(self, node_i, node_j, ang, section):
-        """
-        Adds a beam on that level with given nodes.
-        """
-        # create the element
-        bm_to_add = BeamColumn(node_i, node_j, ang, section=section)
-        # add the element to the level's beams
-        self.beams.add(bm_to_add)
 
     def assign_surface_DL(self,
                           load_per_area: float):
@@ -1427,11 +1445,13 @@ class Building:
                     section=self.sections.active,
                     n_sub=n_sub,
                     placement=self.active_placement,
-                    offset_i=np.array((0., 0., 0.)).copy(),
-                    offset_j=np.array((0., 0., 0.)).copy()
+                    offset_i=np.zeros(3),
+                    offset_j=np.zeros(3)
                 )
                 columns.append(column)
                 level.columns.add(column)
+                top_node.column_below = column
+                bot_node.column_above = column
         return columns
 
     def add_beam_at_points(self,
@@ -1439,7 +1459,9 @@ class Building:
                            end: np.ndarray,
                            n_sub=1,
                            offset_i=np.zeros(shape=3).copy(),
-                           offset_j=np.zeros(shape=3).copy()):
+                           offset_j=np.zeros(shape=3).copy(),
+                           snap_i="centroid",
+                           snap_j="centroid"):
         """
         Adds a beam connecting the given points
         at all the active levels.
@@ -1453,39 +1475,64 @@ class Building:
                       to the internal end of the rigid offset
                       of the i-side of the beam.
             offset_j ~ similar to offset i, for the j side.
+            snap_i (str): Tag used to infer an offset based
+                          on the section of an existing column
+                          at node i
+            snap_j ~ similar to snap_i, for the j side.
         Returns:
             beams (list[BeamColumn]): added beams.
         """
+
         if not self.sections.active:
             raise ValueError("No active section specified")
         beams = []
         for level in self.levels.active:
             # check to see if start node exists
             start_node = level.look_for_node(*start)
-            # create it if it does not exist
-            if not start_node:
+            if start_node:
+                # check if there is a column at node i
+                col = start_node.column_below
+                if col:
+                    o_s_i = col.snap_offset(snap_i)
+                    col_offset_i = col.offset_i - o_s_i
+                else:
+                    col_offset_i = np.zeros(3)
+            else:
+                # create it if it does not exist
                 start_node = Node(
                     np.array([*start, level.elevation]), level.restraint)
                 level.nodes_primary.add(start_node)
+                col_offset_i = np.zeros(3)
             # check to see if end node exists
             end_node = level.look_for_node(*end)
-            # create it if it does not exist
-            if not end_node:
+            if end_node:
+                # check if there is a column at node j
+                col = end_node.column_below
+                if col:
+                    o_s_j = col.snap_offset(snap_j)
+                    col_offset_j = col.offset_j - o_s_j
+                else:
+                    col_offset_j = np.zeros(3)
+            else:
+                # create it if it does not exist
                 end_node = Node(
                     np.array([*end, level.elevation]), level.restraint)
                 level.nodes_primary.add(end_node)
+                col_offset_j = np.zeros(3)
+
             # add the beam connecting the two nodes
-            # avoid making a reference to the same arrays for all beams
             beam = BeamColumn(node_i=start_node,
                               node_j=end_node,
                               ang=self.active_angle,
                               section=self.sections.active,
                               n_sub=n_sub,
                               placement=self.active_placement,
-                              offset_i=offset_i,
-                              offset_j=offset_j)
+                              offset_i=offset_i+col_offset_i,
+                              offset_j=offset_j+col_offset_j)
             level.beams.add(beam)
             beams.append(beam)
+            start_node.beams.append(beam)
+            end_node.beams.append(beam)
         return beams
 
     def add_columns_from_grids(self, n_sub=1):

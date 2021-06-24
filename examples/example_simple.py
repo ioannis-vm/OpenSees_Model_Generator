@@ -46,7 +46,7 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 
 
 # b.plot_building_geometry(extrude_frames=False)
-# b.plot_building_geometry(extrude_frames=True)
+b.plot_building_geometry(extrude_frames=True)
 
 # ~~~~~~~~~~~~~~~~~ #
 #  linear analysis  #
@@ -91,24 +91,24 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 # # performing a nonlinear pushover analysis
-pushover_analysis = solver.PushoverAnalysis(b)
-control_node = b.list_of_parent_nodes()[-1]  # top floor
-# control_node = b.list_of_nodes()[-1]  # top floor somewhere
-analysis_metadata = pushover_analysis.run(
-    "y",
-    40.,
-    control_node,
-    1./2.,
-    np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
-n_plot_steps = analysis_metadata['successful steps']
+# pushover_analysis = solver.PushoverAnalysis(b)
+# control_node = b.list_of_parent_nodes()[-1]  # top floor
+# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
+# analysis_metadata = pushover_analysis.run(
+#     "y",
+#     40.,
+#     control_node,
+#     1./2.,
+#     np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
+# n_plot_steps = analysis_metadata['successful steps']
 
-# plot the deformed shape for any of the steps
-plot_metadata = pushover_analysis.deformed_shape(
-    step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-print(plot_metadata)
+# # plot the deformed shape for any of the steps
+# plot_metadata = pushover_analysis.deformed_shape(
+#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+# print(plot_metadata)
 
-# plot pushover curve
-pushover_analysis.plot_pushover_curve("y", control_node)
+# # plot pushover curve
+# pushover_analysis.plot_pushover_curve("y", control_node)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear time-history analysis  #

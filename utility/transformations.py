@@ -6,6 +6,13 @@ import numpy as np
 from utility import common
 
 
+def rotation_matrix_2D(ang: float) -> np.ndarray:
+    """
+    Return a 2D transformation matrix
+    """
+    return np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
+
+
 def rotation_matrix_3D(axis: np.ndarray, theta: float) -> np.ndarray:
     """
     Return the rotation matrix associated with counterclockwise rotation about
@@ -83,11 +90,10 @@ def local_axes_from_points_and_angle(point_i: np.ndarray,
             up_direction - np.dot(up_direction, x_axis) * x_axis
         # ..and normalize
         y_axis = y_axis / np.linalg.norm(y_axis)
+        y_axis = np.dot(rotation_matrix_3D(
+            x_axis, ang), y_axis)
         # determine z axis from the cross-product
         z_axis = np.cross(x_axis, y_axis)
-        # rotate by `ang` around the x axis
-        z_axis = np.dot(rotation_matrix_3D(
-            x_axis, ang), z_axis)
     return x_axis, y_axis, z_axis
 
 
