@@ -29,12 +29,17 @@ b.add_sections_from_json(
     'W',
     ["W24X94"])
 b.set_active_section("W24X94")
-
+b.add_sections_from_json(
+    "section_data/sections.json",
+    'HSS',
+    ["HSS20.000X0.375"])
 b.set_active_levels("all_above_base")
 
 b.active_placement = 'centroid'
+b.set_active_section("HSS20.000X0.375")
 b.add_columns_from_grids(n_sub=1)
-# b.active_placement = 'top_center'
+b.set_active_section("W24X94")
+b.active_placement = 'top_center'
 b.add_beams_from_grids(n_sub=1)
 
 b.preprocess(assume_floor_slabs=True, self_weight=True)

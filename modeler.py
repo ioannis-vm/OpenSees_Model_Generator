@@ -584,6 +584,36 @@ class Sections:
         section = Section('W', name, material, mesh, properties)
         self.add(section)
 
+    def generate_HSS(self,
+                     name: str,
+                     material: Material,
+                     properties: dict):
+        """
+        Generate a HSS with specified parameters
+        and add it to the sections list.
+        """
+        # use the name to assess whether it's a rectangular
+        # or circular section
+        xs = name.count('X')
+        if xs == 2:
+            # it's a rectangular section
+            ht = properties['Ht']
+            b = properties['B']
+            t = properties['tdes']
+            mesh = mesher_section_gen.HSS_rect_mesh(ht, b, t)
+            section = Section('HSS', name, material, mesh, properties)
+            self.add(section)
+        elif xs == 1:
+            # it's a circular section
+            od = properties['OD']
+            tdes = properties['tdes']
+            n_pts = 25
+            mesh = mesher_section_gen.HSS_circ_mesh(od, tdes, n_pts)
+            section = Section('HSS', name, material, mesh, properties)
+            self.add(section)
+        else:
+            raise ValueError("This should never happen...")
+
     def generate_rect(self,
                       name: str,
                       material: Material,
@@ -601,7 +631,7 @@ class Sections:
         properties['A'] = temp['area']
         properties['Ix'] = temp['inertia']['ixx']
         properties['Iy'] = temp['inertia']['iyy']
-        properties['J'] = h * b**3 * \
+        properties['J'] = h * b**3 *\
             (16./3. - 3.36 * b/h * (1 - b**4/(12.*h**4)))
 
 
@@ -1278,6 +1308,17 @@ class Building:
                 self.sections.generate_W(label,
                                          self.materials.active,
                                          sec_data)
+        if sec_type == "HSS":
+            with open(filename, "r") as json_file:
+                section_dictionary = json.load(json_file)
+            for label in labels:
+                try:
+                    sec_data = section_dictionary[label]
+                except KeyError:
+                    raise KeyError("Section " + label + " not found in file.")
+                self.sections.generate_HSS(label,
+                                           self.materials.active,
+                                           sec_data)
 
     def add_gridlines_from_dxf(self,
                                dxf_file: str):
