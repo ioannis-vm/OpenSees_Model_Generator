@@ -351,19 +351,22 @@ class Node:
                         `building` objects, and is used to store the floor
                         area that corresponds to that node (if beams  with
                         offsets are connected to it)
-        column_above, column_below, beams:
+        column_above, column_below, beams, braces_above, braces_below, ...:
             Pointers to connected elements (only for primary nodes)
     """
 
     coords: np.ndarray
     restraint_type: str = field(default="free")
-    mass: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
-    load: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
-    load_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=6))
-    tributary_area: float = field(default=0.00)
-    column_above: BeamColumn = field(default=None)
-    column_below: BeamColumn = field(default=None)
-    beams: list[BeamColumn] = field(default_factory=list)
+    mass: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    load: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=6), repr=False)
+    load_fl: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=6), repr=False)
+    tributary_area: float = field(default=0.00, repr=False)
+    column_above: BeamColumn = field(default=None, repr=False)
+    column_below: BeamColumn = field(default=None, repr=False)
+    beams: list[BeamColumn] = field(default_factory=list, repr=False)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -389,9 +392,6 @@ class Node:
         generic component.
         """
         return self.load + self.load_fl
-
-    def mass_total(self):
-        return self.mass + self.mass_fl
 
 
 @dataclass
@@ -655,7 +655,7 @@ class Material:
     name: str
     ops_material: str
     density: float  # mass per unit volume, specified in lb-s**2/in**4
-    parameters: dict = field(repr=False)
+    parameters: dict
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -791,6 +791,17 @@ class LinearElement:
         p_j = self.node_j.coords + self.offset_j
         return np.linalg.norm(p_j - p_i)
 
+    def update_axes(self):
+        """
+        Recalculate the local axes of the elements, in case
+        the nodes were changed after the element's definition.
+        """
+        self.internal_pt_i = self.node_i.coords + self.offset_i
+        self.internal_pt_j = self.node_j.coords + self.offset_j
+        self.x_axis, self.y_axis, self.z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                self.internal_pt_i, self.internal_pt_j, self.ang)
+
     def add_udl_glob(self, udl: np.ndarray, ltype='generic'):
         """
         Adds a uniformly distributed load
@@ -861,12 +872,14 @@ class BeamColumn:
     node_i: Node
     node_j: Node
     ang: float
-    section: Section
-    n_sub: int
-    placement: str = field(default="centroid")
-    offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
-    offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
-    tributary_area: float = field(default=0.00)
+    section: Section = field(repr=False)
+    n_sub: int = field(repr=False)
+    placement: str = field(default="centroid", repr=False)
+    offset_i: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    offset_j: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    tributary_area: float = field(default=0.00, repr=False)
 
     def __post_init__(self):
 
@@ -1062,6 +1075,7 @@ class Level:
                                optionally assigned to these nodes.
         columns (BeamColumns): Columns of the level.
         beams (BeamColumns): Beams of the level.
+        braces (BeamColumns): Braces of the level.
         parent_node (Node): If tributary area analysis is done and floors
                             are assumed, a node is created at the
                             center of mass of the level, and acts as the
@@ -1080,14 +1094,15 @@ class Level:
     name: str
     elevation: float
     restraint: str = field(default="free")
-    previous_lvl: 'Level' = field(default=None)
-    surface_DL: float = field(default=0.00)
-    nodes_primary: Nodes = field(default_factory=Nodes)
-    columns: BeamColumns = field(default_factory=BeamColumns)
-    beams: BeamColumns = field(default_factory=BeamColumns)
-    parent_node: Node = field(default=None)
-    floor_coordinates: np.ndarray = field(default=None)
-    floor_bisector_lines: list[np.ndarray] = field(default=None)
+    previous_lvl: 'Level' = field(default=None, repr=False)
+    surface_DL: float = field(default=0.00, repr=False)
+    nodes_primary: Nodes = field(default_factory=Nodes, repr=False)
+    columns: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    beams: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    braces: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    parent_node: Node = field(default=None, repr=False)
+    floor_coordinates: np.ndarray = field(default=None, repr=False)
+    floor_bisector_lines: list[np.ndarray] = field(default=None, repr=False)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -1104,10 +1119,11 @@ class Level:
         Returns the node that occupies a given point
         at the current level, if it exists
         """
-        candidate_node = Node(np.array([x_coord, y_coord,
-                                        self.elevation]), self.restraint)
+        candidate_pt = np.array([x_coord, y_coord,
+                                 self.elevation])
         for other_node in self.nodes_primary.node_list:
-            if other_node == candidate_node:
+            other_pt = other_node.coords
+            if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
                 return other_node
         return None
 
@@ -1535,6 +1551,80 @@ class Building:
             end_node.beams.append(beam)
         return beams
 
+    def add_brace_at_points(self,
+                            start: np.ndarray,
+                            end: np.ndarray,
+                            btype: str = 'single',
+                            n_sub: int = 5,
+                            camber: float = 0.05):
+        """
+        Adds a brace connecting the given points
+        at all the active levels.
+        For single braces, the start node corresponds to the
+        level above, and the end node to the level below.
+        Existing nodes are used, otherwise they are created.
+        Args:
+            start (np.ndarray): X,Y coordinates of point i
+            end (np.ndarray): X,Y coordinates of point j
+            btype (str): Flag for the type of bracing to model
+            n_sub (int): Number of internal elements to add
+            camber (float): Initial imperfection modeled as
+                            parabolic camber, expressed
+                            as a proportion of the element's
+                            length.
+        Returns:
+            braces (list[BeamColumn]): added braces.
+        """
+        if not self.sections.active:
+            raise ValueError("No active section specified")
+        if self.active_angle != 0.00:
+            raise ValueError("Only ang=0.00 is currently supported")
+        braces = []
+        if btype != 'single':
+            raise ValueError("Only `single` brace type supported")
+        for level in self.levels.active:
+            # check to see if start node exists
+            start_node = level.look_for_node(*start)
+            if not start_node:
+                # create it if it does not exist
+                start_node = Node(
+                    np.array([*start, level.elevation]), level.restraint)
+                level.nodes_primary.add(start_node)
+            # check to see if end node exists
+            end_node = level.previous_lvl.look_for_node(*end)
+            if not end_node:
+                # create it if it does not exist
+                end_node = Node(
+                    np.array([*end, level.elevation]), level.restraint)
+                level.nodes_primary.add(end_node)
+            brace = BeamColumn(node_i=start_node,
+                               node_j=end_node,
+                               ang=self.active_angle,
+                               section=self.sections.active,
+                               n_sub=n_sub,
+                               placement='centroid',
+                               offset_i=np.zeros(3),
+                               offset_j=np.zeros(3))
+            # apply camber
+            t_param = np.linspace(0, 1, n_sub+1)
+            x = camber * brace.length_clear()
+            y_deform = 4.0 * x * (t_param**2 - t_param)
+            pts_local = np.column_stack(
+                (np.zeros(n_sub+1), y_deform, np.zeros(n_sub+1)))
+            x_vec = brace.internal_elems[0].x_axis
+            y_vec = brace.internal_elems[0].y_axis
+            z_vec = brace.internal_elems[0].z_axis
+            pts_global = (transformations.transformation_matrix(
+                x_vec, y_vec, z_vec).T @ pts_local.T).T
+            for i in range(1, n_sub):
+                brace.internal_nodes[i-1].coords += pts_global[i]
+            for ielem in brace.internal_elems:
+                ielem.update_axes()
+
+            braces.append(brace)
+            level.braces.add(brace)
+        return braces
+
     def add_columns_from_grids(self, n_sub=1):
         """
         Uses the currently defined gridsystem to obtain all locations
@@ -1573,6 +1663,28 @@ class Building:
                     n_sub=n_sub)
                 beams.extend(bms)
         return beams
+
+    def add_braces_from_grids(self, btype="single", n_sub=5, camber=0.05):
+        """
+        Uses the currently defined gridsystem.
+        For each gridline, braces are placed
+        connecting the starting point at the top level
+        and the end point at the level below.
+        Args:
+            n_sub (int): Number of internal elements to add
+        """
+        braces = []
+        for grid in self.gridsystem.grids:
+            start_pt = grid.start_np
+            end_pt = grid.end_np
+            brcs = self.add_brace_at_points(
+                start_pt,
+                end_pt,
+                btype=btype,
+                n_sub=n_sub,
+                camber=camber)
+            braces.extend(brcs)
+        return braces
 
     #############################################
     # Remove methods - remove objects           #
@@ -1653,9 +1765,18 @@ class Building:
                 list_of_columns.append(col)
         return list_of_columns
 
+    def list_of_braces(self):
+        list_of_braces = []
+        for lvl in self.levels.level_list:
+            for brace in lvl.braces.element_list:
+                list_of_braces.append(brace)
+        return list_of_braces
+
     def list_of_beamcolumn_elems(self):
         list_of_frames = []
-        for element in self.list_of_beams() + self.list_of_columns():
+        for element in self.list_of_beams() \
+            + self.list_of_columns() \
+                + self.list_of_braces():
             list_of_frames.append(element)
         return list_of_frames
 

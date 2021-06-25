@@ -195,20 +195,6 @@ def add_data__diaphragm_lines(dt, lvl):
         }
     })
 
-    # # plot the tributary areas
-    # if tributary_areas:
-    #     for lvl in building.levels.level_list:
-    #         if level.slab_data:
-    #             for loop in level.slab_data['loops']:
-    #                 coords = [h.vertex.coords for h in loop]
-    #                 poly = sg.Polygon(coords)
-    #                 skel = sg.skeleton.create_interior_straight_skeleton(poly)
-    #                 for h in skel.halfedges:
-    #                     if h.is_bisector:
-    #                         p1 = h.vertex.point
-    #                         p2 = h.opposite.vertex.point
-    #                 ax.plot([p1.x(), p2.x()], [p1.y(), p2.y()], 'r-', lw=1)
-
 
 def add_data__bisector_lines(dt, lvl):
     if not lvl.parent_node:
@@ -498,7 +484,7 @@ def plot_building_geometry(building: 'Building',
     # plot the parent nodes
     add_data__parent_nodes(dt, building.list_of_parent_nodes())
 
-    # plot the columns and beams (if any)
+    # plot the linear elements
     if extrude_frames:
         add_data__frame_offsets(dt, building.list_of_beamcolumn_elems())
         add_data__extruded_frames_mesh(
