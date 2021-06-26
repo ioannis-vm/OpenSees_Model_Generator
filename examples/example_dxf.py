@@ -71,7 +71,7 @@ b.clear_gridlines()
 b.add_gridlines_from_dxf("examples/dxf/gridlines_brace.dxf")
 b.set_active_section("HSS9X9X5/16")
 b.set_active_groups(['braces'])
-b.add_braces_from_grids(btype="single", n_sub=10, camber=0.01)
+b.add_braces_from_grids(btype="single", n_sub=6, camber=0.01)
 
 b.preprocess()
 
@@ -82,12 +82,12 @@ b.preprocess()
 #  linear analysis  #
 # ~~~~~~~~~~~~~~~~~ #
 
-for node in b.list_of_parent_nodes():
-    node.load += np.array([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
+# for node in b.list_of_parent_nodes():
+#     node.load += np.array([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
 
-# performing a linear gravity analysis.
-linear_gravity_analysis = solver.LinearGravityAnalysis(b)
-linear_gravity_analysis.run()
+# # performing a linear gravity analysis.
+# linear_gravity_analysis = solver.LinearGravityAnalysis(b)
+# linear_gravity_analysis.run()
 
 # retrieving aggregated textual results
 # reactions = linear_gravity_analysis.global_reactions(0)
@@ -97,29 +97,29 @@ linear_gravity_analysis.run()
 # visualizing results
 # linear_gravity_analysis.deformed_shape(extrude_frames=False)
 # linear_gravity_analysis.deformed_shape(extrude_frames=True)
-linear_gravity_analysis.basic_forces()
+# linear_gravity_analysis.basic_forces()
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear pushover analysis  #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-# # performing a nonlinear pushover analysis
-# pushover_analysis = solver.PushoverAnalysis(b)
-# control_node = b.list_of_parent_nodes()[-1]  # top floor
-# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
-# analysis_metadata = pushover_analysis.run(
-#     "x",
-#     40.,
-#     control_node,
-#     1./2.,
-#     np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
-# n_plot_steps = analysis_metadata['successful steps']
+# performing a nonlinear pushover analysis
+pushover_analysis = solver.PushoverAnalysis(b)
+control_node = b.list_of_parent_nodes()[-1]  # top floor
+# control_node = b.list_of_nodes()[-1]  # top floor somewhere
+analysis_metadata = pushover_analysis.run(
+    "x",
+    40.,
+    control_node,
+    0.10,
+    np.linspace(0., 40., 100), n_x=4, n_y=8, n_p=3)
+n_plot_steps = analysis_metadata['successful steps']
 
-# # plot the deformed shape for any of the steps
-# plot_metadata = pushover_analysis.deformed_shape(
-#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-# print(plot_metadata)
+# plot the deformed shape for any of the steps
+plot_metadata = pushover_analysis.deformed_shape(
+    step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+print(plot_metadata)
 
-# # plot pushover curve
-# pushover_analysis.plot_pushover_curve("x", control_node)
+# plot pushover curve
+pushover_analysis.plot_pushover_curve("x", control_node)

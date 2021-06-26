@@ -188,6 +188,12 @@ class GridSystem:
         """
         self.grids.remove(grdl)
 
+    def clear(self):
+        """
+        Removes all gridlines.
+        """
+        self.grids = []
+
     def intersection_points(self):
         """
         Returns a list of all the points
@@ -248,7 +254,7 @@ class Group:
     """
 
     name: str
-    elements: list = field(init=False)
+    elements: list = field(init=False, repr=False)
 
     def __post_init__(self):
         self.elements = []
@@ -272,6 +278,11 @@ class Group:
         Remove something from the group
         """
         self.elements.remove(element)
+
+    def __repr__(self):
+        return(
+            "Group(name=" + self.name + "): "
+            + str(len(self.elements)) + " elements.")
 
 
 @dataclass
@@ -300,6 +311,20 @@ class Groups:
         # Sort the element groups in ascending order (name-wise)
         self.group_list.sort()
 
+    def retrieve_by_name(self, name: str) -> Group:
+        """
+        Returns a variable pointing to the group that has the
+        given name.
+        Args:
+            name (str): Name of the group to retrieve
+        Returns:
+            group (Group)
+        """
+        for grp in self.group_list:
+            if grp.name == name:
+                return grp
+        raise ValueError("Group " + name + " does not exist")
+
     def set_active(self, names: list[str]):
         """
         Specifies the active groups(one or more).
@@ -311,14 +336,16 @@ class Groups:
             names (list[str]): Names of groups to set as active
         """
         self.active = []
-        found = False
         for name in names:
-            for grp in self.group_list:
-                if grp.name == name:
-                    self.active.append(grp)
-                    found = True
-            if found is False:
-                raise ValueError("Group " + name + " does not exist")
+            grp = self.retrieve_by_name(name)
+            self.active.append(grp)
+
+    def add_element(self, element):
+        """
+        Adds an element to all active groups.
+        """
+        for grp in self.active:
+            grp.add(element)
 
     def __repr__(self):
         out = "The building has " + \
@@ -343,7 +370,6 @@ class Node:
         mass (np.ndarray): Mass with respect to the global coordinate system
                            (shape = 3 for all nodes except parent nodes, where
                             inertia terms are also present, and shape = 6).
-        mass_fl ~ similar to mass, coming from a floor
         load (np.ndarray): Load with respect to the global coordinate system.
         load_fl (np.ndarray): similar to load, coming from the floors.
         tributary_area: This attribute holds the results of tributary area
@@ -415,9 +441,23 @@ class Nodes:
                              + repr(node))
         self.node_list.sort()
 
+    def remove(self, node: Node):
+        """
+        Remove a node from the nodes collection,
+        if it was there.
+        """
+        if node in self.node_list:
+            self.node_list.remove(node)
+        self.node_list.sort()
+
+    def clear(self):
+        """
+        Removes all nodes
+        """
+        self.node_list = []
+
     def __repr__(self):
-        out = "The level has " + \
-            str(len(self.node_list)) + " nodes\n"
+        out = str(len(self.node_list)) + " nodes\n"
         for node in self.node_list:
             out += repr(node) + "\n"
         return out
@@ -738,13 +778,14 @@ class LinearElement:
         offset_j (np.ndarray): Similarly for node j
         internal_pt_i (np.ndarray): Coordinates of the internal point i
         internal_pt_j (np.ndarray): Similarly for node j
-        udl (np.ndarray): Array of size 3 containing components of the
+        udl_self (np.ndarray): Array of size 3 containing components of the
                           uniformly distributed load that is applied
                           to the clear length of the element, acting
                           on the local x, y, and z directions, in the
                           direction of the axes (see Section).
                           Values are in units of force per unit length.
-        udl_fl (np.ndarray): Similar to udl, coming from the floors.
+        udl_fl, udl_other (np.ndarray): Similar to udl, coming from the floors
+                          and anything else
         x_axis: Array of size 3 representing the local x axis vector
                 expressed in the global coordinate system.
         y_axis: (similar)
@@ -766,20 +807,21 @@ class LinearElement:
     node_i: Node
     node_j: Node
     section: Section
+    parent_n_sub: int = field()
     ang: float = field(default=0.00)
     offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
-    udl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    udl_self: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     udl_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    udl_other: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
         # local axes with respect to the global coord system
         self.internal_pt_i = self.node_i.coords + self.offset_i
         self.internal_pt_j = self.node_j.coords + self.offset_j
-        self.x_axis, self.y_axis, self.z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                self.internal_pt_i, self.internal_pt_j, self.ang)
+        self.x_axis, self.y_axis, self.z_axis = transformations.local_axes_from_points_and_angle(
+            self.internal_pt_i, self.internal_pt_j, self.ang)
 
     def length_clear(self):
         """
@@ -802,7 +844,7 @@ class LinearElement:
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
 
-    def add_udl_glob(self, udl: np.ndarray, ltype='generic'):
+    def add_udl_glob(self, udl: np.ndarray, ltype='other'):
         """
         Adds a uniformly distributed load
         to the existing udl of the element.
@@ -820,10 +862,12 @@ class LinearElement:
         T_mat = transformations.transformation_matrix(
             self.x_axis, self.y_axis, self.z_axis)
         udl_local = T_mat @ udl
-        if ltype == 'generic':
-            self.udl += udl_local
+        if ltype == 'self':
+            self.udl_self += udl_local
         elif ltype == 'floor':
             self.udl_fl += udl_local
+        elif ltype == 'other':
+            self.udl_other += udl_local
         else:
             raise ValueError("Unsupported load type")
 
@@ -833,7 +877,17 @@ class LinearElement:
         by summing up the floor's contribution to the
         generic component.
         """
-        return self.udl + self.udl_fl
+        return self.udl_self + self.udl_fl + self.udl_other
+
+    def get_udl_no_floor_glob(self):
+        """
+        Returns the current value of the total UDL to global
+        coordinates
+        """
+        udl = self.udl_self + self.udl_other
+        T_mat = transformations.transformation_matrix(
+            self.x_axis, self.y_axis, self.z_axis)
+        return T_mat.T @ udl
 
 
 @dataclass
@@ -851,6 +905,7 @@ class BeamColumn:
         section (Section): Section of the element.
         n_sub (int): Number of linear elements between
                      the primary nodes node_i and node_j.
+        function (str): Whether it's a beam, column, brace, etc.
         placement (str): String flag that controls the
                          placement point of the element relative
                          to its section.
@@ -874,6 +929,7 @@ class BeamColumn:
     ang: float
     section: Section = field(repr=False)
     n_sub: int = field(repr=False)
+    function: str = field(repr=False)
     placement: str = field(default="centroid", repr=False)
     offset_i: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=3), repr=False)
@@ -892,9 +948,8 @@ class BeamColumn:
         dz, dy = self.section.retrieve_offset(self.placement)
         sec_offset_local = np.array([0.00, dy, dz])
         # retrieve local coordinate system
-        x_axis, y_axis, z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                p_i, p_j, self.ang)
+        x_axis, y_axis, z_axis = transformations.local_axes_from_points_and_angle(
+            p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
             x_axis, y_axis, z_axis)
         t_loc_to_glob = t_glob_to_loc.T
@@ -931,8 +986,8 @@ class BeamColumn:
                 node_j = self.internal_nodes[i]
                 joffset = np.zeros(3).copy()
             self.internal_elems.append(
-                LinearElement(node_i, node_j, self.section, self.ang,
-                              ioffset, joffset))
+                LinearElement(node_i, node_j, self.section, self.n_sub,
+                              self.ang, ioffset, joffset))
 
     def snap_offset(self, tag: str):
         """
@@ -957,9 +1012,8 @@ class BeamColumn:
         dz, dy = self.section.retrieve_offset(tag)
         snap_offset = np.array([0.00, dy, dz])
         # retrieve local coordinate system
-        x_axis, y_axis, z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                p_i, p_j, self.ang)
+        x_axis, y_axis, z_axis = transformations.local_axes_from_points_and_angle(
+            p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
             x_axis, y_axis, z_axis)
         t_loc_to_glob = t_glob_to_loc.T
@@ -972,7 +1026,7 @@ class BeamColumn:
         pt_j = self.internal_pt_j
         return np.linalg.norm(pt_j - pt_i)
 
-    def add_udl_glob(self, udl: np.ndarray, ltype='generic'):
+    def add_udl_glob(self, udl: np.ndarray, ltype='other'):
         """
         Adds a uniformly distributed load
         to the existing udl of the element.
@@ -1008,12 +1062,20 @@ class BeamColumn:
         mass_per_length *= multiplier
         weight_per_length *= multiplier
         self.add_udl_glob(
-            np.array([0., 0., -weight_per_length]), ltype='generic')
+            np.array([0., 0., -weight_per_length]), ltype='self')
+        total_mass_per_length = \
+            -self.internal_elems[0].get_udl_no_floor_glob()[2] / common.G_CONST
         for sub_elm in self.internal_elems:
-            mass = mass_per_length * \
+            mass = total_mass_per_length * \
                 sub_elm.length_clear() / 2.00  # lb-s**2/in
             sub_elm.node_i.mass += np.array([mass, mass, mass])
             sub_elm.node_j.mass += np.array([mass, mass, mass])
+
+    def primary_nodes(self):
+        return [self.node_i, self.node_j]
+
+    def internal_nodes(self):
+        return [self.internal_nodes]
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -1034,18 +1096,42 @@ class BeamColumns:
 
     def add(self, elm: BeamColumn):
         """
-        Add a column in the columns collection,
+        Add an element in the element collection,
         if it does not already exist
         """
         if elm not in self.element_list:
             self.element_list.append(elm)
             self.element_list.sort()
+        else:
+            raise ValueError('Element already exists: '
+                             + repr(elm))
+
+    def remove(self, elm: BeamColumn):
+        """
+        Remove an element from the element collection,
+        if it was there.
+        """
+        if elm in self.element_list:
+            self.element_list.remove(elm)
+            self.element_list.sort()
+
+    def clear(self):
+        """
+        Removes all elements
+        """
+        self.element_list = []
 
     def __repr__(self):
-        out = "The level has " + str(len(self.element_list)) + " elements\n"
+        out = str(len(self.element_list)) + " elements\n"
         for elm in self.element_list:
             out += repr(elm) + "\n"
         return out
+
+    def internal_elems(self):
+        result = []
+        for element in self.element_list:
+            result.extend(element.internal_elems)
+        return result
 
 
 @dataclass
@@ -1066,6 +1152,7 @@ class Level:
                             This load can be distributed to the
                             structural members of the level automatically.
                             It is also converted and applied as mass.
+        diaphragm (bool): True for a rigid diaphragm, False otherwise.
         nodes_primary (Nodes): Primary nodes of the level. Primary means
                                that these nodes are used to connect
                                components of different elements
@@ -1096,6 +1183,7 @@ class Level:
     restraint: str = field(default="free")
     previous_lvl: 'Level' = field(default=None, repr=False)
     surface_DL: float = field(default=0.00, repr=False)
+    diaphragm: bool = field(default=False)
     nodes_primary: Nodes = field(default_factory=Nodes, repr=False)
     columns: BeamColumns = field(default_factory=BeamColumns, repr=False)
     beams: BeamColumns = field(default_factory=BeamColumns, repr=False)
@@ -1204,9 +1292,14 @@ class Levels:
             self.active.append(lvl)
             self.active.sort()
 
-    def get(self, name: str):
+    def retrieve_by_name(self, name: str):
         """"
-        Finds a level given its name.
+        Returns a variable pointing to the level that has the
+        given name.
+        Args:
+            name (str): Name of the level to retrieve
+        Returns:
+            level (Level)
         """
         for lvl in self.level_list:
             if lvl.name == name:
@@ -1229,11 +1322,9 @@ class Levels:
             self.active = self.level_list[1::]
         else:
             for name in names:
-                retrieved_level = self.get(name)
+                retrieved_level = self.retrieve_by_name(name)
                 if retrieved_level not in self.active:
-                    self.active.append(
-                        retrieved_level
-                    )
+                    self.active.append(retrieved_level)
 
     def __repr__(self):
         out = "The building has " + \
@@ -1241,6 +1332,79 @@ class Levels:
         for lvl in self.level_list:
             out += repr(lvl) + "\n"
         return out
+
+
+@dataclass
+class Selection:
+    """
+    This class enables the ability to select elements
+    to modify them.
+
+    """
+    nodes: Nodes = field(default_factory=Nodes, repr=False)
+    beams: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    columns: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    braces: BeamColumns = field(default_factory=BeamColumns, repr=False)
+
+    def clear(self):
+        """
+        Clears all selected elements.
+        """
+        self.nodes = Nodes()
+        self.beams = BeamColumns()
+        self.columns = BeamColumns()
+        self.braces = BeamColumns()
+
+    #############################################
+    # Methods that modify selected elements     #
+    #############################################
+    def add_UDL(self, udl: np.ndarray):
+        """
+        Adds the specified UDL to the selected
+        beamcolumn elements.
+        """
+        for beam in self.beams.element_list:
+            beam.add_udl_glob(udl, ltype='other')
+
+    #############################################
+    # Methods that return objects               #
+    #############################################
+
+    def list_of_beamcolumn_elems(self):
+        """
+        Returns all selected BeamColumn elements.
+        """
+        return self.beams.element_list + \
+            self.columns.element_list + self.braces.element_list
+
+    def list_of_internal_elems(self):
+        beamcolumn_elems = self.list_of_beamcolumn_elems()
+        result = []
+        for element in beamcolumn_elems:
+            result.extend(element.internal_elems)
+        return result
+
+    def list_of_primary_nodes(self):
+        """
+        Returns a list of unique primary nodes on which all the
+        selected elements are connected to.
+        """
+        gather = []
+        for elem in self.list_of_beamcolumn_elems():
+            gather.extend(elem.primary_nodes())
+        # remove duplicates
+        result = []
+        return [result.append(x) for x in gather if x not in gather]
+
+    def list_of_internal_nodes(self):
+        """
+        Returns a list of all secondary nodes that exist
+        in the selected elements.
+        """
+        result = []
+        for elem in self.list_of_beamcolumn_elems():
+            result.extend(elem.internal_nodes)
+        return result
 
 
 @dataclass
@@ -1265,6 +1429,7 @@ class Building:
     groups: Groups = field(default_factory=Groups)
     sections: Sections = field(default_factory=Sections)
     materials: Materials = field(default_factory=Materials)
+    selection: Selection = field(default_factory=Selection)
     active_placement: str = field(default='centroid')
     active_angle: float = field(default=0.00)
 
@@ -1460,12 +1625,14 @@ class Building:
                     ang=self.active_angle,
                     section=self.sections.active,
                     n_sub=n_sub,
+                    function="column",
                     placement=self.active_placement,
                     offset_i=np.zeros(3),
                     offset_j=np.zeros(3)
                 )
                 columns.append(column)
                 level.columns.add(column)
+                self.groups.add_element(column)
                 top_node.column_below = column
                 bot_node.column_above = column
         return columns
@@ -1542,11 +1709,13 @@ class Building:
                               ang=self.active_angle,
                               section=self.sections.active,
                               n_sub=n_sub,
+                              function="beam",
                               placement=self.active_placement,
                               offset_i=offset_i+col_offset_i,
                               offset_j=offset_j+col_offset_j)
             level.beams.add(beam)
             beams.append(beam)
+            self.groups.add_element(beam)
             start_node.beams.append(beam)
             end_node.beams.append(beam)
         return beams
@@ -1602,6 +1771,7 @@ class Building:
                                ang=self.active_angle,
                                section=self.sections.active,
                                n_sub=n_sub,
+                               function="brace",
                                placement='centroid',
                                offset_i=np.zeros(3),
                                offset_j=np.zeros(3))
@@ -1622,6 +1792,7 @@ class Building:
                 ielem.update_axes()
 
             braces.append(brace)
+            self.groups.add_element(brace)
             level.braces.add(brace)
         return braces
 
@@ -1687,11 +1858,85 @@ class Building:
         return braces
 
     #############################################
+    # Select methods - select objects           #
+    #############################################
+
+    def select_all_at_level(self, lvl_name: str):
+        """
+        Selects all selectable objects at a given level,
+        specified by the level's name.
+        """
+        lvl = self.levels.retrieve_by_name(lvl_name)
+        for beam in lvl.beams.element_list:
+            self.selection.beams.add(beam)
+        for column in lvl.columns.element_list:
+            self.selection.columns.add(column)
+        for brace in lvl.braces.element_list:
+            self.selection.braces.add(brace)
+
+    def select_all(self):
+        """
+        Selects all selectable objects.
+        """
+        for lvl in self.levels.level_list:
+            self.select_all_at_level(lvl)
+
+    def select_group(self, group_name: str):
+        """
+        Selects all selectable objects contained
+        in a given group, specified by the
+        group's name.
+        """
+        grp = self.groups.retrieve_by_name(group_name)
+        for elm in grp.elements:
+            if isinstance(elm, BeamColumn):
+                if elm.function == "beam":
+                    self.selection.beams.add(elm)
+                elif elm.function == "column":
+                    self.selection.columns.add(elm)
+                elif elm.function == "brace":
+                    self.selection.braces.add(elm)
+
+    def select_perimeter_beams(self, lvl_name: str):
+        lvl = self.levels.retrieve_by_name(lvl_name)
+        beams = lvl.beams.element_list
+        edges, edge_to_beam_map = \
+            trib_area_analysis.list_of_beams_to_mesh_edges_external(beams)
+        halfedges = mesher.define_halfedges(edges)
+        halfedge_to_beam_map = {}
+        for h in halfedges:
+            halfedge_to_beam_map[h.uniq_id] = \
+                edge_to_beam_map[h.edge.uniq_id]
+        loops = mesher.obtain_closed_loops(halfedges)
+        external, internal, trivial = \
+            mesher.orient_loops(loops)
+        # Sanity checks.
+        mesher.sanity_checks(external, trivial)
+        loop = external[0]
+        for h in loop:
+            beam = halfedge_to_beam_map[h.uniq_id]
+            self.selection.beams.add(beam)
+
+    #############################################
     # Remove methods - remove objects           #
     #############################################
 
     def clear_gridlines(self):
-        self.gridsystem.grids = []
+        self.gridsystem.clear()
+
+    def delete_selected(self):
+        """
+        Deletes the selected objects.
+        """
+        for lvl in self.levels.level_list:
+            for node in self.selection.nodes.node_list:
+                lvl.nodes_primary.remove(node)
+            for beam in self.selection.beams.element_list:
+                lvl.beams.remove(beam)
+            for column in self.selection.columns.element_list:
+                lvl.columns.remove(column)
+            for brace in self.selection.braces.element_list:
+                lvl.braces.remove(brace)
 
     #############################################
     # Set active methods - alter active objects #
@@ -1883,10 +2128,10 @@ class Building:
         for lvl in self.levels.level_list:
             if lvl.parent_node:
                 # remove parent nodes
-                del(lvl.parent_node)
+                lvl.parent_node = None
                 # floor-associated level parameters
-                del(lvl.floor_bisector_lines)
-                del(lvl.floor_coordinates)
+                lvl.floor_bisector_lines = None
+                lvl.floor_coordinates = None
                 # zero-out floor load/mass contribution
                 for node in lvl.list_of_primary_nodes():
                     node.load_fl = np.zeros(6)
@@ -1895,17 +2140,17 @@ class Building:
                         ielm.udl_fl = np.zeros(3)
 
         for lvl in self.levels.level_list:
-            if lvl.restraint != "free":
-                continue
             if assume_floor_slabs:
                 beams = lvl.beams.element_list
-                coords, bisectors = \
-                    trib_area_analysis.calculate_tributary_areas(
-                        beams)
-                lvl.floor_coordinates = coords
-                lvl.floor_bisector_lines = bisectors
-                # distribute floor loads on beams and nodes
-                apply_floor_load(lvl)
+                if beams:
+                    coords, bisectors = \
+                        trib_area_analysis.calculate_tributary_areas(
+                            beams)
+                    lvl.diaphragm = True
+                    lvl.floor_coordinates = coords
+                    lvl.floor_bisector_lines = bisectors
+                    # distribute floor loads on beams and nodes
+                    apply_floor_load(lvl)
 
         # frame element self-weight
         if self_weight:
@@ -1914,45 +2159,47 @@ class Building:
         if assume_floor_slabs:
             for lvl in self.levels.level_list:
                 # accumulate all the mass at the parent nodes
-                if lvl.restraint != "free":
-                    continue
-                properties = mesher.geometric_properties(lvl.floor_coordinates)
-                floor_mass = -lvl.surface_DL * \
-                    properties['area'] / common.G_CONST
-                assert(floor_mass >= 0.00),\
-                    "Error: floor area properties\n" + \
-                    "Overall floor area should be negative (by convention)."
-                floor_centroid = properties['centroid']
-                floor_mass_inertia = properties['inertia']['ir_mass']\
-                    * floor_mass
-                self_mass_centroid = np.array([0.00, 0.00])  # excluding floor
-                total_self_mass = 0.00
-                for node in lvl.list_of_all_nodes():
-                    self_mass_centroid += node.coords[0:2] * node.mass[0]
-                    total_self_mass += node.mass[0]
-                self_mass_centroid = self_mass_centroid * \
-                    (1.00/total_self_mass)
-                total_mass = total_self_mass + floor_mass
-                # combined
-                centroid = [
-                    (self_mass_centroid[0] * total_self_mass +
-                     floor_centroid[0] * floor_mass) / total_mass,
-                    (self_mass_centroid[1] * total_self_mass +
-                     floor_centroid[1] * floor_mass) / total_mass
-                ]
-                lvl.parent_node = Node(
-                    np.array([centroid[0], centroid[1],
-                              lvl.elevation]), "parent")
-                lvl.parent_node.mass = np.array([total_mass,
-                                                 total_mass,
-                                                 0.,
-                                                 0., 0., 0.])
-                lvl.parent_node.mass[5] = floor_mass_inertia
-                for node in lvl.list_of_all_nodes():
-                    lvl.parent_node.mass[5] += node.mass[0] * \
-                        np.linalg.norm(lvl.parent_node.coords - node.coords)**2
-                    node.mass[0] = 0.
-                    node.mass[1] = 0.
+                if lvl.diaphragm:
+                    properties = mesher.geometric_properties(
+                        lvl.floor_coordinates)
+                    floor_mass = -lvl.surface_DL * \
+                        properties['area'] / common.G_CONST
+                    assert(floor_mass >= 0.00),\
+                        "Error: floor area properties\n" + \
+                        "Overall floor area should be negative (by convention)."
+                    floor_centroid = properties['centroid']
+                    floor_mass_inertia = properties['inertia']['ir_mass']\
+                        * floor_mass
+                    self_mass_centroid = np.array(
+                        [0.00, 0.00])  # excluding floor
+                    total_self_mass = 0.00
+                    for node in lvl.list_of_all_nodes():
+                        self_mass_centroid += node.coords[0:2] * node.mass[0]
+                        total_self_mass += node.mass[0]
+                    self_mass_centroid = self_mass_centroid * \
+                        (1.00/total_self_mass)
+                    total_mass = total_self_mass + floor_mass
+                    # combined
+                    centroid = [
+                        (self_mass_centroid[0] * total_self_mass +
+                         floor_centroid[0] * floor_mass) / total_mass,
+                        (self_mass_centroid[1] * total_self_mass +
+                         floor_centroid[1] * floor_mass) / total_mass
+                    ]
+                    lvl.parent_node = Node(
+                        np.array([centroid[0], centroid[1],
+                                  lvl.elevation]), "parent")
+                    lvl.parent_node.mass = np.array([total_mass,
+                                                     total_mass,
+                                                     0.,
+                                                     0., 0., 0.])
+                    lvl.parent_node.mass[5] = floor_mass_inertia
+                    for node in lvl.list_of_all_nodes():
+                        lvl.parent_node.mass[5] += node.mass[0] * \
+                            np.linalg.norm(
+                                lvl.parent_node.coords - node.coords)**2
+                        node.mass[0] = 0.
+                        node.mass[1] = 0.
 
     def level_masses(self):
         lvls = self.levels.level_list
@@ -1972,9 +2219,27 @@ class Building:
     # Preprocessing Visualization #
     ###############################
 
-    def plot_building_geometry(self, extrude_frames=False):
+    def plot_building_geometry(self,
+                               extrude_frames=False,
+                               offsets=True,
+                               gridlines=True,
+                               global_axes=True,
+                               diaphragm_lines=True,
+                               tributary_areas=True,
+                               just_selection=False,
+                               parent_nodes=True,
+                               frame_axes=True):
         preprocessing_3D.plot_building_geometry(
-            self, extrude_frames=extrude_frames)
+            self,
+            extrude_frames=extrude_frames,
+            offsets=offsets,
+            gridlines=gridlines,
+            global_axes=global_axes,
+            diaphragm_lines=diaphragm_lines,
+            tributary_areas=tributary_areas,
+            just_selection=just_selection,
+            parent_nodes=parent_nodes,
+            frame_axes=frame_axes)
 
     def plot_2D_level_geometry(self,
                                lvlname: str,

@@ -135,7 +135,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                                             dt,
                                             list_of_frames,
                                             step,
-                                            num_points,
+                                            sub,
                                             scaling):
     if not list_of_frames:
         return
@@ -147,6 +147,9 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     k_list = []
     index = 0
     for elm in list_of_frames:
+        num_points = int(sub / elm.parent_n_sub)
+        if num_points < 2:
+            num_points = 2
 
         # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
@@ -246,7 +249,7 @@ def add_data__frames_deformed(analysis,
                               dt,
                               list_of_frames,
                               step,
-                              num_points,
+                              sub,
                               scaling):
     if not list_of_frames:
         return
@@ -254,6 +257,10 @@ def add_data__frames_deformed(analysis,
     y = []
     z = []
     for elm in list_of_frames:
+        num_points = int(sub / elm.parent_n_sub)
+        if num_points < 2:
+            num_points = 2
+
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
         u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
@@ -532,7 +539,7 @@ def basic_forces(analysis: 'Analysis',
     dt = []
 
     list_of_frames = analysis.building.list_of_internal_elems()
-    list_of_nodes = analysis.building.list_of_all_nodes()
+    list_of_nodes = analysis.building.list_of_primary_nodes()
 
     # draw the nodes0
     add_data__nodes_undeformed(dt, list_of_nodes)

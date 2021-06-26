@@ -19,6 +19,10 @@ b.add_gridline("2", [0., 288.00], [360.00, 288.00])
 gA = b.add_gridline("A", [0., 0.], [0., 288.00])
 b.add_gridline("B", [360.00, 0.], [360.00, 288.00])
 
+# add groups
+b.add_group("beams")
+b.add_group("columns")
+
 
 # define materials
 b.materials.enable_Steel02()
@@ -38,18 +42,22 @@ b.add_sections_from_json(
 
 # Modeling procedure:
 # - [ ] Set active {section, placement, angle}
-# - [ ] Set active levels
+# - [ ] Set active levels and groups
 # - [ ] Define elements
 # - [ ] Repeat
 # - [ ] In the end, preprocess building
 
 b.set_active_levels("all_above_base")
 
+b.assign_surface_DL(0.833)
+
 b.active_placement = 'centroid'
 b.set_active_section("HSS20.000X0.375")
+b.set_active_groups(["columns"])
 b.add_columns_from_grids(n_sub=1)
 b.set_active_section("W24X94")
 b.active_placement = 'top_center'
+b.set_active_groups(["beams"])
 b.add_beams_from_grids(n_sub=1)
 # for more control (offsets etc.), define elements one by one.
 #     (see example_offsets.py)
@@ -57,11 +65,12 @@ b.add_beams_from_grids(n_sub=1)
 # pt = g1.intersect(gA)
 
 
+b.select_perimeter_beams("1")
+b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
+b.delete_selected()
+b.plot_building_geometry(extrude_frames=False)
+# b.plot_building_geometry()
 b.preprocess(assume_floor_slabs=True, self_weight=True)
-
-
-# b.plot_building_geometry(extrude_frames=False)
-b.plot_building_geometry(extrude_frames=True)
 
 # ~~~~~~~~~~~~~~~~~ #
 #  linear analysis  #
@@ -70,9 +79,9 @@ b.plot_building_geometry(extrude_frames=True)
 # for node in b.list_of_parent_nodes():
 #     node.load += modeler.Load([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
 
-# performing a linear gravity analysis.
-linear_gravity_analysis = solver.LinearGravityAnalysis(b)
-linear_gravity_analysis.run()
+# # performing a linear gravity analysis.
+# linear_gravity_analysis = solver.LinearGravityAnalysis(b)
+# linear_gravity_analysis.run()
 
 # retrieving aggregated textual results
 # reactions = linear_gravity_analysis.global_reactions(0)
@@ -88,9 +97,9 @@ linear_gravity_analysis.run()
 #  modal analysis  #
 # ~~~~~~~~~~~~~~~~ #
 
-# performing a linear modal analysis
-modal_analysis = solver.ModalAnalysis(b, num_modes=9)
-modal_analysis.run()
+# # performing a linear modal analysis
+# modal_analysis = solver.ModalAnalysis(b, num_modes=9)
+# modal_analysis.run()
 
 # # retrieving textual results
 # print(modal_analysis.periods)
@@ -105,17 +114,17 @@ modal_analysis.run()
 #  nonlinear pushover analysis  #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-# performing a nonlinear pushover analysis
-pushover_analysis = solver.PushoverAnalysis(b)
-control_node = b.list_of_parent_nodes()[-1]  # top floor
-# control_node = b.list_of_nodes()[-1]  # top floor somewhere
-analysis_metadata = pushover_analysis.run(
-    "y",
-    40.,
-    control_node,
-    1./2.,
-    np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
-# n_plot_steps = analysis_metadata['successful steps']
+# # performing a nonlinear pushover analysis
+# pushover_analysis = solver.PushoverAnalysis(b)
+# control_node = b.list_of_parent_nodes()[-1]  # top floor
+# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
+# analysis_metadata = pushover_analysis.run(
+#     "y",
+#     40.,
+#     control_node,
+#     1./2.,
+#     np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
+# # n_plot_steps = analysis_metadata['successful steps']
 
 # # plot the deformed shape for any of the steps
 # plot_metadata = pushover_analysis.deformed_shape(

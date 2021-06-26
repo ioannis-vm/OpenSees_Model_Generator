@@ -327,7 +327,7 @@ class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
-    def _define_sections(self, n_x, n_y, n_p):
+    def _define_sections(self, n_x, n_y):
 
         for sec in self.building.sections.section_list:
             pieces = sec.subdivide_section(
@@ -344,22 +344,29 @@ class NonlinearAnalysis(Analysis):
                           z_loc,
                           area,
                           sec.material.uniq_id)
-            ops.beamIntegration(
-                'Lobatto', sec.uniq_id, sec.uniq_id, n_p)
 
-    def _define_beamcolumn_elements(self):
+    def _define_beamcolumn_elements(self, n_p):
         for elm in \
                 self.building.list_of_internal_elems():
+            n_sub = int(n_p / elm.parent_n_sub)
+            if n_sub < 2:
+                n_sub = 2
+            # beamIntegration('Lobatto', tag, secTag, N)
+            ops.beamIntegration(
+                'Lobatto', elm.uniq_id, elm.section.uniq_id, n_p)
             # geometric transformation
             ops.geomTransf('Linear',
                            elm.uniq_id,
                            *elm.z_axis)
+            # element('dispBeamColumn', eleTag, *eleNodes,
+            #         transfTag, integrationTag, '-cMass',
+            #         '-mass', mass=0.0)
             ops.element('dispBeamColumn',
                         elm.uniq_id,
                         elm.node_i.uniq_id,
                         elm.node_j.uniq_id,
                         elm.uniq_id,
-                        elm.section.uniq_id)
+                        elm.uniq_id)
 
     def _to_OpenSees_domain(self, n_x, n_y, n_p):
         """
@@ -373,8 +380,8 @@ class NonlinearAnalysis(Analysis):
         self._define_node_mass()
         # the following two columns use methods that
         # are defined in the inherited classes that follow
-        self._define_sections(n_x, n_y, n_p)
-        self._define_beamcolumn_elements()
+        self._define_sections(n_x, n_y)
+        self._define_beamcolumn_elements(n_p)
 
     def _run_gravity_analysis(self):
         ops.system('SuperLU')
@@ -435,11 +442,11 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction)
-        ops.system('SuperLU')
+        ops.system('FullGeneral')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
-        ops.test('NormUnbalance', 1e-6, 1000)
+        ops.test('NormUnbalance', 1e-6, 2000)
         ops.integrator("DisplacementControl",
                        control_node.uniq_id, control_DOF + 1, displ_incr)
         ops.algorithm("Newton")
@@ -454,8 +461,16 @@ class PushoverAnalysis(NonlinearAnalysis):
                 j_out += 1
             check = ops.analyze(1)
             if check != 0:
-                print('Analysis failed to converge')
-                break
+                ops.integrator("DisplacementControl",
+                               control_node.uniq_id, control_DOF + 1,
+                               displ_incr/10.)
+                check = ops.analyze(1)
+                if check != 0:
+                    print('Analysis failed to converge')
+                    break
+                ops.integrator("DisplacementControl",
+                               control_node.uniq_id, control_DOF + 1,
+                               displ_incr)
             curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
             print('Target displacement: %.2f | Current: %.2f' %
                   (target_displacement, curr_displ), end='\r')

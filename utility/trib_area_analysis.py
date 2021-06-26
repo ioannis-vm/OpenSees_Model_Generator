@@ -216,6 +216,7 @@ def calculate_tributary_areas(
     """
     TODO - docstring
     """
+
     def is_in_some_subloop(halfedge, loops):
         for loop in loops:
             for other_halfedge in loop:
@@ -225,9 +226,6 @@ def calculate_tributary_areas(
                         halfedge.next.vertex.point):
                     return True
         return False
-
-    if not beams:
-        return
 
     bisectors = []
 

@@ -453,47 +453,72 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
 
 def plot_building_geometry(building: 'Building',
                            extrude_frames=False,
-                           tributary_areas=True):
+                           offsets=True,
+                           gridlines=True,
+                           global_axes=True,
+                           diaphragm_lines=True,
+                           tributary_areas=True,
+                           just_selection=False,
+                           parent_nodes=True,
+                           frame_axes=True
+                           ):
 
     layout = common_3D.global_layout()
     dt = []
 
     ref_len = building.reference_length()
 
-    # plot the grids
-    add_data__grids(dt, building)
+    # grid lines
+    if gridlines:
+        add_data__grids(dt, building)
 
     # global axes
-    add_data__global_axes(dt, ref_len)
+    if global_axes:
+        add_data__global_axes(dt, ref_len)
 
-    # plot the diaphgragm lines
-    for lvl in building.levels.level_list:
-        add_data__diaphragm_lines(dt, lvl)
+    # diaphgragm lines
+    if diaphragm_lines:
+        for lvl in building.levels.level_list:
+            add_data__diaphragm_lines(dt, lvl)
 
-    # plot the bisector lines
-    for lvl in building.levels.level_list:
-        add_data__bisector_lines(dt, lvl)
-
-    # plot the internal nodes
-    if not extrude_frames:
-        add_data__internal_nodes(dt, building.list_of_internal_nodes())
+    # bisector lines
+    if tributary_areas:
+        for lvl in building.levels.level_list:
+            add_data__bisector_lines(dt, lvl)
 
     # plot the nodes
-    add_data__nodes(dt, building.list_of_primary_nodes())
+    if not just_selection:
+        nodes_primary = building.list_of_primary_nodes()
+        nodes_internal = building.list_of_internal_nodes()
+    else:
+        nodes_primary = building.selection.list_of_primary_nodes()
+        nodes_internal = building.selection.list_of_internal_nodes()
+    add_data__nodes(dt, nodes_primary)
+    if not extrude_frames:
+        add_data__internal_nodes(dt, nodes_internal)
 
     # plot the parent nodes
-    add_data__parent_nodes(dt, building.list_of_parent_nodes())
+    if parent_nodes:
+        add_data__parent_nodes(dt, building.list_of_parent_nodes())
 
     # plot the linear elements
-    if extrude_frames:
-        add_data__frame_offsets(dt, building.list_of_beamcolumn_elems())
-        add_data__extruded_frames_mesh(
-            dt, building.list_of_internal_elems())
+    if just_selection:
+        beamcolumn_elems = building.selection.list_of_beamcolumn_elems()
+        internal_elems = building.selection.list_of_internal_elems()
     else:
-        add_data__frame_offsets(dt, building.list_of_beamcolumn_elems())
-        add_data__frames(dt, building.list_of_internal_elems())
-        add_data__frame_axes(dt, building.list_of_internal_elems(),
-                             building.reference_length())
+        beamcolumn_elems = building.list_of_beamcolumn_elems()
+        internal_elems = building.list_of_internal_elems()
+    if extrude_frames:
+        add_data__extruded_frames_mesh(
+            dt, internal_elems)
+    else:
+        add_data__frames(dt, internal_elems)
+        if frame_axes:
+            add_data__frame_axes(dt, internal_elems,
+                                 building.reference_length())
+    # plot the rigid offsets
+    if offsets:
+        add_data__frame_offsets(dt, beamcolumn_elems)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
