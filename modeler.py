@@ -742,12 +742,12 @@ class Materials:
         # units: lb, in
         self.add(Material('steel',
                           'Steel02',
-                          0.0007344714506172839,
+                          0.0007342054137099255,
                           {
                               'Fy': 50000,
                               'E0': 29000000,
                               'G':   11153846.15,
-                              'b': 0.01
+                              'b': 0.0001
                           })
                  )
 
@@ -1897,9 +1897,11 @@ class Building:
                 elif elm.function == "brace":
                     self.selection.braces.add(elm)
 
-    def select_perimeter_beams(self, lvl_name: str):
+    def select_perimeter_beams_story(self, lvl_name: str):
         lvl = self.levels.retrieve_by_name(lvl_name)
         beams = lvl.beams.element_list
+        if not beams:
+            return
         edges, edge_to_beam_map = \
             trib_area_analysis.list_of_beams_to_mesh_edges_external(beams)
         halfedges = mesher.define_halfedges(edges)
@@ -1908,7 +1910,7 @@ class Building:
             halfedge_to_beam_map[h.uniq_id] = \
                 edge_to_beam_map[h.edge.uniq_id]
         loops = mesher.obtain_closed_loops(halfedges)
-        external, internal, trivial = \
+        external, _, trivial = \
             mesher.orient_loops(loops)
         # Sanity checks.
         mesher.sanity_checks(external, trivial)
@@ -1916,6 +1918,10 @@ class Building:
         for h in loop:
             beam = halfedge_to_beam_map[h.uniq_id]
             self.selection.beams.add(beam)
+
+    def select_perimeter_beams_all(self):
+        for lvl in self.levels.level_list:
+            self.select_perimeter_beams_story(lvl.name)
 
     #############################################
     # Remove methods - remove objects           #

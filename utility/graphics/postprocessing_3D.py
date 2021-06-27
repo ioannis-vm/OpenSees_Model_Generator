@@ -643,7 +643,7 @@ def basic_forces(analysis: 'Analysis',
         ni, qyi, qzi = T_global2local @ forces_global
         ti, myi, mzi = T_global2local @ moments_global_clear
 
-        wx, wy, wz = element.udl
+        wx, wy, wz = element.udl_total()
 
         l = element.length_clear()
         t = np.linspace(0.00, l, num=num_points)
@@ -656,12 +656,19 @@ def basic_forces(analysis: 'Analysis',
         my_vec = t**2 * 0.50 * wz + t * qzi + myi
 
         # store results in the preallocated arrays
-        nx_vecs[i_elem*num_points:i_elem*num_points+num_points] = nx_vec
-        qy_vecs[i_elem*num_points:i_elem*num_points+num_points] = qy_vec
-        qz_vecs[i_elem*num_points:i_elem*num_points+num_points] = qz_vec
-        tx_vecs[i_elem*num_points:i_elem*num_points+num_points] = tx_vec
-        my_vecs[i_elem*num_points:i_elem*num_points+num_points] = my_vec
-        mz_vecs[i_elem*num_points:i_elem*num_points+num_points] = mz_vec
+        # TODO: make units a bit more formal
+        nx_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = nx_vec * (1.00/1000.)
+        qy_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = qy_vec * (1.00/1000.)
+        qz_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = qz_vec * (1.00/1000.)
+        tx_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = tx_vec * (1.00/1000./12.)
+        my_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = my_vec * (1.00/1000./12.)
+        mz_vecs[i_elem*num_points:i_elem*num_points +
+                num_points] = mz_vec * (1.00/1000./12.)
         x_vecs[i_elem*3: i_elem*3 + 3] = x_vec
         y_vecs[i_elem*3: i_elem*3 + 3] = y_vec
         z_vecs[i_elem*3: i_elem*3 + 3] = z_vec

@@ -59,6 +59,18 @@ def line_plot_interactive(title_text, x, y, mode,
 
     num_points = len(x)
     indices = np.array([i for i in range(num_points)])
+    my_hovertemplate = \
+        'XY value pair: %{customdata:d}<br>' + \
+        xlab + ' = %{x: ' + xhoverformat + '} '
+    if xunit:
+        my_hovertemplate += xunit + '<br>'
+    else:
+        my_hovertemplate += '<br>'
+    my_hovertemplate += ylab+' = %{y:' + yhoverformat + '} '
+    if yunit:
+        my_hovertemplate += yunit + '<extra></extra>'
+    else:
+        my_hovertemplate += '<extra></extra>'
     fig = go.Figure(
         data=go.Scatter(
             x=x,
@@ -72,10 +84,7 @@ def line_plot_interactive(title_text, x, y, mode,
                             color=C_LINE,
                             width=4)),
             customdata=indices,
-            hovertemplate='XY value pair: %{customdata:d}<br>' +
-            xlab+' = %{x: ' + xhoverformat + '} ' + xunit + '<br>' +
-            ylab+' = %{y:' + yhoverformat + '} ' + yunit +
-            '<extra></extra>'
+            hovertemplate=my_hovertemplate
         )
     )
     fig.update_layout(

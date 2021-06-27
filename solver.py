@@ -14,10 +14,59 @@ from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
+import modeler
 from modeler import Building
 from utility.common import G_CONST, EPSILON
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
+
+
+def plot_stress_strain(material: modeler.Material,
+                       num_steps: int,
+                       sigma_max: float):
+    ops.wipe()
+    ops.model('basic', '-ndm', 1, '-ndf', 1)
+
+    if material.ops_material == 'Steel02':
+        ops.uniaxialMaterial('Steel02',
+                             material.uniq_id,
+                             material.parameters['Fy'],
+                             material.parameters['E0'],
+                             material.parameters['b'])
+    else:
+        raise ValueError("Unsupported material")
+    node1_id = 1
+    node1_coords = [0.]
+    ops.node(node1_id, *node1_coords)
+    node2_id = 2
+    node2_coords = [1.]
+    ops.node(node2_id, *node2_coords)
+    ops.fix(node1_id, 1)
+    elm1_id = 1
+    area = 1.00
+    ops.element("Truss", elm1_id, node1_id, node2_id,
+                area, material.uniq_id)
+    ops.timeSeries("Linear", 1)
+    ops.pattern("Plain", 1, 1)
+    ops.load(node2_id, sigma_max)
+    ops.system("ProfileSPD")
+    ops.numberer("Plain")
+    ops.constraints("Plain")
+    ops.integrator("LoadControl", 1.0/num_steps)
+    ops.algorithm("Newton")
+    ops.test('NormUnbalance', 1e-8, 10)
+    ops.analysis("Static")
+    data = np.zeros((num_steps+1, 2))
+    for j in range(num_steps):
+        ops.analyze(1)
+        data[j+1, 0] = ops.nodeDisp(node2_id, 1)
+        data[j+1, 1] = ops.getLoadFactor(1)*sigma_max
+    general_2D.line_plot_interactive(
+        "Stress-strain plot",
+        data[:, 0], data[:, 1],
+        'spline+markers',
+        "strain", None, '.3e',
+        "stress", None, '.3e')
 
 
 class AnalysisResult(TypedDict):
@@ -421,7 +470,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             # if there isn't a parent node, distribute that story's load
             # in proportion to the mass of the nodes
             else:
-                node_list = lvl.nodes.node_list
+                node_list = lvl.nodes_primary.node_list
                 masses = np.array([n.mass[0] for n in node_list])
                 masses = masses/np.linalg.norm(masses)
                 for j, node in enumerate(node_list):
@@ -442,12 +491,12 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction)
-        ops.system('FullGeneral')
+        ops.system('ProfileSPD')
         ops.numberer('RCM')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
         ops.test('NormUnbalance', 1e-6, 2000)
-        ops.integrator("DisplacementControl",
+        ops.integrator("ParallelDisplacementControl",
                        control_node.uniq_id, control_DOF + 1, displ_incr)
         ops.algorithm("Newton")
         ops.analysis("Static")

@@ -12,6 +12,7 @@ b.add_level("base", 0.00, "fixed")
 for i in range(5):
     b.add_level(str(i+1), 144.00*(i+1))
 
+
 # add girdlines
 # getting variables that reference them is optional
 g1 = b.add_gridline("1", [0., 0.], [360.00, 0.])
@@ -27,6 +28,7 @@ b.add_group("columns")
 # define materials
 b.materials.enable_Steel02()
 b.set_active_material('steel')
+# solver.plot_stress_strain(b.materials.active, 100, 50000)
 
 # define sections
 b.add_sections_from_json(
@@ -34,11 +36,10 @@ b.add_sections_from_json(
     'W',
     ["W24X94"])
 b.set_active_section("W24X94")
-b.add_sections_from_json(
-    "section_data/sections.json",
-    'HSS',
-    ["HSS20.000X0.375"])
-
+# b.add_sections_from_json(
+#     "section_data/sections.json",
+#     'HSS',
+#     ["HSS20.000X0.375"])
 
 # Modeling procedure:
 # - [ ] Set active {section, placement, angle}
@@ -49,13 +50,13 @@ b.add_sections_from_json(
 
 b.set_active_levels("all_above_base")
 
-b.assign_surface_DL(0.833)
+b.assign_surface_DL(1.00)
 
 b.active_placement = 'centroid'
-b.set_active_section("HSS20.000X0.375")
+b.set_active_section("W24X94")
+# b.set_active_section("HSS20.000X0.375")
 b.set_active_groups(["columns"])
 b.add_columns_from_grids(n_sub=1)
-b.set_active_section("W24X94")
 b.active_placement = 'top_center'
 b.set_active_groups(["beams"])
 b.add_beams_from_grids(n_sub=1)
@@ -65,12 +66,33 @@ b.add_beams_from_grids(n_sub=1)
 # pt = g1.intersect(gA)
 
 
-b.select_perimeter_beams("1")
-b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
-b.delete_selected()
-b.plot_building_geometry(extrude_frames=False)
+b.select_perimeter_beams_all()
+# b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
+# b.plot_building_geometry(extrude_frames=False)
 # b.plot_building_geometry()
 b.preprocess(assume_floor_slabs=True, self_weight=True)
+
+b.plot_building_geometry(extrude_frames=False,
+                         offsets=True,
+                         gridlines=True,
+                         global_axes=True,
+                         diaphragm_lines=True,
+                         tributary_areas=True,
+                         just_selection=False,
+                         parent_nodes=True,
+                         frame_axes=True)
+
+
+b.plot_building_geometry(extrude_frames=True,
+                         offsets=True,
+                         gridlines=True,
+                         global_axes=True,
+                         diaphragm_lines=True,
+                         tributary_areas=True,
+                         just_selection=False,
+                         parent_nodes=True,
+                         frame_axes=True)
+
 
 # ~~~~~~~~~~~~~~~~~ #
 #  linear analysis  #
@@ -83,14 +105,14 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # linear_gravity_analysis = solver.LinearGravityAnalysis(b)
 # linear_gravity_analysis.run()
 
-# retrieving aggregated textual results
+# # retrieving aggregated textual results
 # reactions = linear_gravity_analysis.global_reactions(0)
 # print(reactions[0:3] / 1000)  # kip
 # print(reactions[3:6] / 1000 / 12)  # kip-ft
 
-# # visualizing results
+# # # visualizing results
 # linear_gravity_analysis.deformed_shape(extrude_frames=False)
-# linear_gravity_analysis.deformed_shape(extrude_frames=True)
+# # linear_gravity_analysis.deformed_shape(extrude_frames=True)
 # linear_gravity_analysis.basic_forces()
 
 # ~~~~~~~~~~~~~~~~ #
@@ -101,13 +123,15 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # modal_analysis = solver.ModalAnalysis(b, num_modes=9)
 # modal_analysis.run()
 
-# # retrieving textual results
+# # # retrieving textual results
 # print(modal_analysis.periods)
 
 # # visualizing results
 # modal_analysis.deformed_shape(step=0, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=1, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=2, scaling=0.00, extrude_frames=True)
+# modal_analysis.deformed_shape(step=3, scaling=0.00, extrude_frames=True)
+# modal_analysis.deformed_shape(step=4, scaling=0.00, extrude_frames=True)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -120,19 +144,20 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # # control_node = b.list_of_nodes()[-1]  # top floor somewhere
 # analysis_metadata = pushover_analysis.run(
 #     "y",
-#     40.,
+#     60.,
 #     control_node,
-#     1./2.,
-#     np.linspace(0., 40., 20), n_x=4, n_y=8, n_p=5)
-# # n_plot_steps = analysis_metadata['successful steps']
+#     1./20.,
+#     np.linspace(0., 60., 80), n_x=20, n_y=20, n_p=10)
+# n_plot_steps = analysis_metadata['successful steps']
 
-# # plot the deformed shape for any of the steps
-# plot_metadata = pushover_analysis.deformed_shape(
-#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-# print(plot_metadata)
+# # # plot the deformed shape for any of the steps
+# # plot_metadata = pushover_analysis.deformed_shape(
+# #     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+# # print(plot_metadata)
 
 # # plot pushover curve
 # pushover_analysis.plot_pushover_curve("y", control_node)
+# # pushover_analysis.basic_forces(step=19)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear time-history analysis  #

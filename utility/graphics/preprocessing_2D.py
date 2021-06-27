@@ -25,7 +25,7 @@ def plot_2D_level_geometry(building: 'Building',
     ax.set_aspect('equal')
 
     # retrieve the specified level
-    level = building.levels.get(lvlname)
+    level = building.levels.retrieve_by_name(lvlname)
 
     # draw the gridlines
     for grd in building.gridsystem.grids:

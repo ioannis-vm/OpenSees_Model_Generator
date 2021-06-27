@@ -33,6 +33,11 @@ def global_layout():
                    xaxis_visible=False,
                    yaxis_visible=False,
                    zaxis_visible=False,
+                   camera=dict(
+                       projection={
+                           "type": "orthographic"
+                       }
+                   )
                    ),
         showlegend=False
     )
