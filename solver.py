@@ -82,6 +82,7 @@ class Analysis:
         default_factory=AnalysisResult)
     node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
     eleForces: AnalysisResult = field(default_factory=AnalysisResult)
+    fiber_stress_strain: AnalysisResult = field(default_factory=AnalysisResult)
 
     def _store_result(self, analysis_result: AnalysisResult,
                       uniq_id: int, result: list):
@@ -205,11 +206,25 @@ class Analysis:
     def _read_frame_element_forces(self):
         for elm in self.building.list_of_internal_elems():
             uid = elm.uniq_id
-            # TODO fix, we need the basic forces.
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.eleForces,
                                uid,
                                forces)
+
+    def _read_frame_fiber_stress_strain(self, n_p):
+        for elm in self.building.list_of_internal_elems():
+            uid = elm.uniq_id
+            mat_id = elm.section.material.uniq_id
+            result = []
+            for fiber in elm.section.subdivide_section(10, 25):
+                z_loc = fiber.centroid.x
+                y_loc = fiber.centroid.y
+                stress_strain = [ops.eleResponse(
+                    uid, "section", i, "-fiber", str(y_loc),
+                    str(z_loc), str(mat_id), "stressStrain")
+                    for i in range(n_p)]
+                result.append(stress_strain)
+            self._store_result(self.fiber_stress_strain, uid, result)
 
     def _read_OpenSees_results(self):
         """
