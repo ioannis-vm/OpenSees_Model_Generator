@@ -1,3 +1,9 @@
-conda activate <envname>
-python -m pip install -r requrements.txt
-conda install scikit-geometry -c conda-forge
+Using anaconda is highly recommended.
+Create an environment and activte it.
+`conda activate <envname>`
+Install all required packages from Pypi
+`python -m pip install -r requrements.txt`
+Install scikit geometry from conda forge
+`conda install scikit-geometry -c conda-forge`
+Done.
+

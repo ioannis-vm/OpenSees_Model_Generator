@@ -1,7 +1,3 @@
-"""
-This code is used to test out the building modeler
-"""
-
 import modeler
 import solver
 import numpy as np

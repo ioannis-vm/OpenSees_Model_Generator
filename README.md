@@ -7,19 +7,16 @@ The module is in constant development, and new functionality is added as needed 
 
 Currently, the following functionality is supported:
 
-### Features
-
 #### Modeling
 
-- Organizing building components in building levels
-- Organizing building components in groups
-- Automated generation of floor tributary areas (based on the closed regions defined by the level's beams), which are used to distribute the floor's UDL on the components
-- Automated element self-weight and mass
-- Using gridline objects to define beams and columns
-- Ability to define multiple elements at once on all active levels
-- Support for importing AISC steel sections
-- Fiber sections of any shape
-- Specifying element offsets and placement point relative to the section
+- Building levels ~ definition of elements on multiple levels with a single line of code
+- Groups
+- Tributary area analysis for floor-to-beam load distribution
+- Element self-weight, self-mass
+- Accelerated element definitions using gridlines
+- Element seleciton and modification
+- AISC steel sections
+- Fiber generation of arbitrary sections
 
 
 #### Analysis
@@ -27,11 +24,11 @@ Currently, the following functionality is supported:
 - Linear static
 - Modal
 - Nonlinear pushover
-- Nonlinear time-history
+- Nonlinear response-history
 
 #### Post processing
 
 - Visualizing the defined components in 3D with metadata in hover boxes, with or without frame extrusions.
-- Visualizing the deformed shape of a given analysis step, with automatic determination of an appropriate scaling factor, with or without extruding the frame elements.
+- Visualizing the deformed shape of a given analysis step, with automatic determination of an appropriate scaling factor, with or without frame extrusions.
 - Visualizing the basic forces of the elements for a given analysis step.
 

@@ -121,5 +121,5 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 
 
 b.plot_2D_level_geometry("1", extrude_frames=True)
-b.plot_building_geometry(extrude_frames=True)
-b.plot_building_geometry(extrude_frames=False)
+# b.plot_building_geometry(extrude_frames=True)
+# b.plot_building_geometry(extrude_frames=False)
