@@ -820,8 +820,9 @@ class LinearElement:
         # local axes with respect to the global coord system
         self.internal_pt_i = self.node_i.coords + self.offset_i
         self.internal_pt_j = self.node_j.coords + self.offset_j
-        self.x_axis, self.y_axis, self.z_axis = transformations.local_axes_from_points_and_angle(
-            self.internal_pt_i, self.internal_pt_j, self.ang)
+        self.x_axis, self.y_axis, self.z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                self.internal_pt_i, self.internal_pt_j, self.ang)
 
     def length_clear(self):
         """
@@ -948,8 +949,9 @@ class BeamColumn:
         dz, dy = self.section.retrieve_offset(self.placement)
         sec_offset_local = np.array([0.00, dy, dz])
         # retrieve local coordinate system
-        x_axis, y_axis, z_axis = transformations.local_axes_from_points_and_angle(
-            p_i, p_j, self.ang)
+        x_axis, y_axis, z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
             x_axis, y_axis, z_axis)
         t_loc_to_glob = t_glob_to_loc.T
@@ -1012,8 +1014,9 @@ class BeamColumn:
         dz, dy = self.section.retrieve_offset(tag)
         snap_offset = np.array([0.00, dy, dz])
         # retrieve local coordinate system
-        x_axis, y_axis, z_axis = transformations.local_axes_from_points_and_angle(
-            p_i, p_j, self.ang)
+        x_axis, y_axis, z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
             x_axis, y_axis, z_axis)
         t_loc_to_glob = t_glob_to_loc.T
@@ -2172,7 +2175,8 @@ class Building:
                         properties['area'] / common.G_CONST
                     assert(floor_mass >= 0.00),\
                         "Error: floor area properties\n" + \
-                        "Overall floor area should be negative (by convention)."
+                        "Overall floor area should be negative" + \
+                        " (by convention)."
                     floor_centroid = properties['centroid']
                     floor_mass_inertia = properties['inertia']['ir_mass']\
                         * floor_mass
