@@ -458,7 +458,7 @@ def get_auto_scaling_deformation(analysis, step):
     ref_len = analysis.building.reference_length()
     # maximum displacement
     max_d = 0.00
-    for elm in analysis.building.list_of_internal_elems():
+    for elm in analysis.building.list_of_line_elements():
         u_i = analysis.node_displacements[
             elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[
@@ -498,7 +498,7 @@ def deformed_shape(analysis: 'Analysis',
     dt = []
 
     list_of_frames = \
-        analysis.building.list_of_internal_elems()
+        analysis.building.list_of_line_elements()
     list_of_nodes = analysis.building.list_of_primary_nodes() + \
         analysis.building.list_of_internal_nodes()
     list_of_parent_nodes = analysis.building.list_of_parent_nodes()
@@ -538,7 +538,7 @@ def basic_forces(analysis: 'Analysis',
     layout = common_3D.global_layout()
     dt = []
 
-    list_of_frames = analysis.building.list_of_internal_elems()
+    list_of_frames = analysis.building.list_of_line_elements()
     list_of_nodes = analysis.building.list_of_primary_nodes()
 
     # draw the nodes0
@@ -609,7 +609,7 @@ def basic_forces(analysis: 'Analysis',
     #  without having to then recalculate the basic forces)
     # (We store the discretized basic force vectors in a
     #  linear fashion, element-wise)
-    num_elems = len(analysis.building.list_of_internal_elems())
+    num_elems = len(analysis.building.list_of_line_elements())
     nx_vecs = np.full(num_elems * num_points, 0.00)
     qy_vecs = np.full(num_elems * num_points, 0.00)
     qz_vecs = np.full(num_elems * num_points, 0.00)
@@ -622,7 +622,8 @@ def basic_forces(analysis: 'Analysis',
     i_poss = np.full(num_elems * 3, 0.00)
     elm_ln = np.full(num_elems, 0.00)
 
-    for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
+    for i_elem, element in enumerate(
+            analysis.building.list_of_line_elements()):
 
         x_vec = element.x_axis
         y_vec = element.y_axis
@@ -657,6 +658,7 @@ def basic_forces(analysis: 'Analysis',
 
         # store results in the preallocated arrays
         # TODO: make units a bit more formal
+
         nx_vecs[i_elem*num_points:i_elem*num_points +
                 num_points] = nx_vec * (1.00/1000.)
         qy_vecs[i_elem*num_points:i_elem*num_points +
@@ -711,7 +713,8 @@ def basic_forces(analysis: 'Analysis',
     if scaling_m > 1.0e8:
         scaling_m = 1.00
 
-    for i_elem, element in enumerate(analysis.building.list_of_internal_elems()):
+    for i_elem, element in enumerate(
+            analysis.building.list_of_line_elements()):
 
         # retrieve results from the preallocated arrays
         nx_vec = nx_vecs[i_elem*num_points:i_elem*num_points+num_points]

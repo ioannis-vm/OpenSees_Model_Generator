@@ -503,22 +503,23 @@ def plot_building_geometry(building: 'Building',
 
     # plot the linear elements
     if just_selection:
-        beamcolumn_elems = building.selection.list_of_beamcolumn_elems()
-        internal_elems = building.selection.list_of_internal_elems()
+        line_element_sequences = \
+            building.selection.list_of_line_element_sequences()
+        line_elems = building.selection.list_of_line_elems()
     else:
-        beamcolumn_elems = building.list_of_beamcolumn_elems()
-        internal_elems = building.list_of_internal_elems()
+        line_element_sequences = building.list_of_line_element_sequences()
+        line_elems = building.list_of_line_elements()
     if extrude_frames:
         add_data__extruded_frames_mesh(
-            dt, internal_elems)
+            dt, line_elems)
     else:
-        add_data__frames(dt, internal_elems)
+        add_data__frames(dt, line_elems)
         if frame_axes:
-            add_data__frame_axes(dt, internal_elems,
+            add_data__frame_axes(dt, line_elems,
                                  building.reference_length())
     # plot the rigid offsets
     if offsets:
-        add_data__frame_offsets(dt, beamcolumn_elems)
+        add_data__frame_offsets(dt, line_element_sequences)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)

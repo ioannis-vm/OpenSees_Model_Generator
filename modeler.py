@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import count
+from typing import Optional
 import json
 import numpy as np
 from utility import transformations, common
@@ -390,9 +391,11 @@ class Node:
     load_fl: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=6), repr=False)
     tributary_area: float = field(default=0.00, repr=False)
-    column_above: BeamColumn = field(default=None, repr=False)
-    column_below: BeamColumn = field(default=None, repr=False)
-    beams: list[BeamColumn] = field(default_factory=list, repr=False)
+    column_above: Optional['LineElementSecquence'] = field(
+        default=None, repr=False)
+    column_below: Optional[LineElementSequence] = field(
+        default=None, repr=False)
+    beams: list[LineElementSequence] = field(default_factory=list, repr=False)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -496,8 +499,8 @@ class Section:
     sec_type: str
     name: str
     material: Material = field(repr=False)
-    mesh: mesher.Mesh = field(default=None, repr=False)
-    properties: dict = field(default=None, repr=False)
+    mesh: Optional[mesher.Mesh] = field(default=None, repr=False)
+    properties: Optional[dict] = field(default=None, repr=False)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -572,7 +575,7 @@ class Sections:
     """
 
     section_list: list[Section] = field(default_factory=list)
-    active: Section = field(default=None, repr=False)
+    active: Optional[Section] = field(default=None, repr=False)
 
     def add(self, section: Section):
         """
@@ -708,7 +711,29 @@ class Materials:
     """
 
     material_list: list[Material] = field(default_factory=list)
-    active: Material = field(default=None)
+    active: Optional[Material] = field(default=None)
+
+    def __post_init__(self):
+        """
+        Add some default materials used
+        to model the connectivity of elements.
+        """
+        self.material_list.append(Material(
+            'fix',
+            'Elastic',
+            0.00,
+            {
+                'E': 1.0e8
+            })
+        )
+        self.material_list.append(Material(
+            'release',
+            'Elastic',
+            0.00,
+            {
+                'E': 1.0e-8
+            })
+        )
 
     def add(self, material: Material):
         """
@@ -731,8 +756,20 @@ class Materials:
             if material.name == name:
                 self.active = material
                 found = True
+                break
         if found is False:
             raise ValueError("Material " + name + " does not exist")
+
+    def retrieve(self, name: str):
+        """
+        Returns the specified material.
+        """
+        result = None
+        for material in self.material_list:
+            if material.name == name:
+                result = material
+                break
+        return result
 
     def enable_Steel02(self):
         """
@@ -747,7 +784,13 @@ class Materials:
                               'Fy': 50000,
                               'E0': 29000000,
                               'G':   11153846.15,
-                              'b': 0.0001
+                              'b': 0.01,
+                              'params': [18.0, 0.925, 0.15],
+                              'a1': 0.00,
+                              'a2': 1.00,
+                              'a3': 0.00,
+                              'a4': 1.00,
+                              'sigInit': 0.00
                           })
                  )
 
@@ -759,7 +802,25 @@ class Materials:
 
 
 @dataclass
-class LinearElement:
+class EndRelease:
+    """
+    This class is used to simulate end-releases.
+    """
+
+    node_i: Node
+    node_j: Node
+    free_dofs: list[int]
+    x_vec: np.ndarray
+    y_vec: np.ndarray
+    mat_fix: Material
+    mat_release: Material
+
+    def __post_init__(self):
+        self.uniq_id = next(_ids)
+
+
+@dataclass
+class LineElement:
     """
     Linear finite element class.
     This class represents the most primitive linear element,
@@ -768,7 +829,6 @@ class LinearElement:
         uniq_id (int): unique identifier
         node_i (Node): Node if end i
         node_j (Node): Node of end j
-        section (Section): Section of the element.
         ang: Parameter that controls the rotation of the
              section around the x-axis
         offset_i (np.ndarray): Components of the vector that starts
@@ -776,6 +836,13 @@ class LinearElement:
                                the first internal node at the end i.
                                Expressed in the global coordinate system.
         offset_j (np.ndarray): Similarly for node j
+        section (Section): Section of the element interior
+        parent_n_sub: Number of subdivisions of the parent element
+        model_as (dict): Either
+                       {'type': 'elastic'}
+                       or
+                       {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
+        geomTransf: {Linear, PDelta}
         internal_pt_i (np.ndarray): Coordinates of the internal point i
         internal_pt_j (np.ndarray): Similarly for node j
         udl_self (np.ndarray): Array of size 3 containing components of the
@@ -801,16 +868,17 @@ class LinearElement:
                        ===
                         | -------> z (blue)
                        ===
-
     """
 
     node_i: Node
     node_j: Node
+    ang: float
+    offset_i: np.ndarray
+    offset_j: np.ndarray
     section: Section
-    parent_n_sub: int = field()
-    ang: float = field(default=0.00)
-    offset_i: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
-    offset_j: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
+    parent_n_sub: int
+    model_as: dict
+    geomTransf: str
     udl_self: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     udl_fl: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
     udl_other: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
@@ -893,52 +961,57 @@ class LinearElement:
 
 @dataclass
 @total_ordering
-class BeamColumn:
+class LineElementSequence:
     """
-    A BeamColumn element here represents a collection
-    of linear elements connected in series.
+    A LineElementSequence represents a collection
+    of line elements connected in series.
+    After instantiating the object, a `generate` method needs to
+    be called, to populte the internal components of the object.
     Attributes:
         uniq_id (int): unique identifier
         node_i (int): primary node for end i
         node_j (int): primary node for end j
         ang: Parameter that controls the rotation of the
              section around the x-axis
-        section (Section): Section of the element.
-        n_sub (int): Number of linear elements between
-                     the primary nodes node_i and node_j.
-        function (str): Whether it's a beam, column, brace, etc.
-        placement (str): String flag that controls the
-                         placement point of the element relative
-                         to its section.
         offset_i (list[float]): Components of the vector that starts
                                 from the primary node i and goes to
                                 the first internal node at the end i.
                                 Expressed in the global coordinate system.
         offset_j (list[float]): Similarly for node j.
+        section (Section): Section of the element.
+        n_sub (int): Number of line elements between
+                     the primary nodes node_i and node_j.
+        model_as (dict): Either
+                       {'type': 'elastic'}
+                       or
+                       {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
+        geomTransf: {Linear, PDelta}
+        placement (str): String flag that controls the
+                         placement point of the element relative
+                         to its section.
         internal_pt_i (np.ndarray): Coordinates of the internal point i
         internal_pt_j (np.ndarray): Similarly for node j
         internal_nodes (list[Node]): Structural nodes needed to connect
                                      internal elements if more than one
                                      internal elements are present
                                      (n_sub > 1).
-        internal_elems (list[LinearElement]): Internal linear elements.
+        internal_elems (list[LineElement]): Internal linear elements.
         tributary_area (float): Area of floor that is supported on the element.
     """
 
     node_i: Node
     node_j: Node
     ang: float
-    section: Section = field(repr=False)
-    n_sub: int = field(repr=False)
-    function: str = field(repr=False)
+    offset_i: np.ndarray
+    offset_j: np.ndarray
+    section: Section
+    n_sub: int
+    model_as: dict
+    geomTransf: str
     placement: str = field(default="centroid", repr=False)
-    offset_i: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
-    offset_j: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
     tributary_area: float = field(default=0.00, repr=False)
 
-    def __post_init__(self):
+    def generate(self):
 
         self.uniq_id = next(_ids)
 
@@ -988,8 +1061,111 @@ class BeamColumn:
                 node_j = self.internal_nodes[i]
                 joffset = np.zeros(3).copy()
             self.internal_elems.append(
-                LinearElement(node_i, node_j, self.section, self.n_sub,
-                              self.ang, ioffset, joffset))
+                LineElement(node_i, node_j, self.ang, ioffset, joffset,
+                            self.section, self.n_sub,
+                            self.model_as, self.geomTransf))
+
+    def generate_pinned(self, release_distance,
+                        mat_fix: Material, mat_release: Material):
+
+        self.uniq_id = next(_ids)
+
+        assert release_distance > 0.00, "Release dist must be > 0"
+
+        p_i = self.node_i.coords + self.offset_i
+        p_j = self.node_j.coords + self.offset_j
+
+        # obtain offset from section (local system)
+        dz, dy = self.section.retrieve_offset(self.placement)
+        sec_offset_local = np.array([0.00, dy, dz])
+        # retrieve local coordinate system
+        x_axis, y_axis, z_axis = \
+            transformations.local_axes_from_points_and_angle(
+                p_i, p_j, self.ang)
+        t_glob_to_loc = transformations.transformation_matrix(
+            x_axis, y_axis, z_axis)
+        t_loc_to_glob = t_glob_to_loc.T
+        sec_offset_global = t_loc_to_glob @ sec_offset_local
+        p_i += sec_offset_global
+        p_j += sec_offset_global
+        self.offset_i = self.offset_i.copy()
+        self.offset_j = self.offset_j.copy()
+        self.offset_i += sec_offset_global
+        self.offset_j += sec_offset_global
+
+        self.internal_pt_i = p_i
+        self.internal_pt_j = p_j
+
+        elm_len = np.linalg.norm(p_j - p_i)
+
+        release_loc_i = p_i + x_axis * release_distance * elm_len
+        release_loc_j = p_i + x_axis * (1.0 - release_distance) * elm_len
+
+        internal_pt_coords = np.linspace(
+            tuple(release_loc_i),
+            tuple(release_loc_j), num=self.n_sub+1)
+
+        self.internal_nodes = []
+        self.internal_elems = []
+
+        # outer elements at end i (before release at i)
+        n_release_outer_i = Node(release_loc_i)
+        self.internal_nodes.append(n_release_outer_i)
+        self.internal_elems.append(
+            LineElement(self.node_i, n_release_outer_i, self.ang,
+                        self.offset_i, np.zeros(3),
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        n_release_inner_i = Node(release_loc_i)
+        self.internal_nodes.append(n_release_inner_i)
+        self.internal_elems.append(
+            EndRelease(n_release_outer_i,
+                       n_release_inner_i,
+                       [5, 6],
+                       x_axis,
+                       y_axis,
+                       mat_fix,
+                       mat_release))
+
+        n_release_inner_j = Node(release_loc_j)
+        n_release_outer_j = Node(release_loc_j)
+
+        # middle internal nodes (if required)
+        if self.n_sub > 1:
+            for i in range(1, len(internal_pt_coords)-1):
+                self.internal_nodes.append(Node(internal_pt_coords[i]))
+        # internal elements
+        for i in range(self.n_sub):
+            if i == 0:
+                node_i = n_release_inner_i
+            else:
+                node_i = self.internal_nodes[i+1]
+            if i == self.n_sub-1:
+                node_j = n_release_inner_j
+            else:
+                node_j = self.internal_nodes[i+2]
+            self.internal_elems.append(
+                LineElement(node_i, node_j, self.ang,
+                            np.zeros(3), np.zeros(3),
+                            self.section, self.n_sub,
+                            self.model_as, self.geomTransf))
+
+        # outer elements at end j (after release at j)
+        self.internal_elems.append(
+            EndRelease(n_release_inner_j,
+                       n_release_outer_j,
+                       [5, 6],
+                       x_axis,
+                       y_axis,
+                       mat_fix,
+                       mat_release))
+        self.internal_nodes.append(n_release_inner_j)
+        self.internal_elems.append(
+            LineElement(n_release_outer_j, self.node_j, self.ang,
+                        np.zeros(3), self.offset_j,
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        self.internal_nodes.append(n_release_outer_j)
 
     def snap_offset(self, tag: str):
         """
@@ -1045,7 +1221,8 @@ class BeamColumn:
                               direction of the global axes.
         """
         for elm in self.internal_elems:
-            elm.add_udl_glob(udl, ltype=ltype)
+            if isinstance(elm, LineElement):
+                elm.add_udl_glob(udl, ltype=ltype)
 
     def apply_self_weight_and_mass(self, multiplier: float):
         """
@@ -1069,10 +1246,11 @@ class BeamColumn:
         total_mass_per_length = \
             -self.internal_elems[0].get_udl_no_floor_glob()[2] / common.G_CONST
         for sub_elm in self.internal_elems:
-            mass = total_mass_per_length * \
-                sub_elm.length_clear() / 2.00  # lb-s**2/in
-            sub_elm.node_i.mass += np.array([mass, mass, mass])
-            sub_elm.node_j.mass += np.array([mass, mass, mass])
+            if isinstance(sub_elm, LineElement):
+                mass = total_mass_per_length * \
+                    sub_elm.length_clear() / 2.00  # lb-s**2/in
+                sub_elm.node_i.mass += np.array([mass, mass, mass])
+                sub_elm.node_j.mass += np.array([mass, mass, mass])
 
     def primary_nodes(self):
         return [self.node_i, self.node_j]
@@ -1089,15 +1267,15 @@ class BeamColumn:
 
 
 @dataclass
-class BeamColumns:
+class LineElementSequences:
     """
     This class is a collector for columns, and provides
     methods that perform operations using columns.
     """
 
-    element_list: list[BeamColumn] = field(default_factory=list)
+    element_list: list[LineElementSequence] = field(default_factory=list)
 
-    def add(self, elm: BeamColumn):
+    def add(self, elm: LineElementSequence):
         """
         Add an element in the element collection,
         if it does not already exist
@@ -1109,7 +1287,7 @@ class BeamColumns:
             raise ValueError('Element already exists: '
                              + repr(elm))
 
-    def remove(self, elm: BeamColumn):
+    def remove(self, elm: LineElementSequence):
         """
         Remove an element from the element collection,
         if it was there.
@@ -1163,9 +1341,9 @@ class Level:
                                nodes of a particular
                                element. A rigid diaphragm constraint can be
                                optionally assigned to these nodes.
-        columns (BeamColumns): Columns of the level.
-        beams (BeamColumns): Beams of the level.
-        braces (BeamColumns): Braces of the level.
+        columns (LineElementSequences): Columns of the level.
+        beams (LineElementSequences): Beams of the level.
+        braces (LineElementSequences): Braces of the level.
         parent_node (Node): If tributary area analysis is done and floors
                             are assumed, a node is created at the
                             center of mass of the level, and acts as the
@@ -1184,16 +1362,20 @@ class Level:
     name: str
     elevation: float
     restraint: str = field(default="free")
-    previous_lvl: 'Level' = field(default=None, repr=False)
+    previous_lvl: Optional[Level] = field(default=None, repr=False)
     surface_DL: float = field(default=0.00, repr=False)
     diaphragm: bool = field(default=False)
     nodes_primary: Nodes = field(default_factory=Nodes, repr=False)
-    columns: BeamColumns = field(default_factory=BeamColumns, repr=False)
-    beams: BeamColumns = field(default_factory=BeamColumns, repr=False)
-    braces: BeamColumns = field(default_factory=BeamColumns, repr=False)
-    parent_node: Node = field(default=None, repr=False)
-    floor_coordinates: np.ndarray = field(default=None, repr=False)
-    floor_bisector_lines: list[np.ndarray] = field(default=None, repr=False)
+    columns: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
+    beams: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
+    braces: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
+    parent_node: Optional[Node] = field(default=None, repr=False)
+    floor_coordinates: Optional[np.ndarray] = field(default=None, repr=False)
+    floor_bisector_lines: Optional[list[np.ndarray]] = field(
+        default=None, repr=False)
 
     def __post_init__(self):
         if self.restraint not in ["free", "fixed", "pinned"]:
@@ -1240,11 +1422,13 @@ class Level:
         # (to remove Nones if they exist)
         return result
 
-    def list_of_internal_elems(self):
+    def list_of_line_elems(self):
         result = []
         for elm in self.beams.element_list + \
-                self.columns.element_list:
-            result.append(elm)
+                self.columns.element_list + \
+                self.braces.element_list:
+            if isinstance(elm, LineElement):
+                result.append(elm)
         return result
 
 
@@ -1345,18 +1529,21 @@ class Selection:
 
     """
     nodes: Nodes = field(default_factory=Nodes, repr=False)
-    beams: BeamColumns = field(default_factory=BeamColumns, repr=False)
-    columns: BeamColumns = field(default_factory=BeamColumns, repr=False)
-    braces: BeamColumns = field(default_factory=BeamColumns, repr=False)
+    beams: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
+    columns: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
+    braces: LineElementSequences = field(
+        default_factory=LineElementSequences, repr=False)
 
     def clear(self):
         """
         Clears all selected elements.
         """
         self.nodes = Nodes()
-        self.beams = BeamColumns()
-        self.columns = BeamColumns()
-        self.braces = BeamColumns()
+        self.beams = LineElementSequences()
+        self.columns = LineElementSequences()
+        self.braces = LineElementSequences()
 
     #############################################
     # Methods that modify selected elements     #
@@ -1373,18 +1560,20 @@ class Selection:
     # Methods that return objects               #
     #############################################
 
-    def list_of_beamcolumn_elems(self):
+    def list_of_line_element_sequences(self):
         """
-        Returns all selected BeamColumn elements.
+        Returns all selected LineElementSequences.
         """
         return self.beams.element_list + \
             self.columns.element_list + self.braces.element_list
 
-    def list_of_internal_elems(self):
-        beamcolumn_elems = self.list_of_beamcolumn_elems()
+    def list_of_line_elements(self):
+        sequences = self.list_of_line_element_sequences()
         result = []
-        for element in beamcolumn_elems:
-            result.extend(element.internal_elems)
+        for sequence in sequences:
+            for elm in sequence:
+                if isinstance(elm, LineElement):
+                    result.append(elm)
         return result
 
     def list_of_primary_nodes(self):
@@ -1393,7 +1582,7 @@ class Selection:
         selected elements are connected to.
         """
         gather = []
-        for elem in self.list_of_beamcolumn_elems():
+        for elem in self.list_of_line_element_sequences():
             gather.extend(elem.primary_nodes())
         # remove duplicates
         result = []
@@ -1405,7 +1594,7 @@ class Selection:
         in the selected elements.
         """
         result = []
-        for elem in self.list_of_beamcolumn_elems():
+        for elem in self.list_of_line_element_sequences():
             result.extend(elem.internal_nodes)
         return result
 
@@ -1426,6 +1615,7 @@ class Building:
                           where applicable (see Section).
         active_angle (float): Angle parameter to use for
                           newly defined elements.
+
     """
     gridsystem: GridSystem = field(default_factory=GridSystem)
     levels: Levels = field(default_factory=Levels)
@@ -1588,7 +1778,9 @@ class Building:
     def add_column_at_point(self,
                             x: float,
                             y: float,
-                            n_sub=1) -> list[BeamColumn]:
+                            n_sub=1,
+                            model_as={'type': 'elastic'},
+                            geomTransf='Linear', ends={'type': 'fixed'}) -> list[LineElementSequence]:
         """
         Adds a vertical column at the given X, Y
         location at all the active levels.
@@ -1597,8 +1789,18 @@ class Building:
             x (float): X coordinate in the global system
             y (float): Y coordinate in the global system
             n_sub (int): Number of internal elements to add
+            model_as (dict): Either
+                           {'type': 'elastic'}
+                           or
+                           {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
+            geomTransf: {Linear, PDelta}
+            ends (str): {'type': 'fixed}', or
+                        {'type': 'pinned', 'dist': float} or
+                        {'type': 'RBS', 'dist': float,
+                         'length': float, 'factor': float}
+
         Returns:
-            columns (list[BeamColumn]): Added columns.
+            columns (list[LineElementSequence]): Added columns.
         """
         if not self.sections.active:
             raise ValueError("No active section")
@@ -1622,17 +1824,30 @@ class Building:
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
                 # add the column connecting the two nodes
-                column = BeamColumn(
+                # TODO if integration_type=HingeRadau, create the sections
+                # and issue a different command to specify them
+                column = LineElementSequence(
                     node_i=top_node,
                     node_j=bot_node,
                     ang=self.active_angle,
+                    offset_i=np.zeros(3),
+                    offset_j=np.zeros(3),
                     section=self.sections.active,
                     n_sub=n_sub,
-                    function="column",
+                    model_as=model_as,
+                    geomTransf=geomTransf,
                     placement=self.active_placement,
-                    offset_i=np.zeros(3),
-                    offset_j=np.zeros(3)
                 )
+                if ends['type'] == 'fixed':
+                    column.generate()
+                elif ends['type'] == 'pinned':
+                    column.generate_pinned(
+                        ends['dist'],
+                        self.materials.retrieve('fix'),
+                        self.materials.retrieve('release'))
+                else:
+                    raise ValueError('Invalid end-type')
+                column.generate()
                 columns.append(column)
                 level.columns.add(column)
                 self.groups.add_element(column)
@@ -1647,7 +1862,10 @@ class Building:
                            offset_i=np.zeros(shape=3).copy(),
                            offset_j=np.zeros(shape=3).copy(),
                            snap_i="centroid",
-                           snap_j="centroid"):
+                           snap_j="centroid",
+                           ends='fixed',
+                           model_as={'type': 'elastic'},
+                           geomTransf='Linear'):
         """
         Adds a beam connecting the given points
         at all the active levels.
@@ -1665,8 +1883,28 @@ class Building:
                           on the section of an existing column
                           at node i
             snap_j ~ similar to snap_i, for the j side.
+            ends (str): {'type': 'fixed}', or
+                        {'type': 'pinned', 'dist': float} or
+                        {'type': 'RBS', 'dist': float,
+                         'length': float, 'factor': float}
+                        For the pinned case,
+                          `dist` represents the
+                            proportion of the distance between the element's
+                            ends to the release, relative to the element's
+                            length, both considered without the offsets.
+                        For the RBS case,
+                          `dist` is similar to the pinned case,
+                            but it corresponds to the start of the RBS portion.
+                          `length` represents the length of the RBS portion.
+                          `factor` represents the proportion of the RBS
+                            section's width, relative to the original section.
+            model_as (dict): Either
+                           {'type': 'elastic'}
+                           or
+                           {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
+            geomTransf: {Linear, PDelta}
         Returns:
-            beams (list[BeamColumn]): added beams.
+            beams (list[LineElementSequence]): added beams.
         """
 
         if not self.sections.active:
@@ -1707,15 +1945,25 @@ class Building:
                 col_offset_j = np.zeros(3)
 
             # add the beam connecting the two nodes
-            beam = BeamColumn(node_i=start_node,
-                              node_j=end_node,
-                              ang=self.active_angle,
-                              section=self.sections.active,
-                              n_sub=n_sub,
-                              function="beam",
-                              placement=self.active_placement,
-                              offset_i=offset_i+col_offset_i,
-                              offset_j=offset_j+col_offset_j)
+            beam = LineElementSequence(node_i=start_node,
+                                       node_j=end_node,
+                                       ang=self.active_angle,
+                                       offset_i=offset_i+col_offset_i,
+                                       offset_j=offset_j+col_offset_j,
+                                       section=self.sections.active,
+                                       n_sub=n_sub,
+                                       model_as=model_as,
+                                       geomTransf=geomTransf,
+                                       placement=self.active_placement)
+            if ends['type'] == 'fixed':
+                beam.generate()
+            elif ends['type'] == 'pinned':
+                beam.generate_pinned(
+                    ends['dist'],
+                    self.materials.retrieve('fix'),
+                    self.materials.retrieve('release'))
+            else:
+                raise ValueError('Invalid end-type')
             level.beams.add(beam)
             beams.append(beam)
             self.groups.add_element(beam)
@@ -1745,7 +1993,7 @@ class Building:
                             as a proportion of the element's
                             length.
         Returns:
-            braces (list[BeamColumn]): added braces.
+            braces (list[LineElementSequence]): added braces.
         """
         if not self.sections.active:
             raise ValueError("No active section specified")
@@ -1769,15 +2017,17 @@ class Building:
                 end_node = Node(
                     np.array([*end, level.elevation]), level.restraint)
                 level.nodes_primary.add(end_node)
-            brace = BeamColumn(node_i=start_node,
-                               node_j=end_node,
-                               ang=self.active_angle,
-                               section=self.sections.active,
-                               n_sub=n_sub,
-                               function="brace",
-                               placement='centroid',
-                               offset_i=np.zeros(3),
-                               offset_j=np.zeros(3))
+            brace = LineElementSequence(node_i=start_node,
+                                        node_j=end_node,
+                                        ang=self.active_angle,
+                                        section=self.sections.active,
+                                        n_sub=n_sub,
+                                        function="brace",
+                                        placement='centroid',
+                                        geomTransf=geomTransf,
+                                        offset_i=np.zeros(3),
+                                        offset_j=np.zeros(3))
+            brace.generate()
             # apply camber
             t_param = np.linspace(0, 1, n_sub+1)
             x = camber * brace.length_clear()
@@ -1799,7 +2049,9 @@ class Building:
             level.braces.add(brace)
         return braces
 
-    def add_columns_from_grids(self, n_sub=1):
+    def add_columns_from_grids(self, n_sub=1,
+                               model_as={'type': 'elastic'},
+                               geomTransf='Linear'):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect, and places a column on
@@ -1807,7 +2059,7 @@ class Building:
         Args:
             n_sub (int): Number of internal elements to add.
         Returns:
-            columns (list[BeamColumn]): added columns
+            columns (list[LineElementSequence]): added columns
         """
         isect_pts = self.gridsystem.intersection_points()
         columns = []
@@ -1818,7 +2070,8 @@ class Building:
             columns.extend(cols)
         return columns
 
-    def add_beams_from_grids(self, n_sub=1):
+    def add_beams_from_grids(self, n_sub=1, ends={'type': 'fixed'},
+                             model_as={'type': 'elastic'}):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect. For each gridline, beams are placed
@@ -1826,6 +2079,21 @@ class Building:
         gridline with all other gridlines.
         Args:
             n_sub (int): Number of internal elements to add
+            ends (str): {'type': 'fixed}', or
+                        {'type': 'pinned', 'dist': float} or
+                        {'type': 'RBS', 'dist': float,
+                         'length': float, 'factor': float}
+                        For the pinned case,
+                          `dist` represents the
+                            proportion of the distance between the element's
+                            ends to the release, relative to the element's
+                            length, both considered without the offsets.
+                        For the RBS case,
+                          `dist` is similar to the pinned case,
+                            but it corresponds to the start of the RBS portion.
+                          `length` represents the length of the RBS portion.
+                          `factor` represents the proportion of the RBS
+                            section's width, relative to the original section.
         """
         beams = []
         for grid in self.gridsystem.grids:
@@ -1834,7 +2102,9 @@ class Building:
                 bms = self.add_beam_at_points(
                     isect_pts[i],
                     isect_pts[i+1],
-                    n_sub=n_sub)
+                    n_sub=n_sub,
+                    ends=ends,
+                    model_as=model_as)
                 beams.extend(bms)
         return beams
 
@@ -1892,7 +2162,7 @@ class Building:
         """
         grp = self.groups.retrieve_by_name(group_name)
         for elm in grp.elements:
-            if isinstance(elm, BeamColumn):
+            if isinstance(elm, LineElementSequence):
                 if elm.function == "beam":
                     self.selection.beams.add(elm)
                 elif elm.function == "column":
@@ -1906,15 +2176,14 @@ class Building:
         if not beams:
             return
         edges, edge_to_beam_map = \
-            trib_area_analysis.list_of_beams_to_mesh_edges_external(beams)
+            trib_area_analysis.list_of_beams_to_mesh_edges_external(
+                beams)
         halfedges = mesher.define_halfedges(edges)
         halfedge_to_beam_map = {}
         for h in halfedges:
-            halfedge_to_beam_map[h.uniq_id] = \
-                edge_to_beam_map[h.edge.uniq_id]
+            halfedge_to_beam_map[h.uniq_id] = edge_to_beam_map[h.edge.uniq_id]
         loops = mesher.obtain_closed_loops(halfedges)
-        external, _, trivial = \
-            mesher.orient_loops(loops)
+        external, _, trivial = mesher.orient_loops(loops)
         # Sanity checks.
         mesher.sanity_checks(external, trivial)
         loop = external[0]
@@ -2008,37 +2277,46 @@ class Building:
     def list_of_beams(self):
         list_of_beams = []
         for lvl in self.levels.level_list:
-            for beam in lvl.beams.element_list:
-                list_of_beams.append(beam)
+            list_of_beams.extend(lvl.beams.element_list)
         return list_of_beams
 
     def list_of_columns(self):
         list_of_columns = []
         for lvl in self.levels.level_list:
-            for col in lvl.columns.element_list:
-                list_of_columns.append(col)
+            list_of_columns.extend(lvl.columns.element_list)
         return list_of_columns
 
     def list_of_braces(self):
         list_of_braces = []
         for lvl in self.levels.level_list:
-            for brace in lvl.braces.element_list:
-                list_of_braces.append(brace)
+            list_of_braces.extend(lvl.braces.element_list)
         return list_of_braces
 
-    def list_of_beamcolumn_elems(self):
-        list_of_frames = []
-        for element in self.list_of_beams() \
-            + self.list_of_columns() \
-                + self.list_of_braces():
-            list_of_frames.append(element)
-        return list_of_frames
-
-    def list_of_internal_elems(self):
-        beamcolumn_elems = self.list_of_beamcolumn_elems()
+    def list_of_line_element_sequences(self):
         result = []
-        for element in beamcolumn_elems:
-            result.extend(element.internal_elems)
+        result.extend(self.list_of_beams())
+        result.extend(self.list_of_columns())
+        result.extend(self.list_of_braces())
+        return result
+
+    def list_of_line_elements(self):
+
+        sequences = self.list_of_line_element_sequences()
+        result = []
+        for sequence in sequences:
+            for elm in sequence.internal_elems:
+                if isinstance(elm, LineElement):
+                    result.append(elm)
+        return result
+
+    def list_of_endreleases(self):
+
+        sequences = self.list_of_line_element_sequences()
+        result = []
+        for sequence in sequences:
+            for elm in sequence.internal_elems:
+                if isinstance(elm, EndRelease):
+                    result.append(elm)
         return result
 
     def list_of_primary_nodes(self):
@@ -2057,9 +2335,9 @@ class Building:
 
     def list_of_internal_nodes(self):
         list_of_internal_nodes = []
-        frame_elems = self.list_of_beamcolumn_elems()
-        for frame in frame_elems:
-            list_of_internal_nodes.extend(frame.internal_nodes)
+        sequences = self.list_of_line_element_sequences()
+        for sequence in sequences:
+            list_of_internal_nodes.extend(sequence.internal_nodes)
         return list_of_internal_nodes
 
     def list_of_all_nodes(self):
@@ -2067,15 +2345,7 @@ class Building:
             self.list_of_internal_nodes() + \
             self.list_of_parent_nodes()
 
-    def list_of_connections(self):
-        bc_elems = self.list_of_beamcolumn_elems()
-        result = []
-        for elm in bc_elems:
-            result.extend([elm.connection_i,
-                           elm.connection_j])
-        return result
-
-    def retrieve_beam(self, uniq_id: int) -> BeamColumn:
+    def retrieve_beam(self, uniq_id: int) -> LineElementSequence:
         beams = self.list_of_beams()
         result = None
         for beam in beams:
@@ -2084,7 +2354,7 @@ class Building:
                 break
         return result
 
-    def retrieve_column(self, uniq_id: int) -> BeamColumn:
+    def retrieve_column(self, uniq_id: int) -> LineElementSequence:
         columns = self.list_of_columns()
         result = None
         for col in columns:
@@ -2163,7 +2433,7 @@ class Building:
 
         # frame element self-weight
         if self_weight:
-            for elm in self.list_of_beamcolumn_elems():
+            for elm in self.list_of_line_element_sequences():
                 elm.apply_self_weight_and_mass(1.00)
         if assume_floor_slabs:
             for lvl in self.levels.level_list:

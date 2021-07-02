@@ -32,7 +32,13 @@ def plot_stress_strain(material: modeler.Material,
                              material.uniq_id,
                              material.parameters['Fy'],
                              material.parameters['E0'],
-                             material.parameters['b'])
+                             material.parameters['b'],
+                             *material.parameters['params'],
+                             material.parameters['a1'],
+                             material.parameters['a2'],
+                             material.parameters['a3'],
+                             material.parameters['a4'],
+                             material.parameters['sigInit'])
     else:
         raise ValueError("Unsupported material")
     node1_id = 1
@@ -84,50 +90,88 @@ class Analysis:
     eleForces: AnalysisResult = field(default_factory=AnalysisResult)
     fiber_stress_strain: AnalysisResult = field(default_factory=AnalysisResult)
 
-    def _store_result(self, analysis_result: AnalysisResult,
-                      uniq_id: int, result: list):
-        if uniq_id in analysis_result.keys():
-            analysis_result[uniq_id].append(result)
+    def _define_material(self, material: modeler.Material):
+        if material.ops_material == 'Steel02':
+            ops.uniaxialMaterial(
+                'Steel02',
+                material.uniq_id,
+                material.parameters['Fy'],
+                material.parameters['E0'],
+                material.parameters['b'],
+                *material.parameters['params'],
+                material.parameters['a1'],
+                material.parameters['a2'],
+                material.parameters['a3'],
+                material.parameters['a4'],
+                material.parameters['sigInit'])
+        elif material.ops_material == 'Elastic':
+            ops.uniaxialMaterial(
+                'Elastic',
+                material.uniq_id,
+                material.parameters['E']
+            )
         else:
-            analysis_result[uniq_id] = [result]
+            raise ValueError("Unsupported material")
 
-    #############################################
-    # Methods that send information to OpenSees #
-    #############################################
-
-    def _initialize(self):
-        ops.wipe()
-        ops.model('basic', '-ndm', 3, '-ndf', 6)
-
-    def _define_materials(self):
-        for material in self.building.materials.material_list:
-            if material.ops_material == 'Steel02':
-                ops.uniaxialMaterial('Steel02',
-                                     material.uniq_id,
-                                     material.parameters['Fy'],
-                                     material.parameters['E0'],
-                                     material.parameters['b'])
-            else:
-                raise ValueError("Unsupported material")
-
-    def _define_nodes(self):
-        for node in self.building.list_of_primary_nodes() + \
-                self.building.list_of_parent_nodes() + \
-                self.building.list_of_internal_nodes():
-            ops.node(node.uniq_id,
-                     *node.coords)
-
-    def _define_node_restraints(self):
-        for node in self.building.list_of_primary_nodes():
-            if node.restraint_type == 'fixed':
-                ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
-            elif node.restraint_type == 'pinned':
-                ops.fix(node.uniq_id, 1, 1, 1, 0, 0, 0)
-        for node in self.building.list_of_parent_nodes():
+    def _define_node(self, node: modeler.Node):
+        ops.node(node.uniq_id, *node.coords)
+        if node.restraint_type == 'fixed':
+            ops.fix(node.uniq_id, 1, 1, 1, 1, 1, 1)
+        elif node.restraint_type == 'pinned':
+            ops.fix(node.uniq_id, 1, 1, 1, 0, 0, 0)
+        elif node.restraint_type == 'parent':
             ops.fix(node.uniq_id, 0, 0, 1, 1, 1, 0)
+        elif node.restraint_type == 'free':
+            pass
+        else:
+            raise ValueError("Invalid restraint type")
+        if max(node.mass) > EPSILON:
+            ops.mass(node.uniq_id,
+                     *node.mass)
+
+    def _define_elastic_section(self, sec: modeler.Section):
+
+        ops.section('Elastic',
+                    sec.uniq_id,
+                    sec.material.parameters['E0'],
+                    sec.properties['A'],
+                    sec.properties['Ix'],
+                    sec.properties['Iy'],
+                    sec.material.parameters['G'],
+                    sec.properties['J'])
+
+    def _define_fiber_section(self, sec: modeler.Section,
+                              n_x: int, n_y: int):
+
+        pieces = sec.subdivide_section(
+            n_x=n_x, n_y=n_y)
+        ops.section('Fiber',
+                    sec.uniq_id,
+                    '-GJ',
+                    sec.properties['J']*sec.material.parameters['G'])
+        for piece in pieces:
+            area = piece.area
+            z_loc = piece.centroid.x
+            y_loc = piece.centroid.y
+            ops.fiber(y_loc,
+                      z_loc,
+                      area,
+                      sec.material.uniq_id)
+
+    def _define_line_element(self, elm: modeler.LineElement):
+        ops.geomTransf(elm.geomTransf,
+                       elm.uniq_id,
+                       *elm.z_axis)
+        ops.beamIntegration(
+            'Lobatto', elm.uniq_id, elm.section.uniq_id, 5)
+        ops.element('dispBeamColumn',
+                    elm.uniq_id,
+                    elm.node_i.uniq_id,
+                    elm.node_j.uniq_id,
+                    elm.uniq_id,
+                    elm.uniq_id)
 
     def _define_node_constraints(self):
-        # Rigid Diaphragms
         for lvl in self.building.levels.level_list:
             if lvl.parent_node:
                 ops.rigidDiaphragm(
@@ -136,20 +180,98 @@ class Analysis:
                     *[node.uniq_id
                       for node in lvl.list_of_primary_nodes()])
 
-    def _define_node_mass(self):
-        for node in self.building.list_of_primary_nodes() + \
-                self.building.list_of_parent_nodes() + \
-                self.building.list_of_internal_nodes():
-            if max(node.mass) > EPSILON:
-                ops.mass(node.uniq_id,
-                         *node.mass)
+    def _to_OpenSees_domain(self):
+        """
+        Defines the building model in OpenSeesPy
+        """
+
+        def define_node(node, defined_nodes):
+            if node.uniq_id not in defined_nodes:
+                self._define_node(node)
+                defined_nodes.append(node.uniq_id)
+
+        defined_nodes = []
+        defined_sections = []
+        defined_materials = []
+
+        ops.wipe()
+        ops.model('basic', '-ndm', 3, '-ndf', 6)
+
+        # define line elements
+        for elm in self.building.list_of_line_elements():
+
+            define_node(elm.node_i, defined_nodes)
+            define_node(elm.node_j, defined_nodes)
+
+            # define section
+            if elm.section.uniq_id not in defined_sections:
+                sec = elm.section
+                # define material
+                if sec.material.uniq_id \
+                   not in defined_materials:
+                    self._define_material(sec.material)
+                    defined_materials.append(sec.material.uniq_id)
+                if elm.model_as['type'] == 'elastic':
+                    self._define_elastic_section(sec)
+                elif elm.model_as['type'] == 'fiber':
+                    n_x = elm.model_as['n_x']
+                    n_y = elm.model_as['n_y']
+                    self._define_fiber_section(sec, n_x, n_y)
+                else:
+                    raise ValueError("Invalid modeling type")
+                defined_sections.append(elm.section.uniq_id)
+
+            self._define_line_element(elm)
+
+        # define zerolength elements representing end releases
+        for elm in self.building.list_of_endreleases():
+
+            define_node(elm.node_i, defined_nodes)
+            define_node(elm.node_j, defined_nodes)
+
+            # define fix material
+            if elm.mat_fix.uniq_id not in defined_materials:
+                self._define_material(elm.mat_fix)
+                defined_materials.append(elm.mat_fix.uniq_id)
+            # define release material
+            if elm.mat_release.uniq_id not in defined_materials:
+                self._define_material(elm.mat_release)
+                defined_materials.append(elm.mat_release.uniq_id)
+
+            # construct a list of material tags
+            all_dofs = [1, 2, 3, 4, 5, 6]
+            free_dofs = elm.free_dofs
+            mat_tags = []
+            for dof in all_dofs:
+                if dof in free_dofs:
+                    mat_tags.append(elm.mat_release.uniq_id)
+                else:
+                    mat_tags.append(elm.mat_fix.uniq_id)
+
+            # define the ZeroLength element
+            ops.element('zeroLength', elm.uniq_id,
+                        elm.node_i.uniq_id,
+                        elm.node_j.uniq_id,
+                        '-mat',
+                        *mat_tags,
+                        '-dir',
+                        *all_dofs,
+                        '-orient',
+                        *elm.x_vec,
+                        *elm.y_vec)
+
+        # define parent nodes
+        for node in self.building.list_of_parent_nodes():
+            define_node(node, defined_nodes)
+
+        # define constraints
+        self._define_node_constraints()
 
     def _define_dead_load(self):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
 
-        for elm in \
-                self.building.list_of_internal_elems():
+        for elm in self.building.list_of_line_elements():
             ops.eleLoad('-ele', elm.uniq_id,
                         '-type', '-beamUniform',
                         elm.udl_total()[1],
@@ -160,32 +282,16 @@ class Analysis:
                 self.building.list_of_internal_nodes():
             ops.load(node.uniq_id, *node.load_total())
 
-    def _define_sections(self):
-        # will be redefined in the child classes
-        # but is needed for `_to_OpenSees_domain()`
-        pass
-
-    def _define_beamcolumn_elements(self):
-        # will be redefined in the child classes
-        # but is needed for `_to_OpenSees_domain()`
-        pass
-
-    def _to_OpenSees_domain(self):
-        """
-        Defines the building model in OpenSeesPy
-        """
-        self._initialize()
-        self._define_materials()
-        self._define_nodes()
-        self._define_node_restraints()
-        self._define_node_constraints()
-        self._define_node_mass()
-        self._define_sections()
-        self._define_beamcolumn_elements()
-
     ####################################################
     # Methods that read back information from OpenSees #
     ####################################################
+
+    def _store_result(self, analysis_result: AnalysisResult,
+                      uniq_id: int, result: list):
+        if uniq_id in analysis_result.keys():
+            analysis_result[uniq_id].append(result)
+        else:
+            analysis_result[uniq_id] = [result]
 
     def _read_node_displacements(self):
         for node in self.building.list_of_all_nodes():
@@ -204,7 +310,7 @@ class Analysis:
                                    local_reaction)
 
     def _read_frame_element_forces(self):
-        for elm in self.building.list_of_internal_elems():
+        for elm in self.building.list_of_line_elements():
             uid = elm.uniq_id
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.eleForces,
@@ -212,7 +318,7 @@ class Analysis:
                                forces)
 
     def _read_frame_fiber_stress_strain(self, n_p):
-        for elm in self.building.list_of_internal_elems():
+        for elm in self.building.list_of_line_elements():
             uid = elm.uniq_id
             mat_id = elm.section.material.uniq_id
             result = []
@@ -289,44 +395,6 @@ class Analysis:
 @dataclass
 class LinearAnalysis(Analysis):
 
-    def _define_sections(self):
-
-        for sec in self.building.sections.section_list:
-            ops.section('Elastic',
-                        sec.uniq_id,
-                        sec.material.parameters['E0'],
-                        sec.properties['A'],
-                        sec.properties['Ix'],
-                        sec.properties['Iy'],
-                        sec.material.parameters['G'],
-                        sec.properties['J'])
-            ops.beamIntegration(
-                'Lobatto',
-                sec.uniq_id,
-                sec.uniq_id,
-                10)
-
-    def _define_beamcolumn_elements(self):
-        for elm in \
-                self.building.list_of_internal_elems():
-            # geometric transformation
-            if np.linalg.norm(elm.offset_i) + \
-               np.linalg.norm(elm.offset_j) > EPSILON:
-                ops.geomTransf('Linear',
-                               elm.uniq_id,
-                               *elm.z_axis,
-                               '-jntOffset', *elm.offset_i, *elm.offset_j)
-            else:
-                ops.geomTransf('Linear',
-                               elm.uniq_id,
-                               *elm.z_axis)
-            ops.element('dispBeamColumn',
-                        elm.uniq_id,
-                        elm.node_i.uniq_id,
-                        elm.node_j.uniq_id,
-                        elm.uniq_id,
-                        elm.section.uniq_id)
-
     def _run_gravity_analysis(self):
         ops.system('FullGeneral')
         ops.numberer('RCM')
@@ -361,8 +429,9 @@ class ModalAnalysis(LinearAnalysis):
     ####################################################
 
     def _read_node_displacements(self):
-        nodes = self.building.list_of_primary_nodes() + \
-            self.building.list_of_internal_nodes()
+        nodes = []
+        nodes.extend(self.building.list_of_primary_nodes())
+        nodes.extend(self.building.list_of_internal_nodes())
         parent_nodes = self.building.list_of_parent_nodes()
         if parent_nodes:
             all_nodes = nodes + parent_nodes
@@ -370,12 +439,12 @@ class ModalAnalysis(LinearAnalysis):
             all_nodes = nodes
         for node in all_nodes:
             for i in range(self.num_modes):
-                self._store_result(self.node_displacements,
-                                   node.uniq_id,
-                                   ops.nodeEigenvector(
-                                       node.uniq_id,
-                                       i+1)
-                                   )
+                self._store_result(
+                    self.node_displacements,
+                    node.uniq_id,
+                    ops.nodeEigenvector(
+                        node.uniq_id,
+                        i+1))
 
     def run(self):
         self._to_OpenSees_domain()
@@ -391,27 +460,9 @@ class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
-    def _define_sections(self, n_x, n_y):
-
-        for sec in self.building.sections.section_list:
-            pieces = sec.subdivide_section(
-                n_x=n_x, n_y=n_y)
-            ops.section('Fiber',
-                        sec.uniq_id,
-                        '-GJ',
-                        sec.properties['J']*sec.material.parameters['G'])
-            for piece in pieces:
-                area = piece.area
-                z_loc = piece.centroid.x
-                y_loc = piece.centroid.y
-                ops.fiber(y_loc,
-                          z_loc,
-                          area,
-                          sec.material.uniq_id)
-
     def _define_beamcolumn_elements(self, n_p):
         for elm in \
-                self.building.list_of_internal_elems():
+                self.building.list_of_line_elements():
             n_sub = int(n_p / elm.parent_n_sub)
             if n_sub < 2:
                 n_sub = 2

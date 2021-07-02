@@ -10,9 +10,7 @@ https://plotly.com/python/reference/
 #
 # https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
 
-from utility.graphics import common
 import plotly.graph_objects as go
-import plotly.io as pio
 # pio.renderers.default = 'browser'
 
 node_marker = {
@@ -28,6 +26,8 @@ def global_layout():
     """
     Some general definitions needed often
     """
+    # view_type = "orthographic"
+    view_type = "perspective"
     return go.Layout(
         scene=dict(aspectmode='data',
                    xaxis_visible=False,
@@ -35,7 +35,7 @@ def global_layout():
                    zaxis_visible=False,
                    camera=dict(
                        projection={
-                           "type": "orthographic"
+                           "type": view_type
                        }
                    )
                    ),

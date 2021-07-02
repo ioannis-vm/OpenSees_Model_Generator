@@ -56,42 +56,50 @@ b.active_placement = 'centroid'
 b.set_active_section("W24X94")
 # b.set_active_section("HSS20.000X0.375")
 b.set_active_groups(["columns"])
-b.add_columns_from_grids(n_sub=1)
+
+modeling_type = {'type': 'elastic'}
+# modeling_type = {'type': 'fiber', 'n_x': 50, 'n_y': 50}
+
+b.add_columns_from_grids(
+    n_sub=1, model_as=modeling_type)
+
 b.active_placement = 'top_center'
 b.set_active_groups(["beams"])
-b.add_beams_from_grids(n_sub=1)
+
+b.add_beams_from_grids(n_sub=5, ends={'type': 'pinned', 'dist': 0.001},
+                       model_as=modeling_type)
+
 # for more control (offsets etc.), define elements one by one.
 #     (see example_offsets.py)
 # Primary points can be obtained by intersecting gridlines:
 # pt = g1.intersect(gA)
 
-
-b.select_perimeter_beams_all()
+# b.select_perimeter_beams_all()
 # b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
 # b.plot_building_geometry(extrude_frames=False)
 # b.plot_building_geometry()
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
-b.plot_building_geometry(extrude_frames=False,
-                         offsets=True,
-                         gridlines=True,
-                         global_axes=True,
-                         diaphragm_lines=True,
-                         tributary_areas=True,
-                         just_selection=False,
-                         parent_nodes=True,
-                         frame_axes=True)
+# b.plot_building_geometry(extrude_frames=False,
+#                          offsets=True,
+#                          gridlines=True,
+#                          global_axes=True,
+#                          diaphragm_lines=True,
+#                          tributary_areas=True,
+#                          just_selection=False,
+#                          parent_nodes=True,
+#                          frame_axes=True)
 
 
-b.plot_building_geometry(extrude_frames=True,
-                         offsets=True,
-                         gridlines=True,
-                         global_axes=True,
-                         diaphragm_lines=True,
-                         tributary_areas=True,
-                         just_selection=False,
-                         parent_nodes=True,
-                         frame_axes=True)
+# b.plot_building_geometry(extrude_frames=True,
+#                          offsets=True,
+#                          gridlines=True,
+#                          global_axes=True,
+#                          diaphragm_lines=True,
+#                          tributary_areas=True,
+#                          just_selection=False,
+#                          parent_nodes=True,
+#                          frame_axes=True)
 
 
 # ~~~~~~~~~~~~~~~~~ #
@@ -110,9 +118,9 @@ b.plot_building_geometry(extrude_frames=True,
 # print(reactions[0:3] / 1000)  # kip
 # print(reactions[3:6] / 1000 / 12)  # kip-ft
 
-# # # visualizing results
+# # visualizing results
 # linear_gravity_analysis.deformed_shape(extrude_frames=False)
-# # linear_gravity_analysis.deformed_shape(extrude_frames=True)
+# linear_gravity_analysis.deformed_shape(extrude_frames=True)
 # linear_gravity_analysis.basic_forces()
 
 # ~~~~~~~~~~~~~~~~ #
@@ -120,10 +128,10 @@ b.plot_building_geometry(extrude_frames=True,
 # ~~~~~~~~~~~~~~~~ #
 
 # # performing a linear modal analysis
-# modal_analysis = solver.ModalAnalysis(b, num_modes=9)
+# modal_analysis = solver.ModalAnalysis(b, num_modes=6)
 # modal_analysis.run()
 
-# # # retrieving textual results
+# retrieving textual results
 # print(modal_analysis.periods)
 
 # # visualizing results
@@ -144,10 +152,10 @@ b.plot_building_geometry(extrude_frames=True,
 # # control_node = b.list_of_nodes()[-1]  # top floor somewhere
 # analysis_metadata = pushover_analysis.run(
 #     "y",
-#     60.,
+#     10.,
 #     control_node,
 #     1./20.,
-#     np.linspace(0., 60., 80), n_x=20, n_y=20, n_p=10)
+#     np.linspace(0., 10., 80), n_x=20, n_y=20, n_p=10)
 # n_plot_steps = analysis_metadata['successful steps']
 
 # # # plot the deformed shape for any of the steps
