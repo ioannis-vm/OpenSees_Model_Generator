@@ -1,7 +1,34 @@
+"""
+Example steel building.
+
+Units: [lb], [in], [s]
+
+Lateral load resisting system:
+    X direction: Braced frame
+    Y direction: Moment frame
+
+Gravity framing: Pinned beams, continuous columns
+                 modeled as linear-elastic.
+
+Lateral load resisting elements:
+    modeled with distributed plasticity
+    displacement-based fiber elements.
+    RBS moment frame beams are used.
+
+Loads:
+    Floor surface loads:
+        All floors: 1.0 lb/in2
+        Roof      : 1.2 lb/in2
+
+Note:
+    Sections are arbitrary.
+"""
+
 import time
 import modeler
 import solver
 import numpy as np
+
 
 # Define a building
 b = modeler.Building()
@@ -14,14 +41,12 @@ for i in range(1, 7):
     b.add_level(str(i), 120*i)
 
 
-# add girdlines
-b.add_gridlines_from_dxf("examples/dxf/gridlines.dxf")
-
-
 # Add goups
 b.add_group('cols')
 b.add_group('bms')
 b.add_group('braces')
+b.add_group('moment frame')
+b.add_group('gravity framing')
 
 # define materials
 b.materials.enable_Steel02()
@@ -31,7 +56,7 @@ b.set_active_material('steel')
 b.add_sections_from_json(
     "section_data/sections.json",
     "W",
-    ["W14X90"])
+    ["W14X90", "W30X132"])
 
 b.add_sections_from_json(
     "section_data/sections.json",
@@ -44,47 +69,62 @@ b.assign_surface_DL(1.00)
 b.set_active_levels(["6"])
 b.assign_surface_DL(1.20)
 
-modeling_type = {'type': 'fiber', 'n_x': 5, 'n_y': 5}
-# modeling_type = {'type': 'elastic'}
+modeling_type_fiber = {'type': 'fiber', 'n_x': 5, 'n_y': 5}
+modeling_type_elastic = {'type': 'elastic'}
 
-# define columns
-b.set_active_groups(['cols'])
-b.set_active_levels([str(i) for i in range(1, 2)])
-b.set_active_section("HSS22X22X3/4")
-b.add_columns_from_grids(
-    n_sub=1,
-    model_as=modeling_type)
-b.set_active_levels([str(i) for i in range(2, 5)])
-b.set_active_section("HSS18X18X3/4")
-b.add_columns_from_grids(
-    n_sub=1,
-    model_as=modeling_type)
-b.set_active_levels([str(i) for i in range(5, 7)])
-b.set_active_section("HSS14X14X3/4")
-b.add_columns_from_grids(
-    n_sub=1,
-    model_as=modeling_type)
 
-# define beams
-b.set_active_groups(['bms'])
-b.set_active_levels("all_above_base")
-b.set_active_section("W14X90")
+# modeling the moment frame
+b.add_gridlines_from_dxf("examples/dxf/gridlines_momentframe_cols.dxf")
+b.set_active_groups(['cols', 'moment frame'])
+b.set_active_levels('all_above_base')
+b.set_active_section("W30X132")
+b.add_columns_from_grids(
+    n_sub=1,
+    model_as=modeling_type_fiber)
+b.clear_gridlines()
+b.add_gridlines_from_dxf("examples/dxf/gridlines_momentframe_beams.dxf")
+b.set_active_groups(['bms', 'moment frame'])
 b.set_active_placement('top_center')
-b.add_beams_from_grids(n_sub=1, model_as=modeling_type,
+b.add_beams_from_grids(n_sub=1, model_as=modeling_type_elastic,
                        ends={'type': 'RBS',
                              'dist': 0.05,
                              'length': 5,
                              'factor': 0.50})
 
-# define brace elements
-b.clear_gridlines()
-b.add_gridlines_from_dxf("examples/dxf/gridlines_brace.dxf")
-b.set_active_section("HSS9X9X5/16")
-b.set_active_groups(['braces'])
-b.add_braces_from_grids(btype="single", n_sub=12, camber=0.01,
-                        model_as=modeling_type, release_distance=0.005)
 
-b.preprocess()
+# b.set_active_levels([str(i) for i in range(2, 5)])
+# b.set_active_section("HSS18X18X3/4")
+# b.add_columns_from_grids(
+#     n_sub=1,
+#     model_as=modeling_type)
+# b.set_active_levels([str(i) for i in range(5, 7)])
+# b.set_active_section("HSS14X14X3/4")
+# b.add_columns_from_grids(
+#     n_sub=1,
+#     model_as=modeling_type)
+
+# # define beams (moment frames)
+# b.set_active_levels("all_above_base")
+# b.set_active_section("W14X90")
+# b.set_active_placement('top_center')
+# b.add_beams_from_grids(n_sub=1, model_as=modeling_type,
+#                        ends={'type': 'RBS',
+#                              'dist': 0.05,
+#                              'length': 5,
+#                              'factor': 0.50})
+
+# # define beams (gravity)
+
+
+# # define brace elements
+# b.clear_gridlines()
+# b.add_gridlines_from_dxf("examples/dxf/gridlines_brace.dxf")
+# b.set_active_section("HSS9X9X5/16")
+# b.set_active_groups(['braces'])
+# b.add_braces_from_grids(btype="single", n_sub=12, camber=0.01,
+#                         model_as=modeling_type, release_distance=0.005)
+
+# b.preprocess()
 
 b.plot_building_geometry(extrude_frames=False, frame_axes=False)
 

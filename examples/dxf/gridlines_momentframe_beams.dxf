@@ -23,7 +23,7 @@ $INSBASE
   9
 $EXTMIN
  10
-0
+140
  20
 0
  30
@@ -31,7 +31,7 @@ $EXTMIN
   9
 $EXTMAX
  10
-700
+560
  20
 350
  30
@@ -91,7 +91,7 @@ STANDARD
   9
 $CLAYER
   8
-columns_gravity
+0
   9
 $CELTYPE
   6
@@ -1115,7 +1115,7 @@ AcDbViewportTableRecord
  21
 1
  12
-492.3579211115229
+492.3579211115228
  22
 251.4168107803521
  13
@@ -1143,9 +1143,9 @@ AcDbViewportTableRecord
  37
 0
  40
-765.4245128201831
+793.3597140179999
  41
-1.75
+1.688380281690141
  42
 50
  43
@@ -2245,116 +2245,6 @@ CONTINUOUS
 390
 F
   0
-LAYER
-  5
-4A
-330
-2
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-brace
- 70
-    0
- 62
-    3
-  6
-CONTINUOUS
-370
-    0
-390
-F
-  0
-LAYER
-  5
-4B
-330
-2
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-columns_gravity
- 70
-    0
- 62
-    6
-  6
-CONTINUOUS
-370
-    0
-390
-F
-  0
-LAYER
-  5
-4C
-330
-2
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-gravity_primary
- 70
-    0
- 62
-    6
-  6
-CONTINUOUS
-370
-    0
-390
-F
-  0
-LAYER
-  5
-4D
-330
-2
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-gravity_secondary
- 70
-    0
- 62
-    4
-  6
-CONTINUOUS
-370
-    0
-390
-F
-  0
-LAYER
-  5
-4E
-330
-2
-100
-AcDbSymbolTableRecord
-100
-AcDbLayerTableRecord
-  2
-moment
- 70
-    0
- 62
-    1
-  6
-CONTINUOUS
-370
-    0
-390
-F
-  0
 ENDTAB
   0
 TABLE
@@ -2371,7 +2261,7 @@ AcDbSymbolTable
   0
 STYLE
   5
-4F
+4A
 330
 2
 100
@@ -2455,7 +2345,7 @@ ACAD
   0
 APPID
   5
-50
+4B
 330
 9
 100
@@ -2487,7 +2377,7 @@ AcDbDimStyleTable
   0
 DIMSTYLE
 105
-51
+4C
 330
 A
 100
@@ -2761,11 +2651,11 @@ ENTITIES
   0
 LINE
   5
-52
+4D
 100
 AcDbEntity
   8
-brace
+0
   6
 ByLayer
  62
@@ -2775,13 +2665,133 @@ ByLayer
 100
 AcDbLine
  10
-420
+140
  20
-350
+175
+ 11
+140
+ 21
+218.75
+  0
+LINE
+  5
+4E
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+140
+ 20
+175
+ 11
+140
+ 21
+131.25
+  0
+LINE
+  5
+4F
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+175
  11
 560
  21
-339.5
+131.25
+  0
+LINE
+  5
+50
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+175
+ 11
+560
+ 21
+218.75
+  0
+LINE
+  5
+51
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+140
+ 20
+218.75
+ 11
+140
+ 21
+262.5
+  0
+LINE
+  5
+52
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+140
+ 20
+262.5
+ 11
+140
+ 21
+306.25
   0
 LINE
   5
@@ -2789,7 +2799,7 @@ LINE
 100
 AcDbEntity
   8
-brace
+0
   6
 ByLayer
  62
@@ -2799,13 +2809,13 @@ ByLayer
 100
 AcDbLine
  10
-420
+140
  20
-0
+306.25
  11
-560
+140
  21
-10.5
+339.5
   0
 LINE
   5
@@ -2813,7 +2823,7 @@ LINE
 100
 AcDbEntity
   8
-brace
+0
   6
 ByLayer
  62
@@ -2825,11 +2835,11 @@ AcDbLine
  10
 140
  20
-339.5
+131.25
  11
-280
+140
  21
-350
+87.5
   0
 LINE
   5
@@ -2837,7 +2847,7 @@ LINE
 100
 AcDbEntity
   8
-brace
+0
   6
 ByLayer
  62
@@ -2849,11 +2859,179 @@ AcDbLine
  10
 140
  20
-10.5
+87.5
  11
-280
+140
  21
+43.75
+  0
+LINE
+  5
+56
+100
+AcDbEntity
+  8
 0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+140
+ 20
+43.75
+ 11
+140
+ 21
+10.5
+  0
+LINE
+  5
+57
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+218.75
+ 11
+560
+ 21
+262.5
+  0
+LINE
+  5
+58
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+262.5
+ 11
+560
+ 21
+306.25
+  0
+LINE
+  5
+59
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+306.25
+ 11
+560
+ 21
+339.5
+  0
+LINE
+  5
+5A
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+131.25
+ 11
+560
+ 21
+87.5
+  0
+LINE
+  5
+5B
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+87.5
+ 11
+560
+ 21
+43.75
+  0
+LINE
+  5
+5C
+100
+AcDbEntity
+  8
+0
+  6
+ByLayer
+ 62
+  256
+370
+   -1
+100
+AcDbLine
+ 10
+560
+ 20
+43.75
+ 11
+560
+ 21
+10.5
   0
 ENDSEC
   0

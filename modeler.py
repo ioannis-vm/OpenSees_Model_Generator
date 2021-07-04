@@ -159,7 +159,20 @@ class GridLine:
         )
         if np.abs(np.linalg.det(mat)) <= common.EPSILON:
             # The lines are parallel
-            return None
+            # in this case, we check if they have
+            # a common starting or ending point
+            # (we ignore the case of a common segment,
+            #  as it has no practical use for our purposes).
+            if np.linalg.norm(self.start_np - grd.start_np) <= common.EPSILON:
+                return self.start_np
+            elif np.linalg.norm(self.start_np - grd.end_np) <= common.EPSILON:
+                return self.start_np
+            elif np.linalg.norm(self.end_np - grd.start_np) <= common.EPSILON:
+                return self.end_np
+            elif np.linalg.norm(self.end_np - grd.end_np) <= common. EPSILON:
+                return self.end_np
+            else:
+                return None
         # Get the origins
         ra_ori = self.start_np
         rb_ori = grd.start_np
@@ -864,7 +877,8 @@ class LineElement:
                                Expressed in the global coordinate system.
         offset_j (np.ndarray): Similarly for node j
         section (Section): Section of the element interior
-        parent_n_sub: Number of subdivisions of the parent element
+        len_proportion (float): Proportion of the line element's length
+                        to the length of its parent line element sequence.
         model_as (dict): Either
                        {'type': 'elastic'}
                        or
@@ -903,7 +917,7 @@ class LineElement:
     offset_i: np.ndarray
     offset_j: np.ndarray
     section: Section
-    parent_n_sub: int
+    len_proportion: float
     model_as: dict
     geomTransf: str
     udl_self: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))

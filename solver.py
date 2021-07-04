@@ -171,12 +171,16 @@ class Analysis:
                       sec.material.uniq_id)
 
     def _define_line_element(self, elm: modeler.LineElement, n_p):
-        n_sub = int(n_p / elm.parent_n_sub)
-        if n_sub < 2:
+        if elm.len_proportion > 0.75:
+            n_sub = 4
+        elif elm.len_proportion > 0.50:
+            n_sub = 3
+        else:
             n_sub = 2
         ops.geomTransf(elm.geomTransf,
                        elm.uniq_id,
                        *elm.z_axis)
+        # syntax:
         # beamIntegration('Lobatto', tag, secTag, N)
         ops.beamIntegration(
             'Lobatto', elm.uniq_id, elm.section.uniq_id, n_sub)
