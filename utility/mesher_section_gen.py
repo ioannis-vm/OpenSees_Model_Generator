@@ -5,9 +5,9 @@ import numpy as np
 def generate(edges):
     halfedges = mesher.define_halfedges(edges)
     loops = mesher.obtain_closed_loops(halfedges)
-    external, _, trivial = mesher.orient_loops(loops)
-    mesher.sanity_checks(external, trivial)
-    return mesher.Mesh(external[0])
+    external, internal, trivial = mesher.orient_loops(loops)
+    mesher.sanity_checks(internal, trivial)
+    return mesher.Mesh(internal[0])
 
 
 def define_edges(vertices):
@@ -23,7 +23,7 @@ def define_edges(vertices):
     return edges
 
 
-def w_mesh(b, h, tw, tf):
+def w_mesh(b, h, t, tw, tf):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the W section with
@@ -32,21 +32,45 @@ def w_mesh(b, h, tw, tf):
     Input:
         b: total width
         h: total height
+        t: clear web height (without fillets)
         tw: web thickness
         tf: flange thickness
     """
+
+    r = (h - t - 2. * tf) / 2.
+    k = (b - 2. * r - tw) / 2.
     vertices = [
         mesher.Vertex((b/2., h/2.)),
         mesher.Vertex((-b/2., h/2.)),
         mesher.Vertex((-b/2., h/2.-tf)),
-        mesher.Vertex((-tw/2., h/2.-tf)),
-        mesher.Vertex((-tw/2., -(h/2.-tf))),
+        mesher.Vertex((-b/2.+k, h/2.-tf)),
+        mesher.Vertex((-b/2.+k+r * np.cos(2.*np.pi/6.),
+                       h/2.-tf-r + r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(np.pi/6.),
+                       h/2.-tf-r+r*np.sin(np.pi/6.))),
+        mesher.Vertex((-b/2.+k+r, h/2.-tf-r)),
+        mesher.Vertex((-b/2.+k+r, -h/2.+tf+r)),
+        mesher.Vertex((-b/2.+k+r*np.cos(np.pi/6.),
+                       -h/2.+tf+r-r*np.sin(np.pi/6.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(2.*np.pi/6.),
+                       -h/2.+tf+r-r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((-b/2.+k, -h/2.+tf)),
         mesher.Vertex((-b/2., -(h/2.-tf))),
         mesher.Vertex((-b/2., -h/2.)),
         mesher.Vertex((b/2., -h/2.)),
         mesher.Vertex((b/2., -(h/2-tf))),
-        mesher.Vertex((tw/2., -(h/2-tf))),
-        mesher.Vertex((tw/2., h/2.-tf)),
+        mesher.Vertex((+b/2.-k, -h/2.+tf)),
+        mesher.Vertex((+b/2.-k-r*np.cos(2.*np.pi/6.),
+                       -h/2.+tf+r-r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(np.pi/6.),
+                       -h/2.+tf+r-r*np.sin(np.pi/6.))),
+        mesher.Vertex((+b/2.-k-r, -h/2.+tf+r)),
+        mesher.Vertex((+b/2.-k-r, +h/2.-tf-r)),
+        mesher.Vertex((+b/2.-k-r*np.cos(np.pi/6.),
+                       +h/2.-tf-r+r*np.sin(np.pi/6.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(2.*np.pi/6.),
+                       +h/2.-tf-r+r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((+b/2.-k, h/2.-tf)),
         mesher.Vertex((b/2., h/2.-tf))
     ]
     edges = define_edges(vertices)

@@ -63,6 +63,31 @@ def point_exists_in_list(pt: np.ndarray,
     return False
 
 
+def rbs(sec: 'Section', reduction_factor) -> 'Section':
+    """
+    Given a W section and a reduction factor
+    expressed as a proportion of the section's width,
+    the method returns a reduced section.
+    """
+    if sec.sec_type != 'W':
+        raise ValueError("Only W sections are supported for RBS")
+    name = sec.name + '_reduced'
+    b = sec.properties['bf']
+    h = sec.properties['d']
+    tw = sec.properties['tw']
+    tf = sec.properties['tf']
+    t = sec.properties['T']
+    b_red = b * reduction_factor
+    properties = dict(sec.properties)
+    properties['bf'] = b_red
+    mesh = mesher_section_gen.w_mesh(b_red, h, t, tw, tf)
+    section = Section(
+        'W', name,
+        sec.material,
+        mesh, properties)
+    return section
+
+
 @dataclass
 @total_ordering
 class GridLine:
@@ -391,11 +416,12 @@ class Node:
     load_fl: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=6), repr=False)
     tributary_area: float = field(default=0.00, repr=False)
-    column_above: Optional['LineElementSecquence'] = field(
+    column_above: Optional['LineElementSequence'] = field(
         default=None, repr=False)
-    column_below: Optional[LineElementSequence] = field(
+    column_below: Optional['LineElementSequence'] = field(
         default=None, repr=False)
-    beams: list[LineElementSequence] = field(default_factory=list, repr=False)
+    beams: list['LineElementSequence'] = field(
+        default_factory=list, repr=False)
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
@@ -628,7 +654,8 @@ class Sections:
         h = properties['d']
         tw = properties['tw']
         tf = properties['tf']
-        mesh = mesher_section_gen.w_mesh(b, h, tw, tf)
+        t = properties['T']
+        mesh = mesher_section_gen.w_mesh(b, h, t, tw, tf)
         section = Section('W', name, material, mesh, properties)
         self.add(section)
 
@@ -723,7 +750,7 @@ class Materials:
             'Elastic',
             0.00,
             {
-                'E': 1.0e8
+                'E': 1.0e12
             })
         )
         self.material_list.append(Material(
@@ -731,7 +758,7 @@ class Materials:
             'Elastic',
             0.00,
             {
-                'E': 1.0e-8
+                'E': 1.0e-12
             })
         )
 
@@ -1011,7 +1038,7 @@ class LineElementSequence:
     placement: str = field(default="centroid", repr=False)
     tributary_area: float = field(default=0.00, repr=False)
 
-    def generate(self):
+    def _generate_common(self):
 
         self.uniq_id = next(_ids)
 
@@ -1031,17 +1058,24 @@ class LineElementSequence:
         sec_offset_global = t_loc_to_glob @ sec_offset_local
         p_i += sec_offset_global
         p_j += sec_offset_global
-        self.offset_i = self.offset_i.copy()
-        self.offset_j = self.offset_j.copy()
-        self.offset_i += sec_offset_global
-        self.offset_j += sec_offset_global
-
-        internal_pt_coords = np.linspace(
-            tuple(p_i), tuple(p_j), num=self.n_sub+1)
-        self.internal_pt_i = internal_pt_coords[0]
-        self.internal_pt_j = internal_pt_coords[-1]
+        self.offset_i = self.offset_i.copy() + sec_offset_global
+        self.offset_j = self.offset_j.copy() + sec_offset_global
+        self.internal_pt_i = p_i
+        self.internal_pt_j = p_j
         self.internal_nodes = []
         self.internal_elems = []
+
+        return x_axis, y_axis, z_axis
+
+    def generate(self):
+
+        x_axis, y_axis, z_axis = \
+            self._generate_common()
+
+        internal_pt_coords = np.linspace(
+            tuple(self.internal_pt_i),
+            tuple(self.internal_pt_j),
+            num=self.n_sub+1)
         # internal nodes (if required)
         if self.n_sub > 1:
             for i in range(1, len(internal_pt_coords)-1):
@@ -1068,45 +1102,22 @@ class LineElementSequence:
     def generate_pinned(self, release_distance,
                         mat_fix: Material, mat_release: Material):
 
-        self.uniq_id = next(_ids)
-
         assert release_distance > 0.00, "Release dist must be > 0"
 
-        p_i = self.node_i.coords + self.offset_i
-        p_j = self.node_j.coords + self.offset_j
-
-        # obtain offset from section (local system)
-        dz, dy = self.section.retrieve_offset(self.placement)
-        sec_offset_local = np.array([0.00, dy, dz])
-        # retrieve local coordinate system
         x_axis, y_axis, z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                p_i, p_j, self.ang)
-        t_glob_to_loc = transformations.transformation_matrix(
-            x_axis, y_axis, z_axis)
-        t_loc_to_glob = t_glob_to_loc.T
-        sec_offset_global = t_loc_to_glob @ sec_offset_local
-        p_i += sec_offset_global
-        p_j += sec_offset_global
-        self.offset_i = self.offset_i.copy()
-        self.offset_j = self.offset_j.copy()
-        self.offset_i += sec_offset_global
-        self.offset_j += sec_offset_global
+            self._generate_common()
 
-        self.internal_pt_i = p_i
-        self.internal_pt_j = p_j
+        elm_len = np.linalg.norm(
+            self.internal_pt_j - self.internal_pt_i)
 
-        elm_len = np.linalg.norm(p_j - p_i)
-
-        release_loc_i = p_i + x_axis * release_distance * elm_len
-        release_loc_j = p_i + x_axis * (1.0 - release_distance) * elm_len
+        release_loc_i = self.internal_pt_i\
+            + x_axis * release_distance * elm_len
+        release_loc_j = self.internal_pt_i\
+            + x_axis * (1.0 - release_distance) * elm_len
 
         internal_pt_coords = np.linspace(
             tuple(release_loc_i),
             tuple(release_loc_j), num=self.n_sub+1)
-
-        self.internal_nodes = []
-        self.internal_elems = []
 
         # outer elements at end i (before release at i)
         n_release_outer_i = Node(release_loc_i)
@@ -1131,6 +1142,184 @@ class LineElementSequence:
         n_release_outer_j = Node(release_loc_j)
 
         # middle internal nodes (if required)
+        if self.n_sub > 1:
+            for i in range(1, len(internal_pt_coords)-1):
+                self.internal_nodes.append(Node(internal_pt_coords[i]))
+        # internal elements
+        for i in range(self.n_sub):
+            if i == 0:
+                node_i = n_release_inner_i
+            else:
+                node_i = self.internal_nodes[i+1]
+            if i == self.n_sub-1:
+                node_j = n_release_inner_j
+            else:
+                node_j = self.internal_nodes[i+2]
+            self.internal_elems.append(
+                LineElement(node_i, node_j, self.ang,
+                            np.zeros(3), np.zeros(3),
+                            self.section, self.n_sub,
+                            self.model_as, self.geomTransf))
+
+        # outer elements at end j (after release at j)
+        self.internal_elems.append(
+            EndRelease(n_release_inner_j,
+                       n_release_outer_j,
+                       [5, 6],
+                       x_axis,
+                       y_axis,
+                       mat_fix,
+                       mat_release))
+        self.internal_nodes.append(n_release_inner_j)
+        self.internal_elems.append(
+            LineElement(n_release_outer_j, self.node_j, self.ang,
+                        np.zeros(3), self.offset_j,
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        self.internal_nodes.append(n_release_outer_j)
+
+    def generate_RBS(self, rbs_distance, rbs_length, rbs_reduction):
+        """
+        Generate a sequence representing a RBS beam.
+        Args:
+            rbs_distance (float): Where the reduction starts
+                         relative to the sequence's clear length
+                         (without the offsets)
+            rbs_length (float): The length of the part where the
+                       section is reduced.
+            rbs_reduction (float): Reduction factor for the rbs part,
+                          expressed as a proportion of the section's width.
+        """
+        assert rbs_distance > 0.00, "RBS distance must be > 0"
+        assert rbs_length > 0.00, "RBS length must be > 0"
+
+        rbs_sec = rbs(self.section, rbs_reduction)
+
+        x_axis, y_axis, z_axis = \
+            self._generate_common()
+
+        elm_len = np.linalg.norm(
+            self.internal_pt_j - self.internal_pt_i)
+
+        rbs_loc_i_start = self.internal_pt_i \
+            + x_axis * (rbs_distance * elm_len)
+        rbs_loc_i_end = self.internal_pt_i \
+            + x_axis * (rbs_distance * elm_len + rbs_length)
+        rbs_loc_j_start = self.internal_pt_i \
+            + x_axis * ((1.0 - rbs_distance) * elm_len)
+        rbs_loc_j_end = self.internal_pt_i \
+            + x_axis * ((1.0 - rbs_distance) * elm_len - rbs_length)
+
+        internal_pt_coords = np.linspace(
+            tuple(rbs_loc_i_end),
+            tuple(rbs_loc_j_start), num=self.n_sub+1)
+
+        # outer elements at end i (before rbs at i)
+        n_rbs_outer_i = Node(rbs_loc_i_start)
+        self.internal_nodes.append(n_rbs_outer_i)
+        self.internal_elems.append(
+            LineElement(self.node_i, n_rbs_outer_i, self.ang,
+                        self.offset_i, np.zeros(3),
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        n_rbs_inner_i = Node(rbs_loc_i_end)
+        self.internal_nodes.append(n_rbs_inner_i)
+        self.internal_elems.append(
+            LineElement(n_rbs_outer_i, n_rbs_inner_i, self.ang,
+                        np.zeros(3), np.zeros(3),
+                        rbs_sec, self.n_sub, self.model_as,
+                        self.geomTransf))
+
+        n_rbs_inner_j = Node(rbs_loc_j_end)
+        n_rbs_outer_j = Node(rbs_loc_j_start)
+
+        # middle internal nodes (if required)
+        if self.n_sub > 1:
+            for i in range(1, len(internal_pt_coords)-1):
+                self.internal_nodes.append(Node(internal_pt_coords[i]))
+        # internal elements
+        for i in range(self.n_sub):
+            if i == 0:
+                node_i = n_rbs_inner_i
+            else:
+                node_i = self.internal_nodes[i+1]
+            if i == self.n_sub-1:
+                node_j = n_rbs_inner_j
+            else:
+                node_j = self.internal_nodes[i+2]
+            self.internal_elems.append(
+                LineElement(node_i, node_j, self.ang,
+                            np.zeros(3), np.zeros(3),
+                            self.section, self.n_sub,
+                            self.model_as, self.geomTransf))
+
+        # outer elements at end j (after rbs at j)
+        self.internal_elems.append(
+            LineElement(n_rbs_inner_j, n_rbs_outer_j, self.ang,
+                        np.zeros(3), np.zeros(3),
+                        rbs_sec, self.n_sub, self.model_as,
+                        self.geomTransf))
+        self.internal_nodes.append(n_rbs_inner_j)
+        self.internal_elems.append(
+            LineElement(n_rbs_outer_j, self.node_j, self.ang,
+                        np.zeros(3), self.offset_j,
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        self.internal_nodes.append(n_rbs_outer_j)
+
+    def generate_brace(self, release_distance,
+                       mat_fix: Material, mat_release: Material,
+                       camber: np.ndarray):
+
+        assert release_distance > 0.00, "Release dist must be > 0"
+
+        x_axis, y_axis, z_axis = \
+            self._generate_common()
+
+        elm_len = np.linalg.norm(
+            self.internal_pt_j - self.internal_pt_i)
+
+        release_loc_i = self.internal_pt_i\
+            + x_axis * release_distance * elm_len
+        release_loc_j = self.internal_pt_i\
+            + x_axis * (1.0 - release_distance) * elm_len
+
+        internal_pt_coords = np.linspace(
+            tuple(release_loc_i),
+            tuple(release_loc_j), num=self.n_sub+1)
+        # apply camber
+        t_param = np.linspace(0, 1, self.n_sub+1)
+        x = camber * self.length_clear()
+        y_deform = 4.0 * x * (t_param**2 - t_param)
+        deformation_local = np.column_stack(
+            (np.zeros(self.n_sub+1), y_deform, np.zeros(self.n_sub+1)))
+        deformation_global = (transformations.transformation_matrix(
+            x_axis, y_axis, z_axis).T @ deformation_local.T).T
+        internal_pt_coords += deformation_global
+
+        # outer elements at end i (before release at i)
+        n_release_outer_i = Node(release_loc_i)
+        self.internal_nodes.append(n_release_outer_i)
+        self.internal_elems.append(
+            LineElement(self.node_i, n_release_outer_i, self.ang,
+                        self.offset_i, np.zeros(3),
+                        self.section, self.n_sub, self.model_as,
+                        self.geomTransf))
+        n_release_inner_i = Node(release_loc_i)
+        self.internal_nodes.append(n_release_inner_i)
+        self.internal_elems.append(
+            EndRelease(n_release_outer_i,
+                       n_release_inner_i,
+                       [5, 6],
+                       x_axis,
+                       y_axis,
+                       mat_fix,
+                       mat_release))
+
+        n_release_inner_j = Node(release_loc_j)
+        n_release_outer_j = Node(release_loc_j)
+
+        # middle internal nodes
         if self.n_sub > 1:
             for i in range(1, len(internal_pt_coords)-1):
                 self.internal_nodes.append(Node(internal_pt_coords[i]))
@@ -1780,7 +1969,8 @@ class Building:
                             y: float,
                             n_sub=1,
                             model_as={'type': 'elastic'},
-                            geomTransf='Linear', ends={'type': 'fixed'}) -> list[LineElementSequence]:
+                            geomTransf='Linear', ends={'type': 'fixed'}) \
+            -> list[LineElementSequence]:
         """
         Adds a vertical column at the given X, Y
         location at all the active levels.
@@ -1863,7 +2053,7 @@ class Building:
                            offset_j=np.zeros(shape=3).copy(),
                            snap_i="centroid",
                            snap_j="centroid",
-                           ends='fixed',
+                           ends={'type': 'fixed'},
                            model_as={'type': 'elastic'},
                            geomTransf='Linear'):
         """
@@ -1962,6 +2152,11 @@ class Building:
                     ends['dist'],
                     self.materials.retrieve('fix'),
                     self.materials.retrieve('release'))
+            elif ends['type'] == 'RBS':
+                beam.generate_RBS(
+                    ends['dist'],
+                    ends['length'],
+                    ends['factor'])
             else:
                 raise ValueError('Invalid end-type')
             level.beams.add(beam)
@@ -1975,7 +2170,10 @@ class Building:
                             start: np.ndarray,
                             end: np.ndarray,
                             btype: str = 'single',
+                            model_as: dict = {'type': 'elastic'},
+                            geomTransf: str = 'Linear',
                             n_sub: int = 5,
+                            release_distance: float = 0.005,
                             camber: float = 0.05):
         """
         Adds a brace connecting the given points
@@ -2017,32 +2215,21 @@ class Building:
                 end_node = Node(
                     np.array([*end, level.elevation]), level.restraint)
                 level.nodes_primary.add(end_node)
-            brace = LineElementSequence(node_i=start_node,
-                                        node_j=end_node,
-                                        ang=self.active_angle,
-                                        section=self.sections.active,
-                                        n_sub=n_sub,
-                                        function="brace",
-                                        placement='centroid',
-                                        geomTransf=geomTransf,
-                                        offset_i=np.zeros(3),
-                                        offset_j=np.zeros(3))
-            brace.generate()
-            # apply camber
-            t_param = np.linspace(0, 1, n_sub+1)
-            x = camber * brace.length_clear()
-            y_deform = 4.0 * x * (t_param**2 - t_param)
-            pts_local = np.column_stack(
-                (np.zeros(n_sub+1), y_deform, np.zeros(n_sub+1)))
-            x_vec = brace.internal_elems[0].x_axis
-            y_vec = brace.internal_elems[0].y_axis
-            z_vec = brace.internal_elems[0].z_axis
-            pts_global = (transformations.transformation_matrix(
-                x_vec, y_vec, z_vec).T @ pts_local.T).T
-            for i in range(1, n_sub):
-                brace.internal_nodes[i-1].coords += pts_global[i]
-            for ielem in brace.internal_elems:
-                ielem.update_axes()
+            brace = LineElementSequence(
+                node_i=start_node,
+                node_j=end_node,
+                ang=self.active_angle,
+                offset_i=np.zeros(3),
+                offset_j=np.zeros(3),
+                section=self.sections.active,
+                n_sub=n_sub,
+                model_as=model_as,
+                geomTransf=geomTransf,
+                placement='centroid')
+            brace.generate_brace(release_distance,
+                                 self.materials.retrieve('fix'),
+                                 self.materials.retrieve('release'),
+                                 camber)
 
             braces.append(brace)
             self.groups.add_element(brace)
@@ -2051,7 +2238,8 @@ class Building:
 
     def add_columns_from_grids(self, n_sub=1,
                                model_as={'type': 'elastic'},
-                               geomTransf='Linear'):
+                               geomTransf='Linear',
+                               ends={'type': 'fixed'}):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect, and places a column on
@@ -2066,7 +2254,10 @@ class Building:
         for pt in isect_pts:
             cols = self.add_column_at_point(
                 *pt,
-                n_sub=n_sub)
+                n_sub=n_sub,
+                model_as=model_as,
+                geomTransf=geomTransf,
+                ends=ends)
             columns.extend(cols)
         return columns
 
@@ -2108,7 +2299,9 @@ class Building:
                 beams.extend(bms)
         return beams
 
-    def add_braces_from_grids(self, btype="single", n_sub=5, camber=0.05):
+    def add_braces_from_grids(self, btype="single", n_sub=5, camber=0.05,
+                              model_as={'type': 'elastic'},
+                              release_distance=0.005):
         """
         Uses the currently defined gridsystem.
         For each gridline, braces are placed
@@ -2125,7 +2318,9 @@ class Building:
                 start_pt,
                 end_pt,
                 btype=btype,
+                model_as=model_as,
                 n_sub=n_sub,
+                release_distance=release_distance,
                 camber=camber)
             braces.extend(brcs)
         return braces

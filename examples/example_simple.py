@@ -41,6 +41,7 @@ b.set_active_section("W24X94")
 #     'HSS',
 #     ["HSS20.000X0.375"])
 
+
 # Modeling procedure:
 # - [ ] Set active {section, placement, angle}
 # - [ ] Set active levels and groups
@@ -57,8 +58,8 @@ b.set_active_section("W24X94")
 # b.set_active_section("HSS20.000X0.375")
 b.set_active_groups(["columns"])
 
-modeling_type = {'type': 'elastic'}
-# modeling_type = {'type': 'fiber', 'n_x': 50, 'n_y': 50}
+# modeling_type = {'type': 'elastic'}
+modeling_type = {'type': 'fiber', 'n_x': 50, 'n_y': 50}
 
 b.add_columns_from_grids(
     n_sub=1, model_as=modeling_type)
@@ -66,8 +67,11 @@ b.add_columns_from_grids(
 b.active_placement = 'top_center'
 b.set_active_groups(["beams"])
 
-b.add_beams_from_grids(n_sub=5, ends={'type': 'pinned', 'dist': 0.001},
-                       model_as=modeling_type)
+# b.add_beams_from_grids(n_sub=5, ends={'type': 'pinned', 'dist': 0.001},
+#                        model_as=modeling_type)
+
+b.add_beams_from_grids(n_sub=5, model_as=modeling_type)
+
 
 # for more control (offsets etc.), define elements one by one.
 #     (see example_offsets.py)
@@ -131,7 +135,7 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # modal_analysis = solver.ModalAnalysis(b, num_modes=6)
 # modal_analysis.run()
 
-# retrieving textual results
+# # retrieving textual results
 # print(modal_analysis.periods)
 
 # # visualizing results
@@ -140,6 +144,8 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # modal_analysis.deformed_shape(step=2, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=3, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=4, scaling=0.00, extrude_frames=True)
+# modal_analysis.deformed_shape(step=5, scaling=0.00, extrude_frames=True)
+# modal_analysis.deformed_shape(step=6, scaling=0.00, extrude_frames=True)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -155,17 +161,17 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 #     10.,
 #     control_node,
 #     1./20.,
-#     np.linspace(0., 10., 80), n_x=20, n_y=20, n_p=10)
+#     np.linspace(0., 10., 80))
 # n_plot_steps = analysis_metadata['successful steps']
 
-# # # plot the deformed shape for any of the steps
-# # plot_metadata = pushover_analysis.deformed_shape(
-# #     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-# # print(plot_metadata)
+# # plot the deformed shape for any of the steps
+# plot_metadata = pushover_analysis.deformed_shape(
+#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+# print(plot_metadata)
 
 # # plot pushover curve
 # pushover_analysis.plot_pushover_curve("y", control_node)
-# # pushover_analysis.basic_forces(step=19)
+# pushover_analysis.basic_forces(step=19)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear time-history analysis  #

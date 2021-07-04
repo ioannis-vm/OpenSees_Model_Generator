@@ -55,7 +55,7 @@ def plot_stress_strain(material: modeler.Material,
     ops.timeSeries("Linear", 1)
     ops.pattern("Plain", 1, 1)
     ops.load(node2_id, sigma_max)
-    ops.system("ProfileSPD")
+    ops.system("UmfPack")
     ops.numberer("Plain")
     ops.constraints("Plain")
     ops.integrator("LoadControl", 1.0/num_steps)
@@ -131,12 +131,24 @@ class Analysis:
 
     def _define_elastic_section(self, sec: modeler.Section):
 
+        # # using AISC database properties
+        # # RBS sections won't work
+        # ops.section('Elastic',
+        #             sec.uniq_id,
+        #             sec.material.parameters['E0'],
+        #             sec.properties['A'],
+        #             sec.properties['Ix'],
+        #             sec.properties['Iy'],
+        #             sec.material.parameters['G'],
+        #             sec.properties['J'])
+
+        # using mesh properties
         ops.section('Elastic',
                     sec.uniq_id,
                     sec.material.parameters['E0'],
-                    sec.properties['A'],
-                    sec.properties['Ix'],
-                    sec.properties['Iy'],
+                    sec.mesh.geometric_properties()['area'],
+                    sec.mesh.geometric_properties()['inertia']['ixx'],
+                    sec.mesh.geometric_properties()['inertia']['iyy'],
                     sec.material.parameters['G'],
                     sec.properties['J'])
 
@@ -158,12 +170,16 @@ class Analysis:
                       area,
                       sec.material.uniq_id)
 
-    def _define_line_element(self, elm: modeler.LineElement):
+    def _define_line_element(self, elm: modeler.LineElement, n_p):
+        n_sub = int(n_p / elm.parent_n_sub)
+        if n_sub < 2:
+            n_sub = 2
         ops.geomTransf(elm.geomTransf,
                        elm.uniq_id,
                        *elm.z_axis)
+        # beamIntegration('Lobatto', tag, secTag, N)
         ops.beamIntegration(
-            'Lobatto', elm.uniq_id, elm.section.uniq_id, 5)
+            'Lobatto', elm.uniq_id, elm.section.uniq_id, n_sub)
         ops.element('dispBeamColumn',
                     elm.uniq_id,
                     elm.node_i.uniq_id,
@@ -221,7 +237,7 @@ class Analysis:
                     raise ValueError("Invalid modeling type")
                 defined_sections.append(elm.section.uniq_id)
 
-            self._define_line_element(elm)
+            self._define_line_element(elm, n_p=5)
 
         # define zerolength elements representing end releases
         for elm in self.building.list_of_endreleases():
@@ -239,14 +255,18 @@ class Analysis:
                 defined_materials.append(elm.mat_release.uniq_id)
 
             # construct a list of material tags
-            all_dofs = [1, 2, 3, 4, 5, 6]
-            free_dofs = elm.free_dofs
-            mat_tags = []
-            for dof in all_dofs:
-                if dof in free_dofs:
-                    mat_tags.append(elm.mat_release.uniq_id)
-                else:
-                    mat_tags.append(elm.mat_fix.uniq_id)
+            # all_dofs = [1, 2, 3, 4, 5, 6]
+            # free_dofs = elm.free_dofs
+            # mat_tags = []
+            # for dof in all_dofs:
+            #     if dof in free_dofs:
+            #         mat_tags.append(elm.mat_release.uniq_id)
+            #     else:
+            #         mat_tags.append(elm.mat_fix.uniq_id)
+
+            # alternative ~ just define the rigid dofs
+            mat_tags = [elm.mat_fix.uniq_id]*4
+            all_dofs = [1, 2, 3, 4]
 
             # define the ZeroLength element
             ops.element('zeroLength', elm.uniq_id,
@@ -396,8 +416,8 @@ class Analysis:
 class LinearAnalysis(Analysis):
 
     def _run_gravity_analysis(self):
-        ops.system('FullGeneral')
-        ops.numberer('RCM')
+        ops.system('UmfPack')
+        ops.numberer('Plain')
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-8, 20, 3)
         ops.algorithm('Newton')
@@ -460,53 +480,15 @@ class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
-    def _define_beamcolumn_elements(self, n_p):
-        for elm in \
-                self.building.list_of_line_elements():
-            n_sub = int(n_p / elm.parent_n_sub)
-            if n_sub < 2:
-                n_sub = 2
-            # beamIntegration('Lobatto', tag, secTag, N)
-            ops.beamIntegration(
-                'Lobatto', elm.uniq_id, elm.section.uniq_id, n_p)
-            # geometric transformation
-            ops.geomTransf('Linear',
-                           elm.uniq_id,
-                           *elm.z_axis)
-            # element('dispBeamColumn', eleTag, *eleNodes,
-            #         transfTag, integrationTag, '-cMass',
-            #         '-mass', mass=0.0)
-            ops.element('dispBeamColumn',
-                        elm.uniq_id,
-                        elm.node_i.uniq_id,
-                        elm.node_j.uniq_id,
-                        elm.uniq_id,
-                        elm.uniq_id)
-
-    def _to_OpenSees_domain(self, n_x, n_y, n_p):
-        """
-        Defines the building model in OpenSeesPy
-        """
-        self._initialize()
-        self._define_materials()
-        self._define_nodes()
-        self._define_node_restraints()
-        self._define_node_constraints()
-        self._define_node_mass()
-        # the following two columns use methods that
-        # are defined in the inherited classes that follow
-        self._define_sections(n_x, n_y)
-        self._define_beamcolumn_elements(n_p)
-
     def _run_gravity_analysis(self):
-        ops.system('SuperLU')
-        ops.numberer('RCM')
+        ops.system('UmfPack')
+        ops.numberer('Plain')
         ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1.0e-6, 1000, 3)
+        ops.test('NormDispIncr', 1.0e-8, 100, 3)
         ops.algorithm('Newton')
-        ops.integrator('LoadControl', 0.01)
+        ops.integrator('LoadControl', 1)
         ops.analysis('Static')
-        ops.analyze(100)
+        ops.analyze(1)
 
 
 @dataclass
@@ -544,25 +526,25 @@ class PushoverAnalysis(NonlinearAnalysis):
                              *(distribution[i]*masses[j]*load_dir))
 
     def run(self, direction, target_displacement,
-            control_node, displ_incr, displ_output, n_x=10, n_y=25, n_p=10):
+            control_node, displ_incr, displ_output):
         if direction == 'x':
             control_DOF = 0
         elif direction == 'y':
             control_DOF = 1
         else:
             raise ValueError("Direction can either be 'x' or 'y'")
-        self._to_OpenSees_domain(n_x, n_y, n_p)
+        self._to_OpenSees_domain()
         self._define_dead_load()
         self._run_gravity_analysis()
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction)
-        ops.system('ProfileSPD')
-        ops.numberer('RCM')
+        ops.system('UmfPack')
+        ops.numberer('Plain')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
-        ops.test('NormUnbalance', 1e-6, 2000)
-        ops.integrator("ParallelDisplacementControl",
+        ops.test('NormDispIncr', 1e-8, 100, 3)
+        ops.integrator("DisplacementControl",
                        control_node.uniq_id, control_DOF + 1, displ_incr)
         ops.algorithm("Newton")
         ops.analysis("Static")
@@ -576,6 +558,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 j_out += 1
             check = ops.analyze(1)
             if check != 0:
+                ops.test('NormDispIncr', 1e-8, 200, 3)
                 ops.integrator("DisplacementControl",
                                control_node.uniq_id, control_DOF + 1,
                                displ_incr/10.)
@@ -583,6 +566,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 if check != 0:
                     print('Analysis failed to converge')
                     break
+                ops.algorithm("Newton")
                 ops.integrator("DisplacementControl",
                                control_node.uniq_id, control_DOF + 1,
                                displ_incr)
@@ -735,11 +719,11 @@ class NLTHAnalysis(NonlinearAnalysis):
             damping_ratio
         )
 
-        ops.system("SuperLU")
-        ops.numberer('RCM')
+        ops.system("UmfPack")
+        ops.numberer('Plain')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
-        ops.test('NormUnbalance', 1e-6, 1000)
+        ops.test('NormUnbalance', 1e-8, 1000)
         # Create the integration scheme, the Newmark
         # with alpha = 0.5 and beta = .25
         ops.algorithm("Newton")
