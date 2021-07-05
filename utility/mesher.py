@@ -282,7 +282,13 @@ def geometric_properties(coords):
 def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     """
     Given a list of edges, defines all the halfedges and
-    associates them with their `next`.
+    associates them with their `next` using a recursive approach.
+    See note:
+        https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3
+    To understand how it works, it is advised to draw a single
+    example and follow the execution of the code while reading
+    the comments.
+    Description:
         Each halfedge stores information about its edge, vertex
         and and next halfedge. Contrary to convention, we don't
         store the twin (opposite) halfedge.
@@ -292,11 +298,20 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         halfedges (list[Halfedge]): List of Halfedge objects
     """
 
+    # This function is called inside the current function.
+    # It is advised to skip it for now, and read the comments
+    # in order to understand the logic.
     def traverse(h_start, v_start, v_current, e_current, h_current):
         """
-        This is a recursive procedure
+        This is the recursive procedure
         that allows traversing through the entire datastructure
         of vertices and edges to define all the halfedges.
+        Args:
+            h_start: The halfedge that we started from.
+            v_start: The vertex taht we started from.
+            v_current: The current vertex.
+            e_current: The current edge.
+            h_current: The current halfedge.
         """
         def ang_reduce(ang):
             while ang < 0:
@@ -304,41 +319,73 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
             while ang >= 2.*np.pi:
                 ang -= 2.*np.pi
             return ang
+        # Use the current edge and vertex to obtain the
+        # next vertex
         v_next = e_current.other_vertex(v_current)
+        # If we end up on the vertex that we started from,
         if v_next == v_start:
+            # Then the `next` of our current halfedge is the
+            # one we started from
             h_current.nxt = h_start
+        # Otherwise,
         else:
-            halfedges = []  # [h.e for h in halfedges]
+            # Define the halfedges of all edges that are
+            # connected to the vertex `v_next`
+            halfedges = []
             for edge in v_next.edges:
                 halfedges.append(edge.define_halfedge(v_next))
+            # Get the angles from the current halfedge to the
+            # newly defined halfedges.
+            # We will use those angles to obtain and assign
+            # the `next` of the current halfedge.
+            # The `next` is the one that forms the smallest
+            # angle with the current.
             angles = np.full(len(halfedges), 0.00)
             for i, h_other in enumerate(halfedges):
                 if h_other.edge == h_current.edge:
+                    # This will be zero, but we are only
+                    # interested in the case where the
+                    # other halfedge is not the current halfedge.
                     angles[i] = 1000.
                 else:
                     angles[i] = ang_reduce(
                         (h_current.direction() - np.pi) - h_other.direction())
             h_current.nxt = halfedges[np.argmin(angles)]
+            # We have defined halfedges, and assigned the `next` to our
+            # current halfedge. Now we repeat the cycle using that `next`
+            # ass our current halfedge.
             v_current = h_current.nxt.vertex
             e_current = h_current.nxt.edge
             h_current = h_current.nxt
             traverse(h_start, v_start, v_current, e_current, h_current)
+            # At this point, we have returned from a recusrion step.
+            # this can only happen if the `next` of the current halfedge
+            # was found to be the initial halfedge, meaning that a loop
+            # was formed. Therefore, we need to search for a halfedge
+            # that has been defined in the previous steps that doesn't
+            # have a `next` assigned to it.
             del halfedges[np.argmin(angles)]
             halfedges_without_next = []
             for halfedge in halfedges:
                 if not halfedge.nxt:
                     halfedges_without_next.append(halfedge)
+            # If the list is empty, we are done.
+            # If the list is not empty, the following code will run.
             for halfedge in halfedges_without_next:
+                # Consider that halfedge to be the start of the
+                # loop, and initiate the recursive procedure.
                 h_start = halfedge
                 v_start = halfedge.vertex
                 v_current = halfedge.vertex
                 e_current = halfedge.edge
                 h_current = halfedge
                 traverse(h_start, v_start, v_current, e_current, h_current)
-    # ~~~
-    # Pick an initial edge
+
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # Pick an initial edge. Could be any.
     e_start = edges[0]
-    # Obtain its vertex
+    # Obtain one of its vertices
     v_start = e_start.v_i
     # Define the first halfedge
     h_start = e_start.define_halfedge(v_start)

@@ -25,6 +25,22 @@ def force_scaling_factor(ref_len, fmax, factor):
 
 
 def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
+    """
+    Given the deformations of the ends of a Bernoulli beam,
+    use its shape functions to obtain intermediate points.
+    Args:
+        element ('modeler.LineElement'): A line element
+        u_i (np.ndarray): 3 displacements at end i, global system
+        r_i (np.ndarray): 3 rotations at end i, global system
+        u_j, r_j: similar to u_i, r_i.
+        num_points: Number of interpolation points
+    See note: https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3
+    Returns:
+        d_global (np.ndarray): Displacements (global system)
+        r_local (np.ndarray): Rotations (local system)
+        (the rotations are needed for plotting the
+         deformed shape with extruded frame elements)
+    """
     x_vec = element.x_axis
     y_vec = element.y_axis
     z_vec = element.z_axis
@@ -148,11 +164,11 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     index = 0
     for elm in list_of_frames:
         if elm.len_proportion > 0.75:
-            num_points = 4
+            num_points = 20
         elif elm.len_proportion > 0.50:
-            num_points = 3
+            num_points = 10
         else:
-            num_points = 2
+            num_points = 5
         # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
@@ -260,11 +276,11 @@ def add_data__frames_deformed(analysis,
     z = []
     for elm in list_of_frames:
         if elm.len_proportion > 0.75:
-            num_points = 4
+            num_points = 20
         elif elm.len_proportion > 0.50:
-            num_points = 3
+            num_points = 10
         else:
-            num_points = 2
+            num_points = 5
 
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]

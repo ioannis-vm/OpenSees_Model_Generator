@@ -63,31 +63,6 @@ def point_exists_in_list(pt: np.ndarray,
     return False
 
 
-def rbs(sec: 'Section', reduction_factor) -> 'Section':
-    """
-    Given a W section and a reduction factor
-    expressed as a proportion of the section's width,
-    the method returns a reduced section.
-    """
-    if sec.sec_type != 'W':
-        raise ValueError("Only W sections are supported for RBS")
-    name = sec.name + '_reduced'
-    b = sec.properties['bf']
-    h = sec.properties['d']
-    tw = sec.properties['tw']
-    tf = sec.properties['tf']
-    t = sec.properties['T']
-    b_red = b * reduction_factor
-    properties = dict(sec.properties)
-    properties['bf'] = b_red
-    mesh = mesher_section_gen.w_mesh(b_red, h, t, tw, tf)
-    section = Section(
-        'W', name,
-        sec.material,
-        mesh, properties)
-    return section
-
-
 @dataclass
 @total_ordering
 class GridLine:
@@ -606,6 +581,31 @@ class Section:
         elif placement == 'bottom_right':
             return - np.array([z_max, y_min])
 
+    def rbs(self, reduction_factor) -> 'Section':
+        """
+        Given a reduction factor
+        expressed as a proportion of the section's width,
+        the method returns a reduced section.
+        Only works for W sections.
+        """
+        if self.sec_type != 'W':
+            raise ValueError("Only W sections are supported for RBS")
+        name = self.name + '_reduced'
+        b = self.properties['bf']
+        h = self.properties['d']
+        tw = self.properties['tw']
+        tf = self.properties['tf']
+        t = self.properties['T']
+        b_red = b * reduction_factor
+        properties = dict(self.properties)
+        properties['bf'] = b_red
+        mesh = mesher_section_gen.w_mesh(b_red, h, t, tw, tf)
+        section = Section(
+            'W', name,
+            self.material,
+            mesh, properties)
+        return section
+
 
 @dataclass
 class Sections:
@@ -877,6 +877,7 @@ class LineElement:
                                Expressed in the global coordinate system.
         offset_j (np.ndarray): Similarly for node j
         section (Section): Section of the element interior
+        len_parent (float): Lenth of the parent element (LineElementSequence)
         len_proportion (float): Proportion of the line element's length
                         to the length of its parent line element sequence.
         model_as (dict): Either
@@ -917,7 +918,7 @@ class LineElement:
     offset_i: np.ndarray
     offset_j: np.ndarray
     section: Section
-    len_proportion: float
+    len_parent: float
     model_as: dict
     geomTransf: str
     udl_self: np.ndarray = field(default_factory=lambda: np.zeros(shape=3))
@@ -932,6 +933,7 @@ class LineElement:
         self.x_axis, self.y_axis, self.z_axis = \
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
+        self.len_proportion = self.length_clear() / self.len_parent
 
     def length_clear(self):
         """
@@ -1001,15 +1003,316 @@ class LineElement:
 
 
 @dataclass
+class EndSegment:
+    """
+    This class represents an end segment of a LineElementSequence.
+    Please read the docstring of that class.
+    See figure:
+        https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+    Attributes:
+        n_external (Node): Primary node of the structure
+        n_internal (Node): Transition internal node between
+                           the EndSegment and the MiddleSegment
+        offset (np.ndarray): Offset vector, pointing from the
+                             primary node to the internal point
+        internal_pt (np.ndarray): The internal point (we don't
+                                  define a node there, but we
+                                  need the coordinates.)
+        internal_nodes (list[Node]): List of internal nodes of
+                                     the EndSegment
+        internal_elems (list): List of internal elements
+    """
+    n_external: Node
+    n_internal: Node
+    offset: np.ndarray
+
+    def __post_init__(self):
+        self.internal_pt = self.n_external.coords + self.offset
+        self.internal_nodes = []
+        self.internal_elems = []
+
+
+@dataclass
+class EndSegment_Fixed(EndSegment):
+    """
+    This class represents a fixed end segment of a LineElementSequence.
+    Please read the docstring of that class.
+    See figure:
+        https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+    Attributes:
+        See the attributes of EndSegment
+    Additional attributes:
+        end: Whether the EndSegment corresponds to the
+             start ("i") or the end ("j") of the LineElementSequence
+        len_parent: Clear length of the parent LineElementSequence
+        ang, section, model_as, geomTransf:
+            Arguments used for element creation. See LineElement.
+    """
+    end: str
+    len_parent: float
+    ang: float
+    section: Section
+    model_as: dict
+    geomTransf: str
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.internal_nodes.append(
+            self.n_internal)
+        if self.end == 'i':
+            self.internal_elems.append(
+                LineElement(
+                    self.n_external, self.n_internal, self.ang,
+                    self.offset, np.zeros(3),
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+        elif self.end == 'j':
+            self.internal_elems.append(
+                LineElement(
+                    self.n_internal, self.n_external, self.ang,
+                    np.zeros(3), self.offset,
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+
+
+@dataclass
+class EndSegment_Pinned(EndSegment):
+    """
+    This class represents a pinned end segment of a LineElementSequence.
+    Please read the docstring of that class.
+    See figure:
+        https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+    Attributes:
+        See the attributes of EndSegment
+    Additional attributes:
+        end: Whether the EndSegment corresponds to the
+             start ("i") or the end ("j") of the LineElementSequence
+        len_parent: Clear length of the parent LineElementSequence
+        ang, section, model_as, geomTransf:
+            Arguments used for element creation. See LineElement.
+        x_axis (np.ndarray): X axis vector of the parent LineElementSequence
+                             (expressed in global coordinates)
+        y_axis (np.ndarray): Similar to X axis
+        mat_fix (Material): Linear elastic material with a very high stiffness
+                            See the Materials class.
+        mat_release (Material): Linear elastic material with a
+                                very low stiffness. See the Material class.
+
+    """
+    end: str
+    len_parent: float
+    ang: float
+    section: Section
+    model_as: dict
+    geomTransf: str
+    x_axis: np.ndarray
+    y_axis: np.ndarray
+    mat_fix: Material
+    mat_release: Material
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.internal_pt = self.n_external.coords + self.offset
+        self.internal_nodes.append(
+            self.n_internal)
+        n_release = Node(self.n_internal.coords)
+        self.internal_nodes.append(n_release)
+        self.internal_elems.append(
+            EndRelease(self.n_internal,
+                       n_release,
+                       [5, 6],
+                       self.x_axis,
+                       self.y_axis,
+                       self.mat_fix,
+                       self.mat_release))
+        if self.end == 'i':
+            self.internal_elems.append(
+                LineElement(
+                    self.n_external, n_release, self.ang,
+                    self.offset, np.zeros(3),
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+        elif self.end == 'j':
+            self.internal_elems.append(
+                LineElement(
+                    n_release, self.n_external, self.ang,
+                    np.zeros(3), self.offset,
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+
+
+@dataclass
+class EndSegment_RBS(EndSegment):
+    """
+    This class represents an RBS end segment of a LineElementSequence.
+    Please read the docstring of that class.
+    See figure:
+        https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+    Attributes:
+        See the attributes of EndSegment
+    Additional attributes:
+        end: Whether the EndSegment corresponds to the
+             start ("i") or the end ("j") of the LineElementSequence
+        len_parent: Clear length of the parent LineElementSequence
+        ang, section, model_as, geomTransf:
+            Arguments used for element creation. See LineElement.
+        x_axis (np.ndarray): X axis vector of the parent LineElementSequence
+                             (expressed in global coordinates)
+        rbs_length (float): Length of the reduced beam segment
+                            (expressed in length units, not proportional)
+        rbs_reduction (float): Proportion of the reduced beam section's width
+                               relative to the initial section.
+    """
+    end: str
+    len_parent: float
+    ang: float
+    section: Section
+    model_as: dict
+    geomTransf: str
+    x_axis: np.ndarray
+    rbs_length: float
+    rbs_reduction: float
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.internal_pt = self.n_external.coords + self.offset
+
+        rbs_sec = self.section.rbs(self.rbs_reduction)
+
+        if self.end == 'i':
+            n_RBS_len = Node(self.n_internal.coords -
+                             self.x_axis * self.rbs_length)
+            self.internal_nodes.append(n_RBS_len)
+            self.internal_nodes.append(self.n_internal)
+            self.internal_elems.append(
+                LineElement(
+                    self.n_external, n_RBS_len, self.ang,
+                    self.offset, np.zeros(3),
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+            self.internal_elems.append(
+                LineElement(
+                    n_RBS_len, self.n_internal, self.ang,
+                    np.zeros(3), np.zeros(3),
+                    rbs_sec, self.len_parent,
+                    self.model_as, self.geomTransf))
+
+        elif self.end == 'j':
+            n_RBS_len = Node(self.n_internal.coords +
+                             self.x_axis * self.rbs_length)
+            self.internal_nodes.append(self.n_internal)
+            self.internal_nodes.append(n_RBS_len)
+            self.internal_elems.append(
+                LineElement(
+                    self.n_internal, n_RBS_len, self.ang,
+                    np.zeros(3), np.zeros(3),
+                    rbs_sec, self.len_parent,
+                    self.model_as, self.geomTransf))
+            self.internal_elems.append(
+                LineElement(
+                    n_RBS_len, self.n_external, self.ang,
+                    np.zeros(3), self.offset,
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+
+
+@dataclass
+class MiddleSegment:
+    """
+    This class represents components of a LineElementSequence.
+    Please read the docstring of that class.
+    See figure:
+        https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+    Attributes:
+        n_i (Node): Transition internal node between
+                    the EndSegment at end i and the MiddleSegment
+        n_j (Node): Transition internal node between
+                    the EndSegment at end j and the MiddleSegment
+        ang, section, model_as, geomTransf:
+            Arguments used for element creation. See LineElement.
+        len_parent: Clear length of the parent LineElementSequence
+        x_axis_parent (np.ndarray): X axis vector of the parent
+                                    LineElementSequence
+                                    (expressed in global coordinates)
+        y_axis_parent, z_axis_parent (np.ndarray): Similar to X axis
+        n_sub: Number of internal LineElements
+        camber (float): Initial imperfection modeled as
+                        parabolic camber, expressed
+                        as a proportion of the element's
+                        length.
+    """
+
+    n_i: Node
+    n_j: Node
+    ang: float
+    section: Section
+    model_as: dict
+    geomTransf: str
+    len_parent: float
+    x_axis_parent: np.ndarray
+    y_axis_parent: np.ndarray
+    z_axis_parent: np.ndarray
+    n_sub: int
+    camber: float
+
+    def __post_init__(self):
+        self.internal_nodes = []
+        self.internal_elems = []
+
+        p_i = self.n_i.coords
+        p_j = self.n_j.coords
+
+        internal_pt_coords = np.linspace(
+            tuple(p_i),
+            tuple(p_j),
+            num=self.n_sub+1)
+
+        # apply camber
+        if self.camber != 0.00:
+            t_param = np.linspace(0, 1, self.n_sub+1)
+            x = self.camber * self.len_parent
+            y_deform = 4.0 * x * (t_param**2 - t_param)
+            deformation_local = np.column_stack(
+                (np.zeros(self.n_sub+1), y_deform, np.zeros(self.n_sub+1)))
+            deformation_global = (transformations.transformation_matrix(
+                self.x_axis_parent, self.y_axis_parent, self.z_axis_parent).T
+                @ deformation_local.T).T
+            internal_pt_coords += deformation_global
+
+        # internal nodes (if required)
+        if self.n_sub > 1:
+            for i in range(1, len(internal_pt_coords)-1):
+                self.internal_nodes.append(Node(internal_pt_coords[i]))
+        # internal elements
+        for i in range(self.n_sub):
+            if i == 0:
+                node_i = self.n_i
+            else:
+                node_i = self.internal_nodes[i-1]
+            if i == self.n_sub-1:
+                node_j = self.n_j
+            else:
+                node_j = self.internal_nodes[i]
+            self.internal_elems.append(
+                LineElement(
+                    node_i, node_j, self.ang,
+                    np.zeros(3), np.zeros(3),
+                    self.section, self.len_parent,
+                    self.model_as, self.geomTransf))
+
+
+@dataclass
 @total_ordering
 class LineElementSequence:
     """
     A LineElementSequence represents a collection
     of line elements connected in series.
+    See figure:
+    https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
+
     After instantiating the object, a `generate` method needs to
     be called, to populte the internal components of the object.
     Attributes:
-        uniq_id (int): unique identifier
         node_i (int): primary node for end i
         node_j (int): primary node for end j
         ang: Parameter that controls the rotation of the
@@ -1030,13 +1333,11 @@ class LineElementSequence:
         placement (str): String flag that controls the
                          placement point of the element relative
                          to its section.
-        internal_pt_i (np.ndarray): Coordinates of the internal point i
-        internal_pt_j (np.ndarray): Similarly for node j
-        internal_nodes (list[Node]): Structural nodes needed to connect
-                                     internal elements if more than one
-                                     internal elements are present
-                                     (n_sub > 1).
-        internal_elems (list[LineElement]): Internal linear elements.
+        end_dist (float): Distance between the start/end points and the
+                          point along the clear length (wihtout offsets) of
+                          the LineElementSequence where it transitions from
+                          the end segments to the middle segment, expressed
+                          as a proportion of the sequence's clear length.
         tributary_area (float): Area of floor that is supported on the element.
     """
 
@@ -1049,326 +1350,58 @@ class LineElementSequence:
     n_sub: int
     model_as: dict
     geomTransf: str
-    placement: str = field(default="centroid", repr=False)
-    tributary_area: float = field(default=0.00, repr=False)
+    placement: str
+    end_dist: float
 
-    def _generate_common(self):
+    def __post_init__(self):
 
-        self.uniq_id = next(_ids)
+        assert self.end_dist > 0.0, "end_dist must be > 0"
+
+        self.tributary_area = 0.00
 
         p_i = self.node_i.coords + self.offset_i
         p_j = self.node_j.coords + self.offset_j
+
+        self.length_clear = np.linalg.norm(p_j - p_i)
 
         # obtain offset from section (local system)
         dz, dy = self.section.retrieve_offset(self.placement)
         sec_offset_local = np.array([0.00, dy, dz])
         # retrieve local coordinate system
-        x_axis, y_axis, z_axis = \
+        self.x_axis, self.y_axis, self.z_axis = \
             transformations.local_axes_from_points_and_angle(
                 p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
-            x_axis, y_axis, z_axis)
+            self.x_axis, self.y_axis, self.z_axis)
         t_loc_to_glob = t_glob_to_loc.T
         sec_offset_global = t_loc_to_glob @ sec_offset_local
+
         p_i += sec_offset_global
         p_j += sec_offset_global
         self.offset_i = self.offset_i.copy() + sec_offset_global
         self.offset_j = self.offset_j.copy() + sec_offset_global
-        self.internal_pt_i = p_i
-        self.internal_pt_j = p_j
-        self.internal_nodes = []
-        self.internal_elems = []
 
-        return x_axis, y_axis, z_axis
+        # location of transition from start segment
+        # to middle segment
+        start_loc = p_i\
+            + self.x_axis * self.end_dist * self.length_clear
+        self.n_i = Node(start_loc)
+        # location of transition from middle segment
+        # to end segment
+        end_loc = p_i\
+            + self.x_axis * (1.0 - self.end_dist) * self.length_clear
+        self.n_j = Node(end_loc)
 
-    def generate(self):
+        self.end_segment_i = None
+        self.end_segment_j = None
+        self.middle_segment = None
 
-        x_axis, y_axis, z_axis = \
-            self._generate_common()
-
-        internal_pt_coords = np.linspace(
-            tuple(self.internal_pt_i),
-            tuple(self.internal_pt_j),
-            num=self.n_sub+1)
-        # internal nodes (if required)
-        if self.n_sub > 1:
-            for i in range(1, len(internal_pt_coords)-1):
-                self.internal_nodes.append(Node(internal_pt_coords[i]))
-        # internal elements
-        for i in range(self.n_sub):
-            if i == 0:
-                node_i = self.node_i
-                ioffset = self.offset_i
-            else:
-                node_i = self.internal_nodes[i-1]
-                ioffset = np.zeros(3).copy()
-            if i == self.n_sub-1:
-                node_j = self.node_j
-                joffset = self.offset_j
-            else:
-                node_j = self.internal_nodes[i]
-                joffset = np.zeros(3).copy()
-            self.internal_elems.append(
-                LineElement(node_i, node_j, self.ang, ioffset, joffset,
-                            self.section, self.n_sub,
-                            self.model_as, self.geomTransf))
-
-    def generate_pinned(self, release_distance,
-                        mat_fix: Material, mat_release: Material):
-
-        assert release_distance > 0.00, "Release dist must be > 0"
-
-        x_axis, y_axis, z_axis = \
-            self._generate_common()
-
-        elm_len = np.linalg.norm(
-            self.internal_pt_j - self.internal_pt_i)
-
-        release_loc_i = self.internal_pt_i\
-            + x_axis * release_distance * elm_len
-        release_loc_j = self.internal_pt_i\
-            + x_axis * (1.0 - release_distance) * elm_len
-
-        internal_pt_coords = np.linspace(
-            tuple(release_loc_i),
-            tuple(release_loc_j), num=self.n_sub+1)
-
-        # outer elements at end i (before release at i)
-        n_release_outer_i = Node(release_loc_i)
-        self.internal_nodes.append(n_release_outer_i)
-        self.internal_elems.append(
-            LineElement(self.node_i, n_release_outer_i, self.ang,
-                        self.offset_i, np.zeros(3),
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        n_release_inner_i = Node(release_loc_i)
-        self.internal_nodes.append(n_release_inner_i)
-        self.internal_elems.append(
-            EndRelease(n_release_outer_i,
-                       n_release_inner_i,
-                       [5, 6],
-                       x_axis,
-                       y_axis,
-                       mat_fix,
-                       mat_release))
-
-        n_release_inner_j = Node(release_loc_j)
-        n_release_outer_j = Node(release_loc_j)
-
-        # middle internal nodes (if required)
-        if self.n_sub > 1:
-            for i in range(1, len(internal_pt_coords)-1):
-                self.internal_nodes.append(Node(internal_pt_coords[i]))
-        # internal elements
-        for i in range(self.n_sub):
-            if i == 0:
-                node_i = n_release_inner_i
-            else:
-                node_i = self.internal_nodes[i+1]
-            if i == self.n_sub-1:
-                node_j = n_release_inner_j
-            else:
-                node_j = self.internal_nodes[i+2]
-            self.internal_elems.append(
-                LineElement(node_i, node_j, self.ang,
-                            np.zeros(3), np.zeros(3),
-                            self.section, self.n_sub,
-                            self.model_as, self.geomTransf))
-
-        # outer elements at end j (after release at j)
-        self.internal_elems.append(
-            EndRelease(n_release_inner_j,
-                       n_release_outer_j,
-                       [5, 6],
-                       x_axis,
-                       y_axis,
-                       mat_fix,
-                       mat_release))
-        self.internal_nodes.append(n_release_inner_j)
-        self.internal_elems.append(
-            LineElement(n_release_outer_j, self.node_j, self.ang,
-                        np.zeros(3), self.offset_j,
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        self.internal_nodes.append(n_release_outer_j)
-
-    def generate_RBS(self, rbs_distance, rbs_length, rbs_reduction):
-        """
-        Generate a sequence representing a RBS beam.
-        Args:
-            rbs_distance (float): Where the reduction starts
-                         relative to the sequence's clear length
-                         (without the offsets)
-            rbs_length (float): The length of the part where the
-                       section is reduced.
-            rbs_reduction (float): Reduction factor for the rbs part,
-                          expressed as a proportion of the section's width.
-        """
-        assert rbs_distance > 0.00, "RBS distance must be > 0"
-        assert rbs_length > 0.00, "RBS length must be > 0"
-
-        rbs_sec = rbs(self.section, rbs_reduction)
-
-        x_axis, y_axis, z_axis = \
-            self._generate_common()
-
-        elm_len = np.linalg.norm(
-            self.internal_pt_j - self.internal_pt_i)
-
-        rbs_loc_i_start = self.internal_pt_i \
-            + x_axis * (rbs_distance * elm_len)
-        rbs_loc_i_end = self.internal_pt_i \
-            + x_axis * (rbs_distance * elm_len + rbs_length)
-        rbs_loc_j_start = self.internal_pt_i \
-            + x_axis * ((1.0 - rbs_distance) * elm_len)
-        rbs_loc_j_end = self.internal_pt_i \
-            + x_axis * ((1.0 - rbs_distance) * elm_len - rbs_length)
-
-        internal_pt_coords = np.linspace(
-            tuple(rbs_loc_i_end),
-            tuple(rbs_loc_j_start), num=self.n_sub+1)
-
-        # outer elements at end i (before rbs at i)
-        n_rbs_outer_i = Node(rbs_loc_i_start)
-        self.internal_nodes.append(n_rbs_outer_i)
-        self.internal_elems.append(
-            LineElement(self.node_i, n_rbs_outer_i, self.ang,
-                        self.offset_i, np.zeros(3),
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        n_rbs_inner_i = Node(rbs_loc_i_end)
-        self.internal_nodes.append(n_rbs_inner_i)
-        self.internal_elems.append(
-            LineElement(n_rbs_outer_i, n_rbs_inner_i, self.ang,
-                        np.zeros(3), np.zeros(3),
-                        rbs_sec, self.n_sub, self.model_as,
-                        self.geomTransf))
-
-        n_rbs_inner_j = Node(rbs_loc_j_end)
-        n_rbs_outer_j = Node(rbs_loc_j_start)
-
-        # middle internal nodes (if required)
-        if self.n_sub > 1:
-            for i in range(1, len(internal_pt_coords)-1):
-                self.internal_nodes.append(Node(internal_pt_coords[i]))
-        # internal elements
-        for i in range(self.n_sub):
-            if i == 0:
-                node_i = n_rbs_inner_i
-            else:
-                node_i = self.internal_nodes[i+1]
-            if i == self.n_sub-1:
-                node_j = n_rbs_inner_j
-            else:
-                node_j = self.internal_nodes[i+2]
-            self.internal_elems.append(
-                LineElement(node_i, node_j, self.ang,
-                            np.zeros(3), np.zeros(3),
-                            self.section, self.n_sub,
-                            self.model_as, self.geomTransf))
-
-        # outer elements at end j (after rbs at j)
-        self.internal_elems.append(
-            LineElement(n_rbs_inner_j, n_rbs_outer_j, self.ang,
-                        np.zeros(3), np.zeros(3),
-                        rbs_sec, self.n_sub, self.model_as,
-                        self.geomTransf))
-        self.internal_nodes.append(n_rbs_inner_j)
-        self.internal_elems.append(
-            LineElement(n_rbs_outer_j, self.node_j, self.ang,
-                        np.zeros(3), self.offset_j,
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        self.internal_nodes.append(n_rbs_outer_j)
-
-    def generate_brace(self, release_distance,
-                       mat_fix: Material, mat_release: Material,
-                       camber: np.ndarray):
-
-        assert release_distance > 0.00, "Release dist must be > 0"
-
-        x_axis, y_axis, z_axis = \
-            self._generate_common()
-
-        elm_len = np.linalg.norm(
-            self.internal_pt_j - self.internal_pt_i)
-
-        release_loc_i = self.internal_pt_i\
-            + x_axis * release_distance * elm_len
-        release_loc_j = self.internal_pt_i\
-            + x_axis * (1.0 - release_distance) * elm_len
-
-        internal_pt_coords = np.linspace(
-            tuple(release_loc_i),
-            tuple(release_loc_j), num=self.n_sub+1)
-        # apply camber
-        t_param = np.linspace(0, 1, self.n_sub+1)
-        x = camber * self.length_clear()
-        y_deform = 4.0 * x * (t_param**2 - t_param)
-        deformation_local = np.column_stack(
-            (np.zeros(self.n_sub+1), y_deform, np.zeros(self.n_sub+1)))
-        deformation_global = (transformations.transformation_matrix(
-            x_axis, y_axis, z_axis).T @ deformation_local.T).T
-        internal_pt_coords += deformation_global
-
-        # outer elements at end i (before release at i)
-        n_release_outer_i = Node(release_loc_i)
-        self.internal_nodes.append(n_release_outer_i)
-        self.internal_elems.append(
-            LineElement(self.node_i, n_release_outer_i, self.ang,
-                        self.offset_i, np.zeros(3),
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        n_release_inner_i = Node(release_loc_i)
-        self.internal_nodes.append(n_release_inner_i)
-        self.internal_elems.append(
-            EndRelease(n_release_outer_i,
-                       n_release_inner_i,
-                       [5, 6],
-                       x_axis,
-                       y_axis,
-                       mat_fix,
-                       mat_release))
-
-        n_release_inner_j = Node(release_loc_j)
-        n_release_outer_j = Node(release_loc_j)
-
-        # middle internal nodes
-        if self.n_sub > 1:
-            for i in range(1, len(internal_pt_coords)-1):
-                self.internal_nodes.append(Node(internal_pt_coords[i]))
-        # internal elements
-        for i in range(self.n_sub):
-            if i == 0:
-                node_i = n_release_inner_i
-            else:
-                node_i = self.internal_nodes[i+1]
-            if i == self.n_sub-1:
-                node_j = n_release_inner_j
-            else:
-                node_j = self.internal_nodes[i+2]
-            self.internal_elems.append(
-                LineElement(node_i, node_j, self.ang,
-                            np.zeros(3), np.zeros(3),
-                            self.section, self.n_sub,
-                            self.model_as, self.geomTransf))
-
-        # outer elements at end j (after release at j)
-        self.internal_elems.append(
-            EndRelease(n_release_inner_j,
-                       n_release_outer_j,
-                       [5, 6],
-                       x_axis,
-                       y_axis,
-                       mat_fix,
-                       mat_release))
-        self.internal_nodes.append(n_release_inner_j)
-        self.internal_elems.append(
-            LineElement(n_release_outer_j, self.node_j, self.ang,
-                        np.zeros(3), self.offset_j,
-                        self.section, self.n_sub, self.model_as,
-                        self.geomTransf))
-        self.internal_nodes.append(n_release_outer_j)
+    def internal_elems(self):
+        result = []
+        result.extend(self.end_segment_i.internal_elems)
+        result.extend(self.middle_segment.internal_elems)
+        result.extend(self.end_segment_j.internal_elems)
+        return result
 
     def snap_offset(self, tag: str):
         """
@@ -1384,29 +1417,24 @@ class LineElementSequence:
             on the column, expressed in the global
             coordinate system.
         """
-        # primary node coordinates
-        p_i = self.node_i.coords
-        p_j = self.node_j.coords
-
         # obtain offset from section (local system)
         # given the snap point tag
         dz, dy = self.section.retrieve_offset(tag)
         snap_offset = np.array([0.00, dy, dz])
-        # retrieve local coordinate system
-        x_axis, y_axis, z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                p_i, p_j, self.ang)
         t_glob_to_loc = transformations.transformation_matrix(
-            x_axis, y_axis, z_axis)
+            self.x_axis, self.y_axis, self.z_axis)
         t_loc_to_glob = t_glob_to_loc.T
         snap_offset_global = t_loc_to_glob @ snap_offset
 
         return snap_offset_global
 
     def length_clear(self):
-        pt_i = self.internal_pt_i
-        pt_j = self.internal_pt_j
-        return np.linalg.norm(pt_j - pt_i)
+        """
+        Returns the clear length of the sequence,
+        (not counting the end offsets, but including
+        the internal elements of the two end segments)
+        """
+        return self.length_clear
 
     def add_udl_glob(self, udl: np.ndarray, ltype='other'):
         """
@@ -1423,7 +1451,7 @@ class LineElementSequence:
                               on the global x, y, and z directions, in the
                               direction of the global axes.
         """
-        for elm in self.internal_elems:
+        for elm in self.internal_elems():
             if isinstance(elm, LineElement):
                 elm.add_udl_glob(udl, ltype=ltype)
 
@@ -1446,9 +1474,10 @@ class LineElementSequence:
         weight_per_length *= multiplier
         self.add_udl_glob(
             np.array([0., 0., -weight_per_length]), ltype='self')
-        total_mass_per_length = \
-            -self.internal_elems[0].get_udl_no_floor_glob()[2] / common.G_CONST
-        for sub_elm in self.internal_elems:
+        total_mass_per_length = - \
+            self.internal_elems()[1].get_udl_no_floor_glob()[
+                2] / common.G_CONST
+        for sub_elm in self.internal_elems():
             if isinstance(sub_elm, LineElement):
                 mass = total_mass_per_length * \
                     sub_elm.length_clear() / 2.00  # lb-s**2/in
@@ -1459,7 +1488,11 @@ class LineElementSequence:
         return [self.node_i, self.node_j]
 
     def internal_nodes(self):
-        return [self.internal_nodes]
+        result = []
+        result.extend(self.end_segment_i.internal_nodes)
+        result.extend(self.middle_segment.internal_nodes)
+        result.extend(self.end_segment_j.internal_nodes)
+        return result
 
     def __eq__(self, other):
         return (self.node_i == other.node_i and
@@ -1467,6 +1500,172 @@ class LineElementSequence:
 
     def __le__(self, other):
         return self.node_i <= other.node_i
+
+
+@dataclass
+@total_ordering
+class LineElementSequence_Fixed(LineElementSequence):
+    """
+    A fixed LineElementSequence consists of a middle
+    segment and two end segments, all having the same
+    section, connected rigidly at the primary end nodes,
+    with the specified rigid offsets.
+    """
+
+    def __post_init__(self):
+        super().__post_init__()
+        # middle segment
+        camber = 0.00
+        self.middle_segment = MiddleSegment(
+            self.n_i,
+            self.n_j,
+            self.ang,
+            self.section,
+            self.model_as,
+            self.geomTransf,
+            self.length_clear,
+            self.x_axis,
+            self.y_axis,
+            self.z_axis,
+            self.n_sub,
+            camber)
+
+        # end segments
+        self.end_segment_i = EndSegment_Fixed(
+            self.node_i, self.n_i,
+            self.offset_i,
+            "i",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf)
+
+        self.end_segment_j = EndSegment_Fixed(
+            self.node_j, self.n_j,
+            self.offset_j,
+            "j",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf)
+
+
+@dataclass
+@total_ordering
+class LineElementSequence_Pinned(LineElementSequence):
+    """
+    A pinned LineElementSequence consists of a middle
+    segment that can have an initial imperfection (camber),
+    and two end segments that have the same section with
+    a moment release between them and the middle segment.
+    The release only affects the two bending moments.
+    """
+    mat_fix: Material
+    mat_release: Material
+    camber: float
+
+    def __post_init__(self):
+        super().__post_init__()
+
+        # generate middle segment
+        self.middle_segment = MiddleSegment(
+            self.n_i,
+            self.n_j,
+            self.ang,
+            self.section,
+            self.model_as,
+            self.geomTransf,
+            self.length_clear,
+            self.x_axis,
+            self.y_axis,
+            self.z_axis,
+            self.n_sub,
+            self.camber)
+
+        # generate end segments
+        self.end_segment_i = EndSegment_Pinned(
+            self.node_i, self.n_i,
+            self.offset_i,
+            "i",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf,
+            self.x_axis, self.y_axis,
+            self.mat_fix, self.mat_release)
+
+        self.end_segment_j = EndSegment_Pinned(
+            self.node_j, self.n_j,
+            self.offset_j,
+            "j",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf,
+            self.x_axis, self.y_axis,
+            self.mat_fix, self.mat_release)
+
+
+@dataclass
+@total_ordering
+class LineElementSequence_RBS(LineElementSequence):
+    """
+    An RBS LineElementSequence consists of a middle segment
+    and two RBS end segments, each connected rigidly to
+    the primary nodes (with the specified rigid offset) and
+    the middle segment. Each RBS end segment consists of two
+    internal LineElements, one towards the end that has the initial
+    section, and another towards the middle segment having the
+    reduced section.
+    """
+    rbs_length: float
+    rbs_reduction: float
+
+    def __post_init__(self):
+        """
+        Generate a sequence representing a RBS beam.
+        Args:
+            rbs_distance (float): Where the reduction starts
+                         relative to the sequence's clear length
+                         (without the offsets)
+            rbs_length (float): The length of the part where the
+                       section is reduced.
+            rbs_reduction (float): Reduction factor for the rbs part,
+                          expressed as a proportion of the section's width.
+        """
+        super().__post_init__()
+        assert self.rbs_length > 0.00, "RBS length must be > 0"
+
+        # generate middle segment
+        camber = 0.00
+        self.middle_segment = MiddleSegment(
+            self.n_i,
+            self.n_j,
+            self.ang,
+            self.section,
+            self.model_as,
+            self.geomTransf,
+            self.length_clear,
+            self.x_axis,
+            self.y_axis,
+            self.z_axis,
+            self.n_sub,
+            camber)
+
+        # generate end segments
+        self.end_segment_i = EndSegment_RBS(
+            self.node_i, self.n_i,
+            self.offset_i,
+            "i",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf,
+            self.x_axis, self.rbs_length, self.rbs_reduction)
+
+        self.end_segment_j = EndSegment_RBS(
+            self.node_j, self.n_j,
+            self.offset_j,
+            "j",
+            self.length_clear,
+            self.ang, self.section,
+            self.model_as, self.geomTransf,
+            self.x_axis, self.rbs_length, self.rbs_reduction)
 
 
 @dataclass
@@ -1618,9 +1817,9 @@ class Level:
         primary = self.nodes_primary.node_list
         internal = []
         for col in self.columns.element_list:
-            internal.extend(col.internal_nodes)
+            internal.extend(col.internal_nodes())
         for bm in self.beams.element_list:
-            internal.extend(bm.internal_nodes)
+            internal.extend(bm.internal_nodes())
         result = [i for i in primary + internal if i]
         # (to remove Nones if they exist)
         return result
@@ -1798,7 +1997,7 @@ class Selection:
         """
         result = []
         for elem in self.list_of_line_element_sequences():
-            result.extend(elem.internal_nodes)
+            result.extend(elem.internal_nodes())
         return result
 
 
@@ -1998,7 +2197,7 @@ class Building:
                            or
                            {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
             geomTransf: {Linear, PDelta}
-            ends (str): {'type': 'fixed}', or
+            ends (str): {'type': 'fixed, 'dist': float}', or
                         {'type': 'pinned', 'dist': float} or
                         {'type': 'RBS', 'dist': float,
                          'length': float, 'factor': float}
@@ -2030,28 +2229,36 @@ class Building:
                 # add the column connecting the two nodes
                 # TODO if integration_type=HingeRadau, create the sections
                 # and issue a different command to specify them
-                column = LineElementSequence(
-                    node_i=top_node,
-                    node_j=bot_node,
-                    ang=self.active_angle,
-                    offset_i=np.zeros(3),
-                    offset_j=np.zeros(3),
-                    section=self.sections.active,
-                    n_sub=n_sub,
-                    model_as=model_as,
-                    geomTransf=geomTransf,
-                    placement=self.active_placement,
-                )
                 if ends['type'] == 'fixed':
-                    column.generate()
+                    column = LineElementSequence_Fixed(
+                        node_i=top_node,
+                        node_j=bot_node,
+                        ang=self.active_angle,
+                        offset_i=np.zeros(3),
+                        offset_j=np.zeros(3),
+                        section=self.sections.active,
+                        n_sub=n_sub,
+                        model_as=model_as,
+                        geomTransf=geomTransf,
+                        placement=self.active_placement,
+                        end_dist=0.05)
                 elif ends['type'] == 'pinned':
-                    column.generate_pinned(
-                        ends['dist'],
-                        self.materials.retrieve('fix'),
-                        self.materials.retrieve('release'))
+                    column = LineElementSequence_Pinned(
+                        node_i=top_node,
+                        node_j=bot_node,
+                        ang=self.active_angle,
+                        offset_i=np.zeros(3),
+                        offset_j=np.zeros(3),
+                        section=self.sections.active,
+                        n_sub=n_sub,
+                        model_as=model_as,
+                        geomTransf=geomTransf,
+                        placement=self.active_placement,
+                        end_dist=ends['dist'],
+                        mat_fix=self.materials.retrieve('fix'),
+                        mat_release=self.materials.retrieve('release'))
                 else:
                     raise ValueError('Invalid end-type')
-                column.generate()
                 columns.append(column)
                 level.columns.add(column)
                 self.groups.add_element(column)
@@ -2087,7 +2294,7 @@ class Building:
                           on the section of an existing column
                           at node i
             snap_j ~ similar to snap_i, for the j side.
-            ends (str): {'type': 'fixed}', or
+            ends (str): {'type': 'fixed, 'dist': float}', or
                         {'type': 'pinned', 'dist': float} or
                         {'type': 'RBS', 'dist': float,
                          'length': float, 'factor': float}
@@ -2149,28 +2356,50 @@ class Building:
                 col_offset_j = np.zeros(3)
 
             # add the beam connecting the two nodes
-            beam = LineElementSequence(node_i=start_node,
-                                       node_j=end_node,
-                                       ang=self.active_angle,
-                                       offset_i=offset_i+col_offset_i,
-                                       offset_j=offset_j+col_offset_j,
-                                       section=self.sections.active,
-                                       n_sub=n_sub,
-                                       model_as=model_as,
-                                       geomTransf=geomTransf,
-                                       placement=self.active_placement)
             if ends['type'] == 'fixed':
-                beam.generate()
+                beam = LineElementSequence_Fixed(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+col_offset_i,
+                    offset_j=offset_j+col_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=0.05)
             elif ends['type'] == 'pinned':
-                beam.generate_pinned(
-                    ends['dist'],
-                    self.materials.retrieve('fix'),
-                    self.materials.retrieve('release'))
+                beam = LineElementSequence_Pinned(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+col_offset_i,
+                    offset_j=offset_j+col_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    mat_fix=self.materials.retrieve('fix'),
+                    mat_release=self.materials.retrieve('release'),
+                    camber=0.00)
             elif ends['type'] == 'RBS':
-                beam.generate_RBS(
-                    ends['dist'],
-                    ends['length'],
-                    ends['factor'])
+                beam = LineElementSequence_RBS(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+col_offset_i,
+                    offset_j=offset_j+col_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    rbs_length=ends['length'],
+                    rbs_reduction=ends['factor'])
             else:
                 raise ValueError('Invalid end-type')
             level.beams.add(beam)
@@ -2229,7 +2458,7 @@ class Building:
                 end_node = Node(
                     np.array([*end, level.elevation]), level.restraint)
                 level.nodes_primary.add(end_node)
-            brace = LineElementSequence(
+            brace = LineElementSequence_Pinned(
                 node_i=start_node,
                 node_j=end_node,
                 ang=self.active_angle,
@@ -2239,12 +2468,11 @@ class Building:
                 n_sub=n_sub,
                 model_as=model_as,
                 geomTransf=geomTransf,
-                placement='centroid')
-            brace.generate_brace(release_distance,
-                                 self.materials.retrieve('fix'),
-                                 self.materials.retrieve('release'),
-                                 camber)
-
+                placement='centroid',
+                end_dist=release_distance,
+                mat_fix=self.materials.retrieve('fix'),
+                mat_release=self.materials.retrieve('release'),
+                camber=camber)
             braces.append(brace)
             self.groups.add_element(brace)
             level.braces.add(brace)
@@ -2284,7 +2512,7 @@ class Building:
         gridline with all other gridlines.
         Args:
             n_sub (int): Number of internal elements to add
-            ends (str): {'type': 'fixed}', or
+            ends (str): {'type': 'fixed, 'dist': float}', or
                         {'type': 'pinned', 'dist': float} or
                         {'type': 'RBS', 'dist': float,
                          'length': float, 'factor': float}
@@ -2513,7 +2741,7 @@ class Building:
         sequences = self.list_of_line_element_sequences()
         result = []
         for sequence in sequences:
-            for elm in sequence.internal_elems:
+            for elm in sequence.internal_elems():
                 if isinstance(elm, LineElement):
                     result.append(elm)
         return result
@@ -2523,7 +2751,7 @@ class Building:
         sequences = self.list_of_line_element_sequences()
         result = []
         for sequence in sequences:
-            for elm in sequence.internal_elems:
+            for elm in sequence.internal_elems():
                 if isinstance(elm, EndRelease):
                     result.append(elm)
         return result
@@ -2546,7 +2774,7 @@ class Building:
         list_of_internal_nodes = []
         sequences = self.list_of_line_element_sequences()
         for sequence in sequences:
-            list_of_internal_nodes.extend(sequence.internal_nodes)
+            list_of_internal_nodes.extend(sequence.internal_nodes())
         return list_of_internal_nodes
 
     def list_of_all_nodes(self):

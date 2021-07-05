@@ -290,9 +290,9 @@ def add_data__frame_offsets(dt, list_of_elems):
 
     for elm in list_of_elems:
         p_i = elm.node_i.coords
-        p_io = elm.internal_pt_i
+        p_io = elm.end_segment_i.internal_pt
         p_j = elm.node_j.coords
-        p_jo = elm.internal_pt_j
+        p_jo = elm.end_segment_j.internal_pt
 
         x.extend((p_i[0], p_io[0], None))
         y.extend((p_i[1], p_io[1], None))
