@@ -67,10 +67,32 @@ def closed_beam_sequences(beams):
     """
     if not beams:
         return
+
     edges, edge_to_beam_map = \
         list_of_beams_to_mesh_edges_external(beams)
 
     halfedges = mesher.define_halfedges(edges)
+
+    # # debug
+    # import matplotlib.pyplot as plt
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111)
+    # ax.set_aspect('equal')
+    # for edge in edges:
+    #     p1 = edge.v_i.coords
+    #     p2 = edge.v_j.coords
+    #     coords = np.row_stack((p1, p2))
+    #     ax.plot(coords[:, 0], coords[:, 1])
+    # for h in halfedges:
+    #     h_nxt = h.nxt
+    #     e = h.edge
+    #     e_nxt = h_nxt.edge
+    #     p1 = (np.array(e.v_i.coords) + np.array(e.v_j.coords))/2.
+    #     p2 = (np.array(e_nxt.v_i.coords) + np.array(e_nxt.v_j.coords))/2.
+    #     dx = p2 - p1
+    #     ax.arrow(*p1, *dx)
+    # plt.show()
+
     halfedge_to_beam_map = {}
     for h in halfedges:
         halfedge_to_beam_map[h.uniq_id] = \
@@ -212,7 +234,7 @@ def list_of_beams_to_mesh_edges_internal(beams):
 
 
 def calculate_tributary_areas(
-        beams: list['BeamColumn']) -> list[np.ndarray]:
+        beams: list['LineElement']) -> list[np.ndarray]:
     """
     TODO - docstring
     """
@@ -263,6 +285,10 @@ def calculate_tributary_areas(
         mesher.sanity_checks(external, trivial)
         assert(len(internal) == 1)
 
+        # # debug
+        # mesher.plot_loop(external[0])
+        # mesher.plot_loop(internal[0])
+
         poly = sg.Polygon([h.vertex.coords for h in internal[0]])
         skel = sg.skeleton.create_interior_straight_skeleton(poly)
 
@@ -296,7 +322,8 @@ def calculate_tributary_areas(
                 bisectors.append(pt)
 
         # DEBUG
-        #
+
+        # import matplotlib.pyplot as plt
         # fig = plt.figure()
         # for h in skel.halfedges:
         #     if h.is_bisector:

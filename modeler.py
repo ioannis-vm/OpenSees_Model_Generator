@@ -929,6 +929,7 @@ class LineElement:
                        ===
                         | -------> z (blue)
                        ===
+        tributary_area (float): Area of floor that is supported on the element.
     """
 
     node_i: Node
@@ -946,6 +947,7 @@ class LineElement:
 
     def __post_init__(self):
         self.uniq_id = next(_ids)
+        self.tributary_area = 0.00
         # local axes with respect to the global coord system
         self.internal_pt_i = self.node_i.coords + self.offset_i
         self.internal_pt_j = self.node_j.coords + self.offset_j
@@ -1447,15 +1449,18 @@ class MiddleSegment:
                         self.internal_nodes)
                 else:
                     # Can move node.
-                    # # find the other LineElement connected to the node
-                    # oelm = self.internal_elems[idx-1]
+                    # find the other LineElement connected to the node
+                    oelm = self.internal_elems[idx-1]
                     # node to be moved
                     node = ielm.node_i
                     # update coordinates
                     node.coords[0:2] = pt
+                    # update internal_pts
+                    ielm.internal_pt_i = ielm.node_i.coords + ielm.offset_i
+                    oelm.internal_pt_j = oelm.node_j.coords + oelm.offset_j
             else:
                 # move node at end j
-                if idx == len(self.internal_elems):
+                if idx+1 == len(self.internal_elems):
                     # Can't move that node! Split instead.
                     node = do_split(
                         ielm,
@@ -1464,12 +1469,15 @@ class MiddleSegment:
                         self.internal_nodes)
                 else:
                     # Can move node.
-                    # # find the other LineElement connected to the node
-                    # oelm = self.internal_elems[idx+1]
+                    # find the other LineElement connected to the node
+                    oelm = self.internal_elems[idx+1]
                     # node to be moved
                     node = ielm.node_j
                     # update coordinates
                     node.coords[0:2] = pt
+                    # update internal_pts
+                    ielm.internal_pt_j = ielm.node_j.coords + ielm.offset_j
+                    oelm.internal_pt_i = oelm.node_i.coords + oelm.offset_i
         else:
             # split
             node = do_split(
@@ -1518,7 +1526,6 @@ class LineElementSequence:
                           the LineElementSequence where it transitions from
                           the end segments to the middle segment, expressed
                           as a proportion of the sequence's clear length.
-        tributary_area (float): Area of floor that is supported on the element.
     """
 
     node_i: Node
@@ -1536,8 +1543,6 @@ class LineElementSequence:
     def __post_init__(self):
 
         assert self.end_dist > 0.0, "end_dist must be > 0"
-
-        self.tributary_area = 0.00
 
         p_i = self.node_i.coords + self.offset_i
         p_j = self.node_j.coords + self.offset_j
@@ -1575,13 +1580,6 @@ class LineElementSequence:
         self.end_segment_i = None
         self.end_segment_j = None
         self.middle_segment = None
-
-    def internal_elems(self):
-        result = []
-        result.extend(self.end_segment_i.internal_elems)
-        result.extend(self.middle_segment.internal_elems)
-        result.extend(self.end_segment_j.internal_elems)
-        return result
 
     def snap_offset(self, tag: str):
         """
@@ -1672,6 +1670,20 @@ class LineElementSequence:
         result.extend(self.end_segment_i.internal_nodes)
         result.extend(self.middle_segment.internal_nodes)
         result.extend(self.end_segment_j.internal_nodes)
+        return result
+
+    def internal_elems(self):
+        result = []
+        result.extend(self.end_segment_i.internal_elems)
+        result.extend(self.middle_segment.internal_elems)
+        result.extend(self.end_segment_j.internal_elems)
+        return result
+
+    def internal_line_elems(self):
+        result = []
+        for elm in self.internal_elems():
+            if isinstance(elm, LineElement):
+                result.append(elm)
         return result
 
     def __eq__(self, other):
@@ -3084,12 +3096,13 @@ class Building:
             """
             if lvl.floor_coordinates is not None:
                 for beam in lvl.beams.element_list:
-                    udlZ_val = - beam.tributary_area * \
-                        lvl.surface_DL / beam.length_clear()
-                    beam.add_udl_glob(
-                        np.array([0.00, 0.00, udlZ_val]),
-                        ltype='floor')
-                for node in lvl.nodes_primary.node_list:
+                    for line_elm in beam.internal_line_elems():
+                        udlZ_val = - line_elm.tributary_area * \
+                            lvl.surface_DL / line_elm.length_clear()
+                        line_elm.add_udl_glob(
+                            np.array([0.00, 0.00, udlZ_val]),
+                            ltype='floor')
+                for node in lvl.list_of_all_nodes():
                     pZ_val = - node.tributary_area * \
                         lvl.surface_DL
                     node.load_fl += np.array((0.00, 0.00, -pZ_val,
@@ -3112,7 +3125,9 @@ class Building:
 
         for lvl in self.levels.level_list:
             if assume_floor_slabs:
-                beams = lvl.beams.element_list
+                beams = []
+                for seq in lvl.beams.element_list:
+                    beams.extend(seq.internal_line_elems())
                 if beams:
                     coords, bisectors = \
                         trib_area_analysis.calculate_tributary_areas(

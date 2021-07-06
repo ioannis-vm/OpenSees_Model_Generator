@@ -131,7 +131,8 @@ class Halfedge:
         """
         drct = (np.array(self.edge.other_vertex(self.vertex).coords) -
                 np.array(self.vertex.coords))
-        drct = drct / np.linalg.norm(drct)
+        norm = np.linalg.norm(drct)
+        drct /= norm
         return np.arctan2(drct[1], drct[0])
 
 
