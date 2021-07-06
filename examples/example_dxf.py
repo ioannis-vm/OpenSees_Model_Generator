@@ -24,6 +24,7 @@ Note:
     Sections are arbitrary.
 """
 
+import pdb
 import time
 import modeler
 import solver
@@ -56,7 +57,7 @@ b.set_active_material('steel')
 b.add_sections_from_json(
     "section_data/sections.json",
     "W",
-    ["W14X90", "W30X132"])
+    ["W14X90", "W24X146", "W30X132"])
 
 b.add_sections_from_json(
     "section_data/sections.json",
@@ -82,39 +83,53 @@ b.add_columns_from_grids(
     n_sub=1,
     model_as=modeling_type_fiber)
 b.clear_gridlines()
+# define beams (moment frames)
 b.add_gridlines_from_dxf("examples/dxf/gridlines_momentframe_beams.dxf")
 b.set_active_groups(['bms', 'moment frame'])
+b.set_active_section("W30X132")
 b.set_active_placement('top_center')
-b.add_beams_from_grids(n_sub=1, model_as=modeling_type_elastic,
-                       ends={'type': 'RBS',
-                             'dist': 0.05,
-                             'length': 5,
-                             'factor': 0.50})
+b.add_beams_from_gridlines(n_sub=1, model_as=modeling_type_elastic,
+                           ends={'type': 'RBS',
+                                 'dist': 0.10,
+                                 'length': 18,
+                                 'factor': 0.50})
+# gravity framing
+b.set_active_placement('centroid')
+b.clear_gridlines()
+b.add_gridlines_from_dxf("examples/dxf/gridlines_gravity_primary.dxf")
+b.set_active_groups(['cols', 'gravity framing'])
+b.set_active_levels([str(i) for i in range(1, 3)])
+b.set_active_section("HSS22X22X3/4")
+b.add_columns_from_grids(
+    n_sub=1,
+    model_as=modeling_type_fiber)
+b.set_active_levels([str(i) for i in range(3, 5)])
+b.set_active_section("HSS18X18X3/4")
+b.add_columns_from_grids(
+    n_sub=1,
+    model_as=modeling_type_fiber)
+b.set_active_levels([str(i) for i in range(5, 7)])
+b.set_active_section("HSS14X14X3/4")
+b.add_columns_from_grids(
+    n_sub=1,
+    model_as=modeling_type_fiber)
 
-
-# b.set_active_levels([str(i) for i in range(2, 5)])
-# b.set_active_section("HSS18X18X3/4")
-# b.add_columns_from_grids(
-#     n_sub=1,
-#     model_as=modeling_type)
-# b.set_active_levels([str(i) for i in range(5, 7)])
-# b.set_active_section("HSS14X14X3/4")
-# b.add_columns_from_grids(
-#     n_sub=1,
-#     model_as=modeling_type)
-
-# # define beams (moment frames)
-# b.set_active_levels("all_above_base")
-# b.set_active_section("W14X90")
-# b.set_active_placement('top_center')
-# b.add_beams_from_grids(n_sub=1, model_as=modeling_type,
-#                        ends={'type': 'RBS',
-#                              'dist': 0.05,
-#                              'length': 5,
-#                              'factor': 0.50})
-
-# # define beams (gravity)
-
+b.set_active_levels("all_above_base")
+b.set_active_placement('top_center')
+b.set_active_section("W24X146")
+b.add_beams_from_gridlines(n_sub=1,
+                           model_as=modeling_type_elastic,
+                           ends={'type': 'pinned',
+                                 'dist': 0.1})
+# secondary beams
+b.clear_gridlines()
+b.add_gridlines_from_dxf("examples/dxf/gridlines_gravity_secondary.dxf")
+b.set_active_section("W14X90")
+b.add_beams_from_gridlines(n_sub=1,
+                           model_as=modeling_type_elastic,
+                           ends={'type': 'pinned',
+                                 'dist': 0.1})
+b.clear_gridlines()
 
 # # define brace elements
 # b.clear_gridlines()
@@ -124,9 +139,10 @@ b.add_beams_from_grids(n_sub=1, model_as=modeling_type_elastic,
 # b.add_braces_from_grids(btype="single", n_sub=12, camber=0.01,
 #                         model_as=modeling_type, release_distance=0.005)
 
-# b.preprocess()
+b.preprocess()
 
-b.plot_building_geometry(extrude_frames=False, frame_axes=False)
+# b.plot_building_geometry(extrude_frames=False, frame_axes=False)
+# b.plot_building_geometry(extrude_frames=True)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear pushover analysis  #
@@ -134,8 +150,8 @@ b.plot_building_geometry(extrude_frames=False, frame_axes=False)
 
 # # performing a nonlinear pushover analysis
 # pushover_analysis = solver.PushoverAnalysis(b)
-# control_node = b.list_of_parent_nodes()[-1]  # top floor
-# # control_node = b.list_of_nodes()[-1]  # top floor somewhere
+# # control_node = b.list_of_parent_nodes()[-1]  # top floor
+# control_node = b.list_of_primary_nodes()[-1]  # top floor somewhere
 
 # t0 = time.time()
 # analysis_metadata = pushover_analysis.run(

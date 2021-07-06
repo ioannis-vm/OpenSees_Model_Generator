@@ -174,6 +174,25 @@ class GridLine:
         pt = ra_ori + ra_dir * uvvec[0]
         return np.array([pt[0], pt[1]])
 
+    def intersects_pt(self, pt: np.ndarray) -> bool:
+        """
+        Check whether the given point pt
+        lies on the gridline
+        Parameters:
+            pt (np.ndarray): a 2D point
+        """
+
+        ra = self.end_np - self.start_np
+        norm2 = np.dot(ra, ra)
+        rb = (pt - self.start_np)
+        cross = np.linalg.norm(np.cross(ra, rb))
+        dot_normalized = np.dot(ra, rb)/norm2
+
+        if cross < common.EPSILON:
+            return bool(0.00 <= dot_normalized <= 1.00)
+        else:
+            return False
+
 
 @dataclass
 class GridSystem:
@@ -1001,6 +1020,38 @@ class LineElement:
             self.x_axis, self.y_axis, self.z_axis)
         return T_mat.T @ udl
 
+    def split(self, proportion: float) \
+            -> tuple[LineElement, LineElement, Node]:
+        """
+        Splits the LineElement into two LineElements
+        and returns the resulting two LineElements
+        and a node that connects them.
+        Warning! This operation should not be performed after
+        processing the building. It does not account for
+        loads, masses etc.
+        Args:
+            proportion (float): Proportion of the distance from
+                the clear end i (without the offset) to the
+                LineElement's clear length (without the offsets)
+        """
+        split_location = self.node_i.coords + \
+            self.offset_i + self.x_axis * \
+            (self.length_clear() * proportion)
+        split_node = Node(split_location)
+        piece_i = LineElement(
+            self.node_i, split_node,
+            self.ang, self.offset_i, np.zeros(3),
+            self.section, self.len_parent, self.model_as,
+            self.geomTransf, self.udl_self, self.udl_fl,
+            self.udl_other)
+        piece_j = LineElement(
+            split_node, self.node_j,
+            self.ang, np.zeros(3), self.offset_j,
+            self.section, self.len_parent, self.model_as,
+            self.geomTransf, self.udl_self, self.udl_fl,
+            self.udl_other)
+        return piece_i, piece_j, split_node
+
 
 @dataclass
 class EndSegment:
@@ -1300,6 +1351,135 @@ class MiddleSegment:
                     self.section, self.len_parent,
                     self.model_as, self.geomTransf))
 
+    def crosses_point(self, pt: np.ndarray) -> bool:
+        line = GridLine('', self.n_i.coords[0:2], self.n_j.coords[0:2])
+        return line.intersects_pt(pt)
+
+    def connect(self, pt: np.ndarray, elev: float) \
+            -> tuple[Node, np.ndarray]:
+        """
+        Perform a split or move internal nodes to accomodate
+        for an internal node that can be used as a connection
+        point for a beam-to-beam connection at a given point.
+        """
+        def do_split(ielm: LineElement,
+                     proportion: float,
+                     internal_elems: list[LineElement],
+                     internal_nodes: list[Node]) -> Node:
+            """
+            Perform the splitting operation.
+            """
+            piece_i, piece_j, split_node = \
+                ielm.split(proportion)
+            # get index of the internal element in list
+            idx = internal_elems.index(ielm)
+            # remove the initial internal element
+            del internal_elems[idx]
+            # add the two pieces
+            internal_elems.insert(idx, piece_j)
+            internal_elems.insert(idx, piece_i)
+            # add the internal node
+            internal_nodes.insert(idx, split_node)
+            return split_node
+
+        # check that the beam is horizontal
+        # (otherwise this method doesn't work)
+        assert np.abs(self.x_axis_parent[2]) < common.EPSILON, \
+            'Error: Only horizontal supporting beams can be modeled.'
+        # obtain offset
+        delta_z = elev - self.n_i.coords[2]
+        offset = np.array((0., 0., delta_z))
+        # now work on providing a connection internal
+        # node at the given point.
+        #
+        # Implementation idea:
+        # Split an existing internal element at the right place
+        # and return the newly defined internal node.
+        # But if that split results in a very short
+        # and a very long internal element, don't split
+        # and just move an existing internal node instead
+        # (and update the internal elements connected to it)
+        # Always split if just 1 internal element.
+
+        # find the internal element that crosses
+        # the point
+        ielm = None
+        for elm in self.internal_elems:
+            if GridLine(
+                'temp',
+                elm.node_i.coords[0:2],
+                    elm.node_j.coords[0:2]).intersects_pt(pt):
+                ielm = elm
+                break
+        if not ielm:
+            # This should never happen
+            raise ValueError("Problem with beam-on-beam connection. " +
+                             "No internal elements found on middle segment.")
+        # length of the crossing internal element
+        ielm_len = ielm.length_clear()
+        # length of the pieces if we were to split it
+        piece_i = np.linalg.norm(ielm.node_i.coords[0:2]-pt)
+        piece_j = np.linalg.norm(ielm.node_j.coords[0:2]-pt)
+        # proportions
+        proportion_i = piece_i / ielm_len
+        proportion_j = piece_j / ielm_len
+        min_proportion = np.minimum(proportion_i, proportion_j)
+        # split or shift existing node?
+        if len(self.internal_elems) == 1:
+            # split regardless
+            node = do_split(
+                ielm,
+                proportion_i,
+                self.internal_elems,
+                self.internal_nodes)
+        elif min_proportion < 0.25:
+            # move
+            # get index of the internal element in list
+            idx = self.internal_elems.index(ielm)
+            if proportion_i < proportion_j:
+                # move node at end i
+                if idx == 0:
+                    # Can't move that node! Split instead.
+                    node = do_split(
+                        ielm,
+                        proportion_i,
+                        self.internal_elems,
+                        self.internal_nodes)
+                else:
+                    # Can move node.
+                    # # find the other LineElement connected to the node
+                    # oelm = self.internal_elems[idx-1]
+                    # node to be moved
+                    node = ielm.node_i
+                    # update coordinates
+                    node.coords[0:2] = pt
+            else:
+                # move node at end j
+                if idx == len(self.internal_elems):
+                    # Can't move that node! Split instead.
+                    node = do_split(
+                        ielm,
+                        proportion_i,
+                        self.internal_elems,
+                        self.internal_nodes)
+                else:
+                    # Can move node.
+                    # # find the other LineElement connected to the node
+                    # oelm = self.internal_elems[idx+1]
+                    # node to be moved
+                    node = ielm.node_j
+                    # update coordinates
+                    node.coords[0:2] = pt
+        else:
+            # split
+            node = do_split(
+                ielm,
+                proportion_i,
+                self.internal_elems,
+                self.internal_nodes)
+
+        return node, offset
+
 
 @dataclass
 @total_ordering
@@ -1502,7 +1682,7 @@ class LineElementSequence:
         return self.node_i <= other.node_i
 
 
-@dataclass
+@dataclass(eq=False, order=False)
 @total_ordering
 class LineElementSequence_Fixed(LineElementSequence):
     """
@@ -1548,7 +1728,7 @@ class LineElementSequence_Fixed(LineElementSequence):
             self.model_as, self.geomTransf)
 
 
-@dataclass
+@dataclass(eq=False, order=False)
 @total_ordering
 class LineElementSequence_Pinned(LineElementSequence):
     """
@@ -1602,7 +1782,7 @@ class LineElementSequence_Pinned(LineElementSequence):
             self.mat_fix, self.mat_release)
 
 
-@dataclass
+@dataclass(eq=False, order=False)
 @total_ordering
 class LineElementSequence_RBS(LineElementSequence):
     """
@@ -1677,7 +1857,7 @@ class LineElementSequences:
 
     element_list: list[LineElementSequence] = field(default_factory=list)
 
-    def add(self, elm: LineElementSequence):
+    def add(self, elm: LineElementSequence) -> bool:
         """
         Add an element in the element collection,
         if it does not already exist
@@ -1685,9 +1865,9 @@ class LineElementSequences:
         if elm not in self.element_list:
             self.element_list.append(elm)
             self.element_list.sort()
+            return True
         else:
-            raise ValueError('Element already exists: '
-                             + repr(elm))
+            return False
 
     def remove(self, elm: LineElementSequence):
         """
@@ -1800,6 +1980,17 @@ class Level:
             other_pt = other_node.coords
             if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
                 return other_node
+        return None
+
+    def look_for_beam(self, x_coord: float, y_coord: float):
+        """
+        Returns a beam if the path of its middle_segment
+        crosses the given point.
+        """
+        candidate_pt = np.array([x_coord, y_coord])
+        for beam in self.beams.element_list:
+            if beam.middle_segment.crosses_point(candidate_pt):
+                return beam
         return None
 
     def assign_surface_DL(self,
@@ -2197,10 +2388,10 @@ class Building:
                            or
                            {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
             geomTransf: {Linear, PDelta}
-            ends (str): {'type': 'fixed, 'dist': float}', or
-                        {'type': 'pinned', 'dist': float} or
-                        {'type': 'RBS', 'dist': float,
-                         'length': float, 'factor': float}
+            ends (dict): {'type': 'fixed, 'dist': float}', or
+                         {'type': 'pinned', 'dist': float} or
+                         {'type': 'RBS', 'dist': float,
+                          'length': float, 'factor': float}
 
         Returns:
             columns (list[LineElementSequence]): Added columns.
@@ -2259,11 +2450,12 @@ class Building:
                         mat_release=self.materials.retrieve('release'))
                 else:
                     raise ValueError('Invalid end-type')
-                columns.append(column)
-                level.columns.add(column)
-                self.groups.add_element(column)
-                top_node.column_below = column
-                bot_node.column_above = column
+                ok = level.columns.add(column)
+                if ok:
+                    columns.append(column)
+                    self.groups.add_element(column)
+                    top_node.column_below = column
+                    bot_node.column_above = column
         return columns
 
     def add_beam_at_points(self,
@@ -2294,10 +2486,10 @@ class Building:
                           on the section of an existing column
                           at node i
             snap_j ~ similar to snap_i, for the j side.
-            ends (str): {'type': 'fixed, 'dist': float}', or
-                        {'type': 'pinned', 'dist': float} or
-                        {'type': 'RBS', 'dist': float,
-                         'length': float, 'factor': float}
+            ends (dict): {'type': 'fixed, 'dist': float}', or
+                         {'type': 'pinned', 'dist': float} or
+                         {'type': 'RBS', 'dist': float,
+                          'length': float, 'factor': float}
                         For the pinned case,
                           `dist` represents the
                             proportion of the distance between the element's
@@ -2322,6 +2514,10 @@ class Building:
             raise ValueError("No active section specified")
         beams = []
         for level in self.levels.active:
+
+            # - #
+            # i #
+            # - #
             # check to see if start node exists
             start_node = level.look_for_node(*start)
             if start_node:
@@ -2329,15 +2525,26 @@ class Building:
                 col = start_node.column_below
                 if col:
                     o_s_i = col.snap_offset(snap_i)
-                    col_offset_i = col.offset_i - o_s_i
+                    connection_offset_i = col.offset_i - o_s_i
                 else:
-                    col_offset_i = np.zeros(3)
+                    connection_offset_i = np.zeros(3)
             else:
-                # create it if it does not exist
-                start_node = Node(
-                    np.array([*start, level.elevation]), level.restraint)
-                level.nodes_primary.add(start_node)
-                col_offset_i = np.zeros(3)
+                # check to see if a beam crosses that point
+                start_beam = level.look_for_beam(*start)
+                if start_beam:
+                    start_node, connection_offset_i = \
+                        start_beam.middle_segment.connect(
+                            start, level.elevation)
+                else:
+                    # no start node or crossing beam found
+                    # create a start node
+                    start_node = Node(
+                        np.array([*start, level.elevation]), level.restraint)
+                    level.nodes_primary.add(start_node)
+                    connection_offset_i = np.zeros(3)
+            # - #
+            # j #
+            # - #
             # check to see if end node exists
             end_node = level.look_for_node(*end)
             if end_node:
@@ -2345,24 +2552,35 @@ class Building:
                 col = end_node.column_below
                 if col:
                     o_s_j = col.snap_offset(snap_j)
-                    col_offset_j = col.offset_j - o_s_j
+                    connection_offset_j = col.offset_j - o_s_j
                 else:
-                    col_offset_j = np.zeros(3)
+                    connection_offset_j = np.zeros(3)
             else:
-                # create it if it does not exist
-                end_node = Node(
-                    np.array([*end, level.elevation]), level.restraint)
-                level.nodes_primary.add(end_node)
-                col_offset_j = np.zeros(3)
+                # check to see if a beam crosses that point
+                end_beam = level.look_for_beam(*end)
+                if end_beam:
+                    end_node, connection_offset_j = \
+                        end_beam.middle_segment.connect(
+                            end, level.elevation)
+                else:
+                    # no end node or crossing beam found
+                    # create an end node
+                    end_node = Node(
+                        np.array([*end, level.elevation]), level.restraint)
+                    level.nodes_primary.add(end_node)
+                    connection_offset_j = np.zeros(3)
 
+            # ---------------- #
+            # element creation #
+            # ---------------- #
             # add the beam connecting the two nodes
             if ends['type'] == 'fixed':
                 beam = LineElementSequence_Fixed(
                     node_i=start_node,
                     node_j=end_node,
                     ang=self.active_angle,
-                    offset_i=offset_i+col_offset_i,
-                    offset_j=offset_j+col_offset_j,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
                     section=self.sections.active,
                     n_sub=n_sub,
                     model_as=model_as,
@@ -2374,8 +2592,8 @@ class Building:
                     node_i=start_node,
                     node_j=end_node,
                     ang=self.active_angle,
-                    offset_i=offset_i+col_offset_i,
-                    offset_j=offset_j+col_offset_j,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
                     section=self.sections.active,
                     n_sub=n_sub,
                     model_as=model_as,
@@ -2390,8 +2608,8 @@ class Building:
                     node_i=start_node,
                     node_j=end_node,
                     ang=self.active_angle,
-                    offset_i=offset_i+col_offset_i,
-                    offset_j=offset_j+col_offset_j,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
                     section=self.sections.active,
                     n_sub=n_sub,
                     model_as=model_as,
@@ -2402,11 +2620,12 @@ class Building:
                     rbs_reduction=ends['factor'])
             else:
                 raise ValueError('Invalid end-type')
-            level.beams.add(beam)
-            beams.append(beam)
-            self.groups.add_element(beam)
-            start_node.beams.append(beam)
-            end_node.beams.append(beam)
+            ok = level.beams.add(beam)
+            if ok:
+                beams.append(beam)
+                self.groups.add_element(beam)
+                start_node.beams.append(beam)
+                end_node.beams.append(beam)
         return beams
 
     def add_brace_at_points(self,
@@ -2503,8 +2722,8 @@ class Building:
             columns.extend(cols)
         return columns
 
-    def add_beams_from_grids(self, n_sub=1, ends={'type': 'fixed'},
-                             model_as={'type': 'elastic'}):
+    def add_beams_from_gridlines(self, n_sub=1, ends={'type': 'fixed'},
+                                 model_as={'type': 'elastic'}):
         """
         Uses the currently defined gridsystem to obtain all locations
         where gridlines intersect. For each gridline, beams are placed
@@ -2512,10 +2731,46 @@ class Building:
         gridline with all other gridlines.
         Args:
             n_sub (int): Number of internal elements to add
-            ends (str): {'type': 'fixed, 'dist': float}', or
-                        {'type': 'pinned', 'dist': float} or
-                        {'type': 'RBS', 'dist': float,
-                         'length': float, 'factor': float}
+            ends (dict): {'type': 'fixed, 'dist': float}', or
+                         {'type': 'pinned', 'dist': float} or
+                         {'type': 'RBS', 'dist': float,
+                          'length': float, 'factor': float}
+                        For the pinned case,
+                          `dist` represents the
+                            proportion of the distance between the element's
+                            ends to the release, relative to the element's
+                            length, both considered without the offsets.
+                        For the RBS case,
+                          `dist` is similar to the pinned case,
+                            but it corresponds to the start of the RBS portion.
+                          `length` represents the length of the RBS portion.
+                          `factor` represents the proportion of the RBS
+                            section's width, relative to the original section.
+        """
+        beams = []
+        for grid in self.gridsystem.grids:
+            bms = self.add_beam_at_points(
+                grid.start_np,
+                grid.end_np,
+                n_sub=n_sub,
+                ends=ends,
+                model_as=model_as)
+            beams.extend(bms)
+        return beams
+
+    def add_beams_from_grid_intersections(self, n_sub=1, ends={'type': 'fixed'},
+                                          model_as={'type': 'elastic'}):
+        """
+        Uses the currently defined gridsystem to obtain all locations
+        where gridlines intersect. For each gridline, beams are placed
+        connecting all the intersection locations of that
+        gridline with all other gridlines.
+        Args:
+            n_sub (int): Number of internal elements to add
+            ends (dict): {'type': 'fixed, 'dist': float}', or
+                         {'type': 'pinned', 'dist': float} or
+                         {'type': 'RBS', 'dist': float,
+                          'length': float, 'factor': float}
                         For the pinned case,
                           `dist` represents the
                             proportion of the distance between the element's
