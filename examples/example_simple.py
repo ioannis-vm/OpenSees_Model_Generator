@@ -70,7 +70,7 @@ b.set_active_groups(["beams"])
 # b.add_beams_from_grids(n_sub=5, ends={'type': 'pinned', 'dist': 0.001},
 #                        model_as=modeling_type)
 
-b.add_beams_from_grids(n_sub=5, model_as=modeling_type)
+b.add_beams_from_gridlines(n_sub=5, model_as=modeling_type)
 
 
 # for more control (offsets etc.), define elements one by one.

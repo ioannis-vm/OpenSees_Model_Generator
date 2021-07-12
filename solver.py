@@ -15,13 +15,14 @@ from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
 import modeler
+import components
 from modeler import Building
 from utility.common import G_CONST, EPSILON
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
 
 
-def plot_stress_strain(material: modeler.Material,
+def plot_stress_strain(material: components.Material,
                        num_steps: int,
                        sigma_max: float):
     ops.wipe()
@@ -90,7 +91,7 @@ class Analysis:
     eleForces: AnalysisResult = field(default_factory=AnalysisResult)
     fiber_stress_strain: AnalysisResult = field(default_factory=AnalysisResult)
 
-    def _define_material(self, material: modeler.Material):
+    def _define_material(self, material: components.Material):
         if material.ops_material == 'Steel02':
             ops.uniaxialMaterial(
                 'Steel02',
@@ -129,7 +130,7 @@ class Analysis:
             ops.mass(node.uniq_id,
                      *node.mass)
 
-    def _define_elastic_section(self, sec: modeler.Section):
+    def _define_elastic_section(self, sec: components.Section):
 
         # # using AISC database properties
         # # RBS sections won't work
@@ -152,7 +153,7 @@ class Analysis:
                     sec.material.parameters['G'],
                     sec.properties['J'])
 
-    def _define_fiber_section(self, sec: modeler.Section,
+    def _define_fiber_section(self, sec: components.Section,
                               n_x: int, n_y: int):
 
         pieces = sec.subdivide_section(
@@ -170,7 +171,7 @@ class Analysis:
                       area,
                       sec.material.uniq_id)
 
-    def _define_line_element(self, elm: modeler.LineElement, n_p):
+    def _define_line_element(self, elm: modeler.LineElement):
         if elm.len_proportion > 0.75:
             n_sub = 4
         elif elm.len_proportion > 0.50:
@@ -241,7 +242,7 @@ class Analysis:
                     raise ValueError("Invalid modeling type")
                 defined_sections.append(elm.section.uniq_id)
 
-            self._define_line_element(elm, n_p=5)
+            self._define_line_element(elm)
 
         # define zerolength elements representing end releases
         for elm in self.building.list_of_endreleases():
@@ -529,8 +530,8 @@ class PushoverAnalysis(NonlinearAnalysis):
                     ops.load(node.uniq_id,
                              *(distribution[i]*masses[j]*load_dir))
 
-    def run(self, direction, target_displacement,
-            control_node, displ_incr, displ_output):
+    def run(self, direction, target_displacements,
+            control_node, displ_incr):
         if direction == 'x':
             control_DOF = 0
         elif direction == 'y':
@@ -546,37 +547,47 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.system('UmfPack')
         ops.numberer('Plain')
         ops.constraints('Transformation')
-        # TODO add refined steps if fails
         ops.test('NormDispIncr', 1e-8, 100, 3)
-        ops.integrator("DisplacementControl",
-                       control_node.uniq_id, control_DOF + 1, displ_incr)
         ops.algorithm("Newton")
         ops.analysis("Static")
-        curr_displ = 0.00
-        j_out = 0
+        curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
         n_steps_success = 0
-        while curr_displ + EPSILON < target_displacement:
-            if curr_displ + EPSILON > displ_output[j_out]:
+        fail = False
+        for target_displacement in target_displacements:
+            if fail:
+                break
+            if curr_displ < target_displacement:
+                displ_incr = abs(displ_incr)
+                sign = +1.00
+            else:
+                displ_incr = -abs(displ_incr)
+                sign = -1.00
+            ops.integrator("DisplacementControl",
+                           control_node.uniq_id, control_DOF + 1, displ_incr)
+            while curr_displ * sign < target_displacement * sign:
                 self._read_OpenSees_results()
                 n_steps_success += 1
-                j_out += 1
-            check = ops.analyze(1)
-            if check != 0:
-                ops.test('NormDispIncr', 1e-8, 200, 3)
-                ops.integrator("DisplacementControl",
-                               control_node.uniq_id, control_DOF + 1,
-                               displ_incr/10.)
                 check = ops.analyze(1)
                 if check != 0:
-                    print('Analysis failed to converge')
-                    break
-                ops.algorithm("Newton")
-                ops.integrator("DisplacementControl",
-                               control_node.uniq_id, control_DOF + 1,
-                               displ_incr)
-            curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
-            print('Target displacement: %.2f | Current: %.2f' %
-                  (target_displacement, curr_displ), end='\r')
+                    ops.integrator("DisplacementControl",
+                                   control_node.uniq_id, control_DOF + 1,
+                                   displ_incr/10.)
+#                     ops.algorithm("ModifiedNewton", "-initial")
+                    check = ops.analyze(1)
+                    if check != 0:
+                        print()
+                        print('======================================')
+                        print('Analysis failed to converge')
+                        print()
+                        fail = True
+                        break
+                    ops.algorithm("Newton")
+                    ops.integrator("DisplacementControl",
+                                   control_node.uniq_id, control_DOF + 1,
+                                   displ_incr)
+                curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
+                print('Target displacement: %.2f | Current: %.2f' %
+                      (target_displacement, curr_displ), end='\r')
 
         self._read_OpenSees_results()
         n_steps_success += 1
@@ -601,8 +612,8 @@ class PushoverAnalysis(NonlinearAnalysis):
             base_shear.append(self.global_reactions(step)[control_DOF])
             displacement.append(
                 self.node_displacements[node.uniq_id][step][control_DOF])
-        base_shear = np.abs(np.array(base_shear))
-        displacement = np.abs(np.array(displacement))
+        base_shear = -np.array(base_shear)
+        displacement = np.array(displacement)
         general_2D.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
             displacement, base_shear, 'spline+markers',

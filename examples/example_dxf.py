@@ -36,11 +36,11 @@ b = modeler.Building()
 
 # Add levels - single-story building
 b.add_level("base", 0.00, "fixed")
-# b.add_level('1', 120.00)
-# b.set_active_levels("all_above_base")
+b.add_level('1', 120.00)
+b.set_active_levels("all_above_base")
 
-for i in range(1, 7):
-    b.add_level(str(i), 120*i)
+# for i in range(1, 7):
+#     b.add_level(str(i), 120*i)
 
 
 # Add goups
@@ -68,7 +68,7 @@ b.add_sections_from_json(
 
 b.set_active_levels("all_above_base")
 b.assign_surface_DL(1.00)
-b.set_active_levels(["6"])
+# b.set_active_levels(["6"])
 b.assign_surface_DL(1.20)
 
 modeling_type_fiber = {'type': 'fiber', 'n_x': 5, 'n_y': 5}
@@ -99,17 +99,17 @@ b.set_active_placement('centroid')
 b.clear_gridlines()
 b.add_gridlines_from_dxf("examples/dxf/gridlines_gravity_primary.dxf")
 b.set_active_groups(['cols', 'gravity framing'])
-b.set_active_levels([str(i) for i in range(1, 3)])
+# b.set_active_levels([str(i) for i in range(1, 3)])
 b.set_active_section("HSS22X22X3/4")
 b.add_columns_from_grids(
     n_sub=1,
     model_as=modeling_type_fiber)
-b.set_active_levels([str(i) for i in range(3, 5)])
+# set_active_levels([str(i) for i in range(3, 5)])
 b.set_active_section("HSS18X18X3/4")
 b.add_columns_from_grids(
     n_sub=1,
     model_as=modeling_type_fiber)
-b.set_active_levels([str(i) for i in range(5, 7)])
+# b.set_active_levels([str(i) for i in range(5, 7)])
 b.set_active_section("HSS14X14X3/4")
 b.add_columns_from_grids(
     n_sub=1,
@@ -140,36 +140,37 @@ b.clear_gridlines()
 # b.add_braces_from_grids(btype="single", n_sub=12, camber=0.01,
 #                         model_as=modeling_type, release_distance=0.005)
 
-b.preprocess()
+b.plot_building_geometry(extrude_frames=False, frame_axes=False)
+b.plot_building_geometry(extrude_frames=True)
 
-# b.plot_building_geometry(extrude_frames=False, frame_axes=False)
-# b.plot_building_geometry(extrude_frames=True)
+# b.preprocess()
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # nonlinear pushover analysis #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-# performing a nonlinear pushover analysis
-pushover_analysis = solver.PushoverAnalysis(b)
-control_node = b.list_of_parent_nodes()[-1]  # top floor
-# control_node = b.list_of_primary_nodes()[-1]  # top floor somewhere
+# # performing a nonlinear pushover analysis
+# pushover_analysis = solver.PushoverAnalysis(b)
+# control_node = b.list_of_parent_nodes()[-1]  # top floor
+# # control_node = b.list_of_primary_nodes()[-1]  # top floor somewhere
 
-t0 = time.time()
-analysis_metadata = pushover_analysis.run(
-    "y",
-    80.,
-    control_node,
-    1.,
-    np.linspace(0., 80., 80))
-n_plot_steps = analysis_metadata['successful steps']
-t1 = time.time()
+# t0 = time.time()
+# analysis_metadata = pushover_analysis.run(
+#     "y",
+#     80.,
+#     control_node,
+#     1.,
+#     np.linspace(0., 80., 80))
+# n_plot_steps = analysis_metadata['successful steps']
+# t1 = time.time()
 
-print(t1-t0)
+# print(t1-t0)
 
-# plot the deformed shape for any of the steps
-plot_metadata = pushover_analysis.deformed_shape(
-    step=n_plot_steps-1, scaling=0.00, extrude_frames=False)
-print(plot_metadata)
+# # plot the deformed shape for any of the steps
+# plot_metadata = pushover_analysis.deformed_shape(
+#     step=n_plot_steps-1, scaling=0.00, extrude_frames=False)
+# print(plot_metadata)
 
 # # plot pushover curve
 # pushover_analysis.plot_pushover_curve("y", control_node)
