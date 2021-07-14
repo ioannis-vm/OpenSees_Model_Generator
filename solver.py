@@ -20,6 +20,7 @@ from modeler import Building
 from utility.common import G_CONST, EPSILON
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
+from utility import transformations
 
 
 def plot_stress_strain(material: components.Material,
@@ -84,7 +85,7 @@ class AnalysisResult(TypedDict):
 @dataclass
 class Analysis:
 
-    building: Building
+    building: Building = field(repr=False)
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)
     node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
@@ -172,12 +173,7 @@ class Analysis:
                       sec.material.uniq_id)
 
     def _define_line_element(self, elm: modeler.LineElement):
-        if elm.len_proportion > 0.75:
-            n_sub = 4
-        elif elm.len_proportion > 0.50:
-            n_sub = 3
-        else:
-            n_sub = 2
+        n_sub = elm.n_p
         ops.geomTransf(elm.geomTransf,
                        elm.uniq_id,
                        *elm.z_axis)
@@ -342,18 +338,24 @@ class Analysis:
                                uid,
                                forces)
 
-    def _read_frame_fiber_stress_strain(self, n_p):
+    def _read_frame_fiber_stress_strain(self):
         for elm in self.building.list_of_line_elements():
+            if elm.model_as['type'] != 'fiber':
+                continue
             uid = elm.uniq_id
             mat_id = elm.section.material.uniq_id
             result = []
-            for fiber in elm.section.subdivide_section(10, 25):
-                z_loc = fiber.centroid.x
-                y_loc = fiber.centroid.y
-                stress_strain = [ops.eleResponse(
-                    uid, "section", i, "-fiber", str(y_loc),
-                    str(z_loc), str(mat_id), "stressStrain")
-                    for i in range(n_p)]
+            n_p = elm.n_p
+            pts = elm.section.snap_points
+            for pt in pts.keys():
+                pt = list(pts.keys())[0]
+                z_loc = pts[pt][0]
+                y_loc = pts[pt][1]
+                stress_strain = []
+                for i in range(n_p):
+                    stress_strain.append(ops.eleResponse(
+                        uid, "section", str(i+1), "-fiber", str(y_loc),
+                        str(z_loc), str(mat_id), "stressStrain"))
                 result.append(stress_strain)
             self._store_result(self.fiber_stress_strain, uid, result)
 
@@ -364,6 +366,7 @@ class Analysis:
         self._read_node_displacements()
         self._read_node_reactions()
         self._read_frame_element_forces()
+        self._read_frame_fiber_stress_strain()
 
     #########################
     # Visualization methods #
@@ -495,6 +498,61 @@ class NonlinearAnalysis(Analysis):
         ops.analysis('Static')
         ops.analyze(1)
 
+    def _acceptance_criteria(self):
+        for elm in self.building.list_of_line_elements():
+
+            if elm.model_as['type'] != 'elastic':
+                continue
+            mat = elm.section.material
+            if mat.name == 'steel':
+                capacity_t = mat.parameters['Fy']/mat.parameters['E0']
+                capacity_c = -capacity_t
+            else:
+                raise ValueError('Unsupported material')
+            strains = []
+            x_vec = elm.x_axis
+            y_vec = elm.y_axis
+            z_vec = elm.z_axis
+            T_global2local = np.vstack((x_vec, y_vec, z_vec))
+            forces_global = self.eleForces[elm.uniq_id][-1][0:3]
+            moments_global_ends = self.eleForces[elm.uniq_id][-1][3:6]
+
+            moments_global_clear = \
+                transformations.offset_transformation(
+                    elm.offset_i, moments_global_ends, forces_global)
+
+            ni, qyi, qzi = T_global2local @ forces_global
+            ti, myi, mzi = T_global2local @ moments_global_clear
+
+            wx, wy, wz = elm.udl_total()
+
+            l = elm.length_clear()
+            t = np.linspace(0.00, l, num=9)
+
+            nx_vec = - t * wx - ni
+            mz_vec = t**2 * 0.50 * wy + t * qyi - mzi
+            my_vec = t**2 * 0.50 * wz + t * qzi + myi
+
+            prop = elm.section.mesh.geometric_properties()
+            area = prop['area']
+            iy = prop['inertia']['ixx']
+            iz = prop['inertia']['iyy']
+            young_mod = elm.section.material.parameters['E0']
+
+            for key, val in elm.section.snap_points.items():
+                z, y = val
+                stress = nx_vec/area \
+                    + my_vec/iz * z \
+                    - mz_vec/iy * y
+                strain = stress / young_mod
+                strains.extend(strain)
+            emax = np.max(np.array(strains))
+            emin = np.min(np.array(strains))
+            if ((emax > capacity_t) or (emin < capacity_c)):
+                raise ValueError(
+                    "Acceptance criteria failed for element " +
+                    str(elm.uniq_id))
+
 
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
@@ -549,7 +607,6 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1e-8, 100, 3)
         ops.algorithm("Newton")
-        ops.analysis("Static")
         curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
         n_steps_success = 0
         fail = False
@@ -564,8 +621,10 @@ class PushoverAnalysis(NonlinearAnalysis):
                 sign = -1.00
             ops.integrator("DisplacementControl",
                            control_node.uniq_id, control_DOF + 1, displ_incr)
+            ops.analysis("Static")
             while curr_displ * sign < target_displacement * sign:
                 self._read_OpenSees_results()
+                self._acceptance_criteria()
                 n_steps_success += 1
                 check = ops.analyze(1)
                 if check != 0:
@@ -590,6 +649,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                       (target_displacement, curr_displ), end='\r')
 
         self._read_OpenSees_results()
+        self._acceptance_criteria()
         n_steps_success += 1
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}

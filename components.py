@@ -276,6 +276,12 @@ class Section:
                   (e.g. W -> steel W section)
         name (str): Unique name for the section
         material (Material): Material of the section
+        snap_points (dict): Dictionary containing the local
+                    coordinates of a set of characetristic points.
+                    These points are:
+                    'centroid', 'top_center', 'top_left', 'top_right',
+                    'center_left', 'center_right', 'bottom_center',
+                    'bottom_left', bottom_right'
         mesh (mesher.Mesh): Mesh object defining the geometry
                             of the section
         properties (dict): Dictionary with geometric properties
@@ -286,6 +292,7 @@ class Section:
     sec_type: str
     name: str
     material: Material = field(repr=False)
+    snap_points: Optional[dict] = field(default=None, repr=False)
     mesh: Optional[mesher.Mesh] = field(default=None, repr=False)
     properties: Optional[dict] = field(default=None, repr=False)
 
@@ -309,50 +316,50 @@ class Section:
         return mesher.subdivide_polygon(
             self.mesh.halfedges, n_x=n_x, n_y=n_y, plot=plot)
 
-    def retrieve_offset(self, placement: str):
-        """
-        Obtain the necessary offset in the y-z plane
-        (local system)
-        such that the element of that section has
-        the specified placement point.
-        The offset is expressed as the vector that moves
-        from the placement point to the centroid.
-        Args:
-            placement (str): Can be one of:
-                'centroid', 'top_center', 'top_left', 'top_right',
-                'center_left', 'center_right', 'bottom_center',
-                'bottom_left', 'bottom_right'
-        """
-        bbox = self.mesh.bounding_box()
-        z_min, y_min, z_max, y_max = bbox.flatten()
-        assert placement in ['centroid',
-                             'top_center',
-                             'top_left',
-                             'top_right',
-                             'center_left',
-                             'center_right',
-                             'bottom_center',
-                             'bottom_left',
-                             'bottom_right'], \
-            "Invalid placement"
-        if placement == 'centroid':
-            return - np.array([0., 0.])
-        elif placement == 'top_center':
-            return - np.array([0., y_max])
-        elif placement == 'top_left':
-            return - np.array([z_min, y_max])
-        elif placement == 'top_right':
-            return - np.array([z_max, y_max])
-        elif placement == 'center_left':
-            return - np.array([z_min, 0.])
-        elif placement == 'center_right':
-            return - np.array([z_max, 0.])
-        elif placement == 'bottom_center':
-            return - np.array([0., y_min])
-        elif placement == 'bottom_left':
-            return - np.array([z_min, y_min])
-        elif placement == 'bottom_right':
-            return - np.array([z_max, y_min])
+    # def retrieve_offset(self, placement: str):
+    #     """
+    #     Obtain the necessary offset in the y-z plane
+    #     (local system)
+    #     such that the element of that section has
+    #     the specified placement point.
+    #     The offset is expressed as the vector that moves
+    #     from the placement point to the centroid.
+    #     Args:
+    #         placement (str): Can be one of:
+    #             'centroid', 'top_center', 'top_left', 'top_right',
+    #             'center_left', 'center_right', 'bottom_center',
+    #             'bottom_left', 'bottom_right'
+    #     """
+    #     bbox = self.mesh.bounding_box()
+    #     z_min, y_min, z_max, y_max = bbox.flatten()
+    #     assert placement in ['centroid',
+    #                          'top_center',
+    #                          'top_left',
+    #                          'top_right',
+    #                          'center_left',
+    #                          'center_right',
+    #                          'bottom_center',
+    #                          'bottom_left',
+    #                          'bottom_right'], \
+    #         "Invalid placement"
+    #     if placement == 'centroid':
+    #         return - np.array([0., 0.])
+    #     elif placement == 'top_center':
+    #         return - np.array([0., y_max])
+    #     elif placement == 'top_left':
+    #         return - np.array([z_min, y_max])
+    #     elif placement == 'top_right':
+    #         return - np.array([z_max, y_max])
+    #     elif placement == 'center_left':
+    #         return - np.array([z_min, 0.])
+    #     elif placement == 'center_right':
+    #         return - np.array([z_max, 0.])
+    #     elif placement == 'bottom_center':
+    #         return - np.array([0., y_min])
+    #     elif placement == 'bottom_left':
+    #         return - np.array([z_min, y_min])
+    #     elif placement == 'bottom_right':
+    #         return - np.array([z_max, y_min])
 
     def rbs(self, reduction_factor) -> 'Section':
         """
@@ -442,7 +449,21 @@ class Sections:
         tf = properties['tf']
         t = properties['T']
         mesh = mesher_section_gen.w_mesh(b, h, t, tw, tf)
-        section = Section('W', name, material, mesh, properties)
+        bbox = mesh.bounding_box()
+        z_min, y_min, z_max, y_max = bbox.flatten()
+        snap_points = {
+            'centroid': np.array([0., 0.]),
+            'top_center': np.array([0., -y_max]),
+            'top_left': np.array([-z_min, -y_max]),
+            'top_right': np.array([-z_max, -y_max]),
+            'center_left': np.array([-z_min, 0.]),
+            'center_right': np.array([-z_max, 0.]),
+            'bottom_center': np.array([0., -y_min]),
+            'bottom_left': np.array([-z_min, -y_min]),
+            'bottom_right': np.array([-z_max, -y_min])
+        }
+        section = Section('W', name, material,
+                          snap_points,  mesh, properties)
         self.add(section)
 
     def generate_HSS(self,
@@ -462,7 +483,21 @@ class Sections:
             b = properties['B']
             t = properties['tdes']
             mesh = mesher_section_gen.HSS_rect_mesh(ht, b, t)
-            section = Section('HSS', name, material, mesh, properties)
+            bbox = mesh.bounding_box()
+            z_min, y_min, z_max, y_max = bbox.flatten()
+            snap_points = {
+                'centroid': np.array([0., 0.]),
+                'top_center': np.array([0., -y_max]),
+                'top_left': np.array([-z_min, -y_max]),
+                'top_right': np.array([-z_max, -y_max]),
+                'center_left': np.array([-z_min, 0.]),
+                'center_right': np.array([-z_max, 0.]),
+                'bottom_center': np.array([0., -y_min]),
+                'bottom_left': np.array([-z_min, -y_min]),
+                'bottom_right': np.array([-z_max, -y_min])
+            }
+            section = Section('HSS', name, material,
+                              snap_points, mesh, properties)
             self.add(section)
         elif xs == 1:
             # it's a circular section
@@ -470,7 +505,21 @@ class Sections:
             tdes = properties['tdes']
             n_pts = 25
             mesh = mesher_section_gen.HSS_circ_mesh(od, tdes, n_pts)
-            section = Section('HSS', name, material, mesh, properties)
+            bbox = mesh.bounding_box()
+            z_min, y_min, z_max, y_max = bbox.flatten()
+            snap_points = {
+                'centroid': np.array([0., 0.]),
+                'top_center': np.array([0., -y_max]),
+                'top_left': np.array([-z_min, -y_max]),
+                'top_right': np.array([-z_max, -y_max]),
+                'center_left': np.array([-z_min, 0.]),
+                'center_right': np.array([-z_max, 0.]),
+                'bottom_center': np.array([0., -y_min]),
+                'bottom_left': np.array([-z_min, -y_min]),
+                'bottom_right': np.array([-z_max, -y_min])
+            }
+            section = Section('HSS', name, material,
+                              snap_points, mesh, properties)
             self.add(section)
         else:
             raise ValueError("This should never happen...")
@@ -486,7 +535,21 @@ class Sections:
         b = properties['b']
         h = properties['h']
         mesh = mesher_section_gen.rect_mesh(b, h)
-        section = Section('rect', name, material, mesh, properties)
+        bbox = mesh.bounding_box()
+        z_min, y_min, z_max, y_max = bbox.flatten()
+        snap_points = {
+            'centroid': np.array([0., 0.]),
+            'top_center': np.array([0., -y_max]),
+            'top_left': np.array([-z_min, -y_max]),
+            'top_right': np.array([-z_max, -y_max]),
+            'center_left': np.array([-z_min, 0.]),
+            'center_right': np.array([-z_max, 0.]),
+            'bottom_center': np.array([0., -y_min]),
+            'bottom_left': np.array([-z_min, -y_min]),
+            'bottom_right': np.array([-z_max, -y_min])
+        }
+        section = Section('rect', name, material,
+                          snap_points, mesh, properties)
         self.add(section)
         temp = mesh.geometric_properties()
         properties['A'] = temp['area']
@@ -535,6 +598,7 @@ class LineElement:
         len_parent (float): Lenth of the parent element (LineElementSequence)
         len_proportion (float): Proportion of the line element's length
                         to the length of its parent line element sequence.
+        n_p (int): Number of integration points
         model_as (dict): Either
                        {'type': 'elastic'}
                        or
@@ -591,6 +655,13 @@ class LineElement:
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
         self.len_proportion = self.length_clear() / self.len_parent
+        if self.len_proportion > 0.75:
+            n_p = 4
+        elif self.len_proportion > 0.50:
+            n_p = 3
+        else:
+            n_p = 2
+        self.n_p = n_p
 
     def length_clear(self):
         """
@@ -1185,7 +1256,7 @@ class LineElementSequence:
 
         self.length_clear = np.linalg.norm(p_j - p_i)
         # obtain offset from section (local system)
-        dz, dy = self.section.retrieve_offset(self.placement)
+        dz, dy = self.section.snap_points[self.placement]
         sec_offset_local = np.array([0.00, dy, dz])
         # retrieve local coordinate system
         self.x_axis, self.y_axis, self.z_axis = \
@@ -1232,7 +1303,7 @@ class LineElementSequence:
         """
         # obtain offset from section (local system)
         # given the snap point tag
-        dz, dy = self.section.retrieve_offset(tag)
+        dz, dy = self.section.snap_points[tag]
         snap_offset = np.array([0.00, dy, dz])
         t_glob_to_loc = transformations.transformation_matrix(
             self.x_axis, self.y_axis, self.z_axis)

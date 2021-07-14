@@ -163,12 +163,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     k_list = []
     index = 0
     for elm in list_of_frames:
-        if elm.len_proportion > 0.75:
-            num_points = 20
-        elif elm.len_proportion > 0.50:
-            num_points = 10
-        else:
-            num_points = 5
+        num_points = elm.n_p * 4
         # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
@@ -275,13 +270,7 @@ def add_data__frames_deformed(analysis,
     y = []
     z = []
     for elm in list_of_frames:
-        if elm.len_proportion > 0.75:
-            num_points = 20
-        elif elm.len_proportion > 0.50:
-            num_points = 10
-        else:
-            num_points = 5
-
+        num_points = elm.n_p * 4
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
         u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]

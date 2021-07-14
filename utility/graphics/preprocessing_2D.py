@@ -59,7 +59,7 @@ def plot_2D_level_geometry(building: 'Building',
     if extrude_frames:
         patches = []
         for bm in level.beams.element_list:
-            for elm in bm.internal_elems:
+            for elm in bm.internal_elems():
                 bbox = elm.section.mesh.bounding_box()
                 sec_b = bbox[1, 0] - bbox[0, 0]
                 p0 = elm.internal_pt_i[0:2] + \
