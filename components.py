@@ -316,51 +316,6 @@ class Section:
         return mesher.subdivide_polygon(
             self.mesh.halfedges, n_x=n_x, n_y=n_y, plot=plot)
 
-    # def retrieve_offset(self, placement: str):
-    #     """
-    #     Obtain the necessary offset in the y-z plane
-    #     (local system)
-    #     such that the element of that section has
-    #     the specified placement point.
-    #     The offset is expressed as the vector that moves
-    #     from the placement point to the centroid.
-    #     Args:
-    #         placement (str): Can be one of:
-    #             'centroid', 'top_center', 'top_left', 'top_right',
-    #             'center_left', 'center_right', 'bottom_center',
-    #             'bottom_left', 'bottom_right'
-    #     """
-    #     bbox = self.mesh.bounding_box()
-    #     z_min, y_min, z_max, y_max = bbox.flatten()
-    #     assert placement in ['centroid',
-    #                          'top_center',
-    #                          'top_left',
-    #                          'top_right',
-    #                          'center_left',
-    #                          'center_right',
-    #                          'bottom_center',
-    #                          'bottom_left',
-    #                          'bottom_right'], \
-    #         "Invalid placement"
-    #     if placement == 'centroid':
-    #         return - np.array([0., 0.])
-    #     elif placement == 'top_center':
-    #         return - np.array([0., y_max])
-    #     elif placement == 'top_left':
-    #         return - np.array([z_min, y_max])
-    #     elif placement == 'top_right':
-    #         return - np.array([z_max, y_max])
-    #     elif placement == 'center_left':
-    #         return - np.array([z_min, 0.])
-    #     elif placement == 'center_right':
-    #         return - np.array([z_max, 0.])
-    #     elif placement == 'bottom_center':
-    #         return - np.array([0., y_min])
-    #     elif placement == 'bottom_left':
-    #         return - np.array([z_min, y_min])
-    #     elif placement == 'bottom_right':
-    #         return - np.array([z_max, y_min])
-
     def rbs(self, reduction_factor) -> 'Section':
         """
         Given a reduction factor
@@ -379,10 +334,12 @@ class Section:
         b_red = b * reduction_factor
         properties = dict(self.properties)
         properties['bf'] = b_red
+        snap_points = {}
         mesh = mesher_section_gen.w_mesh(b_red, h, t, tw, tf)
         section = Section(
             'W', name,
             self.material,
+            snap_points,
             mesh, properties)
         return section
 

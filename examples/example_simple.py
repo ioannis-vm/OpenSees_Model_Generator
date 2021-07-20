@@ -179,15 +179,15 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 
 # nlth = solver.NLTHAnalysis(b)
 
-# # nlth.plot_ground_motion('groundmotions/x.txt', 0.01)
+# nlth.plot_ground_motion('examples/groundmotions/1xa.txt', 0.005)
 
-# nlth.run(10.00, 0.01, np.arange(0.00, 10.00, 0.01),
-#          'groundmotions/x.txt',
-#          'groundmotions/y.txt',
-#          'groundmotions/z.txt', 0.01)
+# nlth.run(10.00, 0.01,
+#          'examples/groundmotions/1xa.txt',
+#          'examples/groundmotions/1xa.txt',
+#          None, 0.005)
 
 # node = b.list_of_parent_nodes()[-1]  # top floor
 
 # nlth.plot_node_displacement_history(node, 1)
-# nlth.deformed_shape(0, scaling=0.00, extrude_frames=True)
+# nlth.deformed_shape(53, scaling=0.00, extrude_frames=True)
 # nlth.global_reactions(0)[3] / 1000

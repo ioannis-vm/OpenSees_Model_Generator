@@ -156,7 +156,6 @@ class Analysis:
 
     def _define_fiber_section(self, sec: components.Section,
                               n_x: int, n_y: int):
-
         pieces = sec.subdivide_section(
             n_x=n_x, n_y=n_y)
         ops.section('Fiber',
@@ -602,14 +601,22 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction)
+
         ops.system('UmfPack')
         ops.numberer('Plain')
         ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1e-8, 100, 3)
         ops.algorithm("Newton")
         curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
-        n_steps_success = 0
+        self._read_OpenSees_results()
+        self._acceptance_criteria()
+        n_steps_success = 1
+
         fail = False
+
+        num_subdiv = 0
+        scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
+        steps = [25, 37, 50, 100, 250, 500]
+
         for target_displacement in target_displacements:
             if fail:
                 break
@@ -619,38 +626,49 @@ class PushoverAnalysis(NonlinearAnalysis):
             else:
                 displ_incr = -abs(displ_incr)
                 sign = -1.00
-            ops.integrator("DisplacementControl",
-                           control_node.uniq_id, control_DOF + 1, displ_incr)
-            ops.analysis("Static")
+            import pdb
+            pdb.set_trace()
+            print('entering loop', target_displacement)
             while curr_displ * sign < target_displacement * sign:
-                self._read_OpenSees_results()
-                self._acceptance_criteria()
-                n_steps_success += 1
-                check = ops.analyze(1)
-                if check != 0:
-                    ops.integrator("DisplacementControl",
-                                   control_node.uniq_id, control_DOF + 1,
-                                   displ_incr/10.)
-#                     ops.algorithm("ModifiedNewton", "-initial")
-                    check = ops.analyze(1)
-                    if check != 0:
+
+                if abs(curr_displ - target_displacement) < \
+                   abs(displ_incr) * scale[num_subdiv]:
+                    incr = displ_incr * scale[num_subdiv]
+                else:
+                    incr = sign * abs(curr_displ - target_displacement)
+                print(incr)
+                ops.test('NormDispIncr', 1e-8, steps[num_subdiv], 0)
+                ops.integrator("DisplacementControl",
+                               control_node.uniq_id, control_DOF + 1,
+                               incr)
+                ops.analysis("Static")
+                flag = ops.analyze(1)
+                print(flag)
+                if flag != 0:
+                    if num_subdiv == 5:
                         print()
                         print('======================================')
                         print('Analysis failed to converge')
                         print()
                         fail = True
                         break
-                    ops.algorithm("Newton")
-                    ops.integrator("DisplacementControl",
-                                   control_node.uniq_id, control_DOF + 1,
-                                   displ_incr)
-                curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
-                print('Target displacement: %.2f | Current: %.2f' %
-                      (target_displacement, curr_displ), end='\r')
-
+                    else:
+                        num_subdiv += 1
+                else:
+                    n_steps_success += 1
+                    self._read_OpenSees_results()
+                    self._acceptance_criteria()
+                    curr_displ = ops.nodeDisp(
+                        control_node.uniq_id, control_DOF+1)
+                    print('Target displacement: %.2f | Current: %.2f' %
+                          (target_displacement, curr_displ), end='\r')
+                    if num_subdiv != 0:
+                        num_subdiv -= 1
+        # finished
         self._read_OpenSees_results()
         self._acceptance_criteria()
         n_steps_success += 1
+
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
         self.n_steps_success = n_steps_success
@@ -679,6 +697,30 @@ class PushoverAnalysis(NonlinearAnalysis):
             displacement, base_shear, 'spline+markers',
             "Displacement", "in", ".0f",
             "Base Shear", "lb", ".0f")
+
+    def plot_brace_hysteresis(self, brace):
+        drift = []
+        resisting_force = []
+        n_i = brace.node_i.uniq_id
+        n_j = brace.node_j.uniq_id
+        x_axis = brace.x_axis
+        x_axis_horiz = np.array((x_axis[0], x_axis[1], 0.00))
+        x_axis_horiz = x_axis_horiz / np.linalg.norm(x_axis_horiz)
+        for step in range(self.n_steps_success):
+            disp_i = self.node_displacements[n_i][step][0:3]
+            disp_j = self.node_displacements[n_j][step][0:3]
+            diff_disp = np.array(disp_j) - np.array(disp_i)
+            disp_prj = np.dot(diff_disp, x_axis)
+            drift.append(disp_prj)
+            ielm = brace.end_segment_i.internal_elems[-1].uniq_id
+            force = self.eleForces[ielm][step][0:3]
+            force_prj = - np.dot(force, x_axis_horiz)
+            resisting_force.append(force_prj)
+        general_2D.line_plot_interactive(
+            "Brace Resisting Force",
+            drift, resisting_force, 'line',
+            'Story drift', 'in', '.0f',
+            'Resisting Force', 'lb', '.0f')
 
 
 @dataclass
@@ -773,14 +815,12 @@ class NLTHAnalysis(NonlinearAnalysis):
                 "No input files specified.")
 
     def run(self, target_timestamp, time_increment,
-            timestamps_output,
             filename_x,
             filename_y,
             filename_z,
             file_time_incr,
-            damping_ratio=0.05,
-            n_x=10, n_y=25, n_p=10):
-        self._to_OpenSees_domain(n_x, n_y, n_p)
+            damping_ratio=0.05):
+        self._to_OpenSees_domain()
         self._define_dead_load()
         self._run_gravity_analysis()
         ops.wipeAnalysis()
@@ -798,7 +838,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         ops.numberer('Plain')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
-        ops.test('NormUnbalance', 1e-8, 1000)
+        ops.test('NormUnbalance', 1e-6, 1000)
         # Create the integration scheme, the Newmark
         # with alpha = 0.5 and beta = .25
         ops.algorithm("Newton")
@@ -809,11 +849,10 @@ class NLTHAnalysis(NonlinearAnalysis):
         j_out = 0
         n_steps_success = 0
         while curr_time + EPSILON < target_timestamp:
-            if curr_time + EPSILON > timestamps_output[j_out]:
-                self._read_OpenSees_results()
-                self.time_vector.append(curr_time)
-                n_steps_success += 1
-                j_out += 1
+            self._read_OpenSees_results()
+            self.time_vector.append(curr_time)
+            n_steps_success += 1
+            j_out += 1
             check = ops.analyze(1, time_increment)
             if check != 0:
                 print('Analysis failed to converge')
