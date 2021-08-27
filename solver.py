@@ -476,7 +476,7 @@ class ModalAnalysis(LinearAnalysis):
     def run(self):
         self._to_OpenSees_domain()
         eigValues = np.array(ops.eigen(
-            '-fullGenLapack',
+            '-genBandArpack',
             self.num_modes))
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
         self._read_node_displacements()
