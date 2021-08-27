@@ -517,6 +517,8 @@ class Selection:
         default_factory=LineElementSequences, repr=False)
     braces: LineElementSequences = field(
         default_factory=LineElementSequences, repr=False)
+    line_elements: list[LineElement] = field(
+        default_factory=list, repr=False)
 
     def clear(self):
         """
@@ -533,10 +535,10 @@ class Selection:
     def add_UDL(self, udl: np.ndarray):
         """
         Adds the specified UDL to the selected
-        beamcolumn elements.
+        line elements.
         """
-        for beam in self.beams.element_list:
-            beam.add_udl_glob(udl, ltype='other')
+        for line_element in self.line_elements:
+            line_element.add_udl_glob(udl, ltype='other')
 
     #############################################
     # Methods that return objects               #
@@ -1257,21 +1259,24 @@ class Building:
         beams = lvl.beams.element_list
         if not beams:
             return
-        edges, edge_to_beam_map = \
+        line_elements = []
+        for beam in beams:
+            line_elements.extend(beam.internal_line_elems())
+        edges, edge_to_elem_map = \
             trib_area_analysis.list_of_beams_to_mesh_edges_external(
-                beams)
+                line_elements)
         halfedges = mesher.define_halfedges(edges)
-        halfedge_to_beam_map = {}
+        halfedge_to_elem_map = {}
         for h in halfedges:
-            halfedge_to_beam_map[h.uniq_id] = edge_to_beam_map[h.edge.uniq_id]
+            halfedge_to_elem_map[h.uniq_id] = edge_to_elem_map[h.edge.uniq_id]
         loops = mesher.obtain_closed_loops(halfedges)
         external, _, trivial = mesher.orient_loops(loops)
         # Sanity checks.
         mesher.sanity_checks(external, trivial)
         loop = external[0]
         for h in loop:
-            beam = halfedge_to_beam_map[h.uniq_id]
-            self.selection.beams.add(beam)
+            line_element = halfedge_to_elem_map[h.uniq_id]
+            self.selection.line_elements.append(line_element)
 
     def select_perimeter_beams_all(self):
         for lvl in self.levels.level_list:
@@ -1282,7 +1287,7 @@ class Building:
     #############################################
 
     def clear_gridlines_all(self):
-        self.gridsystem.clear()
+        self.gridsystem.clear_all()
 
     def clear_gridlines(self, tags: list[str]):
         self.gridsystem.clear(tags)
