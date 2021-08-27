@@ -79,6 +79,19 @@ class GridSystem:
 
     grids: list[GridLine] = field(default_factory=list)
 
+    def get(self, gridline_tag: str):
+        """
+        Returns the gridline with the given tag,
+        or None if there is no gridline with the
+        specified tag.
+        """
+        result = None
+        for gridline in self.grids:
+            if gridline.tag == gridline_tag:
+                result = gridline
+        return result
+            
+
     def add(self, grdl: "GridLine"):
         """
         Add a gridline in the grid system,
@@ -97,7 +110,16 @@ class GridSystem:
         """
         self.grids.remove(grdl)
 
-    def clear(self):
+    def clear(self, tags: list[str]):
+        """
+        Removes the gridlines in the given list,
+        specified by their tag.
+        """
+        for tag in tags:
+            grdl = self.get(tag)
+            self.grids.remove(grdl)
+    
+    def clear_all(self):
         """
         Removes all gridlines.
         """
@@ -1259,9 +1281,12 @@ class Building:
     # Remove methods - remove objects           #
     #############################################
 
-    def clear_gridlines(self):
+    def clear_gridlines_all(self):
         self.gridsystem.clear()
 
+    def clear_gridlines(self, tags: list[str]):
+        self.gridsystem.clear(tags)
+        
     def delete_selected(self):
         """
         Deletes the selected objects.
