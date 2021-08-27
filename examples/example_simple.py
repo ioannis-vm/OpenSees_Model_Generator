@@ -5,7 +5,7 @@ import numpy as np
 # Define a building
 b = modeler.Building()
 
-# Add levels - single-story building
+# Add levels
 b.add_level("base", 0.00, "fixed")
 # b.add_level("1", 144.00)
 
@@ -84,15 +84,15 @@ b.add_beams_from_gridlines(n_sub=5, model_as=modeling_type)
 # b.plot_building_geometry()
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
-# b.plot_building_geometry(extrude_frames=False,
-#                          offsets=True,
-#                          gridlines=True,
-#                          global_axes=True,
-#                          diaphragm_lines=True,
-#                          tributary_areas=True,
-#                          just_selection=False,
-#                          parent_nodes=True,
-#                          frame_axes=True)
+b.plot_building_geometry(extrude_frames=False,
+                         offsets=True,
+                         gridlines=True,
+                         global_axes=False,
+                         diaphragm_lines=True,
+                         tributary_areas=True,
+                         just_selection=False,
+                         parent_nodes=True,
+                         frame_axes=True)
 
 
 # b.plot_building_geometry(extrude_frames=True,
@@ -145,7 +145,6 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 # modal_analysis.deformed_shape(step=3, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=4, scaling=0.00, extrude_frames=True)
 # modal_analysis.deformed_shape(step=5, scaling=0.00, extrude_frames=True)
-# modal_analysis.deformed_shape(step=6, scaling=0.00, extrude_frames=True)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
