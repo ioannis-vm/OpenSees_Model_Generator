@@ -708,14 +708,14 @@ class LineElement:
             self.node_i, split_node,
             self.ang, self.offset_i, np.zeros(3),
             self.section, self.len_parent, self.model_as,
-            self.geomTransf, self.udl_self, self.udl_fl,
-            self.udl_other)
+            self.geomTransf, self.udl_self.copy(), self.udl_fl.copy(),
+            self.udl_other.copy())
         piece_j = LineElement(
             split_node, self.node_j,
             self.ang, np.zeros(3), self.offset_j,
             self.section, self.len_parent, self.model_as,
-            self.geomTransf, self.udl_self, self.udl_fl,
-            self.udl_other)
+            self.geomTransf, self.udl_self.copy(), self.udl_fl.copy(),
+            self.udl_other.copy())
         return piece_i, piece_j, split_node
 
 
