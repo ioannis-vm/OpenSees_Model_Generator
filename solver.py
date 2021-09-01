@@ -475,6 +475,8 @@ class ModalAnalysis(LinearAnalysis):
 
     def run(self):
         self._to_OpenSees_domain()
+        # tags = ops.getNodeTags()
+        # print(len(tags))
         eigValues = np.array(ops.eigen(
             '-genBandArpack',
             self.num_modes))
@@ -782,7 +784,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             damping_ratio):
 
         # define damping
-        period = float(1./np.sqrt(ops.eigen('-fullGenLapack', 1)))
+        period = float(1./np.sqrt(ops.eigen('-genBandArpack', 1)))
         ops.rayleigh(0., 0., 0., 2. * damping_ratio / period)
 
         error = True
@@ -838,7 +840,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         ops.numberer('Plain')
         ops.constraints('Transformation')
         # TODO add refined steps if fails
-        ops.test('NormUnbalance', 1e-6, 1000)
+        ops.test('NormDispIncr', 1e-6, 250)
         # Create the integration scheme, the Newmark
         # with alpha = 0.5 and beta = .25
         ops.algorithm("Newton")
@@ -850,6 +852,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         n_steps_success = 0
         while curr_time + EPSILON < target_timestamp:
             self._read_OpenSees_results()
+            # self._acceptance_criteria()
             self.time_vector.append(curr_time)
             n_steps_success += 1
             j_out += 1
