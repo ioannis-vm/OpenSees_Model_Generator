@@ -9,7 +9,7 @@ b = modeler.Building()
 b.add_level("base", 0.00, "fixed")
 # b.add_level("1", 144.00)
 
-for i in range(5):
+for i in range(20):
     b.add_level(str(i+1), 144.00*(i+1))
 
 
@@ -84,15 +84,15 @@ b.add_beams_from_gridlines(n_sub=5, model_as=modeling_type)
 # b.plot_building_geometry()
 b.preprocess(assume_floor_slabs=True, self_weight=True)
 
-b.plot_building_geometry(extrude_frames=False,
-                         offsets=True,
-                         gridlines=True,
-                         global_axes=False,
-                         diaphragm_lines=True,
-                         tributary_areas=True,
-                         just_selection=False,
-                         parent_nodes=True,
-                         frame_axes=True)
+# b.plot_building_geometry(extrude_frames=False,
+#                          offsets=True,
+#                          gridlines=True,
+#                          global_axes=False,
+#                          diaphragm_lines=True,
+#                          tributary_areas=True,
+#                          just_selection=False,
+#                          parent_nodes=True,
+#                          frame_axes=True)
 
 
 # b.plot_building_geometry(extrude_frames=True,
@@ -131,12 +131,12 @@ b.plot_building_geometry(extrude_frames=False,
 #  modal analysis  #
 # ~~~~~~~~~~~~~~~~ #
 
-# # performing a linear modal analysis
-# modal_analysis = solver.ModalAnalysis(b, num_modes=6)
-# modal_analysis.run()
+# performing a linear modal analysis
+modal_analysis = solver.ModalAnalysis(b, num_modes=6)
+modal_analysis.run()
 
-# # retrieving textual results
-# print(modal_analysis.periods)
+# retrieving textual results
+print(modal_analysis.periods)
 
 # # visualizing results
 # modal_analysis.deformed_shape(step=0, scaling=0.00, extrude_frames=True)
@@ -157,10 +157,9 @@ b.plot_building_geometry(extrude_frames=False,
 # # control_node = b.list_of_nodes()[-1]  # top floor somewhere
 # analysis_metadata = pushover_analysis.run(
 #     "y",
-#     10.,
+#     np.array([10.]),
 #     control_node,
-#     1./20.,
-#     np.linspace(0., 10., 80))
+#     1./20.)
 # n_plot_steps = analysis_metadata['successful steps']
 
 # # plot the deformed shape for any of the steps
