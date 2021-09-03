@@ -88,6 +88,10 @@ class Analysis:
     building: Building = field(repr=False)
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult)
+    node_velocities: AnalysisResult = field(
+        default_factory=AnalysisResult)
+    node_accelerations: AnalysisResult = field(
+        default_factory=AnalysisResult)
     node_reactions: AnalysisResult = field(default_factory=AnalysisResult)
     eleForces: AnalysisResult = field(default_factory=AnalysisResult)
     fiber_stress_strain: AnalysisResult = field(default_factory=AnalysisResult)
@@ -319,6 +323,18 @@ class Analysis:
                                node.uniq_id,
                                ops.nodeDisp(node.uniq_id))
 
+    def _read_node_velocities(self):
+        for node in self.building.list_of_all_nodes():
+            self._store_result(self.node_velocities,
+                               node.uniq_id,
+                               ops.nodeVel(node.uniq_id))
+
+    def _read_node_accelerations(self):
+        for node in self.building.list_of_all_nodes():
+            self._store_result(self.node_accelerations,
+                               node.uniq_id,
+                               ops.nodeAccel(node.uniq_id))
+
     def _read_node_reactions(self):
         ops.reactions()
         for node in self.building.list_of_primary_nodes():
@@ -363,6 +379,8 @@ class Analysis:
         Reads back the results from the OpenSeesPy domain
         """
         self._read_node_displacements()
+        self._read_node_velocities()
+        self._read_node_accelerations()
         self._read_node_reactions()
         self._read_frame_element_forces()
         self._read_frame_fiber_stress_strain()
@@ -618,7 +636,6 @@ class PushoverAnalysis(NonlinearAnalysis):
         num_subdiv = 0
         scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
         steps = [25, 37, 50, 100, 250, 500]
-
         for target_displacement in target_displacements:
             if fail:
                 break
@@ -628,24 +645,28 @@ class PushoverAnalysis(NonlinearAnalysis):
             else:
                 displ_incr = -abs(displ_incr)
                 sign = -1.00
-            import pdb
-            pdb.set_trace()
             print('entering loop', target_displacement)
             while curr_displ * sign < target_displacement * sign:
 
                 if abs(curr_displ - target_displacement) < \
                    abs(displ_incr) * scale[num_subdiv]:
-                    incr = displ_incr * scale[num_subdiv]
-                else:
                     incr = sign * abs(curr_displ - target_displacement)
-                print(incr)
-                ops.test('NormDispIncr', 1e-8, steps[num_subdiv], 0)
+                    print()
+                    print("DEBUG")
+                    print('Current displacement:', curr_displ)
+                    print('Target displacement:', target_displacement)
+                    print('Displacement increment:', displ_incr * scale[num_subdiv])
+                    print('Absolute difference to reach target:', abs(curr_displ) - target_displacement)
+                    print('Increment chosen:', incr)
+                    print()
+                else:
+                    incr = displ_incr * scale[num_subdiv]
+                ops.test('NormDispIncr', 1e-6, steps[num_subdiv], 0)
                 ops.integrator("DisplacementControl",
                                control_node.uniq_id, control_DOF + 1,
                                incr)
                 ops.analysis("Static")
                 flag = ops.analyze(1)
-                print(flag)
                 if flag != 0:
                     if num_subdiv == 5:
                         print()
@@ -784,8 +805,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             damping_ratio):
 
         # define damping
-        period = float(1./np.sqrt(ops.eigen('-genBandArpack', 1)))
-        ops.rayleigh(0., 0., 0., 2. * damping_ratio / period)
+        freq = float(np.sqrt(ops.eigen('-genBandArpack', 1)))
+        ops.rayleigh(0., 0., 0., 2. * damping_ratio / freq)
 
         error = True
         if filename_x:
@@ -852,7 +873,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         n_steps_success = 0
         while curr_time + EPSILON < target_timestamp:
             self._read_OpenSees_results()
-            # self._acceptance_criteria()
+            self._acceptance_criteria()
             self.time_vector.append(curr_time)
             n_steps_success += 1
             j_out += 1
