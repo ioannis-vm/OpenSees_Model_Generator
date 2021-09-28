@@ -843,7 +843,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             filename_z,
             file_time_incr,
             damping_ratio=0.05,
-            skip_steps=0):
+            skip_steps=0,
+            printing=True):
         self._to_OpenSees_domain()
         self._define_dead_load()
         self._run_gravity_analysis()
@@ -886,13 +887,15 @@ class NLTHAnalysis(NonlinearAnalysis):
                 print('Analysis failed to converge')
                 break
             curr_time = ops.getTime()
-            print('Target timestamp: %.2f s | Current: %.2f s' %
-                  (target_timestamp, curr_time), end='\r')
+            if printing:
+                print('Target timestamp: %.2f s | Current: %.2f s' %
+                      (target_timestamp, curr_time), end='\r')
 
         self.time_vector.append(curr_time)
         self._read_OpenSees_results()
         n_steps_success += 1
-        print('Number of saved analysis steps:', n_steps_success)
+        if printing:
+            print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
         self.n_steps_success = n_steps_success
         return metadata
