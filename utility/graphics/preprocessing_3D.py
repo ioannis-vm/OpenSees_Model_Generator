@@ -505,7 +505,7 @@ def plot_building_geometry(building: 'Building',
     if just_selection:
         line_element_sequences = \
             building.selection.list_of_line_element_sequences()
-        line_elems = building.selection.list_of_line_elems()
+        line_elems = building.selection.list_of_line_elements()
     else:
         line_element_sequences = building.list_of_line_element_sequences()
         line_elems = building.list_of_line_elements()
