@@ -528,6 +528,7 @@ class Selection:
         self.beams = LineElementSequences()
         self.columns = LineElementSequences()
         self.braces = LineElementSequences()
+        self.line_elements = []
 
     #############################################
     # Methods that modify selected elements     #
@@ -558,6 +559,7 @@ class Selection:
             for elm in sequence:
                 if isinstance(elm, LineElement):
                     result.append(elm)
+        result.extend(self.line_elements)
         return result
 
     def list_of_primary_nodes(self):
@@ -838,7 +840,8 @@ class Building:
                         placement=self.active_placement,
                         end_dist=ends['dist'],
                         mat_fix=self.materials.retrieve('fix'),
-                        mat_release=self.materials.retrieve('release'))
+                        mat_release=self.materials.retrieve('release'),
+                        camber=0.00)
                 else:
                     raise ValueError('Invalid end-type')
                 ok = level.columns.add(column)
