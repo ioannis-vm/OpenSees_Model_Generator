@@ -318,22 +318,37 @@ class Analysis:
             analysis_result[uniq_id] = [result]
 
     def _read_node_displacements(self):
+        # DEBUG
         for node in self.building.list_of_all_nodes():
             self._store_result(self.node_displacements,
                                node.uniq_id,
                                ops.nodeDisp(node.uniq_id))
+        # for node in self.building.list_of_parent_nodes():
+        #     self._store_result(self.node_displacements,
+        #                        node.uniq_id,
+        #                        ops.nodeDisp(node.uniq_id))
 
     def _read_node_velocities(self):
+        # DEBUG
         for node in self.building.list_of_all_nodes():
             self._store_result(self.node_velocities,
                                node.uniq_id,
                                ops.nodeVel(node.uniq_id))
+        # for node in self.building.list_of_parent_nodes():
+        #     self._store_result(self.node_velocities,
+        #                        node.uniq_id,
+        #                        ops.nodeVel(node.uniq_id))
 
     def _read_node_accelerations(self):
+        # DEBUG
         for node in self.building.list_of_all_nodes():
             self._store_result(self.node_accelerations,
                                node.uniq_id,
                                ops.nodeAccel(node.uniq_id))
+        # for node in self.building.list_of_parent_nodes():
+        #     self._store_result(self.node_accelerations,
+        #                        node.uniq_id,
+        #                        ops.nodeAccel(node.uniq_id))
 
     def _read_node_reactions(self):
         ops.reactions()
@@ -381,6 +396,10 @@ class Analysis:
         self._read_node_displacements()
         self._read_node_velocities()
         self._read_node_accelerations()
+        # DEBUG
+        # self._read_node_reactions()
+        # self._read_frame_element_forces()
+        # self._read_frame_fiber_stress_strain()
         self._read_node_reactions()
         self._read_frame_element_forces()
         self._read_frame_fiber_stress_strain()
@@ -635,7 +654,7 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         num_subdiv = 0
         scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
-        steps = [25, 37, 50, 100, 250, 500]
+        steps = [80, 50, 75, 100, 250, 500]
         for target_displacement in target_displacements:
             if fail:
                 break
@@ -697,7 +716,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         self.n_steps_success = n_steps_success
         return metadata
 
-    def plot_pushover_curve(self, direction, node):
+    def table_pushover_curve(self, direction, node):
         if not self.node_displacements:
             raise ValueError(
                 'No results to plot. Run analysis first.')
@@ -715,6 +734,11 @@ class PushoverAnalysis(NonlinearAnalysis):
                 self.node_displacements[node.uniq_id][step][control_DOF])
         base_shear = -np.array(base_shear)
         displacement = np.array(displacement)
+        return displacement, base_shear
+
+    
+    def plot_pushover_curve(self, direction, node):
+        displacement, base_shear = self.table_pushover_curve(direction, node)
         general_2D.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
             displacement, base_shear, 'spline+markers',
@@ -876,7 +900,8 @@ class NLTHAnalysis(NonlinearAnalysis):
         while curr_time + EPSILON < target_timestamp:
             if j_out == skip_steps:
                 self._read_OpenSees_results()
-                self._acceptance_criteria()
+                # DEBUG
+                # self._acceptance_criteria()
                 self.time_vector.append(curr_time)
                 j_out = 0
                 n_steps_success += 1
