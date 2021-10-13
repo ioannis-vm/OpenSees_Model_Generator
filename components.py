@@ -231,12 +231,12 @@ class Materials:
         # units: lb, in
         self.add(Material('steel',
                           'Steel02',
-                          0.0007342054137099255,
+                          490.00/((12.**3)*common.G_CONST),
                           {
-                              'Fy': 50000,
+                              'Fy': 50000 * 1.1,
                               'E0': 29000000,
                               'G':   11153846.15,
-                              'b': 0.01,
+                              'b': 0.005,
                               'params': [18.0, 0.925, 0.15],
                               'a1': 0.00,
                               'a2': 1.00,
@@ -612,10 +612,12 @@ class LineElement:
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
         self.len_proportion = self.length_clear() / self.len_parent
+        # note: we are using dispBeamColumn, so 2 integreation points
+        # suffice. When using forceBeamColumn, they should be increased.
         if self.len_proportion > 0.75:
-            n_p = 4
+            n_p = 2
         elif self.len_proportion > 0.50:
-            n_p = 3
+            n_p = 2
         else:
             n_p = 2
         self.n_p = n_p
