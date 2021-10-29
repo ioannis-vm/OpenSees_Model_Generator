@@ -9,7 +9,7 @@ b = modeler.Building()
 b.add_level("base", 0.00, "fixed")
 # b.add_level("1", 144.00)
 
-for i in range(20):
+for i in range(3):
     b.add_level(str(i+1), 144.00*(i+1))
 
 
@@ -26,8 +26,7 @@ b.add_group("columns")
 
 
 # define materials
-b.materials.enable_Steel02()
-b.set_active_material('steel')
+b.set_active_material('steel-bilinear-fy50')
 # solver.plot_stress_strain(b.materials.active, 100, 50000)
 
 # define sections
@@ -62,7 +61,7 @@ b.set_active_groups(["columns"])
 modeling_type = {'type': 'fiber', 'n_x': 50, 'n_y': 50}
 
 b.add_columns_from_grids(
-    n_sub=1, model_as=modeling_type)
+    n_sub=10, model_as=modeling_type, geomTransf='Corotational')
 
 b.active_placement = 'top_center'
 b.set_active_groups(["beams"])
@@ -70,7 +69,7 @@ b.set_active_groups(["beams"])
 # b.add_beams_from_grids(n_sub=5, ends={'type': 'pinned', 'dist': 0.001},
 #                        model_as=modeling_type)
 
-b.add_beams_from_gridlines(n_sub=5, model_as=modeling_type)
+b.add_beams_from_gridlines(n_sub=10, model_as=modeling_type)
 
 
 # for more control (offsets etc.), define elements one by one.
@@ -78,11 +77,13 @@ b.add_beams_from_gridlines(n_sub=5, model_as=modeling_type)
 # Primary points can be obtained by intersecting gridlines:
 # pt = g1.intersect(gA)
 
-# b.select_perimeter_beams_all()
-# b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
+b.select_perimeter_beams_all()
+b.selection.add_UDL(np.array((0.00, 0.00, -20.00)))
+
 # b.plot_building_geometry(extrude_frames=False)
 # b.plot_building_geometry()
-b.preprocess(assume_floor_slabs=True, self_weight=True)
+
+b.preprocess(assume_floor_slabs=False, self_weight=True)
 
 # b.plot_building_geometry(extrude_frames=False,
 #                          offsets=True,
@@ -110,33 +111,33 @@ b.preprocess(assume_floor_slabs=True, self_weight=True)
 #  linear analysis  #
 # ~~~~~~~~~~~~~~~~~ #
 
-# for node in b.list_of_parent_nodes():
-#     node.load += modeler.Load([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
+for node in b.list_of_parent_nodes():
+    node.load += np.array([0.00, 100000.00, 0.00, 0.00, 0.00, 0.00])
 
-# # performing a linear gravity analysis.
-# linear_gravity_analysis = solver.LinearGravityAnalysis(b)
-# linear_gravity_analysis.run()
+# performing a linear gravity analysis.
+linear_gravity_analysis = solver.LinearGravityAnalysis(b)
+linear_gravity_analysis.run()
 
-# # retrieving aggregated textual results
-# reactions = linear_gravity_analysis.global_reactions(0)
-# print(reactions[0:3] / 1000)  # kip
-# print(reactions[3:6] / 1000 / 12)  # kip-ft
+# retrieving aggregated textual results
+reactions = linear_gravity_analysis.global_reactions(0)
+print(reactions[0:3] / 1000)  # kip
+print(reactions[3:6] / 1000 / 12)  # kip-ft
 
-# # visualizing results
-# linear_gravity_analysis.deformed_shape(extrude_frames=False)
-# linear_gravity_analysis.deformed_shape(extrude_frames=True)
-# linear_gravity_analysis.basic_forces()
+# visualizing results
+linear_gravity_analysis.deformed_shape(extrude_frames=False)
+linear_gravity_analysis.deformed_shape(extrude_frames=True)
+linear_gravity_analysis.basic_forces()
 
-# ~~~~~~~~~~~~~~~~ #
-#  modal analysis  #
-# ~~~~~~~~~~~~~~~~ #
+# # ~~~~~~~~~~~~~~~~ #
+# #  modal analysis  #
+# # ~~~~~~~~~~~~~~~~ #
 
-# performing a linear modal analysis
-modal_analysis = solver.ModalAnalysis(b, num_modes=6)
-modal_analysis.run()
+# # performing a linear modal analysis
+# modal_analysis = solver.ModalAnalysis(b, num_modes=6)
+# modal_analysis.run()
 
-# retrieving textual results
-print(modal_analysis.periods)
+# # retrieving textual results
+# print(modal_analysis.periods)
 
 # # visualizing results
 # modal_analysis.deformed_shape(step=0, scaling=0.00, extrude_frames=True)
@@ -153,13 +154,13 @@ print(modal_analysis.periods)
 
 # # performing a nonlinear pushover analysis
 # pushover_analysis = solver.PushoverAnalysis(b)
-# control_node = b.list_of_parent_nodes()[-1]  # top floor
+# control_node = b.list_of_all_nodes()[-1]  # top floor
 # # control_node = b.list_of_nodes()[-1]  # top floor somewhere
 # analysis_metadata = pushover_analysis.run(
 #     "y",
-#     np.array([10.]),
+#     np.array([48.6]),
 #     control_node,
-#     1./20.)
+#     1./10.)
 # n_plot_steps = analysis_metadata['successful steps']
 
 # # plot the deformed shape for any of the steps
@@ -169,7 +170,7 @@ print(modal_analysis.periods)
 
 # # plot pushover curve
 # pushover_analysis.plot_pushover_curve("y", control_node)
-# pushover_analysis.basic_forces(step=19)
+# pushover_analysis.basic_forces(step=n_plot_steps-1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #  nonlinear time-history analysis  #
@@ -185,7 +186,7 @@ print(modal_analysis.periods)
 #          None, 0.005)
 
 # node = b.list_of_parent_nodes()[-1]  # top floor
-
 # nlth.plot_node_displacement_history(node, 1)
+
 # nlth.deformed_shape(53, scaling=0.00, extrude_frames=True)
 # nlth.global_reactions(0)[3] / 1000
