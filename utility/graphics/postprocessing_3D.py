@@ -43,7 +43,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     """
     x_vec = element.x_axis
     y_vec = element.y_axis
-    z_vec = element.z_axis
+    z_vec = np.cross(x_vec, y_vec)
 
     # global -> local transformation matrix
     T_global2local = \
@@ -62,7 +62,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # discrete sample location parameter
     t = np.linspace(0.00, 1.00, num=num_points)
-    l = element.length_clear()
+    len_clr = element.length_clear()
 
     # shape function matrices
     Nx_mat = np.column_stack((
@@ -71,15 +71,15 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     ))
     Nyz_mat = np.column_stack((
         1. - 3. * t**2 + 2. * t**3,
-        (t - 2. * t**2 + t**3) * l,
+        (t - 2. * t**2 + t**3) * len_clr,
         3. * t**2 - 2. * t**3,
-        (-t**2 + t**3) * l
+        (-t**2 + t**3) * len_clr
     ))
     Nyz_derivative_mat = np.column_stack((
         - 6. * t + 6. * t**2,
-        (1 - 4. * t + 3. * t**2) * l,
+        (1 - 4. * t + 3. * t**2) * len_clr,
         6. * t - 6. * t**2,
-        (-2. * t + 3. * t**2) * l
+        (-2. * t + 3. * t**2) * len_clr
     ))
 
     # axial deformation
@@ -110,7 +110,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
         r_i_local[2],
         u_j_local[1],
         r_j_local[2]
-    ]) / l
+    ]) / len_clr
 
     # bending rotation around the local y axis
     r_y_local = Nyz_derivative_mat @ np.array([
@@ -118,7 +118,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
         r_i_local[1],
         -u_j_local[2],
         r_j_local[1]
-    ]) / l
+    ]) / len_clr
 
     # all deformations
     d_local = np.column_stack((d_x_local, d_y_local, d_z_local))
@@ -163,6 +163,8 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     k_list = []
     index = 0
     for elm in list_of_frames:
+        if elm.hidden_when_extruded:
+            continue
         num_points = elm.n_p * 4
         # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
@@ -193,33 +195,137 @@ def add_data__extruded_frames_deformed_mesh(analysis,
             loop = elm.section.mesh.halfedges
             for halfedge in loop:
 
-                za = halfedge.vertex.coords[0]
-                ya = halfedge.vertex.coords[1]
-                zb = halfedge.nxt.vertex.coords[0]
-                yb = halfedge.nxt.vertex.coords[1]
-                defo_ia_global = za * z_vec + ya * y_vec + \
-                    (- rot_i_local[2] * ya * x_vec +
-                     rot_i_local[1] * za * x_vec
-                     + rot_i_local[0] * ya * z_vec
-                     - rot_i_local[0] * za * y_vec
+                z_a = halfedge.vertex.coords[0]
+                y_a = halfedge.vertex.coords[1]
+                z_b = halfedge.nxt.vertex.coords[0]
+                y_b = halfedge.nxt.vertex.coords[1]
+                defo_ia_global = z_a * z_vec + y_a * y_vec + \
+                    (- rot_i_local[2] * y_a * x_vec +
+                     rot_i_local[1] * z_a * x_vec
+                     + rot_i_local[0] * y_a * z_vec
+                     - rot_i_local[0] * z_a * y_vec
                      )*scaling
-                defo_ja_global = za * z_vec + ya * y_vec + \
-                    (- rot_j_local[2] * ya * x_vec +
-                     rot_j_local[1] * za * x_vec
-                     + rot_j_local[0] * ya * z_vec
-                     - rot_j_local[0] * za * y_vec
+                defo_ja_global = z_a * z_vec + y_a * y_vec + \
+                    (- rot_j_local[2] * y_a * x_vec +
+                     rot_j_local[1] * z_a * x_vec
+                     + rot_j_local[0] * y_a * z_vec
+                     - rot_j_local[0] * z_a * y_vec
                      )*scaling
-                defo_ib_global = zb * z_vec + yb * y_vec + \
-                    (- rot_i_local[2] * yb * x_vec +
-                     rot_i_local[1] * zb * x_vec
-                     + rot_i_local[0] * yb * z_vec
-                     - rot_i_local[0] * zb * y_vec
+                defo_ib_global = z_b * z_vec + y_b * y_vec + \
+                    (- rot_i_local[2] * y_b * x_vec +
+                     rot_i_local[1] * z_b * x_vec
+                     + rot_i_local[0] * y_b * z_vec
+                     - rot_i_local[0] * z_b * y_vec
                      )*scaling
-                defo_jb_global = zb * z_vec + yb * y_vec + \
-                    (- rot_j_local[2] * yb * x_vec +
-                     rot_i_local[1] * zb * x_vec
-                     + rot_j_local[0] * yb * z_vec
-                     - rot_j_local[0] * zb * y_vec
+                defo_jb_global = z_b * z_vec + y_b * y_vec + \
+                    (- rot_j_local[2] * y_b * x_vec +
+                     rot_i_local[1] * z_b * x_vec
+                     + rot_j_local[0] * y_b * z_vec
+                     - rot_j_local[0] * z_b * y_vec
+                     )*scaling
+                loc0 = loc_i_global + defo_ia_global
+                loc1 = loc_j_global + defo_ja_global
+                loc2 = loc_j_global + defo_jb_global
+                loc3 = loc_i_global + defo_ib_global
+                x_list.append(loc0[0])
+                y_list.append(loc0[1])
+                z_list.append(loc0[2])
+                x_list.append(loc1[0])
+                y_list.append(loc1[1])
+                z_list.append(loc1[2])
+                x_list.append(loc2[0])
+                y_list.append(loc2[1])
+                z_list.append(loc2[2])
+                x_list.append(loc3[0])
+                y_list.append(loc3[1])
+                z_list.append(loc3[2])
+                i_list.append(index + 0)
+                j_list.append(index + 1)
+                k_list.append(index + 2)
+                i_list.append(index + 0)
+                j_list.append(index + 2)
+                k_list.append(index + 3)
+                index += 4
+    dt.append({
+        "type": "mesh3d",
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
+        "i": i_list,
+        "j": j_list,
+        "k": k_list,
+        "hoverinfo": "skip",
+        "color": common.BEAM_MESH_COLOR,
+        "opacity": 0.65
+    })
+
+
+def add_data__extruded_steel_W_PZ_deformed_mesh(
+        analysis, dt, list_of_endsegments, step, scaling):
+
+    if not list_of_endsegments:
+        return
+    x_list = []
+    y_list = []
+    z_list = []
+    i_list = []
+    j_list = []
+    k_list = []
+    index = 0
+
+    for elm in list_of_endsegments:
+
+        num_points = 2
+        # translations and rotations at the offset ends
+        u_i = analysis.node_displacements[elm.n_external.uniq_id][step][0:3]
+        r_i = analysis.node_displacements[elm.n_external.uniq_id][step][3:6]
+        u_j = analysis.node_displacements[elm.n_internal.uniq_id][step][0:3]
+        r_j = analysis.node_displacements[elm.n_internal.uniq_id][step][3:6]
+
+        d_global, r_local = interp3D_deformation(
+            elm, u_i, r_i, u_j, r_j, num_points)
+
+        interpolation_points = interp3D_points(
+            elm, d_global, r_local, num_points, scaling)
+        x_vec = elm.x_axis
+        y_vec = elm.y_axis
+        z_vec = np.cross(x_vec, y_vec)
+        for i in range(num_points-1):
+            loc_i_global = interpolation_points[i, :]
+            loc_j_global = interpolation_points[i+1, :]
+            rot_i_local = r_local[i, :]
+            rot_j_local = r_local[i+1, :]
+
+            loop = elm.col_section.mesh.halfedges
+            for halfedge in loop:
+
+                z_a = halfedge.vertex.coords[0]
+                y_a = halfedge.vertex.coords[1]
+                z_b = halfedge.nxt.vertex.coords[0]
+                y_b = halfedge.nxt.vertex.coords[1]
+                defo_ia_global = z_a * z_vec + y_a * y_vec + \
+                    (- rot_i_local[2] * y_a * x_vec +
+                     rot_i_local[1] * z_a * x_vec
+                     + rot_i_local[0] * y_a * z_vec
+                     - rot_i_local[0] * z_a * y_vec
+                     )*scaling
+                defo_ja_global = z_a * z_vec + y_a * y_vec + \
+                    (- rot_j_local[2] * y_a * x_vec +
+                     rot_j_local[1] * z_a * x_vec
+                     + rot_j_local[0] * y_a * z_vec
+                     - rot_j_local[0] * z_a * y_vec
+                     )*scaling
+                defo_ib_global = z_b * z_vec + y_b * y_vec + \
+                    (- rot_i_local[2] * y_b * x_vec +
+                     rot_i_local[1] * z_b * x_vec
+                     + rot_i_local[0] * y_b * z_vec
+                     - rot_i_local[0] * z_b * y_vec
+                     )*scaling
+                defo_jb_global = z_b * z_vec + y_b * y_vec + \
+                    (- rot_j_local[2] * y_b * x_vec +
+                     rot_i_local[1] * z_b * x_vec
+                     + rot_j_local[0] * y_b * z_vec
+                     - rot_j_local[0] * z_b * y_vec
                      )*scaling
                 loc0 = loc_i_global + defo_ia_global
                 loc1 = loc_j_global + defo_ja_global
@@ -270,6 +376,7 @@ def add_data__frames_deformed(analysis,
     y = []
     z = []
     for elm in list_of_frames:
+
         num_points = elm.n_p * 4
         u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
@@ -392,7 +499,8 @@ def add_data__frames_undeformed(dt, list_of_frames):
         })
 
 
-def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
+def add_data__nodes_deformed(analysis, dt, list_of_nodes, step,
+                             scaling, color=None, marker=None, size=None):
     ids = [node.uniq_id for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
@@ -406,6 +514,15 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
     r = np.reshape(r, (-1, 1))
     ids = np.reshape(np.array(ids), (-1, 1))
     displacement_data = np.concatenate((displacement_data, r, ids), 1)
+    if not marker:
+        marker = [common_3D.node_marker[node.restraint_type][0]
+                  for node in list_of_nodes]
+    if not color:
+        color = common.NODE_PRIMARY_COLOR
+    if not size:
+        size = [common_3D.node_marker[node.restraint_type][1]
+                for node in list_of_nodes]
+
     dt.append({
         "type": "scatter3d",
         "mode": "markers",
@@ -422,19 +539,17 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling):
         'rz: %{customdata[5]:.6g} (rad)<br>' +
         '<extra>Node %{customdata[7]:d}</extra>',
         "marker": {
-            "symbol": [common_3D.node_marker[node.restraint_type][0]
-                       for node in list_of_nodes],
-            "color": common.NODE_PRIMARY_COLOR,
-            "size": [common_3D.node_marker[node.restraint_type][1]
-                     for node in list_of_nodes],
+            "symbol": marker,
+            "color": color,
+            "size": size,
             "line": {
-                "color": common.NODE_PRIMARY_COLOR,
+                "color": color,
                 "width": 4}
         }
     })
 
 
-def add_data__nodes_undeformed(dt, list_of_nodes):
+def add_data__nodes_undeformed(dt, list_of_nodes, color):
     x = [node.coords[0] for node in list_of_nodes]
     y = [node.coords[1] for node in list_of_nodes]
     z = [node.coords[2] for node in list_of_nodes]
@@ -453,7 +568,7 @@ def add_data__nodes_undeformed(dt, list_of_nodes):
             "size": [common_3D.node_marker[node.restraint_type][1]
                      for node in list_of_nodes],
             "line": {
-                "color": common.NODE_PRIMARY_COLOR,
+                "color": color,
                 "width": 4}
         }
     })
@@ -495,7 +610,7 @@ def get_auto_scaling_deformation(analysis, step):
     return scaling
 
 
-def deformed_shape(analysis: 'Analysis',
+def deformed_shape(analysis,
                    step,
                    scaling,
                    extrude_frames):
@@ -509,15 +624,31 @@ def deformed_shape(analysis: 'Analysis',
 
     list_of_frames = \
         analysis.building.list_of_line_elements()
-    list_of_nodes = analysis.building.list_of_primary_nodes() + \
-        analysis.building.list_of_internal_nodes()
+    list_of_steel_W_panel_zones = \
+        analysis.building.list_of_steel_W_panel_zones()
+    list_of_primary_nodes = analysis.building.list_of_primary_nodes()
+    list_of_internal_nodes = analysis.building.list_of_internal_nodes()
     list_of_parent_nodes = analysis.building.list_of_parent_nodes()
+    list_of_release_nodes = \
+        [x.node_i for x in analysis.building.list_of_endreleases()]
 
     if list_of_parent_nodes:
-        list_of_nodes.extend(analysis.building.list_of_parent_nodes())
+        add_data__nodes_deformed(
+            analysis, dt, list_of_parent_nodes, step, scaling)
 
     # draw the nodes
-    add_data__nodes_deformed(analysis, dt, list_of_nodes, step, scaling)
+    add_data__nodes_deformed(
+        analysis, dt, list_of_primary_nodes, step, scaling)
+    add_data__nodes_deformed(
+        analysis, dt, list_of_internal_nodes, step, scaling,
+        color=common.NODE_INTERNAL_COLOR,
+        marker=common_3D.node_marker['internal'][0],
+        size=common_3D.node_marker['internal'][1])
+    add_data__nodes_deformed(
+        analysis, dt, list_of_release_nodes, step, scaling,
+        color=common.NODE_INTERNAL_COLOR,
+        marker=common_3D.node_marker['pinned'][0],
+        size=common_3D.node_marker['pinned'][1])
 
     # draw the frames
     add_data__frames_offsets_deformed(
@@ -525,6 +656,8 @@ def deformed_shape(analysis: 'Analysis',
     if extrude_frames:
         add_data__extruded_frames_deformed_mesh(
             analysis, dt, list_of_frames, step, 15, scaling)
+        add_data__extruded_steel_W_PZ_deformed_mesh(
+            analysis, dt, list_of_steel_W_panel_zones, step, scaling)
     else:
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 15, scaling)
@@ -537,8 +670,9 @@ def deformed_shape(analysis: 'Analysis',
     return metadata
 
 
-def basic_forces(analysis: 'Analysis',
+def basic_forces(analysis,
                  step,
+                 scaling_global,
                  scaling_n,
                  scaling_q,
                  scaling_m,
@@ -549,10 +683,14 @@ def basic_forces(analysis: 'Analysis',
     dt = []
 
     list_of_frames = analysis.building.list_of_line_elements()
-    list_of_nodes = analysis.building.list_of_primary_nodes()
+    list_of_primary_nodes = analysis.building.list_of_primary_nodes()
+    list_of_internal_nodes = analysis.building.list_of_internal_nodes()
 
-    # draw the nodes0
-    add_data__nodes_undeformed(dt, list_of_nodes)
+    # draw the nodes
+    add_data__nodes_undeformed(
+        dt, list_of_primary_nodes, common.NODE_PRIMARY_COLOR)
+    add_data__nodes_undeformed(
+        dt, list_of_internal_nodes, common.NODE_INTERNAL_COLOR)
     # draw the frames
     add_data__frames_undeformed(
         dt, list_of_frames)
@@ -656,8 +794,9 @@ def basic_forces(analysis: 'Analysis',
 
         wx, wy, wz = element.udl_total()
 
-        l = element.length_clear()
-        t = np.linspace(0.00, l, num=num_points)
+        len_clr = element.length_clear()
+
+        t = np.linspace(0.00, len_clr, num=num_points)
 
         nx_vec = - t * wx - ni
         qy_vec = t * wy + qyi
@@ -685,7 +824,7 @@ def basic_forces(analysis: 'Analysis',
         y_vecs[i_elem*3: i_elem*3 + 3] = y_vec
         z_vecs[i_elem*3: i_elem*3 + 3] = z_vec
         i_poss[i_elem*3: i_elem*3 + 3] = i_pos
-        elm_ln[i_elem] = l
+        elm_ln[i_elem] = len_clr
 
     # calculate scaling factors
     ref_len = analysis.building.reference_length()
@@ -737,8 +876,8 @@ def basic_forces(analysis: 'Analysis',
         y_vec = y_vecs[i_elem*3: i_elem*3 + 3]
         z_vec = z_vecs[i_elem*3: i_elem*3 + 3]
         i_pos = i_poss[i_elem*3: i_elem*3 + 3]
-        l = elm_ln[i_elem]
-        t = np.linspace(0.00, l, num=num_points)
+        len_clr = element.length_clear()
+        t = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):
 
@@ -746,8 +885,10 @@ def basic_forces(analysis: 'Analysis',
             p_end = i_pos + t[i+1] * x_vec
 
             # axial load & torsion
-            p_i = p_start + nx_vec[i] * y_vec * scaling_n
-            p_j = p_end + nx_vec[i+1] * y_vec * scaling_n
+            p_i = p_start + \
+                nx_vec[i] * y_vec * scaling_n * scaling_global
+            p_j = p_end + \
+                nx_vec[i+1] * y_vec * scaling_n * scaling_global
             x1_a.extend((p_i[0], p_j[0], None))
             y1_a.extend((p_i[1], p_j[1], None))
             z1_a.extend((p_i[2], p_j[2], None))
@@ -761,8 +902,10 @@ def basic_forces(analysis: 'Analysis',
             z2_a.extend((p_j[2], p_end[2], None))
             colors1_a.extend(["red"]*3)
             colors2_a.extend(["red"]*6)
-            p_i = p_start + tx_vec[i] * z_vec * scaling_t
-            p_j = p_end + tx_vec[i+1] * z_vec * scaling_t
+            p_i = p_start + \
+                tx_vec[i] * z_vec * scaling_t * scaling_global
+            p_j = p_end + \
+                tx_vec[i+1] * z_vec * scaling_t * scaling_global
             x1_a.extend((p_i[0], p_j[0], None))
             y1_a.extend((p_i[1], p_j[1], None))
             z1_a.extend((p_i[2], p_j[2], None))
@@ -778,8 +921,10 @@ def basic_forces(analysis: 'Analysis',
             colors2_a.extend(["orange"]*6)
 
             # shear load on y and z axes
-            p_i = p_start + qy_vec[i] * y_vec * scaling_q
-            p_j = p_end + qy_vec[i+1] * y_vec * scaling_q
+            p_i = p_start + \
+                qy_vec[i] * y_vec * scaling_q * scaling_global
+            p_j = p_end + \
+                qy_vec[i+1] * y_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
@@ -793,8 +938,10 @@ def basic_forces(analysis: 'Analysis',
             z2_b.extend((p_j[2], p_end[2], None))
             colors1_b.extend(["green"]*3)
             colors2_b.extend(["green"]*6)
-            p_i = p_start + qz_vec[i] * z_vec * scaling_q
-            p_j = p_end + qz_vec[i+1] * z_vec * scaling_q
+            p_i = p_start + \
+                qz_vec[i] * z_vec * scaling_q * scaling_global
+            p_j = p_end + \
+                qz_vec[i+1] * z_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
@@ -810,8 +957,10 @@ def basic_forces(analysis: 'Analysis',
             colors2_b.extend(["green"]*6)
 
             # moment around z and y axes
-            p_i = p_start - mz_vec[i] * y_vec * scaling_m
-            p_j = p_end - mz_vec[i+1] * y_vec * scaling_m
+            p_i = p_start - \
+                mz_vec[i] * y_vec * scaling_m * scaling_global
+            p_j = p_end - \
+                mz_vec[i+1] * y_vec * scaling_m * scaling_global
             # note: moments plotted upside down!
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
@@ -827,8 +976,10 @@ def basic_forces(analysis: 'Analysis',
             colors1_c.extend(["blue"]*3)
             colors2_c.extend(["blue"]*6)
             # moment around y axis
-            p_i = p_start - my_vec[i] * z_vec * scaling_m
-            p_j = p_end - my_vec[i+1] * z_vec * scaling_m
+            p_i = p_start - \
+                my_vec[i] * z_vec * scaling_m * scaling_global
+            p_j = p_end - \
+                my_vec[i+1] * z_vec * scaling_m * scaling_global
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
@@ -844,10 +995,12 @@ def basic_forces(analysis: 'Analysis',
             colors2_c.extend(["blue"]*6)
 
             # shear load combined
-            p_i = p_start + (qy_vec[i] * y_vec +
-                             qz_vec[i] * z_vec) * scaling_q
-            p_j = p_end + (qy_vec[i+1] * y_vec +
-                           qz_vec[i+1] * z_vec) * scaling_q
+            p_i = p_start + \
+                (qy_vec[i] * y_vec +
+                 qz_vec[i] * z_vec) * scaling_q * scaling_global
+            p_j = p_end + \
+                (qy_vec[i+1] * y_vec +
+                 qz_vec[i+1] * z_vec) * scaling_q * scaling_global
             x1_d.extend((p_i[0], p_j[0], None))
             y1_d.extend((p_i[1], p_j[1], None))
             z1_d.extend((p_i[2], p_j[2], None))
@@ -864,10 +1017,11 @@ def basic_forces(analysis: 'Analysis',
             colors2_d.extend(["green"]*6)
 
             # both moments combined!
-            p_i = p_start - mz_vec[i] * y_vec * \
-                scaling_m - my_vec[i] * z_vec * scaling_m
+            p_i = p_start -\
+                mz_vec[i] * y_vec * \
+                scaling_m - my_vec[i] * z_vec * scaling_m * scaling_global
             p_j = p_end - mz_vec[i+1] * y_vec * \
-                scaling_m - my_vec[i+1] * z_vec * scaling_m
+                scaling_m - my_vec[i+1] * z_vec * scaling_m * scaling_global
             # note: moments plotted upside down!
             x1_e.extend((p_i[0], p_j[0], None))
             y1_e.extend((p_i[1], p_j[1], None))
@@ -886,7 +1040,6 @@ def basic_forces(analysis: 'Analysis',
             colors1_e.extend(["blue"]*3)
             colors2_e.extend(["blue"]*6)
 
-    # TODO validation: make sure they are pollted correctly
     dt_a = [
         {
             "type": "scatter3d",
@@ -896,7 +1049,7 @@ def basic_forces(analysis: 'Analysis',
             "z": z1_a,
             "visible": False,
             "customdata": customdata_a,
-            "hovertemplate": ' %{customdata:.3g}<br>'
+            "hovertemplate": ' %{customdata:.0f}<br>'
             '<extra></extra>',
             "line": {
                 "width": 3,
@@ -926,7 +1079,7 @@ def basic_forces(analysis: 'Analysis',
             "z": z1_b,
             "visible": False,
             "customdata": customdata_b,
-            "hovertemplate": ' %{customdata:.3g}<br>'
+            "hovertemplate": ' %{customdata:.0f}<br>'
             '<extra></extra>',
             "line": {
                 "width": 3,
@@ -956,7 +1109,7 @@ def basic_forces(analysis: 'Analysis',
             "z": z1_c,
             "visible": False,
             "customdata": customdata_c,
-            "hovertemplate": ' %{customdata:.3g}<br>'
+            "hovertemplate": ' %{customdata:.0f}<br>'
             '<extra></extra>',
             "line": {
                 "width": 3,
@@ -986,7 +1139,7 @@ def basic_forces(analysis: 'Analysis',
             "z": z1_d,
             "visible": False,
             "customdata": customdata_d,
-            "hovertemplate": ' %{customdata:.3g}<br>'
+            "hovertemplate": ' %{customdata:.0f}<br>'
             '<extra></extra>',
             "line": {
                 "width": 3,
@@ -1016,7 +1169,7 @@ def basic_forces(analysis: 'Analysis',
             "z": z1_e,
             "visible": False,
             "customdata": customdata_e,
-            "hovertemplate": ' %{customdata:.3g}<br>'
+            "hovertemplate": ' %{customdata:.0f}<br>'
             '<extra></extra>',
             "line": {
                 "width": 3,

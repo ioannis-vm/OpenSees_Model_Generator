@@ -18,7 +18,8 @@ node_marker = {
     'pinned': ("circle-open", 10),
     'free': ("circle", 5),
     'parent': ("circle-open", 15),
-    'internal': ("x", 3)
+    'internal': ("x", 3),
+    '111011': ("circle-open", 10),
 }
 
 
@@ -26,8 +27,8 @@ def global_layout():
     """
     Some general definitions needed often
     """
-    # view_type = "orthographic"
-    view_type = "perspective"
+    view_type = "orthographic"
+    # view_type = "perspective"
     return go.Layout(
         scene=dict(aspectmode='data',
                    xaxis_visible=False,

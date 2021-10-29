@@ -164,6 +164,37 @@ def add_data__internal_nodes(dt, list_of_nodes):
     })
 
 
+def add_data__release_nodes(dt, list_of_nodes):
+    x = [node.coords[0] for node in list_of_nodes]
+    y = [node.coords[1] for node in list_of_nodes]
+    z = [node.coords[2] for node in list_of_nodes]
+    customdata = []
+    restraint_types = [node.restraint_type for node in list_of_nodes]
+    for node in list_of_nodes:
+        customdata.append(
+            (node.uniq_id,
+             *node.mass,
+             *node.load_total()
+             )
+        )
+    dt.append({
+        "type": "scatter3d",
+        "mode": "markers",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "marker": {
+            "symbol": common_3D.node_marker['pinned'][0],
+            "color": common.NODE_INTERNAL_COLOR,
+            "size": common_3D.node_marker['pinned'][1],
+            "line": {
+                "color": common.NODE_INTERNAL_COLOR,
+                "width": 2}
+        }
+    })
+
+
 def add_data__diaphragm_lines(dt, lvl):
     if not lvl.parent_node:
         return
@@ -235,6 +266,8 @@ def add_data__frames(dt, list_of_frames):
     customdata = []
     section_names = []
     for elm in list_of_frames:
+        if elm.hidden_as_line:
+            continue
         section_names.extend([elm.section.name]*3)
         x.extend(
             (elm.internal_pt_i[0], elm.internal_pt_j[0], None)
@@ -324,6 +357,8 @@ def add_data__frame_axes(dt, list_of_frames, ref_len):
     z = []
     colors = []
     for elm in list_of_frames:
+        if elm.hidden_as_line:
+            continue
         x_vec = elm.x_axis
         y_vec = elm.y_axis
         z_vec = elm.z_axis
@@ -404,11 +439,76 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     k_list = []
     index = 0
     for elm in list_of_frames:
+        if elm.hidden_when_extruded:
+            continue
         side_a = np.array(elm.internal_pt_i)
         side_b = np.array(elm.internal_pt_j)
         y_vec = elm.y_axis
         z_vec = elm.z_axis
         loop = elm.section.mesh.halfedges
+        for halfedge in loop:
+            loc0 = halfedge.vertex.coords[0]*z_vec +\
+                halfedge.vertex.coords[1]*y_vec + side_a
+            loc1 = halfedge.vertex.coords[0]*z_vec +\
+                halfedge.vertex.coords[1]*y_vec + side_b
+            loc2 = halfedge.nxt.vertex.coords[0]*z_vec +\
+                halfedge.nxt.vertex.coords[1]*y_vec + side_b
+            loc3 = halfedge.nxt.vertex.coords[0]*z_vec +\
+                halfedge.nxt.vertex.coords[1]*y_vec + side_a
+            x_list.append(loc0[0])
+            y_list.append(loc0[1])
+            z_list.append(loc0[2])
+            x_list.append(loc1[0])
+            y_list.append(loc1[1])
+            z_list.append(loc1[2])
+            x_list.append(loc2[0])
+            y_list.append(loc2[1])
+            z_list.append(loc2[2])
+            x_list.append(loc3[0])
+            y_list.append(loc3[1])
+            z_list.append(loc3[2])
+            i_list.append(index + 0)
+            j_list.append(index + 1)
+            k_list.append(index + 2)
+            i_list.append(index + 0)
+            j_list.append(index + 2)
+            k_list.append(index + 3)
+            index += 4
+    dt.append({
+        "type": "mesh3d",
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
+        "i": i_list,
+        "j": j_list,
+        "k": k_list,
+        "hoverinfo": "skip",
+        "color": common.BEAM_MESH_COLOR,
+        "opacity": 0.65
+    })
+
+
+def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
+
+    if not list_of_endsegments:
+        return
+    x_list = []
+    y_list = []
+    z_list = []
+    i_list = []
+    j_list = []
+    k_list = []
+    index = 0
+
+    for elm in list_of_endsegments:
+
+        side_a = np.array(elm.internal_pt_i)
+        side_b = np.array(elm.internal_pt_j)
+        x_vec = elm.x_axis
+        y_vec = elm.y_axis
+        z_vec = np.cross(x_vec, y_vec)
+        loop = elm.col_section.mesh.halfedges
+
         for halfedge in loop:
             loc0 = halfedge.vertex.coords[0]*z_vec +\
                 halfedge.vertex.coords[1]*y_vec + side_a
@@ -468,6 +568,19 @@ def plot_building_geometry(building: 'Building',
 
     ref_len = building.reference_length()
 
+    # plot the nodes
+    if not just_selection:
+        nodes_primary = building.list_of_primary_nodes()
+        nodes_internal = building.list_of_internal_nodes()
+        releases = [x.node_i for x in building.list_of_endreleases()]
+    else:
+        nodes_primary = building.selection.list_of_primary_nodes()
+        nodes_internal = building.selection.list_of_internal_nodes()
+    add_data__nodes(dt, nodes_primary)
+    if not extrude_frames:
+        add_data__internal_nodes(dt, nodes_internal)
+        add_data__release_nodes(dt, releases)
+
     # grid lines
     if gridlines:
         add_data__grids(dt, building)
@@ -486,21 +599,6 @@ def plot_building_geometry(building: 'Building',
         for lvl in building.levels.level_list:
             add_data__bisector_lines(dt, lvl)
 
-    # plot the nodes
-    if not just_selection:
-        nodes_primary = building.list_of_primary_nodes()
-        nodes_internal = building.list_of_internal_nodes()
-    else:
-        nodes_primary = building.selection.list_of_primary_nodes()
-        nodes_internal = building.selection.list_of_internal_nodes()
-    add_data__nodes(dt, nodes_primary)
-    if not extrude_frames:
-        add_data__internal_nodes(dt, nodes_internal)
-
-    # plot the parent nodes
-    if parent_nodes:
-        add_data__parent_nodes(dt, building.list_of_parent_nodes())
-
     # plot the linear elements
     if just_selection:
         line_element_sequences = \
@@ -509,9 +607,13 @@ def plot_building_geometry(building: 'Building',
     else:
         line_element_sequences = building.list_of_line_element_sequences()
         line_elems = building.list_of_line_elements()
+        list_of_steel_W_panel_zones = building.list_of_steel_W_panel_zones()
+
     if extrude_frames:
         add_data__extruded_frames_mesh(
             dt, line_elems)
+        add_data__extruded_steel_W_PZ_mesh(
+            dt, list_of_steel_W_panel_zones)
     else:
         add_data__frames(dt, line_elems)
         if frame_axes:
@@ -520,6 +622,10 @@ def plot_building_geometry(building: 'Building',
     # plot the rigid offsets
     if offsets:
         add_data__frame_offsets(dt, line_element_sequences)
+
+    # plot the parent nodes
+    if parent_nodes:
+        add_data__parent_nodes(dt, building.list_of_parent_nodes())
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)

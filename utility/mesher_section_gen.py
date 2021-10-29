@@ -23,7 +23,7 @@ def define_edges(vertices):
     return edges
 
 
-def w_mesh(b, h, t, tw, tf):
+def w_mesh(b, h, tw, tf, target_area=None):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the W section with
@@ -32,44 +32,62 @@ def w_mesh(b, h, t, tw, tf):
     Input:
         b: total width
         h: total height
-        t: clear web height (without fillets)
         tw: web thickness
         tf: flange thickness
+        target_area: AISC database area
+            to determine fillets,
+            because trying to do that using
+            `T` doesn't work.
     """
-
-    r = (h - t - 2. * tf) / 2.
+    area_diff = target_area - (b*tf*2.+(h-2*tf)*tw)
+    r = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
+    # note: 0.9565 is a correction factor to account force
+    # the fact that we approximate the arcs with
+    # four line segments, thus putting more material in there
     k = (b - 2. * r - tw) / 2.
     vertices = [
         mesher.Vertex((b/2., h/2.)),
         mesher.Vertex((-b/2., h/2.)),
         mesher.Vertex((-b/2., h/2.-tf)),
         mesher.Vertex((-b/2.+k, h/2.-tf)),
-        mesher.Vertex((-b/2.+k+r * np.cos(2.*np.pi/6.),
-                       h/2.-tf-r + r*np.sin(2.*np.pi/6.))),
-        mesher.Vertex((-b/2.+k+r*np.cos(np.pi/6.),
-                       h/2.-tf-r+r*np.sin(np.pi/6.))),
+        mesher.Vertex((-b/2.+k+r * np.cos(3.*np.pi/8.),
+                       h/2.-tf-r + r*np.sin(3.*np.pi/8.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
+                       h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
+                       h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
+
         mesher.Vertex((-b/2.+k+r, h/2.-tf-r)),
         mesher.Vertex((-b/2.+k+r, -h/2.+tf+r)),
-        mesher.Vertex((-b/2.+k+r*np.cos(np.pi/6.),
-                       -h/2.+tf+r-r*np.sin(np.pi/6.))),
-        mesher.Vertex((-b/2.+k+r*np.cos(2.*np.pi/6.),
-                       -h/2.+tf+r-r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
+                       -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
+                       -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
+        mesher.Vertex((-b/2.+k+r*np.cos(3.*np.pi/8.),
+                       -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
+
         mesher.Vertex((-b/2.+k, -h/2.+tf)),
         mesher.Vertex((-b/2., -(h/2.-tf))),
         mesher.Vertex((-b/2., -h/2.)),
         mesher.Vertex((b/2., -h/2.)),
         mesher.Vertex((b/2., -(h/2-tf))),
         mesher.Vertex((+b/2.-k, -h/2.+tf)),
-        mesher.Vertex((+b/2.-k-r*np.cos(2.*np.pi/6.),
-                       -h/2.+tf+r-r*np.sin(2.*np.pi/6.))),
-        mesher.Vertex((+b/2.-k-r*np.cos(np.pi/6.),
-                       -h/2.+tf+r-r*np.sin(np.pi/6.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(3.*np.pi/8.),
+                       -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(1.*np.pi/4.),
+                       -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(1.*np.pi/8.),
+                       -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
+
         mesher.Vertex((+b/2.-k-r, -h/2.+tf+r)),
         mesher.Vertex((+b/2.-k-r, +h/2.-tf-r)),
-        mesher.Vertex((+b/2.-k-r*np.cos(np.pi/6.),
-                       +h/2.-tf-r+r*np.sin(np.pi/6.))),
-        mesher.Vertex((+b/2.-k-r*np.cos(2.*np.pi/6.),
-                       +h/2.-tf-r+r*np.sin(2.*np.pi/6.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(1.*np.pi/8.),
+                       +h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(1.*np.pi/4.),
+                       +h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
+        mesher.Vertex((+b/2.-k-r*np.cos(3.*np.pi/8.),
+                       +h/2.-tf-r+r*np.sin(3.*np.pi/8.))),
+
         mesher.Vertex((+b/2.-k, h/2.-tf)),
         mesher.Vertex((b/2., h/2.-tf))
     ]

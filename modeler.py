@@ -23,7 +23,13 @@ from components import EndRelease
 from components import LineElementSequence
 from components import LineElementSequence_Fixed
 from components import LineElementSequence_Pinned
+from components import LineElementSequence_FixedPinned
 from components import LineElementSequence_RBS
+from components import LineElementSequence_RBS_j
+from components import LineElementSequence_IMK
+from components import LineElementSequence_Steel_W_PanelZone
+from components import LineElementSequence_Steel_W_PanelZone_IMK
+from components import LineElementSequence_W_grav_sear_tab
 from components import LineElementSequences
 from components import Sections, Materials
 from utility import common
@@ -90,7 +96,6 @@ class GridSystem:
             if gridline.tag == gridline_tag:
                 result = gridline
         return result
-            
 
     def add(self, grdl: "GridLine"):
         """
@@ -118,7 +123,7 @@ class GridSystem:
         for tag in tags:
             grdl = self.get(tag)
             self.grids.remove(grdl)
-    
+
     def clear_all(self):
         """
         Removes all gridlines.
@@ -413,6 +418,14 @@ class Level:
                 result.append(elm)
         return result
 
+    def list_of_steel_W_panel_zones(self):
+        cols = self.columns.element_list
+        pzs = []
+        for col in cols:
+            if isinstance(col, LineElementSequence_Steel_W_PanelZone):
+                pzs.append(col.end_segment_i)
+        return pzs
+
 
 @dataclass
 class Levels:
@@ -611,6 +624,7 @@ class Building:
     selection: Selection = field(default_factory=Selection)
     active_placement: str = field(default='centroid')
     active_angle: float = field(default=0.00)
+    global_restraints: list = field(default_factory=list)
 
     ###############################################
     # 'Add' methods - add objects to the building #
@@ -766,7 +780,8 @@ class Building:
                             y: float,
                             n_sub=1,
                             model_as={'type': 'elastic'},
-                            geomTransf='Linear', ends={'type': 'fixed'}) \
+                            geomTransf='Linear', ends={'type': 'fixed'},
+                            metadata=None) \
             -> list[LineElementSequence]:
         """
         Adds a vertical column at the given X, Y
@@ -783,8 +798,9 @@ class Building:
             geomTransf: {Linear, PDelta}
             ends (dict): {'type': 'fixed, 'dist': float}', or
                          {'type': 'pinned', 'dist': float} or
+                         {'type': 'fixed-pinned', 'dist': float} or
                          {'type': 'RBS', 'dist': float,
-                          'length': float, 'factor': float}
+                          'length': float, 'factor': float, 'n_sub': int}
 
         Returns:
             columns (list[LineElementSequence]): Added columns.
@@ -811,9 +827,14 @@ class Building:
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
                 # add the column connecting the two nodes
-                # TODO if integration_type=HingeRadau, create the sections
-                # and issue a different command to specify them
-                if ends['type'] == 'fixed':
+                if ends['type'] in ['fixed', 'steel_W_PZ', 'steel_W_PZ_IMK']:
+                    # if ends['type'] is 'steel_W_PZ' or
+                    # 'steel_W_IMK_PZ' then
+                    # LineElementSequence_Fixed will be replaced with
+                    # a LineElementSequence_Steel_W_PanelZone or
+                    # a LineElementSequence_Steel_W_PanelZone_IMK during
+                    # preprocessing. See the preprocess() method.
+                    metadata = {'ends': ends}
                     column = LineElementSequence_Fixed(
                         node_i=top_node,
                         node_j=bot_node,
@@ -825,7 +846,7 @@ class Building:
                         model_as=model_as,
                         geomTransf=geomTransf,
                         placement=self.active_placement,
-                        end_dist=0.05)
+                        end_dist=0.05, metadata=metadata)
                 elif ends['type'] == 'pinned':
                     column = LineElementSequence_Pinned(
                         node_i=top_node,
@@ -839,6 +860,23 @@ class Building:
                         geomTransf=geomTransf,
                         placement=self.active_placement,
                         end_dist=ends['dist'],
+                        metadata=metadata,
+                        mat_fix=self.materials.retrieve('fix'),
+                        camber=0.00)
+                elif ends['type'] == 'fixed-pinned':
+                    column = LineElementSequence_FixedPinned(
+                        node_i=top_node,
+                        node_j=bot_node,
+                        ang=self.active_angle,
+                        offset_i=np.zeros(3),
+                        offset_j=np.zeros(3),
+                        section=self.sections.active,
+                        n_sub=n_sub,
+                        model_as=model_as,
+                        geomTransf=geomTransf,
+                        placement=self.active_placement,
+                        end_dist=ends['dist'],
+                        metadata=metadata,
                         mat_fix=self.materials.retrieve('fix'),
                         mat_release=self.materials.retrieve('release'),
                         camber=0.00)
@@ -882,9 +920,10 @@ class Building:
             snap_j ~ similar to snap_i, for the j side.
             ends (dict): {'type': 'fixed, 'dist': float}', or
                          {'type': 'pinned', 'dist': float} or
+                         {'type': 'fixed-pinned', 'dist': float} or
                          {'type': 'RBS', 'dist': float,
-                          'length': float, 'factor': float}
-                        For the pinned case,
+                          'length': float, 'factor': float, 'n_sub': int}
+                        For the pinned or fixed-pinned case,
                           `dist` represents the
                             proportion of the distance between the element's
                             ends to the release, relative to the element's
@@ -895,6 +934,8 @@ class Building:
                           `length` represents the length of the RBS portion.
                           `factor` represents the proportion of the RBS
                             section's width, relative to the original section.
+                          `n_sub` represents how many LineElements should be
+                            used for the RBS portion
             model_as (dict): Either
                            {'type': 'elastic'}
                            or
@@ -980,7 +1021,8 @@ class Building:
                     model_as=model_as,
                     geomTransf=geomTransf,
                     placement=self.active_placement,
-                    end_dist=0.05)
+                    end_dist=0.05,
+                    metadata=None)
             elif ends['type'] == 'pinned':
                 beam = LineElementSequence_Pinned(
                     node_i=start_node,
@@ -994,6 +1036,23 @@ class Building:
                     geomTransf=geomTransf,
                     placement=self.active_placement,
                     end_dist=ends['dist'],
+                    metadata=None,
+                    mat_fix=self.materials.retrieve('fix'),
+                    camber=0.00)
+            elif ends['type'] == 'fixed-pinned':
+                beam = LineElementSequence_FixedPinned(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    metadata=None,
                     mat_fix=self.materials.retrieve('fix'),
                     mat_release=self.materials.retrieve('release'),
                     camber=0.00)
@@ -1010,8 +1069,57 @@ class Building:
                     geomTransf=geomTransf,
                     placement=self.active_placement,
                     end_dist=ends['dist'],
+                    metadata=None,
                     rbs_length=ends['length'],
-                    rbs_reduction=ends['factor'])
+                    rbs_reduction=ends['factor'],
+                    rbs_n_sub=ends['n_sub'])
+            elif ends['type'] == 'RBS_j':
+                beam = LineElementSequence_RBS_j(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    metadata=None,
+                    rbs_length=ends['length'],
+                    rbs_reduction=ends['factor'],
+                    rbs_n_sub=ends['n_sub'])
+            elif ends['type'] == 'steel_W_IMK':
+                beam = LineElementSequence_IMK(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    metadata=ends,
+                    mat_fix=self.materials.retrieve('fix'))
+            elif ends['type'] == 'steel W shear tab':
+                beam = LineElementSequence_W_grav_sear_tab(
+                    node_i=start_node,
+                    node_j=end_node,
+                    ang=self.active_angle,
+                    offset_i=offset_i+connection_offset_i,
+                    offset_j=offset_j+connection_offset_j,
+                    section=self.sections.active,
+                    n_sub=n_sub,
+                    model_as=model_as,
+                    geomTransf=geomTransf,
+                    placement=self.active_placement,
+                    end_dist=ends['dist'],
+                    metadata=ends,
+                    mat_fix=self.materials.retrieve('fix'))
             else:
                 raise ValueError('Invalid end-type')
             ok = level.beams.add(beam)
@@ -1128,8 +1236,8 @@ class Building:
             ends (dict): {'type': 'fixed, 'dist': float}', or
                          {'type': 'pinned', 'dist': float} or
                          {'type': 'RBS', 'dist': float,
-                          'length': float, 'factor': float}
-                        For the pinned case,
+                          'length': float, 'factor': float, 'n_sub': int}
+                        For the pinned or fixed-pinned case,
                           `dist` represents the
                             proportion of the distance between the element's
                             ends to the release, relative to the element's
@@ -1140,6 +1248,8 @@ class Building:
                           `length` represents the length of the RBS portion.
                           `factor` represents the proportion of the RBS
                             section's width, relative to the original section.
+                          `n_sub` represents how many LineElements should be
+                            used for the RBS portion
         """
         beams = []
         for grid in self.gridsystem.grids:
@@ -1177,6 +1287,8 @@ class Building:
                           `length` represents the length of the RBS portion.
                           `factor` represents the proportion of the RBS
                             section's width, relative to the original section.
+                          `n_sub` represents how many LineElements should be
+                            used for the RBS portion
         """
         beams = []
         for grid in self.gridsystem.grids:
@@ -1294,7 +1406,7 @@ class Building:
 
     def clear_gridlines(self, tags: list[str]):
         self.gridsystem.clear(tags)
-        
+
     def delete_selected(self):
         """
         Deletes the selected objects.
@@ -1350,6 +1462,15 @@ class Building:
         Sets the active angle
         """
         self.active_angle = ang
+
+    def set_global_restraints(self, restraints):
+        """
+        Sets global restraints
+        Args:
+            restraints (list[int]): OpenSees-like
+                restraint vector (ones and zeros)
+        """
+        self.global_restraints = restraints
 
     ############################
     # Methods for adding loads #
@@ -1438,6 +1559,16 @@ class Building:
             self.list_of_internal_nodes() + \
             self.list_of_parent_nodes()
 
+    def list_of_steel_W_panel_zones(self):
+        cols = self.list_of_columns()
+        pzs = []
+        for col in cols:
+            if isinstance(col, LineElementSequence_Steel_W_PanelZone):
+                pzs.append(col.end_segment_i)
+            if isinstance(col, LineElementSequence_Steel_W_PanelZone_IMK):
+                pzs.append(col.end_segment_i)
+        return pzs
+
     def retrieve_beam(self, uniq_id: int) -> LineElementSequence:
         beams = self.list_of_beams()
         result = None
@@ -1471,7 +1602,9 @@ class Building:
         ref_len = np.max(p_max - p_min)
         return ref_len
 
-    def preprocess(self, assume_floor_slabs=True, self_weight=True):
+    def preprocess(self, assume_floor_slabs=True, self_weight=True,
+                   steel_panel_zones=False,
+                   elevate_column_splices=0.00):
         """
         Preprocess the building. No further editing beyond this point.
         This method initiates automated calculations to
@@ -1497,6 +1630,24 @@ class Building:
                     node.load_fl += np.array((0.00, 0.00, -pZ_val,
                                               0.00, 0.00, 0.00))
         # ~~~
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # steel connection panel zones #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        if steel_panel_zones:
+            self._preprocess_steel_panel_zones()
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~ #
+        # column splice elevating #
+        # ~~~~~~~~~~~~~~~~~~~~~~~ #
+        
+        if elevate_column_splices != 0.00:
+            self._elevate_steel_column_splices(elevate_column_splices)
+        
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # tributary areas, weight and mass #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
         for lvl in self.levels.level_list:
             if lvl.parent_node:
@@ -1577,6 +1728,217 @@ class Building:
                         node.mass[0] = 0.
                         node.mass[1] = 0.
 
+    def _preprocess_steel_panel_zones(self):
+        """
+        TODO docstring
+        """
+        for lvl in self.levels.level_list:
+            for i_col, col in enumerate(lvl.columns.element_list):
+                node = col.node_i
+                # get a list of all the connected beams
+                beams = node.beams
+                # determine the ones that are properly connected
+                # for panel zone modeling
+                panel_beam_front = None
+                panel_beam_back = None
+                panel_beam_front_side = None
+                panel_beam_back_side = None
+                for bm in beams:
+                    # beam must be Fixed or RBS
+                    if not isinstance(bm, (LineElementSequence_Fixed,
+                                           LineElementSequence_RBS,
+                                           LineElementSequence_RBS_j,
+                                           LineElementSequence_IMK)):
+                        continue
+                    # it must have a top_center placement
+                    if bm.placement != 'top_center':
+                        continue
+                    # the frame must lie on a plane
+                    if not np.abs(np.dot(bm.x_axis, col.y_axis)) >= \
+                       1.00 - common.EPSILON:
+                        continue
+                    # the column must be vertical
+                    if not col.x_axis[2] == -1:
+                        continue
+                    # if all conditions are met
+                    # a panel zone will be modeled based on
+                    # the properties of that beam
+                    # determine if it's front or back relative to
+                    # the y axis of the column
+
+                    if bm.node_i == node:
+                        bm_other_node = bm.node_j
+                        this_side = 'i'
+                    else:
+                        bm_other_node = bm.node_i
+                        this_side = 'j'
+                    bm_vec = (bm_other_node.coords - node.coords)
+                    if np.dot(bm_vec, col.y_axis) > 0.00:
+                        panel_beam_front = bm
+                        panel_beam_front_side = this_side
+                    else:
+                        panel_beam_back = bm
+                        panel_beam_back_side = this_side
+                # check that the beams are connected at the face of the column
+                if panel_beam_front:
+                    if panel_beam_front_side == 'i':
+                        assert np.abs(np.linalg.norm(
+                            2. * panel_beam_back.offset_i[0:2]) -
+                            col.section.properties['d']) < common.EPSILON, \
+                            'Incorrect connectivity'
+                    else:
+                        assert np.abs(np.linalg.norm(
+                            2. * panel_beam_front.offset_j[0:2]) -
+                            col.section.properties['d']) < common.EPSILON, \
+                            'Incorrect connectivity'
+                if panel_beam_back:
+                    if panel_beam_back_side == 'i':
+                        assert np.abs(np.linalg.norm(
+                            2. * panel_beam_back.offset_i[0:2]) -
+                            col.section.properties['d']) < common.EPSILON, \
+                            'Incorrect connectivity'
+                    else:
+                        assert np.abs(np.linalg.norm(
+                            2. * panel_beam_back.offset_j[0:2]) -
+                            col.section.properties['d']) < common.EPSILON, \
+                            'Incorrect connectivity'
+
+                if panel_beam_front:
+                    beam_depth = panel_beam_front.section.properties['d']
+                elif panel_beam_back:
+                    beam_depth = panel_beam_back.section.properties['d']
+                else:
+                    continue
+
+                # Or maybe it's time to do some more programming?
+                if panel_beam_front and panel_beam_back:
+                    assert panel_beam_front.section.properties['d'] == \
+                        panel_beam_back.section.properties['d'], \
+                        "Incompatible beam depths. Should be equal."
+
+                # replace column with a LineElementSequence_Steel_W_PanelZone
+                # ... define the new element
+                # note: unfortunately here we can't just make changes
+                # to the column and have those changes be applied
+                # wherever this column is referenced, because we
+                # need to replace it with an object that has a different
+                # type. We therefore need to manually assign every variable
+                # that was pointing to it to the new object.
+                # (I wish python had pointers, or alternatively taht I knew
+                #  more python. I'm a structural engineer.)
+                if col.metadata['ends']['type'] == 'fixed':
+                    col = LineElementSequence_Steel_W_PanelZone(
+                        col.node_i, col.node_j, col.ang,
+                        col.offset_i, col.offset_j, col.section,
+                        col.n_sub, col.model_as, col.geomTransf,
+                        col.placement, col.end_dist,
+                        col.metadata,
+                        self.sections.retrieve('rigid'),
+                        self.materials.retrieve('fix'),
+                        beam_depth, col.section.material.parameters['b_PZ'])
+                elif col.metadata['ends']['type'] == 'steel_W_PZ':
+                    col = LineElementSequence_Steel_W_PanelZone(
+                        col.node_i, col.node_j, col.ang,
+                        col.offset_i, col.offset_j, col.section,
+                        col.n_sub, col.model_as, col.geomTransf,
+                        col.placement, col.end_dist,
+                        col.metadata,
+                        self.sections.retrieve('rigid'),
+                        self.materials.retrieve('fix'),
+                        beam_depth, col.section.material.parameters['b_PZ'])
+                elif col.metadata['ends']['type'] == 'steel_W_PZ_IMK':
+                    col = LineElementSequence_Steel_W_PanelZone_IMK(
+                        col.node_i, col.node_j, col.ang,
+                        col.offset_i, col.offset_j, col.section,
+                        col.n_sub, col.model_as, col.geomTransf,
+                        col.placement, col.end_dist,
+                        col.metadata,
+                        self.sections.retrieve('rigid'),
+                        self.materials.retrieve('fix'),
+                        beam_depth, col.section.material.parameters['b_PZ'])
+                else:
+                    raise ValueError('Invalid end type for W column')
+                # ... replace it in the node's `column_below` attribute
+                node.column_below = col
+                # ... replace it in the underlying node's `column_above`
+                nj = col.node_j
+                nj.column_above = col
+                # ... replace it in the leven's column container object
+                lvl.columns.element_list[i_col] = col
+
+                # modify beam connectivity
+                panel_zone_segment = col.end_segment_i
+                if panel_beam_front:
+                    if panel_beam_front_side == 'i':
+                        sgm = panel_beam_front.end_segment_i
+                        sgm.offset = np.zeros(3).copy()
+                        sgm.internal_elems[0].node_i = \
+                            panel_zone_segment.n_front
+                        sgm.internal_elems[0].offset_i = \
+                            np.zeros(3).copy()
+                        sgm.n_external = \
+                            panel_zone_segment.n_front
+                        panel_beam_front.node_i = panel_zone_segment.n_front
+                        panel_beam_front.offset_i = np.zeros(3).copy()
+                    elif panel_beam_front_side == 'j':
+                        sgm = panel_beam_front.end_segment_j
+                        sgm.offset = np.zeros(3).copy()
+                        sgm.internal_elems[-1].node_j = \
+                            panel_zone_segment.n_front
+                        sgm.internal_elems[-1].offset_j = \
+                            np.zeros(3).copy()
+                        sgm.n_external = \
+                            panel_zone_segment.n_front
+                        panel_beam_front.node_j = panel_zone_segment.n_front
+                        panel_beam_front.offset_j = np.zeros(3).copy()
+                    else:
+                        raise ValueError('This should never happen!')
+
+                if panel_beam_back:
+                    if panel_beam_back_side == 'i':
+                        sgm = panel_beam_back.end_segment_i
+                        sgm.offset = np.zeros(3).copy()
+                        sgm.internal_elems[0].node_i = \
+                            panel_zone_segment.n_back
+                        sgm.internal_elems[0].offset_i = \
+                            np.zeros(3).copy()
+                        sgm.n_external = \
+                            panel_zone_segment.n_back
+                        panel_beam_back.node_i = panel_zone_segment.n_back
+                        panel_beam_back.offset_i = np.zeros(3).copy()
+                    elif panel_beam_back_side == 'j':
+                        sgm = panel_beam_back.end_segment_j
+                        sgm.offset = np.zeros(3).copy()
+                        sgm.internal_elems[-1].node_j = \
+                            panel_zone_segment.n_back
+                        sgm.internal_elems[-1].offset_j = \
+                            np.zeros(3).copy()
+                        sgm.n_external = \
+                            panel_zone_segment.n_back
+                        panel_beam_back.node_j = panel_zone_segment.n_back
+                        panel_beam_back.offset_j = np.zeros(3).copy()
+                    else:
+                        raise ValueError('This should never happen!')
+
+    def _elevate_steel_column_splices(self, relative_len):
+        """
+        TODO - add docstring
+        """
+        for col in self.list_of_columns():
+            # check to see if there is a column at the level below
+            n_j = col.node_j
+            if n_j.column_below:
+                sec = n_j.column_below.section
+                if sec is not col.section:
+                    col.end_segment_j.section = sec
+                    for elm in col.end_segment_j.internal_elems:
+                        elm.section = sec
+                    z_test = col.node_j.coords[2] + \
+                        col.length_clear * relative_len
+                    for elm in col.middle_segment.internal_elems:
+                        if elm.node_i.coords[2] < z_test:
+                            elm.section = sec
+        
     def level_masses(self):
         lvls = self.levels.level_list
         n_lvls = len(lvls)

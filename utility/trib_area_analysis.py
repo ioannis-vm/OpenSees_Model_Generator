@@ -23,10 +23,10 @@ def list_of_beams_to_mesh_edges_external(beams):
     coordinate_list = []
 
     for beam in beams:
-        i_coords = list(beam.node_i.coords[0:2])
+        i_coords = list(beam.node_i_trib.coords[0:2])
         if i_coords not in coordinate_list:
             coordinate_list.append(i_coords)
-        j_coords = list(beam.node_j.coords[0:2])
+        j_coords = list(beam.node_j_trib.coords[0:2])
         if j_coords not in coordinate_list:
             coordinate_list.append(j_coords)
     # define Vertices
@@ -35,13 +35,14 @@ def list_of_beams_to_mesh_edges_external(beams):
     # define edges
     edge_to_beam_map = {}
     for beam in beams:
-        i_coords = list(beam.node_i.coords[0:2])
+        i_coords = list(beam.node_i_trib.coords[0:2])
         i_index = coordinate_list.index(i_coords)
-        j_coords = list(beam.node_j.coords[0:2])
+        j_coords = list(beam.node_j_trib.coords[0:2])
         j_index = coordinate_list.index(j_coords)
         edge = mesher.Edge(vertices[i_index], vertices[j_index])
         edges.append(edge)
         edge_to_beam_map[edge.uniq_id] = beam
+    
     return edges, edge_to_beam_map
 
 
@@ -73,7 +74,7 @@ def closed_beam_sequences(beams):
 
     halfedges = mesher.define_halfedges(edges)
 
-    # # debug
+    # debug
     # import matplotlib.pyplot as plt
     # fig = plt.figure()
     # ax = fig.add_subplot(111)
@@ -141,11 +142,11 @@ def list_of_beams_to_mesh_edges_internal(beams):
         if i+1 == len(beams):
             i = -1
         next_beam = beams[i+1]
-        if (current_beam.node_j == next_beam.node_i) or \
-           (current_beam.node_j == next_beam.node_j):
+        if (current_beam.node_j_trib == next_beam.node_i_trib) or \
+           (current_beam.node_j_trib == next_beam.node_j_trib):
             flip.append(False)
-        elif (current_beam.node_i == next_beam.node_i) or \
-             (current_beam.node_i == next_beam.node_j):
+        elif (current_beam.node_i_trib == next_beam.node_i_trib) or \
+             (current_beam.node_i_trib == next_beam.node_j_trib):
             flip.append(True)
         else:
             # By design, this should never happen
@@ -171,10 +172,31 @@ def list_of_beams_to_mesh_edges_internal(beams):
 
     edge_to_beam_map = {}
     for i in range(len(beams)):
+
+        # i = 43 --> problem
+        
         if i+1 == len(beams):
             inext = 0
         else:
             inext = i+1
+
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # for bm in beams:
+        #     p1 = bm.internal_pt_i[0:2]
+        #     p2 = bm.internal_pt_j[0:2]
+        #     pts = np.column_stack((p1, p2))
+        #     plt.plot(pts[0,:], pts[1,:], 'gray')
+        # p1 = beams[i].internal_pt_i[0:2]
+        # p2 = beams[i].internal_pt_j[0:2]
+        # pts = np.column_stack((p1, p2))
+        # plt.plot(pts[0,:], pts[1,:], 'red', linewidth=5)
+        # p1 = beams[inext].internal_pt_i[0:2]
+        # p2 = beams[inext].internal_pt_j[0:2]
+        # pts = np.column_stack((p1, p2))
+        # plt.plot(pts[0,:], pts[1,:], 'green', linewidth=5)
+        # plt.show()
+
         # clear span
         i_coords = list(beams[i].internal_pt_i[0:2])
         i_index = coordinate_list.index(i_coords)
@@ -212,6 +234,7 @@ def list_of_beams_to_mesh_edges_internal(beams):
             if j_index != next_index:
                 edge_offset = mesher.Edge(
                     vertices[j_index], vertices[next_index])
+                edges.append(edge_offset)
             else:
                 edge_offset = None
 
@@ -273,7 +296,7 @@ def calculate_tributary_areas(
         #     p1 = np.array(edge.v_i.coords)
         #     p2 = np.array(edge.v_j.coords)
         #     print(np.linalg.norm(p2-p1))
-
+        
         halfedges = mesher.define_halfedges(edges)
 
         halfedge_to_beam_map = {}
@@ -356,8 +379,8 @@ def calculate_tributary_areas(
                             beam.tributary_area += area
                         elif flag == 1:
                             # 1 means offset at node i
-                            beam.node_i.tributary_area += area
+                            beam.node_i_trib.tributary_area += area
                         else:
                             # 2 means offset at node j
-                            beam.node_j.tributary_area += area
+                            beam.node_j_trib.tributary_area += area
     return coords, bisectors
