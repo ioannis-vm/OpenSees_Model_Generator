@@ -13,6 +13,7 @@ https://plotly.com/python/reference/
 import plotly.graph_objects as go
 import numpy as np
 from utility.graphics import common, common_3D
+from utility.graphics.preprocessing_3D import add_data__global_axes
 from utility import transformations
 
 
@@ -661,6 +662,9 @@ def deformed_shape(analysis,
     else:
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 15, scaling)
+        # we also add axes so that we can see 2D plots
+        ref_len = analysis.building.reference_length()
+        add_data__global_axes(dt, ref_len)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
@@ -694,6 +698,9 @@ def basic_forces(analysis,
     # draw the frames
     add_data__frames_undeformed(
         dt, list_of_frames)
+    # we also add axes so that we can see 2D plots
+    ref_len = analysis.building.reference_length()
+    add_data__global_axes(dt, ref_len)
 
     # For the main lines: 1
     # For the fill lines: 2

@@ -27,8 +27,8 @@ def global_layout():
     """
     Some general definitions needed often
     """
-    view_type = "orthographic"
-    # view_type = "perspective"
+    # view_type = "orthographic"
+    view_type = "perspective"
     return go.Layout(
         scene=dict(aspectmode='data',
                    xaxis_visible=False,
