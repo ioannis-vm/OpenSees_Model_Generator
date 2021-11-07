@@ -16,14 +16,22 @@ import openseespy.opensees as ops
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
+import pandas as pd
 import modeler
 import components
 from modeler import Building
+from components import LineElementSequence_Steel_W_PanelZone
+from components import LineElementSequence_Steel_W_PanelZone_IMK
+from components import LineElementSequence_W_grav_sear_tab
+from components import LineElementSequence_IMK
 from utility import common
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
 from utility import transformations
 
+plt.rc('font', family='serif')
+plt.rc('xtick', labelsize='medium')
+plt.rc('ytick', labelsize='medium')
 
 class AnalysisResult(TypedDict):
     uniq_id: int
@@ -145,8 +153,8 @@ class Analysis:
             ops.uniaxialMaterial(
                 'Pinching4',
                 material.uniq_id,
-                *material.parameters['parameters']
-            )
+                *material.parameters.values())
+
         else:
             raise ValueError("Unsupported material:" + material.ops_material)
 
@@ -466,6 +474,10 @@ class Analysis:
             # This code only monitors strong-axis-bending releases
             # If more releases are implemented in the future, this
             # will need to be updated
+            # if release.uniq_id == 71:
+            #     import pdb
+            #     pdb.set_trace()
+            #     print('hello')
             if 6 in release.dofs:
                 idx = release.dofs.index(6)
                 if mat_names[idx] in ['auto_pinching',
@@ -488,12 +500,12 @@ class Analysis:
                     vec_z = np.cross(vec_x, vec_y)
                     tmat_g2l = transformations.transformation_matrix(
                         vec_x, vec_y, vec_z)
-                    force_i = tmat_g2l @ np.array(moment_i_global)
+                    moment_i = tmat_g2l @ -(np.array(moment_i_global))
                     deformation = tmat_g2l @ np.array(rotation_global)
                     self._store_result(
                         self.release_force_defo,
                         release.uniq_id,
-                        [force_i[2], deformation[2]])
+                        [moment_i[2], deformation[2]])
 
 
     def _read_OpenSees_results(self, data_retention='default'):
@@ -638,6 +650,22 @@ class ModalAnalysis(LinearAnalysis):
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
         self._read_node_displacements()
 
+    def table_shape(self, mode: int):
+        data = {'names': [],
+                'ux': [], 'uy': []}
+        for lvl in self.building.levels.level_list:
+            data['names'].append(lvl.name)
+            disp = np.zeros(6)
+            # TODO debug  - something may be wrong here.
+            for node in lvl.nodes_primary.node_list:
+                disp += np.array(self.node_displacements[node.uniq_id][mode-1])
+            disp /= float(len(lvl.nodes_primary.node_list))
+            data['ux'].append(disp[0])
+            data['uy'].append(disp[1])
+        data['ux'] /= max(np.max(data['ux']), np.max(data['uy']))
+        data['uy'] /= max(np.max(data['ux']), np.max(data['uy']))        
+        return pd.DataFrame.from_dict(data)
+
 
 @dataclass
 class NonlinearAnalysis(Analysis):
@@ -709,11 +737,103 @@ class NonlinearAnalysis(Analysis):
                     "Acceptance criteria failed for element " +
                     str(elm.uniq_id))
 
+    def plot_moment_rot(self, seq, step=0):
+        """
+        Given a LineElementSequence of a type that has any form of end
+        release in bending around the strong axis, plots the moment
+        rotation for all the analysis steps for both ends.
+        """
+        # In this case, we plot the moment-rotation relationship
+        # for the IMK springs at the two ends, and also the
+        # moment-rotation relationship of the panel zone spring
+        endsegment_i = seq.end_segment_i
+        endsegment_j = seq.end_segment_j
+        if isinstance(seq, LineElementSequence_Steel_W_PanelZone_IMK):
+            spring_i = endsegment_i.internal_elems[12]
+            spring_j = endsegment_j.internal_elems[0]
+        elif isinstance(seq, LineElementSequence_IMK):
+            spring_i = endsegment_i.internal_elems[1]
+            spring_j = endsegment_j.internal_elems[0]
+        elif isinstance(seq, LineElementSequence_W_grav_sear_tab):
+            spring_i = endsegment_i.internal_elems[1]
+            spring_j = endsegment_j.internal_elems[0]
+        else:
+            return
+
+        data_i = []
+        data_j = []
+        if step == 0:
+            step = self.n_steps_success
+        for i in range(step):
+            data_i.append(self.release_force_defo[spring_i.uniq_id][i])
+            data_j.append(self.release_force_defo[spring_j.uniq_id][i])
+        data_i = np.array(data_i)
+        data_j = np.array(data_j)
+
+        fig, axs = plt.subplots(nrows=2, sharex=True)
+        axs[0].grid()
+        axs[1].grid()
+        axs[0].plot(data_i[:, 1], data_i[:, 0]/(1.e3 * 12.),
+                    color='lightblue')
+        axs[0].scatter(data_i[-1, 1], data_i[-1, 0]/(1.e3 * 12.),
+                       color='lightblue')
+        axs[1].plot(data_j[:, 1], data_j[:, 0]/(1.e3 * 12.),
+                    color='orange', label='end j')
+        axs[1].scatter(data_j[-1, 1], data_j[-1, 0]/(1.e3 * 12.),
+                       color='orange')
+        axs[0].set_title('Strong-axis bending moment (kip-ft)')
+        axs[0].set_ylabel('End i')
+        axs[1].set_ylabel('End j')
+        plt.xlabel('Rotation (rad)')
+        plt.show()
+
+
+
+    def plot_shear_deformation(self, seq, step=0):
+        """
+        Given a LineElementSequence of a type that has a panel zone,
+        plots the shear-deformation for all the analysis steps.
+        """
+        if isinstance(seq, LineElementSequence_Steel_W_PanelZone_IMK):
+            # In this case, we plot the moment-rotation relationship
+            # for the IMK springs at the two ends, and also the
+            # moment-rotation relationship of the panel zone spring
+            endsegment_i = seq.end_segment_i
+            endsegment_j = seq.end_segment_j
+            spring_i = endsegment_i.internal_elems[12]
+            spring_j = endsegment_j.internal_elems[0]
+            data_i = []
+            data_j = []
+            if step == 0:
+                step = self.n_steps_success
+            for i in range(step):
+                data_i.append(self.release_force_defo[spring_i.uniq_id][i])
+                data_j.append(self.release_force_defo[spring_j.uniq_id][i])
+            data_i = np.array(data_i)
+            data_j = np.array(data_j)
+ 
+            fig, axs = plt.subplots(nrows=2, sharex=True)
+            axs[0].grid()
+            axs[1].grid()
+            axs[0].plot(data_i[:, 1], data_i[:, 0]/(1.e3 * 12.),
+                        color='lightblue')
+            axs[0].scatter(data_i[-1, 1], data_i[-1, 0]/(1.e3 * 12.),
+                           color='lightblue')
+            axs[1].plot(data_j[:, 1], data_j[:, 0]/(1.e3 * 12.),
+                        color='orange', label='end j')
+            axs[1].scatter(data_j[-1, 1], data_j[-1, 0]/(1.e3 * 12.),
+                           color='orange')
+            axs[0].set_title('Strong-axis bending moment (kip-ft)')
+            axs[0].set_ylabel('End i')
+            axs[1].set_ylabel('End j')
+            plt.xlabel('Rotation (rad)')
+            plt.show()
+
 
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
-    def _apply_lateral_load(self, direction, node=None):
+    def _apply_lateral_load(self, direction, modeshape=None, node=None):
         distribution = self.building.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
@@ -723,10 +843,22 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         if direction == 'x':
             load_dir = np.array([1., 0., 0., 0., 0., 0.])
-        if direction == 'y':
+        elif direction == 'y':
             load_dir = np.array([0., 1., 0., 0., 0., 0.])
-        if direction == 'z':
+        elif direction == 'z':
             load_dir = np.array([0., 0., 1., 0., 0., 0.])
+        else:
+            raise ValueError('Invalid direction')
+
+        nodes = self.building.list_of_primary_nodes()
+        if modeshape is not None:
+            if direction not in ['x', 'y']:
+                raise ValueError(
+                    "Can't apply lateral loads based on the 1st " +
+                    "mode shape in the z direction.")
+            modeshape_ampl = modeshape / modeshape[-1]
+        else:
+            modeshape_ampl = np.ones(len(self.building.levels.level_list))
 
         # if a node is given, apply the incremental load on that node
         if node:
@@ -739,7 +871,8 @@ class PushoverAnalysis(NonlinearAnalysis):
                 # if there is a parent node, all load goes there
                 if lvl.parent_node:
                     ops.load(lvl.parent_node.uniq_id,
-                             *(distribution[i]*load_dir))
+                             *(distribution[i]*load_dir *
+                               modeshape_ampl[i]))
                 # if there isn't a parent node, distribute that story's load
                 # in proportion to the mass of the nodes
                 else:
@@ -748,10 +881,11 @@ class PushoverAnalysis(NonlinearAnalysis):
                     masses = masses/np.linalg.norm(masses)
                     for j, node in enumerate(node_list):
                         ops.load(node.uniq_id,
-                                 *(distribution[i]*masses[j]*load_dir))
+                                 *(distribution[i]*masses[j]*load_dir *
+                                   modeshape_ampl[i]))
 
     def run(self, direction, target_displacements,
-            control_node, displ_incr, loaded_node=None):
+            control_node, displ_incr, modeshape=None, loaded_node=None):
         if direction == 'x':
             control_DOF = 0
         elif direction == 'y':
@@ -765,7 +899,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         self._run_gravity_analysis()
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
-        self._apply_lateral_load(direction, loaded_node)
+        self._apply_lateral_load(direction, modeshape, loaded_node)
 
         ops.system('UmfPack')
         ops.numberer('Plain')
@@ -781,7 +915,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
         steps = [25, 50, 75, 100, 250, 500]
-        algor = ['Newton'] + ['Newton'] * 5
+        norm = [1.0e-6] * 5 + [1.0e-2]
+        algor = ['Newton']*6
 
         for target_displacement in target_displacements:
 
@@ -805,7 +940,8 @@ class PushoverAnalysis(NonlinearAnalysis):
                     incr = sign * abs(curr_displ - target_displacement)
                 else:
                     incr = displ_incr * scale[num_subdiv]
-                ops.test('NormDispIncr', 1e-6, steps[num_subdiv], 0)
+                ops.test('NormDispIncr', norm[num_subdiv],
+                         steps[num_subdiv], 0)
                 ops.algorithm(algor[num_subdiv])
                 ops.integrator("DisplacementControl",
                                control_node.uniq_id, control_DOF + 1,
