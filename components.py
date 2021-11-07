@@ -918,8 +918,8 @@ class EndSegment_Pinned(EndSegment):
                     self.model_as, self.geomTransf))
             self.internal_elems.append(
                 EndRelease(
-                    self.n_internal,
                     n_release,
+                    self.n_internal,
                     [1, 2, 3, 4],
                     [self.mat_fix]*4,
                     self.x_axis, self.y_axis))
@@ -1105,8 +1105,8 @@ class EndSegment_IMK(EndSegment):
                     self.model_as, self.geomTransf))
             self.internal_elems.append(
                 EndRelease(
-                    self.n_internal,
                     n_release,
+                    self.n_internal,
                     [1, 2, 3, 4, 6],
                     [self.mat_fix]*4 + [self.mat_IMK],
                     self.x_axis, self.y_axis))
@@ -1449,7 +1449,7 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment):
              self.mat_fix, self.mat_fix],
             self.x_axis, self.y_axis)
         rel_bottom_IMK_spring = EndRelease(
-            n_bottom, n_bottom_spring, [1, 2, 3, 4, 5, 6],
+            n_bottom_spring, n_bottom, [1, 2, 3, 4, 5, 6],
             [self.mat_fix, self.mat_fix, self.mat_fix,
              self.mat_fix, self.mat_fix, self.mat_IMK],
             self.x_axis, self.y_axis)
@@ -1509,8 +1509,8 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                     self.model_as, self.geomTransf))
             self.internal_elems.append(
                 EndRelease(
-                    self.n_internal,
                     n_release,
+                    self.n_internal,
                     [1, 2, 3, 4, 5, 6],
                     [self.mat_fix]*5 + [self.mat_pinching],
                     self.x_axis, self.y_axis))
@@ -2797,29 +2797,59 @@ class LineElementSequence_W_grav_sear_tab(LineElementSequence):
             # th_u_p = + gap
             # th_u_n = - gap
         else:
+            # m_max_pos = 0.35 * sec_mp
+            # m_max_neg = 0.64*0.35 * sec_mp
+            # m1_p = +0.250 * m_max_pos
+            # m1_n = -0.250 * m_max_neg
+            # m2_p = +0.90 * m_max_pos
+            # m2_n = -1.00 * m_max_neg
+            # m3_p = +1.00 * m_max_pos
+            # m3_n = -1.01 * m_max_pos
+            # m4_p = +0.530 * m_max_pos
+            # m4_n = -0.540 * m_max_neg
+            # th_1_p = 0.0042
+            # th_1_n = -0.0042
+            # th_2_p = 0.02
+            # th_2_n = -0.011
+            # th_3_p = 0.036
+            # th_3_n = -0.03
+            # th_4_p = 0.045
+            # th_4_n = -0.055
+            # rdispp = 0.40
+            # rdispn = 0.50
+            # rforcep = 0.13
+            # rforcen = 0.53
+            # uforcep = 0.01
+            # uforcen = 0.05
+            # gklim = 0.30
+            # gdlim = 0.05
+            # gflim = 0.05
+            # ge = 10
+            # dmgtype = 'energy'
+
             m_max_pos = 0.35 * sec_mp
             m_max_neg = 0.64*0.35 * sec_mp
             m1_p = +0.250 * m_max_pos
             m1_n = -0.250 * m_max_neg
             m2_p = +1.00 * m_max_pos
             m2_n = -1.00 * m_max_neg
-            m3_p = +1.001 * m_max_pos
-            m3_n = -1.001 * m_max_pos
-            m4_p = +0.530 * m_max_pos
+            m3_p = +1.01 * m_max_pos
+            m3_n = -1.01 * m_max_pos
+            m4_p = +0.540 * m_max_pos
             m4_n = -0.540 * m_max_neg
             th_1_p = 0.0042
             th_1_n = -0.0042
-            th_2_p = 0.02
+            th_2_p = 0.011
             th_2_n = -0.011
-            th_3_p = 0.039
+            th_3_p = 0.03
             th_3_n = -0.03
-            th_4_p = 0.04
+            th_4_p = 0.055
             th_4_n = -0.055
-            rdispp = 0.40
+            rdispp = 0.50
             rdispn = 0.50
-            rforcep = 0.13
+            rforcep = 0.53
             rforcen = 0.53
-            uforcep = 0.01
+            uforcep = 0.05
             uforcen = 0.05
             gklim = 0.30
             gdlim = 0.05
@@ -2829,19 +2859,28 @@ class LineElementSequence_W_grav_sear_tab(LineElementSequence):
             # th_u_p = + gap
             # th_u_n = - gap
 
-        params = [m1_p, th_1_p, m2_p, th_2_p, m3_p, th_3_p, m4_p,
-                  th_4_p, m1_n, th_1_n, m2_n, th_2_n, m3_n, th_3_n, m4_n,
-                  th_4_n, rdispp, rforcep, uforcep, rdispn, rforcen,
-                  uforcen, 0., 0., 0., 0., gklim, 0., 0., 0., 0.,
-                  gdlim, 0., 0., 0., 0., gflim, ge, dmgtype]
+        params = {'m1_p': m1_p, 'th_1_p': th_1_p,
+                  'm2_p': m2_p, 'th_2_p': th_2_p,
+                  'm3_p': m3_p, 'th_3_p': th_3_p,
+                  'm4_p': m4_p, 'th_4_p': th_4_p,
+                  'm1_n': m1_n, 'th_1_n': th_1_n,
+                  'm2_n': m2_n, 'th_2_n': th_2_n,
+                  'm3_n': m3_n, 'th_3_n': th_3_n,
+                  'm4_n': m4_n, 'th_4_n': th_4_n,
+                  'rdispp': rdispp, 'rforcep': rforcep, 'uforcep': uforcep,
+                  'rdispn': rdispn, 'rforcen': rforcen, 'uforcen': uforcen,
+                  'gk1': 0., 'gk2': 0., 'gk3': 0.,
+                  'gk4': 0., 'gklim': gklim,
+                  'gd1': 0., 'gd2': 0., 'gd3': 0., 'gd4': 0,
+                  'gdlim': gdlim, 'gF1': 0., 'gF2': 0.,
+                  'gF3': 0., 'gF4': 0., 'gflim': gflim,
+                  'ge': ge, 'dmgtype': dmgtype}
 
         spring_mat = Material(
             'auto_pinching',
             'Pinching4',
             0.00,
-            {
-                'parameters': params
-            })
+            params)
 
         # generate end segments
         self.end_segment_i = EndSegment_W_grav_shear_tab(
@@ -2861,7 +2900,7 @@ class LineElementSequence_W_grav_sear_tab(LineElementSequence):
             self.length_clear,
             self.ang, self.section,
             self.model_as, self.geomTransf,
-            -self.x_axis, -self.y_axis,
+            self.x_axis, self.y_axis,
             self.mat_fix, spring_mat)
 
 
