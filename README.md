@@ -52,4 +52,4 @@ This code is *free* code. See `LICENSE`. It relies on OpenSees, which has its ow
 
 4. I found a bug! / You really should have used XYZ / I would like to share an improvement
 
-Thank you for bringing this to my attention! Please send me an email. I am `iοαnnis_νm@berκeley.edυ`, but don't copy paste the address, for it will start dancing Zorbas and drink ouzo. Opa!
+Thank you for bringing this to my attention! Please send me an email. I am `iοαnnis_νm@berκeley.edυ`, but replace the greek characters, otherwise they will start dancing Zorbas and drinking ouzo. Opa!
