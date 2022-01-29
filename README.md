@@ -1,11 +1,15 @@
 # OpenSeesPy Building Modeler
 
+*Analyze structures like a scientist!*
+
 ![Screenshot](/img/teaser_image.png)
 
-The purpose of this module is to assist the definition, analysis, and post-processing of OpenSees models of 3D buildings.
-The module is in constant development, and new functionality is added as needed for my research. No backwards compatibility is maintained. Anyone is free and welcome to use, fork, extend and redistribute the code.
+Fancy user interfaces, while convenient, have a limited functionality. This restriction often traps the engineer in a tedious process of seemingly endless pointing and clicking to accomplish a relatively simple task. Using python to conduct structural analysis opens the gates to unlimited customization, extensibility, and automation. Beautiful plain text and the sky is the limit!
 
-Currently, the following functionality is supported:
+This module aims to assist the definition, analysis, and post-processing of OpenSees models of 3D buildings.
+The module is in constant development, and new functionality is added as needed for my research. No backward compatibility is maintained. Anyone is free and welcome to use, fork, extend and redistribute the code.
+
+## Current Functionality
 
 #### Modeling
 
@@ -14,7 +18,7 @@ Currently, the following functionality is supported:
 - Tributary area analysis for floor-to-beam load distribution
 - Element self-weight, self-mass
 - Accelerated element definitions using gridlines
-- Element seleciton and modification
+- Element selection and modification
 - AISC steel sections
 - Fiber generation of arbitrary sections
 
@@ -32,3 +36,20 @@ Currently, the following functionality is supported:
 - Visualizing the deformed shape of a given analysis step, with automatic determination of an appropriate scaling factor, with or without frame extrusions.
 - Visualizing the basic forces of the elements for a given analysis step.
 
+## FAQ
+
+1. Why isn't this on Pypi?
+
+The code is not meant to be used as a module. At least not yet. There are still parts of the code that require tinkering, depending on the intended functionality. For this reason, it's better to use the code by relative import rather than by installing it as a module.
+
+2. Your examples are confusing
+
+I'm sorry! I plan to improve the examples at some point, replacing them with a tutorial using a series of annotated jupyter notebooks. My main job is focusing on my research, so you have to figure out things on your own until I do that. I would advise using pdb and reading the docstrings.
+
+3. This is what I was looking for! Can I use this for my research/project/practice?
+
+This code is *free* code. See `LICENSE`. It relies on OpenSees, which has its own [license](https://opensees.berkeley.edu/OpenSees/copyright.php). Keep in mind, though, that future changes to this code might shamelessly break backward compatibility. I.e., your code might not run if you pull the latest changes in the future. I need that freedom to be able to experiment and add/drop functionality as needed.
+
+4. I found a bug! / You really should have used XYZ / I would like to share an improvement
+
+Thank you for bringing this to my attention! Please send me an email. I am `iοαnnis_νm@berκeley.edυ`, but don't copy paste the address, for it will start dancing Zorbas and drink ouzo. Opa!
