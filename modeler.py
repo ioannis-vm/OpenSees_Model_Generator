@@ -1697,36 +1697,14 @@ class Building:
                     floor_centroid = properties['centroid']
                     floor_mass_inertia = properties['inertia']['ir_mass']\
                         * floor_mass
-                    self_mass_centroid = np.array(
-                        [0.00, 0.00])  # excluding floor
-                    total_self_mass = 0.00
-                    for node in lvl.list_of_all_nodes():
-                        self_mass_centroid += node.coords[0:2] * node.mass[0]
-                        total_self_mass += node.mass[0]
-                    self_mass_centroid = self_mass_centroid * \
-                        (1.00/total_self_mass)
-                    total_mass = total_self_mass + floor_mass
-                    # combined
-                    centroid = [
-                        (self_mass_centroid[0] * total_self_mass +
-                         floor_centroid[0] * floor_mass) / total_mass,
-                        (self_mass_centroid[1] * total_self_mass +
-                         floor_centroid[1] * floor_mass) / total_mass
-                    ]
                     lvl.parent_node = Node(
-                        np.array([centroid[0], centroid[1],
+                        np.array([floor_centroid[0], floor_centroid[1],
                                   lvl.elevation]), "parent")
-                    lvl.parent_node.mass = np.array([total_mass,
-                                                     total_mass,
+                    lvl.parent_node.mass = np.array([floor_mass,
+                                                     floor_mass,
                                                      0.,
-                                                     0., 0., 0.])
-                    lvl.parent_node.mass[5] = floor_mass_inertia
-                    for node in lvl.list_of_all_nodes():
-                        lvl.parent_node.mass[5] += node.mass[0] * \
-                            np.linalg.norm(
-                                lvl.parent_node.coords - node.coords)**2
-                        node.mass[0] = 0.
-                        node.mass[1] = 0.
+                                                     0., 0.,
+                                                     floor_mass_inertia])
 
     def _preprocess_steel_panel_zones(self):
         """

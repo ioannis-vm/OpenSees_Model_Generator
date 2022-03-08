@@ -80,7 +80,7 @@ analysis_metadata = pushover_analysis.run(
     1./1.)
 n_plot_steps = analysis_metadata['successful steps']
 
-plot the deformed shape for any of the steps
+# plot the deformed shape for any of the steps
 plot_metadata = pushover_analysis.deformed_shape(
     step=n_plot_steps-1, scaling=0.00, extrude_frames=False)
 print(plot_metadata)

@@ -40,6 +40,10 @@ def w_mesh(b, h, tw, tf, target_area=None):
             `T` doesn't work.
     """
     area_diff = target_area - (b*tf*2.+(h-2*tf)*tw)
+    if area_diff < 0:
+        # This happens for W14X426
+        area_diff = 0.00
+        
     r = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
     # note: 0.9565 is a correction factor to account force
     # the fact that we approximate the arcs with

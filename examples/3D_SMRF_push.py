@@ -46,13 +46,13 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
             level_3="W10X100"),
         secondary_beams="W14X30",
         lateral_cols=dict(
-            level_1="W14X342",
-            level_2="W14X311",
-            level_3="W14X283"),
+            level_1="W14X426",
+            level_2="W14X426",
+            level_3="W14X342"),
         lateral_beams=dict(
-            level_1="W24X162",
-            level_2="W24X146",
-            level_3="W21X93")
+            level_1="W24X192",
+            level_2="W24X192",
+            level_3="W24X94")
         )
 
     # define materials
@@ -306,14 +306,14 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
         control_node,
         1./1., modeshape=np.array([0., 0.35, 0.68, 1.0]))
 
-    # # plot the deformed shape for any of the steps
-    # n_plot_steps = analysis_metadata['successful steps']
-    # plot_metadata = pushover_analysis.deformed_shape(
-    #     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-    # print(plot_metadata)
+    # plot the deformed shape for any of the steps
+    n_plot_steps = analysis_metadata['successful steps']
+    plot_metadata = pushover_analysis.deformed_shape(
+        step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+    print(plot_metadata)
 
     # plot pushover curve
-    # pushover_analysis.plot_pushover_curve("x", control_node)
+    pushover_analysis.plot_pushover_curve("x", control_node)
 
     deltas, vbs = pushover_analysis.table_pushover_curve('x', control_node)
     seismic_weight = np.sum(b.level_masses() * 386.22 / 1.e3)  # (kips)
@@ -386,7 +386,7 @@ deltas_fib, vbs_fib, _ = get_response(lat_bm_ends, lat_bm_modeling,
                                       grav_bm_ends)
 
 
-cs = 0.1238
+cs = 0.15115
 omEga = 3.00
 
 
@@ -411,13 +411,13 @@ plt.legend()
 plt.show()
 
 
-# analysis = analysis_objects[0]
+analysis = analysis_objects[0]
 
-# b = analysis.building
+b = analysis.building
 
-# my_col = b.levels.level_list[1].columns.element_list[4]
+my_col = b.levels.level_list[1].columns.element_list[4]
 
-# analysis.plot_moment_rot(my_col)
+analysis.plot_moment_rot(my_col)
 
 
 
@@ -606,7 +606,7 @@ plt.show()
 # # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
 # grav_springs = []
-# seqs = b.list_of_line_element_sequences()
+# seqs = analysis.building.list_of_line_element_sequences()
 # for seq in seqs:
 #     if isinstance(seq, LineElementSequence_W_grav_sear_tab):
 #         grav_springs.append(seq)
@@ -628,7 +628,7 @@ plt.show()
 #         )
 
 #     data = np.array(data)
-#     curr_max = np.max(np.abs(data[:, 1]))
+#     curr_max = np.max(np.abs(data[:, 0]))
 #     if curr_max > ult_max:
 #         ult_max = curr_max
 #         jmax = j
@@ -676,7 +676,8 @@ plt.show()
 # plt.grid()
 # plt.plot(data[:, 1], data[:, 0], color='blue',
 #          ls='solid', linewidth=0.5)
-# plt.plot(backbone_x, backbone_y, 'red', ls='dashed', label='backbone')
+# plt.scatter(data[23, 1], data[23, 0])
+# # plt.plot(backbone_x, backbone_y, 'red', ls='dashed', label='backbone')
 # # plt.axhline(y=sec_mp, label='Mult')
 # # plt.axhline(y=-sec_mp)
 # plt.ylabel('Moment $M$ (kip-in)')
@@ -685,3 +686,9 @@ plt.show()
 # plt.show()
 # # plt.savefig('figure.pdf')
 # plt.close()
+
+# nid3 = analysis.building.list_of_parent_nodes()[-1].uniq_id
+# nid2 = analysis.building.list_of_parent_nodes()[-2].uniq_id
+# u3 = analysis.node_displacements[nid3][23][0]
+# u2 = analysis.node_displacements[nid2][23][0]
+# (u3-u2)/(13*12)

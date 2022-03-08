@@ -14,6 +14,8 @@ from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
 import numpy as np
+import logging
+from datetime import datetime
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -56,6 +58,17 @@ class Analysis:
         default_factory=AnalysisResult, repr=False)
     release_force_defo: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
+    log_file: str = field(default=None)
+
+
+    def __post_init__(self):
+        logging.basicConfig(
+            filename=self.log_file,
+            format='%(asctime)s %(message)s',
+            datefmt='%m/%d/%Y %I:%M:%S %p',
+            level=logging.DEBUG)
+        logging.info('Analysis started')
+
 
     def _define_material(self, material: components.Material):
         if material.ops_material == 'Steel01':
@@ -252,16 +265,37 @@ class Analysis:
                            *elm.z_axis)
 
         if elm.section.sec_type != 'utility':
-            # syntax:
-            # beamIntegration('Lobatto', tag, secTag, N)
-            ops.beamIntegration(
-                'Lobatto', elm.uniq_id, elm.section.uniq_id, elm.n_p)
-            ops.element('dispBeamColumn',
-                        elm.uniq_id,
-                        elm.node_i.uniq_id,
-                        elm.node_j.uniq_id,
-                        elm.uniq_id,
-                        elm.uniq_id)
+            if elm.model_as['type'] == 'elastic':
+                ops.element('elasticBeamColumn', elm.uniq_id,
+                            elm.node_i.uniq_id,
+                            elm.node_j.uniq_id,
+                            elm.section.properties['A'],
+                            elm.section.material.parameters['E0'],
+                            elm.section.material.parameters['G'],
+                            elm.section.properties['J'],
+                            elm.section.properties['Iy'],
+                            elm.section.properties['Ix'],
+                            elm.uniq_id)
+                # or using the mesh properties (difference is negligible)
+                # ops.element('elasticBeamColumn', elm.uniq_id,
+                #             elm.node_i.uniq_id,
+                #             elm.node_j.uniq_id,
+                #             elm.section.mesh.geometric_properties()['area'],
+                #             elm.section.material.parameters['E0'],
+                #             elm.section.material.parameters['G'],
+                #             elm.section.properties['J'],
+                #             elm.section.mesh.geometric_properties()['inertia']['iyy'],
+                #             elm.section.mesh.geometric_properties()['inertia']['ixx'],
+                #             elm.uniq_id)
+            else:
+                ops.beamIntegration(
+                    'Lobatto', elm.uniq_id, elm.section.uniq_id, elm.n_p)
+                ops.element('forceBeamColumn',
+                            elm.uniq_id,
+                            elm.node_i.uniq_id,
+                            elm.node_j.uniq_id,
+                            elm.uniq_id,
+                            elm.uniq_id)
         else:
             ops.element('elasticBeamColumn', elm.uniq_id,
                         elm.node_i.uniq_id,
@@ -303,7 +337,8 @@ class Analysis:
             define_node(elm.node_j, defined_nodes)
 
             # define section
-            if elm.section.uniq_id not in defined_sections:
+            if (elm.section.uniq_id not in defined_sections) and \
+               elm.model_as['type'] != 'elastic':
                 sec = elm.section
                 # we don't define utility sections in OpenSees
                 # (we instead use the appropriate elements)
@@ -592,6 +627,7 @@ class LinearAnalysis(Analysis):
     def _run_gravity_analysis(self):
         ops.system('UmfPack')
         ops.numberer('Plain')
+        # ops.constraints('Penalty', 1.e4, 1.e4)
         ops.constraints('Transformation')
         ops.test('NormDispIncr', 1.0e-8, 20, 3)
         ops.algorithm('Newton')
@@ -644,8 +680,11 @@ class ModalAnalysis(LinearAnalysis):
         self._to_OpenSees_domain()
         # tags = ops.getNodeTags()
         # print(len(tags))
+        # ops.constraints('Penalty', 1.e9, 1.e9)
+        ops.constraints('Transformation')
+        ops.system("UmfPack")
+        # note: using SparseSYM results in wrong eigendecomposition
         eigValues = np.array(ops.eigen(
-            '-genBandArpack',
             self.num_modes))
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
         self._read_node_displacements()
@@ -673,14 +712,17 @@ class NonlinearAnalysis(Analysis):
     n_steps_success: int = field(default=0)
 
     def _run_gravity_analysis(self):
-        ops.system('UmfPack')
+        ops.system('SparseSYM')
         ops.numberer('Plain')
+        # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1.0e-8, 100, 3)
-        ops.algorithm('Newton')
+        ops.test('NormDispIncr', 1.0e-6, 100, 3)
+        ops.algorithm('RaphsonNewton')
         ops.integrator('LoadControl', 1)
         ops.analysis('Static')
-        ops.analyze(1)
+        check = ops.analyze(1)
+        if check != 0:
+            raise ValueError('Analysis Failed')
 
     def _acceptance_criteria(self):
         for elm in self.building.list_of_line_elements():
@@ -903,6 +945,7 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         ops.system('UmfPack')
         ops.numberer('Plain')
+        # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
         curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
         self._read_OpenSees_results()
@@ -918,67 +961,71 @@ class PushoverAnalysis(NonlinearAnalysis):
         norm = [1.0e-6] * 5 + [1.0e-2]
         algor = ['Newton']*6
 
-        for target_displacement in target_displacements:
+        try:
 
-            if total_fail:
-                break
+            for target_displacement in target_displacements:
 
-            # determine push direction
-            if curr_displ < target_displacement:
-                displ_incr = abs(displ_incr)
-                sign = +1.00
-            else:
-                displ_incr = -abs(displ_incr)
-                sign = -1.00
+                if total_fail:
+                    break
 
-            print('entering loop', target_displacement)
-            while curr_displ * sign < target_displacement * sign:
-
-                # determine increment
-                if abs(curr_displ - target_displacement) < \
-                   abs(displ_incr) * scale[num_subdiv]:
-                    incr = sign * abs(curr_displ - target_displacement)
+                # determine push direction
+                if curr_displ < target_displacement:
+                    displ_incr = abs(displ_incr)
+                    sign = +1.00
                 else:
-                    incr = displ_incr * scale[num_subdiv]
-                ops.test('NormDispIncr', norm[num_subdiv],
-                         steps[num_subdiv], 0)
-                ops.algorithm(algor[num_subdiv])
-                ops.integrator("DisplacementControl",
-                               control_node.uniq_id, control_DOF + 1,
-                               incr)
-                ops.analysis("Static")
-                flag = ops.analyze(1)
-                if flag != 0:
-                    # analysis failed
-                    if num_subdiv == len(scale) - 1:
-                        # can't refine further
-                        print()
-                        print('===========================')
-                        print('Analysis failed to converge')
-                        print('===========================')
-                        print()
-                        total_fail = True
-                        break
+                    displ_incr = -abs(displ_incr)
+                    sign = -1.00
+
+                print('entering loop', target_displacement)
+                while curr_displ * sign < target_displacement * sign:
+
+                    # determine increment
+                    if abs(curr_displ - target_displacement) < \
+                       abs(displ_incr) * scale[num_subdiv]:
+                        incr = sign * abs(curr_displ - target_displacement)
                     else:
-                        # can still reduce step size
-                        num_subdiv += 1
-                        # how many times to run with reduced step size
-                        num_times = 50
-                else:
-                    # analysis was successful
-                    if num_times != 0:
-                        num_times -= 1
-                    n_steps_success += 1
-                    self._read_OpenSees_results()
-                    # self._acceptance_criteria()
-                    curr_displ = ops.nodeDisp(
-                        control_node.uniq_id, control_DOF+1)
-                    print('Target displacement: %.2f | Current: %.4f' %
-                          (target_displacement, curr_displ), end='\r')
-                    if num_subdiv != 0:
-                        if num_times == 0:
-                            num_subdiv -= 1
-                            num_times = 50
+                        incr = displ_incr * scale[num_subdiv]
+                    ops.test('NormDispIncr', norm[num_subdiv],
+                             steps[num_subdiv], 0)
+                    ops.algorithm(algor[num_subdiv])
+                    ops.integrator("DisplacementControl",
+                                   control_node.uniq_id, control_DOF + 1,
+                                   incr)
+                    ops.analysis("Static")
+                    flag = ops.analyze(1)
+                    if flag != 0:
+                        # analysis failed
+                        if num_subdiv == len(scale) - 1:
+                            # can't refine further
+                            print()
+                            print('===========================')
+                            print('Analysis failed to converge')
+                            print('===========================')
+                            print()
+                            total_fail = True
+                            break
+                        else:
+                            # can still reduce step size
+                            num_subdiv += 1
+                            # how many times to run with reduced step size
+                            num_times = 10
+                    else:
+                        # analysis was successful
+                        if num_times != 0:
+                            num_times -= 1
+                        n_steps_success += 1
+                        self._read_OpenSees_results()
+                        # self._acceptance_criteria()
+                        curr_displ = ops.nodeDisp(
+                            control_node.uniq_id, control_DOF+1)
+                        print('Target displacement: %.2f | Current: %.4f' %
+                              (target_displacement, curr_displ), end='\r')
+                        if num_subdiv != 0:
+                            if num_times == 0:
+                                num_subdiv -= 1
+                                num_times = 10
+        except KeyboardInterrupt:
+            print("Analysis interrupted")
         # finished
         self._read_OpenSees_results()
         # self._acceptance_criteria()
@@ -1057,6 +1104,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             file_time_incr,
             finish_time=0.00,
             damping_ratio=0.05,
+            num_modes=None,
             printing=True,
             data_retention='default'):
         """
@@ -1074,6 +1122,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                             See the docstring of `_read_OpenSees_results`.
         """
 
+        logging.info('Running NLTH analysis')
         nss = []
         if filename_x:
             gm_vals_x = np.genfromtxt(filename_x)
@@ -1084,6 +1133,10 @@ class NLTHAnalysis(NonlinearAnalysis):
         if filename_z:
             gm_vals_z = np.genfromtxt(filename_z)
             nss.append(len(gm_vals_z))
+
+        logging.info(f'filename_x: {filename_x}')
+        logging.info(f'filename_y: {filename_y}')
+        logging.info(f'filename_z: {filename_z}')
 
         num_gm_points = np.min(np.array(nss))
         duration = num_gm_points * file_time_incr
@@ -1104,13 +1157,19 @@ class NLTHAnalysis(NonlinearAnalysis):
         else:
             target_timestamp = finish_time
 
+        logging.info('Defining model in OpenSees')
         self._to_OpenSees_domain()
 
         # gravity analysis
+        logging.info('Defining dead loads')
         self._define_dead_load()
+        logging.info('Starting analysis')
         self._run_gravity_analysis()
         self._read_OpenSees_results(data_retention)
         n_steps_success = 1
+
+        import pdb
+        pdb.set_trace()
 
         # time-history analysis
         ops.wipeAnalysis()
@@ -1118,63 +1177,182 @@ class NLTHAnalysis(NonlinearAnalysis):
         curr_time = 0.00
         self.time_vector.append(curr_time)
 
+        ops.numberer('Plain')
+        # ops.constraints('Penalty', 1.e15, 1.e15)
+        ops.constraints('Transformation')
+
+        # define damping
+        # if fundamental_period is None:
+        #     s = float(np.sqrt(ops.eigen('-genBandArpack', 3))[0])
+        #     # ops.rayleigh(0., 0., 0., 2. * damping_ratio / s)
+        #     ops.rayleigh(0., 0., 0., 2. * damping_ratio / s)
+        #     print('T = %.3f s' % (2.00 * np.pi / s))
+        # else:
+        #     ops.rayleigh(
+        #         0.,
+        #         0.,
+        #         0.,
+        #         2. * damping_ratio / (2. * np.pi / fundamental_period)
+        #     )
+
+        logging.info(f'Running eigenvalue analysis with {num_modes} modes')
+        ops.system("UmfPack")
+        ops.eigen(num_modes)
+        logging.info(f'Eigenvalue analysis finished')
+        ops.modalDamping(damping_ratio)
+        logging.info(f'{damping_ratio*100:.2f}% modal damping defined')
+
+
+        ops.system("SparseSYM")
+        ops.test('NormDispIncr', 1e-6, 50, 0)
+        ops.algorithm("KrylovNewton")
+        # ops.integrator("TRBDF2")
+        ops.analysis("Transient")
+
+
         self.define_lateral_load_pattern(
             filename_x,
             filename_y,
             filename_z,
             file_time_incr,
-            damping_ratio)
-
-        ops.system("UmfPack")
-        ops.numberer('Plain')
-        ops.constraints('Transformation')
-        ops.test('NormDispIncr', 1e-6, 50, 0)
-        ops.algorithm("Newton")
-        ops.integrator('Newmark',  0.5,  0.25)
-        ops.analysis("Transient")
+            damping_ratio,
+            num_modes)
 
         num_subdiv = 0
         num_times = 0
+        analysis_failed = False
 
-        scale = [1.0, 0.01, 0.001]
+        scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
 
-        while curr_time + common.EPSILON < target_timestamp:
+        # for analysis speed stats:
+        total_step_count = 0
+        now = datetime.now()
+        import time
+        time.sleep(2)
 
-            check = ops.analyze(
-                1, analysis_time_increment * scale[num_subdiv])
+        try:
 
-            if check != 0:
-                # analysis failed
-                if num_subdiv == len(scale) - 1:
-                    print()
-                    print('===========================')
-                    print('Analysis failed to converge')
-                    print('===========================')
-                    print()
-                    break
+            while curr_time + common.EPSILON < target_timestamp:
+
+                # # TODO create a method using this code
+                # # to automate the fastest seup selection process
+                # # debug
+                # systems = ['SparseSYM', 'UmfPack']
+                # algos = ['NewtonLineSearch', 'ModifiedNewton', 'KrylovNewton', 'SecantNewton', 'RaphsonNewton', 'PeriodicNewton', 'BFGS', 'Broyden']
+                # integrs = [('Newmark', 0.50, 0.25), ('HHT', 1.0), ('GeneralizedAlpha', 1., 1.), ('TRBDF2',)]
+
+                # print('Testing systems')
+
+                # times = []
+                # best_sys = 'UmfPack'
+                # best_algo = 'Newton'
+                # best_integ = ('Newmark', 0.50, 0.25)
+                # for syst in systems:
+                #     ops.system(syst)
+                #     ops.algorithm(best_algo)
+                #     ops.integrator(*best_integ)
+
+                #     tt = datetime.now()
+                #     check = ops.analyze(
+                #         20, analysis_time_increment * scale[num_subdiv])
+                #     ttt = datetime.now()
+                #     times.append(ttt - tt)
+                # mn = min(times)
+                # imn = times.index(mn)
+                # best_sys = systems[imn]
+                # print()
+                # print(times)
+                # print(best_sys)
+                # print()
+
+                # times = []
+                # for algo in algos:
+                #     ops.system(best_sys)
+                #     ops.algorithm(algo)
+                #     ops.integrator(*best_integ)
+                #     tt = datetime.now()
+                #     check = ops.analyze(
+                #         20, analysis_time_increment * scale[num_subdiv])
+                #     ttt = datetime.now()
+                #     times.append(ttt - tt)
+                # mn = min(times)
+                # imn = times.index(mn)
+                # best_algo = algos[imn]
+                # print()
+                # print(times)
+                # print(best_algo)
+                # print()
+
+
+                # times = []
+                # for integ in integrs:
+                #     ops.system(best_sys)
+                #     ops.algorithm(best_algo)
+                #     ops.integrator(*integ)
+                #     tt = datetime.now()
+                #     check = ops.analyze(
+                #         20, analysis_time_increment * scale[num_subdiv])
+                #     ttt = datetime.now()
+                #     times.append(ttt - tt)
+                # mn = min(times)
+                # imn = times.index(mn)
+                # best_integ = integrs[imn]
+                # print()
+                # print(times)
+                # print(best_integ)
+                # print()
+
+                check = ops.analyze(
+                    1, analysis_time_increment * scale[num_subdiv])
+
+                # analysis speed stats
+                total_step_count += 1
+                speed = total_step_count / (datetime.now() - now).seconds
+                if total_step_count % 50 == 0:
+                    logging.info(f'Average speed: {speed:.2f} steps/s')
+                    print(f'Average speed: {speed:.2f} steps/s')
+
+                if check != 0:
+                    # analysis failed
+                    if num_subdiv == len(scale) - 1:
+                        print()
+                        print('===========================')
+                        print('Analysis failed to converge')
+                        print('===========================')
+                        print()
+                        logging.warning(
+                            f"Analysis failed at time {curr_time:.5f}")
+                        analysis_failed = True
+                        break
+                    else:
+                        # can still reduce step size
+                        num_subdiv += 1
+                        # how many times to run with reduced step size
+                        num_times = 10
                 else:
-                    # can still reduce step size
-                    num_subdiv += 1
-                    # how many times to run with reduced step size
-                    num_times = 100
-            else:
-                # analysis was successful
-                if num_times != 0:
-                    num_times -= 1
-                n_steps_success += 1
-                curr_time = ops.getTime()
-                self.time_vector.append(curr_time)
-                self._read_OpenSees_results(data_retention)
-                if printing:
-                    print('Target timestamp: %.2f s | Current: %.4f s' %
-                          (target_timestamp, curr_time), end='\r')
-                if num_subdiv != 0:
-                    if num_times == 0:
-                        num_subdiv -= 1
-                        num_times = 100
+                    # analysis was successful
+                    if num_times != 0:
+                        num_times -= 1
+                    n_steps_success += 1
+                    curr_time = ops.getTime()
+                    self.time_vector.append(curr_time)
+                    self._read_OpenSees_results(data_retention)
+                    if printing:
+                        print('Target timestamp: %.2f s | Current: %.4f s' %
+                              (target_timestamp, curr_time), end='\r')
+                    if num_subdiv != 0:
+                        if num_times == 0:
+                            num_subdiv -= 1
+                            num_times = 10
 
-        metadata = {'successful steps': n_steps_success}
+        except KeyboardInterrupt:
+            print("Analysis interrupted")
+            logging.warning("Analysis interrupted")
+
+        metadata = {'successful steps': n_steps_success,
+                    'analysis_finished_successfully': not analysis_failed}
         self.n_steps_success = n_steps_success
+        logging.info('Analysis finished')
 
         return metadata
 
@@ -1257,12 +1435,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             filename_y,
             filename_z,
             file_time_incr,
-            damping_ratio):
-
-        # define damping
-        s = float(np.sqrt(ops.eigen('-genBandArpack', 3))[0])
-        ops.rayleigh(0., 0., 0., 2. * damping_ratio / s)
-        print('T = %.3f s' % (2.00 * np.pi / s))
+            damping_ratio,
+            num_modes=3):
 
         error = True
         if filename_x:
