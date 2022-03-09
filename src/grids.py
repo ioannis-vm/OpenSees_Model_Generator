@@ -16,6 +16,23 @@ import numpy as np
 from utility import common
 
 
+def point_exists_in_list(pt: np.ndarray,
+                         pts: list[np.ndarray]) -> bool:
+    """
+    Determines whether a given list containing points
+    (represented with numpy arrays) contains a point
+    that is equal (with a fudge factor) to a given point.
+    Args:
+        pt (np.ndarray): A numpy array to look for
+        pts (list[np.ndarray]): A list to search for pt
+    """
+    for other in pts:
+        dist = np.linalg.norm(pt - other)
+        if dist < common.EPSILON:
+            return True
+    return False
+
+
 @dataclass
 @total_ordering
 class GridLine:
