@@ -8,7 +8,7 @@ https://plotly.com/python/reference/
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
+# https://github.com/ioannis-vm/OpenSees_Model_Builder/
 
 # https://www.google.com/search?q=color+picker
 GRID_COLOR = '#d1d1d1'

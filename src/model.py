@@ -1,5 +1,5 @@
 """
-Building Modeler for OpenSeesPy ~ Modeler module
+Model Builder for OpenSeesPy ~ Model module
 """
 
 #   __                 UC Berkeley
@@ -8,7 +8,7 @@ Building Modeler for OpenSeesPy ~ Modeler module
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
+# https://github.com/ioannis-vm/OpenSees_Model_Builder
 
 from __future__ import annotations
 from dataclasses import dataclass, field

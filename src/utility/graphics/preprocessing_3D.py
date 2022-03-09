@@ -8,7 +8,7 @@ https://plotly.com/python/reference/
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
+# https://github.com/ioannis-vm/OpenSees_Model_Builder/
 
 import plotly.graph_objects as go
 import numpy as np

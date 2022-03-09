@@ -1,5 +1,5 @@
 """
-Building Modeler for OpenSeesPy ~ Gridlines
+Model Builder for OpenSees ~ Gridlines
 """
 
 #   __                 UC Berkeley
@@ -8,7 +8,7 @@ Building Modeler for OpenSeesPy ~ Gridlines
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
+# https://github.com/ioannis-vm/OpenSees_Model_Builder
 
 from dataclasses import dataclass, field
 from functools import total_ordering

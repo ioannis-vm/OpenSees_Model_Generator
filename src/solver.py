@@ -1,5 +1,5 @@
 """
-Building Modeler for OpenSeesPy ~ Solver module
+Model Builder for OpenSeesPy ~ Solver module
 """
 
 #   __                 UC Berkeley
@@ -8,7 +8,7 @@ Building Modeler for OpenSeesPy ~ Solver module
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler
+# https://github.com/ioannis-vm/OpenSees_Model_Builder
 
 from typing import List, TypedDict
 from dataclasses import dataclass, field
@@ -19,9 +19,9 @@ from datetime import datetime
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pandas as pd
-import modeler
+import model
 import components
-from modeler import Building
+from model import Building
 from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequence_Steel_W_PanelZone_IMK
 from components import LineElementSequence_W_grav_sear_tab
@@ -171,7 +171,7 @@ class Analysis:
         else:
             raise ValueError("Unsupported material:" + material.ops_material)
 
-    def _define_node(self, node: modeler.Node):
+    def _define_node(self, node: model.Node):
         ops.node(node.uniq_id, *node.coords)
 
         def superimpose_restraints(c_1, c_2):
@@ -251,7 +251,7 @@ class Analysis:
                       area,
                       sec.material.uniq_id)
 
-    def _define_line_element(self, elm: modeler.LineElement):
+    def _define_line_element(self, elm: model.LineElement):
 
         if np.linalg.norm(elm.offset_i) + \
            np.linalg.norm(elm.offset_j) > common.EPSILON:

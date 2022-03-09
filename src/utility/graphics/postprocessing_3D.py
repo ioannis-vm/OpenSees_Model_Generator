@@ -8,7 +8,7 @@ https://plotly.com/python/reference/
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
+# https://github.com/ioannis-vm/OpenSees_Model_Builder/
 
 import plotly.graph_objects as go
 import numpy as np
@@ -30,7 +30,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
     Args:
-        element ('modeler.LineElement'): A line element
+        element ('model.LineElement'): A line element
         u_i (np.ndarray): 3 displacements at end i, global system
         r_i (np.ndarray): 3 rotations at end i, global system
         u_j, r_j: similar to u_i, r_i.

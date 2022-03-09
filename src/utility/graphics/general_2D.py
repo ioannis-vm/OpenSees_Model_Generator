@@ -8,7 +8,7 @@ Library for consistent all-purpose 2D plots
 # /\_/ /\ V / /\/\ \
 # \___/  \_/\/    \/   April 2021
 #
-# https://github.com/ioannis-vm/OpenSeesPy_Building_Modeler/
+# https://github.com/ioannis-vm/OpenSees_Model_Builder/
 
 #############
 # Resources #
