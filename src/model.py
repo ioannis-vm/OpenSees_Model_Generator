@@ -31,7 +31,8 @@ from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequence_Steel_W_PanelZone_IMK
 from components import LineElementSequence_W_grav_sear_tab
 from components import LineElementSequences
-from components import Sections, Materials
+from material import Materials
+from section import Sections
 from utility import common
 from utility import trib_area_analysis
 from utility import mesher
