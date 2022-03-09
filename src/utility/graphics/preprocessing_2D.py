@@ -17,7 +17,7 @@ import numpy as np
 from utility.graphics import common
 
 
-def plot_2D_level_geometry(building: 'Building',
+def plot_2D_level_geometry(building: 'Model',
                            lvlname: str,
                            extrude_frames=False):
     fig = plt.figure()

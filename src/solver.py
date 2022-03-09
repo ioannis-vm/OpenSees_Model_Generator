@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import model
 import components
-from model import Building
+from model import Model
 from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequence_Steel_W_PanelZone_IMK
 from components import LineElementSequence_W_grav_sear_tab
@@ -43,7 +43,7 @@ class AnalysisResult(TypedDict):
 @dataclass
 class Analysis:
 
-    building: Building = field(repr=False)
+    building: Model = field(repr=False)
     node_displacements: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
     node_velocities: AnalysisResult = field(

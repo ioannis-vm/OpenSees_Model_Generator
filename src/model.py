@@ -599,7 +599,7 @@ class Selection:
 
 
 @dataclass
-class Building:
+class Model:
     """
     This class manages building objects.
     Attributes:

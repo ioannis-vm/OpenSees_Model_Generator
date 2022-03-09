@@ -551,7 +551,7 @@ def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
     })
 
 
-def plot_building_geometry(building: 'Building',
+def plot_building_geometry(building: 'Model',
                            extrude_frames=False,
                            offsets=True,
                            gridlines=True,
