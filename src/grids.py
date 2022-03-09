@@ -145,3 +145,110 @@ class GridLine:
             return bool(0.00 <= dot_normalized <= 1.00)
         else:
             return False
+
+
+@dataclass
+class GridSystem:
+    """
+    This class is a collector for the gridlines, and provides
+    methods that perform operations using gridlines.
+    """
+
+    grids: list[GridLine] = field(default_factory=list)
+
+    def get(self, gridline_tag: str):
+        """
+        Returns the gridline with the given tag,
+        or None if there is no gridline with the
+        specified tag.
+        """
+        result = None
+        for gridline in self.grids:
+            if gridline.tag == gridline_tag:
+                result = gridline
+        return result
+
+    def add(self, grdl: "GridLine"):
+        """
+        Add a gridline in the grid system,
+        if it is not already in
+        """
+        if grdl not in self.grids:
+            self.grids.append(grdl)
+        else:
+            raise ValueError('Gridline already exists: '
+                             + repr(grdl))
+        self.grids.sort()
+
+    def remove(self, grdl: "GridLine"):
+        """
+        Remove a gridline from the grid system
+        """
+        self.grids.remove(grdl)
+
+    def clear(self, tags: list[str]):
+        """
+        Removes the gridlines in the given list,
+        specified by their tag.
+        """
+        for tag in tags:
+            grdl = self.get(tag)
+            self.grids.remove(grdl)
+
+    def clear_all(self):
+        """
+        Removes all gridlines.
+        """
+        self.grids = []
+
+    def intersection_points(self):
+        """
+        Returns a list of all the points
+        defined by gridline intersections
+        """
+        pts = []  # intersection points
+        for i, grd1 in enumerate(self.grids):
+            for j in range(i+1, len(self.grids)):
+                grd2 = self.grids[j]
+                pt = grd1.intersect(grd2)
+                if pt is not None:  # if an intersection point exists
+                    # and is not already in the list
+                    if not point_exists_in_list(pt, pts):
+                        pts.append(pt)
+        return pts
+
+    def intersect(self, grd: GridLine):
+        """
+        Returns a list of all the points
+        defined by the intersection of a given
+        gridline with all the other gridlines
+        in the gridsystem
+        """
+        pts = []  # intersection points
+        for other_grd in self.grids:
+            # ignore current grid
+            if other_grd == grd:
+                continue
+            # get the intersection point, if any
+            pt = grd.intersect(other_grd)
+            if pt is not None:  # if there is an intersection
+                # and is not already in the list
+                if not point_exists_in_list(pt, pts):
+                    pts.append(pt)
+            # We also need to sort the list.
+            # We do this by sorting the instersection points
+            # by their distance from the current gridline's
+            # starting point.
+            distances = [np.linalg.norm(pt-grd.start_np)
+                         for pt in pts]
+            pts = [x for _, x in sorted(zip(distances, pts))]
+        return pts
+
+    def __repr__(self):
+        out = "The building has " + \
+            str(len(self.grids)) + " gridlines\n"
+        for grd in self.grids:
+            out += repr(grd) + "\n"
+        return out
+
+
