@@ -22,6 +22,7 @@ import pandas as pd
 import model
 import components
 from model import Model
+from node import Node
 from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequence_Steel_W_PanelZone_IMK
 from components import LineElementSequence_W_grav_sear_tab

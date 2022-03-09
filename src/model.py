@@ -17,7 +17,7 @@ from typing import Optional
 import json
 import numpy as np
 from grids import GridLine
-from components import Node, Nodes
+from node import Node, Nodes
 from components import LineElement
 from components import EndRelease
 from components import LineElementSequence
