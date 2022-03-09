@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 import json
 import numpy as np
 from grids import GridLine, GridSystem
-from node import Node, Nodes
+from node import Node
 from components import LineElement
 from components import EndRelease
 from components import LineElementSequence
@@ -28,11 +28,11 @@ from components import LineElementSequence_IMK
 from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequence_Steel_W_PanelZone_IMK
 from components import LineElementSequence_W_grav_sear_tab
-from components import LineElementSequences
 from material import Materials
 from section import Sections
 from level import Level, Levels
 from group import Group, Groups
+from selection import Selection
 from utility import common
 from utility import trib_area_analysis
 from utility import mesher
@@ -42,88 +42,6 @@ from utility.graphics import preprocessing_2D
 
 # pylint: disable=unsubscriptable-object
 # pylint: disable=invalid-name
-
-
-@dataclass
-class Selection:
-    """
-    This class enables the ability to select elements
-    to modify them.
-
-    """
-    nodes: Nodes = field(default_factory=Nodes, repr=False)
-    beams: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    columns: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    braces: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    line_elements: list[LineElement] = field(
-        default_factory=list, repr=False)
-
-    def clear(self):
-        """
-        Clears all selected elements.
-        """
-        self.nodes = Nodes()
-        self.beams = LineElementSequences()
-        self.columns = LineElementSequences()
-        self.braces = LineElementSequences()
-        self.line_elements = []
-
-    #############################################
-    # Methods that modify selected elements     #
-    #############################################
-    def add_UDL(self, udl: np.ndarray):
-        """
-        Adds the specified UDL to the selected
-        line elements.
-        """
-        for line_element in self.line_elements:
-            line_element.add_udl_glob(udl, ltype='other')
-
-    #############################################
-    # Methods that return objects               #
-    #############################################
-
-    def list_of_line_element_sequences(self):
-        """
-        Returns all selected LineElementSequences.
-        """
-        return self.beams.element_list + \
-            self.columns.element_list + self.braces.element_list
-
-    def list_of_line_elements(self):
-        sequences = self.list_of_line_element_sequences()
-        result = []
-        for sequence in sequences:
-            for elm in sequence:
-                if isinstance(elm, LineElement):
-                    result.append(elm)
-        result.extend(self.line_elements)
-        return result
-
-    def list_of_primary_nodes(self):
-        """
-        Returns a list of unique primary nodes on which all the
-        selected elements are connected to.
-        """
-        gather = []
-        for elem in self.list_of_line_element_sequences():
-            gather.extend(elem.primary_nodes())
-        # remove duplicates
-        result = []
-        return [result.append(x) for x in gather if x not in gather]
-
-    def list_of_internal_nodes(self):
-        """
-        Returns a list of all secondary nodes that exist
-        in the selected elements.
-        """
-        result = []
-        for elem in self.list_of_line_element_sequences():
-            result.extend(elem.internal_nodes())
-        return result
 
 
 @dataclass
