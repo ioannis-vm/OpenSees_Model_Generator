@@ -13,6 +13,7 @@ Model builder for OpenSees ~ Node
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import count
+from collections import OrderedDict
 import numpy as np
 from utility import common
 
@@ -94,38 +95,10 @@ class Nodes:
     methods that perform operations using nodes.
     """
 
-    node_list: list[Node] = field(default_factory=list)
+    registry: OrderedDict[int, Node] = field(default_factory=OrderedDict)
 
     def add(self, node: Node):
         """
-        Add a node in the nodes collection,
-        if it does not already exist
+        Add a node in the nodes collection
         """
-        if node not in self.node_list:
-            self.node_list.append(node)
-        else:
-            raise ValueError('Node already exists: '
-                             + repr(node))
-        self.node_list.sort()
-
-    def remove(self, node: Node):
-        """
-        Remove a node from the nodes collection,
-        if it was there.
-        """
-        if node in self.node_list:
-            self.node_list.remove(node)
-        self.node_list.sort()
-
-    def clear(self):
-        """
-        Removes all nodes
-        """
-        self.node_list = []
-
-    def __repr__(self):
-        out = str(len(self.node_list)) + " nodes\n"
-        for node in self.node_list:
-            out += repr(node) + "\n"
-        return out
-
+        self.registry[node.uniq_id] = node

@@ -987,7 +987,7 @@ class Model:
     def list_of_primary_nodes(self):
         list_of_nodes = []
         for lvl in self.levels.registry.values():
-            for node in lvl.nodes_primary.node_list:
+            for node in lvl.nodes_primary.registry.values():
                 list_of_nodes.append(node)
         return list_of_nodes
 

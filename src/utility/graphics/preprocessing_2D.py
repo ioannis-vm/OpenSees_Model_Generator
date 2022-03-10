@@ -100,8 +100,8 @@ def plot_2D_level_geometry(building: 'Model',
 
     # draw the nodes
     points = []
-    if level.nodes_primary.node_list:
-        for nd in level.nodes_primary.node_list:
+    if level.nodes_primary.registry.values():
+        for nd in level.nodes_primary.registry.values():
             points.append(nd.coords)
         points_np = np.array(points)
         ax.scatter(points_np[:, 0], points_np[:, 1],

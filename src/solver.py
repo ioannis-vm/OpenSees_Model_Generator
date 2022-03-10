@@ -697,9 +697,9 @@ class ModalAnalysis(LinearAnalysis):
             data['names'].append(lvl.name)
             disp = np.zeros(6)
             # TODO debug  - something may be wrong here.
-            for node in lvl.nodes_primary.node_list:
+            for node in lvl.nodes_primary.registry.values():
                 disp += np.array(self.node_displacements[node.uniq_id][mode-1])
-            disp /= float(len(lvl.nodes_primary.node_list))
+            disp /= float(len(lvl.nodes_primary.registry))
             data['ux'].append(disp[0])
             data['uy'].append(disp[1])
         data['ux'] /= max(np.max(data['ux']), np.max(data['uy']))
@@ -919,7 +919,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 # if there isn't a parent node, distribute that story's load
                 # in proportion to the mass of the nodes
                 else:
-                    node_list = lvl.nodes_primary.node_list
+                    node_list = lvl.nodes_primary.registry.values()
                     masses = np.array([n.mass[0] for n in node_list])
                     masses = masses/np.linalg.norm(masses)
                     for j, node in enumerate(node_list):

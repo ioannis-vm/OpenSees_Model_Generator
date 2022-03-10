@@ -125,7 +125,7 @@ class Level:
         """
         candidate_pt = np.array([x_coord, y_coord,
                                  self.elevation])
-        for other_node in self.nodes_primary.node_list:
+        for other_node in self.nodes_primary.registry.values():
             other_pt = other_node.coords
             if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
                 return other_node
@@ -147,14 +147,14 @@ class Level:
         self.surface_DL = load_per_area
 
     def list_of_primary_nodes(self):
-        return self.nodes_primary.node_list
+        return self.nodes_primary.registry.values()
 
     def list_of_all_nodes(self):
         """
         Returns a list containing all the nodes
         of that level *except* the parent node.
         """
-        primary = self.nodes_primary.node_list
+        primary = list(self.nodes_primary.registry.values())
         internal = []
         for col in self.columns.element_list:
             internal.extend(col.internal_nodes())

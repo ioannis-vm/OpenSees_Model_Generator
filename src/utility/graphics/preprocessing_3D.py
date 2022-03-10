@@ -202,7 +202,7 @@ def add_data__diaphragm_lines(dt, lvl):
     x = []
     y = []
     z = []
-    for node in lvl.nodes_primary.node_list:
+    for node in lvl.nodes_primary.registry.values():
         x.extend(
             (node.coords[0], mnode.coords[0], None)
         )
