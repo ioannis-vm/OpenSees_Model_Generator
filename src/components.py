@@ -165,7 +165,7 @@ class LineElement:
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
         self.len_proportion = self.length_clear() / self.len_parent
-        # note: we are using dispBeamColumn, so 2 integration points
+        # note: for dispBeamColumn, 2 integration points
         # suffice. When using forceBeamColumn, they should be increased.
         if self.len_proportion > 0.75:
             n_p = 2
