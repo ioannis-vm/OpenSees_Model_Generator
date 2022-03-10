@@ -12,18 +12,14 @@ Model builder for OpenSees ~ Section
 
 from typing import Optional
 from dataclasses import dataclass, field
-from functools import total_ordering
 from itertools import count
+from collections import OrderedDict
 import numpy as np
-from grids import GridLine
-from node import Node
 from material import Material
-from utility import common
-from utility import transformations
 from utility import mesher
 from utility import mesher_section_gen
 
-_ids = count(0)
+section_ids = count(0)
 
 
 @dataclass
@@ -70,7 +66,7 @@ class Section:
     properties: Optional[dict] = field(default=None, repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(_ids)
+        self.uniq_id = next(section_ids)
 
     def __eq__(self, other):
         return (self.name == other.name)
@@ -124,42 +120,31 @@ class Sections:
     This class is a collector for sections.
     """
 
-    section_list: list[Section] = field(default_factory=list)
+    registry: OrderedDict[str, Section] = field(
+        default_factory=OrderedDict, repr=False)
     active: Optional[Section] = field(default=None, repr=False)
 
     def __post_init__(self):
         """
         Add a default section for rigid links
+        and a dummy section used when plotting panel zones
         """
-        self.section_list.append(
-            Section('utility', 'rigid', None,
-                    None, mesher_section_gen.rect_mesh(1.00, 1.00))
-        )
-        self.section_list.append(
-            Section('utility', 'dummy_PZ', None,
-                    None, None)
-        )
+        self.registry['rigid'] = Section(
+            'utility', 'rigid', None,
+            None, mesher_section_gen.rect_mesh(1.00, 1.00))
+        self.registry['dummy_PZ'] = Section(
+            'utility', 'dummy_PZ', None,
+            None, None)
 
     def add(self, section: Section):
         """
         Add a section in the section collection,
         if it does not already exist
         """
-        if section not in self.section_list:
-            self.section_list.append(section)
+        if section.name not in self.registry:
+            self.registry[section.name] = section
         else:
-            raise ValueError('Section already exists: '
-                             + repr(section))
-
-    def retrieve(self, name: str):
-        found = False
-        for section in self.section_list:
-            if section.name == name:
-                result = section
-                found = True
-        if found is False:
-            raise ValueError("Section " + name + " does not exist")
-        return result
+            raise ValueError(f'Section {section.name} already defined')
 
     def set_active(self, name: str):
         """
@@ -171,13 +156,10 @@ class Sections:
                  section to set as active.
         """
         self.active = None
-        self.active = self.retrieve(name)
-
-    def __repr__(self):
-        out = "Defined sections: " + str(len(self.section_list)) + "\n"
-        for section in self.section_list:
-            out += repr(section) + "\n"
-        return out
+        if name in self.registry:
+            self.active = self.registry[name]
+        else:
+            raise ValueError(f'Undefined section: {section.name}')
 
     ####################
     # Shape generators #

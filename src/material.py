@@ -12,15 +12,9 @@ Model builder for OpenSees ~ Material
 
 from typing import Optional
 from dataclasses import dataclass, field
-from functools import total_ordering
 from itertools import count
-import numpy as np
-from grids import GridLine
-from node import Node
+from collections import OrderedDict
 from utility import common
-from utility import transformations
-from utility import mesher
-from utility import mesher_section_gen
 
 material_ids = count(0)
 
@@ -38,9 +32,10 @@ class Material:
                            These depend on the meterial model specified.
     """
     name: str
-    ops_material: str
-    density: float  # mass per unit volume, specified in lb-s**2/in**4
-    parameters: dict
+    ops_material: str = field(repr=False)
+    # mass per unit volume, specified in lb-s**2/in**4
+    density: float = field(repr=False)
+    parameters: dict = field(repr=False)
 
     def __post_init__(self):
         self.uniq_id = next(material_ids)
@@ -52,31 +47,30 @@ class Materials:
     This class is a collector for materials.
     """
 
-    material_list: list[Material] = field(default_factory=list)
-    active: Optional[Material] = field(default=None)
+    registry: OrderedDict[str, Material] = field(
+        default_factory=OrderedDict, repr=False)
+    active: Optional[Material] = field(default=None, repr=False)
 
     def __post_init__(self):
         """
         Add some default materials used
         to model the connectivity of elements.
         """
-        self.material_list.append(Material(
+        self.registry['fix'] = Material(
             'fix',
             'Elastic',
             0.00,
             {
                 'E': common.STIFF_ROT
             })
-        )
-        self.material_list.append(Material(
+        self.registry['release'] = Material(
             'release',
             'Elastic',
             0.00,
             {
                 'E': common.TINY
             })
-        )
-        self.material_list.append(Material(
+        self.registry['steel-UVCuniaxial-fy50'] = Material(
             'steel-UVCuniaxial-fy50',
             'UVCuniaxial',
             490.00/((12.**3)*common.G_CONST),
@@ -88,8 +82,7 @@ class Materials:
                 'G': 11153846.15,
                 'b_PZ': 0.02
             })
-        )
-        self.material_list.append(Material(
+        self.registry['steel-bilinear-fy50'] = Material(
             'steel-bilinear-fy50',
             'Steel01',
             490.00/((12.**3)*common.G_CONST),
@@ -100,9 +93,7 @@ class Materials:
                 'b': 0.00001,
                 'b_PZ': 0.02
             })
-        )
-
-        self.material_list.append(Material(
+        self.registry['steel02-fy50'] = Material(
             'steel02-fy50',
             'Steel02',
             490.00/((12.**3)*common.G_CONST),
@@ -119,48 +110,22 @@ class Materials:
                 'sigInit': 0.00,
                 'b_PZ': 0.02
             })
-        )
 
     def add(self, material: Material):
         """
         Add a material in the materials collection,
         if it does not already exist
         """
-        if material not in self.material_list:
-            self.material_list.append(material)
+        if material not in self.registry:
+            self.registry[material.name] = material
         else:
-            raise ValueError('Material already exists: '
-                             + repr(material))
+            raise ValueError(f'Material {material.name} already exists')
 
     def set_active(self, name: str):
         """
         Assigns the active material.
         """
-        self.active = None
-        found = False
-        for material in self.material_list:
-            if material.name == name:
-                self.active = material
-                found = True
-                break
-        if found is False:
-            raise ValueError("Material " + name + " does not exist")
-
-    def retrieve(self, name: str):
-        """
-        Returns the specified material.
-        """
-        result = None
-        for material in self.material_list:
-            if material.name == name:
-                result = material
-                break
-        return result
-
-    def __repr__(self):
-        out = "Defined materials: " + str(len(self.material_list)) + "\n"
-        for material in self.material_list:
-            out += repr(material) + "\n"
-        return out
-
-
+        material = self.registry.get(name)
+        if material is None:
+            raise ValueError(f'Undefined material: {name}')
+        self.active = material
