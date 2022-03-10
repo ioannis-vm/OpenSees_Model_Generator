@@ -10,7 +10,6 @@ Model builder for OpenSees ~ Components
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Builder
 
-from typing import Optional
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import count
@@ -21,10 +20,10 @@ from material import Material
 from section import Section
 from utility import common
 from utility import transformations
-from utility import mesher
-from utility import mesher_section_gen
 
-_ids = count(0)
+
+line_elem_ids = count(0)
+end_release_ids = count(0)
 
 
 @dataclass
@@ -58,7 +57,7 @@ class EndRelease:
     y_vec: np.ndarray
 
     def __post_init__(self):
-        self.uniq_id = next(_ids)
+        self.uniq_id = next(end_release_ids)
         assert len(self.dofs) == len(self.materials), \
             "Dimensions don't match."
 
@@ -84,14 +83,19 @@ class LineElement:
         len_parent (float): Lenth of the parent element (LineElementSequence)
         len_proportion (float): Proportion of the line element's length
                         to the length of its parent line element sequence.
-        n_p (int): Number of integration points
         model_as (dict): Either
                        {'type': 'elastic'}
                        or
-                       {'type': 'fiber', 'n_x': n_x, 'n_y': n_y}
-        geomTransf: {Linear, PDelta}
+                       {'type': 'fiber', 'n_x': n_x, 'n_y': n_y, 'n_p': n_p}
+                       n_x, n_y: # of segments in Y and Z axis for sec
+                       subdivision
+                       n_p: # of integr points along element length
+        geomTransf: {Linear, PDelta, Corotational}
         internal_pt_i (np.ndarray): Coordinates of the internal point i
         internal_pt_j (np.ndarray): Similarly for node j
+                                    Internal points are the ones opposite to
+                                    the primary nodes, when we subtract the
+                                    rigid offsets.
         udl_self (np.ndarray): Array of size 3 containing components of the
                           uniformly distributed load that is applied
                           to the clear length of the element, acting
@@ -151,7 +155,7 @@ class LineElement:
         self.node_j_trib = self.node_j
         # ~~~~
 
-        self.uniq_id = next(_ids)
+        self.uniq_id = next(line_elem_ids)
         self.tributary_area = 0.00
         # local axes with respect to the global coord system
         self.internal_pt_i = self.node_i.coords + self.offset_i
@@ -1918,8 +1922,8 @@ class LineElementSequence_Steel_W_PanelZone(LineElementSequence):
 
         # define nonlinear spring uniaxialMaterial
         if 'doubler plate thickness' in self.metadata['ends'].keys():
-                doubler_thickness = \
-                    self.metadata['ends']['doubler plate thickness']
+            doubler_thickness = \
+                self.metadata['ends']['doubler plate thickness']
         else:
             raise ValueError('No doubler plate thickness specified')
         fy = self.section.material.parameters['Fy']
@@ -2005,8 +2009,8 @@ class LineElementSequence_Steel_W_PanelZone_IMK(LineElementSequence):
 
         # define nonlinear spring uniaxialMaterial
         if 'doubler plate thickness' in self.metadata['ends'].keys():
-                doubler_thickness = \
-                    self.metadata['ends']['doubler plate thickness']
+            doubler_thickness = \
+                self.metadata['ends']['doubler plate thickness']
         else:
             raise ValueError('No doubler plate thickness specified')
         fy = self.section.material.parameters['Fy']
@@ -2124,7 +2128,7 @@ class LineElementSequence_Steel_W_PanelZone_IMK(LineElementSequence):
             mcmy = 1.30
         elif mcmy < 1.00:
             mcmy = 1.00
-        
+
         theta_u = 0.15
         residual_plus = 0.50 - 0.4 * pgpye
         residual_minus = 0.50 - 0.4 * pgpye
@@ -2235,7 +2239,7 @@ class LineElementSequence_W_grav_sear_tab(LineElementSequence):
 
         # Plastic moment of the section
         sec_mp = sec_zx * mat_fy * 1.e3
-        
+
         if not consider_composite:
             m_max_pos = 0.121 * sec_mp
             m_max_neg = 0.121 * sec_mp

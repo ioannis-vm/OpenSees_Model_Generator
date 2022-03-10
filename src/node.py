@@ -16,7 +16,7 @@ from itertools import count
 import numpy as np
 from utility import common
 
-_ids = count(0)
+node_ids = count(0)
 
 
 @dataclass
@@ -62,7 +62,7 @@ class Node:
         default_factory=list, repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(_ids)
+        self.uniq_id = next(node_ids)
 
     def __eq__(self, other):
         """

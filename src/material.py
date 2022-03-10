@@ -22,7 +22,7 @@ from utility import transformations
 from utility import mesher
 from utility import mesher_section_gen
 
-_ids = count(0)
+material_ids = count(0)
 
 
 @dataclass
@@ -43,7 +43,7 @@ class Material:
     parameters: dict
 
     def __post_init__(self):
-        self.uniq_id = next(_ids)
+        self.uniq_id = next(material_ids)
 
 
 @dataclass
