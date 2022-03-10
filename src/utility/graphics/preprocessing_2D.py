@@ -58,7 +58,7 @@ def plot_2D_level_geometry(building: 'Model',
     # draw the beam column elements
     if extrude_frames:
         patches = []
-        for bm in level.beams.element_list:
+        for bm in level.beams.registry.values():
             for elm in bm.internal_elems():
                 bbox = elm.section.mesh.bounding_box()
                 sec_b = bbox[1, 0] - bbox[0, 0]
@@ -72,7 +72,7 @@ def plot_2D_level_geometry(building: 'Model',
                     elm.z_axis[0:2]*sec_b/2
                 coords = np.vstack((p0, p1, p2, p3))
                 patches.append(Polygon(coords, True))
-        for col in level.columns.element_list:
+        for col in level.columns.registry.values():
             coords = np.array(
                 [h.vertex.coords for h in col.section.mesh.halfedges])
             ang = col.ang
@@ -89,7 +89,7 @@ def plot_2D_level_geometry(building: 'Model',
         ax.add_collection(collection)
 
     else:
-        for bm in level.beams.element_list:
+        for bm in level.beams.registry.values():
             for elm in bm.internal_elems:
                 line = [
                     elm.internal_pt_i[0:2],

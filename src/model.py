@@ -55,6 +55,9 @@ class Model:
         groups (Groups): Groups of the building
         sections (Sections): Sections used
         materials (Materials): Materials used
+        line_connectivity (dict[tuple, int]): How primary nodes
+            are connected with LineElementSequences. Used to prevent
+            defining many elements that connect the same two nodes.
         active_placement (str): Placement parameter to use
                           for newly defined elements
                           where applicable (see Section).
@@ -68,6 +71,7 @@ class Model:
     sections: Sections = field(default_factory=Sections)
     materials: Materials = field(default_factory=Materials)
     selection: Selection = field(default_factory=Selection)
+    line_connectivity: dict[tuple, int] = field(default_factory=dict)
     active_placement: str = field(default='centroid')
     active_angle: float = field(default=0.00)
     global_restraints: list = field(default_factory=list)
@@ -250,11 +254,10 @@ class Model:
                           'length': float, 'factor': float, 'n_sub': int}
 
         Returns:
-            columns (list[LineElementSequence]): Added columns.
+            column (LineElementSequence): Added column.
         """
         if not self.sections.active:
             raise ValueError("No active section")
-        columns = []
         for levelname in self.levels.active:
             level = self.levels.registry[levelname]
             if level.previous_lvl:  # if previous level exists
@@ -274,6 +277,12 @@ class Model:
                         np.array([x, y, level.previous_lvl.elevation]),
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
+                # check if column connecting the two nodes already exists
+                node_ids = [top_node.uniq_id, bot_node.uniq_id]
+                node_ids.sort()
+                node_ids = tuple(node_ids)
+                if node_ids in self.line_connectivity:
+                    raise ValueError('Element already exists')
                 # add the column connecting the two nodes
                 if ends['type'] in ['fixed', 'steel_W_PZ', 'steel_W_PZ_IMK']:
                     # if ends['type'] is 'steel_W_PZ' or
@@ -309,7 +318,7 @@ class Model:
                         placement=self.active_placement,
                         end_dist=ends['dist'],
                         metadata=metadata,
-                        mat_fix=self.materials.retrieve('fix'),
+                        mat_fix=self.materials.registry['fix'],
                         camber=0.00)
                 elif ends['type'] == 'fixed-pinned':
                     column = LineElementSequence_FixedPinned(
@@ -325,18 +334,16 @@ class Model:
                         placement=self.active_placement,
                         end_dist=ends['dist'],
                         metadata=metadata,
-                        mat_fix=self.materials.retrieve('fix'),
-                        mat_release=self.materials.retrieve('release'),
+                        mat_fix=self.materials.registry['fix'],
+                        mat_release=self.materials.registry['release'],
                         camber=0.00)
                 else:
                     raise ValueError('Invalid end-type')
-                ok = level.columns.add(column)
-                if ok:
-                    columns.append(column)
-                    self.groups.add_element(column)
-                    top_node.column_below = column
-                    bot_node.column_above = column
-        return columns
+                level.columns.add(column)
+                self.line_connectivity[node_ids] = column.uniq_id
+                top_node.column_below = column
+                bot_node.column_above = column
+        return column
 
     def add_beam_at_points(self,
                            start: np.ndarray,
@@ -453,6 +460,13 @@ class Model:
                         np.array([*end, level.elevation]), level.restraint)
                     level.nodes_primary.add(end_node)
                     connection_offset_j = np.zeros(3)
+            # check for an existing LineElementSequence connecting
+            # the start and end nodes.
+            node_ids = [start_node.uniq_id, end_node.uniq_id]
+            node_ids.sort()
+            node_ids = tuple(node_ids)
+            if node_ids in self.line_connectivity:
+                raise ValueError('Element already exists')
 
             # ---------------- #
             # element creation #
@@ -486,7 +500,7 @@ class Model:
                     placement=self.active_placement,
                     end_dist=ends['dist'],
                     metadata=None,
-                    mat_fix=self.materials.retrieve('fix'),
+                    mat_fix=self.materials.registry['fix'],
                     camber=0.00)
             elif ends['type'] == 'fixed-pinned':
                 beam = LineElementSequence_FixedPinned(
@@ -502,8 +516,8 @@ class Model:
                     placement=self.active_placement,
                     end_dist=ends['dist'],
                     metadata=None,
-                    mat_fix=self.materials.retrieve('fix'),
-                    mat_release=self.materials.retrieve('release'),
+                    mat_fix=self.materials.registry['fix'],
+                    mat_release=self.materials.registry['release'],
                     camber=0.00)
             elif ends['type'] == 'RBS':
                 beam = LineElementSequence_RBS(
@@ -553,7 +567,7 @@ class Model:
                     placement=self.active_placement,
                     end_dist=ends['dist'],
                     metadata=ends,
-                    mat_fix=self.materials.retrieve('fix'))
+                    mat_fix=self.materials.registry['fix'])
             elif ends['type'] == 'steel W shear tab':
                 beam = LineElementSequence_W_grav_sear_tab(
                     node_i=start_node,
@@ -568,216 +582,15 @@ class Model:
                     placement=self.active_placement,
                     end_dist=ends['dist'],
                     metadata=ends,
-                    mat_fix=self.materials.retrieve('fix'))
+                    mat_fix=self.materials.registry['fix'])
             else:
                 raise ValueError('Invalid end-type')
-            ok = level.beams.add(beam)
-            if ok:
-                beams.append(beam)
-                self.groups.add_element(beam)
-                start_node.beams.append(beam)
-                end_node.beams.append(beam)
+            level.beams.add(beam)
+            beams.append(beam)
+            self.line_connectivity[node_ids] = beam.uniq_id
+            start_node.beams.append(beam)
+            end_node.beams.append(beam)
         return beams
-
-    def add_brace_at_points(self,
-                            start: np.ndarray,
-                            end: np.ndarray,
-                            btype: str = 'single',
-                            model_as: dict = {'type': 'elastic'},
-                            geomTransf: str = 'Linear',
-                            n_sub: int = 5,
-                            release_distance: float = 0.005,
-                            camber: float = 0.05):
-        """
-        Adds a brace connecting the given points
-        at all the active levels.
-        For single braces, the start node corresponds to the
-        level above, and the end node to the level below.
-        Existing nodes are used, otherwise they are created.
-        Args:
-            start (np.ndarray): X,Y coordinates of point i
-            end (np.ndarray): X,Y coordinates of point j
-            btype (str): Flag for the type of bracing to model
-            n_sub (int): Number of internal elements to add
-            camber (float): Initial imperfection modeled as
-                            parabolic camber, expressed
-                            as a proportion of the element's
-                            length.
-        Returns:
-            braces (list[LineElementSequence]): added braces.
-        """
-        if not self.sections.active:
-            raise ValueError("No active section specified")
-        if self.active_angle != 0.00:
-            raise ValueError("Only ang=0.00 is currently supported")
-        braces = []
-        if btype != 'single':
-            raise ValueError("Only `single` brace type supported")
-        for levelname in self.levels.active:
-            level = self.levels.registry[levelname]
-            # check to see if start node exists
-            start_node = level.look_for_node(*start)
-            if not start_node:
-                # create it if it does not exist
-                start_node = Node(
-                    np.array([*start, level.elevation]), level.restraint)
-                level.nodes_primary.add(start_node)
-            # check to see if end node exists
-            end_node = level.previous_lvl.look_for_node(*end)
-            if not end_node:
-                # create it if it does not exist
-                end_node = Node(
-                    np.array([*end, level.elevation]), level.restraint)
-                level.nodes_primary.add(end_node)
-            brace = LineElementSequence_Pinned(
-                node_i=start_node,
-                node_j=end_node,
-                ang=self.active_angle,
-                offset_i=np.zeros(3),
-                offset_j=np.zeros(3),
-                section=self.sections.active,
-                n_sub=n_sub,
-                model_as=model_as,
-                geomTransf=geomTransf,
-                placement='centroid',
-                end_dist=release_distance,
-                mat_fix=self.materials.retrieve('fix'),
-                mat_release=self.materials.retrieve('release'),
-                camber=camber)
-            braces.append(brace)
-            self.groups.add_element(brace)
-            level.braces.add(brace)
-        return braces
-
-    def add_columns_from_grids(self, n_sub=1,
-                               model_as={'type': 'elastic'},
-                               geomTransf='Linear',
-                               ends={'type': 'fixed'}):
-        """
-        Uses the currently defined gridsystem to obtain all locations
-        where gridlines intersect, and places a column on
-        all such locations.
-        Args:
-            n_sub (int): Number of internal elements to add.
-        Returns:
-            columns (list[LineElementSequence]): added columns
-        """
-        isect_pts = self.gridsystem.intersection_points()
-        columns = []
-        for pt in isect_pts:
-            cols = self.add_column_at_point(
-                *pt,
-                n_sub=n_sub,
-                model_as=model_as,
-                geomTransf=geomTransf,
-                ends=ends)
-            columns.extend(cols)
-        return columns
-
-    def add_beams_from_gridlines(self, n_sub=1, ends={'type': 'fixed'},
-                                 model_as={'type': 'elastic'}):
-        """
-        Uses the currently defined gridsystem to obtain all locations
-        where gridlines intersect. For each gridline, beams are placed
-        connecting all the intersection locations of that
-        gridline with all other gridlines.
-        Args:
-            n_sub (int): Number of internal elements to add
-            ends (dict): {'type': 'fixed, 'dist': float}', or
-                         {'type': 'pinned', 'dist': float} or
-                         {'type': 'RBS', 'dist': float,
-                          'length': float, 'factor': float, 'n_sub': int}
-                        For the pinned or fixed-pinned case,
-                          `dist` represents the
-                            proportion of the distance between the element's
-                            ends to the release, relative to the element's
-                            length, both considered without the offsets.
-                        For the RBS case,
-                          `dist` is similar to the pinned case,
-                            but it corresponds to the start of the RBS portion.
-                          `length` represents the length of the RBS portion.
-                          `factor` represents the proportion of the RBS
-                            section's width, relative to the original section.
-                          `n_sub` represents how many LineElements should be
-                            used for the RBS portion
-        """
-        beams = []
-        for grid in self.gridsystem.grids:
-            bms = self.add_beam_at_points(
-                grid.start_np,
-                grid.end_np,
-                n_sub=n_sub,
-                ends=ends,
-                model_as=model_as)
-            beams.extend(bms)
-        return beams
-
-    def add_beams_from_grid_intersections(
-        self, n_sub=1, ends={'type': 'fixed'},
-            model_as={'type': 'elastic'}):
-        """
-        Uses the currently defined gridsystem to obtain all locations
-        where gridlines intersect. For each gridline, beams are placed
-        connecting all the intersection locations of that
-        gridline with all other gridlines.
-        Args:
-            n_sub (int): Number of internal elements to add
-            ends (dict): {'type': 'fixed, 'dist': float}', or
-                         {'type': 'pinned', 'dist': float} or
-                         {'type': 'RBS', 'dist': float,
-                          'length': float, 'factor': float}
-                        For the pinned case,
-                          `dist` represents the
-                            proportion of the distance between the element's
-                            ends to the release, relative to the element's
-                            length, both considered without the offsets.
-                        For the RBS case,
-                          `dist` is similar to the pinned case,
-                            but it corresponds to the start of the RBS portion.
-                          `length` represents the length of the RBS portion.
-                          `factor` represents the proportion of the RBS
-                            section's width, relative to the original section.
-                          `n_sub` represents how many LineElements should be
-                            used for the RBS portion
-        """
-        beams = []
-        for grid in self.gridsystem.grids:
-            isect_pts = self.gridsystem.intersect(grid)
-            for i in range(len(isect_pts)-1):
-                bms = self.add_beam_at_points(
-                    isect_pts[i],
-                    isect_pts[i+1],
-                    n_sub=n_sub,
-                    ends=ends,
-                    model_as=model_as)
-                beams.extend(bms)
-        return beams
-
-    def add_braces_from_grids(self, btype="single", n_sub=5, camber=0.05,
-                              model_as={'type': 'elastic'},
-                              release_distance=0.005):
-        """
-        Uses the currently defined gridsystem.
-        For each gridline, braces are placed
-        connecting the starting point at the top level
-        and the end point at the level below.
-        Args:
-            n_sub (int): Number of internal elements to add
-        """
-        braces = []
-        for grid in self.gridsystem.grids:
-            start_pt = grid.start_np
-            end_pt = grid.end_np
-            brcs = self.add_brace_at_points(
-                start_pt,
-                end_pt,
-                btype=btype,
-                model_as=model_as,
-                n_sub=n_sub,
-                release_distance=release_distance,
-                camber=camber)
-            braces.extend(brcs)
-        return braces
 
     #############################################
     # Select methods - select objects           #
@@ -789,11 +602,11 @@ class Model:
         specified by the level's name.
         """
         lvl = self.levels.registry[lvl_name]
-        for beam in lvl.beams.element_list:
+        for beam in lvl.beams.registry.values():
             self.selection.beams.add(beam)
-        for column in lvl.columns.element_list:
+        for column in lvl.columns.registry.values():
             self.selection.columns.add(column)
-        for brace in lvl.braces.element_list:
+        for brace in lvl.braces.registry.values():
             self.selection.braces.add(brace)
 
     def select_all(self):
@@ -821,7 +634,7 @@ class Model:
 
     def select_perimeter_beams_story(self, lvl_name: str):
         lvl = self.levels.registry[lvl_name]
-        beams = lvl.beams.element_list
+        beams = lvl.beams.registry.values()
         if not beams:
             return
         line_elements = []
@@ -856,20 +669,6 @@ class Model:
 
     def clear_gridlines(self, tags: list[str]):
         self.gridsystem.clear(tags)
-
-    def delete_selected(self):
-        """
-        Deletes the selected objects.
-        """
-        for lvl in self.levels.registry.values():
-            for node in self.selection.nodes.node_list:
-                lvl.nodes_primary.remove(node)
-            for beam in self.selection.beams.element_list:
-                lvl.beams.remove(beam)
-            for column in self.selection.columns.element_list:
-                lvl.columns.remove(column)
-            for brace in self.selection.braces.element_list:
-                lvl.braces.remove(brace)
 
     #############################################
     # Set active methods - alter active objects #
@@ -942,19 +741,19 @@ class Model:
     def list_of_beams(self):
         list_of_beams = []
         for lvl in self.levels.registry.values():
-            list_of_beams.extend(lvl.beams.element_list)
+            list_of_beams.extend(lvl.beams.registry.values())
         return list_of_beams
 
     def list_of_columns(self):
         list_of_columns = []
         for lvl in self.levels.registry.values():
-            list_of_columns.extend(lvl.columns.element_list)
+            list_of_columns.extend(lvl.columns.registry.values())
         return list_of_columns
 
     def list_of_braces(self):
         list_of_braces = []
         for lvl in self.levels.registry.values():
-            list_of_braces.extend(lvl.braces.element_list)
+            list_of_braces.extend(lvl.braces.registry.values())
         return list_of_braces
 
     def list_of_line_element_sequences(self):
@@ -1068,7 +867,7 @@ class Model:
             of that level.
             """
             if lvl.floor_coordinates is not None:
-                for beam in lvl.beams.element_list:
+                for beam in lvl.beams.registry.values():
                     for line_elm in beam.internal_line_elems():
                         udlZ_val = - line_elm.tributary_area * \
                             lvl.surface_DL / line_elm.length_clear()
@@ -1117,7 +916,7 @@ class Model:
         for lvl in self.levels.registry.values():
             if assume_floor_slabs:
                 beams = []
-                for seq in lvl.beams.element_list:
+                for seq in lvl.beams.registry.values():
                     beams.extend(seq.internal_line_elems())
                 if beams:
                     coords, bisectors = \
@@ -1162,7 +961,8 @@ class Model:
         TODO docstring
         """
         for lvl in self.levels.registry.values():
-            for i_col, col in enumerate(lvl.columns.element_list):
+            columns = list(lvl.columns.registry.values())
+            for col in columns:
                 node = col.node_i
                 # get a list of all the connected beams
                 beams = node.beams
@@ -1255,6 +1055,7 @@ class Model:
                 # that was pointing to it to the new object.
                 # (I wish python had pointers, or alternatively taht I knew
                 #  more python. I'm a structural engineer.)
+                previous_id = col.uniq_id
                 if col.metadata['ends']['type'] == 'fixed':
                     col = LineElementSequence_Steel_W_PanelZone(
                         col.node_i, col.node_j, col.ang,
@@ -1262,8 +1063,8 @@ class Model:
                         col.n_sub, col.model_as, col.geomTransf,
                         col.placement, col.end_dist,
                         col.metadata,
-                        self.sections.retrieve('rigid'),
-                        self.materials.retrieve('fix'),
+                        self.sections.registry['rigid'],
+                        self.materials.registry['fix'],
                         beam_depth, col.section.material.parameters['b_PZ'])
                 elif col.metadata['ends']['type'] == 'steel_W_PZ':
                     col = LineElementSequence_Steel_W_PanelZone(
@@ -1272,8 +1073,8 @@ class Model:
                         col.n_sub, col.model_as, col.geomTransf,
                         col.placement, col.end_dist,
                         col.metadata,
-                        self.sections.retrieve('rigid'),
-                        self.materials.retrieve('fix'),
+                        self.sections.registry['rigid'],
+                        self.materials.registry['fix'],
                         beam_depth, col.section.material.parameters['b_PZ'])
                 elif col.metadata['ends']['type'] == 'steel_W_PZ_IMK':
                     col = LineElementSequence_Steel_W_PanelZone_IMK(
@@ -1282,8 +1083,8 @@ class Model:
                         col.n_sub, col.model_as, col.geomTransf,
                         col.placement, col.end_dist,
                         col.metadata,
-                        self.sections.retrieve('rigid'),
-                        self.materials.retrieve('fix'),
+                        self.sections.registry['rigid'],
+                        self.materials.registry['fix'],
                         beam_depth, col.section.material.parameters['b_PZ'])
                 else:
                     raise ValueError('Invalid end type for W column')
@@ -1292,8 +1093,9 @@ class Model:
                 # ... replace it in the underlying node's `column_above`
                 nj = col.node_j
                 nj.column_above = col
-                # ... replace it in the leven's column container object
-                lvl.columns.element_list[i_col] = col
+                # ... replace it in the level's column container object
+                lvl.columns.remove(previous_id)
+                lvl.columns.add(col)
 
                 # modify beam connectivity
                 panel_zone_segment = col.end_segment_i

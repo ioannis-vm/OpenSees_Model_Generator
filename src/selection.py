@@ -64,8 +64,9 @@ class Selection:
         """
         Returns all selected LineElementSequences.
         """
-        return self.beams.element_list + \
-            self.columns.element_list + self.braces.element_list
+        return self.beams.registry.values() + \
+            self.columns.registry.values() + \
+            self.braces.registry.values()
 
     def list_of_line_elements(self):
         sequences = self.list_of_line_element_sequences()

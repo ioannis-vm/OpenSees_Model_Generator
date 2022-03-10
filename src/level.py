@@ -137,7 +137,7 @@ class Level:
         crosses the given point.
         """
         candidate_pt = np.array([x_coord, y_coord])
-        for beam in self.beams.element_list:
+        for beam in self.beams.registry.values():
             if beam.middle_segment.crosses_point(candidate_pt):
                 return beam
         return None
@@ -156,9 +156,9 @@ class Level:
         """
         primary = list(self.nodes_primary.registry.values())
         internal = []
-        for col in self.columns.element_list:
+        for col in self.columns.registry.values():
             internal.extend(col.internal_nodes())
-        for bm in self.beams.element_list:
+        for bm in self.beams.registry.values():
             internal.extend(bm.internal_nodes())
         result = [i for i in primary + internal if i]
         # (to remove Nones if they exist)
@@ -166,15 +166,15 @@ class Level:
 
     def list_of_line_elems(self):
         result = []
-        for elm in self.beams.element_list + \
-                self.columns.element_list + \
-                self.braces.element_list:
+        for elm in self.beams.registry.values() + \
+                self.columns.registry.values() + \
+                self.braces.registry.values():
             if isinstance(elm, LineElement):
                 result.append(elm)
         return result
 
     def list_of_steel_W_panel_zones(self):
-        cols = self.columns.element_list
+        cols = self.columns.registry.values()
         pzs = []
         for col in cols:
             if isinstance(col, LineElementSequence_Steel_W_PanelZone):

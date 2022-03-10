@@ -13,6 +13,7 @@ Model builder for OpenSees ~ Components
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import count
+from collections import OrderedDict
 import numpy as np
 from grids import GridLine
 from node import Node
@@ -22,8 +23,8 @@ from utility import common
 from utility import transformations
 
 
-line_elem_ids = count(0)
-end_release_ids = count(0)
+elem_ids = count(0)
+line_elem_seq_ids = count(0)
 
 
 @dataclass
@@ -57,7 +58,7 @@ class EndRelease:
     y_vec: np.ndarray
 
     def __post_init__(self):
-        self.uniq_id = next(end_release_ids)
+        self.uniq_id = next(elem_ids)
         assert len(self.dofs) == len(self.materials), \
             "Dimensions don't match."
 
@@ -155,7 +156,7 @@ class LineElement:
         self.node_j_trib = self.node_j
         # ~~~~
 
-        self.uniq_id = next(line_elem_ids)
+        self.uniq_id = next(elem_ids)
         self.tributary_area = 0.00
         # local axes with respect to the global coord system
         self.internal_pt_i = self.node_i.coords + self.offset_i
@@ -1280,6 +1281,8 @@ class LineElementSequence:
 
     def __post_init__(self):
 
+        self.uniq_id = next(line_elem_seq_ids)
+
         assert self.end_dist > 0.0, "end_dist must be > 0"
 
         p_i = self.node_i.coords + self.offset_i
@@ -2383,48 +2386,32 @@ class LineElementSequence_W_grav_sear_tab(LineElementSequence):
 @dataclass
 class LineElementSequences:
     """
-    This class is a collector for columns, and provides
-    methods that perform operations using columns.
+    This class is a collector for line element sequences.
     """
 
-    element_list: list[LineElementSequence] = field(default_factory=list)
+    registry: OrderedDict[int, LineElementSequence] = field(
+        default_factory=OrderedDict, repr=False)
 
     def add(self, elm: LineElementSequence) -> bool:
         """
-        Add an element in the element collection,
-        if it does not already exist
+        Add an element in the registry
         """
 
-        if elm not in self.element_list:
-            self.element_list.append(elm)
-            self.element_list.sort()
-            return True
+        if elm.uniq_id not in self.registry:
+            self.registry[elm.uniq_id] = elm
         else:
-            return False
+            raise ValueError('LineElementSequence already exists')
 
-    def remove(self, elm: LineElementSequence):
+    def remove(self, key: int):
         """
         Remove an element from the element collection,
-        if it was there.
+        if it was there, using it's unique ID
         """
-        if elm in self.element_list:
-            self.element_list.remove(elm)
-            self.element_list.sort()
-
-    def clear(self):
-        """
-        Removes all elements
-        """
-        self.element_list = []
-
-    def __repr__(self):
-        out = str(len(self.element_list)) + " elements\n"
-        for elm in self.element_list:
-            out += repr(elm) + "\n"
-        return out
+        if key in self.registry:
+            self.registry.pop(key)
 
     def internal_elems(self):
         result = []
-        for element in self.element_list:
+        for element in self.registry.values():
             result.extend(element.internal_elems)
         return result
