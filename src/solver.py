@@ -306,7 +306,7 @@ class Analysis:
                         elm.uniq_id)
 
     def _define_node_constraints(self):
-        for lvl in self.building.levels.level_list:
+        for lvl in self.building.levels.registry.values():
             if lvl.parent_node:
                 ops.rigidDiaphragm(
                     3,
@@ -599,7 +599,7 @@ class Analysis:
 
     def global_reactions(self, step):
         reactions = np.full(6, 0.00)
-        for lvl in self.building.levels.level_list:
+        for lvl in self.building.levels.registry.values():
             for node in lvl.list_of_primary_nodes():
                 if node.restraint_type != 'free':
                     uid = node.uniq_id
@@ -693,7 +693,7 @@ class ModalAnalysis(LinearAnalysis):
     def table_shape(self, mode: int):
         data = {'names': [],
                 'ux': [], 'uy': []}
-        for lvl in self.building.levels.level_list:
+        for lvl in self.building.levels.registry.values():
             data['names'].append(lvl.name)
             disp = np.zeros(6)
             # TODO debug  - something may be wrong here.
@@ -901,13 +901,13 @@ class PushoverAnalysis(NonlinearAnalysis):
                     "mode shape in the z direction.")
             modeshape_ampl = modeshape / modeshape[-1]
         else:
-            modeshape_ampl = np.ones(len(self.building.levels.level_list))
+            modeshape_ampl = np.ones(len(self.building.levels.registry.values()))
 
         # if a node is given, apply the incremental load on that node
         if node:
             ops.load(node.uniq_id, *(1.00*load_dir))
         else:
-            for i, lvl in enumerate(self.building.levels.level_list):
+            for i, lvl in enumerate(self.building.levels.registry.values()):
                 # if the level is restrained, no load applied
                 if lvl.restraint != 'free':
                     continue

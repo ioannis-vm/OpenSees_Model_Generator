@@ -84,7 +84,8 @@ class Model:
         Returns all added nodes.
         """
         added_nodes = []
-        for level in self.levels.active:
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
             node = Node([x, y,
                          level.elevation], level.restraint)
             level.nodes_primary.add(node)
@@ -254,7 +255,8 @@ class Model:
         if not self.sections.active:
             raise ValueError("No active section")
         columns = []
-        for level in self.levels.active:
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
             if level.previous_lvl:  # if previous level exists
                 # check to see if top node exists
                 top_node = level.look_for_node(x, y)
@@ -394,7 +396,8 @@ class Model:
         if not self.sections.active:
             raise ValueError("No active section specified")
         beams = []
-        for level in self.levels.active:
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
 
             # - #
             # i #
@@ -610,7 +613,8 @@ class Model:
         braces = []
         if btype != 'single':
             raise ValueError("Only `single` brace type supported")
-        for level in self.levels.active:
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
             # check to see if start node exists
             start_node = level.look_for_node(*start)
             if not start_node:
@@ -784,7 +788,7 @@ class Model:
         Selects all selectable objects at a given level,
         specified by the level's name.
         """
-        lvl = self.levels.retrieve_by_name(lvl_name)
+        lvl = self.levels.registry[lvl_name]
         for beam in lvl.beams.element_list:
             self.selection.beams.add(beam)
         for column in lvl.columns.element_list:
@@ -796,7 +800,7 @@ class Model:
         """
         Selects all selectable objects.
         """
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             self.select_all_at_level(lvl)
 
     def select_group(self, group_name: str):
@@ -816,7 +820,7 @@ class Model:
                     self.selection.braces.add(elm)
 
     def select_perimeter_beams_story(self, lvl_name: str):
-        lvl = self.levels.retrieve_by_name(lvl_name)
+        lvl = self.levels.registry[lvl_name]
         beams = lvl.beams.element_list
         if not beams:
             return
@@ -840,7 +844,7 @@ class Model:
             self.selection.line_elements.append(line_element)
 
     def select_perimeter_beams_all(self):
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             self.select_perimeter_beams_story(lvl.name)
 
     #############################################
@@ -857,7 +861,7 @@ class Model:
         """
         Deletes the selected objects.
         """
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             for node in self.selection.nodes.node_list:
                 lvl.nodes_primary.remove(node)
             for beam in self.selection.beams.element_list:
@@ -927,7 +931,8 @@ class Model:
         """
         Assigns surface loads on the active levels
         """
-        for level in self.levels.active:
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
             level.assign_surface_DL(load_per_area)
 
     #########################
@@ -936,19 +941,19 @@ class Model:
 
     def list_of_beams(self):
         list_of_beams = []
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             list_of_beams.extend(lvl.beams.element_list)
         return list_of_beams
 
     def list_of_columns(self):
         list_of_columns = []
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             list_of_columns.extend(lvl.columns.element_list)
         return list_of_columns
 
     def list_of_braces(self):
         list_of_braces = []
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             list_of_braces.extend(lvl.braces.element_list)
         return list_of_braces
 
@@ -981,14 +986,14 @@ class Model:
 
     def list_of_primary_nodes(self):
         list_of_nodes = []
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             for node in lvl.nodes_primary.node_list:
                 list_of_nodes.append(node)
         return list_of_nodes
 
     def list_of_parent_nodes(self):
         list_of_parent_nodes = []
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             if lvl.parent_node:
                 list_of_parent_nodes.append(lvl.parent_node)
         return list_of_parent_nodes
@@ -1095,7 +1100,7 @@ class Model:
         # tributary areas, weight and mass #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             if lvl.parent_node:
                 # remove parent nodes
                 lvl.parent_node = None
@@ -1109,7 +1114,7 @@ class Model:
                     for ielm in elm.internal_elems:
                         ielm.udl_fl = np.zeros(3)
 
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             if assume_floor_slabs:
                 beams = []
                 for seq in lvl.beams.element_list:
@@ -1129,7 +1134,7 @@ class Model:
             for elm in self.list_of_line_element_sequences():
                 elm.apply_self_weight_and_mass(1.00)
         if assume_floor_slabs:
-            for lvl in self.levels.level_list:
+            for lvl in self.levels.registry.values():
                 # accumulate all the mass at the parent nodes
                 if lvl.diaphragm:
                     properties = mesher.geometric_properties(
@@ -1156,7 +1161,7 @@ class Model:
         """
         TODO docstring
         """
-        for lvl in self.levels.level_list:
+        for lvl in self.levels.registry.values():
             for i_col, col in enumerate(lvl.columns.element_list):
                 node = col.node_i
                 # get a list of all the connected beams
@@ -1364,7 +1369,7 @@ class Model:
                             elm.section = sec
 
     def level_masses(self):
-        lvls = self.levels.level_list
+        lvls = self.levels.registry.values()
         n_lvls = len(lvls)
         level_masses = np.full(n_lvls, 0.00)
         for i, lvl in enumerate(lvls):

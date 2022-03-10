@@ -1,5 +1,5 @@
 """
-Model Builder for OpenSeesPy ~ Model module
+Model Builder for OpenSeesPy ~ Level module
 """
 
 #   __                 UC Berkeley
@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
 from typing import Optional
+from collections import OrderedDict
 import numpy as np
 from node import Node, Nodes
 from components import LineElement
@@ -26,20 +27,23 @@ from utility import common
 # pylint: disable=invalid-name
 
 
-def previous_element(lst: list, obj):
+def previous_element(dct: OrderedDict, key):
     """
-    Returns the previous object in a list
-    given a target object, assuming it is in the list.
+    Returns the previous object in an OrderedDict
+    given a target key, assuming it is in the OrderedDict.
     If it is not, it returns None.
-    If the target is the first object, it returns None.
+    If the target key is the first object, it returns None.
     """
-    try:
-        idx = lst.index(obj)
-    except ValueError:
-        return None
-    if idx == 0:
-        return None
-    return lst[idx - 1]
+    if key in dct:
+        key_list = list(dct.keys())
+        idx = key_list.index(key)
+        if idx == 0:
+            ans = None
+        else:
+            ans = dct[key_list[idx-1]]
+    else:
+        ans = None
+    return ans
 
 
 @dataclass
@@ -186,12 +190,14 @@ class Levels:
     Levels must be defined in order, from the lower elevation
     to the highest.
     Attributes:
-        level_list (list[Level]): list containing unique levels
-        active (list[Level]): list of active levels
+        registry (OrderedDict[str, Level]): OrderedDict containing
+        unique levels
+        active (list[str]): list of active level keys
     """
 
-    level_list: list[Level] = field(default_factory=list)
-    active: list[Level] = field(default_factory=list)
+    registry: OrderedDict[str, Level] = field(
+        default_factory=OrderedDict, repr=False)
+    active: list[str] = field(default_factory=list)
 
     def add(self, lvl: Level):
         """
@@ -202,42 +208,17 @@ class Levels:
             lvl(Level): the level to add
         """
         # Verify level name is unique
-        if lvl in self.level_list:
+        if lvl.name in self.registry:
             raise ValueError('Level name already exists: ' + repr(lvl))
         # Verify level elevation is unique
         if lvl.elevation in [lev.elevation
-                             for lev in self.level_list]:
+                             for lev in self.registry.values()]:
             raise ValueError('Level elevation already exists: ' + repr(lvl))
-        # Don't accept levels out of order
-        if self.level_list:
-            if lvl.elevation < self.level_list[-1].elevation:
-                raise ValueError(
-                    'Levels should be defined from the bottom up for now..')
-        # Append the new level in the level list
-        self.level_list.append(lvl)
-        previous_lvl = previous_element(self.level_list, lvl)
+
+        self.registry[lvl.name] = lvl
+        previous_lvl = previous_element(self.registry, lvl.name)
         if previous_lvl:
             lvl.previous_lvl = previous_lvl
-
-        # If there's no active level, make
-        # the newly added level active
-        if not self.active:
-            self.active.append(lvl)
-            self.active.sort()
-
-    def retrieve_by_name(self, name: str):
-        """"
-        Returns a variable pointing to the level that has the
-        given name.
-        Args:
-            name (str): Name of the level to retrieve
-        Returns:
-            level (Level)
-        """
-        for lvl in self.level_list:
-            if lvl.name == name:
-                return lvl
-        raise ValueError("Level " + name + " does not exist")
 
     def set_active(self, names: list[str]):
         """
@@ -250,18 +231,8 @@ class Levels:
         """
         self.active = []
         if names == "all":
-            self.active = self.level_list
+            self.active = list(self.registry.keys())
         elif names == "all_above_base":
-            self.active = self.level_list[1::]
+            self.active = list(self.registry.keys())[1::]
         else:
-            for name in names:
-                retrieved_level = self.retrieve_by_name(name)
-                if retrieved_level not in self.active:
-                    self.active.append(retrieved_level)
-
-    def __repr__(self):
-        out = "The building has " + \
-            str(len(self.level_list)) + " levels\n"
-        for lvl in self.level_list:
-            out += repr(lvl) + "\n"
-        return out
+            self.active = names

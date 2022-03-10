@@ -16,7 +16,7 @@ from utility.graphics import common, common_3D
 
 
 def add_data__grids(dt, building):
-    for lvl in building.levels.level_list:
+    for lvl in building.levels.registry.values():
         elevation = lvl.elevation
         for grid in building.gridsystem.grids:
             dt.append({
@@ -591,12 +591,12 @@ def plot_building_geometry(building: 'Model',
 
     # diaphgragm lines
     if diaphragm_lines:
-        for lvl in building.levels.level_list:
+        for lvl in building.levels.registry.values():
             add_data__diaphragm_lines(dt, lvl)
 
     # bisector lines
     if tributary_areas:
-        for lvl in building.levels.level_list:
+        for lvl in building.levels.registry.values():
             add_data__bisector_lines(dt, lvl)
 
     # plot the linear elements
