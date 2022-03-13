@@ -1,14 +1,14 @@
 import sys
-sys.path.append("../OpenSeesPy_Building_Modeler")
+sys.path.append("../OpenSees_Model_Builder/src")
 
 import numpy as np
-import modeler
+import model
 import solver
 import time
 import matplotlib.pyplot as plt
 
 # Define a building
-b = modeler.Building()
+b = model.Model()
 
 # Add levels
 b.add_level("base", 0.00, "fixed")
@@ -21,7 +21,7 @@ b.set_active_material('steel-bilinear-fy50')
 # define sections
 
 b.add_sections_from_json(
-    "../OpenSeesPy_Building_Modeler/section_data/sections.json",
+    "../OpenSees_Model_Builder/section_data/sections.json",
     'W',
     ['W14X120'])
 
@@ -45,23 +45,49 @@ nsub = 1  # element subdivision
 b.set_active_angle(np.pi/2.00)
 col = b.add_column_at_point(
     0.00, 0.00, n_sub=nsub,
-    model_as=fiber_modeling_type, geomTransf=gtransf)
+    model_as=fiber_modeling_type, geom_transf=gtransf)
 
 
 b.preprocess(assume_floor_slabs=False, self_weight=True)
 
 
-b.plot_building_geometry(extrude_frames=True,
-                         offsets=True,
-                         gridlines=True,
-                         global_axes=False,
-                         diaphragm_lines=True,
-                         tributary_areas=True,
-                         just_selection=False,
-                         parent_nodes=True,
-                         frame_axes=False)
 
-node = col[0].node_i
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# b.plot_building_geometry(extrude_frames=True,
+#                          offsets=True,
+#                          gridlines=True,
+#                          global_axes=False,
+#                          diaphragm_lines=True,
+#                          tributary_areas=True,
+#                          just_selection=False,
+#                          parent_nodes=True,
+#                          frame_axes=False)
+
+node = col.node_i
 
 node.load += np.array([0.00, 0.00, -635.00*1e3, 0.00, 0.00, 0.00])
 
@@ -73,15 +99,14 @@ u1_el = linear_gravity_analysis.node_displacements[
 print(u1_el)
 
 # analytic solution
-# ii = col[0].section.properties['Ix']
-aa = col[0].section.mesh.geometric_properties()['area']
-ee = col[0].section.material.parameters['E0']
-ll = col[0].length_clear
+# ii = col.section.properties['Ix']
+aa = col.end_segment_i.section.mesh.geometric_properties()['area']
+ee = col.end_segment_i.section.material.parameters['E0']
+ll = col.length_clear()
 u_analytical = 635.00*1e3 * ll / (ee*aa)
 print(u_analytical)
 
 linear_gravity_analysis.deformed_shape(extrude_frames=True)
-
 
 # performing a nonlinear pushover analysis
 pushover_analysis = solver.PushoverAnalysis(b)
@@ -106,6 +131,3 @@ plt.figure()
 plt.grid()
 plt.plot(deltas, vbs/1e3, 'k')
 plt.show()
-
-
-

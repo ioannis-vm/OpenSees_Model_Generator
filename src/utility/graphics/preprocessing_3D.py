@@ -507,7 +507,7 @@ def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
         x_vec = elm.x_axis
         y_vec = elm.y_axis
         z_vec = np.cross(x_vec, y_vec)
-        loop = elm.col_section.mesh.halfedges
+        loop = elm.section.mesh.halfedges
 
         for halfedge in loop:
             loc0 = halfedge.vertex.coords[0]*z_vec +\

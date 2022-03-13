@@ -1,10 +1,10 @@
-import modeler
+import model
 import numpy as np
 
 # Note: units are lb, in
 
 # Define a building
-b = modeler.Building()
+b = model.Model()
 
 # Add levels - single-story building
 b.add_level("base", 0.00, "fixed")

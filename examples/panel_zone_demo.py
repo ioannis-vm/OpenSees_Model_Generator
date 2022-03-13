@@ -1,10 +1,13 @@
-import modeler
+import sys
+sys.path.append("../OpenSees_Model_Builder/src")
+
+import model
 import solver
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Define a building
-b = modeler.Building()
+b = model.Model()
 
 # Add levels
 b.add_level("base", 0.00, "fixed")
@@ -27,20 +30,20 @@ p1 = np.array([2.0, 2.90]) * 12
 b.set_active_levels("all_above_base")
 
 b.set_active_angle(-(90-62.241)/180.*np.pi)
-cols = b.add_column_at_point(
-    p0[0], p0[1], n_sub=30,
-    geomTransf='Corotational',
-    ends={'type': 'fixed',
+col = b.add_column_at_point(
+    p0[0], p0[1], n_sub=10,
+    geom_transf='Corotational',
+    ends={'type': 'steel_W_PZ',
           'doubler plate thickness': 0.0})
 b.set_active_angle(0.00)
 b.set_active_placement('top_center')
 b.set_active_levels(['1'])
 b.set_active_section('W14X132')
-beams = b.add_beam_at_points(p1, p0, snap_j='top_center',
-                             n_sub=30)
+beams = b.add_beam_at_points(p0, p1, snap_i='top_center',
+                             n_sub=10)
 
 # fix the top node too
-cols[1].node_i.restraint_type='fixed'
+col.node_i.restraint_type='fixed'
 
 # before preprocessing
 # b.plot_building_geometry(extrude_frames=False)
@@ -49,17 +52,17 @@ cols[1].node_i.restraint_type='fixed'
 b.preprocess(assume_floor_slabs=False, self_weight=True,
              steel_panel_zones=True)
 
-# after preprocessing
-# b.plot_building_geometry(extrude_frames=True)
-# b.plot_building_geometry(extrude_frames=False)
+# # after preprocessing
+b.plot_building_geometry(extrude_frames=True)
+b.plot_building_geometry(extrude_frames=False)
 
-# ~~~~~~~~~~~~~~~~~ #
-#  linear analysis  #
-# ~~~~~~~~~~~~~~~~~ #
+# # ~~~~~~~~~~~~~~~~~ #
+# #  linear analysis  #
+# # ~~~~~~~~~~~~~~~~~ #
 
-control_node = beams[0].node_i
+# control_node = beams[0].node_i
 
-control_node.load += np.array([100.00, 30.00, -100000.00, 0.00, 0.00, 0.00])
+# control_node.load += np.array([100.00, 30.00, -100000.00, 0.00, 0.00, 0.00])
 
 # linear_gravity_analysis = solver.LinearGravityAnalysis(b)
 # linear_gravity_analysis.run()
@@ -68,38 +71,38 @@ control_node.load += np.array([100.00, 30.00, -100000.00, 0.00, 0.00, 0.00])
 # linear_gravity_analysis.deformed_shape(extrude_frames=True)
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-#  nonlinear pushover analysis  #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# #  nonlinear pushover analysis  #
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-control_node.load -= np.array([100.00, 30.00, -100000.00, 0.00, 0.00, 0.00])
+# control_node.load -= np.array([100.00, 30.00, -100000.00, 0.00, 0.00, 0.00])
 
-control_node = beams[0].node_i
+# control_node = beams[0].node_i
 
-pushover_analysis = solver.PushoverAnalysis(b)
+# pushover_analysis = solver.PushoverAnalysis(b)
 
-vals = []
-for i in range(1, 10):
-    vals.append(i/10)
-    vals.append(-i/10)
-vals = np.array(vals) * 1.
+# vals = []
+# for i in range(1, 10):
+#     vals.append(i/10)
+#     vals.append(-i/10)
+# vals = np.array(vals) * 1.
 
-analysis_metadata = pushover_analysis.run(
-    "z",
-    vals,
-    control_node,
-    1./50.,
-    loaded_node=control_node)
-n_plot_steps = analysis_metadata['successful steps']
+# analysis_metadata = pushover_analysis.run(
+#     "z",
+#     vals,
+#     control_node,
+#     1./50.,
+#     loaded_node=control_node)
+# n_plot_steps = analysis_metadata['successful steps']
 
-# plot the deformed shape
-plot_metadata = pushover_analysis.deformed_shape(
-    step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
-print(plot_metadata)
+# # plot the deformed shape
+# plot_metadata = pushover_analysis.deformed_shape(
+#     step=n_plot_steps-1, scaling=0.00, extrude_frames=True)
+# print(plot_metadata)
 
-displ, force = pushover_analysis.table_pushover_curve('z', control_node)
+# displ, force = pushover_analysis.table_pushover_curve('z', control_node)
 
-plt.figure()
-plt.plot(displ, force/1000.00)
-plt.show()
+# plt.figure()
+# plt.plot(displ, force/1000.00)
+# plt.show()
 

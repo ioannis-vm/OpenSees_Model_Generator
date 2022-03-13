@@ -1,9 +1,9 @@
 import sys
-sys.path.append("../OpenSeesPy_Building_Modeler")
+sys.path.append("../OpenSees_Model_Builder")
 
 import numpy as np
 import matplotlib.pyplot as plt
-import modeler
+import model
 import solver
 
 hi = np.array([15.00, 13.00, 13.00]) * 12.00  # in
@@ -21,7 +21,7 @@ def define_building(lat_bm_ends, lat_bm_modeling,
                     lat_col_ends, lat_col_modeling_type):
 
     # Define a building
-    b = modeler.Building()
+    b = model.Model()
 
     # Add levels
     b.add_level("base", 0.00, "fixed")
@@ -57,7 +57,7 @@ def define_building(lat_bm_ends, lat_bm_modeling,
 
     for sec in wsections:
         b.add_sections_from_json(
-            "../OpenSeesPy_Building_Modeler/section_data/sections.json",
+            "../OpenSees_Model_Builder/section_data/sections.json",
             'W',
             [sec])
 
@@ -94,7 +94,7 @@ def define_building(lat_bm_ends, lat_bm_modeling,
                 b.add_column_at_point(
                     pt[0], pt[1], n_sub=nsub,
                     ends=lat_col_ends,
-                    model_as=lat_col_modeling_type, geomTransf=col_gtransf)
+                    model_as=lat_col_modeling_type, geom_transf=col_gtransf)
         # define X-dir frame beams
         b.set_active_angle(0.00)
         b.set_active_section(sections['lateral_beams'][level_tag])
@@ -127,7 +127,7 @@ def define_building(lat_bm_ends, lat_bm_modeling,
                 pt = point[tag1][tag2]
                 col = b.add_column_at_point(
                     pt[0], pt[1], n_sub=1, ends=fixedpinned_ends,
-                    model_as=elastic_modeling_type, geomTransf=col_gtransf)
+                    model_as=elastic_modeling_type, geom_transf=col_gtransf)
                 ni = col[0].node_i
                 nis.append(ni)
 

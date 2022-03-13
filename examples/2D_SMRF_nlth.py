@@ -1,8 +1,8 @@
 import sys
-sys.path.append("../OpenSeesPy_Building_Modeler")
+sys.path.append("../OpenSees_Model_Builder")
 
 import numpy as np
-import modeler
+import model
 import solver
 import matplotlib.pyplot as plt
 
@@ -19,7 +19,7 @@ total_height = (15. + 13.*2) * 12.00
 def define_building(lat_bm_ends):
 
     # Define a building
-    b = modeler.Building()
+    b = model.Model()
     b.set_global_restraints([0, 1, 0, 0, 0, 0])
 
     # Add levels
@@ -58,7 +58,7 @@ def define_building(lat_bm_ends):
 
     for sec in wsections:
         b.add_sections_from_json(
-            "../OpenSeesPy_Building_Modeler/section_data/sections.json",
+            "../OpenSees_Model_Builder/section_data/sections.json",
             'W',
             [sec])
 
@@ -95,7 +95,7 @@ def define_building(lat_bm_ends):
                 b.add_column_at_point(
                     pt[0], pt[1], n_sub=nsub,
                     model_as=fiber_modeling_type,
-                    geomTransf=col_gtransf,
+                    geom_transf=col_gtransf,
                     ends=lat_col_ends)
         # define X-dir frame beams
         b.set_active_angle(0.00)
@@ -129,7 +129,7 @@ def define_building(lat_bm_ends):
                 pt = point[tag1][tag2]
                 col = b.add_column_at_point(
                     pt[0], pt[1], n_sub=1, ends=fixedpinned_ends,
-                    model_as=elastic_modeling_type, geomTransf=col_gtransf)
+                    model_as=elastic_modeling_type, geom_transf=col_gtransf)
                 ni = col[0].node_i
                 nis.append(ni)
 

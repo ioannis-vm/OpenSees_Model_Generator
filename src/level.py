@@ -18,7 +18,6 @@ from collections import OrderedDict
 import numpy as np
 from node import Node, Nodes
 from components import LineElement
-from components import LineElementSequence_Steel_W_PanelZone
 from components import LineElementSequences
 from utility import common
 

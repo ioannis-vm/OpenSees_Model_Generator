@@ -1,14 +1,14 @@
 import sys
-sys.path.append("../OpenSeesPy_Building_Modeler")
+sys.path.append("../OpenSees_Model_Builder")
 
 import numpy as np
-import modeler
+import model
 import solver
 import pickle
 import matplotlib.pyplot as plt
 
 
-b = modeler.Building()
+b = model.Model()
 
 b.set_global_restraints([0, 1, 0, 1, 0, 1])
 
@@ -22,7 +22,7 @@ beam_sec = 'W24X94'
 b.set_active_material('steel02-fy50')
 
 b.add_sections_from_json(
-    "../OpenSeesPy_Building_Modeler/section_data/sections.json",
+    "../OpenSees_Model_Builder/section_data/sections.json",
     'W',
     [col_sec, beam_sec])
 
@@ -48,10 +48,10 @@ b.set_active_levels(['1'])
 b.set_active_section(col_sec)
 col1 = b.add_column_at_point(
     pt1[0], pt1[1], n_sub=nsub, ends=col_ends,
-    model_as=elastic_modeling_type, geomTransf=col_gtransf)[0]
+    model_as=elastic_modeling_type, geom_transf=col_gtransf)[0]
 col2 = b.add_column_at_point(
     pt2[0], pt2[1], n_sub=nsub, ends=col_ends,
-    model_as=elastic_modeling_type, geomTransf=col_gtransf)[0]
+    model_as=elastic_modeling_type, geom_transf=col_gtransf)[0]
 b.set_active_placement('top_center')
 b.set_active_section(beam_sec)
 b.set_active_angle(0.00)

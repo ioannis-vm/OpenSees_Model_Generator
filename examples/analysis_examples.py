@@ -1,9 +1,9 @@
-import modeler
+import model
 import solver
 import numpy as np
 
 # Define a building
-b = modeler.Building()
+b = model.Model()
 
 # Add levels
 b.add_level("base", 0.00, "fixed")
@@ -61,7 +61,7 @@ b.set_active_groups(["columns"])
 modeling_type = {'type': 'fiber', 'n_x': 50, 'n_y': 50}
 
 b.add_columns_from_grids(
-    n_sub=10, model_as=modeling_type, geomTransf='Corotational')
+    n_sub=10, model_as=modeling_type, geom_transf='Corotational')
 
 b.active_placement = 'top_center'
 b.set_active_groups(["beams"])

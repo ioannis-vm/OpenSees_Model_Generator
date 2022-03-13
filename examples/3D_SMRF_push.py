@@ -1,15 +1,12 @@
 import sys
-sys.path.append("../OpenSeesPy_Building_Modeler")
+sys.path.append("../OpenSees_Model_Builder/src")
 
 import numpy as np
-import modeler
+import model
 import solver
 import pickle
 import matplotlib.pyplot as plt
-from components import LineElementSequence_Steel_W_PanelZone
-from components import LineElementSequence_Steel_W_PanelZone_IMK
-from components import LineElementSequence_W_grav_sear_tab
-from components import LineElementSequence_IMK
+from components import LineElementSequence
 
 # Initialize a container
 analysis_objects = []
@@ -18,7 +15,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
                  lat_col_ends, lat_col_modeling_type,
                  grav_bm_ends):
 
-    b = modeler.Building()
+    b = model.Model()
 
     hi = np.array([15.00, 13.00, 13.00]) * 12.00  # in
 
@@ -71,15 +68,16 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
 
     for sec in wsections:
         b.add_sections_from_json(
-            "../OpenSeesPy_Building_Modeler/section_data/sections.json",
+            "../OpenSees_Model_Builder/section_data/sections.json",
             'W',
             [sec])
 
     #
     # define structural members
     #
-    pinned_ends = {'type': 'pinned', 'dist': 0.005}
-    fixedpinned_ends = {'type': 'fixed-pinned', 'dist': 0.005}
+    pinned_ends = {'type': 'pinned', 'end_dist': 0.005}
+    fixedpinned_ends = {'type': 'fixed-pinned', 'end_dist': 0.005,
+                        'doubler plate thickness': 0.00}
     elastic_modeling_type = {'type': 'elastic'}
     col_gtransf = 'Corotational'
     nsub = 8  # element subdivision
@@ -111,13 +109,13 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
             pt = point[tag]['1']
             col = b.add_column_at_point(
                 pt[0], pt[1], n_sub=1, ends=grav_col_ends,
-                model_as=elastic_modeling_type, geomTransf=col_gtransf)
+                model_as=elastic_modeling_type, geom_transf=col_gtransf)
         for tag1 in ['B', 'C', 'D', 'E']:
             for tag2 in ['2', '3', '4']:
                 pt = point[tag1][tag2]
                 col = b.add_column_at_point(
                     pt[0], pt[1], n_sub=1, ends=grav_col_ends,
-                    model_as=elastic_modeling_type, geomTransf=col_gtransf)
+                    model_as=elastic_modeling_type, geom_transf=col_gtransf)
 
         # define X-dir frame columns
         b.set_active_section(sections['lateral_cols'][level_tag])
@@ -127,7 +125,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
                 pt = point[tag1][tag2]
                 b.add_column_at_point(
                     pt[0], pt[1], n_sub=nsub, ends=lat_col_ends,
-                    model_as=lat_col_modeling_type, geomTransf=col_gtransf)
+                    model_as=lat_col_modeling_type, geom_transf=col_gtransf)
         # deffine Y-dir frame columns
         b.set_active_angle(0.00)
         for tag1 in ['A', 'F']:
@@ -135,7 +133,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
                 pt = point[tag1][tag2]
                 b.add_column_at_point(
                     pt[0], pt[1], n_sub=nsub, ends=lat_col_ends,
-                    model_as=lat_col_modeling_type, geomTransf=col_gtransf)
+                    model_as=lat_col_modeling_type, geom_transf=col_gtransf)
         # define X-dir frame beams
         b.set_active_section(sections['lateral_beams'][level_tag])
         b.set_active_placement('top_center')
@@ -171,25 +169,57 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
                 b.add_beam_at_points(
                     point[tag1][tag2_start[j]],
                     point[tag1][tag2_end[j]],
-                    ends=grav_bm_ends)
-        for tag1 in ['1', '5']:
-            tag2_start = ['A', 'E']
-            tag2_end = ['B', 'F']
-            for j in range(len(tag2_start)):
-                b.add_beam_at_points(
-                    point[tag2_start[j]][tag1],
-                    point[tag2_end[j]][tag1],
-                    ends=grav_bm_ends)
+                    ends=grav_bm_ends,
+                    snap_i='bottom_center',
+                    snap_j='top_center')
+        b.add_beam_at_points(
+            point['A']['1'],
+            point['B']['1'],
+            snap_j='top_center',
+            ends=grav_bm_ends)
+        b.add_beam_at_points(
+            point['E']['1'],
+            point['F']['1'],
+            snap_i='bottom_center',
+            ends=grav_bm_ends)
+        b.add_beam_at_points(
+            point['A']['5'],
+            point['B']['5'],
+            snap_j='top_center',
+            ends=grav_bm_ends)
+        b.add_beam_at_points(
+            point['E']['5'],
+            point['F']['5'],
+            snap_i='bottom_center',
+            ends=grav_bm_ends)
         # define interior gravity beams
         for tag1 in ['B', 'C', 'D', 'E']:
             b.set_active_section(
                 sections['gravity_beams_interior_25'][level_tag])
-            tag2_start = ['1', '2', '3', '4']
-            tag2_end = ['2', '3', '4', '5']
+            tag2_start = ['2', '3']
+            tag2_end = ['3', '4']
             for j in range(len(tag2_start)):
                 b.add_beam_at_points(
                     point[tag1][tag2_start[j]],
                     point[tag1][tag2_end[j]],
+                    snap_i='bottom_center',
+                    snap_j='top_center',
+                    ends=grav_bm_ends)
+            tag2_start = ['1']
+            tag2_end = ['2']
+            for j in range(len(tag2_start)):
+                b.add_beam_at_points(
+                    point[tag1][tag2_start[j]],
+                    point[tag1][tag2_end[j]],
+                    snap_j='top_center',
+                    ends=grav_bm_ends)
+            tag2_start = ['4']
+            tag2_end = ['5']
+            for j in range(len(tag2_start)):
+                b.add_beam_at_points(
+                    point[tag1][tag2_start[j]],
+                    point[tag1][tag2_end[j]],
+                    snap_i='bottom_center',
                     ends=grav_bm_ends)
         for tag1 in ['2', '3', '4']:
             tag2_start = ['A', 'B', 'C', 'D', 'E']
@@ -245,7 +275,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
     # the tributary area of the 1st story cladding support is
     # half the height of the 1st story and half the height of the second
     # we get lb/ft, so we divide by 12 to convert this to lb/in
-    # which is what OpenSeesPy_Building_Modeler uses.
+    # which is what OpenSees_Model_Builder uses.
     b.selection.add_UDL(np.array((0.00, 0.00,
                                   -((10./12.**2) * (hi[0] + hi[1]) / 2.00))))
 
@@ -262,10 +292,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
                                   -((10./12.**2) * hi[2] / 2.00))))
     b.selection.clear()
 
-    b.preprocess(assume_floor_slabs=True, self_weight=True,
-                 steel_panel_zones=True, elevate_column_splices=0.25)
-
-    # b.plot_building_geometry(extrude_frames=True,
+    # b.plot_building_geometry(extrude_frames=False,
     #                          offsets=True,
     #                          gridlines=True,
     #                          global_axes=False,
@@ -274,6 +301,19 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
     #                          just_selection=False,
     #                          parent_nodes=True,
     #                          frame_axes=False)
+
+    b.preprocess(assume_floor_slabs=True, self_weight=True,
+                 steel_panel_zones=True, elevate_column_splices=0.25)
+
+    b.plot_building_geometry(extrude_frames=False,
+                             offsets=True,
+                             gridlines=True,
+                             global_axes=False,
+                             diaphragm_lines=True,
+                             tributary_areas=True,
+                             just_selection=False,
+                             parent_nodes=True,
+                             frame_axes=False)
 
     
     # ~~~~~~~~~~~~~~~~ #
@@ -326,98 +366,98 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
     return deltas, vbs, pushover_analysis
 
 
-lat_bm_ends = {'type': 'steel_W_IMK', 'dist': 0.05,
+lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
                'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
                'composite action': False,
                'doubler plate thickness': 0.00}
 lat_bm_modeling_type = {'type': 'elastic'}
-lat_col_ends = {'type': 'steel_W_PZ_IMK', 'dist': 0.05,
+lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
                 'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.005,
                 'doubler plate thickness': 0.00}
 lat_col_modeling_type = {'type': 'elastic'}
-grav_bm_ends = {'type': 'steel W shear tab', 'dist': 0.005,
+grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
                 'composite action': False}
 deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
                                       lat_col_ends, lat_col_modeling_type,
                                       grav_bm_ends)
 
 
-lat_bm_ends = {'type': 'steel_W_IMK', 'dist': 0.05,
-               'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
-               'composite action': True,
-               'doubler plate thickness': 0.00}
-lat_bm_modeling = {'type': 'elastic'}
-lat_col_ends = {'type': 'steel_W_PZ_IMK', 'dist': 0.05,
-                'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
-                'doubler plate thickness': 0.00}
-lat_col_modeling_type = {'type': 'elastic'}
-lat_bm_modeling_type = {'type': 'elastic'}
-grav_bm_ends = {'type': 'steel W shear tab', 'dist': 0.005,
-                'composite action': False}
-deltas_imk_c, vbs_imk_c, analysis = get_response(
-    lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
-    lat_col_modeling_type, grav_bm_ends)
+# lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
+#                'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
+#                'composite action': True,
+#                'doubler plate thickness': 0.00}
+# lat_bm_modeling = {'type': 'elastic'}
+# lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
+#                 'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
+#                 'doubler plate thickness': 0.00}
+# lat_col_modeling_type = {'type': 'elastic'}
+# lat_bm_modeling_type = {'type': 'elastic'}
+# grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
+#                 'composite action': False}
+# deltas_imk_c, vbs_imk_c, analysis = get_response(
+#     lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
+#     lat_col_modeling_type, grav_bm_ends)
 
-lat_bm_ends = {'type': 'steel_W_IMK', 'dist': 0.05,
-               'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
-               'composite action': True,
-               'doubler plate thickness': 0.00}
-lat_bm_modeling = {'type': 'elastic'}
-lat_col_ends = {'type': 'steel_W_PZ_IMK', 'dist': 0.05,
-                'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
-                'doubler plate thickness': 0.00}
-lat_col_modeling_type = {'type': 'elastic'}
-lat_bm_modeling_type = {'type': 'elastic'}
-grav_bm_ends = {'type': 'steel W shear tab', 'dist': 0.005,
-                'composite action': True}
-deltas_imk_c2, vbs_imk_c2, analysis = get_response(
-    lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
-    lat_col_modeling_type, grav_bm_ends)
-
-
-lat_bm_ends = {'type': 'RBS', 'dist': (17.50+17.5)/(25.*12.),
-               'length': 17.5, 'factor': 0.60, 'n_sub': 15}
-lat_bm_modeling = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
-lat_col_ends = {'type': 'steel_W_PZ', 'doubler plate thickness': 0.00}
-lat_col_modeling_type = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
-grav_bm_ends = {'type': 'pinned', 'dist': 0.005}
-deltas_fib, vbs_fib, _ = get_response(lat_bm_ends, lat_bm_modeling,
-                                      lat_col_ends, lat_col_modeling_type,
-                                      grav_bm_ends)
+# lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
+#                'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
+#                'composite action': True,
+#                'doubler plate thickness': 0.00}
+# lat_bm_modeling = {'type': 'elastic'}
+# lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
+#                 'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
+#                 'doubler plate thickness': 0.00}
+# lat_col_modeling_type = {'type': 'elastic'}
+# lat_bm_modeling_type = {'type': 'elastic'}
+# grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
+#                 'composite action': True}
+# deltas_imk_c2, vbs_imk_c2, analysis = get_response(
+#     lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
+#     lat_col_modeling_type, grav_bm_ends)
 
 
-cs = 0.15115
-omEga = 3.00
+# lat_bm_ends = {'type': 'RBS', 'end_dist': (17.50+17.5)/(25.*12.),
+#                'rbs_length': 17.5, 'rbs_reduction': 0.60, 'rbs_n_sub': 15}
+# lat_bm_modeling = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
+# lat_col_ends = {'type': 'steel_W_PZ', 'doubler plate thickness': 0.00, 'end_dist': 0.01}
+# lat_col_modeling_type = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
+# grav_bm_ends = {'type': 'pinned', 'end_dist': 0.005}
+# deltas_fib, vbs_fib, _ = get_response(lat_bm_ends, lat_bm_modeling,
+#                                       lat_col_ends, lat_col_modeling_type,
+#                                       grav_bm_ends)
 
 
-plt.rc('font', family='serif')
-plt.rc('xtick', labelsize='medium')
-plt.rc('ytick', labelsize='medium')
-plt.rc('text', usetex=True)
-
-plt.figure()
-plt.grid()
-plt.axhline(y=cs, color='0.50', ls='dashed')
-plt.axhline(y=cs*omEga, color='0.50', ls='dashed')
-plt.plot(deltas_fib, vbs_fib, color='k', ls='dotted', label='fiber')
-plt.plot(deltas_imk, vbs_imk, color='k', ls='solid', label='IMK')
-plt.plot(deltas_imk_c, vbs_imk_c, color='k',
-         ls='dashed', label='IMK, composite lat beams')
-oplt.plot(deltas_imk_c2, vbs_imk_c2, color='k',
-          ls='dashed', label='IMK, composite all beams')
-plt.ylabel('Vb / W')
-plt.xlabel('Roof Drift Ratio $\\Delta$/H')
-plt.legend()
-plt.show()
+# cs = 0.15115
+# omEga = 3.00
 
 
-analysis = analysis_objects[0]
+# plt.rc('font', family='serif')
+# plt.rc('xtick', labelsize='medium')
+# plt.rc('ytick', labelsize='medium')
+# plt.rc('text', usetex=False)
 
-b = analysis.building
+# plt.figure()
+# plt.grid()
+# plt.axhline(y=cs, color='0.50', ls='dashed')
+# plt.axhline(y=cs*omEga, color='0.50', ls='dashed')
+# plt.plot(deltas_fib, vbs_fib, color='k', ls='dotted', label='fiber')
+# plt.plot(deltas_imk, vbs_imk, color='k', ls='solid', label='IMK')
+# plt.plot(deltas_imk_c, vbs_imk_c, color='k',
+#          ls='dashed', label='IMK, composite lat beams')
+# plt.plot(deltas_imk_c2, vbs_imk_c2, color='k',
+#          ls='dashed', label='IMK, composite all beams')
+# plt.ylabel('Vb / W')
+# plt.xlabel('Roof Drift Ratio $\\Delta$/H')
+# plt.legend()
+# plt.show()
 
-my_col = b.levels.level_list[1].columns.element_list[4]
 
-analysis.plot_moment_rot(my_col)
+# analysis = analysis_objects[0]
+
+# b = analysis.building
+
+# my_col = b.levels.level_list[1].columns.element_list[4]
+
+# analysis.plot_moment_rot(my_col)
 
 
 

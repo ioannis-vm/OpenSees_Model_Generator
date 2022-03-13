@@ -297,7 +297,7 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
             rot_i_local = r_local[i, :]
             rot_j_local = r_local[i+1, :]
 
-            loop = elm.col_section.mesh.halfedges
+            loop = elm.section.mesh.halfedges
             for halfedge in loop:
 
                 z_a = halfedge.vertex.coords[0]

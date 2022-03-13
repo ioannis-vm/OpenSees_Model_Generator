@@ -23,10 +23,7 @@ import model
 import components
 from model import Model
 from node import Node
-from components import LineElementSequence_Steel_W_PanelZone
-from components import LineElementSequence_Steel_W_PanelZone_IMK
-from components import LineElementSequence_W_grav_sear_tab
-from components import LineElementSequence_IMK
+from components import LineElementSequence
 from utility import common
 from utility.graphics import postprocessing_3D
 from utility.graphics import general_2D
@@ -256,12 +253,12 @@ class Analysis:
 
         if np.linalg.norm(elm.offset_i) + \
            np.linalg.norm(elm.offset_j) > common.EPSILON:
-            ops.geomTransf(elm.geomTransf,
+            ops.geomTransf(elm.geom_transf,
                            elm.uniq_id,
                            *elm.z_axis,
                            '-jntOffset', *elm.offset_i, *elm.offset_j)
         else:
-            ops.geomTransf(elm.geomTransf,
+            ops.geomTransf(elm.geom_transf,
                            elm.uniq_id,
                            *elm.z_axis)
 
@@ -370,13 +367,13 @@ class Analysis:
 
             # define materials
             mats = elm.materials
-            for mat in mats:
+            for mat in mats.values():
                 if mat.uniq_id not in defined_materials:
                     self._define_material(mat)
                     defined_materials.append(mat.uniq_id)
 
-            dofs = elm.dofs
-            mat_tags = [mat.uniq_id for mat in mats]
+            dofs = elm.materials.keys()
+            mat_tags = [mat.uniq_id for mat in elm.materials.values()]
 
             # define the ZeroLength element
             ops.element('zeroLength', elm.uniq_id,
@@ -503,22 +500,15 @@ class Analysis:
 
     def _read_release_moment_rot(self):
         for release in self.building.list_of_endreleases():
-            # don't gather data for simple pins
-            mat_names = [material.name
-                         for material in release.materials]
+            # don't store data for simple pin releases
             # WARNING
             # This code only monitors strong-axis-bending releases
             # If more releases are implemented in the future, this
             # will need to be updated
-            # if release.uniq_id == 71:
-            #     import pdb
-            #     pdb.set_trace()
-            #     print('hello')
-            if 6 in release.dofs:
-                idx = release.dofs.index(6)
-                if mat_names[idx] in ['auto_pinching',
-                                      'auto__panel_zone_spring',
-                                      'auto_IMK']:
+            if 6 in release.materials:
+                if release.materials[6].name in ['auto_pinching',
+                                                 'auto__panel_zone_spring',
+                                                 'auto_IMK']:
                     # force, deformation in the global system
                     moment_i_global = ops.eleResponse(
                         release.uniq_id, 'force')[3:6]
