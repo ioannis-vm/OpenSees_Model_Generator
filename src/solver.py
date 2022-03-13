@@ -34,7 +34,7 @@ plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
 class AnalysisResult(TypedDict):
-    uniq_id: int
+    id: int
     results = List
 
 
@@ -72,14 +72,14 @@ class Analysis:
         if material.ops_material == 'Steel01':
             ops.uniaxialMaterial(
                 'Steel01',
-                material.uniq_id,
+                material.uid,
                 material.parameters['Fy'],
                 material.parameters['E0'],
                 material.parameters['b'])
         elif material.ops_material == 'Steel02':
             ops.uniaxialMaterial(
                 'Steel02',
-                material.uniq_id,
+                material.uid,
                 material.parameters['Fy'],
                 material.parameters['E0'],
                 material.parameters['b'],
@@ -92,7 +92,7 @@ class Analysis:
         elif material.ops_material == 'UVCuniaxial':
             ops.uniaxialMaterial(
                 'UVCuniaxial',
-                material.uniq_id,
+                material.uid,
                 material.parameters['E0'],
                 material.parameters['Fy'],
                 *material.parameters['params']
@@ -100,20 +100,20 @@ class Analysis:
         elif material.ops_material == 'Elastic':
             ops.uniaxialMaterial(
                 'Elastic',
-                material.uniq_id,
+                material.uid,
                 material.parameters['E']
             )
         elif material.ops_material == 'ElasticPP':
             ops.uniaxialMaterial(
                 'ElasticPP',
-                material.uniq_id,
+                material.uid,
                 material.parameters['E0'],
                 material.parameters['ey']
             )
         elif material.ops_material == 'Hysteretic':
             ops.uniaxialMaterial(
                 'Hysteretic',
-                material.uniq_id,
+                material.uid,
                 material.parameters['M1y'],
                 material.parameters['gamma1_y'],
                 material.parameters['M2y'],
@@ -136,7 +136,7 @@ class Analysis:
 
             ops.uniaxialMaterial(
                 'Bilin',
-                material.uniq_id,
+                material.uid,
                 material.parameters['initial_stiffness'],
                 material.parameters['b+'],
                 material.parameters['b-'],
@@ -163,14 +163,14 @@ class Analysis:
 
             ops.uniaxialMaterial(
                 'Pinching4',
-                material.uniq_id,
+                material.uid,
                 *material.parameters.values())
 
         else:
             raise ValueError("Unsupported material:" + material.ops_material)
 
     def _define_node(self, node: model.Node):
-        ops.node(node.uniq_id, *node.coords)
+        ops.node(node.uid, *node.coords)
 
         def superimpose_restraints(c_1, c_2):
             assert len(c_1) == len(c_2)
@@ -187,26 +187,26 @@ class Analysis:
         if node.restraint_type == 'fixed':
             n_r = [1, 1, 1, 1, 1, 1]
             n_res = superimpose_restraints(n_g, n_r)
-            ops.fix(node.uniq_id, *n_res)
+            ops.fix(node.uid, *n_res)
         elif node.restraint_type == 'pinned':
             n_r = [1, 1, 1, 0, 0, 0]
             n_res = superimpose_restraints(n_g, n_r)
-            ops.fix(node.uniq_id, *n_res)
+            ops.fix(node.uid, *n_res)
         elif node.restraint_type == 'parent':
             n_r = [0, 0, 1, 1, 1, 0]
             n_res = superimpose_restraints(n_g, n_r)
-            ops.fix(node.uniq_id, *n_res)
+            ops.fix(node.uid, *n_res)
         elif node.restraint_type == 'free':
             n_r = [0, 0, 0, 0, 0, 0]
             n_res = superimpose_restraints(n_g, n_r)
             if 1 in n_res:
-                ops.fix(node.uniq_id, *n_res)
+                ops.fix(node.uid, *n_res)
         else:
             raise ValueError("Invalid restraint type")
 
         # mass
         if max(node.mass) > common.EPSILON:
-            ops.mass(node.uniq_id,
+            ops.mass(node.uid,
                      *node.mass)
 
     def _define_elastic_section(self, sec: components.Section):
@@ -214,7 +214,7 @@ class Analysis:
         # # using AISC database properties
         # # RBS sections won't work
         # ops.section('Elastic',
-        #             sec.uniq_id,
+        #             sec.uid,
         #             sec.material.parameters['E0'],
         #             sec.properties['A'],
         #             sec.properties['Ix'],
@@ -224,7 +224,7 @@ class Analysis:
 
         # using mesh properties
         ops.section('Elastic',
-                    sec.uniq_id,
+                    sec.uid,
                     sec.material.parameters['E0'],
                     sec.mesh.geometric_properties()['area'],
                     sec.mesh.geometric_properties()['inertia']['ixx'],
@@ -237,7 +237,7 @@ class Analysis:
         pieces = sec.subdivide_section(
             n_x=n_x, n_y=n_y)
         ops.section('Fiber',
-                    sec.uniq_id,
+                    sec.uid,
                     '-GJ',
                     sec.properties['J']*sec.material.parameters['G'])
         for piece in pieces:
@@ -247,68 +247,68 @@ class Analysis:
             ops.fiber(y_loc,
                       z_loc,
                       area,
-                      sec.material.uniq_id)
+                      sec.material.uid)
 
     def _define_line_element(self, elm: model.LineElement):
 
         if np.linalg.norm(elm.offset_i) + \
            np.linalg.norm(elm.offset_j) > common.EPSILON:
             ops.geomTransf(elm.geom_transf,
-                           elm.uniq_id,
+                           elm.uid,
                            *elm.z_axis,
                            '-jntOffset', *elm.offset_i, *elm.offset_j)
         else:
             ops.geomTransf(elm.geom_transf,
-                           elm.uniq_id,
+                           elm.uid,
                            *elm.z_axis)
 
         if elm.section.sec_type != 'utility':
             if elm.model_as['type'] == 'elastic':
-                ops.element('elasticBeamColumn', elm.uniq_id,
-                            elm.node_i.uniq_id,
-                            elm.node_j.uniq_id,
+                ops.element('elasticBeamColumn', elm.uid,
+                            elm.node_i.uid,
+                            elm.node_j.uid,
                             elm.section.properties['A'],
                             elm.section.material.parameters['E0'],
                             elm.section.material.parameters['G'],
                             elm.section.properties['J'],
                             elm.section.properties['Iy'],
                             elm.section.properties['Ix'],
-                            elm.uniq_id)
+                            elm.uid)
                 # or using the mesh properties (difference is negligible)
-                # ops.element('elasticBeamColumn', elm.uniq_id,
-                #             elm.node_i.uniq_id,
-                #             elm.node_j.uniq_id,
+                # ops.element('elasticBeamColumn', elm.uid,
+                #             elm.node_i.uid,
+                #             elm.node_j.uid,
                 #             elm.section.mesh.geometric_properties()['area'],
                 #             elm.section.material.parameters['E0'],
                 #             elm.section.material.parameters['G'],
                 #             elm.section.properties['J'],
                 #             elm.section.mesh.geometric_properties()['inertia']['iyy'],
                 #             elm.section.mesh.geometric_properties()['inertia']['ixx'],
-                #             elm.uniq_id)
+                #             elm.uid)
             else:
                 ops.beamIntegration(
-                    'Lobatto', elm.uniq_id, elm.section.uniq_id, elm.n_p)
+                    'Lobatto', elm.uid, elm.section.uid, elm.n_p)
                 ops.element('forceBeamColumn',
-                            elm.uniq_id,
-                            elm.node_i.uniq_id,
-                            elm.node_j.uniq_id,
-                            elm.uniq_id,
-                            elm.uniq_id)
+                            elm.uid,
+                            elm.node_i.uid,
+                            elm.node_j.uid,
+                            elm.uid,
+                            elm.uid)
         else:
-            ops.element('elasticBeamColumn', elm.uniq_id,
-                        elm.node_i.uniq_id,
-                        elm.node_j.uniq_id,
+            ops.element('elasticBeamColumn', elm.uid,
+                        elm.node_i.uid,
+                        elm.node_j.uid,
                         1.00, common.STIFF, common.STIFF,
                         1.00, 1.00, 1.00,
-                        elm.uniq_id)
+                        elm.uid)
 
     def _define_node_constraints(self):
         for lvl in self.building.levels.registry.values():
             if lvl.parent_node:
                 ops.rigidDiaphragm(
                     3,
-                    lvl.parent_node.uniq_id,
-                    *[node.uniq_id
+                    lvl.parent_node.uid,
+                    *[node.uid
                       for node in lvl.list_of_primary_nodes()])
 
     def _to_OpenSees_domain(self):
@@ -317,9 +317,9 @@ class Analysis:
         """
 
         def define_node(node, defined_nodes):
-            if node.uniq_id not in defined_nodes:
+            if node.uid not in defined_nodes:
                 self._define_node(node)
-                defined_nodes.append(node.uniq_id)
+                defined_nodes.append(node.uid)
 
         defined_nodes = []
         defined_sections = []
@@ -335,7 +335,7 @@ class Analysis:
             define_node(elm.node_j, defined_nodes)
 
             # define section
-            if (elm.section.uniq_id not in defined_sections) and \
+            if (elm.section.uid not in defined_sections) and \
                elm.model_as['type'] != 'elastic':
                 sec = elm.section
                 # we don't define utility sections in OpenSees
@@ -343,10 +343,10 @@ class Analysis:
                 if sec.sec_type != 'utility':
                     # define material
                     mat = sec.material
-                    if mat.uniq_id \
+                    if mat.uid \
                        not in defined_materials:
                         self._define_material(mat)
-                        defined_materials.append(mat.uniq_id)
+                        defined_materials.append(mat.uid)
                     if elm.model_as['type'] == 'elastic':
                         self._define_elastic_section(sec)
                     elif elm.model_as['type'] == 'fiber':
@@ -355,7 +355,7 @@ class Analysis:
                         self._define_fiber_section(sec, n_x, n_y)
                     else:
                         raise ValueError("Invalid modeling type")
-                    defined_sections.append(elm.section.uniq_id)
+                    defined_sections.append(elm.section.uid)
 
             self._define_line_element(elm)
 
@@ -368,17 +368,17 @@ class Analysis:
             # define materials
             mats = elm.materials
             for mat in mats.values():
-                if mat.uniq_id not in defined_materials:
+                if mat.uid not in defined_materials:
                     self._define_material(mat)
-                    defined_materials.append(mat.uniq_id)
+                    defined_materials.append(mat.uid)
 
             dofs = elm.materials.keys()
-            mat_tags = [mat.uniq_id for mat in elm.materials.values()]
+            mat_tags = [mat.uid for mat in elm.materials.values()]
 
             # define the ZeroLength element
-            ops.element('zeroLength', elm.uniq_id,
-                        elm.node_i.uniq_id,
-                        elm.node_j.uniq_id,
+            ops.element('zeroLength', elm.uid,
+                        elm.node_i.uid,
+                        elm.node_j.uid,
                         '-mat',
                         *mat_tags,
                         '-dir',
@@ -399,7 +399,7 @@ class Analysis:
         ops.pattern('Plain', 1, 1)
 
         for elm in self.building.list_of_line_elements():
-            ops.eleLoad('-ele', elm.uniq_id,
+            ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
                         elm.udl_total()[1],
                         elm.udl_total()[2],
@@ -407,18 +407,18 @@ class Analysis:
         for node in self.building.list_of_primary_nodes() + \
                 self.building.list_of_parent_nodes() + \
                 self.building.list_of_internal_nodes():
-            ops.load(node.uniq_id, *node.load_total())
+            ops.load(node.uid, *node.load_total())
 
     ####################################################
     # Methods that read back information from OpenSees #
     ####################################################
 
     def _store_result(self, analysis_result: AnalysisResult,
-                      uniq_id: int, result: list):
-        if uniq_id in analysis_result.keys():
-            analysis_result[uniq_id].append(result)
+                      id: int, result: list):
+        if id in analysis_result.keys():
+            analysis_result[id].append(result)
         else:
-            analysis_result[uniq_id] = [result]
+            analysis_result[id] = [result]
 
     def _read_node_displacements(self, data_retention='default'):
         if data_retention == 'default':
@@ -430,8 +430,8 @@ class Analysis:
                              + data_retention)
         for node in node_list:
             self._store_result(self.node_displacements,
-                               node.uniq_id,
-                               ops.nodeDisp(node.uniq_id))
+                               node.uid,
+                               ops.nodeDisp(node.uid))
 
     def _read_node_velocities(self, data_retention='default'):
         if data_retention == 'default':
@@ -443,8 +443,8 @@ class Analysis:
                              + data_retention)
         for node in node_list:
             self._store_result(self.node_velocities,
-                               node.uniq_id,
-                               ops.nodeVel(node.uniq_id))
+                               node.uid,
+                               ops.nodeVel(node.uid))
 
     def _read_node_accelerations(self, data_retention='default'):
         if data_retention == 'default':
@@ -456,14 +456,14 @@ class Analysis:
                              + data_retention)
         for node in node_list:
             self._store_result(self.node_accelerations,
-                               node.uniq_id,
-                               ops.nodeAccel(node.uniq_id))
+                               node.uid,
+                               ops.nodeAccel(node.uid))
 
     def _read_node_reactions(self):
         ops.reactions()
         for node in self.building.list_of_primary_nodes():
             if node.restraint_type != 'free':
-                uid = node.uniq_id
+                uid = node.uid
                 local_reaction = np.array(ops.nodeReaction(uid))
                 self._store_result(self.node_reactions,
                                    uid,
@@ -471,7 +471,7 @@ class Analysis:
 
     def _read_frame_element_forces(self):
         for elm in self.building.list_of_line_elements():
-            uid = elm.uniq_id
+            uid = elm.uid
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.eleForces,
                                uid,
@@ -481,8 +481,8 @@ class Analysis:
         for elm in self.building.list_of_line_elements():
             if elm.model_as['type'] != 'fiber':
                 continue
-            uid = elm.uniq_id
-            mat_id = elm.section.material.uniq_id
+            uid = elm.uid
+            mat_id = elm.section.material.uid
             result = []
             n_p = elm.n_p
             pts = elm.section.snap_points
@@ -511,13 +511,13 @@ class Analysis:
                                                  'auto_IMK']:
                     # force, deformation in the global system
                     moment_i_global = ops.eleResponse(
-                        release.uniq_id, 'force')[3:6]
+                        release.uid, 'force')[3:6]
                     # note: moment_j is the opposite of force_i by equilibrium
                     # no need to store it too
                     # rotation_global = ops.eleResponse(
-                    #     release.uniq_id, 'deformation')[3:6]
-                    rot_i_global = ops.nodeDisp(release.node_i.uniq_id)[3:6]
-                    rot_j_global = ops.nodeDisp(release.node_j.uniq_id)[3:6]
+                    #     release.uid, 'deformation')[3:6]
+                    rot_i_global = ops.nodeDisp(release.node_i.uid)[3:6]
+                    rot_j_global = ops.nodeDisp(release.node_j.uid)[3:6]
                     rotation_global = np.array(rot_j_global) - \
                         np.array(rot_i_global)
                     # convert to the local system
@@ -530,7 +530,7 @@ class Analysis:
                     deformation = tmat_g2l @ np.array(rotation_global)
                     self._store_result(
                         self.release_force_defo,
-                        release.uniq_id,
+                        release.uid,
                         [moment_i[2], deformation[2]])
 
 
@@ -592,7 +592,7 @@ class Analysis:
         for lvl in self.building.levels.registry.values():
             for node in lvl.list_of_primary_nodes():
                 if node.restraint_type != 'free':
-                    uid = node.uniq_id
+                    uid = node.uid
                     x = node.coords[0]
                     y = node.coords[1]
                     z = node.coords[2]
@@ -662,9 +662,9 @@ class ModalAnalysis(LinearAnalysis):
             for i in range(self.num_modes):
                 self._store_result(
                     self.node_displacements,
-                    node.uniq_id,
+                    node.uid,
                     ops.nodeEigenvector(
-                        node.uniq_id,
+                        node.uid,
                         i+1))
 
     def run(self):
@@ -688,7 +688,7 @@ class ModalAnalysis(LinearAnalysis):
             disp = np.zeros(6)
             # TODO debug  - something may be wrong here.
             for node in lvl.nodes_primary.registry.values():
-                disp += np.array(self.node_displacements[node.uniq_id][mode-1])
+                disp += np.array(self.node_displacements[node.uid][mode-1])
             disp /= float(len(lvl.nodes_primary.registry))
             data['ux'].append(disp[0])
             data['uy'].append(disp[1])
@@ -731,8 +731,8 @@ class NonlinearAnalysis(Analysis):
             y_vec = elm.y_axis
             z_vec = elm.z_axis
             T_global2local = np.vstack((x_vec, y_vec, z_vec))
-            forces_global = self.eleForces[elm.uniq_id][-1][0:3]
-            moments_global_ends = self.eleForces[elm.uniq_id][-1][3:6]
+            forces_global = self.eleForces[elm.uid][-1][0:3]
+            moments_global_ends = self.eleForces[elm.uid][-1][3:6]
 
             moments_global_clear = \
                 transformations.offset_transformation(
@@ -743,7 +743,7 @@ class NonlinearAnalysis(Analysis):
 
             wx, wy, wz = elm.udl_total()
 
-            len_clr = elm.length_clear()
+            len_clr = elm.length_clear
             t = np.linspace(0.00, len_clr, num=9)
 
             nx_vec = - t * wx - ni
@@ -768,7 +768,7 @@ class NonlinearAnalysis(Analysis):
             if ((emax > capacity_t) or (emin < capacity_c)):
                 raise ValueError(
                     "Acceptance criteria failed for element " +
-                    str(elm.uniq_id))
+                    str(elm.uid))
 
     def plot_moment_rot(self, seq, step=0):
         """
@@ -798,8 +798,8 @@ class NonlinearAnalysis(Analysis):
         if step == 0:
             step = self.n_steps_success
         for i in range(step):
-            data_i.append(self.release_force_defo[spring_i.uniq_id][i])
-            data_j.append(self.release_force_defo[spring_j.uniq_id][i])
+            data_i.append(self.release_force_defo[spring_i.uid][i])
+            data_j.append(self.release_force_defo[spring_j.uid][i])
         data_i = np.array(data_i)
         data_j = np.array(data_j)
 
@@ -840,8 +840,8 @@ class NonlinearAnalysis(Analysis):
             if step == 0:
                 step = self.n_steps_success
             for i in range(step):
-                data_i.append(self.release_force_defo[spring_i.uniq_id][i])
-                data_j.append(self.release_force_defo[spring_j.uniq_id][i])
+                data_i.append(self.release_force_defo[spring_i.uid][i])
+                data_j.append(self.release_force_defo[spring_j.uid][i])
             data_i = np.array(data_i)
             data_j = np.array(data_j)
  
@@ -895,7 +895,7 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         # if a node is given, apply the incremental load on that node
         if node:
-            ops.load(node.uniq_id, *(1.00*load_dir))
+            ops.load(node.uid, *(1.00*load_dir))
         else:
             for i, lvl in enumerate(self.building.levels.registry.values()):
                 # if the level is restrained, no load applied
@@ -903,7 +903,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                     continue
                 # if there is a parent node, all load goes there
                 if lvl.parent_node:
-                    ops.load(lvl.parent_node.uniq_id,
+                    ops.load(lvl.parent_node.uid,
                              *(distribution[i]*load_dir *
                                modeshape_ampl[i]))
                 # if there isn't a parent node, distribute that story's load
@@ -913,7 +913,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                     masses = np.array([n.mass[0] for n in node_list])
                     masses = masses/np.linalg.norm(masses)
                     for j, node in enumerate(node_list):
-                        ops.load(node.uniq_id,
+                        ops.load(node.uid,
                                  *(distribution[i]*masses[j]*load_dir *
                                    modeshape_ampl[i]))
 
@@ -938,7 +938,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.numberer('Plain')
         # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
-        curr_displ = ops.nodeDisp(control_node.uniq_id, control_DOF+1)
+        curr_displ = ops.nodeDisp(control_node.uid, control_DOF+1)
         self._read_OpenSees_results()
         # self._acceptance_criteria()
         n_steps_success = 1
@@ -980,7 +980,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                              steps[num_subdiv], 0)
                     ops.algorithm(algor[num_subdiv])
                     ops.integrator("DisplacementControl",
-                                   control_node.uniq_id, control_DOF + 1,
+                                   control_node.uid, control_DOF + 1,
                                    incr)
                     ops.analysis("Static")
                     flag = ops.analyze(1)
@@ -1008,7 +1008,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                         self._read_OpenSees_results()
                         # self._acceptance_criteria()
                         curr_displ = ops.nodeDisp(
-                            control_node.uniq_id, control_DOF+1)
+                            control_node.uid, control_DOF+1)
                         print('Target displacement: %.2f | Current: %.4f' %
                               (target_displacement, curr_displ), end='\r')
                         if num_subdiv != 0:
@@ -1044,7 +1044,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         for step in range(self.n_steps_success):
             base_shear.append(self.global_reactions(step)[control_DOF])
             displacement.append(
-                self.node_displacements[node.uniq_id][step][control_DOF])
+                self.node_displacements[node.uid][step][control_DOF])
         base_shear = -np.array(base_shear)
         displacement = np.array(displacement)
         return displacement, base_shear
@@ -1060,8 +1060,8 @@ class PushoverAnalysis(NonlinearAnalysis):
     def plot_brace_hysteresis(self, brace):
         drift = []
         resisting_force = []
-        n_i = brace.node_i.uniq_id
-        n_j = brace.node_j.uniq_id
+        n_i = brace.node_i.uid
+        n_j = brace.node_j.uid
         x_axis = brace.x_axis
         x_axis_horiz = np.array((x_axis[0], x_axis[1], 0.00))
         x_axis_horiz = x_axis_horiz / np.linalg.norm(x_axis_horiz)
@@ -1071,7 +1071,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             diff_disp = np.array(disp_j) - np.array(disp_i)
             disp_prj = np.dot(diff_disp, x_axis)
             drift.append(disp_prj)
-            ielm = brace.end_segment_i.internal_elems[-1].uniq_id
+            ielm = brace.end_segment_i.internal_elems[-1].uid
             force = self.eleForces[ielm][step][0:3]
             force_prj = - np.dot(force, x_axis_horiz)
             resisting_force.append(force_prj)
@@ -1377,12 +1377,12 @@ class NLTHAnalysis(NonlinearAnalysis):
 
             if kind == 'Displacement':
                 response_quant.append(
-                    self.node_displacements[node.uniq_id][step][dof])
+                    self.node_displacements[node.uid][step][dof])
             elif kind == 'Acceleration':
                 time = self.time_vector[step]
                 response_quant.append(
                     self.node_accelerations[
-                        node.uniq_id][step][dof] / common.G_CONST +
+                        node.uid][step][dof] / common.G_CONST +
                     float(self.a_g[dof](time)))
             else:
                 raise ValueError('Invalid response type: %s' % (kind))
@@ -1412,7 +1412,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         general_2D.line_plot_interactive(
             kind + " time-history<br>" +
-            "Node: " + str(node.uniq_id) +
+            "Node: " + str(node.uid) +
             ", direction: " + direction,
             time,
             response,

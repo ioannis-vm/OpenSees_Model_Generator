@@ -95,14 +95,14 @@ linear_gravity_analysis = solver.LinearGravityAnalysis(b)
 linear_gravity_analysis.run()
 
 u1_el = linear_gravity_analysis.node_displacements[
-    node.uniq_id][0]
+    node.uid][0]
 print(u1_el)
 
 # analytic solution
 # ii = col.section.properties['Ix']
 aa = col.end_segment_i.section.mesh.geometric_properties()['area']
 ee = col.end_segment_i.section.material.parameters['E0']
-ll = col.length_clear()
+ll = col.length_clear
 u_analytical = 635.00*1e3 * ll / (ee*aa)
 print(u_analytical)
 

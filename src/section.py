@@ -40,7 +40,7 @@ class Section:
             | -------> z (blue)
            ===
     Attributes:
-        uniq_id (int): unique identifier
+        id (int): unique identifier
         sec_type (str): Flag representing the type of section
                   (e.g. W -> steel W section)
         name (str): Unique name for the section
@@ -66,7 +66,7 @@ class Section:
     properties: Optional[dict] = field(default=None, repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(section_ids)
+        self.uid = next(section_ids)
 
     def __eq__(self, other):
         return (self.name == other.name)

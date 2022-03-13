@@ -24,7 +24,7 @@ class Material:
     """
     Material object.
     Attributes:
-        uniq_id (int): unique identifier
+        uid (int): unique identifier
         name (str): Name of the material
         ops_material (str): Name of the material model to use in OpenSees
         density (float): Mass per unit volume of the material
@@ -38,7 +38,7 @@ class Material:
     parameters: dict = field(repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(material_ids)
+        self.uid = next(material_ids)
 
 
 @dataclass

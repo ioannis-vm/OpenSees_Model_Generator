@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../OpenSees_Model_Builder")
+sys.path.append("../OpenSees_Model_Builder/src")
 
 import numpy as np
 import matplotlib.pyplot as plt

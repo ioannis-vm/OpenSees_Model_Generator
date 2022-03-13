@@ -26,7 +26,7 @@ class Node:
     """
     Node object.
     Attributes:
-        uniq_id (int): unique identifier
+        id (int): unique identifier
         coords (np.ndarray): Coordinates of the location of the node
         restraint_type (str): Can be either "free", "pinned", or "fixed".
                        It can also be "parent" or "internal", but
@@ -63,7 +63,7 @@ class Node:
         default_factory=list, repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(node_ids)
+        self.uid = next(node_ids)
 
     def __eq__(self, other):
         """
@@ -101,4 +101,4 @@ class Nodes:
         """
         Add a node in the nodes collection
         """
-        self.registry[node.uniq_id] = node
+        self.registry[node.uid] = node

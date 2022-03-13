@@ -63,7 +63,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # discrete sample location parameter
     t = np.linspace(0.00, 1.00, num=num_points)
-    len_clr = element.length_clear()
+    len_clr = element.length_clear
 
     # shape function matrices
     Nx_mat = np.column_stack((
@@ -168,10 +168,10 @@ def add_data__extruded_frames_deformed_mesh(analysis,
             continue
         num_points = elm.n_p * 4
         # translations and rotations at the offset ends
-        u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
-        r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
-        u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
-        r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
+        u_i = analysis.node_displacements[elm.node_i.uid][step][0:3]
+        r_i = analysis.node_displacements[elm.node_i.uid][step][3:6]
+        u_j = analysis.node_displacements[elm.node_j.uid][step][0:3]
+        r_j = analysis.node_displacements[elm.node_j.uid][step][3:6]
 
         # transferring them to the clear element ends
         offset_i = elm.offset_i
@@ -278,10 +278,10 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
 
         num_points = 2
         # translations and rotations at the offset ends
-        u_i = analysis.node_displacements[elm.n_external.uniq_id][step][0:3]
-        r_i = analysis.node_displacements[elm.n_external.uniq_id][step][3:6]
-        u_j = analysis.node_displacements[elm.n_internal.uniq_id][step][0:3]
-        r_j = analysis.node_displacements[elm.n_internal.uniq_id][step][3:6]
+        u_i = analysis.node_displacements[elm.n_external.uid][step][0:3]
+        r_i = analysis.node_displacements[elm.n_external.uid][step][3:6]
+        u_j = analysis.node_displacements[elm.n_internal.uid][step][0:3]
+        r_j = analysis.node_displacements[elm.n_internal.uid][step][3:6]
 
         d_global, r_local = interp3D_deformation(
             elm, u_i, r_i, u_j, r_j, num_points)
@@ -379,10 +379,10 @@ def add_data__frames_deformed(analysis,
     for elm in list_of_frames:
 
         num_points = elm.n_p * 4
-        u_i = analysis.node_displacements[elm.node_i.uniq_id][step][0:3]
-        r_i = analysis.node_displacements[elm.node_i.uniq_id][step][3:6]
-        u_j = analysis.node_displacements[elm.node_j.uniq_id][step][0:3]
-        r_j = analysis.node_displacements[elm.node_j.uniq_id][step][3:6]
+        u_i = analysis.node_displacements[elm.node_i.uid][step][0:3]
+        r_i = analysis.node_displacements[elm.node_i.uid][step][3:6]
+        u_j = analysis.node_displacements[elm.node_j.uid][step][0:3]
+        r_j = analysis.node_displacements[elm.node_j.uid][step][3:6]
         # transferring them to the clear element ends
         offset_i = elm.offset_i
         offset_j = elm.offset_j
@@ -432,18 +432,18 @@ def add_data__frames_offsets_deformed(analysis,
         p_io = np.array(elm.internal_pt_i)
         offset_i = elm.offset_i
         u_i = np.array(
-            analysis.node_displacements[elm.node_i.uniq_id][step][0:3])
+            analysis.node_displacements[elm.node_i.uid][step][0:3])
         r_i = np.array(
-            analysis.node_displacements[elm.node_i.uniq_id][step][3:6])
+            analysis.node_displacements[elm.node_i.uid][step][3:6])
         u_io = transformations.offset_transformation(offset_i, u_i, r_i)
 
         p_j = np.array(elm.node_j.coords)
         p_jo = np.array(elm.internal_pt_j)
         offset_j = elm.offset_j
         u_j = np.array(
-            analysis.node_displacements[elm.node_j.uniq_id][step][0:3])
+            analysis.node_displacements[elm.node_j.uid][step][0:3])
         r_j = np.array(
-            analysis.node_displacements[elm.node_j.uniq_id][step][3:6])
+            analysis.node_displacements[elm.node_j.uid][step][3:6])
         u_jo = transformations.offset_transformation(offset_j, u_j, r_j)
 
         x_i = p_i + u_i * scaling
@@ -502,13 +502,13 @@ def add_data__frames_undeformed(dt, list_of_frames):
 
 def add_data__nodes_deformed(analysis, dt, list_of_nodes, step,
                              scaling, color=None, marker=None, size=None):
-    ids = [node.uniq_id for node in list_of_nodes]
+    ids = [node.uid for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
     for i, node in enumerate(list_of_nodes):
         location_data[i, :] = node.coords
         displacement_data[i, :] = \
-            analysis.node_displacements[node.uniq_id][step]
+            analysis.node_displacements[node.uid][step]
     r = np.sqrt(displacement_data[:, 0]**2 +
                 displacement_data[:, 1]**2 +
                 displacement_data[:, 2]**2)
@@ -586,13 +586,13 @@ def get_auto_scaling_deformation(analysis, step):
     max_d = 0.00
     for elm in analysis.building.list_of_line_elements():
         u_i = analysis.node_displacements[
-            elm.node_i.uniq_id][step][0:3]
+            elm.node_i.uid][step][0:3]
         r_i = analysis.node_displacements[
-            elm.node_i.uniq_id][step][3:6]
+            elm.node_i.uid][step][3:6]
         u_j = analysis.node_displacements[
-            elm.node_j.uniq_id][step][0:3]
+            elm.node_j.uid][step][0:3]
         r_j = analysis.node_displacements[
-            elm.node_j.uniq_id][step][3:6]
+            elm.node_j.uid][step][3:6]
         d_global, r_local = interp3D_deformation(
             elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
@@ -789,9 +789,9 @@ def basic_forces(analysis,
         T_global2local = np.vstack((x_vec, y_vec, z_vec))
 
         forces_global = analysis.eleForces[
-            element.uniq_id][step][0:3]
+            element.uid][step][0:3]
         moments_global_ends = analysis.eleForces[
-            element.uniq_id][step][3:6]
+            element.uid][step][3:6]
 
         moments_global_clear = transformations.offset_transformation(
             element.offset_i, moments_global_ends, forces_global)
@@ -801,7 +801,7 @@ def basic_forces(analysis,
 
         wx, wy, wz = element.udl_total()
 
-        len_clr = element.length_clear()
+        len_clr = element.length_clear
 
         t = np.linspace(0.00, len_clr, num=num_points)
 
@@ -883,7 +883,7 @@ def basic_forces(analysis,
         y_vec = y_vecs[i_elem*3: i_elem*3 + 3]
         z_vec = z_vecs[i_elem*3: i_elem*3 + 3]
         i_pos = i_poss[i_elem*3: i_elem*3 + 3]
-        len_clr = element.length_clear()
+        len_clr = element.length_clear
         t = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):

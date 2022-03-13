@@ -25,13 +25,13 @@ class Vertex:
         self.coords = coords
         self.edges = []
         self.halfedges = []
-        self.uniq_id = next(self._ids)
+        self.uid = next(self._ids)
 
     def __eq__(self, other):
-        return self.uniq_id == other.uniq_id
+        return self.uid == other.uid
 
     def __repr__(self):
-        return str(self.uniq_id)
+        return str(self.uid)
 
 
 class Edge:
@@ -47,7 +47,7 @@ class Edge:
     def __init__(self, v_i: Vertex, v_j: Vertex):
         self.v_i = v_i
         self.v_j = v_j
-        self.uniq_id = next(self._ids)
+        self.uid = next(self._ids)
         self.h_i = None
         self.h_j = None
         if self not in self.v_i.edges:
@@ -56,7 +56,7 @@ class Edge:
             self.v_j.edges.append(self)
 
     def __repr__(self):
-        return str(self.uniq_id)
+        return str(self.uid)
 
     def define_halfedge(self, vertex: Vertex):
         """
@@ -117,14 +117,14 @@ class Halfedge:
     def __init__(self, vertex: Vertex, edge: Edge):
         self.vertex = vertex
         self.edge = edge
-        self.uniq_id = self.uniq_id = next(self._ids)
+        self.uid = self.uid = next(self._ids)
         self.nxt = None
 
     def __repr__(self):
-        return str(self.uniq_id)
+        return str(self.uid)
 
     def __lt__(self, other):
-        return self.uniq_id < other.uniq_id
+        return self.uid < other.uid
 
     def direction(self):
         """

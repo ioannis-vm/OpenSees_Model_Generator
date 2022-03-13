@@ -27,6 +27,25 @@ elem_ids = count(0)
 line_elem_seq_ids = count(0)
 
 
+def first(ordct: OrderedDict):
+    """
+    Returns the first value in an OrderedDict
+    """
+    return list(ordct.values())[0]
+
+def last(ordct: OrderedDict):
+    """
+    Returns the first value in an OrderedDict
+    """
+    return list(ordct.values())[-1]
+
+def nth_item(ordct: OrderedDict, idx):
+    """
+    Returns the idx-th value in an OrderedDict
+    """
+    return list(ordct.values())[idx]
+
+
 def generate_pz_mat(section: Section,
                     pz_length: float,
                     pz_doubler_plate_thickness: float) -> Material:
@@ -236,7 +255,7 @@ class EndRelease:
     y_vec: np.ndarray = field(repr=False)
 
     def __post_init__(self):
-        self.uniq_id = next(elem_ids)
+        self.uid = next(elem_ids)
 
 
 @dataclass
@@ -246,7 +265,7 @@ class LineElement:
     This class represents the most primitive linear element,
     on which more complex classes build upon.
     Attributes:
-        uniq_id (int): unique identifier
+        uid (int): unique identifier
         node_i (Node): Node if end i
         node_j (Node): Node of end j
         ang: Parameter that controls the rotation of the
@@ -321,10 +340,13 @@ class LineElement:
 
     def __post_init__(self):
 
+        assert(isinstance(self.node_i, Node))
+        assert(isinstance(self.node_j, Node))
+
         # ---  this is needed for tributary area analysis  ---
         # ( ... since adding support for steel W panel zones              )
         # ( the convention that every closed shape in plan view could     )
-        # ( be extracted by following the connevtivity of line elements   )
+        # ( be extracted by following the connectivity of line elements   )
         # ( was broken, because line elements connected to panel zones    )
         # ( create a gap between the front and the back nodes of the      )
         # ( panel zone. To overcome this, we retain their prior           )
@@ -335,15 +357,19 @@ class LineElement:
         self.node_j_trib = self.node_j
         # ~~~~
 
-        self.uniq_id = next(elem_ids)
+        self.uid = next(elem_ids)
         self.tributary_area = 0.00
         # local axes with respect to the global coord system
+
         self.internal_pt_i = self.node_i.coords + self.offset_i
         self.internal_pt_j = self.node_j.coords + self.offset_j
+
+        self.length_clear = np.linalg.norm(
+            self.internal_pt_i - self.internal_pt_j)
         self.x_axis, self.y_axis, self.z_axis = \
             transformations.local_axes_from_points_and_angle(
                 self.internal_pt_i, self.internal_pt_j, self.ang)
-        self.len_proportion = self.length_clear() / self.len_parent
+        self.len_proportion = self.length_clear / self.len_parent
         # note: for dispBeamColumn, 2 integration points
         # suffice. When using forceBeamColumn, they should be increased.
         if self.len_proportion > 0.75:
@@ -354,26 +380,16 @@ class LineElement:
             n_p = 2
         self.n_p = n_p
 
-    def length_clear(self):
-        """
-        Computes the clear length of the element, excluding the offsets.
-        Returns:
-            float: distance
-        """
-        p_i = self.node_i.coords + self.offset_i
-        p_j = self.node_j.coords + self.offset_j
-        return np.linalg.norm(p_j - p_i)
-
-    def update_axes(self):
-        """
-        Recalculate the local axes of the elements, in case
-        the nodes were changed after the element's definition.
-        """
-        self.internal_pt_i = self.node_i.coords + self.offset_i
-        self.internal_pt_j = self.node_j.coords + self.offset_j
-        self.x_axis, self.y_axis, self.z_axis = \
-            transformations.local_axes_from_points_and_angle(
-                self.internal_pt_i, self.internal_pt_j, self.ang)
+    # def update_axes(self):
+    #     """
+    #     Recalculate the local axes of the elements, in case
+    #     the nodes were changed after the element's definition.
+    #     """
+    #     self.internal_pt_i = self.node_i.coords + self.offset_i
+    #     self.internal_pt_j = self.node_j.coords + self.offset_j
+    #     self.x_axis, self.y_axis, self.z_axis = \
+    #         transformations.local_axes_from_points_and_angle(
+    #             self.internal_pt_i, self.internal_pt_j, self.ang)
 
     def add_udl_glob(self, udl: np.ndarray, ltype='other'):
         """
@@ -436,7 +452,7 @@ class LineElement:
         """
         split_location = self.node_i.coords + \
             self.offset_i + self.x_axis * \
-            (self.length_clear() * proportion)
+            (self.length_clear * proportion)
         split_node = Node(split_location)
         piece_i = LineElement(
             self.node_i, split_node,
@@ -460,75 +476,81 @@ class EndSegment:
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
-    Attributes:
-        n_external (Node): Primary node of the structure
-        n_internal (Node): Transition internal node between
-                           the EndSegment and the MiddleSegment
-        offset (np.ndarray): Offset vector, pointing from the
-                             primary node to the internal point
-        internal_pt (np.ndarray): The internal point (we don't
-                                  define a node there, but we
-                                  need the coordinates.)
-        internal_nodes (list[Node]): List of internal nodes of
-                                     the EndSegment
-        internal_elems (list): List of internal elements
     """
+    parent: 'LineElementSequence'  # parent line element sequence
     n_external: Node
     n_internal: Node
-    offset: np.ndarray
-    internal_Nodes: OrderedDict = field(
-        default_factory=OrderedDict, repr=False)
-    internal_LineElems: OrderedDict = field(
-        default_factory=OrderedDict, repr=False)
-    internal_EndReleases: OrderedDict = field(
-        default_factory=OrderedDict, repr=False)
+    end: str
 
     def __post_init__(self):
-        self.internal_pt = self.n_external.coords + self.offset
+        
+        self.internal_nodes = OrderedDict()
+        self.internal_line_elems = OrderedDict()
+        self.internal_end_releases = OrderedDict()
+        
+        if self.end == 'i':
+            offset = self.parent.offset_i
+        else:
+            offset = self.parent.offset_j
+        self.internal_pt = self.n_external.coords + offset
+
+    def offset(self):
+        """
+        Retrieves the offset from the parent LineElementSequence
+        depending on whether the endsegment is at the i or the j
+        end.
+        """
+        if self.end == 'i':
+            offset = self.parent.offset_i
+        else:
+            offset = self.parent.offset_j
+        return offset
+
+    def add(self, thing):
+        """
+        Adds internal elements to the EndSegment.
+        """
+        if isinstance(thing, Node):
+            self.internal_nodes[thing.uid] = thing
+        elif isinstance(thing, LineElement):
+            self.internal_line_elems[thing.uid] = thing
+        elif isinstance(thing, EndRelease):
+            self.internal_end_releases[thing.uid] = thing
+        else:
+            raise ValueError(f'Unknown type: {type(thing)}')
+
+    def first_line_elem(self):
+        return list(self.internal_line_elems.values())[0]
+
+    def last_line_elem(self):
+        return list(self.internal_line_elems.values())[-1]
 
 
 @dataclass
 class EndSegment_Fixed(EndSegment):
     """
-    This class represents a fixed end segment of a LineElementSequence.
+    This class represents a pinned end segment of a LineElementSequence.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
     Attributes:
         See the attributes of EndSegment
-    Additional attributes:
-        end: Whether the EndSegment corresponds to the
-             start ("i") or the end ("j") of the LineElementSequence
-        len_parent: Clear length of the parent LineElementSequence
-        ang, section, model_as, geom_transf:
-            Arguments used for element creation. See LineElement.
     """
-    end: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-
     def __post_init__(self):
         super().__post_init__()
-        self.internal_nodes.append(
-            self.n_internal)
         if self.n_external != self.n_internal:
             if self.end == 'i':
-                self.internal_elems.append(
-                    LineElement(
-                        self.n_external, self.n_internal, self.ang,
-                        self.offset, np.zeros(3).copy(),
-                        self.section, self.len_parent,
-                        self.model_as, self.geom_transf))
+                self.add(LineElement(
+                        self.n_external, self.n_internal, self.parent.ang,
+                        self.parent.offset_i, np.zeros(3).copy(),
+                        self.parent.section, self.parent.length_clear,
+                        self.parent.model_as, self.parent.geom_transf))
             elif self.end == 'j':
-                self.internal_elems.append(
-                    LineElement(
-                        self.n_internal, self.n_external, self.ang,
-                        np.zeros(3).copy(), self.offset,
-                        self.section, self.len_parent,
-                        self.model_as, self.geom_transf))
+                self.add(LineElement(
+                        self.n_internal, self.n_external, self.parent.ang,
+                        np.zeros(3).copy(), self.parent.offset_j,
+                        self.parent.section, self.parent.length_clear,
+                        self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -541,68 +563,45 @@ class EndSegment_Pinned(EndSegment):
     Attributes:
         See the attributes of EndSegment
     Additional attributes:
-        end: Whether the EndSegment corresponds to the
-             start ("i") or the end ("j") of the LineElementSequence
-        len_parent: Clear length of the parent LineElementSequence
-        ang, section, model_as, geom_transf:
-            Arguments used for element creation. See LineElement.
-        x_axis (np.ndarray): X axis vector of the parent LineElementSequence
-                             (expressed in global coordinates)
-        y_axis (np.ndarray): Similar to X axis
         mat_fix (Material): Linear elastic material with a very high stiffness
                             See the Materials class.
     """
 
-    end: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    y_axis: np.ndarray = field(repr=False)
     mat_fix: Material = field(repr=False)
 
     def __post_init__(self):
-        assert(isinstance(self.mat_fix, Material))
         super().__post_init__()
-        self.internal_pt = self.n_external.coords + self.offset
-        self.internal_nodes.append(
-            self.n_internal)
         n_release = Node(self.n_internal.coords)
-        self.internal_nodes.append(n_release)
+        self.internal_nodes[n_release.uid] = n_release
         if self.end == 'i':
-            self.internal_elems.append(
-                LineElement(
-                    self.n_external, n_release, self.ang,
-                    self.offset, np.zeros(3).copy(),
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
-            self.internal_elems.append(
-                EndRelease(
+            self.add(LineElement(
+                    self.n_external, n_release, self.parent.ang,
+                    self.offset(), np.zeros(3).copy(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
+            self.add(EndRelease(
                     n_release,
                     self.n_internal,
                     {1: self.mat_fix,
                      2: self.mat_fix,
                      3: self.mat_fix,
                      4: self.mat_fix},
-                    self.x_axis, self.y_axis))
+                    self.parent.x_axis, self.parent.y_axis))
+
         elif self.end == 'j':
-            self.internal_elems.append(
-                EndRelease(
+            self.add(EndRelease(
                     self.n_internal,
                     n_release,
                     {1: self.mat_fix,
                      2: self.mat_fix,
                      3: self.mat_fix,
                      4: self.mat_fix},
-                    self.x_axis, self.y_axis))
-            self.internal_elems.append(
-                LineElement(
-                    n_release, self.n_external, self.ang,
-                    np.zeros(3).copy(), self.offset,
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
+                    self.parent.x_axis, self.parent.y_axis))
+            self.add(LineElement(
+                    n_release, self.n_external, self.parent.ang,
+                    np.zeros(3).copy(), self.offset(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -628,96 +627,94 @@ class EndSegment_RBS(EndSegment):
                                relative to the initial section.
         n_sub (int): Number of LineElement objects representing the RBS segment
     """
-    end: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    ends: dict = field(repr=False)
 
     def __post_init__(self):
         super().__post_init__()
 
-        assert self.ends['rbs_length'] > 0.00, "RBS length must be > 0"
-
-        self.internal_pt = self.n_external.coords + self.offset
+        assert self.parent.ends['rbs_length'] > 0.00, "RBS length must be > 0"
 
         # Generate the reduced section
         reduced_sections = []
-        bf = self.section.properties['bf']
-        c = (1.00 - self.ends['rbs_reduction']) * bf / 2.
-        rbs_length = self.ends['rbs_length']
+        b_f = self.parent.section.properties['bf']
+        rbs_c = (1.00 - self.parent.ends['rbs_reduction']) * b_f / 2.
+        rbs_length = self.parent.ends['rbs_length']
 
         # i versus j matters because of the orientation of things
 
         if self.end == 'i':
             for x in np.linspace(
-                    0.00, 1.00, num=self.ends['rbs_n_sub'] + 2)[1::][::-1]:
+                    0.00, 1.00,
+                    num=self.parent.ends['rbs_n_sub'] + 2)[1::][::-1]:
                 # define and add internal nodes
-                self.internal_nodes.append(
+                self.add(
                     Node(self.n_internal.coords -
-                         self.x_axis * self.ends['rbs_length'] * x)
+                         self.parent.x_axis *
+                         self.parent.ends['rbs_length'] * x)
                 )
                 # define reduced sections
-                x_sec = x - 1/(self.ends['rbs_n_sub']+1)
-                c_cur = 1./8.*(8.*c - np.sqrt((
-                    rbs_length**2+4.*c**2)**2/(c)**2) +
-                    np.sqrt(rbs_length**4/c**2+16.*c**2-8.*rbs_length**2 *
+                x_sec = x - 1/(self.parent.ends['rbs_n_sub']+1)
+                rbs_c_cur = 1./8.*(8.*rbs_c - np.sqrt((
+                    rbs_length**2+4.*rbs_c**2)**2/(rbs_c)**2) +
+                    np.sqrt(rbs_length**4/rbs_c**2 +
+                            16.*rbs_c**2-8.*rbs_length**2 *
                             (1.-8.*x_sec+8.*x_sec**2)))
-                reduction_cur = (bf - 2. * c_cur) / bf
-                reduced_sections.append(self.section.rbs(reduction_cur))
-            self.internal_nodes.append(self.n_internal)
-            self.internal_elems.append(
+                reduction_cur = (b_f - 2. * rbs_c_cur) / b_f
+                reduced_sections.append(
+                    self.parent.section.rbs(reduction_cur))
+            self.add(self.n_internal)
+            self.add(
                 LineElement(
-                    self.n_external, self.internal_nodes[0],
-                    self.ang,
+                    self.n_external, first(self.internal_nodes),
+                    self.parent.ang,
                     self.offset, np.zeros(3).copy(),
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
-            for i in range(self.ends['rbs_n_sub']+1):
-                self.internal_elems.append(
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
+            for i in range(self.parent.ends['rbs_n_sub']+1):
+                self.add(
                     LineElement(
-                        self.internal_nodes[i],
-                        self.internal_nodes[i+1],
-                        self.ang,
+                        nth_item(self.internal_nodes, i),
+                        nth_item(self.internal_nodes, i+1),
+                        self.parent.ang,
                         np.zeros(3).copy(), np.zeros(3).copy(),
-                        reduced_sections[i], self.len_parent,
-                        self.model_as, self.geom_transf))
+                        reduced_sections[i], self.parent.length_clear,
+                        self.parent.model_as, self.parent.geom_transf))
 
         elif self.end == 'j':
-            self.internal_nodes.append(self.n_internal)
+            self.add(self.n_internal)
             for x in np.linspace(
-                    0.00, 1.00, num=self.ends['rbs_n_sub'] + 2)[1::]:
+                    0.00, 1.00, num=self.parent.ends['rbs_n_sub'] + 2)[1::]:
                 # define and add internal nodes
-                self.internal_nodes.append(
+                self.add(
                     Node(self.n_internal.coords +
-                         self.x_axis * self.ends['rbs_length'] * x)
+                         self.parent.x_axis *
+                         self.parent.ends['rbs_length'] * x)
                 )
                 # define reduced sections
-                x_sec = x - 1/(self.ends['rbs_n_sub']+1)
-                c_cur = 1./8.*(8.*c - np.sqrt((
-                    rbs_length**2+4.*c**2)**2/(c)**2) +
-                    np.sqrt(rbs_length**4/c**2+16.*c**2-8.*rbs_length**2 *
+                x_sec = x - 1/(self.parent.ends['rbs_n_sub']+1)
+                rbs_c_cur = 1./8.*(8.*rbs_c - np.sqrt((
+                    rbs_length**2+4.*rbs_c**2)**2/(rbs_c)**2) +
+                    np.sqrt(rbs_length**4/rbs_c**2 +
+                            16.*rbs_c**2-8.*rbs_length**2 *
                             (1.-8.*x_sec+8.*x_sec**2)))
-                reduction_cur = (bf - 2. * c_cur) / bf
-                reduced_sections.append(self.section.rbs(reduction_cur))
-            for i in range(self.ends['rbs_n_sub']+1):
-                self.internal_elems.append(
+                reduction_cur = (b_f - 2. * rbs_c_cur) / b_f
+                reduced_sections.append(
+                    self.parent.section.rbs(reduction_cur))
+            for i in range(self.parent.ends['rbs_n_sub']+1):
+                self.add(
                     LineElement(
-                        self.internal_nodes[i],
-                        self.internal_nodes[i+1],
-                        self.ang,
+                        nth_item(self.internal_nodes, i),
+                        nth_item(self.internal_nodes, i+1),
+                        self.parent.ang,
                         np.zeros(3).copy(), np.zeros(3).copy(),
-                        reduced_sections[i], self.len_parent,
-                        self.model_as, self.geom_transf))
-            self.internal_elems.append(
+                        reduced_sections[i], self.parent.length_clear,
+                        self.parent.model_as, self.parent.geom_transf))
+            self.add(
                 LineElement(
-                    self.internal_nodes[-1], self.n_external, self.ang,
+                    last(self.internal_nodes), self.n_external,
+                    self.parent.ang,
                     np.zeros(3).copy(), self.offset,
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -745,39 +742,26 @@ class EndSegment_IMK(EndSegment):
                                relative to the initial section.
         n_sub (int): Number of LineElement objects representing the RBS segment
     """
-    end: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    y_axis: np.ndarray = field(repr=False)
     mat_fix: Material = field(repr=False)
-    ends: dict = field(repr=False)
 
     def __post_init__(self):
-
-        assert(isinstance(self.mat_fix, Material))
 
         super().__post_init__()
 
         self.mat_imk = generate_IMK_mat(
-            self.section, self.ends, self.len_parent)
+            self.parent.section, self.parent.ends, self.parent.length_clear)
 
-        self.internal_pt = self.n_external.coords + self.offset
-        self.internal_nodes.append(
-            self.n_internal)
         n_release = Node(self.n_internal.coords)
-        self.internal_nodes.append(n_release)
+        self.add(n_release)
         if self.end == 'i':
-            self.internal_elems.append(
+            self.add(
                 LineElement(
-                    self.n_external, n_release, self.ang,
-                    self.offset, np.zeros(3).copy(),
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
-            self.internal_elems.append(
+                    self.n_external, n_release,
+                    self.parent.ang,
+                    self.offset(), np.zeros(3).copy(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
+            self.add(
                 EndRelease(
                     n_release,
                     self.n_internal,
@@ -786,9 +770,9 @@ class EndSegment_IMK(EndSegment):
                      3: self.mat_fix,
                      4: self.mat_fix,
                      6: self.mat_imk},
-                    self.x_axis, self.y_axis))
+                    self.parent.x_axis, self.parent.y_axis))
         elif self.end == 'j':
-            self.internal_elems.append(
+            self.add(
                 EndRelease(
                     self.n_internal,
                     n_release,
@@ -797,13 +781,13 @@ class EndSegment_IMK(EndSegment):
                      3: self.mat_fix,
                      4: self.mat_fix,
                      6: self.mat_imk},
-                    self.x_axis, self.y_axis))
-            self.internal_elems.append(
+                    self.parent.x_axis, self.parent.y_axis))
+            self.add(
                 LineElement(
-                    n_release, self.n_external, self.ang,
-                    np.zeros(3).copy(), self.offset,
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
+                    n_release, self.n_external, self.parent.ang,
+                    np.zeros(3).copy(), self.offset(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -824,53 +808,53 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
         from the defined elements instead of being required at the column
         definition phase.
     """
-    section: Section = field(repr=False)
-    ang: float = field(repr=False)
     rigid_util_section: Section = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    y_axis: np.ndarray = field(repr=False)
     mat_fix: Material = field(repr=False)
-    ends: dict = field(repr=False)
 
     def __post_init__(self):
 
         super().__post_init__()
 
         self.mat_pz = generate_pz_mat(
-            self.section,
-            self.ends['end_dist'],
-            self.ends['doubler plate thickness'])
+            self.parent.section,
+            self.parent.ends['end_dist'],
+            self.parent.ends['doubler plate thickness'])
 
-        column_depth = self.section.properties['d']
+        column_depth = self.parent.section.properties['d']
 
         # define nodes
         n_top = self.n_external
         n_bottom = self.n_internal
-        n_bottom.coords = n_top.coords + self.x_axis * self.ends['end_dist']
+        n_bottom.coords = n_top.coords + self.parent.x_axis \
+            * self.parent.ends['end_dist']
 
-        # these two attributes are used for plotting
+        # these three attributes are used for plotting
         self.internal_pt_i = n_top.coords
         self.internal_pt_j = n_bottom.coords
+        self.length_clear = np.linalg.norm(
+            self.n_external.coords - self.n_internal.coords)
 
-        n_1 = Node(n_top.coords + self.y_axis * column_depth / 2.)
-        n_2 = Node(n_top.coords + self.y_axis * column_depth / 2.)
-        self.n_front = Node(n_top.coords + self.y_axis * column_depth / 2.
-                            + self.x_axis * self.ends['end_dist'] / 2.)
-        n_3 = Node(n_top.coords + self.y_axis * column_depth / 2.
-                   + self.x_axis * self.ends['end_dist'])
-        n_4 = Node(n_top.coords + self.y_axis * column_depth / 2.
-                   + self.x_axis * self.ends['end_dist'])
-        n_5 = Node(n_top.coords - self.y_axis * column_depth / 2.
-                   + self.x_axis * self.ends['end_dist'])
-        n_6 = Node(n_top.coords - self.y_axis * column_depth / 2.
-                   + self.x_axis * self.ends['end_dist'])
-        self.n_back = Node(n_top.coords - self.y_axis * column_depth / 2.
-                           + self.x_axis * self.ends['end_dist'] / 2.)
-        n_7 = Node(n_top.coords - self.y_axis * column_depth / 2.)
-        n_8 = Node(n_top.coords - self.y_axis * column_depth / 2.)
+        n_1 = Node(n_top.coords + self.parent.y_axis * column_depth / 2.)
+        n_2 = Node(n_top.coords + self.parent.y_axis * column_depth / 2.)
+        self.n_front = Node(
+            n_top.coords + self.parent.y_axis * column_depth / 2.
+            + self.parent.x_axis * self.parent.ends['end_dist'] / 2.)
+        n_3 = Node(n_top.coords + self.parent.y_axis * column_depth / 2.
+                   + self.parent.x_axis * self.parent.ends['end_dist'])
+        n_4 = Node(n_top.coords + self.parent.y_axis * column_depth / 2.
+                   + self.parent.x_axis * self.parent.ends['end_dist'])
+        n_5 = Node(n_top.coords - self.parent.y_axis * column_depth / 2.
+                   + self.parent.x_axis * self.parent.ends['end_dist'])
+        n_6 = Node(n_top.coords - self.parent.y_axis * column_depth / 2.
+                   + self.parent.x_axis * self.parent.ends['end_dist'])
+        self.n_back = Node(
+            n_top.coords - self.parent.y_axis * column_depth / 2.
+            + self.parent.x_axis * self.parent.ends['end_dist'] / 2.)
+        n_7 = Node(n_top.coords - self.parent.y_axis * column_depth / 2.)
+        n_8 = Node(n_top.coords - self.parent.y_axis * column_depth / 2.)
 
         # define rigid line elements connecting the nodes
-        ang = self.ang
+        ang = self.parent.ang
         elm_a = LineElement(n_top, n_1, 0.00,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
@@ -945,7 +929,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
              4: self.mat_fix,
              5: self.mat_fix,
              6: self.mat_pz},
-            self.x_axis, self.y_axis)
+            self.parent.x_axis, self.parent.y_axis)
         rel_bottom_front = EndRelease(
             n_3, n_4,
             {1: self.mat_fix,
@@ -953,7 +937,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
              3: self.mat_fix,
              4: self.mat_fix,
              5: self.mat_fix},
-            self.x_axis, self.y_axis)
+            self.parent.x_axis, self.parent.y_axis)
         rel_bottom_back = EndRelease(
             n_5, n_6,
             {1: self.mat_fix,
@@ -961,7 +945,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
              3: self.mat_fix,
              4: self.mat_fix,
              5: self.mat_fix},
-            self.x_axis, self.y_axis)
+            self.parent.x_axis, self.parent.y_axis)
         rel_top_back = EndRelease(
             n_7, n_8,
             {1: self.mat_fix,
@@ -969,25 +953,38 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
              3: self.mat_fix,
              4: self.mat_fix,
              5: self.mat_fix},
-            self.x_axis, self.y_axis)
+            self.parent.x_axis, self.parent.y_axis)
 
         # store internal objects in corresponding lists
-        self.internal_nodes = [
-            n_bottom, n_1, n_2, self.n_front, n_3, n_4,
-            n_5, n_6, self.n_back, n_7, n_8]
-        self.internal_elems = [
-            elm_a, elm_b, elm_c, elm_d, elm_e,
-            elm_f, elm_g, elm_h,
-            rel_spring, rel_bottom_front,
-            rel_bottom_back, rel_top_back
-        ]
-
-    def length_clear(self):
-        """
-        (used in postprocessing_3D extruded view plots).
-        Clear length of the panel zone (in the longitudinal direction)
-        """
-        return np.linalg.norm(self.n_external.coords - self.n_internal.coords)
+        self.internal_nodes = {
+            'bottom': n_bottom,
+            '1': n_1,
+            '2': n_2,
+            'front': self.n_front,
+            '3': n_3,
+            '4': n_4,
+            '5': n_5,
+            '6': n_6,
+            'back': self.n_back,
+            '7': n_7,
+            '8': n_8
+        }
+        self.internal_line_elems = {
+            'A': elm_a,
+            'B': elm_b,
+            'C': elm_c,
+            'D': elm_d,
+            'E': elm_e,
+            'F': elm_f,
+            'G': elm_g,
+            'H': elm_h
+        }
+        self.internal_end_releases = {
+            'PZ': rel_spring,
+            'release_bottom_front': rel_bottom_front,
+            'release_bottom_back': rel_bottom_back,
+            'release_top_back': rel_top_back
+        }
 
 
 @dataclass
@@ -1008,50 +1005,38 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
         from the defined elements instead of being required at the column
         definition phase.
     """
-    section: Section = field(repr=False)
-    ang: float = field(repr=False)
-    rigid_util_section: Section = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    y_axis: np.ndarray = field(repr=False)
-    mat_fix: Material = field(repr=False)
-    ends: dict = field(repr=False)
-    len_parent: float = field(repr=False)
 
     def __post_init__(self):
     
         super().__post_init__()
 
-        n_bottom = self.internal_nodes[0]
-        [n_bottom, n_1, n_2, self.n_front, n_3, n_4,
-            n_5, n_6, self.n_back, n_7, n_8] = self.internal_nodes
-        [
-            elm_a, elm_b, elm_c, elm_d, elm_e,
-            elm_f, elm_g, elm_h,
-            rel_spring, rel_bottom_front,
-            rel_bottom_back, rel_top_back
-        ] = self.internal_elems
-
+        n_bottom = self.internal_nodes['bottom']
+        n_4 = self.internal_nodes['4']
+        n_5 = self.internal_nodes['5']
         n_bottom_spring = Node(n_bottom.coords)
 
-        elm_d = LineElement(n_bottom_spring, n_4, 0.00,
-                            np.zeros(3).copy(),
-                            np.zeros(3).copy(),
-                            self.rigid_util_section,
-                            1.00,
-                            model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_e = LineElement(n_5, n_bottom_spring, 0.00,
-                            np.zeros(3).copy(),
-                            np.zeros(3).copy(),
-                            self.rigid_util_section,
-                            1.00,
-                            model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
+        self.internal_line_elems['D'] = LineElement(
+            n_bottom_spring, n_4, 0.00,
+            np.zeros(3).copy(),
+            np.zeros(3).copy(),
+            self.rigid_util_section,
+            1.00,
+            model_as={'type': 'elastic'},
+            geom_transf='Linear',
+            hidden_when_extruded=True)
+
+        self.internal_line_elems['E'] = LineElement(
+            n_5, n_bottom_spring, 0.00,
+            np.zeros(3).copy(),
+            np.zeros(3).copy(),
+            self.rigid_util_section,
+            1.00,
+            model_as={'type': 'elastic'},
+            geom_transf='Linear',
+            hidden_when_extruded=True)
 
         self.mat_imk = generate_IMK_mat(
-            self.section, self.ends, self.len_parent)
+            self.parent.section, self.parent.ends, self.parent.length_clear)
 
         rel_bottom_imk_spring = EndRelease(
             n_bottom_spring, n_bottom,
@@ -1061,26 +1046,11 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
              4: self.mat_fix,
              5: self.mat_fix,
              6: self.mat_imk},
-            self.x_axis, self.y_axis)
+            self.parent.x_axis, self.parent.y_axis)
 
         # store internal objects in corresponding lists
-        self.internal_nodes = [
-            n_bottom, n_bottom_spring, n_1, n_2, self.n_front, n_3, n_4,
-            n_5, n_6, self.n_back, n_7, n_8]
-        self.internal_elems = [
-            elm_a, elm_b, elm_c, elm_d, elm_e,
-            elm_f, elm_g, elm_h,
-            rel_spring, rel_bottom_front,
-            rel_bottom_back, rel_top_back,
-            rel_bottom_imk_spring
-        ]
-
-    def length_clear(self):
-        """
-        (used in postprocessing_3D extruded view plots).
-        Clear length of the panel zone (in the longitudinal direction)
-        """
-        return np.linalg.norm(self.n_external.coords - self.n_internal.coords)
+        self.internal_nodes['bottom_spring'] = n_bottom_spring
+        self.internal_end_releases['release_imk'] = rel_bottom_imk_spring
 
 
 @dataclass
@@ -1091,30 +1061,19 @@ class EndSegment_W_grav_shear_tab(EndSegment):
            code repetition
         (IMK, W_grav_shear_tab, pinned)
     """
-    end: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-    x_axis: np.ndarray = field(repr=False)
-    y_axis: np.ndarray = field(repr=False)
     mat_fix: Material = field(repr=False)
-    ends: dict = field(repr=False)
 
     def __post_init__(self):
-
-        assert(isinstance(self.mat_fix, Material))
 
         super().__post_init__()
 
         # define IMK material based on element properties
-        assert self.section.sec_type == 'W', \
+        assert self.parent.section.sec_type == 'W', \
             "Error: Only W sections can be used"
-        mat_fy = self.section.material.parameters['Fy'] / 1.e3
-        sec_zx = self.section.properties['Zx']
+        mat_fy = self.parent.section.material.parameters['Fy'] / 1.e3
+        sec_zx = self.parent.section.properties['Zx']
         # gap = self.ends['gap']
-        consider_composite = self.ends['composite action']
+        consider_composite = self.parent.ends['composite action']
         # Plastic moment of the section
         sec_mp = sec_zx * mat_fy * 1.e3
         if not consider_composite:
@@ -1232,19 +1191,16 @@ class EndSegment_W_grav_shear_tab(EndSegment):
             0.00,
             params)
 
-        self.internal_pt = self.n_external.coords + self.offset
-        self.internal_nodes.append(
-            self.n_internal)
         n_release = Node(self.n_internal.coords)
-        self.internal_nodes.append(n_release)
+        self.add(n_release)
         if self.end == 'i':
-            self.internal_elems.append(
+            self.add(
                 LineElement(
-                    self.n_external, n_release, self.ang,
-                    self.offset, np.zeros(3).copy(),
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
-            self.internal_elems.append(
+                    self.n_external, n_release, self.parent.ang,
+                    self.offset(), np.zeros(3).copy(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
+            self.add(
                 EndRelease(
                     n_release,
                     self.n_internal,
@@ -1254,9 +1210,9 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                      4: self.mat_fix,
                      5: self.mat_fix,
                      6: self.mat_pinching},
-                    self.x_axis, self.y_axis))
+                    self.parent.x_axis, self.parent.y_axis))
         elif self.end == 'j':
-            self.internal_elems.append(
+            self.add(
                 EndRelease(
                     self.n_internal,
                     n_release,
@@ -1266,13 +1222,13 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                      4: self.mat_fix,
                      5: self.mat_fix,
                      6: self.mat_pinching},
-                    self.x_axis, self.y_axis))
-            self.internal_elems.append(
+                    self.parent.x_axis, self.parent.y_axis))
+            self.add(
                 LineElement(
-                    n_release, self.n_external, self.ang,
-                    np.zeros(3).copy(), self.offset,
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
+                    n_release, self.n_external, self.parent.ang,
+                    np.zeros(3).copy(), self.offset(),
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -1301,68 +1257,63 @@ class MiddleSegment:
                         length.
     """
 
-    n_i: Node = field(repr=False)
-    n_j: Node = field(repr=False)
+    parent: 'LineElementSequence'  # parent line element sequence
     offset_i: np.ndarray = field(repr=False)
     offset_j: np.ndarray = field(repr=False)
-    ang: float = field(repr=False)
-    section: Section = field(repr=False)
-    model_as: dict = field(repr=False)
-    geom_transf: str = field(repr=False)
-    len_parent: float = field(repr=False)
-    x_axis_parent: np.ndarray = field(repr=False)
-    y_axis_parent: np.ndarray = field(repr=False)
-    z_axis_parent: np.ndarray = field(repr=False)
-    n_sub: int = field(repr=False)
     camber: float = field(repr=False)
 
     def __post_init__(self):
-        self.internal_nodes = []
-        self.internal_elems = []
 
-        p_i = self.n_i.coords + self.offset_i
-        p_j = self.n_j.coords + self.offset_j
+        self.internal_nodes = OrderedDict()
+        self.internal_line_elems = OrderedDict()
+
+        p_i = self.parent.n_i.coords + self.offset_i
+        p_j = self.parent.n_j.coords + self.offset_j
 
         internal_pt_coords = np.linspace(
             tuple(p_i),
             tuple(p_j),
-            num=self.n_sub+1)
+            num=self.parent.n_sub+1)
 
         # apply camber
         if self.camber != 0.00:
-            t_param = np.linspace(0, 1, self.n_sub+1)
-            x = self.camber * self.len_parent
+            t_param = np.linspace(0, 1, self.parent.n_sub+1)
+            x = self.camber * self.parent.length_clear
             y_deform = 4.0 * x * (t_param**2 - t_param)
             deformation_local = np.column_stack(
-                (np.zeros(self.n_sub+1), y_deform, np.zeros(self.n_sub+1)))
+                (np.zeros(self.parent.n_sub+1), y_deform,
+                 np.zeros(self.parent.n_sub+1)))
             deformation_global = (transformations.transformation_matrix(
-                self.x_axis_parent, self.y_axis_parent, self.z_axis_parent).T
+                self.parent.x_axis_parent,
+                self.parent.y_axis_parent,
+                self.parent.z_axis_parent).T
                 @ deformation_local.T).T
             internal_pt_coords += deformation_global
 
         # internal nodes (if required)
-        if self.n_sub > 1:
+        if self.parent.n_sub > 1:
             for i in range(1, len(internal_pt_coords)-1):
-                self.internal_nodes.append(Node(internal_pt_coords[i]))
+                self.add(Node(internal_pt_coords[i]))
         # internal elements
-        for i in range(self.n_sub):
+        for i in range(self.parent.n_sub):
             if i == 0:
-                node_i = self.n_i
+                node_i = self.parent.n_i
             else:
-                node_i = self.internal_nodes[i-1]
-            if i == self.n_sub-1:
-                node_j = self.n_j
+                node_i = nth_item(self.internal_nodes, i-1)
+            if i == self.parent.n_sub-1:
+                node_j = self.parent.n_j
             else:
-                node_j = self.internal_nodes[i]
-            self.internal_elems.append(
+                node_j = nth_item(self.internal_nodes, i)
+            self.add(
                 LineElement(
-                    node_i, node_j, self.ang,
+                    node_i, node_j, self.parent.ang,
                     np.zeros(3).copy(), np.zeros(3).copy(),
-                    self.section, self.len_parent,
-                    self.model_as, self.geom_transf))
+                    self.parent.section, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
     def crosses_point(self, pt: np.ndarray) -> bool:
-        line = GridLine('', self.n_i.coords[0:2], self.n_j.coords[0:2])
+        line = GridLine('', self.parent.n_i.coords[0:2],
+                        self.parent.n_j.coords[0:2])
         return line.intersects_pt(pt)
 
     def connect(self, pt: np.ndarray, elev: float) \
@@ -1372,15 +1323,17 @@ class MiddleSegment:
         for an internal node that can be used as a connection
         point for a beam-to-beam connection at a given point.
         """
-        def do_split(ielm: LineElement,
-                     proportion: float,
-                     internal_elems: list[LineElement],
-                     internal_nodes: list[Node]) -> Node:
+        def do_split(
+                segment: MiddleSegment,
+                ielm: LineElement,
+                proportion: float) -> Node:
             """
             Perform the splitting operation.
             """
             piece_i, piece_j, split_node = \
                 ielm.split(proportion)
+            internal_elems = list(segment.internal_line_elems.values())
+            internal_nodes = list(segment.internal_nodes.values())
             # get index of the internal element in list
             idx = internal_elems.index(ielm)
             # remove the initial internal element
@@ -1390,14 +1343,18 @@ class MiddleSegment:
             internal_elems.insert(idx, piece_i)
             # add the internal node
             internal_nodes.insert(idx, split_node)
+            ielm_ids = [elm.uid for elm in internal_elems]
+            inod_ids = [ind.uid for ind in internal_nodes]
+            segment.internal_line_elems = OrderedDict(zip(ielm_ids, internal_elems))
+            segment.internal_nodes = OrderedDict(zip(inod_ids, internal_nodes))
             return split_node
 
         # check that the beam is horizontal
         # (otherwise this method doesn't work)
-        assert np.abs(self.x_axis_parent[2]) < common.EPSILON, \
+        assert np.abs(self.parent.x_axis[2]) < common.EPSILON, \
             'Error: Only horizontal supporting beams can be modeled.'
         # obtain offset
-        delta_z = elev - self.n_i.coords[2]
+        delta_z = elev - self.parent.n_i.coords[2]
         offset = np.array((0., 0., delta_z))
         # now work on providing a connection internal
         # node at the given point.
@@ -1414,7 +1371,7 @@ class MiddleSegment:
         # find the internal element that crosses
         # the point
         ielm = None
-        for elm in self.internal_elems:
+        for elm in self.internal_line_elems.values():
             if GridLine(
                 'temp',
                 elm.node_i.coords[0:2],
@@ -1426,7 +1383,7 @@ class MiddleSegment:
             raise ValueError("Problem with beam-on-beam connection. " +
                              "No internal elements found on middle segment.")
         # length of the crossing internal element
-        ielm_len = ielm.length_clear()
+        ielm_len = ielm.length_clear
         # length of the pieces if we were to split it
         piece_i = np.linalg.norm(ielm.node_i.coords[0:2]-pt)
         piece_j = np.linalg.norm(ielm.node_j.coords[0:2]-pt)
@@ -1435,30 +1392,29 @@ class MiddleSegment:
         proportion_j = piece_j / ielm_len
         min_proportion = np.minimum(proportion_i, proportion_j)
         # split or shift existing node?
-        if len(self.internal_elems) == 1:
+        if len(self.internal_line_elems) == 1:
             # split regardless
             node = do_split(
+                self,
                 ielm,
-                proportion_i,
-                self.internal_elems,
-                self.internal_nodes)
+                proportion_i)
         elif min_proportion < 0.25:
             # move
+            internal_line_elems = list(self.internal_line_elems.values())
             # get index of the internal element in list
-            idx = self.internal_elems.index(ielm)
+            idx = internal_line_elems.index(ielm)
             if proportion_i < proportion_j:
                 # move node at end i
                 if idx == 0:
                     # Can't move that node! Split instead.
                     node = do_split(
+                        self,
                         ielm,
-                        proportion_i,
-                        self.internal_elems,
-                        self.internal_nodes)
+                        proportion_i)
                 else:
                     # Can move node.
                     # find the other LineElement connected to the node
-                    oelm = self.internal_elems[idx-1]
+                    oelm = internal_line_elems[idx-1]
                     # node to be moved
                     node = ielm.node_i
                     # update coordinates
@@ -1468,17 +1424,16 @@ class MiddleSegment:
                     oelm.internal_pt_j = oelm.node_j.coords + oelm.offset_j
             else:
                 # move node at end j
-                if idx+1 == len(self.internal_elems):
+                if idx+1 == len(internal_line_elems):
                     # Can't move that node! Split instead.
                     node = do_split(
+                        self,
                         ielm,
-                        proportion_i,
-                        self.internal_elems,
-                        self.internal_nodes)
+                        proportion_i)
                 else:
                     # Can move node.
                     # find the other LineElement connected to the node
-                    oelm = self.internal_elems[idx+1]
+                    oelm = internal_line_elems[idx+1]
                     # node to be moved
                     node = ielm.node_j
                     # update coordinates
@@ -1489,13 +1444,28 @@ class MiddleSegment:
         else:
             # split
             node = do_split(
+                self,
                 ielm,
-                proportion_i,
-                self.internal_elems,
-                self.internal_nodes)
+                proportion_i)
 
         return node, offset
 
+    def add(self, thing):
+        """
+        Adds internal elements to the MiddleSegment.
+        """
+        if isinstance(thing, Node):
+            self.internal_nodes[thing.uid] = thing
+        elif isinstance(thing, LineElement):
+            self.internal_line_elems[thing.uid] = thing
+        else:
+            raise ValueError(f'Unknown type: {type(thing)}')
+
+    def first_line_elem(self):
+        return list(self.internal_line_elems.values())[0]
+
+    def last_line_elem(self):
+        return list(self.internal_line_elems.values())[-1]
 
 @dataclass
 class LineElementSequence:
@@ -1521,10 +1491,14 @@ class LineElementSequence:
 
     def __post_init__(self):
 
-        self.uniq_id = next(line_elem_seq_ids)
+        self.uid = next(line_elem_seq_ids)
 
         p_i = self.node_i.coords + self.offset_i
         p_j = self.node_j.coords + self.offset_j
+
+        self.length_clear = np.linalg.norm(p_j - p_i)
+
+        self.section = self.sections.active
 
         # obtain offset from section (local system)
         dz, dy = self.sections.active.snap_points[self.placement]
@@ -1552,167 +1526,73 @@ class LineElementSequence:
             # location of transition from start segment
             # to middle segment
             start_loc = p_i\
-                + self.x_axis * self.ends['end_dist'] * self.length_clear()
+                + self.x_axis * self.ends['end_dist'] * self.length_clear
             self.n_i = Node(start_loc)
             # location of transition from middle segment
             # to end segment
             end_loc = p_i\
                 + self.x_axis * (1.0 - self.ends['end_dist']) \
-                * self.length_clear()
+                * self.length_clear
             self.n_j = Node(end_loc)
             o_i = np.zeros(3).copy()
             o_j = np.zeros(3).copy()
 
         self.middle_segment = MiddleSegment(
-            n_i=self.n_i,
-            n_j=self.n_j,
+            self,
             offset_i=o_i,
             offset_j=o_j,
-            ang=self.ang,
-            section=self.sections.active,
-            model_as=self.model_as,
-            geom_transf=self.geom_transf,
-            len_parent=self.length_clear(),
-            x_axis_parent=self.x_axis,
-            y_axis_parent=self.y_axis,
-            z_axis_parent=self.z_axis,
-            n_sub=self.n_sub,
             camber=0.00)
 
         if self.ends['type'] in ['fixed', 'steel_W_PZ']:
             # note: panel zones are never defined at element definition.
             # they are automatically assigned during model postprocessing
             self.end_segment_i = EndSegment_Fixed(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf)
+                self, self.node_i, self.n_i, "i")
             self.end_segment_j = EndSegment_Fixed(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf)
+                self, self.node_j, self.n_j, "j")
 
         elif self.ends['type'] == 'pinned':
             self.end_segment_i = EndSegment_Pinned(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
+                self, self.node_i, self.n_i, "i",
                 self.materials.registry['fix'])
             self.end_segment_j = EndSegment_Pinned(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
+                self, self.node_j, self.n_j, "j",
                 self.materials.registry['fix'])
 
         elif self.ends['type'] == 'fixed-pinned':
             self.end_segment_i = EndSegment_Fixed(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf)
+                self, self.node_i, self.n_i, "i")
             self.end_segment_j = EndSegment_Pinned(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
+                self, self.node_j, self.n_j, "j",
                 self.materials.registry['fix'])
 
         elif self.ends['type'] == 'RBS':
             self.end_segment_i = EndSegment_RBS(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.ends)
+                self, self.node_i, self.n_i, "i")
             self.end_segment_j = EndSegment_RBS(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.ends)
+                self, self.node_i, self.n_j, "j")
 
         elif self.ends['type'] == 'RBS_j':
             self.end_segment_i = EndSegment_Fixed(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf)
+                self, self.node_i, self.n_i, "i")
             self.end_segment_j = EndSegment_RBS(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.ends)
+                self, self.node_i, self.n_j, "j")
 
         elif self.ends['type'] in ['steel_W_IMK', 'steel_W_PZ_IMK']:
             self.end_segment_i = EndSegment_IMK(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
-                self.materials.registry['fix'],
-                self.ends)
+                self, self.node_i, self.n_i,
+                "i", self.materials.registry['fix'])
             self.end_segment_j = EndSegment_IMK(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
-                self.materials.registry['fix'],
-                self.ends)
+                self, self.node_j, self.n_j,
+                "j", self.materials.registry['fix'])
 
         elif self.ends['type'] == 'steel W shear tab':
             self.end_segment_i = EndSegment_W_grav_shear_tab(
-                self.node_i, self.n_i,
-                self.offset_i,
-                "i",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
-                self.materials.registry['fix'],
-                self.ends)
+                self, self.node_i, self.n_i,
+                "i", self.materials.registry['fix'])
             self.end_segment_j = EndSegment_W_grav_shear_tab(
-                self.node_j, self.n_j,
-                self.offset_j,
-                "j",
-                self.length_clear(),
-                self.ang, self.sections.active,
-                self.model_as, self.geom_transf,
-                self.x_axis, self.y_axis,
-                self.materials.registry['fix'],
-                self.ends)
+                self, self.node_j, self.n_j,
+                "j", self.materials.registry['fix'])
         else:
             raise ValueError(f"Invalid end type: {self.ends['type']}")
 
@@ -1732,7 +1612,7 @@ class LineElementSequence:
         """
         # obtain offset from section (local system)
         # given the snap point tag
-        dz, dy = self.end_segment_i.section.snap_points[tag]
+        dz, dy = self.section.snap_points[tag]
         snap_offset = np.array([0.00, dy, dz])
         t_glob_to_loc = transformations.transformation_matrix(
             self.x_axis, self.y_axis, self.z_axis)
@@ -1740,18 +1620,6 @@ class LineElementSequence:
         snap_offset_global = t_loc_to_glob @ snap_offset
 
         return snap_offset_global
-
-    def length_clear(self):
-        """
-        Returns the clear length of the sequence,
-        (not counting the end offsets, but including
-        the internal elements of the two end segments)
-        """
-
-        p_i = self.node_i.coords + self.offset_i
-        p_j = self.node_j.coords + self.offset_j
-
-        return np.linalg.norm(p_j - p_i)
 
     def add_udl_glob(self, udl: np.ndarray, ltype='other'):
         """
@@ -1799,7 +1667,7 @@ class LineElementSequence:
             total_mass_per_length = - \
                 sub_elm.get_udl_no_floor_glob()[2] / common.G_CONST
             mass = total_mass_per_length * \
-                sub_elm.length_clear() / 2.00  # lb-s**2/in
+                sub_elm.length_clear / 2.00  # lb-s**2/in
             sub_elm.node_i.mass += np.array([mass, mass, mass])
             sub_elm.node_j.mass += np.array([mass, mass, mass])
 
@@ -1808,23 +1676,33 @@ class LineElementSequence:
 
     def internal_nodes(self):
         result = []
-        result.extend(self.end_segment_i.internal_nodes)
-        result.extend(self.middle_segment.internal_nodes)
-        result.extend(self.end_segment_j.internal_nodes)
+        result.extend(self.end_segment_i.internal_nodes.values())
+        result.extend(self.middle_segment.internal_nodes.values())
+        result.extend(self.end_segment_j.internal_nodes.values())
         return result
 
     def internal_elems(self):
         result = []
-        result.extend(self.end_segment_i.internal_elems)
-        result.extend(self.middle_segment.internal_elems)
-        result.extend(self.end_segment_j.internal_elems)
+        result.extend(self.end_segment_i.internal_line_elems.values())
+        result.extend(self.end_segment_i.internal_end_releases.values())
+        result.extend(self.middle_segment.internal_line_elems.values())
+        result.extend(self.end_segment_j.internal_line_elems.values())
+        result.extend(self.end_segment_j.internal_end_releases.values())
         return result
 
     def internal_line_elems(self):
+        # TODO stop using isinstance() so much in the solver..
+        # separate end releases and just use those datastructures
         result = []
-        for elm in self.internal_elems():
-            if isinstance(elm, LineElement):
-                result.append(elm)
+        result.extend(self.end_segment_i.internal_line_elems.values())
+        result.extend(self.middle_segment.internal_line_elems.values())
+        result.extend(self.end_segment_j.internal_line_elems.values())
+        for thing in result:
+            if isinstance(thing, Node):
+                print(thing)
+                import pdb
+                pdb.set_trace()
+                print()
         return result
 
 @dataclass
@@ -1841,8 +1719,8 @@ class LineElementSequences:
         Add an element in the registry
         """
 
-        if elm.uniq_id not in self.registry:
-            self.registry[elm.uniq_id] = elm
+        if elm.uid not in self.registry:
+            self.registry[elm.uid] = elm
         else:
             raise ValueError('LineElementSequence already exists')
 

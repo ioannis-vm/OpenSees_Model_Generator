@@ -273,7 +273,7 @@ class Model:
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
                 # check if column connecting the two nodes already exists
-                node_ids = [top_node.uniq_id, bot_node.uniq_id]
+                node_ids = [top_node.uid, bot_node.uid]
                 node_ids.sort()
                 node_ids = tuple(node_ids)
                 if node_ids in self.line_connectivity:
@@ -293,7 +293,7 @@ class Model:
                     materials=self.materials,
                     sections=self.sections)
                 level.columns.add(column)
-                self.line_connectivity[node_ids] = column.uniq_id
+                self.line_connectivity[node_ids] = column.uid
                 top_node.column_below = column
                 bot_node.column_above = column
         return column
@@ -415,7 +415,7 @@ class Model:
                     connection_offset_j = np.zeros(3)
             # check for an existing LineElementSequence connecting
             # the start and end nodes.
-            node_ids = [start_node.uniq_id, end_node.uniq_id]
+            node_ids = [start_node.uid, end_node.uid]
             node_ids.sort()
             node_ids = tuple(node_ids)
             if node_ids in self.line_connectivity:
@@ -440,7 +440,7 @@ class Model:
                 sections=self.sections)
             level.beams.add(beam)
             beams.append(beam)
-            self.line_connectivity[node_ids] = beam.uniq_id
+            self.line_connectivity[node_ids] = beam.uid
             start_node.beams.append(beam)
             end_node.beams.append(beam)
         return beams
@@ -499,14 +499,14 @@ class Model:
         halfedges = mesher.define_halfedges(edges)
         halfedge_to_elem_map = {}
         for h in halfedges:
-            halfedge_to_elem_map[h.uniq_id] = edge_to_elem_map[h.edge.uniq_id]
+            halfedge_to_elem_map[h.uid] = edge_to_elem_map[h.edge.uid]
         loops = mesher.obtain_closed_loops(halfedges)
         external, _, trivial = mesher.orient_loops(loops)
         # Sanity checks.
         mesher.sanity_checks(external, trivial)
         loop = external[0]
         for h in loop:
-            line_element = halfedge_to_elem_map[h.uniq_id]
+            line_element = halfedge_to_elem_map[h.uid]
             self.selection.line_elements.append(line_element)
 
     def select_perimeter_beams_all(self):
@@ -673,20 +673,20 @@ class Model:
                 pzs.append(col.end_segment_i)
         return pzs
 
-    def retrieve_beam(self, uniq_id: int) -> LineElementSequence:
+    def retrieve_beam(self, uid: int) -> LineElementSequence:
         beams = self.list_of_beams()
         result = None
         for beam in beams:
-            if beam.uniq_id == uniq_id:
+            if beam.uid == uid:
                 result = beam
                 break
         return result
 
-    def retrieve_column(self, uniq_id: int) -> LineElementSequence:
+    def retrieve_column(self, uid: int) -> LineElementSequence:
         columns = self.list_of_columns()
         result = None
         for col in columns:
-            if col.uniq_id == uniq_id:
+            if col.uid == uid:
                 result = col
                 break
         return result
@@ -724,7 +724,7 @@ class Model:
                 for beam in lvl.beams.registry.values():
                     for line_elm in beam.internal_line_elems():
                         udlZ_val = - line_elm.tributary_area * \
-                            lvl.surface_DL / line_elm.length_clear()
+                            lvl.surface_DL / line_elm.length_clear
                         line_elm.add_udl_glob(
                             np.array([0.00, 0.00, udlZ_val]),
                             ltype='floor')
@@ -864,7 +864,7 @@ class Model:
                         offset = panel_beam_front.offset_j
                     assert np.abs(np.linalg.norm(
                         2. * offset[0:2]) -
-                        col.end_segment_i.section.properties['d']) \
+                        col.section.properties['d']) \
                         < common.EPSILON, \
                         'Incorrect connectivity'
                 if panel_beam_back:
@@ -874,40 +874,21 @@ class Model:
                         offset = panel_beam_back.offset_j
                     assert np.abs(np.linalg.norm(
                         2. * offset[0:2]) -
-                        col.end_segment_i.section.properties['d']) \
+                        col.section.properties['d']) \
                         < common.EPSILON, \
                         'Incorrect connectivity'
 
                 if panel_beam_front:
-                    if panel_beam_front_side == 'i':
-                        beam_depth = \
-                            panel_beam_front.end_segment_i.\
-                            section.properties['d']
-                    else:
-                        beam_depth = \
-                            panel_beam_front.end_segment_j.\
-                            section.properties['d']
+                    beam_depth = \
+                        panel_beam_front.section.properties['d']
                 elif panel_beam_back:
-                    if panel_beam_back_side == 'i':
-                        beam_depth = \
-                            panel_beam_back.end_segment_i.\
-                            section.properties['d']
-                    else:
-                        beam_depth = \
-                            panel_beam_back.end_segment_j.\
-                            section.properties['d']
+                    beam_depth = \
+                        panel_beam_back.section.properties['d']
 
                 if panel_beam_front and panel_beam_back:
-                    if panel_beam_front_side == 'i':
-                        d_f = panel_beam_front.end_segment_i.section.properties['d']
-                    else:
-                        d_f = panel_beam_front.end_segment_j.section.properties['d']
-                    if panel_beam_back_side == 'i':
-                        d_b = panel_beam_front.end_segment_i.section.properties['d']
-                    else:
-                        d_b = panel_beam_front.end_segment_j.section.properties['d']
-                    assert d_f == d_b, \
-                        "Incompatible beam depths. Should be equal."
+                    d_f = panel_beam_front.section.properties['d']
+                    d_b = panel_beam_back.section.properties['d']
+                    beam_depth = max([d_f, d_b])
 
                 if not (panel_beam_front or panel_beam_back):
                     # Don't model panel zones if no beams are
@@ -918,39 +899,23 @@ class Model:
                 p_i = col.node_i.coords + col.offset_i
                 start_loc = p_i + col.x_axis * col.ends['end_dist']
                 col.n_i = Node(start_loc)
-                sec = col.end_segment_i.section
                 col.middle_segment = MiddleSegment(
-                    n_i=col.n_i,
-                    n_j=col.n_j,
-                    offset_i=np.zeros(3).copy(),
-                    offset_j=np.zeros(3).copy(),
-                    ang=col.ang,
-                    section=sec,
-                    model_as=col.model_as,
-                    geom_transf=col.geom_transf,
-                    len_parent=col.length_clear(),
-                    x_axis_parent=col.x_axis,
-                    y_axis_parent=col.y_axis,
-                    z_axis_parent=col.z_axis,
-                    n_sub=col.n_sub,
-                    camber=0.00)
+                    col,
+                    np.zeros(3).copy(),
+                    np.zeros(3).copy(),
+                    0.00)
                 # generate end segment i (panel zone)
                 if col.ends['type'] in [
                         'steel_W_PZ', 'fixed', 'fixed-pinned']:
                     col.end_segment_i = EndSegment_Steel_W_PanelZone(
-                        col.node_i, col.n_i,
-                        np.zeros(3).copy(), sec, col.ang,
+                        col, col.node_i, col.n_i, "i",
                         self.sections.registry['rigid'],
-                        col.x_axis, col.y_axis,
-                        self.materials.registry['fix'], col.ends)
+                        self.materials.registry['fix'])
                 elif col.ends['type'] == 'steel_W_PZ_IMK':
                     col.end_segment_i = EndSegment_Steel_W_PanelZone_IMK(
-                        col.node_i, col.n_i,
-                        np.zeros(3).copy(), sec, col.ang,
+                        col, col.node_i, col.n_i, "i",
                         self.sections.registry['rigid'],
-                        col.x_axis, col.y_axis,
-                        self.materials.registry['fix'], col.ends,
-                        col.length_clear())
+                        self.materials.registry['fix'])
                 else:
                     raise ValueError('Invalid end type for W column')
 
@@ -960,23 +925,21 @@ class Model:
                     if panel_beam_front_side == 'i':
                         # grab the end segment
                         sgm = panel_beam_front.end_segment_i
-                        # modify the offset of the endsegment
-                        sgm.offset = np.zeros(3).copy()
                         if isinstance(sgm, EndSegment_Fixed):
                             # modify the node
                             panel_beam_front.middle_segment.\
-                                internal_elems[0].node_i = \
+                                first_line_elem().node_i = \
                                 panel_zone_segment.n_front
                             # modify the offset of the lineelement
                             panel_beam_front.middle_segment.\
-                                internal_elems[0].offset_i = \
+                                first_line_elem().offset_i = \
                                 np.zeros(3).copy()
                         else:
                             # modify the node
-                            sgm.internal_elems[0].node_i = \
+                            sgm.first_line_elem().node_i = \
                                 panel_zone_segment.n_front
                             # modify the offset of the lineelement
-                            sgm.internal_elems[0].offset_i = \
+                            sgm.first_line_elem().offset_i = \
                                 np.zeros(3).copy()
                         # modify the node of the endsegment
                         sgm.n_external = \
@@ -992,18 +955,18 @@ class Model:
                         if isinstance(sgm, EndSegment_Fixed):
                             # modify the node
                             panel_beam_front.middle_segment.\
-                                internal_elems[-1].node_j = \
+                                last_line_elem().node_j = \
                                 panel_zone_segment.n_front
                             # modify the offset of the lineelement
                             panel_beam_front.middle_segment.\
-                                internal_elems[-1].offset_j = \
+                                last_line_elem().offset_j = \
                                 np.zeros(3).copy()
                         else:
                             # modify the node
-                            sgm.internal_elems[-1].node_j = \
+                            sgm.last_line_elem().node_j = \
                                 panel_zone_segment.n_front
                             # modify the offset of the lineelement
-                            sgm.internal_elems[-1].offset_j = \
+                            sgm.last_line_elem().offset_j = \
                                 np.zeros(3).copy()
                         # modify the node of the endsegment
                         sgm.n_external = \
@@ -1018,23 +981,22 @@ class Model:
                     if panel_beam_back_side == 'i':
                         # grab the end segment
                         sgm = panel_beam_back.end_segment_i
-                        # modify the offset of the endsegment
-                        sgm.offset = np.zeros(3).copy()
                         if isinstance(sgm, EndSegment_Fixed):
                             # modify the node
                             panel_beam_back.middle_segment.\
-                                internal_elems[0].node_i = \
+                                first_line_elem().node_i = \
                                 panel_zone_segment.n_back
+                            panel_beam_back.n_i = panel_zone_segment.n_back
                             # modify the offset of the lineelement
                             panel_beam_back.middle_segment.\
-                                internal_elems[0].offset_i = \
+                                first_line_elem().offset_i = \
                                 np.zeros(3).copy()
                         else:
                             # modify the node
-                            sgm.internal_elems[0].node_i = \
+                            sgm.first_line_elem().node_i = \
                                 panel_zone_segment.n_back
                             # modify the offset of the lineelement
-                            sgm.internal_elems[0].offset_i = \
+                            sgm.first_line_elem().offset_i = \
                                 np.zeros(3).copy()
                         # modify the node of the endsegment
                         sgm.n_external = \
@@ -1045,23 +1007,21 @@ class Model:
                     elif panel_beam_back_side == 'j':
                         # grab the end segment
                         sgm = panel_beam_back.end_segment_j
-                        # modify the offset of the endsegment
-                        sgm.offset = np.zeros(3).copy()
                         if isinstance(sgm, EndSegment_Fixed):
                             # modify the node
                             panel_beam_back.middle_segment.\
-                                internal_elems[-1].node_j = \
+                                last_line_elem().node_j = \
                                 panel_zone_segment.n_back
                             # modify the offset of the lineelement
                             panel_beam_back.middle_segment.\
-                                internal_elems[-1].offset_j = \
+                                last_line_elem().offset_j = \
                                 np.zeros(3).copy()
                         else:
                             # modify the node
-                            sgm.internal_elems[-1].node_j = \
+                            sgm.last_line_elem().node_j = \
                                 panel_zone_segment.n_back
                             # modify the offset of the lineelement
-                            sgm.internal_elems[-1].offset_j = \
+                            sgm.last_line_elem().offset_j = \
                                 np.zeros(3).copy()
                         # modify the node of the endsegment
                         sgm.n_external = \
@@ -1080,14 +1040,13 @@ class Model:
             # check to see if there is a column at the level below
             n_j = col.node_j
             if n_j.column_below:
-                sec = n_j.column_below.end_segment_i.section
-                if sec is not col.end_segment_j.section:
-                    col.end_segment_j.section = sec
-                    for elm in col.end_segment_j.internal_elems:
+                sec = n_j.column_below.section
+                if sec is not col.section:
+                    for elm in col.end_segment_j.internal_line_elems.values():
                         elm.section = sec
                     z_test = col.node_j.coords[2] + \
-                        col.length_clear() * relative_len
-                    for elm in col.middle_segment.internal_elems:
+                        col.length_clear * relative_len
+                    for elm in col.middle_segment.internal_line_elems.values():
                         if elm.node_i.coords[2] < z_test:
                             elm.section = sec
 

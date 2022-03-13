@@ -41,7 +41,7 @@ def list_of_beams_to_mesh_edges_external(beams):
         j_index = coordinate_list.index(j_coords)
         edge = mesher.Edge(vertices[i_index], vertices[j_index])
         edges.append(edge)
-        edge_to_beam_map[edge.uniq_id] = beam
+        edge_to_beam_map[edge.uid] = beam
     
     return edges, edge_to_beam_map
 
@@ -96,8 +96,8 @@ def closed_beam_sequences(beams):
 
     halfedge_to_beam_map = {}
     for h in halfedges:
-        halfedge_to_beam_map[h.uniq_id] = \
-            edge_to_beam_map[h.edge.uniq_id]
+        halfedge_to_beam_map[h.uid] = \
+            edge_to_beam_map[h.edge.uid]
     loops = mesher.obtain_closed_loops(halfedges)
     external, internal, trivial = \
         mesher.orient_loops(loops)
@@ -111,7 +111,7 @@ def closed_beam_sequences(beams):
         sequence = []
         for h in loop:
             sequence.append(halfedge_to_beam_map[
-                h.uniq_id
+                h.uid
             ])
         sequences_of_beams.append(sequence)
     return sequences_of_beams, coords
@@ -243,14 +243,14 @@ def list_of_beams_to_mesh_edges_internal(beams):
         # 0 means clear length of a beam
         # 1 means offset at node i
         # 2 means offset at node j
-        edge_to_beam_map[edge_span.uniq_id] = \
+        edge_to_beam_map[edge_span.uid] = \
             (beams[i], 0)
         if edge_offset:
             if flip[i]:
-                edge_to_beam_map[edge_offset.uniq_id] = \
+                edge_to_beam_map[edge_offset.uid] = \
                     (beams[i], 1)
             else:
-                edge_to_beam_map[edge_offset.uniq_id] = \
+                edge_to_beam_map[edge_offset.uid] = \
                     (beams[i], 2)
 
     return edges, edge_to_beam_map
@@ -301,7 +301,7 @@ def calculate_tributary_areas(
 
         halfedge_to_beam_map = {}
         for h in halfedges:
-            halfedge_to_beam_map[h.uniq_id] = edge_to_beam_map[h.edge.uniq_id]
+            halfedge_to_beam_map[h.uid] = edge_to_beam_map[h.edge.uid]
         loops = mesher.obtain_closed_loops(halfedges)
         external, internal, trivial = mesher.orient_loops(loops)
         # Sanity checks.
@@ -373,7 +373,7 @@ def calculate_tributary_areas(
                     pt_2 = halfedge.next.vertex.point
                     if ((pt_1 == v_i and pt_2 == v_j) or
                             (pt_1 == v_j and pt_2 == v_i)):
-                        beam, flag = edge_to_beam_map[edge.uniq_id]
+                        beam, flag = edge_to_beam_map[edge.uid]
                         if flag == 0:
                             # 0 means clear length of a beam
                             beam.tributary_area += area

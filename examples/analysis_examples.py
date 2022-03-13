@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../OpenSees_Model_Builder/src")
+
 import model
 import solver
 import numpy as np

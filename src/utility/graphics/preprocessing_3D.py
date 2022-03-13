@@ -41,7 +41,7 @@ def add_data__nodes(dt, list_of_nodes):
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
-            (node.uniq_id,
+            (node.uid,
              *node.mass,
              *node.load_total()
              )
@@ -86,7 +86,7 @@ def add_data__parent_nodes(dt, list_of_nodes):
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
-            (node.uniq_id,
+            (node.uid,
              *node.mass,
              *node.load_total()
              )
@@ -133,7 +133,7 @@ def add_data__internal_nodes(dt, list_of_nodes):
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
-            (node.uniq_id,
+            (node.uid,
              *node.mass,
              *node.load_total()
              )
@@ -172,7 +172,7 @@ def add_data__release_nodes(dt, list_of_nodes):
     restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
-            (node.uniq_id,
+            (node.uid,
              *node.mass,
              *node.load_total()
              )
@@ -279,14 +279,14 @@ def add_data__frames(dt, list_of_frames):
             (elm.internal_pt_i[2], elm.internal_pt_j[2], None)
         )
         customdata.append(
-            (elm.uniq_id,
+            (elm.uid,
              *elm.udl_total(),
-             elm.node_i.uniq_id)
+             elm.node_i.uid)
         )
         customdata.append(
-            (elm.uniq_id,
+            (elm.uid,
              *elm.udl_total(),
-             elm.node_j.uniq_id)
+             elm.node_j.uid)
         )
         customdata.append(
             [None]*6
@@ -362,7 +362,7 @@ def add_data__frame_axes(dt, list_of_frames, ref_len):
         x_vec = elm.x_axis
         y_vec = elm.y_axis
         z_vec = elm.z_axis
-        l_clear = elm.length_clear()
+        l_clear = elm.length_clear
         i_pos = np.array(elm.internal_pt_i)
         mid_pos = i_pos + x_vec * l_clear/2.00
         x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))

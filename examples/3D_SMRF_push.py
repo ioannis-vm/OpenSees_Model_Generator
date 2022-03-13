@@ -484,7 +484,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 # data = []
 # for i in range(analysis.n_steps_success):
 #     data.append(
-#         analysis.release_force_defo[spring.uniq_id][i]
+#         analysis.release_force_defo[spring.uid][i]
 #     )
 
 # data = np.array(data)
@@ -526,7 +526,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 #     data = []
 #     for i in range(analysis.n_steps_success):
 #         data.append(
-#             analysis.release_force_defo[spring.uniq_id][i]
+#             analysis.release_force_defo[spring.uid][i]
 #         )
 
 #     data = np.array(data)
@@ -539,7 +539,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 # data = []
 # for i in range(analysis.n_steps_success):
 #     data.append(
-#         analysis.release_force_defo[spring.uniq_id][i]
+#         analysis.release_force_defo[spring.uid][i]
 #     )
 
 # data = np.array(data)
@@ -593,7 +593,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 #     data = []
 #     for i in range(analysis.n_steps_success):
 #         data.append(
-#             analysis.release_force_defo[spring.uniq_id][i]
+#             analysis.release_force_defo[spring.uid][i]
 #         )
 
 #     data = np.array(data)
@@ -606,7 +606,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 # data = []
 # for i in range(analysis.n_steps_success):
 #     data.append(
-#         analysis.release_force_defo[spring.uniq_id][i]
+#         analysis.release_force_defo[spring.uid][i]
 #     )
 
 # data = np.array(data)
@@ -664,7 +664,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 #     data = []
 #     for i in range(analysis.n_steps_success):
 #         data.append(
-#             analysis.release_force_defo[spring.uniq_id][i]
+#             analysis.release_force_defo[spring.uid][i]
 #         )
 
 #     data = np.array(data)
@@ -677,7 +677,7 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 # data = []
 # for i in range(analysis.n_steps_success):
 #     data.append(
-#         analysis.release_force_defo[spring.uniq_id][i]
+#         analysis.release_force_defo[spring.uid][i]
 #     )
 
 # data = np.array(data)
@@ -727,8 +727,8 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
 # # plt.savefig('figure.pdf')
 # plt.close()
 
-# nid3 = analysis.building.list_of_parent_nodes()[-1].uniq_id
-# nid2 = analysis.building.list_of_parent_nodes()[-2].uniq_id
+# nid3 = analysis.building.list_of_parent_nodes()[-1].uid
+# nid2 = analysis.building.list_of_parent_nodes()[-2].uid
 # u3 = analysis.node_displacements[nid3][23][0]
 # u2 = analysis.node_displacements[nid2][23][0]
 # (u3-u2)/(13*12)
