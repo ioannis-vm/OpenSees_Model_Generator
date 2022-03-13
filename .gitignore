@@ -130,5 +130,5 @@ dmypy.json
 
 # Temporary file folder
 /temp
-*~
+*~/
 notes
