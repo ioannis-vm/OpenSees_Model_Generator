@@ -23,6 +23,7 @@ import model
 import components
 from model import Model
 from node import Node
+from components import LineElement
 from components import LineElementSequence
 from utility import common
 from utility.graphics import postprocessing_3D
@@ -34,7 +35,8 @@ plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
 class AnalysisResult(TypedDict):
-    id: int
+
+    uid: int
     results = List
 
 
@@ -249,7 +251,7 @@ class Analysis:
                       area,
                       sec.material.uid)
 
-    def _define_line_element(self, elm: model.LineElement):
+    def _define_line_element(self, elm: LineElement):
 
         if np.linalg.norm(elm.offset_i) + \
            np.linalg.norm(elm.offset_j) > common.EPSILON:
@@ -414,11 +416,11 @@ class Analysis:
     ####################################################
 
     def _store_result(self, analysis_result: AnalysisResult,
-                      id: int, result: list):
-        if id in analysis_result.keys():
-            analysis_result[id].append(result)
+                      uid: int, result: list):
+        if uid in analysis_result.keys():
+            analysis_result[uid].append(result)
         else:
-            analysis_result[id] = [result]
+            analysis_result[uid] = [result]
 
     def _read_node_displacements(self, data_retention='default'):
         if data_retention == 'default':

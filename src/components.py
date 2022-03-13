@@ -11,7 +11,6 @@ Model builder for OpenSees ~ Components
 # https://github.com/ioannis-vm/OpenSees_Model_Builder
 
 from dataclasses import dataclass, field
-from functools import total_ordering
 from itertools import count
 from collections import OrderedDict
 import numpy as np
@@ -483,10 +482,12 @@ class EndSegment:
     end: str
 
     def __post_init__(self):
-        
+
         self.internal_nodes = OrderedDict()
         self.internal_line_elems = OrderedDict()
         self.internal_end_releases = OrderedDict()
+
+        self.add(self.n_internal)
         
         if self.end == 'i':
             offset = self.parent.offset_i
@@ -1007,7 +1008,7 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
     """
 
     def __post_init__(self):
-    
+
         super().__post_init__()
 
         n_bottom = self.internal_nodes['bottom']
@@ -1192,7 +1193,9 @@ class EndSegment_W_grav_shear_tab(EndSegment):
             params)
 
         n_release = Node(self.n_internal.coords)
+
         self.add(n_release)
+
         if self.end == 'i':
             self.add(
                 LineElement(
@@ -1636,9 +1639,8 @@ class LineElementSequence:
                               on the global x, y, and z directions, in the
                               direction of the global axes.
         """
-        for elm in self.internal_elems():
-            if isinstance(elm, LineElement):
-                elm.add_udl_glob(udl, ltype=ltype)
+        for elm in self.internal_line_elems():
+            elm.add_udl_glob(udl, ltype=ltype)
 
     def apply_self_weight_and_mass(self):
         """
@@ -1681,29 +1683,19 @@ class LineElementSequence:
         result.extend(self.end_segment_j.internal_nodes.values())
         return result
 
-    def internal_elems(self):
+    def internal_end_releases(self):
         result = []
-        result.extend(self.end_segment_i.internal_line_elems.values())
         result.extend(self.end_segment_i.internal_end_releases.values())
-        result.extend(self.middle_segment.internal_line_elems.values())
-        result.extend(self.end_segment_j.internal_line_elems.values())
         result.extend(self.end_segment_j.internal_end_releases.values())
         return result
 
     def internal_line_elems(self):
-        # TODO stop using isinstance() so much in the solver..
-        # separate end releases and just use those datastructures
         result = []
         result.extend(self.end_segment_i.internal_line_elems.values())
         result.extend(self.middle_segment.internal_line_elems.values())
         result.extend(self.end_segment_j.internal_line_elems.values())
-        for thing in result:
-            if isinstance(thing, Node):
-                print(thing)
-                import pdb
-                pdb.set_trace()
-                print()
         return result
+
 
 @dataclass
 class LineElementSequences:

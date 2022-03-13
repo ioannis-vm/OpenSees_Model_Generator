@@ -42,10 +42,10 @@ def w_mesh(b, h, tw, tf, target_area=None):
     area_diff = target_area - (b*tf*2.+(h-2*tf)*tw)
     if area_diff < 0:
         # This happens for W14X426
-        area_diff = 0.00
+        area_diff = 1e-4
         
     r = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
-    # note: 0.9565 is a correction factor to account force
+    # note: 0.9565 is a correction factor to account for
     # the fact that we approximate the arcs with
     # four line segments, thus putting more material in there
     k = (b - 2. * r - tw) / 2.

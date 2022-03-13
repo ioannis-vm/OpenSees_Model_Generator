@@ -305,15 +305,15 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
     b.preprocess(assume_floor_slabs=True, self_weight=True,
                  steel_panel_zones=True, elevate_column_splices=0.25)
 
-    b.plot_building_geometry(extrude_frames=False,
-                             offsets=True,
-                             gridlines=True,
-                             global_axes=False,
-                             diaphragm_lines=True,
-                             tributary_areas=True,
-                             just_selection=False,
-                             parent_nodes=True,
-                             frame_axes=False)
+    # b.plot_building_geometry(extrude_frames=False,
+    #                          offsets=True,
+    #                          gridlines=True,
+    #                          global_axes=False,
+    #                          diaphragm_lines=True,
+    #                          tributary_areas=True,
+    #                          just_selection=False,
+    #                          parent_nodes=True,
+    #                          frame_axes=False)
 
     
     # ~~~~~~~~~~~~~~~~ #
@@ -342,7 +342,7 @@ def get_response(lat_bm_ends, lat_bm_modeling_type,
     control_node = b.list_of_parent_nodes()[-1]  # top floor
     analysis_metadata = pushover_analysis.run(
         "x",
-        np.array([50.0]),
+        np.array([2.0]),
         control_node,
         1./1., modeshape=np.array([0., 0.35, 0.68, 1.0]))
 
@@ -382,73 +382,73 @@ deltas_imk, vbs_imk, _ = get_response(lat_bm_ends, lat_bm_modeling_type,
                                       grav_bm_ends)
 
 
-# lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
-#                'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
-#                'composite action': True,
-#                'doubler plate thickness': 0.00}
-# lat_bm_modeling = {'type': 'elastic'}
-# lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
-#                 'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
-#                 'doubler plate thickness': 0.00}
-# lat_col_modeling_type = {'type': 'elastic'}
-# lat_bm_modeling_type = {'type': 'elastic'}
-# grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
-#                 'composite action': False}
-# deltas_imk_c, vbs_imk_c, analysis = get_response(
-#     lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
-#     lat_col_modeling_type, grav_bm_ends)
+lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
+               'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
+               'composite action': True,
+               'doubler plate thickness': 0.00}
+lat_bm_modeling = {'type': 'elastic'}
+lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
+                'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
+                'doubler plate thickness': 0.00}
+lat_col_modeling_type = {'type': 'elastic'}
+lat_bm_modeling_type = {'type': 'elastic'}
+grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
+                'composite action': False}
+deltas_imk_c, vbs_imk_c, analysis = get_response(
+    lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
+    lat_col_modeling_type, grav_bm_ends)
 
-# lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
-#                'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
-#                'composite action': True,
-#                'doubler plate thickness': 0.00}
-# lat_bm_modeling = {'type': 'elastic'}
-# lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
-#                 'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
-#                 'doubler plate thickness': 0.00}
-# lat_col_modeling_type = {'type': 'elastic'}
-# lat_bm_modeling_type = {'type': 'elastic'}
-# grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
-#                 'composite action': True}
-# deltas_imk_c2, vbs_imk_c2, analysis = get_response(
-#     lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
-#     lat_col_modeling_type, grav_bm_ends)
-
-
-# lat_bm_ends = {'type': 'RBS', 'end_dist': (17.50+17.5)/(25.*12.),
-#                'rbs_length': 17.5, 'rbs_reduction': 0.60, 'rbs_n_sub': 15}
-# lat_bm_modeling = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
-# lat_col_ends = {'type': 'steel_W_PZ', 'doubler plate thickness': 0.00, 'end_dist': 0.01}
-# lat_col_modeling_type = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
-# grav_bm_ends = {'type': 'pinned', 'end_dist': 0.005}
-# deltas_fib, vbs_fib, _ = get_response(lat_bm_ends, lat_bm_modeling,
-#                                       lat_col_ends, lat_col_modeling_type,
-#                                       grav_bm_ends)
+lat_bm_ends = {'type': 'steel_W_IMK', 'end_dist': 0.05,
+               'Lb/ry': 60., 'L/H': 0.50, 'RBS_factor': 0.60,
+               'composite action': True,
+               'doubler plate thickness': 0.00}
+lat_bm_modeling = {'type': 'elastic'}
+lat_col_ends = {'type': 'steel_W_PZ_IMK', 'end_dist': 0.05,
+                'Lb/ry': 60., 'L/H': 1.0, 'pgpye': 0.05,
+                'doubler plate thickness': 0.00}
+lat_col_modeling_type = {'type': 'elastic'}
+lat_bm_modeling_type = {'type': 'elastic'}
+grav_bm_ends = {'type': 'steel W shear tab', 'end_dist': 0.005,
+                'composite action': True}
+deltas_imk_c2, vbs_imk_c2, analysis = get_response(
+    lat_bm_ends, lat_bm_modeling_type, lat_col_ends,
+    lat_col_modeling_type, grav_bm_ends)
 
 
-# cs = 0.15115
-# omEga = 3.00
+lat_bm_ends = {'type': 'RBS', 'end_dist': (17.50+17.5)/(25.*12.),
+               'rbs_length': 17.5, 'rbs_reduction': 0.60, 'rbs_n_sub': 15}
+lat_bm_modeling = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
+lat_col_ends = {'type': 'steel_W_PZ', 'doubler plate thickness': 0.00, 'end_dist': 0.01}
+lat_col_modeling_type = {'type': 'fiber', 'n_x': 10, 'n_y': 25}
+grav_bm_ends = {'type': 'pinned', 'end_dist': 0.005}
+deltas_fib, vbs_fib, _ = get_response(lat_bm_ends, lat_bm_modeling,
+                                      lat_col_ends, lat_col_modeling_type,
+                                      grav_bm_ends)
 
 
-# plt.rc('font', family='serif')
-# plt.rc('xtick', labelsize='medium')
-# plt.rc('ytick', labelsize='medium')
-# plt.rc('text', usetex=False)
+cs = 0.15115
+omEga = 3.00
 
-# plt.figure()
-# plt.grid()
-# plt.axhline(y=cs, color='0.50', ls='dashed')
-# plt.axhline(y=cs*omEga, color='0.50', ls='dashed')
-# plt.plot(deltas_fib, vbs_fib, color='k', ls='dotted', label='fiber')
-# plt.plot(deltas_imk, vbs_imk, color='k', ls='solid', label='IMK')
-# plt.plot(deltas_imk_c, vbs_imk_c, color='k',
-#          ls='dashed', label='IMK, composite lat beams')
-# plt.plot(deltas_imk_c2, vbs_imk_c2, color='k',
-#          ls='dashed', label='IMK, composite all beams')
-# plt.ylabel('Vb / W')
-# plt.xlabel('Roof Drift Ratio $\\Delta$/H')
-# plt.legend()
-# plt.show()
+
+plt.rc('font', family='serif')
+plt.rc('xtick', labelsize='medium')
+plt.rc('ytick', labelsize='medium')
+plt.rc('text', usetex=False)
+
+plt.figure()
+plt.grid()
+plt.axhline(y=cs, color='0.50', ls='dashed')
+plt.axhline(y=cs*omEga, color='0.50', ls='dashed')
+plt.plot(deltas_fib, vbs_fib, color='k', ls='dotted', label='fiber')
+plt.plot(deltas_imk, vbs_imk, color='k', ls='solid', label='IMK')
+plt.plot(deltas_imk_c, vbs_imk_c, color='k',
+         ls='dashed', label='IMK, composite lat beams')
+plt.plot(deltas_imk_c2, vbs_imk_c2, color='k',
+         ls='dashed', label='IMK, composite all beams')
+plt.ylabel('Vb / W')
+plt.xlabel('Roof Drift Ratio $\\Delta$/H')
+plt.legend()
+plt.show()
 
 
 # analysis = analysis_objects[0]

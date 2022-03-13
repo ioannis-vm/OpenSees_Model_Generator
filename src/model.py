@@ -12,13 +12,12 @@ Model Builder for OpenSeesPy ~ Model module
 
 from __future__ import annotations
 from dataclasses import dataclass, field
+from typing import Optional
 import json
 import numpy as np
 from grids import GridLine, GridSystem
 from node import Node
-from components import LineElement
 from components import MiddleSegment
-from components import EndRelease
 from components import EndSegment_Fixed
 from components import EndSegment_Steel_W_PanelZone
 from components import EndSegment_Steel_W_PanelZone_IMK
@@ -85,8 +84,9 @@ class Model:
         added_nodes = []
         for levelname in self.levels.active:
             level = self.levels.registry[levelname]
-            node = Node([x, y,
-                         level.elevation], level.restraint)
+            node = Node(
+                np.array([x, y, level.elevation]),
+                level.restraint)
             level.nodes_primary.add(node)
             added_nodes.append(node)
         return added_nodes
@@ -621,9 +621,8 @@ class Model:
         sequences = self.list_of_line_element_sequences()
         result = []
         for sequence in sequences:
-            for elm in sequence.internal_elems():
-                if isinstance(elm, LineElement):
-                    result.append(elm)
+            for elm in sequence.internal_line_elems():
+                result.append(elm)
         return result
 
     def list_of_endreleases(self):
@@ -631,9 +630,8 @@ class Model:
         sequences = self.list_of_line_element_sequences()
         result = []
         for sequence in sequences:
-            for elm in sequence.internal_elems():
-                if isinstance(elm, EndRelease):
-                    result.append(elm)
+            for elm in sequence.internal_end_releases():
+                result.append(elm)
         return result
 
     def list_of_primary_nodes(self):
@@ -673,7 +671,7 @@ class Model:
                 pzs.append(col.end_segment_i)
         return pzs
 
-    def retrieve_beam(self, uid: int) -> LineElementSequence:
+    def retrieve_beam(self, uid: int) -> Optional[LineElementSequence]:
         beams = self.list_of_beams()
         result = None
         for beam in beams:
@@ -682,12 +680,21 @@ class Model:
                 break
         return result
 
-    def retrieve_column(self, uid: int) -> LineElementSequence:
+    def retrieve_column(self, uid: int) -> Optional[LineElementSequence]:
         columns = self.list_of_columns()
         result = None
         for col in columns:
             if col.uid == uid:
                 result = col
+                break
+        return result
+
+    def retrieve_node(self, uid: int) -> Optional[LineElementSequence]:
+        nodes = self.list_of_all_nodes()
+        result = None
+        for node in nodes:
+            if node.uid == uid:
+                result = node
                 break
         return result
 

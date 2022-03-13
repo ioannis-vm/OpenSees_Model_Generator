@@ -15,6 +15,7 @@ import numpy as np
 from utility.graphics import common, common_3D
 from utility.graphics.preprocessing_3D import add_data__global_axes
 from utility import transformations
+from components import LineElement
 
 
 def force_scaling_factor(ref_len, fmax, factor):
@@ -42,8 +43,13 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
         (the rotations are needed for plotting the
          deformed shape with extruded frame elements)
     """
-    x_vec = element.x_axis
-    y_vec = element.y_axis
+
+    if isinstance(element, LineElement):
+        x_vec = element.x_axis
+        y_vec = element.y_axis
+    else:
+        x_vec = element.parent.x_axis
+        y_vec = element.parent.y_axis
     z_vec = np.cross(x_vec, y_vec)
 
     # global -> local transformation matrix
@@ -288,8 +294,8 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
 
         interpolation_points = interp3D_points(
             elm, d_global, r_local, num_points, scaling)
-        x_vec = elm.x_axis
-        y_vec = elm.y_axis
+        x_vec = elm.parent.x_axis
+        y_vec = elm.parent.y_axis
         z_vec = np.cross(x_vec, y_vec)
         for i in range(num_points-1):
             loc_i_global = interpolation_points[i, :]
@@ -297,7 +303,7 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
             rot_i_local = r_local[i, :]
             rot_j_local = r_local[i+1, :]
 
-            loop = elm.section.mesh.halfedges
+            loop = elm.parent.section.mesh.halfedges
             for halfedge in loop:
 
                 z_a = halfedge.vertex.coords[0]
