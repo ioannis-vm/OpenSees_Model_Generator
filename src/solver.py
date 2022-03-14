@@ -479,16 +479,14 @@ class Analysis:
     def _define_dead_load(self):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
-
         for elm in self.building.list_of_line_elements():
             ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
                         elm.udl_total()[1],
                         elm.udl_total()[2],
                         elm.udl_total()[0])
-        for node in self.building.list_of_primary_nodes() + \
-                self.building.list_of_parent_nodes() + \
-                self.building.list_of_internal_nodes():
+
+        for node in self.building.list_of_all_nodes():
             ops.load(node.uid, *node.load_total())
 
     ####################################################
@@ -788,7 +786,7 @@ class NonlinearAnalysis(Analysis):
     n_steps_success: int = field(default=0)
 
     def _run_gravity_analysis(self):
-        ops.system('SparseSYM')
+        ops.system('FullGeneral')
         ops.numberer('Plain')
         # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
@@ -858,42 +856,53 @@ class NonlinearAnalysis(Analysis):
     def retrieve_node_displacement(self, uid):
         res = np.zeros((self.n_steps_success, 6))
         for i in range(self.n_steps_success):
-            res[i] = self.node_displacements[i][uid]
+            res[i] = self.node_displacements[uid][i]
+        return res
 
     def retrieve_node_acceleration(self, uid):
         res = np.zeros((self.n_steps_success, 6))
         for i in range(self.n_steps_success):
-            res[i] = self.node_accelerations[i][uid]
+            res[i] = self.node_accelerations[uid][i]
+        return res
 
     def retrieve_node_velocity(self, uid):
         res = np.zeros((self.n_steps_success, 6))
         for i in range(self.n_steps_success):
-            res[i] = self.node_velocities[i][uid]
+            res[i] = self.node_velocities[uid][i]
+        return res
 
     def retrieve_node_abs_acceleration(self, uid):
         res = np.zeros((self.n_steps_success, 6))
         for i in range(self.n_steps_success):
-            res[i] = self.node_accelerations[i][uid]
+            res[i] = self.node_accelerations[uid][i]
+        if 0 in self.a_g:
+            res[:, 0] += self.a_g[0](self.time_vector)*common.G_CONST
+        if 1 in self.a_g:
+            res[:, 1] += self.a_g[1](self.time_vector)*common.G_CONST
+        if 2 in self.a_g:
+            res[:, 2] += self.a_g[2](self.time_vector)*common.G_CONST
+        return res
 
     def retrieve_node_abs_velocity(self, uid):
         res = np.zeros((self.n_steps_success, 6))
         for i in range(self.n_steps_success):
-            res[i] = self.node_velocities[i][uid]
+            res[i] = self.node_velocities[uid][i]
         if 0 in self.a_g:
             v_g = integrate.cumulative_trapezoid(
-                self.a_g[0][self.time_vector]*common.G_CONST,
+                self.a_g[0](self.time_vector)*common.G_CONST,
                 self.time_vector, initial=0)
             res[:, 0] = res[:, 0] + v_g
         if 1 in self.a_g:
             v_g = integrate.cumulative_trapezoid(
-                self.a_g[1][self.time_vector]*common.G_CONST,
+                self.a_g[1](self.time_vector)*common.G_CONST,
                 self.time_vector, initial=0)
             res[:, 1] = res[:, 1] + v_g
         if 2 in self.a_g:
             v_g = integrate.cumulative_trapezoid(
-                self.a_g[2][self.time_vector]*common.G_CONST,
+                self.a_g[2](self.time_vector)*common.G_CONST,
                 self.time_vector, initial=0)
             res[:, 2] = res[:, 2] + v_g
+        return res
 
     def retrieve_release_force_defo(self, uid):
         force_defo = np.array(self.release_force_defo[uid])
@@ -972,7 +981,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction, modeshape, loaded_node)
 
-        ops.system('SparseSYM')
+        ops.system('UmfPack')
         ops.numberer('Plain')
         # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
@@ -1120,13 +1129,22 @@ class PushoverAnalysis(NonlinearAnalysis):
             'Story drift', 'in', '.0f',
             'Resisting Force', 'lb', '.0f')
 
-
 @dataclass
 class NLTHAnalysis(NonlinearAnalysis):
 
     time_vector: List[float] = field(default_factory=list)
     a_g: dict = field(default_factory=dict)
 
+    # def run(self, analysis_time_increment,
+    #         filename_x,
+    #         filename_y,
+    #         filename_z,
+    #         file_time_incr,
+    #         finish_time=0.00,
+    #         damping_ratio=0.05,
+    #         num_modes=None,
+    #         printing=True,
+    #         data_retention='default'):
     def run(self, analysis_time_increment,
             filename_x,
             filename_y,
@@ -1153,6 +1171,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         """
 
         logging.info('Running NLTH analysis')
+
         nss = []
         if filename_x:
             gm_vals_x = np.genfromtxt(filename_x)
@@ -1229,7 +1248,26 @@ class NLTHAnalysis(NonlinearAnalysis):
         ops.modalDamping(damping_ratio)
         logging.info(f'{damping_ratio*100:.2f}% modal damping defined')
 
-        ops.system("SparseSYM")
+        # ops.system("UmfPack")
+        # w2 = ops.eigen(20)
+
+        # # Pick your modes and damping ratios
+        # wi = w2[0]**0.5
+        # zetai = 0.05  # 5% in mode 1
+        # wj = w2[9]**0.5
+        # zetaj = 0.05  # 2% in mode 10
+
+        # A = np.array([[1/wi, wi], [1/wj, wj]])
+        # b = np.array([zetai, zetaj])
+
+        # x = np.linalg.solve(A, 2*b)
+
+        # ops.rayleigh(x[0], 0.0, 0.0, x[1])
+
+
+
+        
+        # ops.system("UmfPack")
         ops.test('NormDispIncr', 1e-6, 50, 0)
         ops.algorithm("KrylovNewton")
         # ops.integrator("TRBDF2")
@@ -1239,9 +1277,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             filename_x,
             filename_y,
             filename_z,
-            file_time_incr,
-            damping_ratio,
-            num_modes)
+            file_time_incr)
 
         num_subdiv = 0
         num_times = 0
@@ -1459,9 +1495,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             filename_x,
             filename_y,
             filename_z,
-            file_time_incr,
-            damping_ratio,
-            num_modes=3):
+            file_time_incr):
 
         error = True
         if filename_x:

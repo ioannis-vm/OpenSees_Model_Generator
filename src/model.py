@@ -649,16 +649,31 @@ class Model:
         return list_of_parent_nodes
 
     def list_of_internal_nodes(self):
-        list_of_internal_nodes = []
+        res = {}
         sequences = self.list_of_line_element_sequences()
         for sequence in sequences:
-            list_of_internal_nodes.extend(sequence.internal_nodes())
-        return list_of_internal_nodes
+            internal_nodes = sequence.internal_nodes()
+            for node in internal_nodes:
+                if node.uid not in res:
+                    res[node.uid] = node
+        return list(res.values())
 
     def list_of_all_nodes(self):
-        return self.list_of_primary_nodes() + \
-            self.list_of_internal_nodes() + \
-            self.list_of_parent_nodes()
+        """
+        Caution: It is crucial that the resulting list contains unique
+        elements
+        """
+        res = {}
+        for n in self.list_of_primary_nodes():
+            if n.uid not in res:
+                res[n.uid] = n
+        for n in self.list_of_internal_nodes():
+            if n.uid not in res:
+                res[n.uid] = n
+        for n in self.list_of_parent_nodes():
+            if n.uid not in res:
+                res[n.uid] = n
+        return list(res.values())
 
     def list_of_steel_W_panel_zones(self):
         cols = self.list_of_columns()
