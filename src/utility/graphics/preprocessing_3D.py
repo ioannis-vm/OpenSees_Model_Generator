@@ -281,12 +281,14 @@ def add_data__frames(dt, list_of_frames):
         customdata.append(
             (elm.uid,
              *elm.udl_total(),
-             elm.node_i.uid)
+             elm.node_i.uid,
+             elm.parent.uid)
         )
         customdata.append(
             (elm.uid,
              *elm.udl_total(),
-             elm.node_j.uid)
+             elm.node_j.uid,
+             elm.parent.uid)
         )
         customdata.append(
             [None]*6
@@ -305,7 +307,8 @@ def add_data__frames(dt, list_of_frames):
         'UDL (local): (%{customdata[1]:.3g}, ' +
         '%{customdata[2]:.3g}, %{customdata[3]:.3g})' +
         '<extra>Element: %{customdata[0]:d}<br>' +
-        'Node @ this end: %{customdata[4]:d}</extra>',
+        'Node @ this end: %{customdata[4]:d}<br>'
+        'Parent: %{customdata[5]}</extra>',
         "line": {
             "width": 5,
             "color": common.FRAME_COLOR

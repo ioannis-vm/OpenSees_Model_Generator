@@ -13,7 +13,10 @@ Model Builder for OpenSeesPy ~ Solver module
 from typing import List, TypedDict
 from dataclasses import dataclass, field
 import openseespy.opensees as ops
+import os
+import pickle
 import numpy as np
+from scipy import integrate
 import logging
 from datetime import datetime
 from scipy.interpolate import interp1d
@@ -52,13 +55,14 @@ class Analysis:
         default_factory=AnalysisResult, repr=False)
     node_reactions: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
-    eleForces: AnalysisResult = field(
+    element_forces: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
     fiber_stress_strain: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
     release_force_defo: AnalysisResult = field(
         default_factory=AnalysisResult, repr=False)
     log_file: str = field(default=None)
+    output_directory: str = field(default=None)
 
 
     def __post_init__(self):
@@ -68,6 +72,81 @@ class Analysis:
             datefmt='%m/%d/%Y %I:%M:%S %p',
             level=logging.DEBUG)
         logging.info('Analysis started')
+        if not self.output_directory:
+            curr = datetime.now()
+            self.output_directory = curr.strftime(
+                '/tmp/analysis_%Y-%m-%d_%I-%M-%S_%p')
+            logging.info(
+                'Using default output directory: '
+                f'{self.output_directory}')
+            if not os.path.exists(self.output_directory):
+                os.makedirs(
+                    self.output_directory,
+                    exist_ok=True)
+
+    def _write_results(self):
+
+        def dump(varname, var):
+            with open(
+                    f'{self.output_directory}/{varname}.pcl',
+                    'wb') as file:
+                pickle.dump(var, file)
+
+        logging.info('Storing analysis results')
+
+        dump('node_displacements', self.node_displacements)
+        dump('node_velocities', self.node_velocities)
+        dump('node_accelerations', self.node_accelerations)
+        dump('node_reactions', self.node_reactions)
+        dump('element_forces', self.element_forces)
+        dump('fiber_stress_strain', self.fiber_stress_strain)
+        dump('release_force_defo', self.release_force_defo)
+
+        if hasattr(self, 'num_modes'):
+            dump('num_modes', self.num_modes)
+        if hasattr(self, 'periods'):
+            dump('periods', self.periods)
+        if hasattr(self, 'n_steps_success'):
+            dump('n_steps_success', self.n_steps_success)
+        if hasattr(self, 'time_vector'):
+            dump('time_vector', self.time_vector)
+        if hasattr(self, 'a_g'):
+            dump('a_g', self.a_g)
+
+            logging.info('Analysis results stored successfully')
+
+    def read_results(self, output_directory):
+
+        self.output_directory = output_directory
+        def read(varname):
+            with open(
+                    f'{self.output_directory}/{varname}.pcl',
+                    'rb') as file:
+                return pickle.load(file)
+
+        logging.info('Reading analysis results')
+
+        self.node_displacements = read('node_displacements')
+        self.node_velocities = read('node_velocities')
+        self.node_accelerations = read('node_accelerations')
+        self.node_reactions = read('node_reactions')
+        self.element_forces = read('element_forces')
+        self.fiber_stress_strain = read('fiber_stress_strain')
+        self.release_force_defo = read('release_force_defo')
+
+        if os.path.exists(f'{self.output_directory}/num_modes.pcl'):
+            self.num_modes = read('num_modes')
+        if os.path.exists(f'{self.output_directory}/periods.pcl'):
+            self.periods = read('periods')
+        if os.path.exists(f'{self.output_directory}/n_steps_success.pcl'):
+            self.n_steps_success = read('n_steps_success')
+        if os.path.exists(f'{self.output_directory}/time_vector.pcl'):
+            self.time_vector = read('time_vector')
+        if os.path.exists(f'{self.output_directory}/a_g.pcl'):
+            self.a_g = read('a_g')
+            
+
+        logging.info('Analysis results read successfully')
 
 
     def _define_material(self, material: components.Material):
@@ -318,6 +397,8 @@ class Analysis:
         Defines the building model in OpenSeesPy
         """
 
+        logging.info('Defining model in OpenSees')
+
         def define_node(node, defined_nodes):
             if node.uid not in defined_nodes:
                 self._define_node(node)
@@ -337,8 +418,7 @@ class Analysis:
             define_node(elm.node_j, defined_nodes)
 
             # define section
-            if (elm.section.uid not in defined_sections) and \
-               elm.model_as['type'] != 'elastic':
+            if (elm.section.uid not in defined_sections):
                 sec = elm.section
                 # we don't define utility sections in OpenSees
                 # (we instead use the appropriate elements)
@@ -475,7 +555,7 @@ class Analysis:
         for elm in self.building.list_of_line_elements():
             uid = elm.uid
             forces = np.array(ops.eleForce(uid))
-            self._store_result(self.eleForces,
+            self._store_result(self.element_forces,
                                uid,
                                forces)
 
@@ -627,6 +707,7 @@ class LinearAnalysis(Analysis):
         ops.integrator('LoadControl', 1.0)
         ops.analysis('Static')
         ops.analyze(1)
+        logging.info('Analysis Finished')
 
 
 @dataclass
@@ -636,6 +717,7 @@ class LinearGravityAnalysis(LinearAnalysis):
         self._define_dead_load()
         self._run_gravity_analysis()
         self._read_OpenSees_results()
+        self._write_results()
 
 
 @dataclass
@@ -681,6 +763,7 @@ class ModalAnalysis(LinearAnalysis):
             self.num_modes))
         self.periods = 2.00*np.pi / np.sqrt(eigValues)
         self._read_node_displacements()
+        self._write_results()
 
     def table_shape(self, mode: int):
         data = {'names': [],
@@ -695,7 +778,7 @@ class ModalAnalysis(LinearAnalysis):
             data['ux'].append(disp[0])
             data['uy'].append(disp[1])
         data['ux'] /= max(np.max(data['ux']), np.max(data['uy']))
-        data['uy'] /= max(np.max(data['ux']), np.max(data['uy']))        
+        data['uy'] /= max(np.max(data['ux']), np.max(data['uy']))
         return pd.DataFrame.from_dict(data)
 
 
@@ -733,8 +816,8 @@ class NonlinearAnalysis(Analysis):
             y_vec = elm.y_axis
             z_vec = elm.z_axis
             T_global2local = np.vstack((x_vec, y_vec, z_vec))
-            forces_global = self.eleForces[elm.uid][-1][0:3]
-            moments_global_ends = self.eleForces[elm.uid][-1][3:6]
+            forces_global = self.element_forces[elm.uid][-1][0:3]
+            moments_global_ends = self.element_forces[elm.uid][-1][3:6]
 
             moments_global_clear = \
                 transformations.offset_transformation(
@@ -758,7 +841,7 @@ class NonlinearAnalysis(Analysis):
             iz = prop['inertia']['iyy']
             young_mod = elm.section.material.parameters['E0']
 
-            for key, val in elm.section.snap_points.items():
+            for val in elm.section.snap_points.values():
                 z, y = val
                 stress = nx_vec/area \
                     + my_vec/iz * z \
@@ -772,97 +855,50 @@ class NonlinearAnalysis(Analysis):
                     "Acceptance criteria failed for element " +
                     str(elm.uid))
 
-    def plot_moment_rot(self, seq, step=0):
-        """
-        Given a LineElementSequence of a type that has any form of end
-        release in bending around the strong axis, plots the moment
-        rotation for all the analysis steps for both ends.
-        """
-        # In this case, we plot the moment-rotation relationship
-        # for the IMK springs at the two ends, and also the
-        # moment-rotation relationship of the panel zone spring
-        endsegment_i = seq.end_segment_i
-        endsegment_j = seq.end_segment_j
-        if isinstance(seq, LineElementSequence_Steel_W_PanelZone_IMK):
-            spring_i = endsegment_i.internal_elems[12]
-            spring_j = endsegment_j.internal_elems[0]
-        elif isinstance(seq, LineElementSequence_IMK):
-            spring_i = endsegment_i.internal_elems[1]
-            spring_j = endsegment_j.internal_elems[0]
-        elif isinstance(seq, LineElementSequence_W_grav_sear_tab):
-            spring_i = endsegment_i.internal_elems[1]
-            spring_j = endsegment_j.internal_elems[0]
-        else:
-            return
+    def retrieve_node_displacement(self, uid):
+        res = np.zeros((self.n_steps_success, 6))
+        for i in range(self.n_steps_success):
+            res[i] = self.node_displacements[i][uid]
 
-        data_i = []
-        data_j = []
-        if step == 0:
-            step = self.n_steps_success
-        for i in range(step):
-            data_i.append(self.release_force_defo[spring_i.uid][i])
-            data_j.append(self.release_force_defo[spring_j.uid][i])
-        data_i = np.array(data_i)
-        data_j = np.array(data_j)
+    def retrieve_node_acceleration(self, uid):
+        res = np.zeros((self.n_steps_success, 6))
+        for i in range(self.n_steps_success):
+            res[i] = self.node_accelerations[i][uid]
 
-        fig, axs = plt.subplots(nrows=2, sharex=True)
-        axs[0].grid()
-        axs[1].grid()
-        axs[0].plot(data_i[:, 1], data_i[:, 0]/(1.e3 * 12.),
-                    color='lightblue')
-        axs[0].scatter(data_i[-1, 1], data_i[-1, 0]/(1.e3 * 12.),
-                       color='lightblue')
-        axs[1].plot(data_j[:, 1], data_j[:, 0]/(1.e3 * 12.),
-                    color='orange', label='end j')
-        axs[1].scatter(data_j[-1, 1], data_j[-1, 0]/(1.e3 * 12.),
-                       color='orange')
-        axs[0].set_title('Strong-axis bending moment (kip-ft)')
-        axs[0].set_ylabel('End i')
-        axs[1].set_ylabel('End j')
-        plt.xlabel('Rotation (rad)')
-        plt.show()
+    def retrieve_node_velocity(self, uid):
+        res = np.zeros((self.n_steps_success, 6))
+        for i in range(self.n_steps_success):
+            res[i] = self.node_velocities[i][uid]
 
+    def retrieve_node_abs_acceleration(self, uid):
+        res = np.zeros((self.n_steps_success, 6))
+        for i in range(self.n_steps_success):
+            res[i] = self.node_accelerations[i][uid]
 
+    def retrieve_node_abs_velocity(self, uid):
+        res = np.zeros((self.n_steps_success, 6))
+        for i in range(self.n_steps_success):
+            res[i] = self.node_velocities[i][uid]
+        if 0 in self.a_g:
+            v_g = integrate.cumulative_trapezoid(
+                self.a_g[0][self.time_vector]*common.G_CONST,
+                self.time_vector, initial=0)
+            res[:, 0] = res[:, 0] + v_g
+        if 1 in self.a_g:
+            v_g = integrate.cumulative_trapezoid(
+                self.a_g[1][self.time_vector]*common.G_CONST,
+                self.time_vector, initial=0)
+            res[:, 1] = res[:, 1] + v_g
+        if 2 in self.a_g:
+            v_g = integrate.cumulative_trapezoid(
+                self.a_g[2][self.time_vector]*common.G_CONST,
+                self.time_vector, initial=0)
+            res[:, 2] = res[:, 2] + v_g
 
-    def plot_shear_deformation(self, seq, step=0):
-        """
-        Given a LineElementSequence of a type that has a panel zone,
-        plots the shear-deformation for all the analysis steps.
-        """
-        if isinstance(seq, LineElementSequence_Steel_W_PanelZone_IMK):
-            # In this case, we plot the moment-rotation relationship
-            # for the IMK springs at the two ends, and also the
-            # moment-rotation relationship of the panel zone spring
-            endsegment_i = seq.end_segment_i
-            endsegment_j = seq.end_segment_j
-            spring_i = endsegment_i.internal_elems[12]
-            spring_j = endsegment_j.internal_elems[0]
-            data_i = []
-            data_j = []
-            if step == 0:
-                step = self.n_steps_success
-            for i in range(step):
-                data_i.append(self.release_force_defo[spring_i.uid][i])
-                data_j.append(self.release_force_defo[spring_j.uid][i])
-            data_i = np.array(data_i)
-            data_j = np.array(data_j)
- 
-            fig, axs = plt.subplots(nrows=2, sharex=True)
-            axs[0].grid()
-            axs[1].grid()
-            axs[0].plot(data_i[:, 1], data_i[:, 0]/(1.e3 * 12.),
-                        color='lightblue')
-            axs[0].scatter(data_i[-1, 1], data_i[-1, 0]/(1.e3 * 12.),
-                           color='lightblue')
-            axs[1].plot(data_j[:, 1], data_j[:, 0]/(1.e3 * 12.),
-                        color='orange', label='end j')
-            axs[1].scatter(data_j[-1, 1], data_j[-1, 0]/(1.e3 * 12.),
-                           color='orange')
-            axs[0].set_title('Strong-axis bending moment (kip-ft)')
-            axs[0].set_ylabel('End i')
-            axs[1].set_ylabel('End j')
-            plt.xlabel('Rotation (rad)')
-            plt.show()
+    def retrieve_release_force_defo(self, uid):
+        force_defo = np.array(self.release_force_defo[uid])
+        return force_defo
+
 
 
 @dataclass
@@ -936,7 +972,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction, modeshape, loaded_node)
 
-        ops.system('UmfPack')
+        ops.system('SparseSYM')
         ops.numberer('Plain')
         # ops.constraints('Penalty', 1.e15, 1.e15)
         ops.constraints('Transformation')
@@ -1027,6 +1063,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
         self.n_steps_success = n_steps_success
+        self._write_results()
         return metadata
 
     def table_pushover_curve(self, direction, node):
@@ -1074,7 +1111,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             disp_prj = np.dot(diff_disp, x_axis)
             drift.append(disp_prj)
             ielm = brace.end_segment_i.internal_elems[-1].uid
-            force = self.eleForces[ielm][step][0:3]
+            force = self.element_forces[ielm][step][0:3]
             force_prj = - np.dot(force, x_axis_horiz)
             resisting_force.append(force_prj)
         general_2D.line_plot_interactive(
@@ -1161,9 +1198,6 @@ class NLTHAnalysis(NonlinearAnalysis):
         self._read_OpenSees_results(data_retention)
         n_steps_success = 1
 
-        import pdb
-        pdb.set_trace()
-
         # time-history analysis
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
@@ -1195,13 +1229,11 @@ class NLTHAnalysis(NonlinearAnalysis):
         ops.modalDamping(damping_ratio)
         logging.info(f'{damping_ratio*100:.2f}% modal damping defined')
 
-
         ops.system("SparseSYM")
         ops.test('NormDispIncr', 1e-6, 50, 0)
         ops.algorithm("KrylovNewton")
         # ops.integrator("TRBDF2")
         ops.analysis("Transient")
-
 
         self.define_lateral_load_pattern(
             filename_x,
@@ -1346,7 +1378,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                     'analysis_finished_successfully': not analysis_failed}
         self.n_steps_success = n_steps_success
         logging.info('Analysis finished')
-
+        self._write_results()
         return metadata
 
     def plot_ground_motion(self, filename, file_time_incr, plotly=False):

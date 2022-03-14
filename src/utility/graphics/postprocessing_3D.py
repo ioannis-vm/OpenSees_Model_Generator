@@ -158,7 +158,6 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                                             dt,
                                             list_of_frames,
                                             step,
-                                            sub,
                                             scaling):
     if not list_of_frames:
         return
@@ -168,11 +167,13 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     i_list = []
     j_list = []
     k_list = []
+    intensity = []
     index = 0
     for elm in list_of_frames:
         if elm.hidden_when_extruded:
             continue
-        num_points = elm.n_p * 4
+        len_proportion = elm.length_clear / elm.len_parent
+        num_points = int(len_proportion * 5. + 2.)
         # translations and rotations at the offset ends
         u_i = analysis.node_displacements[elm.node_i.uid][step][0:3]
         r_i = analysis.node_displacements[elm.node_i.uid][step][3:6]
@@ -252,15 +253,24 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                 i_list.append(index + 0)
                 j_list.append(index + 2)
                 k_list.append(index + 3)
+                intensity.append(np.linalg.norm(d_global[0, :]))
+                intensity.append(np.linalg.norm(d_global[1, :]))
+                intensity.append(np.linalg.norm(d_global[1, :]))
+                intensity.append(np.linalg.norm(d_global[0, :]))
                 index += 4
+    intensity = np.array(intensity)
+    intensity_max = np.max(intensity)
     dt.append({
         "type": "mesh3d",
         "x": x_list,
         "y": y_list,
         "z": z_list,
+        "colorscale": [[0, 'blue'], [1.0, 'red']],
         "i": i_list,
         "j": j_list,
         "k": k_list,
+        "intensity": intensity,
+        "colorbar_title": 'Displacement',
         "hoverinfo": "skip",
         "color": common.BEAM_MESH_COLOR,
         "opacity": 0.65
@@ -278,6 +288,7 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
     i_list = []
     j_list = []
     k_list = []
+    intensity = []
     index = 0
 
     for elm in list_of_endsegments:
@@ -356,15 +367,23 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
                 i_list.append(index + 0)
                 j_list.append(index + 2)
                 k_list.append(index + 3)
+                intensity.append(np.linalg.norm(d_global[0, :]))
+                intensity.append(np.linalg.norm(d_global[1, :]))
+                intensity.append(np.linalg.norm(d_global[1, :]))
+                intensity.append(np.linalg.norm(d_global[0, :]))
+
                 index += 4
     dt.append({
         "type": "mesh3d",
         "x": x_list,
         "y": y_list,
         "z": z_list,
+        "colorscale": [[0, 'blue'], [1.0, 'red']],
         "i": i_list,
         "j": j_list,
         "k": k_list,
+        "intensity": intensity,
+        "colorbar_title": 'Displacement',
         "hoverinfo": "skip",
         "color": common.BEAM_MESH_COLOR,
         "opacity": 0.65
@@ -382,6 +401,7 @@ def add_data__frames_deformed(analysis,
     x = []
     y = []
     z = []
+    
     for elm in list_of_frames:
 
         num_points = elm.n_p * 4
@@ -662,7 +682,7 @@ def deformed_shape(analysis,
         analysis, dt, list_of_frames, step, scaling)
     if extrude_frames:
         add_data__extruded_frames_deformed_mesh(
-            analysis, dt, list_of_frames, step, 15, scaling)
+            analysis, dt, list_of_frames, step, scaling)
         add_data__extruded_steel_W_PZ_deformed_mesh(
             analysis, dt, list_of_steel_W_panel_zones, step, scaling)
     else:
@@ -794,9 +814,9 @@ def basic_forces(analysis,
 
         T_global2local = np.vstack((x_vec, y_vec, z_vec))
 
-        forces_global = analysis.eleForces[
+        forces_global = analysis.element_forces[
             element.uid][step][0:3]
-        moments_global_ends = analysis.eleForces[
+        moments_global_ends = analysis.element_forces[
             element.uid][step][3:6]
 
         moments_global_clear = transformations.offset_transformation(

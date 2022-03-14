@@ -222,20 +222,19 @@ class Model:
         return group
 
     def add_column_at_point(self,
-                            x: float,
-                            y: float,
+                            pt: np.ndarray,
                             n_sub=1,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear', ends={'type': 'fixed'},
-                            metadata=None) \
+                            geom_transf='Linear', ends={'type': 'fixed'}) \
             -> list[LineElementSequence]:
         """
         Adds a vertical column at the given X, Y
         location at all the active levels.
         Existing nodes are used, otherwise they are created.
         Args:
-            x (float): X coordinate in the global system
-            y (float): Y coordinate in the global system
+            pt (np.ndarray): Size-2 array containing x and y, where
+              x (float): X coordinate in the global system
+              y (float): Y coordinate in the global system
             n_sub (int): Number of internal elements to add
             model_as (dict): Either
                            {'type': 'elastic'}
@@ -251,6 +250,7 @@ class Model:
         Returns:
             column (LineElementSequence): Added column.
         """
+        [x, y] = pt
         if not self.sections.active:
             raise ValueError("No active section")
         for levelname in self.levels.active:

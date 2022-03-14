@@ -325,6 +325,7 @@ class LineElement:
     offset_i: np.ndarray = field(repr=False)
     offset_j: np.ndarray = field(repr=False)
     section: Section = field(repr=False)
+    parent: 'LineElementSequence' = field(repr=False)
     len_parent: float = field(repr=False)
     model_as: dict = field(repr=False)
     geom_transf: str = field(repr=False)
@@ -456,13 +457,13 @@ class LineElement:
         piece_i = LineElement(
             self.node_i, split_node,
             self.ang, self.offset_i, np.zeros(3).copy(),
-            self.section, self.len_parent, self.model_as,
+            self.section, self.parent, self.len_parent, self.model_as,
             self.geom_transf, self.udl_self.copy(), self.udl_fl.copy(),
             self.udl_other.copy())
         piece_j = LineElement(
             split_node, self.node_j,
             self.ang, np.zeros(3).copy(), self.offset_j,
-            self.section, self.len_parent, self.model_as,
+            self.section, self.parent, self.len_parent, self.model_as,
             self.geom_transf, self.udl_self.copy(), self.udl_fl.copy(),
             self.udl_other.copy())
         return piece_i, piece_j, split_node
@@ -542,16 +543,18 @@ class EndSegment_Fixed(EndSegment):
         if self.n_external != self.n_internal:
             if self.end == 'i':
                 self.add(LineElement(
-                        self.n_external, self.n_internal, self.parent.ang,
-                        self.parent.offset_i, np.zeros(3).copy(),
-                        self.parent.section, self.parent.length_clear,
-                        self.parent.model_as, self.parent.geom_transf))
+                    self.n_external, self.n_internal, self.parent.ang,
+                    self.parent.offset_i, np.zeros(3).copy(),
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
             elif self.end == 'j':
                 self.add(LineElement(
-                        self.n_internal, self.n_external, self.parent.ang,
-                        np.zeros(3).copy(), self.parent.offset_j,
-                        self.parent.section, self.parent.length_clear,
-                        self.parent.model_as, self.parent.geom_transf))
+                    self.n_internal, self.n_external, self.parent.ang,
+                    np.zeros(3).copy(), self.parent.offset_j,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
+                    self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -576,10 +579,11 @@ class EndSegment_Pinned(EndSegment):
         self.internal_nodes[n_release.uid] = n_release
         if self.end == 'i':
             self.add(LineElement(
-                    self.n_external, n_release, self.parent.ang,
-                    self.offset(), np.zeros(3).copy(),
-                    self.parent.section, self.parent.length_clear,
-                    self.parent.model_as, self.parent.geom_transf))
+                self.n_external, n_release, self.parent.ang,
+                self.offset(), np.zeros(3).copy(),
+                self.parent.section,
+                self.parent, self.parent.length_clear,
+                self.parent.model_as, self.parent.geom_transf))
             self.add(EndRelease(
                     n_release,
                     self.n_internal,
@@ -599,10 +603,11 @@ class EndSegment_Pinned(EndSegment):
                      4: self.mat_fix},
                     self.parent.x_axis, self.parent.y_axis))
             self.add(LineElement(
-                    n_release, self.n_external, self.parent.ang,
-                    np.zeros(3).copy(), self.offset(),
-                    self.parent.section, self.parent.length_clear,
-                    self.parent.model_as, self.parent.geom_transf))
+                n_release, self.n_external, self.parent.ang,
+                np.zeros(3).copy(), self.offset(),
+                self.parent.section,
+                self.parent, self.parent.length_clear,
+                self.parent.model_as, self.parent.geom_transf))
 
 
 @dataclass
@@ -668,7 +673,8 @@ class EndSegment_RBS(EndSegment):
                     self.n_external, first(self.internal_nodes),
                     self.parent.ang,
                     self.offset, np.zeros(3).copy(),
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
             for i in range(self.parent.ends['rbs_n_sub']+1):
                 self.add(
@@ -677,7 +683,8 @@ class EndSegment_RBS(EndSegment):
                         nth_item(self.internal_nodes, i+1),
                         self.parent.ang,
                         np.zeros(3).copy(), np.zeros(3).copy(),
-                        reduced_sections[i], self.parent.length_clear,
+                        reduced_sections[i],
+                        self.parent, self.parent.length_clear,
                         self.parent.model_as, self.parent.geom_transf))
 
         elif self.end == 'j':
@@ -707,14 +714,16 @@ class EndSegment_RBS(EndSegment):
                         nth_item(self.internal_nodes, i+1),
                         self.parent.ang,
                         np.zeros(3).copy(), np.zeros(3).copy(),
-                        reduced_sections[i], self.parent.length_clear,
+                        reduced_sections[i],
+                        self.parent, self.parent.length_clear,
                         self.parent.model_as, self.parent.geom_transf))
             self.add(
                 LineElement(
                     last(self.internal_nodes), self.n_external,
                     self.parent.ang,
                     np.zeros(3).copy(), self.offset,
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
 
 
@@ -760,7 +769,8 @@ class EndSegment_IMK(EndSegment):
                     self.n_external, n_release,
                     self.parent.ang,
                     self.offset(), np.zeros(3).copy(),
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
             self.add(
                 EndRelease(
@@ -787,7 +797,8 @@ class EndSegment_IMK(EndSegment):
                 LineElement(
                     n_release, self.n_external, self.parent.ang,
                     np.zeros(3).copy(), self.offset(),
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
 
 
@@ -860,6 +871,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -868,6 +880,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -876,6 +889,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -884,6 +898,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -892,6 +907,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -900,6 +916,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -908,6 +925,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -916,6 +934,7 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
+                            self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
                             geom_transf='Linear',
@@ -1021,6 +1040,7 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
             np.zeros(3).copy(),
             np.zeros(3).copy(),
             self.rigid_util_section,
+            self.parent,
             1.00,
             model_as={'type': 'elastic'},
             geom_transf='Linear',
@@ -1031,6 +1051,7 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
             np.zeros(3).copy(),
             np.zeros(3).copy(),
             self.rigid_util_section,
+            self.parent,
             1.00,
             model_as={'type': 'elastic'},
             geom_transf='Linear',
@@ -1201,7 +1222,8 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                 LineElement(
                     self.n_external, n_release, self.parent.ang,
                     self.offset(), np.zeros(3).copy(),
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
             self.add(
                 EndRelease(
@@ -1230,7 +1252,8 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                 LineElement(
                     n_release, self.n_external, self.parent.ang,
                     np.zeros(3).copy(), self.offset(),
-                    self.parent.section, self.parent.length_clear,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
 
 
@@ -1301,17 +1324,22 @@ class MiddleSegment:
         for i in range(self.parent.n_sub):
             if i == 0:
                 node_i = self.parent.n_i
+                o_i = self.offset_i
             else:
                 node_i = nth_item(self.internal_nodes, i-1)
+                o_i = np.zeros(3).copy()
             if i == self.parent.n_sub-1:
                 node_j = self.parent.n_j
+                o_j = self.offset_j
             else:
                 node_j = nth_item(self.internal_nodes, i)
+                o_j = np.zeros(3).copy()
             self.add(
                 LineElement(
                     node_i, node_j, self.parent.ang,
-                    np.zeros(3).copy(), np.zeros(3).copy(),
-                    self.parent.section, self.parent.length_clear,
+                    o_i, o_j,
+                    self.parent.section,
+                    self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
 
     def crosses_point(self, pt: np.ndarray) -> bool:
