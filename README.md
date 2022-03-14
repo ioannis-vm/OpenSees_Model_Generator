@@ -14,14 +14,10 @@ The module is in constant development, and new functionality is added as needed 
 #### Modeling
 
 - Building levels ~ definition of elements on multiple levels with a single line of code
-- Groups
 - Tributary area analysis for floor-to-beam load distribution
 - Element self-weight, self-mass
-- Accelerated element definitions using gridlines
-- Element selection and modification
 - AISC steel sections
-- Fiber generation of arbitrary sections
-
+- Section polygon subdivision for fiber elements
 
 #### Analysis
 
