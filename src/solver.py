@@ -25,7 +25,7 @@ import pandas as pd
 import model
 import components
 from model import Model
-from node import Node
+import node
 from components import LineElement
 from components import LineElementSequence
 from utility import common
@@ -36,6 +36,12 @@ from utility import transformations
 plt.rc('font', family='serif')
 plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
+
+LN_ANALYSIS_SYSTEM = 'SparseSYM'
+NL_ANALYSIS_SYSTEM = 'SparseSYM'
+MD_ANALYSIS_SYSTEM = 'UmfPack'
+CONSTRAINTS = ('Transformation',)
+NUMBERER = 'Plain'
 
 class AnalysisResult(TypedDict):
 
@@ -250,7 +256,7 @@ class Analysis:
         else:
             raise ValueError("Unsupported material:" + material.ops_material)
 
-    def _define_node(self, node: model.Node):
+    def _define_node(self, node: node.Node):
         ops.node(node.uid, *node.coords)
 
         def superimpose_restraints(c_1, c_2):
@@ -287,8 +293,11 @@ class Analysis:
 
         # mass
         if max(node.mass) > common.EPSILON:
-            ops.mass(node.uid,
-                     *node.mass)
+            if len(node.mass) == 3:
+                mass = list(node.mass)+[common.EPSILON]*3
+            else:
+                mass = node.mass
+            ops.mass(node.uid, *mass)
 
     def _define_elastic_section(self, sec: components.Section):
 
@@ -418,7 +427,8 @@ class Analysis:
             define_node(elm.node_j, defined_nodes)
 
             # define section
-            if (elm.section.uid not in defined_sections):
+            if (elm.section.uid not in defined_sections) and \
+               (elm.model_as['type'] != 'elastic'):
                 sec = elm.section
                 # we don't define utility sections in OpenSees
                 # (we instead use the appropriate elements)
@@ -696,10 +706,9 @@ class Analysis:
 class LinearAnalysis(Analysis):
 
     def _run_gravity_analysis(self):
-        ops.system('UmfPack')
-        ops.numberer('Plain')
-        # ops.constraints('Penalty', 1.e4, 1.e4)
-        ops.constraints('Transformation')
+        ops.system(LN_ANALYSIS_SYSTEM)
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
         ops.test('NormDispIncr', 1.0e-8, 20, 3)
         ops.algorithm('Newton')
         ops.integrator('LoadControl', 1.0)
@@ -753,9 +762,8 @@ class ModalAnalysis(LinearAnalysis):
         self._to_OpenSees_domain()
         # tags = ops.getNodeTags()
         # print(len(tags))
-        # ops.constraints('Penalty', 1.e9, 1.e9)
-        ops.constraints('Transformation')
-        ops.system("UmfPack")
+        ops.constraints(*CONSTRAINTS)
+        ops.system(MD_ANALYSIS_SYSTEM)
         # note: using SparseSYM results in wrong eigendecomposition
         eigValues = np.array(ops.eigen(
             self.num_modes))
@@ -786,10 +794,10 @@ class NonlinearAnalysis(Analysis):
     n_steps_success: int = field(default=0)
 
     def _run_gravity_analysis(self):
-        ops.system('FullGeneral')
-        ops.numberer('Plain')
-        # ops.constraints('Penalty', 1.e15, 1.e15)
-        ops.constraints('Transformation')
+        print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
+        ops.system(NL_ANALYSIS_SYSTEM)
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
         ops.test('NormDispIncr', 1.0e-6, 100, 3)
         ops.algorithm('RaphsonNewton')
         ops.integrator('LoadControl', 1)
@@ -981,10 +989,10 @@ class PushoverAnalysis(NonlinearAnalysis):
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction, modeshape, loaded_node)
 
-        ops.system('UmfPack')
-        ops.numberer('Plain')
-        # ops.constraints('Penalty', 1.e15, 1.e15)
-        ops.constraints('Transformation')
+        print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
+        ops.system(NL_ANALYSIS_SYSTEM)
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
         curr_displ = ops.nodeDisp(control_node.uid, control_DOF+1)
         self._read_OpenSees_results()
         # self._acceptance_criteria()
@@ -1151,8 +1159,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             filename_z,
             file_time_incr,
             finish_time=0.00,
-            damping_ratio=0.05,
-            num_modes=None,
+            damping={'type': None},
             printing=True,
             data_retention='default'):
         """
@@ -1164,7 +1171,10 @@ class NLTHAnalysis(NonlinearAnalysis):
             finish_time: Specify a target time (s) to stop the analysis
                          the default value of 0.00 means that it will
                          run for the entire duration of the files.
-            damping_ratio: Self explanatory.
+            damping: Can be any of:
+                     {'type': None},
+                     {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
+                     {'type': 'modal', 'num_modes': n}
             printing: Controls whether the current time is printed out
             data_retention: Can be 'default' or 'lightweight' (memroy saver).
                             See the docstring of `_read_OpenSees_results`.
@@ -1212,7 +1222,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         # gravity analysis
         logging.info('Defining dead loads')
         self._define_dead_load()
-        logging.info('Starting analysis')
+        logging.info('Starting gravity analysis')
         self._run_gravity_analysis()
         self._read_OpenSees_results(data_retention)
         n_steps_success = 1
@@ -1223,54 +1233,54 @@ class NLTHAnalysis(NonlinearAnalysis):
         curr_time = 0.00
         self.time_vector.append(curr_time)
 
-        ops.numberer('Plain')
-        # ops.constraints('Penalty', 1.e15, 1.e15)
-        ops.constraints('Transformation')
 
-        # define damping
-        # if fundamental_period is None:
-        #     s = float(np.sqrt(ops.eigen('-genBandArpack', 3))[0])
-        #     # ops.rayleigh(0., 0., 0., 2. * damping_ratio / s)
-        #     ops.rayleigh(0., 0., 0., 2. * damping_ratio / s)
-        #     print('T = %.3f s' % (2.00 * np.pi / s))
-        # else:
-        #     ops.rayleigh(
-        #         0.,
-        #         0.,
-        #         0.,
-        #         2. * damping_ratio / (2. * np.pi / fundamental_period)
-        #     )
+        damping_type = damping.get('type')
 
-        logging.info(f'Running eigenvalue analysis with {num_modes} modes')
-        ops.system("UmfPack")
-        ops.eigen(num_modes)
-        logging.info(f'Eigenvalue analysis finished')
-        ops.modalDamping(damping_ratio)
-        logging.info(f'{damping_ratio*100:.2f}% modal damping defined')
+        if damping_type == 'rayleigh':
 
-        # ops.system("UmfPack")
-        # w2 = ops.eigen(20)
+            logging.info(
+            f'Using Rayleigh damping')
+            wi = 2 * np.pi / damping['periods'][0]
+            zetai = damping['ratio']
+            wj = 2 * np.pi / damping['periods'][1]
+            zetaj = damping['ratio']
+            A = np.array([[1/wi, wi], [1/wj, wj]])
+            b = np.array([zetai, zetaj])
+            x = np.linalg.solve(A, 2*b)
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
+            print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
+            ops.system(NL_ANALYSIS_SYSTEM)
+            ops.rayleigh(x[0], 0.0, 0.0, x[1])
+            # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
+            # thanks prof. Scott!
 
-        # # Pick your modes and damping ratios
-        # wi = w2[0]**0.5
-        # zetai = 0.05  # 5% in mode 1
-        # wj = w2[9]**0.5
-        # zetaj = 0.05  # 2% in mode 10
+        if damping_type == 'modal':
+            # tags = ops.getNodeTags()
+            # num_nodes = len(tags) - 4
+            # num_modeshapes = 3*num_nodes
+            # print(len(tags))
 
-        # A = np.array([[1/wi, wi], [1/wj, wj]])
-        # b = np.array([zetai, zetaj])
+            num_modes = damping['num_modes']
+            # num_modes = num_modeshapes
+            damping_ratio = damping['ratio']
+            logging.info(
+                'Running eigenvalue analysis'
+                f' with {num_modes} modes')
+            ops.system(MD_ANALYSIS_SYSTEM)
+            ops.eigen(num_modes)
+            ops.system(NL_ANALYSIS_SYSTEM)
+            # ops.systemSize()
+            logging.info('Eigenvalue analysis finished')
+            ops.modalDamping(damping['ratio'])
+            logging.info(
+                f'{damping_ratio*100:.2f}% '
+                'modal damping defined')
 
-        # x = np.linalg.solve(A, 2*b)
-
-        # ops.rayleigh(x[0], 0.0, 0.0, x[1])
-
-
-
-        
-        # ops.system("UmfPack")
+        logging.info('Starting transient analysis')
         ops.test('NormDispIncr', 1e-6, 50, 0)
-        ops.algorithm("KrylovNewton")
-        # ops.integrator("TRBDF2")
+        ops.algorithm("ModifiedNewton")
+        ops.integrator('TRBDF2')
         ops.analysis("Transient")
 
         self.define_lateral_load_pattern(

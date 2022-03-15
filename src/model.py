@@ -16,13 +16,16 @@ from typing import Optional
 import json
 import numpy as np
 from grids import GridLine, GridSystem
-from node import Node
+import node
+import components
 from components import MiddleSegment
 from components import EndSegment_Fixed
 from components import EndSegment_Steel_W_PanelZone
 from components import EndSegment_Steel_W_PanelZone_IMK
 from components import LineElementSequence
+import material
 from material import Materials
+import section
 from section import Sections
 from level import Level, Levels
 from group import Group, Groups
@@ -32,6 +35,7 @@ from utility import trib_area_analysis
 from utility import mesher
 from utility.graphics import preprocessing_3D
 from utility.graphics import preprocessing_2D
+from itertools import count
 
 
 # pylint: disable=unsubscriptable-object
@@ -70,13 +74,24 @@ class Model:
     active_angle: float = field(default=0.00)
     global_restraints: list = field(default_factory=list)
 
+    def __post_init__(self):
+        """
+        Zero-out counters so that we retain the same object IDs
+        between subsequent model definitions
+        """
+        node.node_ids = count(0)
+        section.section_ids = count(0)
+        material.material_ids = count(0)
+        components.elem_ids = count(0)
+        components.line_elem_seq_ids = count(0)
+
     ###############################################
     # 'Add' methods - add objects to the building #
     ###############################################
 
     def add_node(self,
                  x: float,
-                 y: float) -> list[Node]:
+                 y: float) -> list[node.Node]:
         """
         Adds a node at a particular point in all active levels.
         Returns all added nodes.
@@ -84,11 +99,11 @@ class Model:
         added_nodes = []
         for levelname in self.levels.active:
             level = self.levels.registry[levelname]
-            node = Node(
+            nd = node.Node(
                 np.array([x, y, level.elevation]),
                 level.restraint)
-            level.nodes_primary.add(node)
-            added_nodes.append(node)
+            level.nodes_primary.add(nd)
+            added_nodes.append(nd)
         return added_nodes
 
     def add_level(self,
@@ -260,7 +275,7 @@ class Model:
                 top_node = level.look_for_node(x, y)
                 # create it if it does not exist
                 if not top_node:
-                    top_node = Node(
+                    top_node = node.Node(
                         np.array([x, y, level.elevation]), level.restraint)
                     level.nodes_primary.add(top_node)
                 # check to see if bottom node exists
@@ -268,7 +283,7 @@ class Model:
                     x, y)
                 # create it if it does not exist
                 if not bot_node:
-                    bot_node = Node(
+                    bot_node = node.Node(
                         np.array([x, y, level.previous_lvl.elevation]),
                         level.previous_lvl.restraint)
                     level.previous_lvl.nodes_primary.add(bot_node)
@@ -382,7 +397,7 @@ class Model:
                 else:
                     # no start node or crossing beam found
                     # create a start node
-                    start_node = Node(
+                    start_node = node.Node(
                         np.array([*start, level.elevation]), level.restraint)
                     level.nodes_primary.add(start_node)
                     connection_offset_i = np.zeros(3)
@@ -409,7 +424,7 @@ class Model:
                 else:
                     # no end node or crossing beam found
                     # create an end node
-                    end_node = Node(
+                    end_node = node.Node(
                         np.array([*end, level.elevation]), level.restraint)
                     level.nodes_primary.add(end_node)
                     connection_offset_j = np.zeros(3)
@@ -637,8 +652,8 @@ class Model:
     def list_of_primary_nodes(self):
         list_of_nodes = []
         for lvl in self.levels.registry.values():
-            for node in lvl.nodes_primary.registry.values():
-                list_of_nodes.append(node)
+            for nd in lvl.nodes_primary.registry.values():
+                list_of_nodes.append(nd)
         return list_of_nodes
 
     def list_of_parent_nodes(self):
@@ -653,9 +668,9 @@ class Model:
         sequences = self.list_of_line_element_sequences()
         for sequence in sequences:
             internal_nodes = sequence.internal_nodes()
-            for node in internal_nodes:
-                if node.uid not in res:
-                    res[node.uid] = node
+            for nd in internal_nodes:
+                if nd.uid not in res:
+                    res[nd.uid] = nd
         return list(res.values())
 
     def list_of_all_nodes(self):
@@ -707,9 +722,9 @@ class Model:
     def retrieve_node(self, uid: int) -> Optional[LineElementSequence]:
         nodes = self.list_of_all_nodes()
         result = None
-        for node in nodes:
-            if node.uid == uid:
-                result = node
+        for nd in nodes:
+            if nd.uid == uid:
+                result = nd
                 break
         return result
 
@@ -721,8 +736,8 @@ class Model:
         """
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
-        for node in self.list_of_primary_nodes():
-            p = np.array(node.coords)
+        for nd in self.list_of_primary_nodes():
+            p = np.array(nd.coords)
             p_min = np.minimum(p_min, p)
             p_max = np.maximum(p_max, p)
         ref_len = np.max(p_max - p_min)
@@ -750,11 +765,11 @@ class Model:
                         line_elm.add_udl_glob(
                             np.array([0.00, 0.00, udlZ_val]),
                             ltype='floor')
-                for node in lvl.list_of_all_nodes():
-                    pZ_val = - node.tributary_area * \
+                for nd in lvl.list_of_all_nodes():
+                    pZ_val = - nd.tributary_area * \
                         lvl.surface_DL
-                    node.load_fl += np.array((0.00, 0.00, -pZ_val,
-                                              0.00, 0.00, 0.00))
+                    nd.load_fl += np.array((0.00, 0.00, -pZ_val,
+                                            0.00, 0.00, 0.00))
         # ~~~
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -783,8 +798,8 @@ class Model:
                 lvl.floor_bisector_lines = None
                 lvl.floor_coordinates = None
                 # zero-out floor load/mass contribution
-                for node in lvl.list_of_primary_nodes():
-                    node.load_fl = np.zeros(6)
+                for nd in lvl.list_of_primary_nodes():
+                    nd.load_fl = np.zeros(6)
                 for elm in lvl.list_of_internal_elems():
                     for ielm in elm.internal_elems:
                         ielm.udl_fl = np.zeros(3)
@@ -823,7 +838,7 @@ class Model:
                     floor_centroid = properties['centroid']
                     floor_mass_inertia = properties['inertia']['ir_mass']\
                         * floor_mass
-                    lvl.parent_node = Node(
+                    lvl.parent_node = node.Node(
                         np.array([floor_centroid[0], floor_centroid[1],
                                   lvl.elevation]), "parent")
                     lvl.parent_node.mass = np.array([floor_mass,
@@ -839,9 +854,9 @@ class Model:
         for lvl in self.levels.registry.values():
             columns = list(lvl.columns.registry.values())
             for col in columns:
-                node = col.node_i
+                nd = col.node_i
                 # get a list of all the connected beams
-                beams = node.beams
+                beams = nd.beams
                 # determine the ones that are properly connected
                 # for panel zone modeling
                 panel_beam_front = None
@@ -865,13 +880,13 @@ class Model:
 
                     # determine if it's front or back relative to
                     # the y axis of the column
-                    if bm.node_i == node:
+                    if bm.node_i == nd:
                         bm_other_node = bm.node_j
                         this_side = 'i'
                     else:
                         bm_other_node = bm.node_i
                         this_side = 'j'
-                    bm_vec = (bm_other_node.coords - node.coords)
+                    bm_vec = (bm_other_node.coords - nd.coords)
                     if np.dot(bm_vec, col.y_axis) > 0.00:
                         panel_beam_front = bm
                         panel_beam_front_side = this_side
@@ -920,7 +935,7 @@ class Model:
                 col.ends['end_dist'] = beam_depth
                 p_i = col.node_i.coords + col.offset_i
                 start_loc = p_i + col.x_axis * col.ends['end_dist']
-                col.n_i = Node(start_loc)
+                col.n_i = node.Node(start_loc)
                 col.middle_segment = MiddleSegment(
                     col,
                     np.zeros(3).copy(),
@@ -1078,9 +1093,9 @@ class Model:
         level_masses = np.full(n_lvls, 0.00)
         for i, lvl in enumerate(lvls):
             total_mass = 0.00
-            for node in lvl.list_of_all_nodes():
-                if node.restraint_type == "free":
-                    total_mass += node.mass[0]
+            for nd in lvl.list_of_all_nodes():
+                if nd.restraint_type == "free":
+                    total_mass += nd.mass[0]
             if lvl.parent_node:
                 total_mass += lvl.parent_node.mass[0]
             level_masses[i] = total_mass
