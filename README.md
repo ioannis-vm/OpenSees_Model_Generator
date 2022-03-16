@@ -1,4 +1,4 @@
-# OpenSeesPy Building Modeler
+# OpenSeesPy Model Builder
 
 *Analyze structures like a scientist!*
 
