@@ -1,10 +1,10 @@
-# OpenSeesPy Building Modeler
+# OpenSees Model Builder
 
 *Analyze structures like a scientist!*
 
 ![Screenshot](/img/teaser_image.png)
 
-Fancy user interfaces, while convenient, have limited functionality. This restriction often traps the engineer in a tedious process of seemingly endless pointing and clicking to accomplish a relatively simple task. Using python to conduct structural analysis opens the gates to unlimited customization, extensibility, and automation. Beautiful plain text and the sky is the limit!
+Fancy user interfaces, while convenient, have limited functionality. This restriction often traps the engineer in a tedious process of seemingly endless pointing and clicking to accomplish a relatively simple task. Using python to conduct structural analysis opens the gate to unlimited customization, extensibility, and automation. Beautiful plain text and the sky is the limit!
 
 This module aims to assist the definition, analysis, and post-processing of OpenSees models of 3D buildings.
 The module is in constant development, and new functionality is added as needed for my research. No backward compatibility is maintained. Anyone is free and welcome to use, fork, extend and redistribute the code.
