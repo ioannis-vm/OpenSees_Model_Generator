@@ -521,6 +521,19 @@ class EndSegment:
         else:
             raise ValueError(f'Unknown type: {type(thing)}')
 
+    def remove(self, thing):
+        """
+        Removes internal elements from the EndSegment.
+        """
+        if isinstance(thing, Node):
+            self.internal_nodes.pop(thing.uid)
+        elif isinstance(thing, LineElement):
+            self.internal_line_elems.pop(thing.uid)
+        elif isinstance(thing, EndRelease):
+            self.internal_end_releases.pop(thing.uid)
+        else:
+            raise ValueError(f'Unknown type: {type(thing)}')
+
     def first_line_elem(self):
         return list(self.internal_line_elems.values())[0]
 
@@ -647,6 +660,8 @@ class EndSegment_RBS(EndSegment):
 
         # i versus j matters because of the orientation of things
 
+        self.remove(self.n_internal)
+
         if self.end == 'i':
             for x in np.linspace(
                     0.00, 1.00,
@@ -672,7 +687,7 @@ class EndSegment_RBS(EndSegment):
                 LineElement(
                     self.n_external, first(self.internal_nodes),
                     self.parent.ang,
-                    self.offset, np.zeros(3).copy(),
+                    self.offset(), np.zeros(3).copy(),
                     self.parent.section,
                     self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
@@ -721,7 +736,7 @@ class EndSegment_RBS(EndSegment):
                 LineElement(
                     last(self.internal_nodes), self.n_external,
                     self.parent.ang,
-                    np.zeros(3).copy(), self.offset,
+                    np.zeros(3).copy(), self.offset(),
                     self.parent.section,
                     self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
@@ -1601,7 +1616,7 @@ class LineElementSequence:
             self.end_segment_i = EndSegment_RBS(
                 self, self.node_i, self.n_i, "i")
             self.end_segment_j = EndSegment_RBS(
-                self, self.node_i, self.n_j, "j")
+                self, self.node_j, self.n_j, "j")
 
         elif self.ends['type'] == 'RBS_j':
             self.end_segment_i = EndSegment_Fixed(
