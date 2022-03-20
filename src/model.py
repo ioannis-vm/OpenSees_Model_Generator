@@ -84,6 +84,17 @@ class Model:
         material.material_ids = count(0)
         components.elem_ids = count(0)
         components.line_elem_seq_ids = count(0)
+        self.update_required = False
+        self.lst_beams = []
+        self.lst_columns = []
+        self.lst_braces = []
+        self.lst_line_element_sequences = []
+        self.lst_line_elements = []
+        self.lst_end_releases = []
+        self.lst_primary_nodes = []
+        self.lst_parent_nodes = []
+        self.lst_internal_nodes = []
+        self.lst_all_nodes = []
 
     ###############################################
     # 'Add' methods - add objects to the building #
@@ -104,6 +115,7 @@ class Model:
                 level.restraint)
             level.nodes_primary.add(nd)
             added_nodes.append(nd)
+            self.update_required = True
         return added_nodes
 
     def add_level(self,
@@ -311,6 +323,7 @@ class Model:
                 self.line_connectivity[node_ids] = column.uid
                 top_node.column_below = column
                 bot_node.column_above = column
+            self.update_required = True
         return column
 
     def add_beam_at_points(self,
@@ -458,6 +471,7 @@ class Model:
             self.line_connectivity[node_ids] = beam.uid
             start_node.beams.append(beam)
             end_node.beams.append(beam)
+            self.update_required = True
         return beams
 
     #############################################
@@ -606,89 +620,94 @@ class Model:
     # Preprocessing methods #
     #########################
 
-    def list_of_beams(self):
-        list_of_beams = []
+    def _update_lists(self):
+        self.dct_beams = {}
+        self.dct_columns = {}
+        self.dct_braces = {}
+        self.dct_primary_nodes = {}
+        self.dct_parent_nodes = {}
+        self.dct_internal_nodes = {}
         for lvl in self.levels.registry.values():
-            list_of_beams.extend(lvl.beams.registry.values())
-        return list_of_beams
-
-    def list_of_columns(self):
-        list_of_columns = []
-        for lvl in self.levels.registry.values():
-            list_of_columns.extend(lvl.columns.registry.values())
-        return list_of_columns
-
-    def list_of_braces(self):
-        list_of_braces = []
-        for lvl in self.levels.registry.values():
-            list_of_braces.extend(lvl.braces.registry.values())
-        return list_of_braces
-
-    def list_of_line_element_sequences(self):
-        result = []
-        result.extend(self.list_of_beams())
-        result.extend(self.list_of_columns())
-        result.extend(self.list_of_braces())
-        return result
-
-    def list_of_line_elements(self):
-
-        sequences = self.list_of_line_element_sequences()
-        result = []
-        for sequence in sequences:
-            for elm in sequence.internal_line_elems():
-                result.append(elm)
-        return result
-
-    def list_of_endreleases(self):
-
-        sequences = self.list_of_line_element_sequences()
-        result = []
-        for sequence in sequences:
-            for elm in sequence.internal_end_releases():
-                result.append(elm)
-        return result
-
-    def list_of_primary_nodes(self):
-        list_of_nodes = []
-        for lvl in self.levels.registry.values():
+            self.dct_beams.update(lvl.beams.registry)
+            self.dct_columns.update(lvl.columns.registry)
+            self.dct_braces.update(lvl.braces.registry)
             for nd in lvl.nodes_primary.registry.values():
-                list_of_nodes.append(nd)
-        return list_of_nodes
-
-    def list_of_parent_nodes(self):
-        list_of_parent_nodes = []
-        for lvl in self.levels.registry.values():
+                self.dct_primary_nodes[nd.uid] = nd
             if lvl.parent_node:
-                list_of_parent_nodes.append(lvl.parent_node)
-        return list_of_parent_nodes
-
-    def list_of_internal_nodes(self):
-        res = {}
-        sequences = self.list_of_line_element_sequences()
-        for sequence in sequences:
+                self.dct_parent_nodes[lvl.parent_node.uid] = lvl.parent_node
+        self.dct_line_element_sequences = {}
+        self.dct_line_element_sequences.update(self.dct_beams)
+        self.dct_line_element_sequences.update(self.dct_columns)
+        self.dct_line_element_sequences.update(self.dct_braces)
+        self.dct_line_elements = {}
+        self.dct_end_releases = {}
+        for sequence in self.dct_line_element_sequences.values():
+            for elm in sequence.internal_line_elems():
+                self.dct_line_elements[elm.uid] = elm
+            for elm in sequence.internal_end_releases():
+                self.dct_end_releases[elm.uid] = elm
             internal_nodes = sequence.internal_nodes()
             for nd in internal_nodes:
-                if nd.uid not in res:
-                    res[nd.uid] = nd
-        return list(res.values())
+                if nd.uid not in self.dct_internal_nodes:
+                    self.dct_internal_nodes[nd.uid] = nd
+        self.dct_all_nodes = {}
+        if self.dct_primary_nodes:
+            self.dct_all_nodes.update(self.dct_primary_nodes)
+        if self.dct_internal_nodes:
+            self.dct_all_nodes.update(self.dct_internal_nodes)
+        if self.dct_parent_nodes:
+            self.dct_all_nodes.update(self.dct_parent_nodes)
+        self.update_required = False
+
+    def list_of_beams(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_beams.values())
+
+    def list_of_columns(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_columns.values())
+
+    def list_of_braces(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_braces.values())
+
+    def list_of_line_element_sequences(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_line_element_sequences.values())
+
+    def list_of_line_elements(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_line_elements.values())
+
+    def list_of_endreleases(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_end_releases.values())
+
+    def list_of_primary_nodes(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_primary_nodes.values())
+
+    def list_of_parent_nodes(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_parent_nodes.values())
+
+    def list_of_internal_nodes(self):
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_internal_nodes.values())
 
     def list_of_all_nodes(self):
-        """
-        Caution: It is crucial that the resulting list contains unique
-        elements
-        """
-        res = {}
-        for n in self.list_of_primary_nodes():
-            if n.uid not in res:
-                res[n.uid] = n
-        for n in self.list_of_internal_nodes():
-            if n.uid not in res:
-                res[n.uid] = n
-        for n in self.list_of_parent_nodes():
-            if n.uid not in res:
-                res[n.uid] = n
-        return list(res.values())
+        if self.update_required:
+            self._update_lists()
+        return list(self.dct_all_nodes.values())
 
     def list_of_steel_W_panel_zones(self):
         cols = self.list_of_columns()
@@ -702,30 +721,15 @@ class Model:
         return pzs
 
     def retrieve_beam(self, uid: int) -> Optional[LineElementSequence]:
-        beams = self.list_of_beams()
-        result = None
-        for beam in beams:
-            if beam.uid == uid:
-                result = beam
-                break
+        result = self.dct_beams[uid]
         return result
 
     def retrieve_column(self, uid: int) -> Optional[LineElementSequence]:
-        columns = self.list_of_columns()
-        result = None
-        for col in columns:
-            if col.uid == uid:
-                result = col
-                break
+        result = self.dct_columns[uid]
         return result
 
     def retrieve_node(self, uid: int) -> Optional[LineElementSequence]:
-        nodes = self.list_of_all_nodes()
-        result = None
-        for nd in nodes:
-            if nd.uid == uid:
-                result = nd
-                break
+        result = self.dct_all_nodes[uid]
         return result
 
     def reference_length(self):
@@ -778,6 +782,8 @@ class Model:
 
         if steel_panel_zones:
             self._preprocess_steel_panel_zones()
+
+        self.update_required = True
 
         # ~~~~~~~~~~~~~~~~~~~~~~~ #
         # column splice elevating #
@@ -846,6 +852,7 @@ class Model:
                                                      0.,
                                                      0., 0.,
                                                      floor_mass_inertia])
+        self.update_required = True
 
     def _preprocess_steel_panel_zones(self):
         """
@@ -1086,6 +1093,7 @@ class Model:
                     for elm in col.middle_segment.internal_line_elems.values():
                         if elm.node_i.coords[2] < z_test:
                             elm.section = sec
+        self.update_required = True
 
     def level_masses(self):
         lvls = self.levels.registry.values()

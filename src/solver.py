@@ -69,30 +69,23 @@ class Analysis:
             datefmt='%m/%d/%Y %I:%M:%S %p',
             level=logging.DEBUG)
 
-        if not os.path.exists(self.output_directory):
+        if self.output_directory and not os.path.exists(self.output_directory):
             os.makedirs(
                 self.output_directory,
                 exist_ok=True)
 
         if not self.disk_storage:
-            self.node_displacements: AnalysisResult = field(
-                default_factory=AnalysisResult, repr=False)
-            self.node_velocities: AnalysisResult = field(
-                default_factory=AnalysisResult, repr=False)
-            self.node_accelerations: AnalysisResult = field(
-                default_factory=AnalysisResult, repr=False)
+            self.node_displacements = AnalysisResult()
+            self.node_velocities = AnalysisResult()
+            self.node_accelerations = AnalysisResult()
             if self.store_reactions:
-                self.node_reactions: AnalysisResult = field(
-                    default_factory=AnalysisResult, repr=False)
+                self.node_reactions = AnalysisResult()
             if self.store_forces:
-                self.element_forces: AnalysisResult = field(
-                    default_factory=AnalysisResult, repr=False)
+                self.element_forces = AnalysisResult()
             if self.store_fiber:
-                self.fiber_stress_strain: AnalysisResult = field(
-                    default_factory=AnalysisResult, repr=False)
+                self.fiber_stress_strain = AnalysisResult()
             if self.store_release_force_defo:
-                self.release_force_defo: AnalysisResult = field(
-                    default_factory=AnalysisResult, repr=False)
+                self.release_force_defo = AnalysisResult()
         else:
             self.node_displacements = \
                 shelve.open(
@@ -885,21 +878,31 @@ class ModalAnalysis(LinearAnalysis):
         self._read_node_displacements()
         self._write_results()
 
-    def table_shape(self, mode: int):
-        data = {'names': [],
-                'ux': [], 'uy': []}
-        for lvl in self.building.levels.registry.values():
-            data['names'].append(lvl.name)
-            disp = np.zeros(6)
-            # TODO debug  - something may be wrong here.
-            for nd in lvl.nodes_primary.registry.values():
-                disp += np.array(self.node_displacements[str(nd.uid)][mode-1])
-            disp /= float(len(lvl.nodes_primary.registry))
-            data['ux'].append(disp[0])
-            data['uy'].append(disp[1])
-        data['ux'] /= max(np.max(data['ux']), np.max(data['uy']))
-        data['uy'] /= max(np.max(data['ux']), np.max(data['uy']))
-        return pd.DataFrame.from_dict(data)
+    def modal_participation_factors(self, direction):
+
+        dof_dir = {'x': 0, 'y': 1, 'z': 2}
+        ntgs = ops.getNodeTags()
+        gammas = np.zeros(self.num_modes)
+        mstars = np.zeros(self.num_modes)
+        Mn_tot = 0.
+        for ntg in ntgs:
+            if self.building.retrieve_node(ntg).restraint_type == 'free':
+                node_mass = ops.nodeMass(ntg)
+                Mn_tot += node_mass[dof_dir[direction]]
+        for mode in range(self.num_modes):
+            Ln = 0.
+            Mn = 0.
+            for ntg in ntgs:
+                node_mass = ops.nodeMass(ntg)
+                node_phi = ops.nodeEigenvector(ntg, mode+1)
+                Ln += node_phi[dof_dir[direction]] * \
+                    node_mass[dof_dir[direction]]
+                for dof in range(6):
+                    Mn += (node_phi[dof]**2) * node_mass[dof]
+            gammas[mode] = Ln/Mn
+            mstars[mode] = Ln**2/Mn
+        mstars /= Mn_tot
+        return (gammas, mstars)
 
 
 @dataclass
