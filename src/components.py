@@ -1701,10 +1701,15 @@ class LineElementSequence:
                 # and other such elements that do not contribute
                 # to self-weight/mass etc. --> skip
                 continue
+            if sub_elm.section.sec_type == 'W':
+                # To account for misc. steel and connections.
+                multiplier = 1.15
+            else:
+                multiplier = 1.00
             cross_section_area = sub_elm.section.properties["A"]
             # lb-s**2/in**2
             mass_per_length = cross_section_area * \
-                sub_elm.section.material.density
+                sub_elm.section.material.density * multiplier
             # lb/in
             weight_per_length = mass_per_length * common.G_CONST
             sub_elm.add_udl_glob(
