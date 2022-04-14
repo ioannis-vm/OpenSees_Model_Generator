@@ -36,8 +36,10 @@ plt.rc('font', family='serif')
 plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
-LN_ANALYSIS_SYSTEM = 'SparseSYM'
-NL_ANALYSIS_SYSTEM = 'SparseSYM'
+# LN_ANALYSIS_SYSTEM = 'SparseSYM'
+# NL_ANALYSIS_SYSTEM = 'SparseSYM'
+LN_ANALYSIS_SYSTEM = 'UmfPack'
+NL_ANALYSIS_SYSTEM = 'UmfPack'
 MD_ANALYSIS_SYSTEM = 'UmfPack'
 CONSTRAINTS = ('Transformation',)
 NUMBERER = 'Plain'
@@ -66,8 +68,9 @@ class Analysis:
         logging.basicConfig(
             filename=self.log_file,
             format='%(asctime)s %(message)s',
-            datefmt='%m/%d/%Y %I:%M:%S %p',
-            level=logging.DEBUG)
+            datefmt='%m/%d/%Y %I:%M:%S %p')
+        self.logger = logging.getLogger('OpenSees_Model_Builder')
+        self.logger.setLevel(logging.DEBUG)
 
         if self.output_directory and not os.path.exists(self.output_directory):
             os.makedirs(
@@ -120,12 +123,12 @@ class Analysis:
                         f'{self.output_directory}/release_force_defo',
                         writeback=True)
 
-        logging.info('Analysis started')
+        self.logger.info('Analysis started')
         if not self.output_directory:
             curr = datetime.now()
             self.output_directory = curr.strftime(
                 '/tmp/analysis_%Y-%m-%d_%I-%M-%S_%p')
-            logging.info(
+            self.logger.info(
                 'Using default output directory: '
                 f'{self.output_directory}')
             if not os.path.exists(self.output_directory):
@@ -158,7 +161,7 @@ class Analysis:
 
         if not self.disk_storage:
 
-            logging.info('Storing analysis results')
+            self.logger.info('Storing analysis results')
 
             dump('node_displacements', self.node_displacements)
             dump('node_velocities', self.node_velocities)
@@ -172,7 +175,7 @@ class Analysis:
             if hasattr(self, 'release_force_defo'):
                 dump('release_force_defo', self.release_force_defo)
 
-            logging.info('Analysis results stored successfully')
+            self.logger.info('Analysis results stored successfully')
 
         else:
             self.node_displacements.close()
@@ -208,7 +211,7 @@ class Analysis:
 
         if not self.disk_storage:
 
-            logging.info('Reading analysis results')
+            self.logger.info('Reading analysis results')
 
             self.node_displacements = read('node_displacements')
             self.node_velocities = read('node_velocities')
@@ -269,7 +272,7 @@ class Analysis:
         if os.path.exists(f'{self.output_directory}/a_g.pcl'):
             self.a_g = read('a_g')
 
-        logging.info('Analysis results read successfully')
+        self.logger.info('Analysis results read successfully')
 
 
     def _define_material(self, material: components.Material):
@@ -409,12 +412,11 @@ class Analysis:
             raise ValueError("Invalid restraint type")
 
         # mass
-        if max(nd.mass) > common.EPSILON:
-            if len(nd.mass) == 3:
-                mass = list(nd.mass)+[common.EPSILON]*3
-            else:
-                mass = nd.mass
-            ops.mass(nd.uid, *mass)
+        if len(nd.mass) == 3:
+            mass = list(nd.mass)+[common.EPSILON]*3
+        else:
+            mass = nd.mass
+        ops.mass(nd.uid, *mass)
 
     def _define_elastic_section(self, sec: components.Section):
 
@@ -523,7 +525,7 @@ class Analysis:
         Defines the building model in OpenSeesPy
         """
 
-        logging.info('Defining model in OpenSees')
+        self.logger.info('Defining model in OpenSees')
 
         def define_node(nd, defined_nodes):
             if nd.uid not in defined_nodes:
@@ -757,11 +759,13 @@ class Analysis:
     #########################
     # Visualization methods #
     #########################
-    def deformed_shape(self, step=0, scaling=0.00, extrude_frames=False):
+    def deformed_shape(self, step=0, scaling=0.00, extrude_frames=False,
+                       camera=None):
         return postprocessing_3D.deformed_shape(self,
                                                 step,
                                                 scaling,
-                                                extrude_frames)
+                                                extrude_frames,
+                                                camera)
 
     def basic_forces(self, step=0,
                      scaling_global=1.00,
@@ -769,7 +773,8 @@ class Analysis:
                      scaling_q=0.00,
                      scaling_m=0.00,
                      scaling_t=0.00,
-                     num_points=11):
+                     num_points=4,
+                     only_selected=False):
         return postprocessing_3D.basic_forces(
             self,
             step,
@@ -778,7 +783,8 @@ class Analysis:
             scaling_q,
             scaling_m,
             scaling_t,
-            num_points)
+            num_points,
+            only_selected)
 
     ##################################
     # Numeric Result Post-processing #
@@ -821,7 +827,7 @@ class LinearAnalysis(Analysis):
         ops.integrator('LoadControl', 1.0)
         ops.analysis('Static')
         ops.analyze(1)
-        logging.info('Analysis Finished')
+        self.logger.info('Analysis Finished')
 
 
 @dataclass
@@ -886,7 +892,8 @@ class ModalAnalysis(LinearAnalysis):
         mstars = np.zeros(self.num_modes)
         Mn_tot = 0.
         for ntg in ntgs:
-            if self.building.retrieve_node(ntg).restraint_type == 'free':
+            if self.building.retrieve_node(ntg).\
+               restraint_type in ['free', 'parent']:
                 node_mass = ops.nodeMass(ntg)
                 Mn_tot += node_mass[dof_dir[direction]]
         for mode in range(self.num_modes):
@@ -902,7 +909,7 @@ class ModalAnalysis(LinearAnalysis):
             gammas[mode] = Ln/Mn
             mstars[mode] = Ln**2/Mn
         mstars /= Mn_tot
-        return (gammas, mstars)
+        return (gammas, mstars, Mn_tot)
 
 
 @dataclass
@@ -1067,7 +1074,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                     continue
                 # if there is a parent node, all load goes there
                 if lvl.parent_node:
-                    ops.load(lvl.parent_nd.uid,
+                    ops.load(lvl.parent_node.uid,
                              *(distribution[i]*load_dir *
                                modeshape_ampl[i]))
                 # if there isn't a parent node, distribute that story's load
@@ -1193,7 +1200,7 @@ class PushoverAnalysis(NonlinearAnalysis):
         self._write_results()
         return metadata
 
-    def table_pushover_curve(self, direction, node):
+    def table_pushover_curve(self, direction, nd):
         if not self.node_displacements:
             raise ValueError(
                 'No results to plot. Run analysis first.')
@@ -1215,8 +1222,8 @@ class PushoverAnalysis(NonlinearAnalysis):
         displacement = np.array(displacement)
         return displacement, base_shear
 
-    def plot_pushover_curve(self, direction, node):
-        displacement, base_shear = self.table_pushover_curve(direction, node)
+    def plot_pushover_curve(self, direction, nd):
+        displacement, base_shear = self.table_pushover_curve(direction, nd)
         general_2D.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
             displacement, base_shear, 'spline+markers',
@@ -1288,7 +1295,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             printing: Controls whether the current time is printed out
         """
 
-        logging.info('Running NLTH analysis')
+        self.logger.info('Running NLTH analysis')
 
         nss = []
         if filename_x:
@@ -1301,9 +1308,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             gm_vals_z = np.genfromtxt(filename_z)
             nss.append(len(gm_vals_z))
 
-        logging.info(f'filename_x: {filename_x}')
-        logging.info(f'filename_y: {filename_y}')
-        logging.info(f'filename_z: {filename_z}')
+        self.logger.info(f'filename_x: {filename_x}')
+        self.logger.info(f'filename_y: {filename_y}')
+        self.logger.info(f'filename_z: {filename_z}')
 
         num_gm_points = np.min(np.array(nss))
         duration = num_gm_points * file_time_incr
@@ -1327,13 +1334,13 @@ class NLTHAnalysis(NonlinearAnalysis):
         else:
             target_timestamp = finish_time
 
-        logging.info('Defining model in OpenSees')
+        self.logger.info('Defining model in OpenSees')
         self._to_OpenSees_domain()
 
         # gravity analysis
-        logging.info('Defining dead loads')
+        self.logger.info('Defining dead loads')
         self._define_dead_load()
-        logging.info('Starting gravity analysis')
+        self.logger.info('Starting gravity analysis')
         self._run_gravity_analysis()
         self._read_OpenSees_results()
         n_steps_success = 1
@@ -1348,7 +1355,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         if damping_type == 'rayleigh':
 
-            logging.info(
+            self.logger.info(
             f'Using Rayleigh damping')
             wi = 2 * np.pi / damping['periods'][0]
             zetai = damping['ratio']
@@ -1374,23 +1381,23 @@ class NLTHAnalysis(NonlinearAnalysis):
             num_modes = damping['num_modes']
             # num_modes = num_modeshapes
             damping_ratio = damping['ratio']
-            logging.info(
+            self.logger.info(
                 'Running eigenvalue analysis'
                 f' with {num_modes} modes')
             ops.system(MD_ANALYSIS_SYSTEM)
             ops.eigen(num_modes)
             ops.system(NL_ANALYSIS_SYSTEM)
             # ops.systemSize()
-            logging.info('Eigenvalue analysis finished')
+            self.logger.info('Eigenvalue analysis finished')
             ops.modalDamping(damping['ratio'])
-            logging.info(
+            self.logger.info(
                 f'{damping_ratio*100:.2f}% '
                 'modal damping defined')
 
-        logging.info('Starting transient analysis')
+        self.logger.info('Starting transient analysis')
         ops.test('NormDispIncr', 1e-6, 50, 0)
-        ops.algorithm("ModifiedNewton")
-        ops.integrator('TRBDF2')
+        ops.algorithm("KrylovNewton")
+        # ops.integrator('TRBDF2')
         ops.analysis("Transient")
 
         self.define_lateral_load_pattern(
@@ -1491,7 +1498,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                 speed = total_step_count / (datetime.now() - now).seconds
                 if total_step_count % 50 == 0:
                     # provide run speed statistics
-                    logging.info(f'Average speed: {speed:.2f} steps/s')
+                    self.logger.info(f'Average speed: {speed:.2f} steps/s')
                     print(f'Average speed: {speed:.2f} steps/s')
                 if total_step_count % 200 == 0:
                     # dump results to disk if applicable
@@ -1505,7 +1512,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                         print('Analysis failed to converge')
                         print('===========================')
                         print()
-                        logging.warning(
+                        self.logger.warning(
                             f"Analysis failed at time {curr_time:.5f}")
                         analysis_failed = True
                         break
@@ -1533,12 +1540,12 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         except KeyboardInterrupt:
             print("Analysis interrupted")
-            logging.warning("Analysis interrupted")
+            self.logger.warning("Analysis interrupted")
 
         metadata = {'successful steps': n_steps_success,
                     'analysis_finished_successfully': not analysis_failed}
         self.n_steps_success = n_steps_success
-        logging.info('Analysis finished')
+        self.logger.info('Analysis finished')
         self._write_results()
         return metadata
 

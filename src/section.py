@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from itertools import count
 from collections import OrderedDict
 import numpy as np
-from material import Material
 from utility import mesher
 from utility import mesher_section_gen
 
@@ -60,7 +59,7 @@ class Section:
     """
     sec_type: str
     name: str
-    material: Material = field(repr=False)
+    material: 'Material' = field(repr=False)
     snap_points: Optional[dict] = field(default=None, repr=False)
     mesh: Optional[mesher.Mesh] = field(default=None, repr=False)
     properties: Optional[dict] = field(default=None, repr=False)
@@ -167,7 +166,7 @@ class Sections:
 
     def generate_W(self,
                    name: str,
-                   material: Material,
+                   material: 'Material',
                    properties: dict):
         """
         Generate a W section with specified parameters
@@ -198,7 +197,7 @@ class Sections:
 
     def generate_HSS(self,
                      name: str,
-                     material: Material,
+                     material: 'Material',
                      properties: dict):
         """
         Generate a HSS with specified parameters
@@ -256,7 +255,7 @@ class Sections:
 
     def generate_rect(self,
                       name: str,
-                      material: Material,
+                      material: 'Material',
                       properties: dict):
         """
         Generate a rectangular section with specified
@@ -287,5 +286,3 @@ class Sections:
         properties['Iy'] = temp['inertia']['iyy']
         properties['J'] = h * b**3 *\
             (16./3. - 3.36 * b/h * (1 - b**4/(12.*h**4)))
-
-

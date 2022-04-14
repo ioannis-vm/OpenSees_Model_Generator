@@ -23,8 +23,7 @@ from components import EndSegment_Fixed
 from components import EndSegment_Steel_W_PanelZone
 from components import EndSegment_Steel_W_PanelZone_IMK
 from components import LineElementSequence
-import material
-from material import Materials
+from components import Materials
 import section
 from section import Sections
 from level import Level, Levels
@@ -1122,7 +1121,8 @@ class Model:
                                tributary_areas=True,
                                just_selection=False,
                                parent_nodes=True,
-                               frame_axes=True):
+                               frame_axes=True,
+                               camera=None):
         preprocessing_3D.plot_building_geometry(
             self,
             extrude_frames=extrude_frames,
@@ -1133,7 +1133,8 @@ class Model:
             tributary_areas=tributary_areas,
             just_selection=just_selection,
             parent_nodes=parent_nodes,
-            frame_axes=frame_axes)
+            frame_axes=frame_axes,
+            camera=camera)
 
     def plot_2D_level_geometry(self,
                                lvlname: str,
