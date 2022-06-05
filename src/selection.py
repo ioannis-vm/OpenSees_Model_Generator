@@ -1,14 +1,15 @@
 """
-Model Builder for OpenSeesPy ~ Selection module
+Model Generator for OpenSees ~ selection
 """
 
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generato
 
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -64,17 +65,16 @@ class Selection:
         """
         Returns all selected LineElementSequences.
         """
-        return self.beams.registry.values() + \
-            self.columns.registry.values() + \
-            self.braces.registry.values()
+        return list(self.beams.registry.values()) + \
+            list(self.columns.registry.values()) + \
+            list(self.braces.registry.values())
 
     def list_of_line_elements(self):
         sequences = self.list_of_line_element_sequences()
         result = []
         for sequence in sequences:
-            for elm in sequence:
-                if isinstance(elm, LineElement):
-                    result.append(elm)
+            for elm in sequence.internal_line_elems():
+                result.append(elm)
         result.extend(self.line_elements)
         return result
 

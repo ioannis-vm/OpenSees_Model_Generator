@@ -2,13 +2,14 @@
 The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder/
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import plotly.graph_objects as go
 import numpy as np
@@ -258,8 +259,6 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                 intensity.append(np.linalg.norm(d_global[1, :]))
                 intensity.append(np.linalg.norm(d_global[0, :]))
                 index += 4
-    intensity = np.array(intensity)
-    intensity_max = np.max(intensity)
     dt.append({
         "type": "mesh3d",
         "x": x_list,
@@ -272,13 +271,29 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         "intensity": intensity,
         "colorbar_title": 'Displacement',
         "hoverinfo": "skip",
-        "color": common.BEAM_MESH_COLOR,
         "opacity": 0.65
     })
 
 
 def add_data__extruded_steel_W_PZ_deformed_mesh(
         analysis, dt, list_of_endsegments, step, scaling):
+
+    # determine the mesh3d dictionary
+    # to append components to it
+    # instead of creating a new mesh3d
+    # (to have a consistent colorscale)
+    idx = 0
+    for k, item in enumerate(dt):
+        if item['type'] == 'mesh3d':
+            idx = k
+            break
+
+    imax = max(dt[idx]['i'])
+    jmax = max(dt[idx]['j'])
+    kmax = max(dt[idx]['k'])
+    ijkmax = max((imax, jmax, kmax))
+
+    index = ijkmax + 1
 
     if not list_of_endsegments:
         return
@@ -289,7 +304,6 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
     j_list = []
     k_list = []
     intensity = []
-    index = 0
 
     for elm in list_of_endsegments:
 
@@ -371,23 +385,15 @@ def add_data__extruded_steel_W_PZ_deformed_mesh(
                 intensity.append(np.linalg.norm(d_global[1, :]))
                 intensity.append(np.linalg.norm(d_global[1, :]))
                 intensity.append(np.linalg.norm(d_global[0, :]))
-
                 index += 4
-    dt.append({
-        "type": "mesh3d",
-        "x": x_list,
-        "y": y_list,
-        "z": z_list,
-        "colorscale": [[0, 'blue'], [1.0, 'red']],
-        "i": i_list,
-        "j": j_list,
-        "k": k_list,
-        "intensity": intensity,
-        "colorbar_title": 'Displacement',
-        "hoverinfo": "skip",
-        "color": common.BEAM_MESH_COLOR,
-        "opacity": 0.65
-    })
+
+    dt[idx]['x'].extend(x_list)
+    dt[idx]['y'].extend(y_list)
+    dt[idx]['z'].extend(z_list)
+    dt[idx]['i'].extend(i_list)
+    dt[idx]['j'].extend(j_list)
+    dt[idx]['k'].extend(k_list)
+    dt[idx]['intensity'].extend(intensity)
 
 
 def add_data__frames_deformed(analysis,
@@ -640,13 +646,14 @@ def get_auto_scaling_deformation(analysis, step):
 def deformed_shape(analysis,
                    step,
                    scaling,
-                   extrude_frames):
+                   extrude_frames,
+                   camera=None):
 
     # calculate a nice scaling factor if 0.00 is passed
     if scaling == 0:
         scaling = get_auto_scaling_deformation(analysis, step)
 
-    layout = common_3D.global_layout()
+    layout = common_3D.global_layout(camera)
     dt = []
 
     list_of_frames = \
@@ -663,34 +670,34 @@ def deformed_shape(analysis,
         add_data__nodes_deformed(
             analysis, dt, list_of_parent_nodes, step, scaling)
 
-    # draw the nodes
-    add_data__nodes_deformed(
-        analysis, dt, list_of_primary_nodes, step, scaling)
-    add_data__nodes_deformed(
-        analysis, dt, list_of_internal_nodes, step, scaling,
-        color=common.NODE_INTERNAL_COLOR,
-        marker=common_3D.node_marker['internal'][0],
-        size=common_3D.node_marker['internal'][1])
-    add_data__nodes_deformed(
-        analysis, dt, list_of_release_nodes, step, scaling,
-        color=common.NODE_INTERNAL_COLOR,
-        marker=common_3D.node_marker['pinned'][0],
-        size=common_3D.node_marker['pinned'][1])
-
-    # draw the frames
-    add_data__frames_offsets_deformed(
-        analysis, dt, list_of_frames, step, scaling)
-    if extrude_frames:
-        add_data__extruded_frames_deformed_mesh(
+    if not extrude_frames:
+        # draw the nodes
+        add_data__nodes_deformed(
+            analysis, dt, list_of_primary_nodes, step, scaling)
+        add_data__nodes_deformed(
+            analysis, dt, list_of_internal_nodes, step, scaling,
+            color=common.NODE_INTERNAL_COLOR,
+            marker=common_3D.node_marker['internal'][0],
+            size=common_3D.node_marker['internal'][1])
+        add_data__nodes_deformed(
+            analysis, dt, list_of_release_nodes, step, scaling,
+            color=common.NODE_INTERNAL_COLOR,
+            marker=common_3D.node_marker['pinned'][0],
+            size=common_3D.node_marker['pinned'][1])
+        # draw the frames as lines
+        add_data__frames_offsets_deformed(
             analysis, dt, list_of_frames, step, scaling)
-        add_data__extruded_steel_W_PZ_deformed_mesh(
-            analysis, dt, list_of_steel_W_panel_zones, step, scaling)
-    else:
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 15, scaling)
         # we also add axes so that we can see 2D plots
         ref_len = analysis.building.reference_length()
         add_data__global_axes(dt, ref_len)
+    else:
+        # draw the extruded frames
+        add_data__extruded_frames_deformed_mesh(
+            analysis, dt, list_of_frames, step, scaling)
+        add_data__extruded_steel_W_PZ_deformed_mesh(
+            analysis, dt, list_of_steel_W_panel_zones, step, scaling)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
@@ -707,14 +714,21 @@ def basic_forces(analysis,
                  scaling_q,
                  scaling_m,
                  scaling_t,
-                 num_points):
+                 num_points,
+                 only_selected,
+                 camera=None):
 
-    layout = common_3D.global_layout()
+    layout = common_3D.global_layout(camera)
     dt = []
 
-    list_of_frames = analysis.building.list_of_line_elements()
-    list_of_primary_nodes = analysis.building.list_of_primary_nodes()
-    list_of_internal_nodes = analysis.building.list_of_internal_nodes()
+    if only_selected:
+        list_of_line_elements = analysis.building.selection.list_of_line_elements()
+        list_of_primary_nodes = analysis.building.selection.list_of_primary_nodes()
+        list_of_internal_nodes = analysis.building.selection.list_of_internal_nodes()
+    else:
+        list_of_line_elements = analysis.building.list_of_line_elements()
+        list_of_primary_nodes = analysis.building.list_of_primary_nodes()
+        list_of_internal_nodes = analysis.building.list_of_internal_nodes()
 
     # draw the nodes
     add_data__nodes_undeformed(
@@ -723,7 +737,7 @@ def basic_forces(analysis,
         dt, list_of_internal_nodes, common.NODE_INTERNAL_COLOR)
     # draw the frames
     add_data__frames_undeformed(
-        dt, list_of_frames)
+        dt, list_of_line_elements)
     # we also add axes so that we can see 2D plots
     ref_len = analysis.building.reference_length()
     add_data__global_axes(dt, ref_len)
@@ -790,7 +804,7 @@ def basic_forces(analysis,
     #  without having to then recalculate the basic forces)
     # (We store the discretized basic force vectors in a
     #  linear fashion, element-wise)
-    num_elems = len(analysis.building.list_of_line_elements())
+    num_elems = len(list_of_line_elements)
     nx_vecs = np.full(num_elems * num_points, 0.00)
     qy_vecs = np.full(num_elems * num_points, 0.00)
     qz_vecs = np.full(num_elems * num_points, 0.00)
@@ -804,7 +818,7 @@ def basic_forces(analysis,
     elm_ln = np.full(num_elems, 0.00)
 
     for i_elem, element in enumerate(
-            analysis.building.list_of_line_elements()):
+            list_of_line_elements):
 
         x_vec = element.x_axis
         y_vec = element.y_axis
@@ -896,7 +910,7 @@ def basic_forces(analysis,
         scaling_m = 1.00
 
     for i_elem, element in enumerate(
-            analysis.building.list_of_line_elements()):
+            list_of_line_elements):
 
         # retrieve results from the preallocated arrays
         nx_vec = nx_vecs[i_elem*num_points:i_elem*num_points+num_points]

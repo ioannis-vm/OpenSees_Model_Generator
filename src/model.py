@@ -1,14 +1,15 @@
 """
-Model Builder for OpenSeesPy ~ Model module
+Model Generator for OpenSees ~ model
 """
 
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -80,20 +81,19 @@ class Model:
         """
         node.node_ids = count(0)
         section.section_ids = count(0)
-        material.material_ids = count(0)
         components.elem_ids = count(0)
         components.line_elem_seq_ids = count(0)
         self.update_required = False
-        self.lst_beams = []
-        self.lst_columns = []
-        self.lst_braces = []
-        self.lst_line_element_sequences = []
-        self.lst_line_elements = []
-        self.lst_end_releases = []
-        self.lst_primary_nodes = []
-        self.lst_parent_nodes = []
-        self.lst_internal_nodes = []
-        self.lst_all_nodes = []
+        self.dct_beams = []
+        self.dct_columns = []
+        self.dct_braces = []
+        self.dct_line_element_sequences = []
+        self.dct_line_elements = []
+        self.dct_end_releases = []
+        self.dct_primary_nodes = []
+        self.dct_parent_nodes = []
+        self.dct_internal_nodes = []
+        self.dct_all_nodes = []
 
     ###############################################
     # 'Add' methods - add objects to the building #
@@ -477,6 +477,14 @@ class Model:
     # Select methods - select objects           #
     #############################################
 
+    def select_beam(self, uid):
+        if uid in self.dct_beams:
+            self.selection.beams.add(self.dct_beams[uid])
+
+    def select_column(self, uid):
+        if uid in self.dct_columns:
+            self.selection.columns.add(self.dct_columns[uid])
+
     def select_all_at_level(self, lvl_name: str):
         """
         Selects all selectable objects at a given level,
@@ -606,14 +614,23 @@ class Model:
     # Methods for adding loads #
     ############################
 
-    def assign_surface_DL(self,
+    def assign_surface_load(self,
                           load_per_area: float):
         """
         Assigns surface loads on the active levels
         """
         for levelname in self.levels.active:
             level = self.levels.registry[levelname]
-            level.assign_surface_DL(load_per_area)
+            level.assign_surface_load(load_per_area)
+
+    def assign_surface_load_massless(self,
+                                     load_per_area: float):
+        """
+        Assigns surface loads on the active levels
+        """
+        for levelname in self.levels.active:
+            level = self.levels.registry[levelname]
+            level.assign_surface_load_massless(load_per_area)
 
     #########################
     # Preprocessing methods #
@@ -764,13 +781,19 @@ class Model:
                 for beam in lvl.beams.registry.values():
                     for line_elm in beam.internal_line_elems():
                         udlZ_val = - line_elm.tributary_area * \
-                            lvl.surface_DL / line_elm.length_clear
+                            lvl.surface_load / line_elm.length_clear
                         line_elm.add_udl_glob(
                             np.array([0.00, 0.00, udlZ_val]),
                             ltype='floor')
+                        udlZ_val_massless = - line_elm.tributary_area * \
+                            lvl.surface_load_massless / line_elm.length_clear
+                        line_elm.add_udl_glob(
+                            np.array([0.00, 0.00, udlZ_val_massless]),
+                            ltype='floor_massless'
+                        )
                 for nd in lvl.list_of_all_nodes():
                     pZ_val = - nd.tributary_area * \
-                        lvl.surface_DL
+                        (lvl.surface_load + lvl.surface_load_massless)
                     nd.load_fl += np.array((0.00, 0.00, -pZ_val,
                                             0.00, 0.00, 0.00))
         # ~~~
@@ -779,10 +802,10 @@ class Model:
         # steel connection panel zones #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
+        self.update_required = True
+
         if steel_panel_zones:
             self._preprocess_steel_panel_zones()
-
-        self.update_required = True
 
         # ~~~~~~~~~~~~~~~~~~~~~~~ #
         # column splice elevating #
@@ -824,39 +847,88 @@ class Model:
                     # distribute floor loads on beams and nodes
                     apply_floor_load(lvl)
 
-        # frame element self-weight
+        # # frame element self-weight
+        # if self_weight:
+        #     for elm in self.list_of_line_element_sequences():
+        #         elm.apply_self_weight_and_mass()
+        # if assume_floor_slabs:
+        #     for lvl in self.levels.registry.values():
+        #         # accumulate all the mass at the parent nodes
+        #         if lvl.diaphragm:
+        #             properties = mesher.geometric_properties(
+        #                 lvl.floor_coordinates)
+        #             floor_mass = -lvl.surface_load * \
+        #                 properties['area'] / common.G_CONST
+        #             assert(floor_mass >= 0.00),\
+        #                 "Error: floor area properties\n" + \
+        #                 "Overall floor area should be negative" + \
+        #                 " (by convention)."
+        #             floor_centroid = properties['centroid']
+        #             floor_mass_inertia = properties['inertia']['ir_mass']\
+        #                 * floor_mass
+        #             lvl.parent_node = node.Node(
+        #                 np.array([floor_centroid[0], floor_centroid[1],
+        #                           lvl.elevation]), "parent")
+        #             lvl.parent_node.mass = np.array([floor_mass,
+        #                                              floor_mass,
+        #                                              0.,
+        #                                              0., 0.,
+        #                                              floor_mass_inertia])
+                # frame element self-weight
         if self_weight:
             for elm in self.list_of_line_element_sequences():
                 elm.apply_self_weight_and_mass()
         if assume_floor_slabs:
             for lvl in self.levels.registry.values():
                 # accumulate all the mass at the parent nodes
-                if lvl.diaphragm:
-                    properties = mesher.geometric_properties(
-                        lvl.floor_coordinates)
-                    floor_mass = -lvl.surface_DL * \
-                        properties['area'] / common.G_CONST
-                    assert(floor_mass >= 0.00),\
-                        "Error: floor area properties\n" + \
-                        "Overall floor area should be negative" + \
-                        " (by convention)."
-                    floor_centroid = properties['centroid']
-                    floor_mass_inertia = properties['inertia']['ir_mass']\
-                        * floor_mass
-                    lvl.parent_node = node.Node(
-                        np.array([floor_centroid[0], floor_centroid[1],
-                                  lvl.elevation]), "parent")
-                    lvl.parent_node.mass = np.array([floor_mass,
-                                                     floor_mass,
-                                                     0.,
-                                                     0., 0.,
-                                                     floor_mass_inertia])
+                if lvl.restraint != "free":
+                    continue
+                properties = mesher.geometric_properties(lvl.floor_coordinates)
+                floor_mass = -lvl.surface_load * \
+                    properties['area'] / common.G_CONST
+                assert(floor_mass >= 0.00),\
+                    "Error: floor area properties\n" + \
+                    "Overall floor area should be negative (by convention)."
+                floor_centroid = properties['centroid']
+                floor_mass_inertia = properties['inertia']['ir_mass']\
+                    * floor_mass
+                self_mass_centroid = np.array([0.00, 0.00])  # excluding floor
+                total_self_mass = 0.00
+                for nd in lvl.list_of_all_nodes():
+                    self_mass_centroid += nd.coords[0:2] * nd.mass[0]
+                    total_self_mass += nd.mass[0]
+                self_mass_centroid = self_mass_centroid * \
+                    (1.00/total_self_mass)
+                total_mass = total_self_mass + floor_mass
+                # combined
+                centroid = [
+                    (self_mass_centroid[0] * total_self_mass +
+                     floor_centroid[0] * floor_mass) / total_mass,
+                    (self_mass_centroid[1] * total_self_mass +
+                     floor_centroid[1] * floor_mass) / total_mass
+                ]
+                lvl.parent_node = node.Node(
+                    np.array([centroid[0], centroid[1],
+                              lvl.elevation]), "parent")
+                lvl.parent_node.mass = np.array([total_mass,
+                                                 total_mass,
+                                                 0.,
+                                                 0., 0., 0.])
+                lvl.parent_node.mass[5] = floor_mass_inertia
+                for nd in lvl.list_of_all_nodes():
+                    lvl.parent_node.mass[5] += nd.mass[0] * \
+                        np.linalg.norm(lvl.parent_node.coords - nd.coords)**2
+                    nd.mass[0] = common.EPSILON
+                    nd.mass[1] = common.EPSILON
+                    nd.mass[2] = common.EPSILON
         self.update_required = True
 
     def _preprocess_steel_panel_zones(self):
         """
         TODO docstring
         """
+        self._update_lists()
+
         for lvl in self.levels.registry.values():
             columns = list(lvl.columns.registry.values())
             for col in columns:

@@ -1,14 +1,15 @@
 """
-Model builder for OpenSees ~ Components
+Model Generator for OpenSees ~ components
 """
 
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from dataclasses import dataclass, field
 from typing import Optional
@@ -47,6 +48,7 @@ class Material:
 
     def __post_init__(self):
         self.uid = next(material_ids)
+        self.parameters = self.parameters.copy()
 
 
 @dataclass
@@ -71,7 +73,6 @@ class Materials:
             {
                 'E': common.STIFF_ROT
             })
-        self.registry['fix'].uid = 0
         
         self.registry['release'] = Material(
             'release',
@@ -80,7 +81,6 @@ class Materials:
             {
                 'E': common.TINY
             })
-        self.registry['release'].uid = 1
         
         self.registry['steel-UVCuniaxial-fy50'] = Material(
             'steel-UVCuniaxial-fy50',
@@ -94,7 +94,6 @@ class Materials:
                 'G': 11153846.15,
                 'b_PZ': 0.02
             })
-        self.registry['steel-UVCuniaxial-fy50'].uid = 2
         
         self.registry['steel-bilinear-fy50'] = Material(
             'steel-bilinear-fy50',
@@ -107,7 +106,6 @@ class Materials:
                 'b': 0.00001,
                 'b_PZ': 0.02
             })
-        self.registry['steel-bilinear-fy50'].uid = 3
         
         self.registry['steel02-fy50'] = Material(
             'steel02-fy50',
@@ -126,7 +124,6 @@ class Materials:
                 'sigInit': 0.00,
                 'b_PZ': 0.02
             })
-        self.registry['steel02-fy50'].uid = 4
 
     def add(self, material: Material):
         """
@@ -454,6 +451,8 @@ class LineElement:
         default_factory=lambda: np.zeros(shape=3), repr=False)
     udl_fl: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=3), repr=False)
+    udl_fl_massless: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
     udl_other: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=3), repr=False)
     hidden_when_extruded: bool = field(default=False)
@@ -463,6 +462,7 @@ class LineElement:
 
         assert(isinstance(self.node_i, Node))
         assert(isinstance(self.node_j, Node))
+        self.model_as = self.model_as.copy()
 
         # ---  this is needed for tributary area analysis  ---
         # ( ... since adding support for steel W panel zones              )
@@ -536,6 +536,8 @@ class LineElement:
             self.udl_fl += udl_local
         elif ltype == 'other':
             self.udl_other += udl_local
+        elif ltype == 'floor_massless':
+            self.udl_fl_massless += udl_local
         else:
             raise ValueError("Unsupported load type")
 
@@ -545,7 +547,8 @@ class LineElement:
         by summing up the floor's contribution to the
         generic component.
         """
-        return self.udl_self + self.udl_fl + self.udl_other
+        return self.udl_self + self.udl_fl \
+            + self.udl_fl_massless + self.udl_other
 
     def get_udl_no_floor_glob(self):
         """
@@ -1302,23 +1305,23 @@ class EndSegment_W_grav_shear_tab(EndSegment):
             m1_n = -0.250 * m_max_neg
             m2_p = +1.00 * m_max_pos
             m2_n = -1.00 * m_max_neg
-            m3_p = +1.01 * m_max_pos
-            m3_n = -1.01 * m_max_pos
-            m4_p = +0.540 * m_max_pos
+            m3_p = +1.001 * m_max_pos
+            m3_n = -1.001 * m_max_neg
+            m4_p = +0.530 * m_max_pos
             m4_n = -0.540 * m_max_neg
             th_1_p = 0.0042
             th_1_n = -0.0042
-            th_2_p = 0.011
+            th_2_p = 0.02
             th_2_n = -0.011
-            th_3_p = 0.03
+            th_3_p = 0.039
             th_3_n = -0.03
-            th_4_p = 0.055
+            th_4_p = 0.04
             th_4_n = -0.055
-            rdispp = 0.50
+            rdispp = 0.40
             rdispn = 0.50
-            rforcep = 0.53
+            rforcep = 0.13
             rforcen = 0.53
-            uforcep = 0.05
+            uforcep = 0.01
             uforcen = 0.05
             gklim = 0.30
             gdlim = 0.05
@@ -1659,6 +1662,9 @@ class LineElementSequence:
     def __post_init__(self):
 
         self.uid = next(line_elem_seq_ids)
+
+        self.model_as = self.model_as.copy()
+        self.ends = self.ends.copy()
 
         p_i = self.node_i.coords + self.offset_i
         p_j = self.node_j.coords + self.offset_j

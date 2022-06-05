@@ -2,13 +2,14 @@
 https://plotly.com/python/reference/
 
 """
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder/
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon

@@ -3,6 +3,15 @@ Enables functionality by utilizing the `halfedge`
 data structure.
 """
 
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
+
 from __future__ import annotations
 from itertools import count
 from descartes.patch import PolygonPatch

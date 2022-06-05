@@ -2,13 +2,14 @@
 The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
-#   __                 UC eley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder/
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import plotly.graph_objects as go
 import numpy as np
@@ -563,10 +564,11 @@ def plot_building_geometry(building: 'Model',
                            tributary_areas=True,
                            just_selection=False,
                            parent_nodes=True,
-                           frame_axes=True
+                           frame_axes=True,
+                           camera=None
                            ):
 
-    layout = common_3D.global_layout()
+    layout = common_3D.global_layout(camera)
     dt = []
 
     ref_len = building.reference_length()

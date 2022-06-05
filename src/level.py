@@ -1,14 +1,15 @@
 """
-Model Builder for OpenSeesPy ~ Level module
+Model Generator for OpenSees ~ level
 """
 
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -59,10 +60,11 @@ class Level:
                          restraint.
         previous_lvl (Level): Points to the level below that level, if
                               the considered level is not the base..
-        surface_DL (float): Uniformly distributed dead load of the level.
-                            This load can be distributed to the
-                            structural members of the level automatically.
-                            It is also converted and applied as mass.
+        surface_load (float): Uniformly distributed dead load of the level.
+                              This load can be distributed to the
+                              structural members of the level automatically.
+                              It is also converted and applied as mass.
+        surface_load_massless (float): Same, but without mass contribution.
         diaphragm (bool): True for a rigid diaphragm, False otherwise.
         nodes_primary (Nodes): Primary nodes of the level. Primary means
                                that these nodes are used to connect
@@ -93,7 +95,8 @@ class Level:
     elevation: float
     restraint: str = field(default="free")
     previous_lvl: Optional[Level] = field(default=None, repr=False)
-    surface_DL: float = field(default=0.00, repr=False)
+    surface_load: float = field(default=0.00, repr=False)
+    surface_load_massless: float = field(default=0.00, repr=False)
     diaphragm: bool = field(default=False)
     nodes_primary: Nodes = field(default_factory=Nodes, repr=False)
     columns: LineElementSequences = field(
@@ -141,9 +144,13 @@ class Level:
                 return beam
         return None
 
-    def assign_surface_DL(self,
-                          load_per_area: float):
-        self.surface_DL = load_per_area
+    def assign_surface_load(self,
+                            load_per_area: float):
+        self.surface_load = load_per_area
+
+    def assign_surface_load_massless(self,
+                                     load_per_area: float):
+        self.surface_load_massless = load_per_area
 
     def list_of_primary_nodes(self):
         return self.nodes_primary.registry.values()

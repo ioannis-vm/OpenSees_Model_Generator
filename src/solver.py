@@ -1,14 +1,15 @@
 """
-Model Builder for OpenSeesPy ~ Solver module
+Model Generator for OpenSees ~ solver
 """
 
-#   __                 UC Berkeley
-#   \ \/\   /\/\/\     John Vouvakis Manousakis
-#    \ \ \ / /    \    Dimitrios Konstantinidis
-# /\_/ /\ V / /\/\ \
-# \___/  \_/\/    \/   April 2021
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Builder
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ / 
+# / /_/ / / / / / / /_/ /_/  
+# \____/_/ /_/ /_/\__, (_)   
+#                /____/      
+#                            
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from typing import List, TypedDict
 from dataclasses import dataclass, field
@@ -36,10 +37,8 @@ plt.rc('font', family='serif')
 plt.rc('xtick', labelsize='medium')
 plt.rc('ytick', labelsize='medium')
 
-# LN_ANALYSIS_SYSTEM = 'SparseSYM'
-# NL_ANALYSIS_SYSTEM = 'SparseSYM'
-LN_ANALYSIS_SYSTEM = 'UmfPack'
-NL_ANALYSIS_SYSTEM = 'UmfPack'
+LN_ANALYSIS_SYSTEM = 'SparseSYM'
+NL_ANALYSIS_SYSTEM = 'SparseSYM'
 MD_ANALYSIS_SYSTEM = 'UmfPack'
 CONSTRAINTS = ('Transformation',)
 NUMBERER = 'Plain'
@@ -69,7 +68,7 @@ class Analysis:
             filename=self.log_file,
             format='%(asctime)s %(message)s',
             datefmt='%m/%d/%Y %I:%M:%S %p')
-        self.logger = logging.getLogger('OpenSees_Model_Builder')
+        self.logger = logging.getLogger('OpenSees_Model_Generator')
         self.logger.setLevel(logging.DEBUG)
 
         if self.output_directory and not os.path.exists(self.output_directory):
@@ -524,7 +523,6 @@ class Analysis:
         """
         Defines the building model in OpenSeesPy
         """
-
         self.logger.info('Defining model in OpenSees')
 
         def define_node(nd, defined_nodes):
@@ -917,9 +915,9 @@ class NonlinearAnalysis(Analysis):
 
     n_steps_success: int = field(default=0)
 
-    def _run_gravity_analysis(self):
-        print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
-        ops.system(NL_ANALYSIS_SYSTEM)
+    def _run_gravity_analysis(self, system):
+        print(f'Setting system to {system}')
+        ops.system(system)
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
         ops.test('NormDispIncr', 1.0e-6, 100, 3)
@@ -1100,13 +1098,11 @@ class PushoverAnalysis(NonlinearAnalysis):
             raise ValueError("Direction can be 'x', 'y' or 'z'")
         self._to_OpenSees_domain()
         self._define_dead_load()
-        self._run_gravity_analysis()
+        self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
         ops.wipeAnalysis()
         ops.loadConst('-time', 0.0)
         self._apply_lateral_load(direction, modeshape, loaded_node)
 
-        print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
-        ops.system(NL_ANALYSIS_SYSTEM)
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
         curr_displ = ops.nodeDisp(control_node.uid, control_DOF+1)
@@ -1153,6 +1149,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                     ops.integrator("DisplacementControl",
                                    control_node.uid, control_DOF + 1,
                                    incr)
+                    ops.system(NL_ANALYSIS_SYSTEM)
                     ops.analysis("Static")
                     flag = ops.analyze(1)
                     if flag != 0:
@@ -1297,6 +1294,15 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         self.logger.info('Running NLTH analysis')
 
+        damping_type = damping.get('type')
+
+        if damping_type == 'rayleigh':
+            system = NL_ANALYSIS_SYSTEM
+        elif damping_type == 'modal':
+            system = MD_ANALYSIS_SYSTEM
+        else:
+            system = NL_ANALYSIS_SYSTEM
+
         nss = []
         if filename_x:
             gm_vals_x = np.genfromtxt(filename_x)
@@ -1341,7 +1347,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         self.logger.info('Defining dead loads')
         self._define_dead_load()
         self.logger.info('Starting gravity analysis')
-        self._run_gravity_analysis()
+        self._run_gravity_analysis(system)
         self._read_OpenSees_results()
         n_steps_success = 1
 
@@ -1351,10 +1357,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         curr_time = 0.00
         self.time_vector.append(curr_time)
 
-        damping_type = damping.get('type')
-
         if damping_type == 'rayleigh':
-
             self.logger.info(
             f'Using Rayleigh damping')
             wi = 2 * np.pi / damping['periods'][0]
@@ -1366,8 +1369,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             x = np.linalg.solve(A, 2*b)
             ops.numberer(NUMBERER)
             ops.constraints(*CONSTRAINTS)
-            print(f'Setting system to {NL_ANALYSIS_SYSTEM}')
-            ops.system(NL_ANALYSIS_SYSTEM)
+            ops.system(system)
             ops.rayleigh(x[0], 0.0, 0.0, x[1])
             # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
             # thanks prof. Scott!
@@ -1384,9 +1386,11 @@ class NLTHAnalysis(NonlinearAnalysis):
             self.logger.info(
                 'Running eigenvalue analysis'
                 f' with {num_modes} modes')
-            ops.system(MD_ANALYSIS_SYSTEM)
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
+            ops.system(system)
             ops.eigen(num_modes)
-            ops.system(NL_ANALYSIS_SYSTEM)
+            # ops.system(NL_ANALYSIS_SYSTEM)
             # ops.systemSize()
             self.logger.info('Eigenvalue analysis finished')
             ops.modalDamping(damping['ratio'])
@@ -1397,7 +1401,8 @@ class NLTHAnalysis(NonlinearAnalysis):
         self.logger.info('Starting transient analysis')
         ops.test('NormDispIncr', 1e-6, 50, 0)
         ops.algorithm("KrylovNewton")
-        # ops.integrator('TRBDF2')
+        # ops.integrator('Newmark', 0.50, 0.25)
+        ops.integrator('TRBDF2')
         ops.analysis("Transient")
 
         self.define_lateral_load_pattern(
@@ -1412,7 +1417,6 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
 
-        # for analysis speed stats:
         total_step_count = 0
         now = datetime.now()
         import time
@@ -1608,4 +1612,3 @@ class NLTHAnalysis(NonlinearAnalysis):
             plt.xlabel('Time (s)')
             plt.ylabel(f'Acceleration ({gmunit})')
             plt.show()
-
