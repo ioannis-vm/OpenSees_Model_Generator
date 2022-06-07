@@ -53,7 +53,7 @@ class AnalysisResult(TypedDict):
 @dataclass
 class Analysis:
 
-    building: Model = field(repr=False)
+    mdl: Model = field(repr=False)
     log_file: str = field(default=None)
     output_directory: str = field(default=None)
     disk_storage: bool = field(default=False)
@@ -386,8 +386,8 @@ class Analysis:
             return result
 
         # restraints
-        if self.building.global_restraints:
-            n_g = self.building.global_restraints
+        if self.mdl.global_restraints:
+            n_g = self.mdl.global_restraints
         else:
             n_g = [0, 0, 0, 0, 0, 0]
         if nd.restraint_type == 'fixed':
@@ -496,7 +496,7 @@ class Analysis:
             else:
                 ops.beamIntegration(
                     'Lobatto', elm.uid, elm.section.uid, elm.n_p)
-                ops.element('forceBeamColumn',
+                ops.element('dispBeamColumn',
                             elm.uid,
                             elm.node_i.uid,
                             elm.node_j.uid,
@@ -511,7 +511,7 @@ class Analysis:
                         elm.uid)
 
     def _define_node_constraints(self):
-        for lvl in self.building.levels.registry.values():
+        for lvl in self.mdl.levels.registry.values():
             if lvl.parent_node:
                 ops.rigidDiaphragm(
                     3,
@@ -521,7 +521,7 @@ class Analysis:
 
     def _to_OpenSees_domain(self):
         """
-        Defines the building model in OpenSeesPy
+        Defines the model in OpenSeesPy
         """
         self.logger.info('Defining model in OpenSees')
 
@@ -538,7 +538,7 @@ class Analysis:
         ops.model('basic', '-ndm', 3, '-ndf', 6)
 
         # define line elements
-        for elm in self.building.list_of_line_elements():
+        for elm in self.mdl.list_of_line_elements():
 
             define_node(elm.node_i, defined_nodes)
             define_node(elm.node_j, defined_nodes)
@@ -569,7 +569,7 @@ class Analysis:
             self._define_line_element(elm)
 
         # define zerolength elements representing end releases
-        for elm in self.building.list_of_endreleases():
+        for elm in self.mdl.list_of_endreleases():
 
             define_node(elm.node_i, defined_nodes)
             define_node(elm.node_j, defined_nodes)
@@ -597,7 +597,7 @@ class Analysis:
                         *elm.y_vec)
 
         # define parent nodes
-        for nd in self.building.list_of_parent_nodes():
+        for nd in self.mdl.list_of_parent_nodes():
             define_node(nd, defined_nodes)
 
         # define constraints
@@ -606,14 +606,14 @@ class Analysis:
     def _define_dead_load(self):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
-        for elm in self.building.list_of_line_elements():
+        for elm in self.mdl.list_of_line_elements():
             ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
                         elm.udl_total()[1],
                         elm.udl_total()[2],
                         elm.udl_total()[0])
 
-        for nd in self.building.list_of_all_nodes():
+        for nd in self.mdl.list_of_all_nodes():
             ops.load(nd.uid, *nd.load_total())
 
     ####################################################
@@ -628,7 +628,7 @@ class Analysis:
             analysis_result[str(uid)] = [result]
 
     def _read_node_displacements(self):
-        node_list = self.building.list_of_all_nodes()
+        node_list = self.mdl.list_of_all_nodes()
         for nd in node_list:
             if self.specific_nodes:
                 if nd.uid not in self.specific_nodes:
@@ -638,7 +638,7 @@ class Analysis:
                                ops.nodeDisp(nd.uid))
 
     def _read_node_velocities(self):
-        node_list = self.building.list_of_all_nodes()
+        node_list = self.mdl.list_of_all_nodes()
         for nd in node_list:
             if self.specific_nodes:
                 if nd.uid not in self.specific_nodes:
@@ -648,7 +648,7 @@ class Analysis:
                                ops.nodeVel(nd.uid))
 
     def _read_node_accelerations(self):
-        node_list = self.building.list_of_all_nodes()
+        node_list = self.mdl.list_of_all_nodes()
         for nd in node_list:
             if self.specific_nodes:
                 if nd.uid not in self.specific_nodes:
@@ -659,7 +659,7 @@ class Analysis:
 
     def _read_node_reactions(self):
         ops.reactions()
-        for nd in self.building.list_of_primary_nodes():
+        for nd in self.mdl.list_of_primary_nodes():
             if nd.restraint_type != 'free':
                 uid = nd.uid
                 local_reaction = np.array(ops.nodeReaction(uid))
@@ -668,7 +668,7 @@ class Analysis:
                                    local_reaction)
 
     def _read_frame_element_forces(self):
-        for elm in self.building.list_of_line_elements():
+        for elm in self.mdl.list_of_line_elements():
             uid = elm.uid
             forces = np.array(ops.eleForce(uid))
             self._store_result(self.element_forces,
@@ -676,7 +676,7 @@ class Analysis:
                                forces)
 
     def _read_frame_fiber_stress_strain(self):
-        for elm in self.building.list_of_line_elements():
+        for elm in self.mdl.list_of_line_elements():
             if elm.model_as['type'] != 'fiber':
                 continue
             uid = elm.uid
@@ -697,7 +697,7 @@ class Analysis:
             self._store_result(self.fiber_stress_strain, str(uid), result)
 
     def _read_release_moment_rot(self):
-        for release in self.building.list_of_endreleases():
+        for release in self.mdl.list_of_endreleases():
             # don't store data for simple pin releases
             # WARNING
             # This code only monitors strong-axis-bending releases
@@ -790,7 +790,7 @@ class Analysis:
 
     def global_reactions(self, step):
         reactions = np.full(6, 0.00)
-        for lvl in self.building.levels.registry.values():
+        for lvl in self.mdl.levels.registry.values():
             for nd in lvl.list_of_primary_nodes():
                 if nd.restraint_type != 'free':
                     uid = nd.uid
@@ -841,8 +841,7 @@ class LinearGravityAnalysis(LinearAnalysis):
 @dataclass
 class ModalAnalysis(LinearAnalysis):
     """
-    Runs a modal analysis assuming the building has
-    been defined in the OpenSees domain.
+    Runs a modal analysis.
     """
     num_modes: int = field(default=1)
     periods: List[float] = field(default_factory=list)
@@ -853,9 +852,9 @@ class ModalAnalysis(LinearAnalysis):
 
     def _read_node_displacements(self):
         nodes = []
-        nodes.extend(self.building.list_of_primary_nodes())
-        nodes.extend(self.building.list_of_internal_nodes())
-        parent_nodes = self.building.list_of_parent_nodes()
+        nodes.extend(self.mdl.list_of_primary_nodes())
+        nodes.extend(self.mdl.list_of_internal_nodes())
+        parent_nodes = self.mdl.list_of_parent_nodes()
         if parent_nodes:
             all_nodes = nodes + parent_nodes
         else:
@@ -890,7 +889,7 @@ class ModalAnalysis(LinearAnalysis):
         mstars = np.zeros(self.num_modes)
         Mn_tot = 0.
         for ntg in ntgs:
-            if self.building.retrieve_node(ntg).\
+            if self.mdl.retrieve_node(ntg).\
                restraint_type in ['free', 'parent']:
                 node_mass = ops.nodeMass(ntg)
                 Mn_tot += node_mass[dof_dir[direction]]
@@ -929,7 +928,7 @@ class NonlinearAnalysis(Analysis):
             raise ValueError('Analysis Failed')
 
     def _acceptance_criteria(self):
-        for elm in self.building.list_of_line_elements():
+        for elm in self.mdl.list_of_line_elements():
 
             if elm.model_as['type'] != 'elastic':
                 continue
@@ -1037,7 +1036,7 @@ class NonlinearAnalysis(Analysis):
 class PushoverAnalysis(NonlinearAnalysis):
 
     def _apply_lateral_load(self, direction, modeshape=None, nd=None):
-        distribution = self.building.level_masses()
+        distribution = self.mdl.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
         # define the load pattern
@@ -1060,13 +1059,13 @@ class PushoverAnalysis(NonlinearAnalysis):
                     "mode shape in the z direction.")
             modeshape_ampl = modeshape / modeshape[-1]
         else:
-            modeshape_ampl = np.ones(len(self.building.levels.registry.values()))
+            modeshape_ampl = np.ones(len(self.mdl.levels.registry.values()))
 
         # if a node is given, apply the incremental load on that node
         if nd:
             ops.load(nd.uid, *(1.00*load_dir))
         else:
-            for i, lvl in enumerate(self.building.levels.registry.values()):
+            for i, lvl in enumerate(self.mdl.levels.registry.values()):
                 # if the level is restrained, no load applied
                 if lvl.restraint != 'free':
                     continue
@@ -1503,7 +1502,6 @@ class NLTHAnalysis(NonlinearAnalysis):
                 if total_step_count % 50 == 0:
                     # provide run speed statistics
                     self.logger.info(f'Average speed: {speed:.2f} steps/s')
-                    print(f'Average speed: {speed:.2f} steps/s')
                 if total_step_count % 200 == 0:
                     # dump results to disk if applicable
                     self._sync_results()
@@ -1611,4 +1609,26 @@ class NLTHAnalysis(NonlinearAnalysis):
             plt.plot(x, y, 'k')
             plt.xlabel('Time (s)')
             plt.ylabel(f'Acceleration ({gmunit})')
+            plt.show()
+
+    def plot_node_displacement_history(self, node, direction,
+                                       plotly=False):
+        t = self.time_vector
+        y = []
+        uid = node.uid
+        for disp in self.node_displacements[str(uid)]:
+            y.append(disp[direction])
+        y = np.array(y)
+        if plotly:
+            general_2D.line_plot_interactive(
+                f"Node {uid} displacement history",
+                t, y,
+                "line",
+                "Time", "s", ".3f",
+                "Rel. Displacement", 'in', ".4f")
+        else:
+            plt.figure()
+            plt.plot(t, y, 'k')
+            plt.xlabel('Time (s)')
+            plt.ylabel(f'Displacement (in)')
             plt.show()

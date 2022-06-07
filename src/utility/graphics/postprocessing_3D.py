@@ -2,6 +2,7 @@
 The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
+
 #                          __
 #   ____  ____ ___  ____ _/ /
 #  / __ \/ __ `__ \/ __ `/ / 
@@ -613,10 +614,10 @@ def get_auto_scaling_deformation(analysis, step):
     makes the maximum displacement appear approximately
     10% of the largest dimention of the building's bounding box
     """
-    ref_len = analysis.building.reference_length()
+    ref_len = analysis.mdl.reference_length()
     # maximum displacement
     max_d = 0.00
-    for elm in analysis.building.list_of_line_elements():
+    for elm in analysis.mdl.list_of_line_elements():
         u_i = analysis.node_displacements[
             str(elm.node_i.uid)][step][0:3]
         r_i = analysis.node_displacements[
@@ -657,14 +658,14 @@ def deformed_shape(analysis,
     dt = []
 
     list_of_frames = \
-        analysis.building.list_of_line_elements()
+        analysis.mdl.list_of_line_elements()
     list_of_steel_W_panel_zones = \
-        analysis.building.list_of_steel_W_panel_zones()
-    list_of_primary_nodes = analysis.building.list_of_primary_nodes()
-    list_of_internal_nodes = analysis.building.list_of_internal_nodes()
-    list_of_parent_nodes = analysis.building.list_of_parent_nodes()
+        analysis.mdl.list_of_steel_W_panel_zones()
+    list_of_primary_nodes = analysis.mdl.list_of_primary_nodes()
+    list_of_internal_nodes = analysis.mdl.list_of_internal_nodes()
+    list_of_parent_nodes = analysis.mdl.list_of_parent_nodes()
     list_of_release_nodes = \
-        [x.node_i for x in analysis.building.list_of_endreleases()]
+        [x.node_i for x in analysis.mdl.list_of_endreleases()]
 
     if list_of_parent_nodes:
         add_data__nodes_deformed(
@@ -690,7 +691,7 @@ def deformed_shape(analysis,
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 15, scaling)
         # we also add axes so that we can see 2D plots
-        ref_len = analysis.building.reference_length()
+        ref_len = analysis.mdl.reference_length()
         add_data__global_axes(dt, ref_len)
     else:
         # draw the extruded frames
@@ -722,13 +723,13 @@ def basic_forces(analysis,
     dt = []
 
     if only_selected:
-        list_of_line_elements = analysis.building.selection.list_of_line_elements()
-        list_of_primary_nodes = analysis.building.selection.list_of_primary_nodes()
-        list_of_internal_nodes = analysis.building.selection.list_of_internal_nodes()
+        list_of_line_elements = analysis.mdl.selection.list_of_line_elements()
+        list_of_primary_nodes = analysis.mdl.selection.list_of_primary_nodes()
+        list_of_internal_nodes = analysis.mdl.selection.list_of_internal_nodes()
     else:
-        list_of_line_elements = analysis.building.list_of_line_elements()
-        list_of_primary_nodes = analysis.building.list_of_primary_nodes()
-        list_of_internal_nodes = analysis.building.list_of_internal_nodes()
+        list_of_line_elements = analysis.mdl.list_of_line_elements()
+        list_of_primary_nodes = analysis.mdl.list_of_primary_nodes()
+        list_of_internal_nodes = analysis.mdl.list_of_internal_nodes()
 
     # draw the nodes
     add_data__nodes_undeformed(
@@ -739,7 +740,7 @@ def basic_forces(analysis,
     add_data__frames_undeformed(
         dt, list_of_line_elements)
     # we also add axes so that we can see 2D plots
-    ref_len = analysis.building.reference_length()
+    ref_len = analysis.mdl.reference_length()
     add_data__global_axes(dt, ref_len)
 
     # For the main lines: 1
@@ -874,7 +875,7 @@ def basic_forces(analysis,
         elm_ln[i_elem] = len_clr
 
     # calculate scaling factors
-    ref_len = analysis.building.reference_length()
+    ref_len = analysis.mdl.reference_length()
     factor = 0.05
     nx_max = np.max(np.abs(nx_vecs))
     scaling_n = force_scaling_factor(ref_len, nx_max, factor)
