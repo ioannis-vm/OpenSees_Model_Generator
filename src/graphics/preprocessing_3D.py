@@ -4,17 +4,20 @@ https://plotly.com/python/reference/
 """
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-import plotly.graph_objects as go
+from __future__ import annotations
+from typing import TYPE_CHECKING
+import plotly.graph_objects as go  # type: ignore
 import numpy as np
-from utility.graphics import common, common_3D
-
+from graphics import graphics_common, graphics_common_3D
+if TYPE_CHECKING:
+    from model import Model
 
 def add_data__grids(dt, building):
     for lvl in building.levels.registry.values():
@@ -29,7 +32,7 @@ def add_data__grids(dt, building):
                 "hoverinfo": "skip",
                 "line": {
                     "width": 4,
-                    "color": common.GRID_COLOR
+                    "color": graphics_common.GRID_COLOR
                 }
             })
 
@@ -66,13 +69,13 @@ def add_data__nodes(dt, list_of_nodes):
         '%{customdata[5]:.3g}, %{customdata[6]:.3g})' +
         '<extra>Node: %{customdata[0]:d}</extra>',
         "marker": {
-            "symbol": [common_3D.node_marker[node.restraint_type][0]
+            "symbol": [graphics_common_3D.node_marker[node.restraint_type][0]
                        for node in list_of_nodes],
-            "color": common.NODE_PRIMARY_COLOR,
-            "size": [common_3D.node_marker[node.restraint_type][1]
+            "color": graphics_common.NODE_PRIMARY_COLOR,
+            "size": [graphics_common_3D.node_marker[node.restraint_type][1]
                      for node in list_of_nodes],
             "line": {
-                "color": common.NODE_PRIMARY_COLOR,
+                "color": graphics_common.NODE_PRIMARY_COLOR,
                 "width": 4}
         }
     })
@@ -114,13 +117,13 @@ def add_data__parent_nodes(dt, list_of_nodes):
         '%{customdata[12]:.3g})' +
         '<extra>Parent Node: %{customdata[0]:d}</extra>',
         "marker": {
-            "symbol": [common_3D.node_marker[node.restraint_type][0]
+            "symbol": [graphics_common_3D.node_marker[node.restraint_type][0]
                        for node in list_of_nodes],
-            "color": common.NODE_PRIMARY_COLOR,
-            "size": [common_3D.node_marker[node.restraint_type][1]
+            "color": graphics_common.NODE_PRIMARY_COLOR,
+            "size": [graphics_common_3D.node_marker[node.restraint_type][1]
                      for node in list_of_nodes],
             "line": {
-                "color": common.NODE_PRIMARY_COLOR,
+                "color": graphics_common.NODE_PRIMARY_COLOR,
                 "width": 4}
         }
     })
@@ -155,11 +158,11 @@ def add_data__internal_nodes(dt, list_of_nodes):
         '%{customdata[5]:.3g}, %{customdata[6]:.3g})' +
         '<extra>Node: %{customdata[0]:d}</extra>',
         "marker": {
-            "symbol": common_3D.node_marker['internal'][0],
-            "color": common.NODE_INTERNAL_COLOR,
-            "size": common_3D.node_marker['internal'][1],
+            "symbol": graphics_common_3D.node_marker['internal'][0],
+            "color": graphics_common.NODE_INTERNAL_COLOR,
+            "size": graphics_common_3D.node_marker['internal'][1],
             "line": {
-                "color": common.NODE_INTERNAL_COLOR,
+                "color": graphics_common.NODE_INTERNAL_COLOR,
                 "width": 2}
         }
     })
@@ -186,11 +189,11 @@ def add_data__release_nodes(dt, list_of_nodes):
         "z": z,
         "hoverinfo": "skip",
         "marker": {
-            "symbol": common_3D.node_marker['pinned'][0],
-            "color": common.NODE_INTERNAL_COLOR,
-            "size": common_3D.node_marker['pinned'][1],
+            "symbol": graphics_common_3D.node_marker['pinned'][0],
+            "color": graphics_common.NODE_INTERNAL_COLOR,
+            "size": graphics_common_3D.node_marker['pinned'][1],
             "line": {
-                "color": common.NODE_INTERNAL_COLOR,
+                "color": graphics_common.NODE_INTERNAL_COLOR,
                 "width": 2}
         }
     })
@@ -223,7 +226,7 @@ def add_data__diaphragm_lines(dt, lvl):
         "line": {
             "width": 4,
             "dash": "dash",
-            "color": common.GRID_COLOR
+            "color": graphics_common.GRID_COLOR
         }
     })
 
@@ -255,7 +258,7 @@ def add_data__bisector_lines(dt, lvl):
         "hoverinfo": "skip",
         "line": {
             "width": 4,
-            "color": common.BISECTOR_COLOR
+            "color": graphics_common.BISECTOR_COLOR
         }
     })
 
@@ -287,7 +290,7 @@ def add_data__frames(dt, list_of_frames):
         )
         customdata.append(
             (elm.uid,
-             *elm.udl_total(),
+             *elm.udl.total(),
              elm.node_j.uid,
              elm.parent.uid)
         )
@@ -312,7 +315,7 @@ def add_data__frames(dt, list_of_frames):
         'Parent: %{customdata[5]}</extra>',
         "line": {
             "width": 5,
-            "color": common.FRAME_COLOR
+            "color": graphics_common.FRAME_COLOR
         }
     })
 
@@ -347,7 +350,7 @@ def add_data__frame_offsets(dt, list_of_elems):
         "hoverinfo": "skip",
         "line": {
             "width": 8,
-            "color": common.OFFSET_COLOR
+            "color": graphics_common.OFFSET_COLOR
         }
     })
 
@@ -443,7 +446,7 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
     k_list = []
     index = 0
     for elm in list_of_frames:
-        if elm.hidden_when_extruded:
+        if elm.visibility.hidden_when_extruded:
             continue
         side_a = np.array(elm.internal_pt_i)
         side_b = np.array(elm.internal_pt_j)
@@ -487,7 +490,7 @@ def add_data__extruded_frames_mesh(dt, list_of_frames):
         "j": j_list,
         "k": k_list,
         "hoverinfo": "skip",
-        "color": common.BEAM_MESH_COLOR,
+        "color": graphics_common.BEAM_MESH_COLOR,
         "opacity": 0.65
     })
 
@@ -550,12 +553,12 @@ def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
         "j": j_list,
         "k": k_list,
         "hoverinfo": "skip",
-        "color": common.BEAM_MESH_COLOR,
+        "color": graphics_common.BEAM_MESH_COLOR,
         "opacity": 0.65
     })
 
 
-def plot_building_geometry(building: 'Model',
+def plot_building_geometry(building: Model,
                            extrude_frames=False,
                            offsets=True,
                            gridlines=True,
@@ -568,8 +571,8 @@ def plot_building_geometry(building: 'Model',
                            camera=None
                            ):
 
-    layout = common_3D.global_layout(camera)
-    dt = []
+    layout = graphics_common_3D.global_layout(camera)
+    dt: list[dict] = []
 
     ref_len = building.reference_length()
 

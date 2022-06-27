@@ -4,14 +4,15 @@ Generates meshes for preconfigured sections
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-from utility import mesher, common
+import mesher
+import common
 import numpy as np
 
 
@@ -171,7 +172,7 @@ def HSS_circ_mesh(od: float, tdes: float, n_pts: int):
     pts_all = np.concatenate((pts_outer, pts_inner))
     vertices = []
     for point in pts_all:
-        vertices.append(mesher.Vertex(tuple(point)))
+        vertices.append(mesher.Vertex((point[0], point[1])))
     edges = define_edges(vertices)
     return generate(edges)
 

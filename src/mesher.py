@@ -5,20 +5,21 @@ data structure.
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+from typing import Optional
 from itertools import count
-from descartes.patch import PolygonPatch
+from descartes.patch import PolygonPatch  # type: ignore
 import numpy as np
-import matplotlib.pyplot as plt
-from shapely.geometry import Polygon as shapely_Polygon
-from utility import common
+import matplotlib.pyplot as plt   # type: ignore
+from shapely.geometry import Polygon as shapely_Polygon   # type: ignore
+import common
 
 
 class Vertex:
@@ -32,9 +33,9 @@ class Vertex:
 
     def __init__(self, coords: tuple[float, float]):
         self.coords = coords
-        self.edges = []
-        self.halfedges = []
-        self.uid = next(self._ids)
+        self.edges: list[Edge] = []
+        self.halfedges: list[Halfedge] = []
+        self.uid: int = next(self._ids)
 
     def __eq__(self, other):
         return self.uid == other.uid
@@ -56,9 +57,9 @@ class Edge:
     def __init__(self, v_i: Vertex, v_j: Vertex):
         self.v_i = v_i
         self.v_j = v_j
-        self.uid = next(self._ids)
-        self.h_i = None
-        self.h_j = None
+        self.uid = str(next(self._ids))
+        self.h_i: Optional[Halfedge] = None
+        self.h_j: Optional[Halfedge] = None
         if self not in self.v_i.edges:
             self.v_i.edges.append(self)
         if self not in self.v_j.edges:
@@ -126,7 +127,7 @@ class Halfedge:
     def __init__(self, vertex: Vertex, edge: Edge):
         self.vertex = vertex
         self.edge = edge
-        self.uid = self.uid = next(self._ids)
+        self.uid: int = next(self._ids)
         self.nxt = None
 
     def __repr__(self):

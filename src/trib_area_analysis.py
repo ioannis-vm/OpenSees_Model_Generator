@@ -4,16 +4,21 @@ Performs tributary area analysis for load distribution
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-import skgeom as sg
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from typing import Any
+import skgeom as sg  # type: ignore
 import numpy as np
-from utility import mesher
+import mesher
+if TYPE_CHECKING:
+    from components import BeamColumnElement
 
 
 def list_of_beams_to_mesh_edges_external(beams):
@@ -270,7 +275,7 @@ def list_of_beams_to_mesh_edges_internal(beams):
 
 
 def calculate_tributary_areas(
-        beams: list['LineElement']) -> list[np.ndarray]:
+        beams: list[BeamColumnElement]) -> tuple[list[np.ndarray], list[Any]]:
     """
     TODO - docstring
     """
@@ -328,7 +333,7 @@ def calculate_tributary_areas(
         poly = sg.Polygon([h.vertex.coords for h in internal[0]])
         skel = sg.skeleton.create_interior_straight_skeleton(poly)
 
-        subloops = []
+        subloops: list[list[mesher.Halfedge]] = []
         for halfedge in skel.halfedges:
             if subloops:
                 if is_in_some_subloop(halfedge, subloops):
@@ -341,7 +346,7 @@ def calculate_tributary_areas(
             subloops.append(subloop)
 
         subloop_areas = [float(sg.Polygon(
-            [h.vertex.point for h in subloop]).area())
+            [h.vertex.point for h in subloop]).area())  # type: ignore
             for subloop in subloops]
         outer = min(subloop_areas)  # Remove the exterior loop
         index = subloop_areas.index(outer)
@@ -349,10 +354,10 @@ def calculate_tributary_areas(
         del subloop_areas[index]
 
         for h in skel.halfedges:
-            if h.is_bisector:
-                p1 = h.vertex.point
+            if h.is_bisector:  # type: ignore
+                p1 = h.vertex.point  # type: ignore
                 p1c = np.array((float(p1.x()), float(p1.y())))
-                p2 = h.opposite.vertex.point
+                p2 = h.opposite.vertex.point  # type: ignore
                 p2c = np.array((float(p2.x()), float(p2.y())))
                 pt = np.row_stack((p1c, p2c))
                 bisectors.append(pt)

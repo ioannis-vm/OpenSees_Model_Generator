@@ -5,19 +5,19 @@ https://plotly.com/python/reference/
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-import plotly.graph_objects as go
+import plotly.graph_objects as go  # type: ignore
 import numpy as np
-from utility.graphics import common, common_3D
-from utility.graphics.preprocessing_3D import add_data__global_axes
-from utility import transformations
-from components import LineElement
+from graphics import graphics_common, graphics_common_3D
+from graphics.preprocessing_3D import add_data__global_axes
+import transformations
+from components import BeamColumnElement
 
 
 def force_scaling_factor(ref_len, fmax, factor):
@@ -46,7 +46,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
          deformed shape with extruded frame elements)
     """
 
-    if isinstance(element, LineElement):
+    if isinstance(element, BeamColumnElement):
         x_vec = element.x_axis
         y_vec = element.y_axis
     else:
@@ -172,7 +172,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     intensity = []
     index = 0
     for elm in list_of_frames:
-        if elm.hidden_when_extruded:
+        if elm.visibility.hidden_when_extruded:
             continue
         len_proportion = elm.length_clear / elm.len_parent
         num_points = int(len_proportion * 5. + 2.)
@@ -445,7 +445,7 @@ def add_data__frames_deformed(analysis,
         "hoverinfo": "skip",
         "line": {
             "width": 5,
-            "color": common.BEAM_MESH_COLOR
+            "color": graphics_common.BEAM_MESH_COLOR
         }
     })
 
@@ -500,7 +500,7 @@ def add_data__frames_offsets_deformed(analysis,
         "hoverinfo": "skip",
         "line": {
             "width": 8,
-            "color": common.OFFSET_COLOR
+            "color": graphics_common.OFFSET_COLOR
         }
     })
 
@@ -528,7 +528,7 @@ def add_data__frames_undeformed(dt, list_of_frames):
             "hoverinfo": "skip",
             "line": {
                 "width": 5,
-                "color": common.BEAM_MESH_COLOR
+                "color": graphics_common.BEAM_MESH_COLOR
             }
         })
 
@@ -549,12 +549,12 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step,
     ids = np.reshape(np.array(ids), (-1, 1))
     displacement_data = np.concatenate((displacement_data, r, ids), 1)
     if not marker:
-        marker = [common_3D.node_marker[node.restraint_type][0]
+        marker = [graphics_common_3D.node_marker[node.restraint_type][0]
                   for node in list_of_nodes]
     if not color:
-        color = common.NODE_PRIMARY_COLOR
+        color = graphics_common.NODE_PRIMARY_COLOR
     if not size:
-        size = [common_3D.node_marker[node.restraint_type][1]
+        size = [graphics_common_3D.node_marker[node.restraint_type][1]
                 for node in list_of_nodes]
 
     dt.append({
@@ -596,10 +596,10 @@ def add_data__nodes_undeformed(dt, list_of_nodes, color):
         "z": z,
         "hoverinfo": "skip",
         "marker": {
-            "symbol": [common_3D.node_marker[node.restraint_type][0]
+            "symbol": [graphics_common_3D.node_marker[node.restraint_type][0]
                        for node in list_of_nodes],
-            "color": common.NODE_PRIMARY_COLOR,
-            "size": [common_3D.node_marker[node.restraint_type][1]
+            "color": graphics_common.NODE_PRIMARY_COLOR,
+            "size": [graphics_common_3D.node_marker[node.restraint_type][1]
                      for node in list_of_nodes],
             "line": {
                 "color": color,
@@ -654,7 +654,7 @@ def deformed_shape(analysis,
     if scaling == 0:
         scaling = get_auto_scaling_deformation(analysis, step)
 
-    layout = common_3D.global_layout(camera)
+    layout = graphics_common_3D.global_layout(camera)
     dt = []
 
     list_of_frames = \
@@ -677,14 +677,14 @@ def deformed_shape(analysis,
             analysis, dt, list_of_primary_nodes, step, scaling)
         add_data__nodes_deformed(
             analysis, dt, list_of_internal_nodes, step, scaling,
-            color=common.NODE_INTERNAL_COLOR,
-            marker=common_3D.node_marker['internal'][0],
-            size=common_3D.node_marker['internal'][1])
+            color=graphics_common.NODE_INTERNAL_COLOR,
+            marker=graphics_common_3D.node_marker['internal'][0],
+            size=graphics_common_3D.node_marker['internal'][1])
         add_data__nodes_deformed(
             analysis, dt, list_of_release_nodes, step, scaling,
-            color=common.NODE_INTERNAL_COLOR,
-            marker=common_3D.node_marker['pinned'][0],
-            size=common_3D.node_marker['pinned'][1])
+            color=graphics_common.NODE_INTERNAL_COLOR,
+            marker=graphics_common_3D.node_marker['pinned'][0],
+            size=graphics_common_3D.node_marker['pinned'][1])
         # draw the frames as lines
         add_data__frames_offsets_deformed(
             analysis, dt, list_of_frames, step, scaling)
@@ -719,7 +719,7 @@ def basic_forces(analysis,
                  only_selected,
                  camera=None):
 
-    layout = common_3D.global_layout(camera)
+    layout = graphics_common_3D.global_layout(camera)
     dt = []
 
     if only_selected:
@@ -733,9 +733,9 @@ def basic_forces(analysis,
 
     # draw the nodes
     add_data__nodes_undeformed(
-        dt, list_of_primary_nodes, common.NODE_PRIMARY_COLOR)
+        dt, list_of_primary_nodes, graphics_common.NODE_PRIMARY_COLOR)
     add_data__nodes_undeformed(
-        dt, list_of_internal_nodes, common.NODE_INTERNAL_COLOR)
+        dt, list_of_internal_nodes, graphics_common.NODE_INTERNAL_COLOR)
     # draw the frames
     add_data__frames_undeformed(
         dt, list_of_line_elements)
@@ -840,7 +840,7 @@ def basic_forces(analysis,
         ni, qyi, qzi = T_global2local @ forces_global
         ti, myi, mzi = T_global2local @ moments_global_clear
 
-        wx, wy, wz = element.udl_total()
+        wx, wy, wz = element.udl.total()
 
         len_clr = element.length_clear
 
