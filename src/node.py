@@ -56,15 +56,15 @@ class Node:
     load_fl: np.ndarray = field(
         default_factory=lambda: np.zeros(shape=6), repr=False)
     tributary_area: float = field(default=0.00, repr=False)
-    column_above: 'LineElementSequence' = field(
+    column_above: Optional[ComponentAssembly] = field(
         default=None, repr=False)
-    column_below: 'LineElementSequence' = field(
+    column_below: Optional[ComponentAssembly] = field(
         default=None, repr=False)
-    beams: list['LineElementSequence'] = field(
+    beams: list['ComponentAssembly'] = field(
         default_factory=list, repr=False)
 
     def __post_init__(self):
-        self.uid = next(node_ids)
+        self.uid = str(next(node_ids))
 
     def __eq__(self, other):
         """

@@ -4,24 +4,27 @@ Model Generator for OpenSees ~ components
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from typing import Optional
 from itertools import count
 from collections import OrderedDict
 import numpy as np
-from grids import GridLine
 from node import Node
 from section import Section, Sections
-from utility import common
-from utility import transformations
-
+import common
+import transformations
+from line import Line
+from graphics.visibility import ElementVisibility
+if TYPE_CHECKING:
+    pass
 
 elem_ids = count(0)
 line_elem_seq_ids = count(0)
@@ -47,7 +50,7 @@ class Material:
     parameters: dict = field(repr=False)
 
     def __post_init__(self):
-        self.uid = next(material_ids)
+        self.uid = str(next(material_ids))
         self.parameters = self.parameters.copy()
 
 
@@ -372,94 +375,98 @@ class EndRelease:
     y_vec: np.ndarray = field(repr=False)
 
     def __post_init__(self):
-        self.uid = next(elem_ids)
+        self.uid = str(next(elem_ids))
+
+
 
 
 @dataclass
-class LineElement:
-    """
-    Linear finite element class.
-    This class represents the most primitive linear element,
-    on which more complex classes build upon.
-    Attributes:
-        uid (int): unique identifier
-        node_i (Node): Node if end i
-        node_j (Node): Node of end j
-        ang: Parameter that controls the rotation of the
-             section around the x-axis
-        offset_i (np.ndarray): Components of the vector that starts
-                               from the primary node i and goes to
-                               the first internal node at the end i.
-                               Expressed in the global coordinate system.
-        offset_j (np.ndarray): Similarly for node j
-        section (Section): Section of the element interior
-        len_parent (float): Lenth of the parent element (LineElementSequence)
-        len_proportion (float): Proportion of the line element's length
-                        to the length of its parent line element sequence.
-        model_as (dict): Either
-                       {'type': 'elastic'}
-                       or
-                       {'type': 'fiber', 'n_x': n_x, 'n_y': n_y, 'n_p': n_p}
-                       n_x, n_y: # of segments in Y and Z axis for sec
-                       subdivision
-                       n_p: # of integr points along element length
-        geom_transf: {Linear, PDelta, Corotational}
-        internal_pt_i (np.ndarray): Coordinates of the internal point i
-        internal_pt_j (np.ndarray): Similarly for node j
-                                    Internal points are the ones opposite to
-                                    the primary nodes, when we subtract the
-                                    rigid offsets.
-        udl_self (np.ndarray): Array of size 3 containing components of the
-                          uniformly distributed load that is applied
-                          to the clear length of the element, acting
-                          on the local x, y, and z directions, in the
-                          direction of the axes (see Section).
-                          Values are in units of force per unit length.
-        udl_fl, udl_other (np.ndarray): Similar to udl, coming from the floors
-                          and anything else
-        x_axis: Array of size 3 representing the local x axis vector
-                expressed in the global coordinate system.
-        y_axis: (similar)
-        z_axis: (similar).
-                The axes are defined in the same way as they are
-                defined in OpenSees.
-
-                        y(green)
-                        ^         x(red)
-                        :       .
-                        :     .
-                        :   .
-                       ===
-                        | -------> z (blue)
-                       ===
-        tributary_area (float): Area of floor that is supported on the element.
-        hidden_when_extruded (bool): controls plotting behavior
-        hinned_as_line (bool): --//--
+class LineElementUDL:
     """
 
+    """
+    parent_line_element: 'BeamColumnElement' = field(
+        init=False, repr=False)
+    self_weight: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    floor_weight: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    floor_massless_load: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+    other_load: np.ndarray = field(
+        default_factory=lambda: np.zeros(shape=3), repr=False)
+
+    def total(self):
+        return (self.self_weight
+                + self.floor_weight
+                + self.floor_massless_load
+                + self.other_load)
+
+    def copy(self) -> 'LineElementUDL':
+        other = LineElementUDL()
+        other.self_weight = self.self_weight.copy()
+        other.floor_weight = self.floor_weight.copy()
+        other.floor_massless_load = self.floor_massless_load.copy()
+        other.other_load = self.other_load.copy()
+        return other
+
+    def add_glob(self, udl: np.ndarray, ltype='other_load'):
+        """
+        Adds a uniformly distributed load
+        to the existing udl
+        The load is defined
+        with respect to the global coordinate system
+        of the building, and it is converted to the
+        local coordinate system prior to adding it.
+        Args:
+            udl (np.ndarray): Array of size 3 containing components of the
+                              uniformly distributed load that is applied
+                              to the clear length of the element, acting
+                              on the global x, y, and z directions, in the
+                              direction of the global axes.
+        """
+        assert hasattr(self, ltype)
+        parent = self.parent_line_element
+        T_mat = transformations.transformation_matrix(
+            parent.x_axis, parent.y_axis, parent.z_axis)
+        udl_local = T_mat @ udl
+        attr = getattr(self, ltype)
+        attr += udl_local
+
+    def get_udl_self_other_glob(self):
+        """
+
+        """
+        udl = self.self_weight + self.other_load
+        parent = self.parent_line_element
+        T_mat = transformations.transformation_matrix(
+            parent.x_axis, parent.y_axis, parent.z_axis)
+        return T_mat.T @ udl
+
+
+@dataclass
+class BeamColumnElement:
+    """
+    
+    """
     node_i: Node = field(repr=False)
     node_j: Node = field(repr=False)
     ang: float = field(repr=False)
     offset_i: np.ndarray = field(repr=False)
     offset_j: np.ndarray = field(repr=False)
     section: Section = field(repr=False)
-    parent: 'LineElementSequence' = field(repr=False)
+    parent: 'ComponentAssembly' = field(repr=False)
     len_parent: float = field(repr=False)
     model_as: dict = field(repr=False)
     geom_transf: str = field(repr=False)
-    udl_self: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
-    udl_fl: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
-    udl_fl_massless: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
-    udl_other: np.ndarray = field(
-        default_factory=lambda: np.zeros(shape=3), repr=False)
-    hidden_when_extruded: bool = field(default=False)
-    hidden_as_line: bool = field(default=False)
+    udl: LineElementUDL = field(
+        default_factory=LineElementUDL, repr=False)
+    visibility: ElementVisibility = field(
+        default_factory=ElementVisibility, repr=False)
 
     def __post_init__(self):
 
+        self.udl.parent_line_element = self
         assert(isinstance(self.node_i, Node))
         assert(isinstance(self.node_j, Node))
         self.model_as = self.model_as.copy()
@@ -478,7 +485,7 @@ class LineElement:
         self.node_j_trib = self.node_j
         # ~~~~
 
-        self.uid = next(elem_ids)
+        self.uid = str(next(elem_ids))
         self.tributary_area = 0.00
         # local axes with respect to the global coord system
 
@@ -1661,7 +1668,7 @@ class LineElementSequence:
 
     def __post_init__(self):
 
-        self.uid = next(line_elem_seq_ids)
+        self.uid = str(next(line_elem_seq_ids))
 
         self.model_as = self.model_as.copy()
         self.ends = self.ends.copy()

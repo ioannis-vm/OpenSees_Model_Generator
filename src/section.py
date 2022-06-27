@@ -60,13 +60,13 @@ class Section:
     """
     sec_type: str
     name: str
-    material: 'Material' = field(repr=False)
-    snap_points: Optional[dict] = field(default=None, repr=False)
+    material: Material = field(repr=False)
+    snap_points: Optional[dict[str, np.ndarray]] = field(default=None, repr=False)
     mesh: Optional[mesher.Mesh] = field(default=None, repr=False)
-    properties: Optional[dict] = field(default=None, repr=False)
+    properties: Optional[dict[str, float]] = field(default=None, repr=False)
 
     def __post_init__(self):
-        self.uid = next(section_ids)
+        self.uid = str(next(section_ids))
 
     def __eq__(self, other):
         return (self.name == other.name)
