@@ -4,20 +4,25 @@ Model Generator for OpenSees ~ section
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from typing import Optional
+from typing import Union
 from dataclasses import dataclass, field
 from itertools import count
 from collections import OrderedDict
 import numpy as np
-from utility import mesher
-from utility import mesher_section_gen
+import mesher
+import mesher_section_gen
+if TYPE_CHECKING:
+    from components import Material
 
 section_ids = count(0)
 
@@ -95,6 +100,8 @@ class Section:
         if self.sec_type != 'W':
             raise ValueError("Only W sections are supported for RBS")
         name = self.name + '_reduced'
+        if not self.properties:
+            raise ValueError('The section has no properties attribute')
         b = self.properties['bf']
         h = self.properties['d']
         tw = self.properties['tw']
@@ -103,13 +110,13 @@ class Section:
         properties = dict(self.properties)
         properties['bf'] = b_red
         c = (b - b_red) / 2.
-        new_area = properties['A'] - 4. * tf * c
-        snap_points = {}
+        area = properties['A']
+        new_area = float(area) - 4. * tf * c
         mesh = mesher_section_gen.w_mesh(b_red, h, tw, tf, new_area)
         section = Section(
             'W', name,
             self.material,
-            snap_points,
+            None,
             mesh, properties)
         return section
 
@@ -159,7 +166,7 @@ class Sections:
         if name in self.registry:
             self.active = self.registry[name]
         else:
-            raise ValueError(f'Undefined section: {section.name}')
+            raise ValueError(f'Undefined section: {name}')
 
     ####################
     # Shape generators #
@@ -167,7 +174,7 @@ class Sections:
 
     def generate_W(self,
                    name: str,
-                   material: 'Material',
+                   material: Material,
                    properties: dict):
         """
         Generate a W section with specified parameters
@@ -198,7 +205,7 @@ class Sections:
 
     def generate_HSS(self,
                      name: str,
-                     material: 'Material',
+                     material: Material,
                      properties: dict):
         """
         Generate a HSS with specified parameters
@@ -256,7 +263,7 @@ class Sections:
 
     def generate_rect(self,
                       name: str,
-                      material: 'Material',
+                      material: Material,
                       properties: dict):
         """
         Generate a rectangular section with specified

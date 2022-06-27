@@ -4,11 +4,11 @@ Model Generator for OpenSees ~ level
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
@@ -18,32 +18,15 @@ from typing import Optional
 from collections import OrderedDict
 import numpy as np
 from node import Node, Nodes
-from components import LineElement
-from components import LineElementSequences
-from utility import common
+from components import BeamColumnElement
+from components import ComponentAssemblies
+import common
 
 
 # pylint: disable=unsubscriptable-object
 # pylint: disable=invalid-name
 
 
-def previous_element(dct: OrderedDict, key):
-    """
-    Returns the previous object in an OrderedDict
-    given a target key, assuming it is in the OrderedDict.
-    If it is not, it returns None.
-    If the target key is the first object, it returns None.
-    """
-    if key in dct:
-        key_list = list(dct.keys())
-        idx = key_list.index(key)
-        if idx == 0:
-            ans = None
-        else:
-            ans = dct[key_list[idx-1]]
-    else:
-        ans = None
-    return ans
 
 
 @dataclass
@@ -73,9 +56,9 @@ class Level:
                                nodes of a particular
                                element. A rigid diaphragm constraint can be
                                optionally assigned to these nodes.
-        columns (LineElementSequences): Columns of the level.
-        beams (LineElementSequences): Beams of the level.
-        braces (LineElementSequences): Braces of the level.
+        columns (ComponentAssemblies): Columns of the level.
+        beams (ComponentAssemblies): Beams of the level.
+        braces (ComponentAssemblies): Braces of the level.
         parent_node (Node): If tributary area analysis is done and floors
                             are assumed, a node is created at the
                             center of mass of the level, and acts as the
@@ -99,12 +82,12 @@ class Level:
     surface_load_massless: float = field(default=0.00, repr=False)
     diaphragm: bool = field(default=False)
     nodes_primary: Nodes = field(default_factory=Nodes, repr=False)
-    columns: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    beams: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    braces: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
+    columns: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
+    beams: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
+    braces: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
     parent_node: Optional[Node] = field(default=None, repr=False)
     floor_coordinates: Optional[np.ndarray] = field(default=None, repr=False)
     floor_bisector_lines: Optional[list[np.ndarray]] = field(
@@ -175,7 +158,7 @@ class Level:
         for elm in self.beams.registry.values() + \
                 self.columns.registry.values() + \
                 self.braces.registry.values():
-            if isinstance(elm, LineElement):
+            if isinstance(elm, BeamColumnElement):
                 result.append(elm)
         return result
 
@@ -183,7 +166,7 @@ class Level:
         cols = self.columns.registry.values()
         pzs = []
         for col in cols:
-            if isinstance(col, LineElementSequence_Steel_W_PanelZone):
+            if isinstance(col, ComponentAssembly_Steel_W_PanelZone):
                 pzs.append(col.end_segment_i)
         return pzs
 
@@ -222,7 +205,7 @@ class Levels:
             raise ValueError('Level elevation already exists: ' + repr(lvl))
 
         self.registry[lvl.name] = lvl
-        previous_lvl = previous_element(self.registry, lvl.name)
+        previous_lvl = common.previous_element(self.registry, lvl.name)
         if previous_lvl:
             lvl.previous_lvl = previous_lvl
 

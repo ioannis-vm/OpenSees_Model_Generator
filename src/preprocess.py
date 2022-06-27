@@ -18,9 +18,9 @@ from components import MiddleSegment
 from components import EndSegment_Fixed
 from components import EndSegment_Steel_W_PanelZone
 from components import EndSegment_Steel_W_PanelZone_IMK
-from utility import common
-from utility import trib_area_analysis
-from utility import mesher
+import common
+import trib_area_analysis
+import mesher
 
 
 def diaphragms(mdl):
@@ -52,14 +52,14 @@ def tributary_area_analysis(mdl):
                 for line_elm in beam.internal_line_elems():
                     udlZ_val = - line_elm.tributary_area * \
                         lvl.surface_load / line_elm.length_clear
-                    line_elm.add_udl_glob(
+                    line_elm.udl.add_glob(
                         np.array([0.00, 0.00, udlZ_val]),
-                        ltype='floor')
+                        ltype='floor_weight')
                     udlZ_val_massless = - line_elm.tributary_area * \
                         lvl.surface_load_massless / line_elm.length_clear
-                    line_elm.add_udl_glob(
+                    line_elm.udl.add_glob(
                         np.array([0.00, 0.00, udlZ_val_massless]),
-                        ltype='floor_massless'
+                        ltype='floor_massless_load'
                     )
             for nd in lvl.list_of_all_nodes():
                 pZ_val = - nd.tributary_area * \
@@ -68,7 +68,7 @@ def tributary_area_analysis(mdl):
                                         0.00, 0.00, 0.00))
     # ~~~
 
-    mdl.update_required = True
+    mdl.dct_update_required = True
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     # tributary areas, weight and mass #
@@ -167,7 +167,7 @@ def self_weight_and_mass(mdl):
             nd.mass[0] = common.EPSILON
             nd.mass[1] = common.EPSILON
             nd.mass[2] = common.EPSILON
-    mdl.update_required = True
+    mdl.dct_update_required = True
 
 
 def model_steel_frame_panel_zones(mdl):
@@ -176,7 +176,7 @@ def model_steel_frame_panel_zones(mdl):
     steel frame panel zones
     """
     mdl._update_lists()
-    mdl.update_required = True
+    mdl.dct_update_required = True
 
     for lvl in mdl.levels.registry.values():
         columns = list(lvl.columns.registry.values())
@@ -402,7 +402,7 @@ def elevate_steel_column_splices(mdl, relative_len):
     Brings column splices higher than the level transition elevation.
     """
     mdl._update_lists()
-    mdl.update_required = True
+    mdl.dct_update_required = True
     for col in mdl.list_of_columns():
         # check to see if there is a column at the level below
         n_j = col.node_j

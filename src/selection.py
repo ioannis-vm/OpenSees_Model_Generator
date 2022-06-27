@@ -4,18 +4,18 @@ Model Generator for OpenSees ~ selection
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generato
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from components import LineElementSequences
+from components import ComponentAssemblies
 from node import Nodes
-from components import LineElement
+from components import BeamColumnElement
 import numpy as np
 
 
@@ -27,13 +27,13 @@ class Selection:
 
     """
     nodes: Nodes = field(default_factory=Nodes, repr=False)
-    beams: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    columns: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    braces: LineElementSequences = field(
-        default_factory=LineElementSequences, repr=False)
-    line_elements: list[LineElement] = field(
+    beams: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
+    columns: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
+    braces: ComponentAssemblies = field(
+        default_factory=ComponentAssemblies, repr=False)
+    line_elements: list[BeamColumnElement] = field(
         default_factory=list, repr=False)
 
     def clear(self):
@@ -41,9 +41,9 @@ class Selection:
         Clears all selected elements.
         """
         self.nodes = Nodes()
-        self.beams = LineElementSequences()
-        self.columns = LineElementSequences()
-        self.braces = LineElementSequences()
+        self.beams = ComponentAssemblies()
+        self.columns = ComponentAssemblies()
+        self.braces = ComponentAssemblies()
         self.line_elements = []
 
     #############################################
@@ -55,7 +55,7 @@ class Selection:
         line elements.
         """
         for line_element in self.line_elements:
-            line_element.add_udl_glob(udl, ltype='other')
+            line_element.udl.add_glob(udl, ltype='other_load')
 
     #############################################
     # Methods that return objects               #
@@ -63,7 +63,7 @@ class Selection:
 
     def list_of_line_element_sequences(self):
         """
-        Returns all selected LineElementSequences.
+        Returns all selected ComponentAssemblies.
         """
         return list(self.beams.registry.values()) + \
             list(self.columns.registry.values()) + \

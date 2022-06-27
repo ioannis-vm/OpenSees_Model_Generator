@@ -4,34 +4,34 @@ Model Generator for OpenSees ~ solver
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from typing import List, TypedDict
+from typing import Optional
 from dataclasses import dataclass, field
-import openseespy.opensees as ops
+import openseespy.opensees as ops  # type: ignore
 import os
 import shelve
 import pickle
 import numpy as np
-from scipy import integrate
+from scipy import integrate  # type: ignore
+from scipy.interpolate import interp1d  # type: ignore
 import logging
 from datetime import datetime
-from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
-import pandas as pd
+import matplotlib.pyplot as plt  # type: ignore
+import pandas as pd  # type: ignore
 import components
 from model import Model
 import node
-from components import LineElement
-from utility import common
-from utility.graphics import postprocessing_3D
-from utility.graphics import general_2D
-from utility import transformations
+from components import BeamColumnElement
+import common
+from graphics import postprocessing_3D
+import transformations
 
 plt.rc('font', family='serif')
 plt.rc('xtick', labelsize='medium')
@@ -44,24 +44,32 @@ CONSTRAINTS = ('Transformation',)
 NUMBERER = 'Plain'
 
 
-class AnalysisResult(TypedDict):
-
-    uid: int
-    results = List
-
-
 @dataclass
 class Analysis:
 
     mdl: Model = field(repr=False)
-    log_file: str = field(default=None)
-    output_directory: str = field(default=None)
-    disk_storage: bool = field(default=False)
-    store_forces: bool = field(default=True)
-    store_reactions: bool = field(default=True)
-    store_fiber: bool = field(default=True)
-    store_release_force_defo: bool = field(default=True)
-    specific_nodes: list = field(default_factory=list)
+    log_file: Optional[str] = field(default=None, repr=False)
+    output_directory: Optional[str] = field(default=None, repr=False)
+    disk_storage: bool = field(default=False, repr=False)
+    store_forces: bool = field(default=True, repr=False)
+    store_reactions: bool = field(default=True, repr=False)
+    store_fiber: bool = field(default=True, repr=False)
+    store_release_force_defo: bool = field(default=True, repr=False)
+    specific_nodes: list = field(default_factory=list, repr=False)
+    node_displacements: dict[str, list[float]] = field(
+        init=False, repr=False)
+    node_velocities: dict[str, list[float]] = field(
+        init=False, repr=False)
+    node_accelerations: dict[str, list[float]] = field(
+        init=False, repr=False)
+    node_reactions: dict[str, list[float]] = field(
+        init=False, repr=False)
+    element_forces: dict[str, list[float]] = field(
+        init=False, repr=False)
+    fiber_stress_strain: dict[str, list[float]] = field(
+        init=False, repr=False)
+    release_force_defo: dict[str, list[float]] = field(
+        init=False, repr=False)
 
     def __post_init__(self):
         logging.basicConfig(
@@ -77,17 +85,17 @@ class Analysis:
                 exist_ok=True)
 
         if not self.disk_storage:
-            self.node_displacements = AnalysisResult()
-            self.node_velocities = AnalysisResult()
-            self.node_accelerations = AnalysisResult()
+            self.node_displacements = {}
+            self.node_velocities = {}
+            self.node_accelerations = {}
             if self.store_reactions:
-                self.node_reactions = AnalysisResult()
+                self.node_reactions = {}
             if self.store_forces:
-                self.element_forces = AnalysisResult()
+                self.element_forces = {}
             if self.store_fiber:
-                self.fiber_stress_strain = AnalysisResult()
+                self.fiber_stress_strain = {}
             if self.store_release_force_defo:
-                self.release_force_defo = AnalysisResult()
+                self.release_force_defo = {}
         else:
             self.node_displacements = \
                 shelve.open(
@@ -414,7 +422,7 @@ class Analysis:
         if len(nd.mass) == 3:
             mass = list(nd.mass)+[common.EPSILON]*3
         else:
-            mass = nd.mass
+            mass = list(nd.mass)
         ops.mass(nd.uid, *mass)
 
     def _define_elastic_section(self, sec: components.Section):
@@ -431,6 +439,9 @@ class Analysis:
         #             sec.properties['J'])
 
         # using mesh properties
+        assert sec.mesh
+        assert sec.properties
+        assert sec.material.parameters
         ops.section('Elastic',
                     sec.uid,
                     sec.material.parameters['E0'],
@@ -444,6 +455,7 @@ class Analysis:
                               n_x: int, n_y: int):
         pieces = sec.subdivide_section(
             n_x=n_x, n_y=n_y)
+        assert sec.properties
         ops.section('Fiber',
                     sec.uid,
                     '-GJ',
@@ -457,7 +469,7 @@ class Analysis:
                       area,
                       sec.material.uid)
 
-    def _define_line_element(self, elm: LineElement):
+    def _define_line_element(self, elm: BeamColumnElement):
 
         if np.linalg.norm(elm.offset_i) + \
            np.linalg.norm(elm.offset_j) > common.EPSILON:
@@ -472,6 +484,7 @@ class Analysis:
 
         if elm.section.sec_type != 'utility':
             if elm.model_as['type'] == 'elastic':
+                assert elm.section.properties
                 ops.element('elasticBeamColumn', elm.uid,
                             elm.node_i.uid,
                             elm.node_j.uid,
@@ -607,11 +620,12 @@ class Analysis:
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
         for elm in self.mdl.list_of_line_elements():
+            udl_total = elm.udl.total()
             ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
-                        elm.udl_total()[1],
-                        elm.udl_total()[2],
-                        elm.udl_total()[0])
+                        udl_total[1],
+                        udl_total[2],
+                        udl_total[0])
 
         for nd in self.mdl.list_of_all_nodes():
             ops.load(nd.uid, *nd.load_total())
@@ -620,7 +634,7 @@ class Analysis:
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def _store_result(self, analysis_result: AnalysisResult,
+    def _store_result(self, analysis_result: dict[str, list],
                       uid: int, result: list):
         if str(uid) in analysis_result:
             analysis_result[str(uid)].append(result)
@@ -843,8 +857,8 @@ class ModalAnalysis(LinearAnalysis):
     """
     Runs a modal analysis.
     """
-    num_modes: int = field(default=1)
-    periods: List[float] = field(default_factory=list)
+    num_modes: int = field(default=1, repr=False)
+    periods: List[float] = field(default_factory=list, repr=False)
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -912,7 +926,7 @@ class ModalAnalysis(LinearAnalysis):
 @dataclass
 class NonlinearAnalysis(Analysis):
 
-    n_steps_success: int = field(default=0)
+    n_steps_success: int = field(default=0, repr=False)
 
     def _run_gravity_analysis(self, system):
         print(f'Setting system to {system}')
@@ -953,7 +967,7 @@ class NonlinearAnalysis(Analysis):
             ni, qyi, qzi = T_global2local @ forces_global
             ti, myi, mzi = T_global2local @ moments_global_clear
 
-            wx, wy, wz = elm.udl_total()
+            wx, wy, wz = elm.udl.total()
 
             len_clr = elm.length_clear
             t = np.linspace(0.00, len_clr, num=9)
@@ -1254,8 +1268,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 @dataclass
 class NLTHAnalysis(NonlinearAnalysis):
 
-    time_vector: List[float] = field(default_factory=list)
-    a_g: dict = field(default_factory=dict)
+    time_vector: List[float] = field(default_factory=list, repr=False)
+    a_g: dict = field(default_factory=dict, repr=False)
 
     # def run(self, analysis_time_increment,
     #         filename_x,

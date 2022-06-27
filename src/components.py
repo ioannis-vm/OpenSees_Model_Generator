@@ -172,6 +172,7 @@ def generate_pz_mat(section: Section,
                     pz_doubler_plate_thickness: float) -> Material:
     fy = section.material.parameters['Fy']
     hardening = section.material.parameters['b_PZ']
+    assert section.properties
     dc = section.properties['d']
     bfc = section.properties['bf']
     tp = section.properties['tw'] + pz_doubler_plate_thickness
@@ -211,6 +212,8 @@ def generate_IMK_mat(section: Section, ends: dict, elm_length) -> Material:
     # define IMK material based on element properties
     assert section.sec_type == 'W', \
         "Error: Only W sections can be used"
+    assert section.material.parameters
+    assert section.properties
     # Young's modulus
     mat_e = section.material.parameters['E0'] / 1.e3
     # Yield stress
@@ -519,56 +522,9 @@ class BeamColumnElement:
     #         transformations.local_axes_from_points_and_angle(
     #             self.internal_pt_i, self.internal_pt_j, self.ang)
 
-    def add_udl_glob(self, udl: np.ndarray, ltype='other'):
-        """
-        Adds a uniformly distributed load
-        to the existing udl of the element.
-        The load is defined
-        with respect to the global coordinate system
-        of the building, and it is converted to the
-        local coordinate system prior to adding it.
-        Args:
-            udl (np.ndarray): Array of size 3 containing components of the
-                              uniformly distributed load that is applied
-                              to the clear length of the element, acting
-                              on the global x, y, and z directions, in the
-                              direction of the global axes.
-        """
-        T_mat = transformations.transformation_matrix(
-            self.x_axis, self.y_axis, self.z_axis)
-        udl_local = T_mat @ udl
-        if ltype == 'self':
-            self.udl_self += udl_local
-        elif ltype == 'floor':
-            self.udl_fl += udl_local
-        elif ltype == 'other':
-            self.udl_other += udl_local
-        elif ltype == 'floor_massless':
-            self.udl_fl_massless += udl_local
-        else:
-            raise ValueError("Unsupported load type")
-
-    def udl_total(self):
-        """
-        Returns the total udl applied to the element,
-        by summing up the floor's contribution to the
-        generic component.
-        """
-        return self.udl_self + self.udl_fl \
-            + self.udl_fl_massless + self.udl_other
-
-    def get_udl_no_floor_glob(self):
-        """
-        Returns the current value of the total UDL to global
-        coordinates
-        """
-        udl = self.udl_self + self.udl_other
-        T_mat = transformations.transformation_matrix(
-            self.x_axis, self.y_axis, self.z_axis)
-        return T_mat.T @ udl
 
     def split(self, proportion: float) \
-            -> tuple['LineElement', 'LineElement', Node]:
+            -> tuple['BeamColumnElement', 'BeamColumnElement', Node]:
         """
         Splits the LineElement into two LineElements
         and returns the resulting two LineElements
@@ -585,30 +541,53 @@ class BeamColumnElement:
             self.offset_i + self.x_axis * \
             (self.length_clear * proportion)
         split_node = Node(split_location)
-        piece_i = LineElement(
+        piece_i = BeamColumnElement(
             self.node_i, split_node,
             self.ang, self.offset_i, np.zeros(3).copy(),
             self.section, self.parent, self.len_parent, self.model_as,
-            self.geom_transf, self.udl_self.copy(), self.udl_fl.copy(),
-            self.udl_other.copy())
-        piece_j = LineElement(
+            self.geom_transf, self.udl.copy())
+        piece_j = BeamColumnElement(
             split_node, self.node_j,
             self.ang, np.zeros(3).copy(), self.offset_j,
             self.section, self.parent, self.len_parent, self.model_as,
-            self.geom_transf, self.udl_self.copy(), self.udl_fl.copy(),
-            self.udl_other.copy())
+            self.geom_transf, self.udl.copy())
         return piece_i, piece_j, split_node
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 @dataclass
 class EndSegment:
     """
-    This class represents an end segment of a LineElementSequence.
+    This class represents an end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
     """
-    parent: 'LineElementSequence'  # parent line element sequence
+    parent: 'ComponentAssembly'  # parent line element sequence
     n_external: Node
     n_internal: Node
     end: str
@@ -629,7 +608,7 @@ class EndSegment:
 
     def offset(self):
         """
-        Retrieves the offset from the parent LineElementSequence
+        Retrieves the offset from the parent ComponentAssembly
         depending on whether the endsegment is at the i or the j
         end.
         """
@@ -645,7 +624,7 @@ class EndSegment:
         """
         if isinstance(thing, Node):
             self.internal_nodes[thing.uid] = thing
-        elif isinstance(thing, LineElement):
+        elif isinstance(thing, BeamColumnElement):
             self.internal_line_elems[thing.uid] = thing
         elif isinstance(thing, EndRelease):
             self.internal_end_releases[thing.uid] = thing
@@ -658,7 +637,7 @@ class EndSegment:
         """
         if isinstance(thing, Node):
             self.internal_nodes.pop(thing.uid)
-        elif isinstance(thing, LineElement):
+        elif isinstance(thing, BeamColumnElement):
             self.internal_line_elems.pop(thing.uid)
         elif isinstance(thing, EndRelease):
             self.internal_end_releases.pop(thing.uid)
@@ -675,7 +654,7 @@ class EndSegment:
 @dataclass
 class EndSegment_Fixed(EndSegment):
     """
-    This class represents a pinned end segment of a LineElementSequence.
+    This class represents a pinned end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -686,14 +665,14 @@ class EndSegment_Fixed(EndSegment):
         super().__post_init__()
         if self.n_external != self.n_internal:
             if self.end == 'i':
-                self.add(LineElement(
+                self.add(BeamColumnElement(
                     self.n_external, self.n_internal, self.parent.ang,
                     self.parent.offset_i, np.zeros(3).copy(),
                     self.parent.section,
                     self.parent, self.parent.length_clear,
                     self.parent.model_as, self.parent.geom_transf))
             elif self.end == 'j':
-                self.add(LineElement(
+                self.add(BeamColumnElement(
                     self.n_internal, self.n_external, self.parent.ang,
                     np.zeros(3).copy(), self.parent.offset_j,
                     self.parent.section,
@@ -704,7 +683,7 @@ class EndSegment_Fixed(EndSegment):
 @dataclass
 class EndSegment_Pinned(EndSegment):
     """
-    This class represents a pinned end segment of a LineElementSequence.
+    This class represents a pinned end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -722,7 +701,7 @@ class EndSegment_Pinned(EndSegment):
         n_release = Node(self.n_internal.coords)
         self.internal_nodes[n_release.uid] = n_release
         if self.end == 'i':
-            self.add(LineElement(
+            self.add(BeamColumnElement(
                 self.n_external, n_release, self.parent.ang,
                 self.offset(), np.zeros(3).copy(),
                 self.parent.section,
@@ -746,7 +725,7 @@ class EndSegment_Pinned(EndSegment):
                      3: self.mat_fix,
                      4: self.mat_fix},
                     self.parent.x_axis, self.parent.y_axis))
-            self.add(LineElement(
+            self.add(BeamColumnElement(
                 n_release, self.n_external, self.parent.ang,
                 np.zeros(3).copy(), self.offset(),
                 self.parent.section,
@@ -757,7 +736,7 @@ class EndSegment_Pinned(EndSegment):
 @dataclass
 class EndSegment_RBS(EndSegment):
     """
-    This class represents an RBS end segment of a LineElementSequence.
+    This class represents an RBS end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -765,11 +744,11 @@ class EndSegment_RBS(EndSegment):
         See the attributes of EndSegment
     Additional attributes:
         end: Whether the EndSegment corresponds to the
-             start ("i") or the end ("j") of the LineElementSequence
-        len_parent: Clear length of the parent LineElementSequence
+             start ("i") or the end ("j") of the ComponentAssembly
+        len_parent: Clear length of the parent ComponentAssembly
         ang, section, model_as, geom_transf:
             Arguments used for element creation. See LineElement.
-        x_axis (np.ndarray): X axis vector of the parent LineElementSequence
+        x_axis (np.ndarray): X axis vector of the parent ComponentAssembly
                              (expressed in global coordinates)
         rbs_length (float): Length of the reduced beam segment
                             (expressed in length units, not proportional)
@@ -815,7 +794,7 @@ class EndSegment_RBS(EndSegment):
                     self.parent.section.rbs(reduction_cur))
             self.add(self.n_internal)
             self.add(
-                LineElement(
+                BeamColumnElement(
                     self.n_external, first(self.internal_nodes),
                     self.parent.ang,
                     self.offset(), np.zeros(3).copy(),
@@ -824,7 +803,7 @@ class EndSegment_RBS(EndSegment):
                     self.parent.model_as, self.parent.geom_transf))
             for i in range(self.parent.ends['rbs_n_sub']+1):
                 self.add(
-                    LineElement(
+                    BeamColumnElement(
                         nth_item(self.internal_nodes, i),
                         nth_item(self.internal_nodes, i+1),
                         self.parent.ang,
@@ -855,7 +834,7 @@ class EndSegment_RBS(EndSegment):
                     self.parent.section.rbs(reduction_cur))
             for i in range(self.parent.ends['rbs_n_sub']+1):
                 self.add(
-                    LineElement(
+                    BeamColumnElement(
                         nth_item(self.internal_nodes, i),
                         nth_item(self.internal_nodes, i+1),
                         self.parent.ang,
@@ -864,7 +843,7 @@ class EndSegment_RBS(EndSegment):
                         self.parent, self.parent.length_clear,
                         self.parent.model_as, self.parent.geom_transf))
             self.add(
-                LineElement(
+                BeamColumnElement(
                     last(self.internal_nodes), self.n_external,
                     self.parent.ang,
                     np.zeros(3).copy(), self.offset(),
@@ -878,7 +857,7 @@ class EndSegment_IMK(EndSegment):
     """
     TODO ~ update docstring to provide context.
     IMK ~ Ibarra Medina Krawinkler concentrated plasticity deterioration model
-    This class represents an IMK end segment of a LineElementSequence.
+    This class represents an IMK end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -886,11 +865,11 @@ class EndSegment_IMK(EndSegment):
         See the attributes of EndSegment
     Additional attributes:
         end: Whether the EndSegment corresponds to the
-             start ("i") or the end ("j") of the LineElementSequence
-        len_parent: Clear length of the parent LineElementSequence
+             start ("i") or the end ("j") of the ComponentAssembly
+        len_parent: Clear length of the parent ComponentAssembly
         ang, section, model_as, geom_transf:
             Arguments used for element creation. See LineElement.
-        x_axis (np.ndarray): X axis vector of the parent LineElementSequence
+        x_axis (np.ndarray): X axis vector of the parent ComponentAssembly
                              (expressed in global coordinates)
         rbs_length (float): Length of the reduced beam segment
                             (expressed in length units, not proportional)
@@ -911,7 +890,7 @@ class EndSegment_IMK(EndSegment):
         self.add(n_release)
         if self.end == 'i':
             self.add(
-                LineElement(
+                BeamColumnElement(
                     self.n_external, n_release,
                     self.parent.ang,
                     self.offset(), np.zeros(3).copy(),
@@ -940,7 +919,7 @@ class EndSegment_IMK(EndSegment):
                      6: self.mat_imk},
                     self.parent.x_axis, self.parent.y_axis))
             self.add(
-                LineElement(
+                BeamColumnElement(
                     n_release, self.n_external, self.parent.ang,
                     np.zeros(3).copy(), self.offset(),
                     self.parent.section,
@@ -951,7 +930,7 @@ class EndSegment_IMK(EndSegment):
 @dataclass
 class EndSegment_Steel_W_PanelZone(EndSegment):
     """
-    This class represents a panel zone end segment of a LineElementSequence.
+    This class represents a panel zone end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         TODO
@@ -1013,78 +992,70 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
 
         # define rigid line elements connecting the nodes
         ang = self.parent.ang
-        elm_a = LineElement(n_top, n_1, 0.00,
+        elm_a = BeamColumnElement(n_top, n_1, 0.00,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_b = LineElement(n_2, self.n_front, ang,
+                            geom_transf='Linear')
+        elm_b = BeamColumnElement(n_2, self.n_front, ang,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_c = LineElement(self.n_front, n_3, ang,
+                            geom_transf='Linear')
+        elm_c = BeamColumnElement(self.n_front, n_3, ang,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_d = LineElement(n_bottom, n_4, 0.00,
+                            geom_transf='Linear')
+        elm_d = BeamColumnElement(n_bottom, n_4, 0.00,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_e = LineElement(n_5, n_bottom, 0.00,
+                            geom_transf='Linear')
+        elm_e = BeamColumnElement(n_5, n_bottom, 0.00,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_f = LineElement(self.n_back, n_6, ang,
+                            geom_transf='Linear')
+        elm_f = BeamColumnElement(self.n_back, n_6, ang,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_g = LineElement(n_7, self.n_back, ang,
+                            geom_transf='Linear')
+        elm_g = BeamColumnElement(n_7, self.n_back, ang,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
-        elm_h = LineElement(n_8, n_top, 0.00,
+                            geom_transf='Linear')
+        elm_h = BeamColumnElement(n_8, n_top, 0.00,
                             np.zeros(3).copy(),
                             np.zeros(3).copy(),
                             self.rigid_util_section,
                             self.parent,
                             1.00,
                             model_as={'type': 'elastic'},
-                            geom_transf='Linear',
-                            hidden_when_extruded=True)
+                            geom_transf='Linear')
 
         # define releases
         rel_spring = EndRelease(
@@ -1151,12 +1122,14 @@ class EndSegment_Steel_W_PanelZone(EndSegment):
             'release_bottom_back': rel_bottom_back,
             'release_top_back': rel_top_back
         }
+        for elm in self.internal_line_elems.values():
+            elm.visibility.hidden_when_extruded = True
 
 
 @dataclass
 class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
     """
-    This class represents a panel zone end segment of a LineElementSequence.
+    This class represents a panel zone end segment of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         TODO
@@ -1181,7 +1154,7 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
         n_5 = self.internal_nodes['5']
         n_bottom_spring = Node(n_bottom.coords)
 
-        self.internal_line_elems['D'] = LineElement(
+        self.internal_line_elems['D'] = BeamColumnElement(
             n_bottom_spring, n_4, 0.00,
             np.zeros(3).copy(),
             np.zeros(3).copy(),
@@ -1189,10 +1162,10 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
             self.parent,
             1.00,
             model_as={'type': 'elastic'},
-            geom_transf='Linear',
-            hidden_when_extruded=True)
+            geom_transf='Linear')
+        self.internal_line_elems['D'].visibility.hidden_when_extruded = True
 
-        self.internal_line_elems['E'] = LineElement(
+        self.internal_line_elems['E'] = BeamColumnElement(
             n_5, n_bottom_spring, 0.00,
             np.zeros(3).copy(),
             np.zeros(3).copy(),
@@ -1200,8 +1173,8 @@ class EndSegment_Steel_W_PanelZone_IMK(EndSegment_Steel_W_PanelZone):
             self.parent,
             1.00,
             model_as={'type': 'elastic'},
-            geom_transf='Linear',
-            hidden_when_extruded=True)
+            geom_transf='Linear')
+        self.internal_line_elems['E'].visibility.hidden_when_extruded = True
 
         self.mat_imk = generate_IMK_mat(
             self.parent.section, self.parent.ends, self.parent.length_clear)
@@ -1365,7 +1338,7 @@ class EndSegment_W_grav_shear_tab(EndSegment):
 
         if self.end == 'i':
             self.add(
-                LineElement(
+                BeamColumnElement(
                     self.n_external, n_release, self.parent.ang,
                     self.offset(), np.zeros(3).copy(),
                     self.parent.section,
@@ -1395,7 +1368,7 @@ class EndSegment_W_grav_shear_tab(EndSegment):
                      6: self.mat_pinching},
                     self.parent.x_axis, self.parent.y_axis))
             self.add(
-                LineElement(
+                BeamColumnElement(
                     n_release, self.n_external, self.parent.ang,
                     np.zeros(3).copy(), self.offset(),
                     self.parent.section,
@@ -1406,7 +1379,7 @@ class EndSegment_W_grav_shear_tab(EndSegment):
 @dataclass
 class MiddleSegment:
     """
-    This class represents components of a LineElementSequence.
+    This class represents components of a ComponentAssembly.
     Please read the docstring of that class.
     See figure:
         https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -1417,9 +1390,9 @@ class MiddleSegment:
                     the EndSegment at end j and the MiddleSegment
         ang, section, model_as, geom_transf:
             Arguments used for element creation. See LineElement.
-        len_parent: Clear length of the parent LineElementSequence
+        len_parent: Clear length of the parent ComponentAssembly
         x_axis_parent (np.ndarray): X axis vector of the parent
-                                    LineElementSequence
+                                    ComponentAssembly
                                     (expressed in global coordinates)
         y_axis_parent, z_axis_parent (np.ndarray): Similar to X axis
         n_sub: Number of internal LineElements
@@ -1429,7 +1402,7 @@ class MiddleSegment:
                         length.
     """
 
-    parent: 'LineElementSequence'  # parent line element sequence
+    parent: 'ComponentAssembly'  # parent line element sequence
     offset_i: np.ndarray = field(repr=False)
     offset_j: np.ndarray = field(repr=False)
     camber: float = field(repr=False)
@@ -1481,7 +1454,7 @@ class MiddleSegment:
                 node_j = nth_item(self.internal_nodes, i)
                 o_j = np.zeros(3).copy()
             self.add(
-                LineElement(
+                BeamColumnElement(
                     node_i, node_j, self.parent.ang,
                     o_i, o_j,
                     self.parent.section,
@@ -1489,8 +1462,8 @@ class MiddleSegment:
                     self.parent.model_as, self.parent.geom_transf))
 
     def crosses_point(self, pt: np.ndarray) -> bool:
-        line = GridLine('', self.parent.n_i.coords[0:2],
-                        self.parent.n_j.coords[0:2])
+        line = Line('', self.parent.n_i.coords[0:2],
+                    self.parent.n_j.coords[0:2])
         return line.intersects_pt(pt)
 
     def connect(self, pt: np.ndarray, elev: float) \
@@ -1502,7 +1475,7 @@ class MiddleSegment:
         """
         def do_split(
                 segment: MiddleSegment,
-                ielm: LineElement,
+                ielm: BeamColumnElement,
                 proportion: float) -> Node:
             """
             Perform the splitting operation.
@@ -1549,7 +1522,7 @@ class MiddleSegment:
         # the point
         ielm = None
         for elm in self.internal_line_elems.values():
-            if GridLine(
+            if Line(
                 'temp',
                 elm.node_i.coords[0:2],
                     elm.node_j.coords[0:2]).intersects_pt(pt):
@@ -1633,7 +1606,7 @@ class MiddleSegment:
         """
         if isinstance(thing, Node):
             self.internal_nodes[thing.uid] = thing
-        elif isinstance(thing, LineElement):
+        elif isinstance(thing, BeamColumnElement):
             self.internal_line_elems[thing.uid] = thing
         else:
             raise ValueError(f'Unknown type: {type(thing)}')
@@ -1645,9 +1618,9 @@ class MiddleSegment:
         return list(self.internal_line_elems.values())[-1]
 
 @dataclass
-class LineElementSequence:
+class ComponentAssembly:
     """
-    A LineElementSequence represents a collection
+    A ComponentAssembly represents a collection
     of line elements connected in series.
     See figure:
     https://notability.com/n/0Nvu2Gqlt3gfwEcQE2~RKf
@@ -1817,7 +1790,7 @@ class LineElementSequence:
                               direction of the global axes.
         """
         for elm in self.internal_line_elems():
-            elm.add_udl_glob(udl, ltype=ltype)
+            elm.udl.add_glob(udl, ltype=ltype)
 
     def apply_self_weight_and_mass(self):
         """
@@ -1846,10 +1819,10 @@ class LineElementSequence:
                 sub_elm.section.material.density * multiplier
             # lb/in
             weight_per_length = mass_per_length * common.G_CONST
-            sub_elm.add_udl_glob(
-                np.array([0., 0., -weight_per_length]), ltype='self')
+            sub_elm.udl.add_glob(
+                np.array([0., 0., -weight_per_length]), ltype='self_weight')
             total_mass_per_length = - \
-                sub_elm.get_udl_no_floor_glob()[2] / common.G_CONST
+                sub_elm.udl.get_udl_self_other_glob()[2] / common.G_CONST
             mass = total_mass_per_length * \
                 sub_elm.length_clear / 2.00  # lb-s**2/in
             sub_elm.node_i.mass += np.array([mass, mass, mass])
@@ -1880,15 +1853,14 @@ class LineElementSequence:
 
 
 @dataclass
-class LineElementSequences:
+class ComponentAssemblies:
     """
     This class is a collector for line element sequences.
     """
-
-    registry: OrderedDict[int, LineElementSequence] = field(
+    registry: OrderedDict[int, ComponentAssembly] = field(
         default_factory=OrderedDict, repr=False)
 
-    def add(self, elm: LineElementSequence):
+    def add(self, elm: ComponentAssembly):
         """
         Add an element in the registry
         """
@@ -1896,7 +1868,7 @@ class LineElementSequences:
         if elm.uid not in self.registry:
             self.registry[elm.uid] = elm
         else:
-            raise ValueError('LineElementSequence already exists')
+            raise ValueError('ComponentAssembly already exists')
 
     def remove(self, key: int):
         """

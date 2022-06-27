@@ -4,19 +4,25 @@ Model Generator for OpenSees ~ node
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from typing import Optional
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import count
 from collections import OrderedDict
 import numpy as np
-from utility import common
+import common
+if TYPE_CHECKING:
+    from components import ComponentAssembly
+
 
 node_ids = count(0)
 
