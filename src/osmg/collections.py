@@ -121,20 +121,6 @@ class ComponentCollection(Collection):
     """
     registry: dict[int, ComponentAssembly] = field(default_factory=dict)
 
-    def add(self, component):
-        # pre-add hook: check for existing component
-        uids = [node.uid for node in component.external_nodes.registry.values()]
-        uids.sort()
-        uids_tuple = (*uids,)
-        if uids_tuple in self.parent.parent_model.component_connectivity:
-            raise ValueError('This should never happen!')
-        # add component
-        super().add(component)
-        # post-add hook: update model connectivity
-        self.parent.parent_model.component_connectivity[uids_tuple] = component
-
-
-
 @dataclass(repr=False)
 class SectionCollection(Collection):
     """
@@ -206,14 +192,14 @@ class elasticBeamColumnCollection(Collection):
     registry: dict[int, elasticBeamColumn] = field(default_factory=dict)
 
     def add(self, elm):
-        super().add(elm)
         # update component assembly connectivity
         uids = [nd.uid for nd in elm.eleNodes]
         uids.sort()
         uids_tuple = (*uids,)
-        if uids_tuple in elm.parent.element_connectivity:
+        if uids_tuple in elm.parent_component.element_connectivity():
             raise ValueError('This should never happen!')
-        elm.parent.element_connectivity[uids_tuple] = elm
+        elm.parent_component.element_connectivity[uids_tuple] = elm
+        super().add(elm)
 
 
 @dataclass(repr=False)
@@ -227,14 +213,14 @@ class dispBeamColumnCollection(Collection):
     registry: dict[int, dispBeamColumn] = field(default_factory=dict)
 
     def add(self, elm):
-        super().add(elm)
         # update component assembly connectivity
         uids = [nd.uid for nd in elm.eleNodes]
         uids.sort()
         uids_tuple = (*uids,)
-        if uids_tuple in elm.parent.element_connectivity:
+        if uids_tuple in elm.parent_component.element_connectivity():
             raise ValueError('This should never happen!')
-        elm.parent.element_connectivity[uids_tuple] = elm
+        elm.parent_component.element_connectivity()[uids_tuple] = elm
+        super().add(elm)
 
 
 @dataclass(repr=False)

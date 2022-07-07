@@ -12,7 +12,7 @@ def split_component(component, point):
 
     elms = []
     elms.extend(component.elastic_beamcolumn_elements.registry.values())
-    elms.extend(component.force_beamcolumn_elements.registry.values())
+    elms.extend(component.disp_beamcolumn_elements.registry.values())
     split_elm = None
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
@@ -52,7 +52,7 @@ def split_component(component, point):
     if isinstance(closest_elm, elasticBeamColumn):
         component.elastic_beamcolumn_elements.registry.pop(closest_elm.uid)
     elif isinstance(closest_elm, dispBeamColumn):
-        component.force_beamcolumn_elements.registry.pop(closest_elm.uid)
+        component.disp_beamcolumn_elements.registry.pop(closest_elm.uid)
     else:
         raise ValueError('Unsupported element type')
     
@@ -102,7 +102,7 @@ def split_component(component, point):
             transf_i,
             beam_integration
         )
-        component.force_beamcolumn_elements.add(elm_i)
+        component.disp_beamcolumn_elements.add(elm_i)
     # part j
     o_i = np.zeros(3)
     o_j = prev_gtransf.offset_j
@@ -143,17 +143,8 @@ def split_component(component, point):
             transf_j,
             beam_integration
         )
-        component.force_beamcolumn_elements.add(elm_j)
+        component.disp_beamcolumn_elements.add(elm_j)
     
-    
-    # reconfigure connectivity
-    uid_list = [node_i.uid, node_j.uid]
-    uid_list.sort()
-    uid_tuple = (*uid_list,)
-    component.element_connectivity.pop(uid_tuple)
-    component.element_connectivity[conn_i] = elm_i
-    component.element_connectivity[conn_j] = elm_j
-
     # calculate offset and return
     offset = point - np.array(middle_node.coords)
     return middle_node, offset

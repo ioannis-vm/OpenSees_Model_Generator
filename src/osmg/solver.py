@@ -135,7 +135,7 @@ class Analysis:
             self.results.node_reactions.registry[uid] = {}
         for uid in self.mdl.dict_of_elastic_beamcolumn_elements():
             self.results.element_forces.registry[uid] = {}
-        for uid in self.mdl.dict_of_force_beamcolumn_elements():
+        for uid in self.mdl.dict_of_disp_beamcolumn_elements():
             self.results.element_forces.registry[uid] = {}
 
     def _write_results_to_disk(self):
@@ -553,7 +553,7 @@ class Analysis:
         defined_sections = {}
         defined_materials = {}
 
-        elms = self.mdl.dict_of_force_beamcolumn_elements().values()
+        elms = self.mdl.dict_of_disp_beamcolumn_elements().values()
 
         for elm in elms:
             sec = elm.section
@@ -822,7 +822,7 @@ class Analysis:
 #                     moment_i = tmat_g2l @ -(np.array(moment_i_global))
 #                     deformation = tmat_g2l @ np.array(rotation_global)
 #                     self._store_result(
-#                         self.release_force_defo,
+#                         self.release_disp_defo,
 #                         str(release.uid),
 #                         [moment_i[2], deformation[2]])
 
@@ -831,7 +831,7 @@ class Analysis:
             step,
             nodes,
             elastic_beamcolumn_elements,
-            force_beamcolumn_elements):
+            disp_beamcolumn_elements):
         self._read_node_displacements(step, nodes)
         self._read_node_velocities(step, nodes)
         self._read_node_accelerations(step, nodes)
@@ -841,10 +841,10 @@ class Analysis:
             self._read_frame_element_forces(
                 step, elastic_beamcolumn_elements)
             self._read_frame_element_forces(
-                step, force_beamcolumn_elements)
+                step, disp_beamcolumn_elements)
         # if self.settings.store_fiber:
         #     self._read_frame_fiber_stress_strain()
-        # if self.settings.store_release_force_defo:
+        # if self.settings.store_release_disp_defo:
         #     self._read_release_moment_rot()
 
 #     ##################################
@@ -883,7 +883,7 @@ class StaticAnalysis(Analysis):
         self._define_loads()
         nodes = self.mdl.list_of_all_nodes()
         elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        force_elems = self.mdl.list_of_force_beamcolumn_elements()
+        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
         step = 0
         ops.system(LN_ANALYSIS_SYSTEM)
         ops.numberer(NUMBERER)
@@ -897,7 +897,7 @@ class StaticAnalysis(Analysis):
             step,
             nodes,
             elastic_elems,
-            force_elems)
+            disp_elems)
         self.logger.info('Analysis Finished')
         self._write_results_to_disk()
 
@@ -1083,9 +1083,9 @@ class NonlinearAnalysis(Analysis):
                 res[:, j] = res[:, j] + v_g
         return res
 
-    # def retrieve_release_force_defo(self, uid):
-    #     force_defo: nparr = np.array(self.release_force_defo[str(uid)])
-    #     return force_defo
+    # def retrieve_release_disp_defo(self, uid):
+    #     disp_defo: nparr = np.array(self.release_force_defo[str(uid)])
+    #     return disp_defo
 
 
 @dataclass
@@ -1153,7 +1153,7 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         nodes = self.mdl.list_of_all_nodes()
         elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        force_elems = self.mdl.list_of_force_beamcolumn_elements()
+        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
 
         self._to_OpenSees_domain()
         self._define_loads()
@@ -1170,7 +1170,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             n_steps_success,
             nodes,
             elastic_elems,
-            force_elems)
+            disp_elems)
 
         total_fail = False
         num_subdiv = 0
@@ -1239,7 +1239,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                             n_steps_success,
                             nodes,
                             elastic_elems,
-                            force_elems)
+                            disp_elems)
                         # self._acceptance_criteria()
                         curr_displ = ops.nodeDisp(
                             int(control_node.uid), control_DOF+1)
@@ -1258,7 +1258,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             n_steps_success,
             nodes,
             elastic_elems,
-            force_elems)
+            disp_elems)
         print('Number of saved analysis steps:', n_steps_success)
         metadata = {'successful steps': n_steps_success}
         self.n_steps_success = n_steps_success
@@ -1401,7 +1401,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         nodes = self.mdl.list_of_all_nodes()
         elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        force_elems = self.mdl.list_of_force_beamcolumn_elements()
+        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
 
         damping_type = damping.get('type')
 
@@ -1462,7 +1462,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             n_steps_success,
             nodes,
             elastic_elems,
-            force_elems
+            disp_elems
         )
 
         # time-history analysis
@@ -1640,7 +1640,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                             n_steps_success,
                             nodes,
                             elastic_elems,
-                            force_elems
+                            disp_elems
                         )
                         self.time_vector.append(curr_time)
                     if printing:

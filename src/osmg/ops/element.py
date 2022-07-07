@@ -34,7 +34,7 @@ class Element:
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
     """
-    parent: ComponentAssembly = field(repr=False)
+    parent_component: ComponentAssembly = field(repr=False)
     uid: int
     eleNodes: list[Node]
 

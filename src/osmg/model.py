@@ -71,8 +71,6 @@ class Model:
         init=False)
     physical_materials: PhysicalMaterialCollection = field(
         init=False)
-    component_connectivity: dict[tuple[str, ...], int] = field(
-        default_factory=dict)
     uid_generator: UIDGenerator = field(
         default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
@@ -83,6 +81,18 @@ class Model:
         self.fiber_sections = SectionCollection(self)
         self.uniaxial_materials = UniaxialMaterialCollection(self)
         self.physical_materials = PhysicalMaterialCollection(self)
+
+    def component_connectivity(self) -> dict[tuple[str, ...], int]:
+        res = {}
+        components = self.list_of_components()
+        for component in components:
+            uids = [node.uid for node in component.external_nodes.registry.values()]
+            uids.sort()
+            uids_tuple = (*uids,)
+            assert uids_tuple not in res, 'Error! Duplicate component found.'
+            res[uids_tuple] = component
+        return res
+
 
     def add_level(self,
                   uid: int,
@@ -130,6 +140,16 @@ class Model:
         list_of_nodes.extend(self.list_of_internal_nodes())
         return list_of_nodes
 
+    def dict_of_components(self):
+        comps = {}
+        for lvl in self.levels.registry.values():
+            for component in lvl.components.registry.values():
+                comps[component.uid] = component
+        return comps
+
+    def list_of_components(self):
+        return list(self.dict_of_components().values())
+
     def dict_of_elastic_beamcolumn_elements(self):
         elems = {}
         for lvl in self.levels.registry.values():
@@ -138,38 +158,28 @@ class Model:
         return elems
 
     def list_of_elastic_beamcolumn_elements(self):
-        elems = []
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                for elm in component.elastic_beamcolumn_elements.registry.values():
-                    elems.append(elm)
-        return elems
+        return list(self.dict_of_elastic_beamcolumn_elements().values())
 
-    def dict_of_force_beamcolumn_elements(self):
+    def dict_of_disp_beamcolumn_elements(self):
         elems = {}
         for lvl in self.levels.registry.values():
             for component in lvl.components.registry.values():
-                elems.update(component.force_beamcolumn_elements.registry)
+                elems.update(component.disp_beamcolumn_elements.registry)
         return elems
 
-    def list_of_force_beamcolumn_elements(self):
-        elems = []
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                for elm in component.force_beamcolumn_elements.registry.values():
-                    elems.append(elm)
-        return elems
+    def list_of_disp_beamcolumn_elements(self):
+        return list(self.dict_of_disp_beamcolumn_elements().values())
 
     def dict_of_beamcolumn_elements(self):
         elems = {}
         elems.update(self.dict_of_elastic_beamcolumn_elements())
-        elems.update(self.dict_of_force_beamcolumn_elements())
+        elems.update(self.dict_of_disp_beamcolumn_elements())
         return elems
 
     def list_of_beamcolumn_elements(self):
         elems = []
         elems.extend(self.list_of_elastic_beamcolumn_elements())
-        elems.extend(self.list_of_force_beamcolumn_elements())
+        elems.extend(self.list_of_disp_beamcolumn_elements())
         return elems
 
     def reference_length(self):

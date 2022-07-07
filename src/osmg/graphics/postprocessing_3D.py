@@ -22,7 +22,7 @@ from . import graphics_common_3D
 from .preprocessing_3D import add_data__global_axes
 
 
-def force_scaling_factor(ref_len, fmax, factor):
+def disp_scaling_factor(ref_len, fmax, factor):
     if fmax == 0.00:
         result = 0.00
     else:
@@ -700,7 +700,7 @@ def basic_forces(analysis,
                  scaling_m,
                  scaling_t,
                  num_points,
-                 force_conversion=1.00,
+                 disp_conversion=1.00,
                  moment_conversion=1.00,
                  camera=None):
 

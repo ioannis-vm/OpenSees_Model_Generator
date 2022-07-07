@@ -38,8 +38,9 @@ class ElmQuerry:
         uids = [node.uid for node in nodes]
         uids.sort()
         uids_tuple = (*uids,)
-        if uids_tuple in self.model.component_connectivity:
-            return self.model.component_connectivity[uids_tuple]
+        conn_dict = self.model.component_connectivity()
+        if uids_tuple in conn_dict:
+            return conn_dict[uids_tuple]
 
     def search_node_lvl(self, x: float, y: float, lvl: int):
         """
@@ -66,7 +67,7 @@ class ElmQuerry:
             line_elems = []
             line_elems.extend(component.elastic_beamcolumn_elements
                               .registry.values())
-            line_elems.extend(component.force_beamcolumn_elements
+            line_elems.extend(component.disp_beamcolumn_elements
                               .registry.values())
             for elm in line_elems:
                 p_i = (np.array(elm.eleNodes[0].coords)
