@@ -627,12 +627,28 @@ class BeamColumnGenerator:
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
             lvl = lvls.registry[key]
-            node_i = querry.search_node_lvl(xi_coord, yi_coord, key)
-            node_j = querry.search_node_lvl(xj_coord, yj_coord, key)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             p_i_init = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
             p_j_init = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
-            p_i = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
-            p_j = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
+
+
+
+
             if section.snap_points and (placement != 'centroid'):
                 # obtain offset from section (local system)
                 dz, dy = section.snap_points[placement]
@@ -640,92 +656,61 @@ class BeamColumnGenerator:
                 # retrieve local coordinate system
                 x_axis, y_axis, z_axis = \
                     local_axes_from_points_and_angle(
-                        p_i, p_j, angle)
+                        p_i_init, p_j_init, angle)
                 t_glob_to_loc = transformation_matrix(
                     x_axis, y_axis, z_axis)
                 t_loc_to_glob = t_glob_to_loc.T
                 sec_offset_global = t_loc_to_glob @ sec_offset_local
-                p_i += sec_offset_global
-                p_j += sec_offset_global
             else:
                 sec_offset_global = np.zeros(3)
-            eo_i = offset_i.copy() + sec_offset_global
-            eo_j = offset_j.copy() + sec_offset_global
-            if not node_i:
-                if split_existing_i:
-                    node_i, offset = split_component(split_existing_i, p_i_init)
-                    eo_i += offset
-                    p_i = np.array((node_i.coords)) + eo_i
-            else:
-                if key-1 in lvls.registry:
-                    node_i_below = querry.search_node_lvl(
-                        xi_coord, yi_coord, key-1)
-                    if node_i_below:
-                        column = querry.search_connectivity(
-                            [node_i, node_i_below])
-                        if column:
-                            elms = []
-                            for dctkey in column.element_connectivity().keys():
-                                if node_i.uid in dctkey:
-                                    elms.append(
-                                        column
-                                        .element_connectivity()[dctkey])
-                            assert elms, 'There should be an element here.'
-                            assert len(elms) == 1, \
-                                'There should only be one element here.'
-                            elm = elms[0]
-                            # obtain offset from section (local system)
-                            if elm.section.snap_points:
-                                dz, dy = elm.section.snap_points[snap_i]
-                                sec_offset_local = np.array([0.00, dy, dz])
-                                # retrieve local coordinate system
-                                x_axis = elm.geomtransf.x_axis
-                                y_axis = elm.geomtransf.y_axis
-                                z_axis = elm.geomtransf.z_axis
-                                t_glob_to_loc = transformation_matrix(
-                                    x_axis, y_axis, z_axis)
-                                t_loc_to_glob = t_glob_to_loc.T
-                                sec_offset_global = (
-                                    t_loc_to_glob @ sec_offset_local)
-                                eo_i += sec_offset_global
-            if not node_j:
-                if split_existing_j:
-                    node_j, offset = split_component(split_existing_j, p_j_init)
-                    eo_j += offset
-                    p_j = np.array((node_j.coords)) + eo_j
-            else:
-                if key-1 in lvls.registry:
-                    node_j_below = querry.search_node_lvl(
-                        xj_coord, yj_coord, key-1)
-                    if node_j_below:
-                        node_j_below = querry.search_node_lvl(
-                            xj_coord, yj_coord, key-1)
-                        column = querry.search_connectivity(
-                            [node_j, node_j_below])
-                        if column:
-                            elms = []
-                            for dctkey in column.element_connectivity().keys():
-                                if node_j.uid in dctkey:
-                                    elms.append(
-                                        column
-                                        .element_connectivity()[dctkey])
-                            assert elms, 'There should be an element here.'
-                            assert len(elms) == 1, 'There should only be one element here.'
-                            elm = elms[0]
-                            # obtain offset from section (local system)
-                            if elm.section.snap_points:
-                                dz, dy = elm.section.snap_points[snap_j]
-                                sec_offset_local = np.array([0.00, dy, dz])
-                                # retrieve local coordinate system
-                                x_axis = elm.geomtransf.x_axis
-                                y_axis = elm.geomtransf.y_axis
-                                z_axis = elm.geomtransf.z_axis
-                                t_glob_to_loc = transformation_matrix(
-                                    x_axis, y_axis, z_axis)
-                                t_loc_to_glob = t_glob_to_loc.T
-                                sec_offset_global = (
-                                    t_loc_to_glob @ sec_offset_local)
-                                eo_j += sec_offset_global
+
+
+            def beam_placement_lookup(x, y, lvl, user_offset, section_offset, split_existing, snap):
+                node = querry.search_node_lvl(x, y, lvl.uid)
+                pinit = np.array((x, y, lvl.elevation)) + user_offset
+                p = pinit + section_offset
+                eo = user_offset.copy() + section_offset
+                if not node:
+                    if split_existing:
+                        node, offset = split_component(split_existing, pinit)
+                        eo += offset
+                        p = np.array((node.coords)) + eo
+                else:
+                    if key-1 in lvls.registry:
+                        node_below = querry.search_node_lvl(
+                            x, y, key-1)
+                        if node_below:
+                            column = querry.search_connectivity(
+                                [node, node_below])
+                            if column:
+                                elms = []
+                                for dctkey in column.element_connectivity().keys():
+                                    if node.uid in dctkey:
+                                        elms.append(
+                                            column
+                                            .element_connectivity()[dctkey])
+                                assert elms, 'There should be an element here.'
+                                assert len(elms) == 1, \
+                                    'There should only be one element here.'
+                                elm = elms[0]
+                                # obtain offset from section (local system)
+                                if elm.section.snap_points:
+                                    dz, dy = elm.section.snap_points[snap]
+                                    sec_offset_local = np.array([0.00, dy, dz])
+                                    # retrieve local coordinate system
+                                    x_axis = elm.geomtransf.x_axis
+                                    y_axis = elm.geomtransf.y_axis
+                                    z_axis = elm.geomtransf.z_axis
+                                    t_glob_to_loc = transformation_matrix(
+                                        x_axis, y_axis, z_axis)
+                                    t_loc_to_glob = t_glob_to_loc.T
+                                    sec_offset_global = (
+                                        t_loc_to_glob @ sec_offset_local)
+                                    eo += sec_offset_global
+                return node, p, eo
+
+            node_i, p_i, eo_i = beam_placement_lookup(xi_coord, yi_coord, lvl, offset_i, sec_offset_global, split_existing_i, snap_i)
+            node_j, p_j, eo_j = beam_placement_lookup(xj_coord, yj_coord, lvl, offset_j, sec_offset_global, split_existing_j, snap_j)
 
             self.generate_plain_component_assembly(
                 lvl, node_i, node_j,
