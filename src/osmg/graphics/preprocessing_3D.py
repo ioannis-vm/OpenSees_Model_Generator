@@ -363,13 +363,13 @@ def add_data__frames(dt, mdl, load_case):
                 (elm.uid,
                  *load_case.line_element_udl.registry[elm.uid].total(),
                  elm.eleNodes[0].uid,
-                 elm.parent.uid)
+                 elm.parent_component.uid)
             )
             customdata.append(
                 (elm.uid,
                  *load_case.line_element_udl.registry[elm.uid].total(),
                  elm.eleNodes[1].uid,
-                 elm.parent.uid)
+                 elm.parent_component.uid)
             )
             customdata.append(
                 [None]*6
@@ -378,12 +378,12 @@ def add_data__frames(dt, mdl, load_case):
             customdata.append(
                 (elm.uid,
                  elm.eleNodes[0].uid,
-                 elm.parent.uid)
+                 elm.parent_component.uid)
             )
             customdata.append(
                 (elm.uid,
                  elm.eleNodes[1].uid,
-                 elm.parent.uid)
+                 elm.parent_component.uid)
             )
             customdata.append(
                 [None]*3
@@ -629,10 +629,10 @@ def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
 
         side_a = np.array(elm.internal_pt_i)
         side_b = np.array(elm.internal_pt_j)
-        x_vec = elm.parent.x_axis
-        y_vec = elm.parent.y_axis
+        x_vec = elm.parent_component.x_axis
+        y_vec = elm.parent_component.y_axis
         z_vec = np.cross(x_vec, y_vec)
-        loop = elm.parent.section.mesh.halfedges
+        loop = elm.parent_component.section.mesh.halfedges
 
         for halfedge in loop:
             loc0 = halfedge.vertex.coords[0]*z_vec +\

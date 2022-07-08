@@ -64,11 +64,19 @@ class Collection:
                     res = thing
         return res
 
-    def __repr__(self):
+    def __srepr__(self):
+        """
+        Short version of repr
+        """
         return f'[Collection of {len(self.registry)} items]'
 
-    def __str__(self):
-        return f'[Collection of {len(self.registry)} items]'
+    def __repr__(self):
+        res = ''
+        res += 'Collection Object\n'
+        res += f'ID: {id(self)}\n'
+        res += f'Parent object: {self.parent}\n'
+        res += f'Registry size: {len(self.registry)}\n'
+        return res
 
 
 @dataclass(repr=False)
@@ -235,14 +243,14 @@ class LineElementUDLCollection(Collection):
 
 
 @dataclass(repr=False)
-class NodePointLoadCollection(Collection):
+class NodePointLoadMassCollection(Collection):
     """
     Node load collection.
     Attributes:
         parent (Any)
         registry (dict[int, elasticBeamColumn])
     """
-    registry: dict[int, PointLoad] = field(default_factory=dict)
+    registry: dict[int, PointLoadMass] = field(default_factory=dict)
 
 
 @dataclass(repr=False)
@@ -253,6 +261,4 @@ class NodeMassCollection(Collection):
         parent (Any)
         registry (dict[int, elasticBeamColumn])
     """
-    registry: dict[int, PointMass] = field(default_factory=dict)
-
-
+    registry: dict[int, PointMassMass] = field(default_factory=dict)

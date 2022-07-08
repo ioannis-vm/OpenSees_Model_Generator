@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 # pylint: disable=too-many-instance-attributes
 
 
-@dataclass(repr=False)
+@dataclass
 class uniaxialMaterial:
     """
     OpenSees uniaxialMaterial
@@ -27,7 +27,7 @@ class uniaxialMaterial:
     name: str
 
 
-@dataclass(repr=False)
+@dataclass
 class Steel02(uniaxialMaterial):
     """
     OpenSees Steel02

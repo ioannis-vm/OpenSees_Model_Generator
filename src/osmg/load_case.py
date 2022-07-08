@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 from . import transformations
-from .collections import NodePointLoadCollection
+from .collections import NodePointLoadMassCollection
 from .collections import NodeMassCollection
 from .collections import LineElementUDLCollection
 
@@ -30,7 +30,7 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass
-class PointLoad:
+class PointLoadMass:
     """
     Point load object. Global coordinate system.
     Attributes:
@@ -43,6 +43,14 @@ class PointLoad:
     def __post_init__(self):
         self.other = [0.00]*6
         self.floor = [0.00]*6
+
+    def __repr__(self):
+        res = ''
+        res += 'Point Load (or mass) object\n'
+        res += 'Components: (global system)\n'
+        res += f'other: {self.other}\n'
+        res += f'floor: {self.floor}\n'
+        return res
 
     def add(self, load: list[float], kind='other'):
         """
@@ -61,39 +69,6 @@ class PointLoad:
         return [o + f for o, f in zip(self.other, self.floor)]
 
 
-@dataclass
-class PointMass:
-    """
-    Point mass object. Global coordinate system.
-    Attributes:
-        mself (list[float])
-        floor (list[float])
-    """
-    mself: list[float] = field(init=False, repr=False)
-    floor: list[float] = field(init=False, repr=False)
-
-    def __post_init__(self):
-        self.mself = [0.00]*6
-        self.floor = [0.00]*6
-
-    def add(self, mass: list[float], kind='other'):
-        """
-        Adds a mass to the existing mass
-        """
-        assert hasattr(self, kind)
-        assert(len(mass) == len(self.mself))
-        current = getattr(self, kind)
-        current = [c + o for c, o in zip(current, mass)]
-
-    def total(self):
-        """
-        Returns the total mass
-        """
-        return [o + f for o, f in zip(self.mself, self.floor)]
-
-
-
-
 
 @dataclass(repr=False)
 class LineElementUDL:
@@ -109,6 +84,17 @@ class LineElementUDL:
         default_factory=lambda: np.zeros(shape=3))
     other_load: nparr = field(
         default_factory=lambda: np.zeros(shape=3))
+
+    def __repr__(self):
+        res = ''
+        res += 'LineElementUDL object\n'
+        res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
+        res += 'Components:\n'
+        res += f'  self_weight: {self.self_weight}\n'
+        res += f'  floor_weight: {self.floor_weight}\n'
+        res += f'  floor_massless_load: {self.floor_massless_load}\n'
+        res += f'  other_load: {self.other_load}\n'
+        return res
 
     def total(self):
         return (self.self_weight
@@ -166,19 +152,26 @@ class LoadCase:
     """
     name: str
     parent_model: Model
-    node_loads: NodePointLoadCollection = field(init=False)
+    node_loads: NodePointLoadMassCollection = field(init=False)
     node_mass: NodeMassCollection = field(init=False)
     line_element_udl: LineElementUDLCollection = field(init=False)
 
     def __post_init__(self):
-        self.node_loads = NodePointLoadCollection(self)
+        self.node_loads = NodePointLoadMassCollection(self)
         self.node_mass = NodeMassCollection(self)
         self.line_element_udl = LineElementUDLCollection(self)
         # initialize loads and mass
         for node in self.parent_model.list_of_all_nodes():
-            self.node_loads.registry[node.uid] = PointLoad()
-            self.node_mass.registry[node.uid] = PointLoad()
+            self.node_loads.registry[node.uid] = PointLoadMass()
+            self.node_mass.registry[node.uid] = PointLoadMass()
         for line_element in (self.parent_model
                              .list_of_beamcolumn_elements()):
             self.line_element_udl.registry[line_element.uid] = \
                 LineElementUDL(line_element)
+
+    def __repr__(self):
+        res = ''
+        res += 'LoadCase object\n'
+        res += f'name: {self.name}\n'
+        res += f'parent_model: {self.parent_model.name}\n'
+        return res

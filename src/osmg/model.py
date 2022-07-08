@@ -47,6 +47,14 @@ class Settings:
     ndm: int = field(default=3)  # that's all we support
     ndf: int = field(default=6)  # that's all we support
 
+    def __repr__(self):
+        res = ''
+        res += '~~~ Model Settings ~~~\n'
+        res += f'  Imperial units: {self.imperial_units}\n'
+        res += f'  ndm           : {self.ndm}\n'
+        res += f'  ndf           : {self.ndf}\n'
+        return res
+
 
 @dataclass(repr=False)
 class Model:
@@ -61,6 +69,7 @@ class Model:
         uid_generator (UIDGenerator)
         settings
     """
+    name: str
     levels: LevelCollection = field(
         init=False)
     elastic_sections: SectionCollection = field(
@@ -81,6 +90,17 @@ class Model:
         self.fiber_sections = SectionCollection(self)
         self.uniaxial_materials = UniaxialMaterialCollection(self)
         self.physical_materials = PhysicalMaterialCollection(self)
+
+    def __repr__(self):
+        res = ''
+        res += '~~~ Model Object ~~~\n'
+        res += f'ID: {id(self)}\n'
+        res += f'levels: {self.levels.__srepr__()}\n'
+        res += f'elastic_sections: {self.elastic_sections.__srepr__()}\n'
+        res += f'fiber_sections: {self.fiber_sections.__srepr__()}\n'
+        res += f'uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n'
+        res += f'physical_materials: {self.physical_materials.__srepr__()}\n'
+        return res
 
     def component_connectivity(self) -> dict[tuple[str, ...], int]:
         res = {}

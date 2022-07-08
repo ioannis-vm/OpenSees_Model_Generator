@@ -50,6 +50,22 @@ class ComponentAssembly:
         self.elastic_beamcolumn_elements = elasticBeamColumnCollection(self)
         self.disp_beamcolumn_elements = dispBeamColumnCollection(self)
 
+    def __srepr__(self):
+        return f'Component assembly, uid: {self.uid}'
+
+    def __repr__(self):
+        res = ''
+        res += 'Component assembly object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'parent_collection.uid: {self.parent_collection.uid}\n'
+        res += f'External Nodes\n'
+        for nd in self.external_nodes.registry.values():
+            res += f'  {nd.uid}, {nd.coords}'
+        res += f'Internal Nodes\n'
+        for nd in self.internal_nodes.registry.values():
+            res += f'  {nd.uid}, {nd.coords}'
+        return res
+
     def dict_of_elastic_beamcolumn_elements(self):
         res = {}
         for elm in self.elastic_beamcolumn_elements.registry.values():

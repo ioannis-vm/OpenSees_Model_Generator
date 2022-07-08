@@ -38,3 +38,11 @@ class Node:
 
     def __le__(self, other):
         return self.uid < other.uid
+
+    def __repr__(self):
+        res = ''
+        res += 'Node object\n'
+        res += f'  uid: {self.uid}\n'
+        res += f'  coords: {self.coords}\n'
+        res += f'  restraint: {self.restraint}\n'
+        return res

@@ -107,10 +107,11 @@ class elasticBeamColumn(Element):
 
 
 
-@dataclass(repr=False)
+@dataclass
 class beamIntegration:
     uid: int
-    parent_section: int
+    parent_section: int = field(repr=False)
+    # todo: fix this typing anno
 
 
 @dataclass

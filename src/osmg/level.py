@@ -44,3 +44,15 @@ class Level:
     def __post_init__(self):
         self.nodes = NodeCollection(self)
         self.components = ComponentCollection(self)
+
+    def __repr__(self):
+        res = ''
+        res += 'Level object\n'
+        res += f'parent_model: {self.parent_model.name}\n'
+        res += f'uid: {self.uid}\n'
+        res += f'elevations: {self.elevation}\n'
+        res += 'Nodes: \n'
+        res += self.nodes.__srepr__()
+        res += 'Components: \n'
+        res += self.components.__srepr__()
+        return res

@@ -63,6 +63,27 @@ class ElasticSection(Section):
             res = self.W
         return res
 
+    def __repr__(self):
+        res = ''
+        res += 'ElasticSection object\n'
+        res += f'name: {self.name}\n'
+        res += f'uid: {self.uid}\n'
+        res += 'Properties:'
+        res += f'  E: {self.E}\n'
+        res += f'  A: {self.A}\n'
+        res += f'  Iy: {self.Iy}\n'
+        res += f'  Ix: {self.Ix}\n'
+        res += f'  G: {self.G}\n'
+        res += f'  J: {self.J}\n'
+        res += f'  W: {self.W}\n'
+        if self.outside_shape:
+            res += 'outside_shape: specified\n'
+        else:
+            res += 'outside_shape: None\n'
+        if self.snap_points:
+            res += 'snap_points: specified\n'
+        else:
+            res += 'snap_points: None\n'
 
 @dataclass(repr=False)
 class SectionComponent:
@@ -73,6 +94,21 @@ class SectionComponent:
     holes: dict[str, Mesh]
     ops_material: uniaxialMaterial
     physical_material: PhysicalMaterial
+
+    def __repr__(self):
+        res = ''
+        res += 'SectionComponent object\n'
+        if self.outside_shape:
+            res += 'outside_shape: specified\n'
+        else:
+            res += 'outside_shape: None\n'
+        if self.holes:
+            res += 'holes: exist\n'
+        else:
+            res += 'holes: no holes\n'
+        res += f'ops_material: {self.ops_material.name}\n'
+        res += f'physical_material: {self.physical_material.name}\n'
+        return res
 
 
 @dataclass(repr=False)
@@ -88,6 +124,18 @@ class FiberSection(Section):
     snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
     n_x: int = field(default=10)  # todo: this shoule be editable
     n_y: int = field(default=10)
+
+    def __repr__(self):
+        res = ''
+        res += 'FiberSection object\n'
+        for part in self.section_parts:
+            res += part.__repr__()
+        if self.snap_points:
+            res += 'snap_points: specified\n'
+        else:
+            res += 'snap_points: None\n'
+        res += f'n_x: {self.n_x}, n_y: {self.n_y}\n'
+        return res
 
     def ops_args(self):
         return['Fiber', self.uid, '-GJ',
