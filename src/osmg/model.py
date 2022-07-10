@@ -16,6 +16,8 @@ from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
+from shapely.geometry import Polygon as shapely_Polygon   # type: ignore
+from shapely.geometry import Point   # type: ignore
 
 from .gen.uid_gen import UIDGenerator
 from .collections import Collection
@@ -25,6 +27,9 @@ from .collections import SectionCollection
 from .collections import UniaxialMaterialCollection
 from .collections import PhysicalMaterialCollection
 from .level import Level
+
+if TYPE_CHECKING:
+    from .component_assembly import ComponentAssembly
 
 nparr = npt.NDArray[np.float64]
 
@@ -202,6 +207,16 @@ class Model:
         elems.extend(self.list_of_disp_beamcolumn_elements())
         return elems
 
+    def dict_of_zerolength_elements(self):
+        elems = {}
+        for lvl in self.levels.registry.values():
+            for component in lvl.components.registry.values():
+                elems.update(component.zerolength_elements.registry)
+        return elems
+
+    def list_of_zerolength_elements(self):
+        return list(self.dict_of_zerolength_elements().values())
+
     def reference_length(self):
         """
         Returns the largest dimension of the
@@ -216,3 +231,56 @@ class Model:
             p_max = np.maximum(p_max, p)
         ref_len = np.max(p_max - p_min)
         return ref_len
+
+    def initialize_empty_copy(self, name):
+        res = Model(name)
+        # copy the settings attributes
+        res.settings.imperial_units = self.settings.imperial_units
+        res.settings.ndf = self.settings.ndf
+        res.settings.ndm = self.settings.ndm
+        # make a copy of the levels
+        for lvlkey, lvl in self.levels.registry.items():
+            res.add_level(lvlkey, lvl.elevation)
+        # giv access to the materials and sections
+        res.elastic_sections = self.elastic_sections
+        res.fiber_sections = self.fiber_sections
+        res.physical_materials = self.physical_materials
+        res.uniaxial_materials = self.uniaxial_materials
+        return res
+
+    def transfer_component(
+            self,
+            other: Model,
+            component: ComponentAssembly):
+        """
+
+        """
+        # note: we don't copy the component assemblies and their contents.
+        # we just add the same objects to the other model.
+        level = component.parent_collection.parent
+        other_level = other.levels.retrieve_by_attr('uid', level.uid)
+        for node in component.external_nodes.registry.values():
+            if node.uid not in other_level.nodes.registry:
+                other_level.nodes.add(node)
+        other_level.components.add(component)
+
+    def transfer_by_polygon_selection(
+            self,
+            other: Model,
+            coords: nparr):
+
+        all_components = self.list_of_components()
+        selected_components = []
+        shape = shapely_Polygon(coords)
+        for component in all_components:
+            accept = True
+            nodes = component.external_nodes.registry.values()
+            for node in nodes:
+                if not shape.contains(Point(node.coords[0:2])):
+                    accept = False
+                    break
+            if accept:
+                selected_components.append(component)
+        for component in selected_components:
+            self.transfer_component(other, component)
+                

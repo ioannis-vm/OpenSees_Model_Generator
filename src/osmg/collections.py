@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from .ops.element import LineElementUDL
     from .ops.element import elasticBeamColumn
     from .ops.element import dispBeamColumn
+    from .ops.element import ZeroLength
     from .physical_material import PhysicalMaterial
     from .ops.section import Section
     from .ops.uniaxialMaterial import uniaxialMaterial
@@ -171,6 +172,7 @@ class NodeCollection(Collection):
         registry (dict[int, Node])
     """
     registry: dict[int, Node] = field(default_factory=dict)
+    named_contents: dict[str, Node] = field(default_factory=dict)
 
     def search_xy(self, x_coord, y_coord):
         """
@@ -198,6 +200,7 @@ class elasticBeamColumnCollection(Collection):
         registry (dict[int, elasticBeamColumn])
     """
     registry: dict[int, elasticBeamColumn] = field(default_factory=dict)
+    named_contents: dict[str, elasticBeamColumn] = field(default_factory=dict)
 
     def add(self, elm):
         # update component assembly connectivity
@@ -206,7 +209,6 @@ class elasticBeamColumnCollection(Collection):
         uids_tuple = (*uids,)
         if uids_tuple in elm.parent_component.element_connectivity():
             raise ValueError('This should never happen!')
-        elm.parent_component.element_connectivity[uids_tuple] = elm
         super().add(elm)
 
 
@@ -219,6 +221,7 @@ class dispBeamColumnCollection(Collection):
         registry (dict[int, elasticBeamColumn])
     """
     registry: dict[int, dispBeamColumn] = field(default_factory=dict)
+    named_contents: dict[str, dispBeamColumn] = field(default_factory=dict)
 
     def add(self, elm):
         # update component assembly connectivity
@@ -227,7 +230,21 @@ class dispBeamColumnCollection(Collection):
         uids_tuple = (*uids,)
         if uids_tuple in elm.parent_component.element_connectivity():
             raise ValueError('This should never happen!')
-        elm.parent_component.element_connectivity()[uids_tuple] = elm
+        super().add(elm)
+
+
+@dataclass(repr=False)
+class zerolengthCollection(Collection):
+    registry: dict[int, ZeroLength] = field(default_factory=dict)
+    named_contents: dict[str, ZeroLength] = field(default_factory=dict)
+
+    def add(self, elm):
+        # update component assembly connectivity
+        uids = [nd.uid for nd in elm.eleNodes]
+        uids.sort()
+        uids_tuple = (*uids,)
+        if uids_tuple in elm.parent_component.element_connectivity():
+            raise ValueError('This should never happen!')
         super().add(elm)
 
 

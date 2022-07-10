@@ -22,7 +22,7 @@ from . import graphics_common_3D
 from .preprocessing_3D import add_data__global_axes
 
 
-def disp_scaling_factor(ref_len, fmax, factor):
+def force_scaling_factor(ref_len, fmax, factor):
     if fmax == 0.00:
         result = 0.00
     else:
@@ -594,16 +594,16 @@ def add_data__nodes_deformed(analysis, dt, list_of_nodes, step,
     })
 
 
-def get_auto_scaling_deformation(analysis, step):
+def get_auto_scaling_deformation(analysis, mdl, step):
     """
     Automatically calculate a scaling value that
     makes the maximum displacement appear approximately
     10% of the largest dimention of the building's bounding box
     """
-    ref_len = analysis.mdl.reference_length()
+    ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
-    elms = analysis.mdl.list_of_beamcolumn_elements()
+    elms = mdl.list_of_beamcolumn_elements()
     for elm in elms:
         u_i = analysis.results.node_displacements.registry[
             elm.eleNodes[0].uid][step][0:3]
@@ -635,23 +635,28 @@ def deformed_shape(analysis,
                    step,
                    scaling,
                    extrude_frames,
-                   camera=None):
+                   camera=None,
+                   subset_model=None):
 
+    if subset_model:
+        mdl = subset_model
+    else:
+        mdl = analysis.mdl
     # calculate a nice scaling factor if 0.00 is passed
     if scaling == 0:
-        scaling = get_auto_scaling_deformation(analysis, step)
+        scaling = get_auto_scaling_deformation(analysis, mdl, step)
 
     layout = graphics_common_3D.global_layout(camera)
     dt = []
 
-    list_of_frames = analysis.mdl.list_of_beamcolumn_elements()
+    list_of_frames = mdl.list_of_beamcolumn_elements()
     # list_of_steel_W_panel_zones = \
-    #     analysis.mdl.list_of_steel_W_panel_zones()
-    list_of_primary_nodes = analysis.mdl.list_of_primary_nodes()
-    list_of_internal_nodes = analysis.mdl.list_of_internal_nodes()
-    # list_of_parent_nodes = analysis.mdl.list_of_parent_nodes()
+    #     mdl.list_of_steel_W_panel_zones()
+    list_of_primary_nodes = mdl.list_of_primary_nodes()
+    list_of_internal_nodes = mdl.list_of_internal_nodes()
+    # list_of_parent_nodes = mdl.list_of_parent_nodes()
     # list_of_release_nodes = \
-    #     [x.node_i for x in analysis.mdl.list_of_endreleases()]
+    #     [x.node_i for x in mdl.list_of_endreleases()]
 
     # if list_of_parent_nodes:
     #     add_data__nodes_deformed(
@@ -674,7 +679,7 @@ def deformed_shape(analysis,
         add_data__frames_deformed(
             analysis, dt, list_of_frames, step, 15, scaling)
         # we also add axes so that we can see 2D plots
-        ref_len = analysis.mdl.reference_length()
+        ref_len = mdl.reference_length()
         add_data__global_axes(dt, ref_len)
     else:
         # draw the extruded frames
@@ -700,22 +705,27 @@ def basic_forces(analysis,
                  scaling_m,
                  scaling_t,
                  num_points,
-                 disp_conversion=1.00,
+                 force_conversion=1.00,
                  moment_conversion=1.00,
-                 camera=None):
+                 camera=None,
+                 subset_model=None):
 
     layout = graphics_common_3D.global_layout(camera)
     dt = []
 
-    list_of_line_elements = analysis.mdl.list_of_beamcolumn_elements()
-    list_of_primary_nodes = analysis.mdl.list_of_primary_nodes()
-    list_of_internal_nodes = analysis.mdl.list_of_internal_nodes()
+    if subset_model:
+        mdl = subset_model
+    else:
+        mdl = analysis.mdl
+    list_of_line_elements = mdl.list_of_beamcolumn_elements()
+    list_of_primary_nodes = mdl.list_of_primary_nodes()
+    list_of_internal_nodes = mdl.list_of_internal_nodes()
 
     # draw the frames
     add_data__frames_undeformed(
         dt, list_of_line_elements)
     # we also add axes so that we can see 2D plots
-    ref_len = analysis.mdl.reference_length()
+    ref_len = mdl.reference_length()
     add_data__global_axes(dt, ref_len)
 
     # For the main lines: 1
@@ -796,6 +806,9 @@ def basic_forces(analysis,
     for i_elem, element in enumerate(
             list_of_line_elements):
 
+        if element.visibility.skip_OpenSees_definition:
+            continue
+
         x_vec = element.geomtransf.x_axis
         y_vec = element.geomtransf.y_axis
         z_vec = element.geomtransf.z_axis
@@ -851,7 +864,7 @@ def basic_forces(analysis,
         elm_ln[i_elem] = len_clr
 
     # calculate scaling factors
-    ref_len = analysis.mdl.reference_length()
+    ref_len = mdl.reference_length()
     factor = 0.05
     nx_max = np.max(np.abs(nx_vecs))
     scaling_n = force_scaling_factor(ref_len, nx_max, factor)

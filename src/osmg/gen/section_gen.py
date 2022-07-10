@@ -97,7 +97,8 @@ class SectionGenerator:
                         sec_data['J'],
                         sec_data['W'] / 12.00,  # lb/in
                         outside_shape,
-                        snap_points)
+                        snap_points,
+                        properties=sec_data)
                     self.model.elastic_sections.add(sec)
                 else:
                     raise ValueError(

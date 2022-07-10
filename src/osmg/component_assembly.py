@@ -23,6 +23,7 @@ import numpy.typing as npt
 from .collections import NodeCollection
 from .collections import elasticBeamColumnCollection
 from .collections import dispBeamColumnCollection
+from .collections import zerolengthCollection
 from .collections import ComponentCollection
 
 nparr = npt.NDArray[np.float64]
@@ -34,21 +35,25 @@ class ComponentAssembly:
 
     """
     uid: int
-    parent_collection: ComponentCollection = field(repr=False)
+    parent_collection: ComponentCollection
+    component_purpose: str
     external_nodes: NodeCollection = field(
-        init=False, repr=False)
+        init=False)
     internal_nodes: NodeCollection = field(
-        init=False, repr=False)
+        init=False)
     elastic_beamcolumn_elements: elasticBeamColumnCollection = field(
-        init=False, repr=False)
+        init=False)
     disp_beamcolumn_elements: dispBeamColumnCollection = field(
-        init=False, repr=False)
+        init=False)
+    zerolength_elements: zerolengthCollection = field(
+        init=False)
 
     def __post_init__(self):
         self.external_nodes = NodeCollection(self)
         self.internal_nodes = NodeCollection(self)
         self.elastic_beamcolumn_elements = elasticBeamColumnCollection(self)
         self.disp_beamcolumn_elements = dispBeamColumnCollection(self)
+        self.zerolength_elements = zerolengthCollection(self)
 
     def __srepr__(self):
         return f'Component assembly, uid: {self.uid}'
@@ -57,7 +62,7 @@ class ComponentAssembly:
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'
-        res += f'parent_collection.uid: {self.parent_collection.uid}\n'
+        res += f'component_purpose: {self.component_purpose}\n'
         res += f'External Nodes\n'
         for nd in self.external_nodes.registry.values():
             res += f'  {nd.uid}, {nd.coords}'

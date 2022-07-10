@@ -5,12 +5,30 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from .physical_material import PhysicalMaterial
 from . import common
+from .ops.uniaxialMaterial import Elastic
 from .ops.uniaxialMaterial import Steel02
 from .ops.section import ElasticSection
 from .gen.mesh_shapes import rect_mesh
 import numpy as np
 if TYPE_CHECKING:
     from .model import Model
+
+
+def load_util_rigid_elastic(model: Model):
+    new_uid = model.uid_generator.new('section')
+    sec = ElasticSection(
+        name='rigid_link_section',
+        uid=new_uid,
+        outside_shape=None,
+        snap_points=None,
+        E=common.STIFF,
+        A=1.00,
+        Iy=1.00,
+        Ix=1.00,
+        G=common.STIFF,
+        J=1.00,
+        W=0.00)
+    model.elastic_sections.add(sec)
 
 
 def load_default_elastic(model: Model, sec_name: str):
@@ -75,6 +93,24 @@ def load_default_steel(model: Model):
         'A992-Fy50',
         0.2835648148148148/common.G_CONST_IMPERIAL,
         29000000.00,
-        11153846.15)
+        11153846.15,
+        55000.00)
     model.uniaxial_materials.add(uniaxial_mat)
     model.physical_materials.add(physical_mat)
+
+
+def load_default_fix_release(model: Model):
+    """
+    Loads default fix and release elastic uniaxial materials
+    used to simulate moment releases using zerolength elements.
+    """
+    uniaxial_mat = Elastic(
+        uid=model.uid_generator.new('uniaxial material'),
+        name='fix',
+        E=common.STIFF_ROT)
+    model.uniaxial_materials.add(uniaxial_mat)
+    uniaxial_mat = Elastic(
+        uid=model.uid_generator.new('uniaxial material'),
+        name='release',
+        E=common.TINY)
+    model.uniaxial_materials.add(uniaxial_mat)

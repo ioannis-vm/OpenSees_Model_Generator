@@ -39,6 +39,18 @@ class NodeGenerator:
         level.nodes.add(node)
         return node
 
+    def add_node_lvl_xyz(self, x: float, y: float, z: float, lvl: int) -> Node:
+        """
+
+        """
+        lvls = self.model.levels
+        level = lvls.registry[lvl]
+        node = Node(
+            uid=self.model.uid_generator.new('node'),
+            coords=[x, y, z])
+        level.nodes.add(node)
+        return node
+
     def add_node_active(self, x, y):
         """
 

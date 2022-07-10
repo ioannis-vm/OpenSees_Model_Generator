@@ -21,11 +21,26 @@ def self_weight_mass(mdl, lcase):
         # apply lumped mass at the connecting nodes
         half_mass = ((mass_per_length + added_mass) *
                      elm.clear_length() / 2.00)
-        lcase.node_mass.registry[elm.eleNodes[0].uid].add([half_mass]*6, 'other')
-        lcase.node_mass.registry[elm.eleNodes[1].uid].add([half_mass]*6, 'other')
+        lcase.node_mass.registry[
+            elm.eleNodes[0].uid].add([half_mass]*6, 'other')
+        lcase.node_mass.registry[
+            elm.eleNodes[1].uid].add([half_mass]*6, 'other')
 
         # apply weight as UDL
-        lcase.line_element_udl.registry[elm.uid].add_glob(np.array([0., 0., -weight_per_length]), 'self_weight')
+        if elm.visibility.skip_OpenSees_definition:
+            # in that case apply its weight to the connecting nodes
+            elm_len = elm.clear_length()
+            elm_w = weight_per_length * elm_len
+            lcase.node_loads.registry[
+                elm.eleNodes[0].uid].add(
+                    [0.00, 0.00, -elm_w/2.00, 0.00, 0.00, 0.00], 'other')
+            lcase.node_loads.registry[
+                elm.eleNodes[1].uid].add(
+                    [0.00, 0.00, -elm_w/2.00, 0.00, 0.00, 0.00], 'other')
+        else:
+            lcase.line_element_udl.registry[
+                elm.uid].add_glob(np.array(
+                    [0., 0., -weight_per_length]), 'self_weight')
 
     # for lvl in mdl.levels.registry.values():
     #     if not lvl.diaphragm:

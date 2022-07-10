@@ -16,12 +16,17 @@ from typing import TYPE_CHECKING
 from typing import Optional
 from dataclasses import dataclass
 import numpy as np
+import numpy.typing as npt
 from ..line import Line
 from ..load_case import LoadCase
+from .. import common
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
     from ..ops.node import Node
     from ..model import Model
+
+
+nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
@@ -31,28 +36,69 @@ class ElmQuerry:
     """
     model: Model
 
-    def search_connectivity(self, nodes: list[Node]) -> Optional[ComponentAssembly]:
+    def search_connectivity(
+            self,
+            nodes: list[Node]) -> Optional[ComponentAssembly]:
         """
         find component assembly based on connectivity
         """
+        res = None
         uids = [node.uid for node in nodes]
         uids.sort()
         uids_tuple = (*uids,)
         conn_dict = self.model.component_connectivity()
         if uids_tuple in conn_dict:
-            return conn_dict[uids_tuple]
+            res = conn_dict[uids_tuple]
+        return res
 
-    def search_node_lvl(self, x: float, y: float, lvl: int):
+    def search_node_lvl(self,
+                        x: float, y: float,
+                        lvl: int,
+                        z: Optional[float] = None
+                        ) -> Optional[Node]:
         """
         Looks if a node exists at the given location.
         """
         lvls = self.model.levels
         level = lvls.registry[lvl]
+        res = None
         # check to see if node exists
-        node = level.nodes.search_xy(x, y)
-        return node
+        if z:
+            candidate_pt: nparr = np.array([x, y, z])
+        else:
+            candidate_pt = np.array(
+                [x, y, level.elevation])
+        for other_node in level.nodes.registry.values():
+            other_pt: nparr = np.array(other_node.coords)
+            if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
+                res = other_node
+                break
+        return res
 
-    def retrieve_component(self, x, y, lvl):
+    def retrieve_components_from_nodes(
+            self,
+            nodes: list[Node],
+            lvl_uid: Optional[int] = None) -> dict[int, ComponentAssembly]:
+        retrieved_components = {}
+        if lvl_uid:
+            level = self.model.levels.registry[lvl_uid]
+            candidate_components = level.components.registry.values()
+        else:
+            candidate_components = self.model.list_of_components()
+        given_node_uids = [n.uid for n in nodes]
+        for component in candidate_components:
+            accept = False
+            external_nodes = component.external_nodes.registry.values()
+            for node in external_nodes:
+                if node.uid in given_node_uids:
+                    accept = True
+                    continue
+            if accept:
+                retrieved_components[component.uid] = component
+        return retrieved_components
+
+
+    def retrieve_component_2node_horizontal(self, x, y, lvl):
         """
         """
         level = self.model.levels.registry[lvl]

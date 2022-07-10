@@ -28,7 +28,7 @@ nparr = npt.NDArray[np.float64]
 # pylint: disable=too-many-instance-attributes
 
 
-@dataclass
+@dataclass(repr=False)
 class Element:
     """
     OpenSees element
@@ -39,21 +39,44 @@ class Element:
     eleNodes: list[Node]
 
 
-@dataclass
+@dataclass(repr=False)
 class ZeroLength(Element):
     """
     OpenSees ZeroLength element
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     """
-    parent_component: ComponentAssembly = field(init=False, repr=False)  # set by the component
     mats: list[uniaxialMaterial]
     dirs: list[int]
-    rFlag: float
     vecx: nparr
     vecyp: nparr
 
+    def ops_args(self):
+        return [
+            'zeroLength',
+            self.uid,
+            *[n.uid for n in self.eleNodes],
+            '-mat',
+            *[m.uid for m in self.mats],
+            '-dir',
+            *self.dirs,
+            '-orient',
+            *self.vecx,
+            *self.vecyp
+        ]
 
-@dataclass
+    def __repr__(self):
+        res = ''
+        res += 'ZeroLength element object\n'
+        res += f'uid: {self.uid}'
+        res += 'Materials:'
+        for m, d in zip(self.mats, self.dirs):
+            res += f'  {d}: {m.name}\n'
+        res += f'vecx: {self.vecx}\n'
+        res += f'vecyp: {self.vecyp}\n'
+        return res
+
+
+@dataclass(repr=False)
 class geomTransf:
     transfType: str
     uid: int
@@ -74,7 +97,7 @@ class geomTransf:
         ]
 
 
-@dataclass
+@dataclass(repr=False)
 class elasticBeamColumn(Element):
     """
     OpenSees Elastic Beam Column Element
@@ -105,6 +128,21 @@ class elasticBeamColumn(Element):
         p_j = np.array(self.eleNodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
+    def __repr__(self):
+        res = ''
+        res += 'elasticBeamColumn element object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'node_i.uid: {self.eleNodes[0].uid}\n'
+        res += f'node_j.uid: {self.eleNodes[1].uid}\n'
+        res += f'node_i.coords: {self.eleNodes[0].coords}\n'
+        res += f'node_j.coords: {self.eleNodes[1].coords}\n'
+        res += f'offset_i: {self.geomtransf.offset_i}\n'
+        res += f'offset_j: {self.geomtransf.offset_j}\n'
+        res += f'x_axis: {self.geomtransf.x_axis}\n'
+        res += f'y_axis: {self.geomtransf.y_axis}\n'
+        res += f'z_axis: {self.geomtransf.z_axis}\n'
+        res += f'section.name: {self.section.name}\n'
+        return res
 
 
 @dataclass
@@ -153,3 +191,19 @@ class dispBeamColumn(Element):
         p_i = np.array(self.eleNodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.eleNodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
+
+    def __repr__(self):
+        res = ''
+        res += 'dispBeamColumn element object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'node_i.uid: {self.eleNodes[0].uid}\n'
+        res += f'node_j.uid: {self.eleNodes[1].uid}\n'
+        res += f'node_i.coords: {self.eleNodes[0].coords}\n'
+        res += f'node_j.coords: {self.eleNodes[1].coords}\n'
+        res += f'offset_i: {self.geomtransf.offset_i}\n'
+        res += f'offset_j: {self.geomtransf.offset_j}\n'
+        res += f'x_axis: {self.geomtransf.x_axis}\n'
+        res += f'y_axis: {self.geomtransf.y_axis}\n'
+        res += f'z_axis: {self.geomtransf.z_axis}\n'
+        res += f'section.name: {self.section.name}\n'
+        return res

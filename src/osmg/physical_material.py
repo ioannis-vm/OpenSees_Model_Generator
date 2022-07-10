@@ -28,6 +28,7 @@ class PhysicalMaterial:
     density: float
     E: float
     G: float
+    Fy: float
 
     def __srepr__(self):
         return f'Physical material: {self.name}, {self.uid}'

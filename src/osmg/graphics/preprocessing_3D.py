@@ -173,8 +173,10 @@ def add_data__internal_nodes(dt, mdl, load_case):
     for node in list_of_nodes:
         if True in node.restraint:
             restraint_symbols.append("fixed")
+        elif node.visibility.connected_to_zerolength:
+            restraint_symbols.append("release")
         else:
-            restraint_symbols.append("free")
+            restraint_symbols.append("internal")
     for node in list_of_nodes:
         if load_case:
             customdata.append(
@@ -190,6 +192,7 @@ def add_data__internal_nodes(dt, mdl, load_case):
             )
     if load_case:
         dt.append({
+            "name": "Internal nodes",
             "type": "scatter3d",
             "mode": "markers",
             "x": x,
@@ -205,9 +208,11 @@ def add_data__internal_nodes(dt, mdl, load_case):
             '%{customdata[5]:.3g}, %{customdata[6]:.3g})' +
             '<extra>Node: %{customdata[0]:d}</extra>',
             "marker": {
-                "symbol": graphics_common_3D.node_marker['internal'][0],
+                "symbol": [graphics_common_3D.node_marker[sym][0]
+                           for sym in restraint_symbols],
                 "color": graphics_common.NODE_INTERNAL_COLOR,
-                "size": graphics_common_3D.node_marker['internal'][1],
+                "size": [graphics_common_3D.node_marker[sym][1]
+                           for sym in restraint_symbols],
                 "line": {
                     "color": graphics_common.NODE_INTERNAL_COLOR,
                     "width": 2}
@@ -215,6 +220,7 @@ def add_data__internal_nodes(dt, mdl, load_case):
         })
     else:
         dt.append({
+            "name": "Internal nodes",
             "type": "scatter3d",
             "mode": "markers",
             "x": x,
@@ -226,9 +232,11 @@ def add_data__internal_nodes(dt, mdl, load_case):
             'Restraint: %{text}<br>' +
             '<extra>Node: %{customdata[0]:d}</extra>',
             "marker": {
-                "symbol": graphics_common_3D.node_marker['internal'][0],
+                "symbol": [graphics_common_3D.node_marker[sym][0]
+                           for sym in restraint_symbols],
                 "color": graphics_common.NODE_INTERNAL_COLOR,
-                "size": graphics_common_3D.node_marker['internal'][1],
+                "size": [graphics_common_3D.node_marker[sym][1]
+                           for sym in restraint_symbols],
                 "line": {
                     "color": graphics_common.NODE_INTERNAL_COLOR,
                     "width": 2}
@@ -346,8 +354,6 @@ def add_data__frames(dt, mdl, load_case):
             continue
         p_i = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
-        if elm.visibility.hidden_at_line_plots:
-            continue
         section_names.extend([elm.section.name]*3)
         x.extend(
             (p_i[0], p_j[0], None)
@@ -388,7 +394,7 @@ def add_data__frames(dt, mdl, load_case):
             customdata.append(
                 [None]*3
             )
-            
+
     if load_case:
         customdata = np.array(customdata, dtype='object')
         dt.append({
@@ -470,7 +476,8 @@ def add_data__frame_offsets(dt, mdl):
     })
 
 
-def add_data__frame_axes(dt, beamcolumn_elems, ref_len):
+def add_data__frame_axes(dt, mdl, ref_len):
+    beamcolumn_elems = mdl.list_of_beamcolumn_elements()
     if not beamcolumn_elems:
         return
     s = ref_len * 0.025
@@ -481,11 +488,11 @@ def add_data__frame_axes(dt, beamcolumn_elems, ref_len):
     for elm in beamcolumn_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
-        x_vec = elm.x_axis
-        y_vec = elm.y_axis
-        z_vec = elm.z_axis
-        l_clear = elm.length_clear
-        i_pos = np.array(elm.internal_pt_i)
+        x_vec = elm.geomtransf.x_axis
+        y_vec = elm.geomtransf.y_axis
+        z_vec = elm.geomtransf.z_axis
+        l_clear = elm.clear_length()
+        i_pos = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
         mid_pos = i_pos + x_vec * l_clear/2.00
         x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))
         y.extend((mid_pos[1], mid_pos[1]+x_vec[1]*s, None))
@@ -500,6 +507,48 @@ def add_data__frame_axes(dt, beamcolumn_elems, ref_len):
         z.extend((mid_pos[2], mid_pos[2]+z_vec[2]*s, None))
         colors.extend(["blue"]*3)
     dt.append({
+        "name": "Frame axes",
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x,
+        "y": y,
+        "z": z,
+        "hoverinfo": "skip",
+        "line": {
+            "width": 8,
+            "color": colors
+        }
+    })
+
+
+def add_data__zerolength_axes(dt, mdl, ref_len):
+    zerolength_elements = mdl.list_of_zerolength_elements()
+    if not zerolength_elements:
+        return
+    s = ref_len * 0.025
+    x = []
+    y = []
+    z = []
+    colors = []
+    for elm in zerolength_elements:
+        x_vec = elm.vecx
+        y_vec = elm.vecyp
+        z_vec = np.cross(x_vec, y_vec)
+        mid_pos = np.array(elm.eleNodes[0].coords)
+        x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+x_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+x_vec[2]*s, None))
+        colors.extend(["red"]*3)
+        x.extend((mid_pos[0], mid_pos[0]+y_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+y_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+y_vec[2]*s, None))
+        colors.extend(["green"]*3)
+        x.extend((mid_pos[0], mid_pos[0]+z_vec[0]*s, None))
+        y.extend((mid_pos[1], mid_pos[1]+z_vec[1]*s, None))
+        z.extend((mid_pos[2], mid_pos[2]+z_vec[2]*s, None))
+        colors.extend(["blue"]*3)
+    dt.append({
+        "name": "Zerolength axes",
         "type": "scatter3d",
         "mode": "lines",
         "x": x,
@@ -613,70 +662,6 @@ def add_data__extruded_frames_mesh(dt, mdl):
     })
 
 
-def add_data__extruded_steel_W_PZ_mesh(dt, list_of_endsegments):
-
-    if not list_of_endsegments:
-        return
-    x_list = []
-    y_list = []
-    z_list = []
-    i_list = []
-    j_list = []
-    k_list = []
-    index = 0
-
-    for elm in list_of_endsegments:
-
-        side_a = np.array(elm.internal_pt_i)
-        side_b = np.array(elm.internal_pt_j)
-        x_vec = elm.parent_component.x_axis
-        y_vec = elm.parent_component.y_axis
-        z_vec = np.cross(x_vec, y_vec)
-        loop = elm.parent_component.section.mesh.halfedges
-
-        for halfedge in loop:
-            loc0 = halfedge.vertex.coords[0]*z_vec +\
-                halfedge.vertex.coords[1]*y_vec + side_a
-            loc1 = halfedge.vertex.coords[0]*z_vec +\
-                halfedge.vertex.coords[1]*y_vec + side_b
-            loc2 = halfedge.nxt.vertex.coords[0]*z_vec +\
-                halfedge.nxt.vertex.coords[1]*y_vec + side_b
-            loc3 = halfedge.nxt.vertex.coords[0]*z_vec +\
-                halfedge.nxt.vertex.coords[1]*y_vec + side_a
-            x_list.append(loc0[0])
-            y_list.append(loc0[1])
-            z_list.append(loc0[2])
-            x_list.append(loc1[0])
-            y_list.append(loc1[1])
-            z_list.append(loc1[2])
-            x_list.append(loc2[0])
-            y_list.append(loc2[1])
-            z_list.append(loc2[2])
-            x_list.append(loc3[0])
-            y_list.append(loc3[1])
-            z_list.append(loc3[2])
-            i_list.append(index + 0)
-            j_list.append(index + 1)
-            k_list.append(index + 2)
-            i_list.append(index + 0)
-            j_list.append(index + 2)
-            k_list.append(index + 3)
-            index += 4
-    dt.append({
-        "name": "extruded line elements",
-        "type": "mesh3d",
-        "x": x_list,
-        "y": y_list,
-        "z": z_list,
-        "i": i_list,
-        "j": j_list,
-        "k": k_list,
-        "hoverinfo": "skip",
-        "color": graphics_common.BEAM_MESH_COLOR,
-        "opacity": 0.65
-    })
-
-
 def show(mdl: Model,
          load_case: LoadCase=None,
          extrude=False,
@@ -685,14 +670,15 @@ def show(mdl: Model,
          diaphragm_lines=True,
          tributary_areas=True,
          parent_nodes=True,
-         frame_axes=True,
+         frame_axes=False,
+         zerolength_axes=False,
          camera=None
          ):
 
     layout = graphics_common_3D.global_layout(camera)
     dt: list[dict] = []
 
-    # ref_len = mdl.reference_length()
+    ref_len = mdl.reference_length()
 
     # plot the nodes
     
@@ -724,9 +710,10 @@ def show(mdl: Model,
         pass
     else:
         add_data__frames(dt, mdl, load_case)
-        # if frame_axes:
-        #     add_data__frame_axes(dt, beamcolumn_elems,
-        #                          mdl.reference_length())
+        if frame_axes:
+            add_data__frame_axes(dt, mdl, ref_len)
+        if zerolength_axes:
+            add_data__zerolength_axes(dt, mdl, ref_len)
     # plot the rigid offsets
     if offsets:
         add_data__frame_offsets(dt, mdl)

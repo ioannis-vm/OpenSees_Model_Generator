@@ -50,9 +50,9 @@ class Level:
         res += 'Level object\n'
         res += f'parent_model: {self.parent_model.name}\n'
         res += f'uid: {self.uid}\n'
-        res += f'elevations: {self.elevation}\n'
+        res += f'elevation: {self.elevation}\n'
         res += 'Nodes: \n'
-        res += self.nodes.__srepr__()
+        res += self.nodes.__srepr__() + '\n'
         res += 'Components: \n'
-        res += self.components.__srepr__()
+        res += self.components.__srepr__() + '\n'
         return res

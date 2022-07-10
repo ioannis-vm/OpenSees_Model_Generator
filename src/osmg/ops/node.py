@@ -13,6 +13,7 @@ Model Generator for OpenSees ~ node
 
 from dataclasses import dataclass, field
 from functools import total_ordering
+from ..graphics.visibility import NodeVisibility
 
 
 @dataclass
@@ -31,6 +32,7 @@ class Node:
     uid: int
     coords: list[float]
     restraint: list[bool] = field(init=False)
+    visibility: NodeVisibility = field(default_factory=NodeVisibility)
 
     def __post_init__(self):
         self.restraint = [False]*6

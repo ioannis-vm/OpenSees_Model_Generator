@@ -540,6 +540,8 @@ class Analysis:
 
         # define line elements
         for elm in elms:
+            if elm.visibility.skip_OpenSees_definition:
+                continue
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
                            
@@ -549,7 +551,6 @@ class Analysis:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
         # keep track of defined elements
-        defined_elements = {}
         defined_sections = {}
         defined_materials = {}
 
@@ -584,9 +585,22 @@ class Analysis:
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
                 
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # ZeroLength element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-                    
+        elms = self.mdl.list_of_zerolength_elements()
 
+        # define zerolength elements
+        for elm in elms:
+            for mat in elm.mats:
+                if mat.uid not in defined_materials:
+                    ops.uniaxialMaterial(
+                        *mat.ops_args())
+                    defined_materials[mat.uid] = mat
+            ops.element(*elm.ops_args())
+            defined_elements[elm.uid] = elm
+                           
 
 
 
@@ -671,6 +685,8 @@ class Analysis:
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
         for elm in self.mdl.list_of_beamcolumn_elements():
+            if elm.visibility.skip_OpenSees_definition:
+                continue
             udl_total = self.load_case.line_element_udl.registry[elm.uid].total()
             ops.eleLoad('-ele', int(elm.uid),
                         '-type', '-beamUniform',

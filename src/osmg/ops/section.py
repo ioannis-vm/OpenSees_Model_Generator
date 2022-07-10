@@ -14,6 +14,7 @@ Model Generator for OpenSees ~ section
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
+from typing import Any
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
@@ -35,6 +36,20 @@ nparr = npt.NDArray[np.float64]
 @dataclass
 class Section:
     """
+    Section object.
+    The axes are defined in the same way as they are
+    defined in OpenSees. The colors assigned to
+    the axes for plotting follow the
+    AutoCAD convention.
+
+            y(green)
+            ^         x(red)
+            :       .
+            :     .
+            :   .
+           ===
+            | -------> z (blue)
+           ===
 
     """
     name: str
@@ -55,6 +70,7 @@ class ElasticSection(Section):
     W: float
     outside_shape: Optional[Mesh] = field(default=None, repr=False)
     snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
+    properties: Optional[dict[str, Any]] = field(default=None, repr=False)
 
     def weight_per_length(self):
         if self.name[0] == 'W':

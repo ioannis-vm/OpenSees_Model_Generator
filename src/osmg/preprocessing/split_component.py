@@ -13,7 +13,6 @@ def split_component(component, point):
     elms = []
     elms.extend(component.elastic_beamcolumn_elements.registry.values())
     elms.extend(component.disp_beamcolumn_elements.registry.values())
-    split_elm = None
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
         p_i = (np.array(elm.eleNodes[0].coords)
@@ -44,7 +43,6 @@ def split_component(component, point):
     # otherwise:
 
     # remove existing line element
-    element_class = closest_elm.__class__
     node_i = closest_elm.eleNodes[0]
     node_j = closest_elm.eleNodes[1]
     prev_section = closest_elm.section
@@ -55,7 +53,7 @@ def split_component(component, point):
         component.disp_beamcolumn_elements.registry.pop(closest_elm.uid)
     else:
         raise ValueError('Unsupported element type')
-    
+
     # add split node
     middle_node = Node(
         component.parent_collection.parent.parent_model.uid_generator.new('node'),
@@ -67,9 +65,6 @@ def split_component(component, point):
     o_j = np.zeros(3)
     n_i = node_i
     n_j = middle_node
-    conn_i_list = [n_i.uid, n_j.uid]
-    conn_i_list.sort()
-    conn_i = (*conn_i_list,)
     transf_i = geomTransf(
         prev_gtransf.transfType,
         component.parent_collection.parent.parent_model.uid_generator.new('transformation'),
@@ -108,9 +103,6 @@ def split_component(component, point):
     o_j = prev_gtransf.offset_j
     n_i = middle_node
     n_j = node_j
-    conn_j_list = [n_i.uid, n_j.uid]
-    conn_j_list.sort()
-    conn_j = (*conn_j_list,)
     transf_j = geomTransf(
         prev_gtransf.transfType,
         component.parent_collection.parent.parent_model.uid_generator.new('transformation'),

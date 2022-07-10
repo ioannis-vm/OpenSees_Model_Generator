@@ -28,8 +28,9 @@ import plotly.graph_objects as go  # type: ignore
 node_marker = {
     'fixed': ("square", 10),
     'free': ("circle", 5),
-    'parent': ("circle-open", 15),
+    'parent': ("circle-open", 30),
     'internal': ("x", 3),
+    'release': ('circle-open', 15)
 }
 
 
@@ -53,6 +54,7 @@ def global_layout(camera=None):
                    xaxis_visible=False,
                    yaxis_visible=False,
                    zaxis_visible=False,
+                   bgcolor='black',
                    camera=camera
                    )
     )

@@ -22,3 +22,11 @@ class ElementVisibility:
     """
     hidden_when_extruded: bool = field(default=False)
     hidden_at_line_plots: bool = field(default=False)
+    skip_OpenSees_definition: bool = field(default=False)
+
+@dataclass
+class NodeVisibility:
+    """
+
+    """
+    connected_to_zerolength: bool = field(default=False)
