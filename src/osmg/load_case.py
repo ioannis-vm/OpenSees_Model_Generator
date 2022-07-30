@@ -21,10 +21,14 @@ from . import transformations
 from .collections import NodePointLoadMassCollection
 from .collections import NodeMassCollection
 from .collections import LineElementUDLCollection
+from .collections import TributaryAreaAnalysisCollection
+from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
+from .preprocessing.rigid_diaphragm import RDAnalyzer
 
 if TYPE_CHECKING:
     from .model import Model
     from .ops.element import elasticBeamColumn
+    from .ops.node import Node
 
 nparr = npt.NDArray[np.float64]
 
@@ -37,37 +41,18 @@ class PointLoadMass:
         other (list[float])
         floor (list[float])
     """
-    other: list[float] = field(init=False, repr=False)
-    floor: list[float] = field(init=False, repr=False)
+    val: nparr = field(
+        default_factory=lambda: np.zeros(shape=6))
 
-    def __post_init__(self):
-        self.other = [0.00]*6
-        self.floor = [0.00]*6
+    def add(self, load: nparr):
+        self.val += load
 
     def __repr__(self):
         res = ''
         res += 'Point Load (or mass) object\n'
         res += 'Components: (global system)\n'
-        res += f'other: {self.other}\n'
-        res += f'floor: {self.floor}\n'
+        res += f'val: {self.val}\n'
         return res
-
-    def add(self, load: list[float], kind='other'):
-        """
-        Adds a load to the existing load
-        """
-        assert hasattr(self, kind)
-        assert(len(load) == len(self.other))
-        current = getattr(self, kind)
-        new = [c + o for c, o in zip(current, load)]
-        setattr(self, kind, new)
-
-    def total(self):
-        """
-        Returns the total load
-        """
-        return [o + f for o, f in zip(self.other, self.floor)]
-
 
 
 @dataclass(repr=False)
@@ -76,13 +61,7 @@ class LineElementUDL:
 
     """
     parent_line_element: elasticBeamColumn
-    self_weight: nparr = field(
-        default_factory=lambda: np.zeros(shape=3))
-    floor_weight: nparr = field(
-        default_factory=lambda: np.zeros(shape=3))
-    floor_massless_load: nparr = field(
-        default_factory=lambda: np.zeros(shape=3))
-    other_load: nparr = field(
+    val: nparr = field(
         default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
@@ -90,27 +69,10 @@ class LineElementUDL:
         res += 'LineElementUDL object\n'
         res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
         res += 'Components:\n'
-        res += f'  self_weight: {self.self_weight}\n'
-        res += f'  floor_weight: {self.floor_weight}\n'
-        res += f'  floor_massless_load: {self.floor_massless_load}\n'
-        res += f'  other_load: {self.other_load}\n'
+        res += f'  val: {self.val}\n'
         return res
 
-    def total(self):
-        return (self.self_weight
-                + self.floor_weight
-                + self.floor_massless_load
-                + self.other_load)
-
-    def copy(self, other_parent_line_element) -> 'LineElementUDL':
-        other = LineElementUDL(other_parent_line_element)
-        other.self_weight = self.self_weight.copy()
-        other.floor_weight = self.floor_weight.copy()
-        other.floor_massless_load = self.floor_massless_load.copy()
-        other.other_load = self.other_load.copy()
-        return other
-
-    def add_glob(self, udl: nparr, ltype='other_load'):
+    def add_glob(self, udl: nparr):
         """
         Adds a uniformly distributed load
         to the existing udl
@@ -125,20 +87,18 @@ class LineElementUDL:
                 the global x, y, and z directions, in the direction of
                 the global axes.
         """
-        assert hasattr(self, ltype)
         T_mat = transformations.transformation_matrix(
             self.parent_line_element.geomtransf.x_axis,
             self.parent_line_element.geomtransf.y_axis,
             self.parent_line_element.geomtransf.z_axis)
         udl_local = T_mat @ udl
-        attr = getattr(self, ltype)
-        attr += udl_local
+        self.val += udl_local
 
-    def get_udl_self_other_glob(self):
+    def to_global(self):
         """
 
         """
-        udl = self.self_weight + self.other_load
+        udl = self.val
         T_mat = transformations.transformation_matrix(
             self.parent_line_element.geomtransf.x_axis,
             self.parent_line_element.geomtransf.y_axis,
@@ -155,12 +115,17 @@ class LoadCase:
     node_loads: NodePointLoadMassCollection = field(init=False)
     node_mass: NodeMassCollection = field(init=False)
     line_element_udl: LineElementUDLCollection = field(init=False)
+    tributary_area_analysis: TributaryAreaAnalysisCollection = \
+        field(init=False)
+    parent_nodes: dict[int, Node] = field(default_factory=dict)
 
     def __post_init__(self):
         self.node_loads = NodePointLoadMassCollection(self)
         self.node_mass = NodeMassCollection(self)
         self.line_element_udl = LineElementUDLCollection(self)
-        # initialize loads and mass
+        self.tributary_area_analysis = \
+            TributaryAreaAnalysisCollection(self)
+        # initialize loads and mass for each node and element
         for node in self.parent_model.list_of_all_nodes():
             self.node_loads.registry[node.uid] = PointLoadMass()
             self.node_mass.registry[node.uid] = PointLoadMass()
@@ -168,6 +133,16 @@ class LoadCase:
                              .list_of_beamcolumn_elements()):
             self.line_element_udl.registry[line_element.uid] = \
                 LineElementUDL(line_element)
+        # initialize tributary area analysis for each level
+        for lvlkey, lvl in self.parent_model.levels.registry.items():
+            self.tributary_area_analysis.registry[lvlkey] = \
+                TributaryAreaAnaysis(self, lvl)
+
+    def rigid_diaphragms(self, level_uids: list[int], gather_mass=False):
+        for lvl_uid in level_uids:
+            lvl = self.parent_model.levels.registry[lvl_uid]
+            rda = RDAnalyzer(self, lvl)
+            rda.run(gather_mass)
 
     def __repr__(self):
         res = ''

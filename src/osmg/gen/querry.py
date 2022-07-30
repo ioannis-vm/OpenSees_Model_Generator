@@ -54,7 +54,8 @@ class ElmQuerry:
     def search_node_lvl(self,
                         x: float, y: float,
                         lvl: int,
-                        z: Optional[float] = None
+                        z: Optional[float] = None,
+                        internal=False
                         ) -> Optional[Node]:
         """
         Looks if a node exists at the given location.
@@ -65,11 +66,17 @@ class ElmQuerry:
         # check to see if node exists
         if z:
             candidate_pt: nparr = np.array([x, y, z])
+            ndims = 3
         else:
             candidate_pt = np.array(
-                [x, y, level.elevation])
-        for other_node in level.nodes.registry.values():
-            other_pt: nparr = np.array(other_node.coords)
+                [x, y])
+            ndims = 2
+        nodes = level.nodes.registry
+        if internal:
+            for comp in level.components.registry.values():
+                nodes.update(comp.internal_nodes.registry)
+        for other_node in nodes.values():
+            other_pt: nparr = np.array(other_node.coords[:ndims])
             if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
                 res = other_node
                 break
@@ -98,17 +105,12 @@ class ElmQuerry:
         return retrieved_components
 
 
-    def retrieve_component_2node_horizontal(self, x, y, lvl):
+    def retrieve_component(self, x, y, lvl):
         """
         """
         level = self.model.levels.registry[lvl]
         for component in level.components.registry.values():
             if len(component.external_nodes.registry) != 2:
-                continue
-            # consider only horizontal components
-            n_i = list(component.external_nodes.registry.values())[0]
-            n_j = list(component.external_nodes.registry.values())[1]
-            if n_i.coords[2] != n_j.coords[2]:
                 continue
             line_elems = []
             line_elems.extend(component.elastic_beamcolumn_elements
@@ -120,16 +122,14 @@ class ElmQuerry:
                        + elm.geomtransf.offset_i)
                 p_j = (np.array(elm.eleNodes[1].coords)
                        + elm.geomtransf.offset_j)
-                line = Line('', p_i[0:2], p_j[0:2])
-                try:
-                   line.intersects_pt(np.array((x, y)))
-                except:
-                    import pdb
-                    pdb.set_trace()
-                    from ..graphics.preprocessing_3D import show
-                    show(component.parent_model)
-                if line.intersects_pt(np.array((x, y))):
-                    return component
+                if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
+                    if np.linalg.norm(np.array((x, y)) - p_i[0:2]) < common.EPSILON:
+                        return component
+                else:
+                    line = Line('', p_i[0:2], p_j[0:2])
+                    line.intersects_pt(np.array((x, y)))
+                    if line.intersects_pt(np.array((x, y))):
+                        return component
 
 @dataclass
 class LoadCaseQuerry:
@@ -141,11 +141,14 @@ class LoadCaseQuerry:
         num_lvls = len(mdl.levels.registry)
         distr = np.zeros(num_lvls)
         for key, lvl in mdl.levels.registry.items():
-            for component in  lvl.components.registry.values():
-                for node in component.external_nodes.registry.values():
-                    mass = self.loadcase.node_mass.registry[node.uid]
-                    distr[key] += mass.total()[0]
+            for node in lvl.nodes.registry.values():
+                mass = self.loadcase.node_mass.registry[node.uid]
+                distr[key] += mass.val[0]
+
+            for component in lvl.components.registry.values():
                 for node in component.internal_nodes.registry.values():
                     mass = self.loadcase.node_mass.registry[node.uid]
-                    distr[key] += mass.total()[0]
+                    distr[key] += mass.val[0]
+        for uid, node in self.loadcase.parent_nodes.items():
+            distr[uid] += self.loadcase.node_mass.registry[node.uid].val[0]
         return distr

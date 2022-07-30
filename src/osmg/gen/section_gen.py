@@ -22,6 +22,7 @@ from ..ops.section import ElasticSection
 from ..ops.section import FiberSection
 from ..ops.section import SectionComponent
 from ..gen import mesh_shapes
+from .mesh_shapes import rect_mesh
 import pkgutil
 if TYPE_CHECKING:
     from .model import Model
@@ -35,6 +36,52 @@ class SectionGenerator:
     """
     model: Model
 
+    def generate_generic_elastic(
+            self,
+            name: str,
+            ea: float,
+            ei: float,
+            gj: float
+    ):
+        sec = ElasticSection(
+            name=name,
+            uid=self.model.uid_generator.new('section'),
+            outside_shape=None,
+            snap_points=None,
+            E=1.00,
+            A=ea,
+            Iy=ei,
+            Ix=ei,
+            G=1.00,
+            J=gj,
+            W=0.00,
+        )
+        if self.model.settings.imperial_units:
+            y_max = +10.00
+            y_min = -10.00
+            z_max = +6.00
+            z_min = -6.00
+            sec.outside_shape = rect_mesh(12.0, 20.0)
+        else:
+            y_max = +0.25
+            y_min = -0.25
+            z_max = +0.15
+            z_min = -0.15
+            sec.outside_shape = rect_mesh(0.30, 0.50)
+        snap_points = {
+            'centroid': np.array([0., 0.]),
+            'top_center': np.array([0., -y_max]),
+            'top_left': np.array([-z_min, -y_max]),
+            'top_right': np.array([-z_max, -y_max]),
+            'center_left': np.array([-z_min, 0.]),
+            'center_right': np.array([-z_max, 0.]),
+            'bottom_center': np.array([0., -y_min]),
+            'bottom_left': np.array([-z_min, -y_min]),
+            'bottom_right': np.array([-z_max, -y_min])
+        }
+        sec.snap_points = snap_points
+        self.model.elastic_sections.add(sec)
+        return sec
 
     def load_AISC_from_database(
             self,

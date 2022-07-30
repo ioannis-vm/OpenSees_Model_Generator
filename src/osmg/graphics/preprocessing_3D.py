@@ -45,8 +45,8 @@ def add_data__nodes(dt, mdl, load_case):
         if load_case:
             customdata_lst.append(
                 (node.uid,
-                 *load_case.node_mass.registry[node.uid].total(),
-                 *load_case.node_loads.registry[node.uid].total()
+                 *load_case.node_mass.registry[node.uid].val,
+                 *load_case.node_loads.registry[node.uid].val
                  )
             )
         else:
@@ -114,18 +114,19 @@ def add_data__nodes(dt, mdl, load_case):
         
 
 
-def add_data__parent_nodes(dt, list_of_nodes):
+def add_data__parent_nodes(dt, load_case: LoadCase):
 
+    list_of_nodes = load_case.parent_nodes.values()
     x = [node.coords[0] for node in list_of_nodes]
     y = [node.coords[1] for node in list_of_nodes]
     z = [node.coords[2] for node in list_of_nodes]
     customdata = []
-    restraint_types = [node.restraint_type for node in list_of_nodes]
+    restraints = [node.restraint for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
             (node.uid,
-             *load_case.node_mass.registry[node.uid].total(),
-             *node.load_total()
+             *load_case.node_mass.registry[node.uid].val,
+             *load_case.node_loads.registry[node.uid].val
              )
         )
 
@@ -137,7 +138,7 @@ def add_data__parent_nodes(dt, list_of_nodes):
         "y": y,
         "z": z,
         "customdata": customdata,
-        "text": restraint_types,
+        "text": restraints,
         "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
         'Restraint: %{text}<br>' +
         'Mass: (%{customdata[1]:.3g}, ' +
@@ -150,10 +151,10 @@ def add_data__parent_nodes(dt, list_of_nodes):
         '%{customdata[12]:.3g})' +
         '<extra>Parent Node: %{customdata[0]:d}</extra>',
         "marker": {
-            "symbol": [graphics_common_3D.node_marker[node.restraint_type][0]
+            "symbol": [graphics_common_3D.node_marker['parent'][0]
                        for node in list_of_nodes],
             "color": graphics_common.NODE_PRIMARY_COLOR,
-            "size": [graphics_common_3D.node_marker[node.restraint_type][1]
+            "size": [graphics_common_3D.node_marker['parent'][1]
                      for node in list_of_nodes],
             "line": {
                 "color": graphics_common.NODE_PRIMARY_COLOR,
@@ -181,8 +182,8 @@ def add_data__internal_nodes(dt, mdl, load_case):
         if load_case:
             customdata.append(
                 (node.uid,
-                 *load_case.node_mass.registry[node.uid].total(),
-                 *load_case.node_loads.registry[node.uid].total()
+                 *load_case.node_mass.registry[node.uid].val,
+                 *load_case.node_loads.registry[node.uid].val
                  )
             )
         else:
@@ -367,13 +368,13 @@ def add_data__frames(dt, mdl, load_case):
         if load_case:
             customdata.append(
                 (elm.uid,
-                 *load_case.line_element_udl.registry[elm.uid].total(),
+                 *load_case.line_element_udl.registry[elm.uid].val,
                  elm.eleNodes[0].uid,
                  elm.parent_component.uid)
             )
             customdata.append(
                 (elm.uid,
-                 *load_case.line_element_udl.registry[elm.uid].total(),
+                 *load_case.line_element_udl.registry[elm.uid].val,
                  elm.eleNodes[1].uid,
                  elm.parent_component.uid)
             )
@@ -718,9 +719,10 @@ def show(mdl: Model,
     if offsets:
         add_data__frame_offsets(dt, mdl)
 
-    # # plot the parent nodes
-    # if parent_nodes:
-    #     add_data__parent_nodes(dt, mdl.list_of_parent_nodes())
+    # plot the parent nodes
+    if parent_nodes:
+        if load_case:
+            add_data__parent_nodes(dt, load_case)
 
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)

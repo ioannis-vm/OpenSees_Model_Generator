@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from .ops.section import Section
     from .ops.uniaxialMaterial import uniaxialMaterial
     from .mesh import Mesh
+    from .preprocessing.tributary_area_analysis import TributaryAreaAnalysis
 
 
 nparr = npt.NDArray[np.float64]
@@ -279,3 +280,14 @@ class NodeMassCollection(Collection):
         registry (dict[int, elasticBeamColumn])
     """
     registry: dict[int, PointMassMass] = field(default_factory=dict)
+
+
+@dataclass(repr=False)
+class TributaryAreaAnalysisCollection(Collection):
+    """
+    Tributary area analysis object collection.
+    Attributes:
+        parent (Any)
+        registry (dict[int, TributaryAreaAnalysis])
+    """
+    registry: dict[int, TributaryAreaAnalysis] = field(default_factory=dict)

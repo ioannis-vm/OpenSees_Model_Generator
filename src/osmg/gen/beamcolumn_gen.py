@@ -85,12 +85,35 @@ def beam_placement_lookup(
         components = querry.retrieve_components_from_nodes([node], lvl.uid)
         for component in components.values():
             if component.component_purpose == 'steel_W_panel_zone':
-                result_node = component.external_nodes.named_contents[snap]
-        if result_node:
-            eo += np.array((0.00, 0.00, node.coords[2] - result_node.coords[2]))
-            node = result_node
+                if snap in ['middle_front', 'middle_back']:
+                    result_node = component.external_nodes.named_contents[snap]
+                    eo += np.array((0.00, 0.00, node.coords[2] - result_node.coords[2]))
+                    node = result_node
+                    return node, eo
+                elif snap in [
+                        'centroid', 'top_center', 'top_left',
+                        'top_right', 'center_left', 'center_right',
+                        'bottom_center', 'bottom_left', 'bottom_right']:
+                    elm = component.elastic_beamcolumn_elements.named_contents['elm_interior']
+                    dz, dy = elm.section.snap_points[snap]
+                    sec_offset_local = -np.array([0.00, dy, dz])
+                    # retrieve local coordinate system
+                    x_axis = elm.geomtransf.x_axis
+                    y_axis = elm.geomtransf.y_axis
+                    z_axis = elm.geomtransf.z_axis
+                    t_glob_to_loc = transformation_matrix(
+                        x_axis, y_axis, z_axis)
+                    t_loc_to_glob = t_glob_to_loc.T
+                    sec_offset_global = (
+                        t_loc_to_glob @ sec_offset_local)
+                    result_node = node
+                    eo += sec_offset_global
+                    return node, eo
+                else:
+                    raise ValueError(f'Unsupported snap keyword: {snap}')
+
         # else check if a column-like component assembly exists
-        elif key-1 in lvls.registry:
+        if key-1 in lvls.registry:
             node_below = querry.search_node_lvl(
                 x, y, key-1)
             if node_below:
@@ -314,8 +337,6 @@ class BeamColumnGenerator:
             node_i,
             node_j,
             n_sub,
-            n_sub_i,
-            n_sub_j,
             eo_i,
             eo_j,
             section,
@@ -325,9 +346,7 @@ class BeamColumnGenerator:
             zerolength_gen_i,
             zerolength_gen_args_i,
             zerolength_gen_j,
-            zerolength_gen_args_j,
-            distance_i,
-            distance_j):
+            zerolength_gen_args_j):
 
         # instantiate a component assembly
         component = ComponentAssembly(
@@ -349,79 +368,93 @@ class BeamColumnGenerator:
         zerolength_gen_args_i.update({'element_length': clear_length})
         zerolength_gen_args_j.update({'element_length': clear_length})
 
-        hinge_location_i = p_i + x_axis * distance_i
-        hinge_location_j = p_i + x_axis * (clear_length - distance_j)
+        # we can have hinges at both ends, or just one of the two ends.
+        # ...or even no hinges!
+        if zerolength_gen_i:
+            hinge_location_i = p_i + x_axis * zerolength_gen_args_i['distance']
+            nh_i_out = Node(self.model.uid_generator.new('node'),
+                            [*hinge_location_i])
+            nh_i_in = Node(self.model.uid_generator.new('node'),
+                           [*hinge_location_i])
+            nh_i_in.visibility.connected_to_zerolength = True
+            component.internal_nodes.add(nh_i_out)
+            component.internal_nodes.add(nh_i_in)
+            self.add_beamcolumn_elements_in_series(
+                component,
+                node_i,
+                nh_i_out,
+                eo_i,
+                np.zeros(3),
+                zerolength_gen_args_i['n_sub'],
+                transf_type,
+                section,
+                element_type,
+                angle
+            )
+            zerolen_elm = self.define_zerolength(
+                component,
+                nh_i_out,
+                nh_i_in,
+                x_axis,
+                y_axis,
+                zerolength_gen_i,
+                zerolength_gen_args_i
+            )
+            component.zerolength_elements.add(zerolen_elm)
+            conn_node_i = nh_i_in
+            conn_eo_i = np.zeros(3)
+        else:
+            conn_node_i = node_i
+            conn_eo_i = eo_i
+        if zerolength_gen_j:
+            hinge_location_j = p_i + x_axis * (clear_length - zerolength_gen_args_j['distance'])
+            nh_j_out = Node(self.model.uid_generator.new('node'),
+                            [*hinge_location_j])
+            nh_j_in = Node(self.model.uid_generator.new('node'),
+                           [*hinge_location_j])
+            nh_j_in.visibility.connected_to_zerolength = True
+            component.internal_nodes.add(nh_j_out)
+            component.internal_nodes.add(nh_j_in)
+            self.add_beamcolumn_elements_in_series(
+                component,
+                nh_j_out,
+                node_j,
+                np.zeros(3),
+                eo_j,
+                zerolength_gen_args_j['n_sub'],
+                transf_type,
+                section,
+                element_type,
+                angle
+            )
+            zerolen_elm = self.define_zerolength(
+                component,
+                nh_j_out,
+                nh_j_in,
+                -x_axis,
+                y_axis,
+                zerolength_gen_j,
+                zerolength_gen_args_j
+            )
+            component.zerolength_elements.add(zerolen_elm)
+            conn_node_j = nh_j_in
+            conn_eo_j = np.zeros(3)
+        else:
+            conn_node_j = node_j
+            conn_eo_j = eo_j
 
-        nh_i_out = Node(self.model.uid_generator.new('node'),
-                        [*hinge_location_i])
-        nh_i_in = Node(self.model.uid_generator.new('node'),
-                       [*hinge_location_i])
-        nh_i_in.visibility.connected_to_zerolength = True
-        nh_j_out = Node(self.model.uid_generator.new('node'),
-                        [*hinge_location_j])
-        nh_j_in = Node(self.model.uid_generator.new('node'),
-                       [*hinge_location_j])
-        nh_j_in.visibility.connected_to_zerolength = True
-        component.internal_nodes.add(nh_i_out)
-        component.internal_nodes.add(nh_i_in)
-        component.internal_nodes.add(nh_j_out)
-        component.internal_nodes.add(nh_j_in)
         self.add_beamcolumn_elements_in_series(
             component,
-            node_i,
-            nh_i_out,
-            eo_i,
-            np.zeros(3),
-            n_sub_i,
-            transf_type,
-            section,
-            element_type,
-            angle
-        )
-        self.add_beamcolumn_elements_in_series(
-            component,
-            nh_i_in,
-            nh_j_in,
-            np.zeros(3),
-            np.zeros(3),
+            conn_node_i,
+            conn_node_j,
+            conn_eo_i,
+            conn_eo_j,
             n_sub,
             transf_type,
             section,
             element_type,
             angle
         )
-        self.add_beamcolumn_elements_in_series(
-            component,
-            nh_j_out,
-            node_j,
-            np.zeros(3),
-            eo_j,
-            n_sub_j,
-            transf_type,
-            section,
-            element_type,
-            angle
-        )
-        zerolen_elm = self.define_zerolength(
-            component,
-            nh_i_out,
-            nh_i_in,
-            x_axis,
-            y_axis,
-            zerolength_gen_i,
-            zerolength_gen_args_i
-        )
-        component.zerolength_elements.add(zerolen_elm)
-        zerolen_elm = self.define_zerolength(
-            component,
-            nh_j_out,
-            nh_j_in,
-            -x_axis,
-            y_axis,
-            zerolength_gen_j,
-            zerolength_gen_args_j
-        )
-        component.zerolength_elements.add(zerolen_elm)
 
 
     def look_for_panel_zone(
@@ -702,7 +735,7 @@ class BeamColumnGenerator:
                 [top_node, top_h_f],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     y_axis, -x_axis, z_axis
@@ -716,7 +749,7 @@ class BeamColumnGenerator:
                 [top_h_b, top_node],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     y_axis, -x_axis, z_axis
@@ -730,7 +763,7 @@ class BeamColumnGenerator:
                 [bottom_mid, bottom_h_f],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     y_axis, -x_axis, z_axis
@@ -744,7 +777,7 @@ class BeamColumnGenerator:
                 [bottom_h_b, bottom_mid],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     y_axis, -x_axis, z_axis
@@ -758,7 +791,7 @@ class BeamColumnGenerator:
                 [top_v_f, mid_v_f],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
@@ -772,7 +805,7 @@ class BeamColumnGenerator:
                 [top_v_b, mid_v_b],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
@@ -786,7 +819,7 @@ class BeamColumnGenerator:
                 [mid_v_f, bottom_v_f],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
@@ -800,7 +833,7 @@ class BeamColumnGenerator:
                 [mid_v_b, bottom_v_b],
                 rigid_sec,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
@@ -814,7 +847,7 @@ class BeamColumnGenerator:
                 [top_node, bottom_mid],
                 section,
                 geomTransf(
-                    'Linear',
+                    'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
@@ -839,23 +872,20 @@ class BeamColumnGenerator:
                     'pz_hardening': pz_hardening
                  }
             )
-            # zerolen_top_f = self.define_zerolength(
-            #     component,
-            #     top_h_f,
-            #     top_v_f,
-            #     y_axis,
-            #     -x_axis,
-            #     fix_all,
-            #     {}
-            # )
             zerolen_top_b = self.define_zerolength(
                 component,
                 top_h_b,
                 top_v_b,
                 x_axis,
                 y_axis,
-                release_6,
-                {}
+                steel_w_col_pz,
+                {
+                    'section': section,
+                    'physical_material': physical_material,
+                    'pz_length': beam_depth,
+                    'pz_doubler_plate_thickness': pz_doubler_plate_thickness,
+                    'pz_hardening': pz_hardening
+                 }
             )
             zerolen_bottom_f = self.define_zerolength(
                 component,
@@ -863,8 +893,14 @@ class BeamColumnGenerator:
                 bottom_v_f,
                 x_axis,
                 y_axis,
-                release_6,
-                {}
+                steel_w_col_pz,
+                {
+                    'section': section,
+                    'physical_material': physical_material,
+                    'pz_length': beam_depth,
+                    'pz_doubler_plate_thickness': pz_doubler_plate_thickness,
+                    'pz_hardening': pz_hardening
+                 }
             )
             zerolen_bottom_b = self.define_zerolength(
                 component,
@@ -872,8 +908,14 @@ class BeamColumnGenerator:
                 bottom_v_b,
                 x_axis,
                 y_axis,
-                release_6,
-                {}
+                steel_w_col_pz,
+                {
+                    'section': section,
+                    'physical_material': physical_material,
+                    'pz_length': beam_depth,
+                    'pz_doubler_plate_thickness': pz_doubler_plate_thickness,
+                    'pz_hardening': pz_hardening
+                 }
             )
             
             # fill component assembly
@@ -896,7 +938,9 @@ class BeamColumnGenerator:
             component.internal_nodes.add(bottom_v_b)
 
             component.elastic_beamcolumn_elements.add(elm_top_h_f)
+            component.elastic_beamcolumn_elements.named_contents['elm_top_h_f'] = elm_top_h_f
             component.elastic_beamcolumn_elements.add(elm_top_h_b)
+            component.elastic_beamcolumn_elements.named_contents['elm_top_h_b'] = elm_top_h_b
             component.elastic_beamcolumn_elements.add(elm_bottom_h_f)
             component.elastic_beamcolumn_elements.add(elm_bottom_h_b)
             component.elastic_beamcolumn_elements.add(elm_top_v_f)
@@ -904,6 +948,7 @@ class BeamColumnGenerator:
             component.elastic_beamcolumn_elements.add(elm_bottom_v_f)
             component.elastic_beamcolumn_elements.add(elm_bottom_v_b)
             component.elastic_beamcolumn_elements.add(elm_interior)
+            component.elastic_beamcolumn_elements.named_contents['elm_interior'] = elm_interior
 
             component.zerolength_elements.add(zerolen_top_f)
             component.zerolength_elements.named_contents['nonlinear_spring'] = zerolen_top_f

@@ -100,6 +100,7 @@ class ElasticSection(Section):
             res += 'snap_points: specified\n'
         else:
             res += 'snap_points: None\n'
+        return res
 
 @dataclass(repr=False)
 class SectionComponent:

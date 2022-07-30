@@ -28,7 +28,7 @@ import plotly.graph_objects as go  # type: ignore
 node_marker = {
     'fixed': ("square", 10),
     'free': ("circle", 5),
-    'parent': ("circle-open", 30),
+    'parent': ("circle-open", 20),
     'internal': ("x", 3),
     'release': ('circle-open', 15)
 }

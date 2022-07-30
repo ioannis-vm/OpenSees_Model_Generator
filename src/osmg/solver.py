@@ -11,28 +11,28 @@ Model Generator for OpenSees ~ solver
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 from typing import Optional
-from typing import TYPE_CHECKING
-from typing import Union
 from typing import Any
+from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 import os
-import shelve
 import pickle
 import logging
+import time
 import numpy as np
 import numpy.typing as npt
 from scipy import integrate  # type: ignore
 from scipy.interpolate import interp1d  # type: ignore
+import plotly.express as px
+import pandas as pd
 import openseespy.opensees as ops  # type: ignore
-from datetime import datetime
-import time
 import matplotlib.pyplot as plt  # type: ignore
 from .load_case import LoadCase
 from .mesh import subdivide_polygon
 # from .import components
 from .model import Model
-# from .components import elasticBeamColumnElement
+from .ops.element import elasticBeamColumn
 from .import common
 # from .graphics import postprocessing_3D
 from .graphics import general_2D
@@ -40,7 +40,7 @@ from .import transformations
 from .collections import Collection
 from .gen.querry import LoadCaseQuerry
 if TYPE_CHECKING:
-    from section import Section
+    from .ops.uniaxialMaterial import uniaxialMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -55,6 +55,111 @@ MD_ANALYSIS_SYSTEM = 'UmfPack'
 CONSTRAINTS = ('Transformation',)
 NUMBERER = 'Plain'
 
+
+def test_uniaxial_material(
+        mat: uniaxialMaterial,
+        input_deformations: list[float],
+        incr: float,
+        plot: bool
+):
+    """
+    Generates force-deformation pairs using the given uniaxial material.
+    Used for testing and validation.
+    """
+
+    forces = [0.00]
+    deformations = [0.00]
+
+    # define model
+    ops.wipe()
+    ops.model('basic', '-ndm', 1, '-ndf', 1)
+    ops.node(0, 0.00)
+    ops.node(1, 0.00)
+    ops.fix(0, 1)
+    ops.uniaxialMaterial(
+        *mat.ops_args())
+    ops.element('zeroLength', 0, 0, 1, '-mat', mat.uid, '-dir', 1)
+    # define load pattern
+    ops.timeSeries('Linear', 1)
+    ops.pattern('Plain', 1, 1)
+    ops.load(1, 1.00)
+    # run analysis
+    ops.numberer('Plain')
+    ops.constraints('Plain')
+
+    curr_defo = ops.nodeDisp(1, 1)
+    n_steps_success = 0
+    total_fail = False
+    num_subdiv = 0
+    num_times = 0
+    scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
+    steps = [25, 50, 75, 100, 250, 500]
+    norm = [1.0e-6] * 5 + [1.0e-2]
+    algor = ['Newton']*6
+    for target_defo in input_deformations:
+        # determine push direction
+        if curr_defo < target_defo:
+            incr = abs(incr)
+            sign = +1.00
+        else:
+            incr = -abs(incr)
+            sign = -1.00
+        print('entering loop', target_defo)
+        while curr_defo * sign < target_defo * sign:
+            # determine increment
+            if abs(curr_defo - target_defo) < \
+               abs(incr) * scale[num_subdiv]:
+                incr_anl = sign * abs(curr_defo - target_defo)
+            else:
+                incr_anl = incr * scale[num_subdiv]
+            ops.test('NormDispIncr', norm[num_subdiv],
+                     steps[num_subdiv], 0)
+            ops.algorithm(algor[num_subdiv])
+            # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
+            ops.integrator("DisplacementControl", 1, 1, incr_anl)
+            ops.system('FullGeneral')
+            ops.analysis("Static")
+            flag = ops.analyze(1)
+            if flag != 0:
+                # analysis failed
+                if num_subdiv == len(scale) - 1:
+                    # can't refine further
+                    print()
+                    print('===========================')
+                    print('Analysis failed to converge')
+                    print('===========================')
+                    print()
+                    total_fail = True
+                    break
+                else:
+                    # can still reduce step size
+                    num_subdiv += 1
+                    # how many times to run with reduced step size
+                    num_times = 10
+            else:
+                # analysis was successful
+                n_steps_success += 1
+                if num_times != 0:
+                    num_times -= 1
+                if num_subdiv != 0:
+                    if num_times == 0:
+                        num_subdiv -= 1
+                        num_times = 10
+                ops.reactions()
+                curr_defo = ops.nodeDisp(1, 1)
+                reaction = -ops.nodeReaction(0)[0]
+                forces.append(reaction)
+                deformations.append(curr_defo)
+            if total_fail:
+                break
+    print('Number of saved analysis steps:', n_steps_success)
+    results = np.column_stack((deformations, forces))
+    df = pd.DataFrame(results)
+    df.columns = ['deformation', 'froce']
+    if plot:
+        fig = px.line(df, x='deformation', y='force', markers=True)
+        fig.show()
+    return df
 
 
 @dataclass(repr=False)
@@ -81,12 +186,13 @@ class Results:
 class AnalysisStorageSettings:
     """
     """
+    log_file: Optional[str] = field(default=None)
     store_forces: bool = field(default=True)
     store_reactions: bool = field(default=True)
     store_fiber: bool = field(default=True)
     store_release_force_defo: bool = field(default=True)
-    specific_nodes: list[str] = field(default_factory=list)
-    specific_elements: list[str] = field(default_factory=list)
+    specific_nodes: list[int] = field(default_factory=list)
+    pickle_results: bool = field(default=False)
 
 
 @dataclass(repr=False)
@@ -95,392 +201,85 @@ class Analysis:
     todo - work in progress
     """
     mdl: Model
-    load_case: LoadCase
-    log_file: Optional[str] = field(default=None)
+    load_cases: dict[str, LoadCase]
     output_directory: Optional[str] = field(default=None)
-    settings: AnalysisStorageSettings = field(default_factory=AnalysisStorageSettings)
-    results: Results = field(default_factory=Results)
+    silent: bool = field(default=False)
+    settings: AnalysisStorageSettings = field(
+        default_factory=AnalysisStorageSettings)
+    results: dict[str, Results] = field(default_factory=dict)
 
-    def __post_init__(self):
-        logging.basicConfig(
-            filename=self.log_file,
-            format='%(asctime)s %(message)s',
-            datefmt='%m/%d/%Y %I:%M:%S %p')
-        self.logger = logging.getLogger('OpenSees_Model_Generator')
-        self.logger.setLevel(logging.DEBUG)
+    def log(self, msg: str):
+        if self.settings.log_file:
+            self.logger.info(msg)
 
+    def print(self, thing: Any):
+        if not self.silent:
+            print(thing)
+
+    def _init_results(self):
+
+        # initialize logger
+        if self.settings.log_file:
+            logging.basicConfig(
+                filename=self.settings.log_file,
+                format='%(asctime)s %(message)s',
+                datefmt='%m/%d/%Y %I:%M:%S %p')
+            self.logger = logging.getLogger('OpenSees_Model_Generator')
+            self.logger.setLevel(logging.DEBUG)
+
+        # initialize output directory
         if self.output_directory and not os.path.exists(self.output_directory):
             os.makedirs(
                 self.output_directory,
                 exist_ok=True)
 
-        self.logger.info('Analysis started')
-        if not self.output_directory:
-            curr = datetime.now()
-            self.output_directory = curr.strftime(
-                '/tmp/analysis_%Y-%m-%d_%I-%M-%S_%p')
-            self.logger.info(
-                'Using default output directory: '
-                f'{self.output_directory}')
-            if not os.path.exists(self.output_directory):
-                os.makedirs(
-                    self.output_directory,
-                    exist_ok=True)
+        if self.settings.pickle_results and not self.output_directory:
+            raise ValueError('Speficy an output directory for the results.')
 
         # initialize result collections
-        for uid in self.mdl.dict_of_all_nodes():
-            self.results.node_displacements.registry[uid] = {}
-            self.results.node_velocities.registry[uid] = {}
-            self.results.node_accelerations.registry[uid] = {}
-            self.results.node_reactions.registry[uid] = {}
-        for uid in self.mdl.dict_of_elastic_beamcolumn_elements():
-            self.results.element_forces.registry[uid] = {}
-        for uid in self.mdl.dict_of_disp_beamcolumn_elements():
-            self.results.element_forces.registry[uid] = {}
+        assert isinstance(self.load_cases, dict)
+        for case_name in self.load_cases:
+            node_uids = []
+            if self.settings.specific_nodes:
+                node_uids.extend(self.settings.specific_nodes)
+            else:
+                node_uids.extend(nd.uid for nd in self.mdl.list_of_all_nodes())
+                node_uids.extend(
+                    [n.uid for n in self.load_cases[case_name]
+                     .parent_nodes.values()])
+            self.results[case_name] = Results()
+            for uid in node_uids:
+                self.results[case_name].node_displacements.registry[uid] = {}
+                self.results[case_name].node_velocities.registry[uid] = {}
+                self.results[case_name].node_accelerations.registry[uid] = {}
+                self.results[case_name].node_reactions.registry[uid] = {}
+
+            if self.settings.store_forces:
+                for uid in self.mdl.dict_of_elastic_beamcolumn_elements():
+                    self.results[case_name].element_forces.registry[uid] = {}
+            if self.settings.store_fiber:
+                for uid in self.mdl.dict_of_disp_beamcolumn_elements():
+                    self.results[case_name].element_forces.registry[uid] = {}
+            if self.settings.store_release_force_defo:
+                for uid in self.mdl.dict_of_zerolength_elements():
+                    self.results[case_name].release_force_defo.registry[uid] = {}
+
+        self.log('Analysis started')
 
     def _write_results_to_disk(self):
-        self.logger.info('Storing main analysis results')
-        self.logger.info(f'  Path:{self.output_directory}/main_results.pcl')
         with open(f'{self.output_directory}/main_results.pcl',
                   'wb') as file:
             pickle.dump(self.results, file)
-        self.logger.info('Main analysis results stored successfully')
 
     def read_results_from_disk(self):
-        self.logger.info('Reading analysis results')
-        self.logger.info(f'  Path:{self.output_directory}/main_results.pcl')
         with open(f'{self.output_directory}/main_results.pcl',
                   'rb') as file:
             self.results = pickle.load(file)
-        self.logger.info('Main analysis results read successfully')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    # def _define_oal(self, material: components.Material):
-    #     if material.ops_material == 'Steel01':
-    #         ops.uniaxialMaterial(
-    #             'Steel01',
-    #             int(material.uid),
-    #             material.parameters['Fy'],
-    #             material.parameters['E0'],
-    #             material.parameters['b'])
-    #     elif material.ops_material == 'Steel02':
-    #         ops.uniaxialMaterial(
-    #             'Steel02',
-    #             int(material.uid),
-    #             material.parameters['Fy'],
-    #             material.parameters['E0'],
-    #             material.parameters['b'],
-    #             *material.parameters['params'],
-    #             material.parameters['a1'],
-    #             material.parameters['a2'],
-    #             material.parameters['a3'],
-    #             material.parameters['a4'],
-    #             material.parameters['sigInit'])
-    #     elif material.ops_material == 'UVCuniaxial':
-    #         ops.uniaxialMaterial(
-    #             'UVCuniaxial',
-    #             int(material.uid),
-    #             material.parameters['E0'],
-    #             material.parameters['Fy'],
-    #             *material.parameters['params']
-    #         )
-    #     elif material.ops_material == 'Elastic':
-    #         ops.uniaxialMaterial(
-    #             'Elastic',
-    #             int(material.uid),
-    #             material.parameters['E']
-    #         )
-    #     elif material.ops_material == 'ElasticPP':
-    #         ops.uniaxialMaterial(
-    #             'ElasticPP',
-    #             int(material.uid),
-    #             material.parameters['E0'],
-    #             material.parameters['ey']
-    #         )
-    #     elif material.ops_material == 'Hysteretic':
-    #         ops.uniaxialMaterial(
-    #             'Hysteretic',
-    #             int(material.uid),
-    #             material.parameters['M1y'],
-    #             material.parameters['gamma1_y'],
-    #             material.parameters['M2y'],
-    #             material.parameters['gamma2_y'],
-    #             material.parameters['M3y'],
-    #             material.parameters['gamma3_y'],
-    #             - material.parameters['M1y'],
-    #             - material.parameters['gamma1_y'],
-    #             - material.parameters['M2y'],
-    #             - material.parameters['gamma2_y'],
-    #             - material.parameters['M3y'],
-    #             - material.parameters['gamma3_y'],
-    #             material.parameters['pinchX'],
-    #             material.parameters['pinchY'],
-    #             material.parameters['damage1'],
-    #             material.parameters['damage2'],
-    #             material.parameters['beta']
-    #         )
-    #     elif material.ops_material == 'Bilin':
-
-    #         ops.uniaxialMaterial(
-    #             'Bilin',
-    #             int(material.uid),
-    #             material.parameters['initial_stiffness'],
-    #             material.parameters['b+'],
-    #             material.parameters['b-'],
-    #             material.parameters['my+'],
-    #             material.parameters['my-'],
-    #             material.parameters['lamda'],
-    #             material.parameters['lamda'],
-    #             material.parameters['lamda'],
-    #             material.parameters['lamda'],
-    #             1.00, 1.00, 1.00, 1.00,
-    #             material.parameters['theta_p+'],
-    #             material.parameters['theta_p-'],
-    #             material.parameters['theta_pc+'],
-    #             material.parameters['theta_pc-'],
-    #             material.parameters['residual_plus'],
-    #             material.parameters['residual_minus'],
-    #             material.parameters['theta_u'],
-    #             material.parameters['theta_u'],
-    #             material.parameters['d+'],
-    #             material.parameters['d-']
-    #         )
-
-    #     elif material.ops_material == 'Pinching4':
-
-    #         ops.uniaxialMaterial(
-    #             'Pinching4',
-    #             int(material.uid),
-    #             *material.parameters.values())
-
-    #     else:
-    #         raise ValueError("Unsupported material:" + material.ops_material)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#     def _define_elastic_section(self, sec: Section):
-
-#         # # using AISC database properties
-#         # # RBS sections won't work
-#         # ops.section('Elastic',
-#         #             int(sec.uid),
-#         #             sec.material.parameters['E0'],
-#         #             sec.properties['A'],
-#         #             sec.properties['Ix'],
-#         #             sec.properties['Iy'],
-#         #             sec.material.parameters['G'],
-#         #             sec.properties['J'])
-
-#         # using mesh properties
-#         assert sec.mesh
-#         assert sec.properties
-#         assert sec.material.parameters
-#         ops.section('Elastic',
-#                     int(sec.uid),
-#                     sec.material.parameters['E0'],
-#                     sec.mesh.geometric_properties()['area'],
-#                     sec.mesh.geometric_properties()['inertia']['ixx'],
-#                     sec.mesh.geometric_properties()['inertia']['iyy'],
-#                     sec.material.parameters['G'],
-#                     sec.properties['J'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#     def _define_node_constraints(self):
-#         for lvl in self.mdl.levels.registry.values():
-#             if lvl.parent_node:
-#                 ops.rigidDiaphragm(
-#                     3,
-#                     int(lvl.parent_node.uid),
-#                     *[int(nd.uid)
-#                       for nd in lvl.list_of_primary_nodes()])
-
-
-
-
-
-
-
-
-
-
-
-
-    def _to_OpenSees_domain(self):
+    def _to_OpenSees_domain(self, case_name):
         """
         Defines the model in OpenSeesPy
         """
-        self.logger.info('Defining model in OpenSees')
 
         # initialize
         ops.wipe()
@@ -489,19 +288,23 @@ class Analysis:
         # ~~~~~~~~~~~~~~~ #
         # Node definition #
         # ~~~~~~~~~~~~~~~ #
-        
+
         # keep track of defined nodes
         defined_nodes = {}
 
         primary_nodes = self.mdl.dict_of_primary_nodes()
         internal_nodes = self.mdl.dict_of_internal_nodes()
+        parent_nodes = {}
+        parent_node_to_lvl = {}
+        for lvl_uid, node in self.load_cases[case_name].parent_nodes.items():
+            parent_nodes[node.uid] = node
+            parent_node_to_lvl[node.uid] = lvl_uid
 
-        for uid, node in primary_nodes.items():
-            if uid in defined_nodes:
-                raise KeyError(f'Node already defined: {uid}')
-            defined_nodes[uid] = node
-            ops.node(node.uid, *node.coords)
-        for uid, node in internal_nodes.items():
+        all_nodes = {}
+        all_nodes.update(primary_nodes)
+        all_nodes.update(internal_nodes)
+        all_nodes.update(parent_nodes)
+        for uid, node in all_nodes.items():
             if uid in defined_nodes:
                 raise KeyError(f'Node already defined: {uid}')
             defined_nodes[uid] = node
@@ -513,21 +316,19 @@ class Analysis:
         for uid, node in internal_nodes.items():
             # (this is super unusual, but who knows..)
             ops.fix(node.uid, *node.restraint)
-        # for uid, node in self.mdl.dict_of_parent_nodes().items():
-        #     n_r = [False, False, True, True, True, False]
-        #     ops.fix(node.uid, *n_r)
+        for uid in parent_nodes:
+            n_r = [False, False, True, True, True, False]
+            ops.fix(uid, *n_r)
 
         # lumped nodal mass
-        for uid, node in primary_nodes.items():
+        for uid, node in all_nodes.items():
             if np.max(np.array(
-                    (*self.load_case
+                    (*self.load_cases[case_name]
                      .node_mass.registry[node.uid]
-                     .total(),))) < common.EPSILON:
-                continue
-            ops.mass(node.uid, *self.load_case.node_mass
-                     .registry[node.uid].total())
-
-
+                     .val,))) < common.EPSILON:
+              continue
+            ops.mass(node.uid, *self.load_cases[case_name].node_mass
+                     .registry[node.uid].val)
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Elastic BeamColumn element definition #
@@ -544,7 +345,6 @@ class Analysis:
                 continue
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
-                           
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Fiber BeamColumn element definition #
@@ -584,7 +384,7 @@ class Analysis:
             ops.beamIntegration(*elm.integration.ops_args())
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
-                
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # ZeroLength element definition #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -600,191 +400,82 @@ class Analysis:
                     defined_materials[mat.uid] = mat
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
-                           
 
+        # node constraints
+        for uid in parent_nodes:
+            lvl = self.mdl.levels.registry[parent_node_to_lvl[uid]]
+            nodes = lvl.nodes.registry.values()
+            good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
+            ops.rigidDiaphragm(
+                3, uid, *[nd.uid for nd in good_nodes])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
-
-        # # define zerolength elements representing end releases
-        # for elm in self.mdl.list_of_endreleases():
-
-        #     define_node(elm.node_i, defined_nodes)
-        #     define_node(elm.node_j, defined_nodes)
-
-        #     # define materials
-        #     mats = elm.materials
-        #     for mat in mats.values():
-        #         if mat.uid not in defined_materials:
-        #             self._define_material(mat)
-        #             defined_materials.append(mat.uid)
-
-        #     dofs = elm.materials.keys()
-        #     mat_tags = [int(mat.uid) for mat in elm.materials.values()]
-
-        #     # define the ZeroLength element
-        #     ops.element('zeroLength', int(elm.uid),
-        #                 int(elm.node_i.uid),
-        #                 int(elm.node_j.uid),
-        #                 '-mat',
-        #                 *mat_tags,
-        #                 '-dir',
-        #                 *dofs,
-        #                 '-orient',
-        #                 *elm.x_vec,
-        #                 *elm.y_vec)
-
-        # # define parent nodes
-        # for nd in self.mdl.list_of_parent_nodes():
-        #     define_node(nd, defined_nodes)
-
-        # # define constraints
-        # self._define_node_constraints()
-
-    def _define_loads(self):
+    def _define_loads(self, case_name):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
         for elm in self.mdl.list_of_beamcolumn_elements():
             if elm.visibility.skip_OpenSees_definition:
                 continue
-            udl_total = self.load_case.line_element_udl.registry[elm.uid].total()
-            ops.eleLoad('-ele', int(elm.uid),
+            udl_total = self.load_cases[case_name].line_element_udl.registry[elm.uid].val
+            ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
                         udl_total[1],
                         udl_total[2],
                         udl_total[0])
 
         for nd in self.mdl.list_of_all_nodes():
-            ops.load(nd.uid, *self.load_case.node_loads.registry[nd.uid].total())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            ops.load(nd.uid, *self.load_cases[case_name].node_loads.registry[nd.uid].val)
 
     ####################################################
     # Methods that read back information from OpenSees #
     ####################################################
 
-
-
-
-
-
-
-
-
-
-    
-#     def _store_result(self,
-#                       analysis_result: dict[str, Any],
-#                       uid: str, result: Any):
-#         if uid in analysis_result:
-#             analysis_result[uid].append(result)  # type: ignore
-#         else:
-#             analysis_result[uid] = [result]  # type: ignore
-
-    def _read_node_displacements(self, step, nodes):
+    def _read_node_displacements(self, case_name, step, nodes):
         for nd in nodes:
             if self.settings.specific_nodes:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeDisp(nd.uid)
-            self.results.node_displacements.registry[nd.uid][step] = val
+            self.results[case_name].node_displacements.registry[nd.uid][step] = val
 
-    def _read_node_velocities(self, step, nodes):
+    def _read_node_velocities(self, case_name, step, nodes):
         for nd in nodes:
             if self.settings.specific_nodes:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeVel(nd.uid)
-            self.results.node_velocities.registry[nd.uid][step] = val
+            self.results[case_name].node_velocities.registry[nd.uid][step] = val
 
-    def _read_node_accelerations(self, step, nodes):
+    def _read_node_accelerations(self, case_name, step, nodes):
         for nd in nodes:
             if self.settings.specific_nodes:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeAccel(nd.uid)
-            self.results.node_accelerations.registry[nd.uid][step] = val
+            self.results[case_name].node_accelerations.registry[nd.uid][step] = val
 
-    def _read_node_reactions(self, step, nodes):
+    def _read_node_reactions(self, case_name, step, nodes):
         ops.reactions()
         for nd in nodes:
             if True in nd.restraint:
                 val: nparr = np.array(ops.nodeReaction(nd.uid))
-                self.results.node_reactions.registry[nd.uid][step] = val
+                self.results[case_name].node_reactions.registry[nd.uid][step] = val
 
-    def _read_frame_element_forces(self, step, elems):
+    def _read_frame_element_forces(self, case_name, step, elems):
         for elm in elems:
             uid = elm.uid
-            forces: nparr = np.array(ops.eleForce(uid))
-            self.results.element_forces.registry[uid][step] = forces
+            global_values: nparr = np.array(ops.eleForce(uid))
+            forces_global = global_values[0:3]
+            moments_global_ends = global_values[3:6]
+            moments_global_clear = transformations.offset_transformation(
+                elm.geomtransf.offset_i, moments_global_ends, forces_global)
+            x_vec = elm.geomtransf.x_axis
+            y_vec = elm.geomtransf.y_axis
+            z_vec = elm.geomtransf.z_axis
+            T_global2local = np.vstack((x_vec, y_vec, z_vec))
+            ni, qyi, qzi = T_global2local @ forces_global
+            ti, myi, mzi = T_global2local @ moments_global_clear
+            forces = np.array((ni, qyi, qzi, ti, myi, mzi))
+            self.results[case_name].element_forces.registry[uid][step] = forces
 
 #     def _read_frame_fiber_stress_strain(self):
 #         for elm in self.mdl.list_of_line_elements():
@@ -807,67 +498,63 @@ class Analysis:
 #                 result.append(stress_strain)
 #             self._store_result(self.fiber_stress_strain, uid, result)
 
-#     def _read_release_moment_rot(self):
-#         for release in self.mdl.list_of_endreleases():
-#             # don't store data for simple pin releases
-#             # WARNING
-#             # This code only monitors strong-axis-bending releases
-#             # If more releases are implemented in the future, this
-#             # will need to be updated
-#             if 6 in release.materials:
-#                 if release.materials[6].name in ['auto_pinching',
-#                                                  'auto__panel_zone_spring',
-#                                                  'auto_IMK']:
-#                     # force, deformation in the global system
-#                     moment_i_global = ops.eleResponse(
-#                         int(release.uid), 'force')[3:6]
-#                     # note: moment_j is the opposite of force_i by equilibrium
-#                     # no need to store it too
-#                     # rotation_global = ops.eleResponse(
-#                     #     release.uid, 'deformation')[3:6]
-#                     rot_i_global = ops.nodeDisp(int(release.node_i.uid))[3:6]
-#                     rot_j_global = ops.nodeDisp(int(release.node_j.uid))[3:6]
-#                     rotation_global: nparr = np.array(rot_j_global) - \
-#                         np.array(rot_i_global)
-#                     # convert to the local system
-#                     vec_x = release.x_vec
-#                     vec_y = release.y_vec
-#                     vec_z: nparr = np.cross(vec_x, vec_y)
-#                     tmat_g2l = transformations.transformation_matrix(
-#                         vec_x, vec_y, vec_z)
-#                     moment_i = tmat_g2l @ -(np.array(moment_i_global))
-#                     deformation = tmat_g2l @ np.array(rotation_global)
-#                     self._store_result(
-#                         self.release_disp_defo,
-#                         str(release.uid),
-#                         [moment_i[2], deformation[2]])
+    def _read_release_moment_rot(self, case_name, step, zerolength_elms):
+        for release in zerolength_elms:
+            # force_global = ops.eleResponse(
+            #     release.uid, 'force')[:3]
+            moment_global = ops.eleResponse(
+                release.uid, 'force')[3:6]
+            # disp_local = ops.eleResponse(
+            #     release.uid, 'deformation')[:3]
+            rot_local = ops.eleResponse(
+                release.uid, 'deformation')[3:6]
+            # note: j quantities are the opposite of those of
+            # i by equilibrium
+            # no need to store them too
+            # rotation_global = ops.eleResponse(
+            #     release.uid, 'deformation')[3:6]
+            # convert to the local system
+            vec_x = release.vecx
+            vec_y = release.vecyp
+            vec_z: nparr = np.cross(vec_x, vec_y)
+            tmat_g2l = transformations.transformation_matrix(
+                vec_x, vec_y, vec_z)
+            moment_local = tmat_g2l @ -(np.array(moment_global))
+            self.results[case_name].release_force_defo.registry[release.uid][step] = \
+                [*rot_local, *moment_local]
 
     def _read_OpenSees_results(
             self,
+            case_name,
             step,
             nodes,
             elastic_beamcolumn_elements,
-            disp_beamcolumn_elements):
-        self._read_node_displacements(step, nodes)
-        self._read_node_velocities(step, nodes)
-        self._read_node_accelerations(step, nodes)
+            disp_beamcolumn_elements,
+            zerolength_elements):
+        self._read_node_displacements(case_name, step, nodes)
+        self._read_node_velocities(case_name, step, nodes)
+        self._read_node_accelerations(case_name, step, nodes)
         if self.settings.store_reactions:
-            self._read_node_reactions(step, nodes)
+            self._read_node_reactions(case_name, step, nodes)
         if self.settings.store_forces:
             self._read_frame_element_forces(
+                case_name,
                 step, elastic_beamcolumn_elements)
             self._read_frame_element_forces(
+                case_name,
                 step, disp_beamcolumn_elements)
         # if self.settings.store_fiber:
         #     self._read_frame_fiber_stress_strain()
-        # if self.settings.store_release_disp_defo:
-        #     self._read_release_moment_rot()
+        if self.settings.store_release_force_defo:
+            self._read_release_moment_rot(
+                case_name,
+                step, zerolength_elements)
 
-#     ##################################
-#     # Numeric Result Post-processing #
-#     ##################################
+    ##################################
+    # Numeric Result Post-processing #
+    ##################################
 
-    def global_reactions(self, step):
+    def global_reactions(self, case_name, step):
         reactions = np.full(6, 0.00)
         for lvl in self.mdl.levels.registry.values():
             for nd in lvl.nodes.registry.values():
@@ -876,7 +563,8 @@ class Analysis:
                     x = nd.coords[0]
                     y = nd.coords[1]
                     z = nd.coords[2]
-                    local_reaction = self.results.node_reactions.registry[uid][step]
+                    local_reaction = \
+                        self.results[case_name].node_reactions.registry[uid][step]
                     global_reaction: nparr = np.array([
                         local_reaction[0],
                         local_reaction[1],
@@ -895,27 +583,33 @@ class Analysis:
 @dataclass
 class StaticAnalysis(Analysis):
     def run(self):
-        self._to_OpenSees_domain()
-        self._define_loads()
-        nodes = self.mdl.list_of_all_nodes()
-        elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
-        step = 0
-        ops.system(LN_ANALYSIS_SYSTEM)
-        ops.numberer(NUMBERER)
-        ops.constraints(*CONSTRAINTS)
-        ops.test('NormDispIncr', 1.0e-8, 20, 3)
-        ops.algorithm('Newton')
-        ops.integrator('LoadControl', 1.0)
-        ops.analysis('Static')
-        ops.analyze(1)
-        self._read_OpenSees_results(
-            step,
-            nodes,
-            elastic_elems,
-            disp_elems)
-        self.logger.info('Analysis Finished')
-        self._write_results_to_disk()
+        self._init_results()
+        for case_name in self.load_cases:
+            self._to_OpenSees_domain(case_name)
+            self._define_loads(case_name)
+            nodes = self.mdl.list_of_all_nodes()
+            nodes.extend(self.load_cases[case_name].parent_nodes.values())
+            elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
+            disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+            zerolength_elems = self.mdl.list_of_zerolength_elements()
+            step = 0
+            ops.system(LN_ANALYSIS_SYSTEM)
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
+            ops.test('NormDispIncr', 1.0e-8, 20, 3)
+            ops.algorithm('Newton')
+            ops.integrator('LoadControl', 1.0)
+            ops.analysis('Static')
+            ops.analyze(1)
+            self._read_OpenSees_results(
+                case_name,
+                step,
+                nodes,
+                elastic_elems,
+                disp_elems,
+                zerolength_elems)
+            if self.settings.pickle_results:
+                self._write_results_to_disk()
 
 
 @dataclass
@@ -924,35 +618,138 @@ class ModalAnalysis(Analysis):
     Runs a modal analysis.
     """
     num_modes: int = field(default=1, repr=False)
-    periods: list[float] = field(default_factory=list, repr=False)
 
     ####################################################
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def _read_node_displacements(self):
+    def _read_node_displacements(self, case_name):
         nodes = self.mdl.list_of_all_nodes()
+        nodes.extend(self.load_cases[case_name].parent_nodes.values())
         for nd in nodes:
             for i in range(self.num_modes):
                 val = ops.nodeEigenvector(
                         nd.uid,
                         i+1)
-                self.results.node_displacements.registry[nd.uid][i] = val
+                self.results[case_name].node_displacements.registry[nd.uid][i] = val
+
+    def _read_frame_element_forces(self, case_name, elems):
+        # note: opensees does not output the element forces that correspond
+        # to the displacement field of each obtained mode.
+        # to overcome this, we run a separate analysis imposing those
+        # displacements to get the element forces.
+
+        # note: work in progress. currently this doesn't work.
+        
+        for case_name in self.load_cases:
+            for step in range(self.num_modes):
+                for elm in elems:
+                    # if step == 3:
+                    #     import pdb
+                    #     pdb.set_trace()
+                    assert isinstance(elm, elasticBeamColumn)
+                    # displacements at the two ends (global system)
+                    u_i = (self.results[case_name].node_displacements
+                           .registry[elm.eleNodes[0].uid][step][0:3])
+                    r_i = (self.results[case_name].node_displacements
+                           .registry[elm.eleNodes[0].uid][step][3:6])
+                    u_j = (self.results[case_name].node_displacements
+                           .registry[elm.eleNodes[1].uid][step][0:3])
+                    r_j = (self.results[case_name].node_displacements
+                           .registry[elm.eleNodes[1].uid][step][3:6])
+                    offset_i = elm.geomtransf.offset_i
+                    offset_j = elm.geomtransf.offset_j
+                    u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
+                    u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
+
+                    x_vec = elm.geomtransf.x_axis
+                    y_vec = elm.geomtransf.y_axis
+                    z_vec = np.cross(x_vec, y_vec)
+
+                    # global -> local transformation matrix
+                    T_global2local = \
+                        transformations.transformation_matrix(x_vec, y_vec, z_vec)
+                    u_i_local = T_global2local @ u_i_o
+                    r_i_local = T_global2local @ r_i
+                    u_j_local = T_global2local @ u_j_o
+                    r_j_local = T_global2local @ r_j
+
+                    # # element UDL
+                    udl = self.load_cases[case_name].line_element_udl.registry[elm.uid].val
+                    # note: modal analsis doesn't account for applied loads.
+                    # this will cause issues with plotting if loads have been applied.
+                    if np.linalg.norm(udl) > common.EPSILON:
+                        raise ValueError('Loads applied at modal load case.')
+
+                    # stiffness matrix terms
+                    length = elm.clear_length()
+                    ea = elm.section.E * elm.section.A
+                    eimaj = elm.section.E * elm.section.Ix
+                    eimin = elm.section.E * elm.section.Iy
+                    gj = elm.section.G * elm.section.J
+
+                    # deformations
+                    dl = u_j_local[0] - u_i_local[0]
+                    theta_tor = r_j_local[0] - r_i_local[0]
+                    du_xy = u_j_local[1] - u_i_local[1]
+                    du_xz = u_j_local[2] - u_i_local[2]
+
+                    # axial load
+                    ni = ea / length * dl
+
+                    # strong axis bending
+                    mzi = \
+                        (4.00 * eimaj / length * r_i_local[2]
+                         + 2.00 * eimaj / length * r_j_local[2]
+                         - 6.00 * eimaj / length**2 * du_xy)
+                    qyi = (6.00 * eimaj / length**2 * (r_i_local[2] + r_j_local[2])
+                           - 12.00 * eimaj / length**3 * du_xy)
+
+                    # weak axis bending
+                    # work in progress...
+                    # myi = \
+                    #     -(4.00 * eimin / length * (-r_i_local[1])
+                    #      + 2.00 * eimin / length * (-r_j_local[1])
+                    #      - 6.00 * eimin / length * (du_xz))
+                    # qzi = (6.00 * eimin / length**2 * ((-r_i_local[2]) + (-r_j_local[2]))
+                    #        - 12.00 * eimin / length**3 * (du_xz))
+                    myi = 0.00
+                    qzi = 0.00
+
+                    # torsion
+                    ti = gj / length * theta_tor
+
+                    # store results
+                    (self.results[case_name].element_forces
+                     .registry[elm.uid][step]) = \
+                        np.array((ni, qyi, qzi, ti, myi, mzi))
+        
 
     def run(self):
-        self._to_OpenSees_domain()
-        # tags = ops.getNodeTags()
-        # print(len(tags))
-        ops.constraints(*CONSTRAINTS)
-        ops.system(MD_ANALYSIS_SYSTEM)
-        # note: using SparseSYM results in wrong eigendecomposition
-        eigValues: nparr = np.array(ops.eigen(
-            self.num_modes))
-        self.periods = 2.00*np.pi / np.sqrt(eigValues)
-        self._read_node_displacements()
-        self._write_results_to_disk()
+        self._init_results()
+        for case_name in self.load_cases:
+            self._to_OpenSees_domain(case_name)
+            # tags = ops.getNodeTags()
+            # self.print(len(tags))
+            ops.constraints(*CONSTRAINTS)
+            ops.system(MD_ANALYSIS_SYSTEM)
+            # note: using SparseSYM results in wrong eigendecomposition
+            num_inertial_nodes = 0
+            ndtags = ops.getNodeTags()
+            for nd in ndtags:
+                for j in range(6):
+                    if ops.nodeMass(nd, j+1) > 0.00:
+                        num_inertial_nodes += 1
+            eigValues: nparr = np.array(ops.eigen(
+                self.num_modes))
+            self.results[case_name].periods = 2.00*np.pi / np.sqrt(eigValues)
+            self._read_node_displacements(case_name)
+            if self.settings.store_forces:
+                self._read_frame_element_forces(case_name, self.mdl.list_of_beamcolumn_elements())
+        if self.settings.pickle_results:
+            self._write_results_to_disk()
 
-    def modal_participation_factors(self, direction):
+    def modal_participation_factors(self, case_name, direction):
 
         dof_dir = {'x': 0, 'y': 1, 'z': 2}
         ntgs = ops.getNodeTags()
@@ -960,15 +757,13 @@ class ModalAnalysis(Analysis):
         mstars = np.zeros(self.num_modes)
         Mn_tot = 0.
         for ntg in ntgs:
-            if self.mdl.retrieve_node(ntg).\
-               restraint_type in ['free', 'parent']:
-                node_mass = ops.nodeMass(ntg)
-                Mn_tot += node_mass[dof_dir[direction]]
+            node_mass = self.load_cases[case_name].node_mass.registry[ntg].val
+            Mn_tot += node_mass[dof_dir[direction]]
         for mode in range(self.num_modes):
             Ln = 0.
             Mn = 0.
             for ntg in ntgs:
-                node_mass = ops.nodeMass(ntg)
+                node_mass = self.load_cases[case_name].node_mass.registry[ntg].val
                 node_phi = ops.nodeEigenvector(ntg, mode+1)
                 Ln += node_phi[dof_dir[direction]] * \
                     node_mass[dof_dir[direction]]
@@ -983,10 +778,8 @@ class ModalAnalysis(Analysis):
 @dataclass
 class NonlinearAnalysis(Analysis):
 
-    n_steps_success: int = field(default=0, repr=False)
-
     def _run_gravity_analysis(self, system):
-        print(f'Setting system to {system}')
+        self.print(f'Setting system to {system}')
         ops.system(system)
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
@@ -1053,62 +846,83 @@ class NonlinearAnalysis(Analysis):
     #                 "Acceptance criteria failed for element " +
     #                 str(elm.uid))
 
-    def retrieve_node_displacement(self, uid):
-        res = np.zeros((self.n_steps_success, 6))
-        for i in range(self.n_steps_success):
-            res[i] = self.results.node_displacements[uid][i]
+    def retrieve_node_displacement(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].node_displacements.registry[uid][i]
+        df = pd.DataFrame(res, columns=['ux', 'uy', 'uz',
+                                        'urx', 'ury', 'urz'])
+        df.index.name = 'step'
+        return df
+
         return res
 
-    def retrieve_node_acceleration(self, uid):
-        res = np.zeros((self.n_steps_success, 6))
-        for i in range(self.n_steps_success):
-            res[i] = self.results.node_accelerations[uid][i]
-        return res
+    def retrieve_node_acceleration(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].node_accelerations.registry[uid][i]
+        df = pd.DataFrame(res, columns=['ax', 'ay', 'az',
+                                        'arx', 'ary', 'arz'])
+        df.index.name = 'step'
+        return df
 
-    def retrieve_node_velocity(self, uid):
-        res = np.zeros((self.n_steps_success, 6))
-        for i in range(self.n_steps_success):
-            res[i] = self.results.node_velocities[uid][i]
-        return res
+    def retrieve_node_velocity(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].node_velocities.registry[uid][i]
+        df = pd.DataFrame(res, columns=['vx', 'vy', 'vz',
+                                        'vrx', 'vry', 'vrz'])
+        df.index.name = 'step'
+        return df
 
-    def retrieve_node_abs_acceleration(self, uid):
-        res = np.zeros((self.n_steps_success, 6))
-        for i in range(self.n_steps_success):
-            res[i] = self.results.node_accelerations[uid][i]
+    def retrieve_node_abs_acceleration(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].node_accelerations.registry[uid][i]
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
                     self.a_g[j][:, 0], self.a_g[j][:, 1],
                     bounds_error=False, fill_value=0.00)
-                res[:, j] += a_g(self.time_vector)*common.G_CONST
+                res[:, j] += a_g(self.time_vector)*common.G_CONST_IMPERIAL
                 # todo: update to support SI
-        return res
+        df = pd.DataFrame(res, columns=['abs ax', 'abs ay', 'abs az',
+                                        'abs arx', 'abs ary', 'abs arz'])
+        df.index.name = 'step'
+        return df
 
-    def retrieve_node_abs_velocity(self, uid):
-        res = np.zeros((self.n_steps_success, 6))
-        for i in range(self.n_steps_success):
-            res[i] = self.results.node_velocities[uid][i]
+    def retrieve_node_abs_velocity(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].node_velocities.registry[uid][i]
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
                     self.a_g[j][:, 0], self.a_g[j][:, 1],
                     bounds_error=False, fill_value=0.00)
                 v_g = integrate.cumulative_trapezoid(
-                    a_g(self.time_vector)*common.G_CONST,
+                    a_g(self.time_vector)*common.G_CONST_IMPERIAL,
                     self.time_vector, initial=0)
                 res[:, j] = res[:, j] + v_g
-        return res
+        df = pd.DataFrame(res, columns=['abs vx', 'abs vy', 'abs vz',
+                                        'abs vrx', 'abs vry', 'abs vrz'])
+        df.index.name = 'step'
+        return df
 
-    # def retrieve_release_disp_defo(self, uid):
-    #     disp_defo: nparr = np.array(self.release_force_defo[str(uid)])
-    #     return disp_defo
+    def retrieve_release_force_defo(self, uid, case_name):
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        for i in range(self.results[case_name].n_steps_success):
+            res[i] = self.results[case_name].release_force_defo.registry[uid][i]
+        df = pd.DataFrame(res, columns=['u1', 'u2', 'u3', 'q1', 'q2', 'q3'])
+        df.index.name = 'step'
+        return df
 
 
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
-    def _apply_lateral_load(self, direction, modeshape=None, nd=None):
-        querry = LoadCaseQuerry(self.mdl, self.load_case)
+    def _apply_lateral_load(self, case_name, direction, modeshape=None, nd=None):
+        querry = LoadCaseQuerry(self.mdl, self.load_cases[case_name])
         distribution = querry.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
@@ -1136,20 +950,18 @@ class PushoverAnalysis(NonlinearAnalysis):
 
         # if a node is given, apply the incremental load on that node
         if nd:
-            ops.load(int(nd.uid), *(1.00*load_dir))
+            ops.load(nd.uid, *(1.00*load_dir))
         else:
             for i, lvl in enumerate(self.mdl.levels.registry.values()):
-                # if there is a parent node, all load goes there
-                # if lvl.parent_node:
-                #     pass
-                # #     ops.load(int(lvl.parent_node.uid),
-                # #              *(distribution[i]*load_dir *
-                # #                modeshape_ampl[i]))
-                # # if there isn't a parent node, distribute that story's load
-                # # in proportion to the mass of the nodes
-                # else:
-                node_list = lvl.nodes.registry.values()
-                masses: nparr = np.array([self.load_case.node_mass.registry[n.uid].total()[0] for n in node_list])
+                if lvl.uid == 0:
+                    continue
+                if self.load_cases[case_name].parent_nodes:
+                    node_list = [self.load_cases[case_name].parent_nodes[lvl.uid]]
+                else:
+                    node_list = lvl.nodes.registry.values()
+                masses: nparr = np.array(
+                    [self.load_cases[case_name].node_mass.registry[
+                        n.uid].val[0] for n in node_list])
                 masses = masses/np.linalg.norm(masses)
                 for j, nd in enumerate(node_list):
                     ops.load(nd.uid,
@@ -1167,121 +979,132 @@ class PushoverAnalysis(NonlinearAnalysis):
         else:
             raise ValueError("Direction can be 'x', 'y' or 'z'")
 
-        nodes = self.mdl.list_of_all_nodes()
-        elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+        self._init_results()
 
-        self._to_OpenSees_domain()
-        self._define_loads()
-        self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
-        ops.wipeAnalysis()
-        ops.loadConst('-time', 0.0)
-        self._apply_lateral_load(direction, modeshape, loaded_node)
+        for case_name in self.load_cases:
+            nodes = self.mdl.list_of_all_nodes()
+            nodes.extend(self.load_cases[case_name].parent_nodes.values())
+            elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
+            disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+            zerolength_elems = self.mdl.list_of_zerolength_elements()
 
-        ops.numberer(NUMBERER)
-        ops.constraints(*CONSTRAINTS)
-        curr_displ = ops.nodeDisp(int(control_node.uid), control_DOF+1)
-        n_steps_success = 0
-        self._read_OpenSees_results(
-            n_steps_success,
-            nodes,
-            elastic_elems,
-            disp_elems)
+            self._to_OpenSees_domain(case_name)
+            self._define_loads(case_name)
+            self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
+            ops.wipeAnalysis()
+            ops.loadConst('-time', 0.0)
+            self._apply_lateral_load(case_name, direction, modeshape, loaded_node)
 
-        total_fail = False
-        num_subdiv = 0
-        num_times = 0
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
+            curr_displ = ops.nodeDisp(control_node.uid, control_DOF+1)
+            n_steps_success = 0
+            self._read_OpenSees_results(
+                case_name,
+                n_steps_success,
+                nodes,
+                elastic_elems,
+                disp_elems,
+                zerolength_elems)
 
-        scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
-        steps = [25, 50, 75, 100, 250, 500]
-        norm = [1.0e-6] * 5 + [1.0e-2]
-        algor = ['Newton']*6
+            total_fail = False
+            num_subdiv = 0
+            num_times = 0
 
-        try:
+            scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
+            steps = [25, 50, 75, 100, 250, 500]
+            norm = [1.0e-6] * 5 + [1.0e-2]
 
-            for target_displacement in target_displacements:
+            try:
 
-                if total_fail:
-                    break
+                for target_displacement in target_displacements:
 
-                # determine push direction
-                if curr_displ < target_displacement:
-                    displ_incr = abs(displ_incr)
-                    sign = +1.00
-                else:
-                    displ_incr = -abs(displ_incr)
-                    sign = -1.00
+                    if total_fail:
+                        break
 
-                print('entering loop', target_displacement)
-                while curr_displ * sign < target_displacement * sign:
-
-                    # determine increment
-                    if abs(curr_displ - target_displacement) < \
-                       abs(displ_incr) * scale[num_subdiv]:
-                        incr = sign * abs(curr_displ - target_displacement)
+                    # determine push direction
+                    if curr_displ < target_displacement:
+                        displ_incr = abs(displ_incr)
+                        sign = +1.00
                     else:
-                        incr = displ_incr * scale[num_subdiv]
-                    ops.test('NormDispIncr', norm[num_subdiv],
-                             steps[num_subdiv], 0)
-                    ops.algorithm(algor[num_subdiv])
-                    ops.integrator("DisplacementControl",
-                                   int(control_node.uid), control_DOF + 1,
-                                   incr)
-                    ops.system(NL_ANALYSIS_SYSTEM)
-                    ops.analysis("Static")
-                    flag = ops.analyze(1)
-                    if flag != 0:
-                        # analysis failed
-                        if num_subdiv == len(scale) - 1:
-                            # can't refine further
-                            print()
-                            print('===========================')
-                            print('Analysis failed to converge')
-                            print('===========================')
-                            print()
-                            total_fail = True
-                            break
+                        displ_incr = -abs(displ_incr)
+                        sign = -1.00
+
+                    self.print(f'entering loop: {target_displacement}')
+                    while curr_displ * sign < target_displacement * sign:
+
+                        # determine increment
+                        if abs(curr_displ - target_displacement) < \
+                           abs(displ_incr) * scale[num_subdiv]:
+                            incr = sign * abs(curr_displ - target_displacement)
                         else:
-                            # can still reduce step size
-                            num_subdiv += 1
-                            # how many times to run with reduced step size
-                            num_times = 10
-                    else:
-                        # analysis was successful
-                        if num_times != 0:
-                            num_times -= 1
-                        n_steps_success += 1
-                        self._read_OpenSees_results(
-                            n_steps_success,
-                            nodes,
-                            elastic_elems,
-                            disp_elems)
-                        # self._acceptance_criteria()
-                        curr_displ = ops.nodeDisp(
-                            int(control_node.uid), control_DOF+1)
-                        print('Target displacement: %.2f | Current: %.4f' %
-                              (target_displacement, curr_displ), end='\r')
-                        if num_subdiv != 0:
-                            if num_times == 0:
-                                num_subdiv -= 1
+                            incr = displ_incr * scale[num_subdiv]
+                        ops.test('NormDispIncr', norm[num_subdiv],
+                                 steps[num_subdiv], 0)
+                        ops.algorithm('RaphsonNewton')
+                        # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
+                        ops.integrator("DisplacementControl",
+                                       int(control_node.uid), control_DOF + 1,
+                                       incr)
+                        ops.system(NL_ANALYSIS_SYSTEM)
+                        ops.analysis("Static")
+                        flag = ops.analyze(1)
+                        if flag != 0:
+                            # analysis failed
+                            if num_subdiv == len(scale) - 1:
+                                # can't refine further
+                                self.print('===========================')
+                                self.print('Analysis failed to converge')
+                                self.print('===========================')
+                                total_fail = True
+                                break
+                            else:
+                                # can still reduce step size
+                                num_subdiv += 1
+                                # how many times to run with reduced step size
                                 num_times = 10
+                        else:
+                            # analysis was successful
+                            if num_times != 0:
+                                num_times -= 1
+                            n_steps_success += 1
+                            self._read_OpenSees_results(
+                                case_name,
+                                n_steps_success,
+                                nodes,
+                                elastic_elems,
+                                disp_elems,
+                                zerolength_elems)
+                            # self._acceptance_criteria()
+                            curr_displ = ops.nodeDisp(
+                                int(control_node.uid), control_DOF+1)
+                            print('Target displacement: %.2f | Current: %.4f' %
+                                  (target_displacement, curr_displ), end='\r')
+                            if num_subdiv != 0:
+                                if num_times == 0:
+                                    num_subdiv -= 1
+                                    num_times = 10
 
-        except KeyboardInterrupt:
-            print("Analysis interrupted")
+            except KeyboardInterrupt:
+                self.print("Analysis interrupted")
 
-        n_steps_success += 1
-        self._read_OpenSees_results(
-            n_steps_success,
-            nodes,
-            elastic_elems,
-            disp_elems)
-        print('Number of saved analysis steps:', n_steps_success)
-        metadata = {'successful steps': n_steps_success}
-        self.n_steps_success = n_steps_success
-        self._write_results_to_disk()
-        return metadata
+            n_steps_success += 1
+            self._read_OpenSees_results(
+                case_name,
+                n_steps_success,
+                nodes,
+                elastic_elems,
+                disp_elems,
+                zerolength_elems)
+            self.print(f'Number of saved analysis steps: {n_steps_success}')
+            metadata = {'successful steps': n_steps_success}
+            self.results[case_name].n_steps_success = n_steps_success
+            self.results[case_name].metadata = metadata
+        # done with all cases.
+        if self.settings.pickle_results:
+            self._write_results_to_disk()
 
-    def table_pushover_curve(self, direction, nd):
+    def table_pushover_curve(self, case_name, direction, nd):
         if direction == 'x':
             control_DOF = 0
         elif direction == 'y':
@@ -1292,17 +1115,20 @@ class PushoverAnalysis(NonlinearAnalysis):
             raise ValueError("Direction can be 'x', 'y' or 'z'")
         base_shear_lst = []
         displacement_lst = []
-        for step in range(self.n_steps_success):
-            base_shear_lst.append(self.global_reactions(step)[control_DOF])
+        for step in range(self.results[case_name].n_steps_success):
+            base_shear_lst.append(
+                self.global_reactions(case_name, step)[control_DOF])
             displacement_lst.append(
-                self.results.node_displacements.registry[nd.uid][step][control_DOF])
+                self.results[case_name].node_displacements.registry[
+                    nd.uid][step][control_DOF])
         base_shear: nparr = -np.array(base_shear_lst)
         displacement: nparr = np.array(displacement_lst)
         return displacement, base_shear
 
-    def plot_pushover_curve(self, direction, nd):
+    def plot_pushover_curve(self, case_name, direction, nd):
         # todo: units
-        displacement, base_shear = self.table_pushover_curve(direction, nd)
+        displacement, base_shear = self.table_pushover_curve(
+            case_name, direction, nd)
         general_2D.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
             displacement, base_shear, 'spline+markers',
@@ -1317,7 +1143,7 @@ class PushoverAnalysis(NonlinearAnalysis):
     #     x_axis = brace.x_axis
     #     x_axis_horiz: nparr = np.array((x_axis[0], x_axis[1], 0.00))
     #     x_axis_horiz = x_axis_horiz / np.linalg.norm(x_axis_horiz)
-    #     for step in range(self.n_steps_success):
+    #     for step in range(self.results[case_name].n_steps_success):
     #         disp_i = self.node_displacements[str(n_i)][step][0:3]
     #         disp_j = self.node_displacements[str(n_j)][step][0:3]
     #         diff_disp: nparr = np.array(disp_j) - np.array(disp_i)
@@ -1338,7 +1164,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 class NLTHAnalysis(NonlinearAnalysis):
 
     time_vector: list[float] = field(default_factory=list, repr=False)
-    a_g: dict[int, npt.NDArray[np.float64]] = field(default_factory=dict, repr=False)
+    a_g: dict[int, npt.NDArray[np.float64]] = field(
+        default_factory=dict, repr=False)
 
     def _define_lateral_load_pattern(
             self,
@@ -1379,15 +1206,6 @@ class NLTHAnalysis(NonlinearAnalysis):
             raise ValueError(
                 "No input files specified.")
 
-    # def run(self, analysis_time_increment,
-    #         filename_x,
-    #         filename_y,
-    #         filename_z,
-    #         file_time_incr,
-    #         finish_time=0.00,
-    #         damping_ratio=0.05,
-    #         num_modes=None,
-    #         printing=True):
     def run(self, analysis_time_increment,
             filename_x,
             filename_y,
@@ -1396,7 +1214,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             finish_time=0.00,
             skip_steps=1,
             damping={'type': None},
-            printing=True):
+            print_progress=True):
         """
         Run the nonlinear time-history analysis
         Args:
@@ -1410,14 +1228,21 @@ class NLTHAnalysis(NonlinearAnalysis):
                      {'type': None},
                      {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
                      {'type': 'modal', 'num_modes': n}
-            printing: Controls whether the current time is printed out
+            print_progress: Controls whether the current time is printed out
         """
 
-        self.logger.info('Running NLTH analysis')
+        self._init_results()
+        self.log('Running NLTH analysis')
 
         nodes = self.mdl.list_of_all_nodes()
+        # note: only runs the first load case provided.
+        # nlth should not have load cases.
+        # will be fixed in the future.
+        case_name = list(self.load_cases.keys())[0]
+        nodes.extend(self.load_cases[case_name].parent_nodes.values())
         elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
         disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+        zerolength_elems = self.mdl.list_of_zerolength_elements()
 
         damping_type = damping.get('type')
 
@@ -1439,9 +1264,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             gm_vals_z = np.genfromtxt(filename_z)
             nss.append(len(gm_vals_z))
 
-        self.logger.info(f'filename_x: {filename_x}')
-        self.logger.info(f'filename_y: {filename_y}')
-        self.logger.info(f'filename_z: {filename_z}')
+        self.log(f'filename_x: {filename_x}')
+        self.log(f'filename_y: {filename_y}')
+        self.log(f'filename_z: {filename_z}')
 
         num_gm_points = np.min(np.array(nss))
         duration = num_gm_points * file_time_incr
@@ -1465,20 +1290,22 @@ class NLTHAnalysis(NonlinearAnalysis):
         else:
             target_timestamp = finish_time
 
-        self.logger.info('Defining model in OpenSees')
-        self._to_OpenSees_domain()
+        self.log('Defining model in OpenSees')
+        self._to_OpenSees_domain(case_name)
 
         # gravity analysis
-        self.logger.info('Defining dead loads')
-        self._define_loads()
-        self.logger.info('Starting gravity analysis')
+        self.log('Defining dead loads')
+        self._define_loads(case_name)
+        self.log('Starting gravity analysis')
         self._run_gravity_analysis(system)
         n_steps_success = 0
         self._read_OpenSees_results(
+            case_name,
             n_steps_success,
             nodes,
             elastic_elems,
-            disp_elems
+            disp_elems,
+            zerolength_elems
         )
 
         # time-history analysis
@@ -1488,7 +1315,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         self.time_vector.append(curr_time)
 
         if damping_type == 'rayleigh':
-            self.logger.info('Using Rayleigh damping')
+            self.log('Using Rayleigh damping')
             wi = 2 * np.pi / damping['periods'][0]
             zetai = damping['ratio']
             wj = 2 * np.pi / damping['periods'][1]
@@ -1507,12 +1334,12 @@ class NLTHAnalysis(NonlinearAnalysis):
             # tags = ops.getNodeTags()
             # num_nodes = len(tags) - 4
             # num_modeshapes = 3*num_nodes
-            # print(len(tags))
+            # self.print(len(tags))
 
             num_modes = damping['num_modes']
             # num_modes = num_modeshapes
             damping_ratio = damping['ratio']
-            self.logger.info(
+            self.log(
                 'Running eigenvalue analysis'
                 f' with {num_modes} modes')
             ops.numberer(NUMBERER)
@@ -1521,13 +1348,13 @@ class NLTHAnalysis(NonlinearAnalysis):
             ops.eigen(num_modes)
             # ops.system(NL_ANALYSIS_SYSTEM)
             # ops.systemSize()
-            self.logger.info('Eigenvalue analysis finished')
+            self.log('Eigenvalue analysis finished')
             ops.modalDamping(damping['ratio'])
-            self.logger.info(
+            self.log(
                 f'{damping_ratio*100:.2f}% '
                 'modal damping defined')
 
-        self.logger.info('Starting transient analysis')
+        self.log('Starting transient analysis')
         ops.test('NormDispIncr', 1e-6, 50, 0)
         ops.algorithm("KrylovNewton")
         # ops.integrator('Newmark', 0.50, 0.25)
@@ -1560,7 +1387,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # algos = ['NewtonLineSearch', 'ModifiedNewton', 'KrylovNewton', 'SecantNewton', 'RaphsonNewton', 'PeriodicNewton', 'BFGS', 'Broyden']
                 # integrs = [('Newmark', 0.50, 0.25), ('HHT', 1.0), ('GeneralizedAlpha', 1., 1.), ('TRBDF2',)]
 
-                # print('Testing systems')
+                # self.print('Testing systems')
 
                 # times = []
                 # best_sys = 'UmfPack'
@@ -1579,10 +1406,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_sys = systems[imn]
-                # print()
-                # print(times)
-                # print(best_sys)
-                # print()
+                # self.print()
+                # self.print(times)
+                # self.print(best_sys)
+                # self.print()
 
                 # times = []
                 # for algo in algos:
@@ -1597,10 +1424,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_algo = algos[imn]
-                # print()
-                # print(times)
-                # print(best_algo)
-                # print()
+                # self.print()
+                # self.print(times)
+                # self.print(best_algo)
+                # self.print()
                 # times = []
                 # for integ in integrs:
                 #     ops.system(best_sys)
@@ -1614,10 +1441,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_integ = integrs[imn]
-                # print()
-                # print(times)
-                # print(best_integ)
-                # print()
+                # self.print()
+                # self.print(times)
+                # self.print(best_integ)
+                # self.print()
 
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv])
@@ -1627,15 +1454,17 @@ class NLTHAnalysis(NonlinearAnalysis):
                 speed = total_step_count / (time.perf_counter() - now)
                 if total_step_count % 50 == 0:
                     # provide run speed statistics
-                    self.logger.info(f'Average speed: {speed:.2f} steps/s')
+                    # debug
+                    print(f'Average speed: {speed:.2f} steps/s')
+                    self.log(f'Average speed: {speed:.2f} steps/s')
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
-                        print()
-                        print('===========================')
-                        print('Analysis failed to converge')
-                        print('===========================')
-                        print()
+                        self.print()
+                        self.print('===========================')
+                        self.print('Analysis failed to converge')
+                        self.print('===========================')
+                        self.print()
                         self.logger.warning(
                             f"Analysis failed at time {curr_time:.5f}")
                         analysis_failed = True
@@ -1653,29 +1482,33 @@ class NLTHAnalysis(NonlinearAnalysis):
                     if total_step_count % skip_steps == 0:
                         n_steps_success += 1
                         self._read_OpenSees_results(
+                            case_name,
                             n_steps_success,
                             nodes,
                             elastic_elems,
-                            disp_elems
+                            disp_elems,
+                            zerolength_elems
                         )
                         self.time_vector.append(curr_time)
-                    if printing:
-                        print('Target timestamp: %.2f s | Current: %.4f s' %
-                              (target_timestamp, curr_time), end='\r')
+                    if print_progress:
+                        print(
+                            'Target timestamp: %.2f s | Current: %.4f s' %
+                            (target_timestamp, curr_time), end='\r')
                     if num_subdiv != 0:
                         if num_times == 0:
                             num_subdiv -= 1
                             num_times = 10
 
         except KeyboardInterrupt:
-            print("Analysis interrupted")
+            self.print("Analysis interrupted")
             self.logger.warning("Analysis interrupted")
 
         metadata = {'successful steps': n_steps_success,
                     'analysis_finished_successfully': not analysis_failed}
-        self.n_steps_success = len(self.time_vector)
-        self.logger.info('Analysis finished')
-        self._write_results_to_disk()
+        self.results[case_name].n_steps_success = len(self.time_vector)
+        self.log('Analysis finished')
+        if self.settings.pickle_results:
+            self._write_results_to_disk()
         return metadata
 
     def plot_ground_motion(self, filename, file_time_incr,
@@ -1699,13 +1532,15 @@ class NLTHAnalysis(NonlinearAnalysis):
             plt.ylabel(f'Acceleration ({gmunit})')
             plt.show()
 
-    def plot_node_displacement_history(self, node, direction,
+    def plot_node_displacement_history(self, case_name,
+                                       node, direction,
                                        plotly=False):
         time = self.time_vector
         uid = node.uid
         results = []
-        for k in range(self.n_steps_success):
-            results.append(self.results.node_displacements.registry[uid][k][direction])
+        for k in range(self.results[case_name].n_steps_success):
+            results.append(self.results[case_name].node_displacements.registry[
+                uid][k][direction])
         vals = np.array(results)
         if plotly:
             general_2D.line_plot_interactive(
@@ -1720,3 +1555,68 @@ class NLTHAnalysis(NonlinearAnalysis):
             plt.xlabel('Time (s)')
             plt.ylabel('Displacement (in)')
             plt.show()
+
+@dataclass
+class ModalResponseSpectrumAnalysis:
+    mdl: Model
+    load_case: LoadCase
+    num_modes: int
+    periods: nparr
+    spectrum: nparr
+    direction: str
+
+    def run(self):
+        spectrum_ifun = interp1d(
+            self.periods, self.spectrum, kind='linear')
+        anl = ModalAnalysis(
+            self.mdl, {self.load_case.name: self.load_case},
+            num_modes=self.num_modes)
+        anl.settings.pickle_results = False
+        anl.settings.store_fiber = False
+        anl.settings.store_forces = True
+        anl.settings.store_reactions = False
+        anl.run()
+        case_name = self.load_case.name
+        gammas, mstars, mtot = anl.modal_participation_factors(
+            case_name, self.direction)
+        ts = anl.results[case_name].periods
+        if self.mdl.settings.imperial_units:
+            g_const = common.G_CONST_IMPERIAL
+        else:
+            g_const = common.G_CONST_SI
+        vb_modal = np.zeros(self.num_modes)
+        modal_q0 = np.zeros(self.num_modes)
+        for i in range(self.num_modes):
+            vb_modal[i] = ((spectrum_ifun(ts[i]))
+                           * mstars[i] * mtot * g_const)
+            modal_q0[i] = gammas[i] * (spectrum_ifun(ts[i])
+                                       / (2.*np.pi / ts[i])**2 * g_const)
+        self.modal_q0 = modal_q0
+        self.vb_modal = vb_modal
+        self.anl = anl
+
+    def combined_node_disp(self, node_uid):
+        all_vals = []
+        for i in range(self.num_modes):
+            vals = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_uid][i]) * self.modal_q0[i]
+            all_vals.append(vals)
+        all_vals_np = np.column_stack(all_vals)
+        return np.sqrt(np.sum(all_vals_np**2, axis=1))
+
+    def combined_node_disp_diff(self, node_i_uid, node_j_uid):
+        all_vals = []
+        for i in range(self.num_modes):
+            vals_i = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_i_uid][i]) * self.modal_q0[i]
+            vals_j = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_j_uid][i]) * self.modal_q0[i]
+            vals = vals_i - vals_j
+            all_vals.append(vals)
+        all_vals_np = np.column_stack(all_vals)
+        return np.sqrt(np.sum(all_vals_np**2, axis=1))
+
+    def combined_basic_forces(self, element_uid):
+        all_vals = []
+        for i in range(self.num_modes):
+            vals = np.array(self.anl.results[self.load_case.name].element_forces.registry[element_uid][i]) * self.modal_q0[i]
+            all_vals.append(vals)
+        all_vals_np = np.column_stack(all_vals)
+        return np.sqrt(np.sum(all_vals_np**2, axis=1))

@@ -45,7 +45,7 @@ class Vertex:
         return self.uid == other.uid
 
     def __repr__(self):
-        return str(self.uid)
+        return f'(V{self.uid} @ {self.coords}) '
 
 
 class Edge:
@@ -61,7 +61,7 @@ class Edge:
     def __init__(self, v_i: Vertex, v_j: Vertex):
         self.v_i = v_i
         self.v_j = v_j
-        self.uid = str(next(self._ids))
+        self.uid = next(self._ids)
         self.h_i: Optional[Halfedge] = None
         self.h_j: Optional[Halfedge] = None
         if self not in self.v_i.edges:
@@ -70,7 +70,7 @@ class Edge:
             self.v_j.edges.append(self)
 
     def __repr__(self):
-        return str(self.uid)
+        return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
 
     def define_halfedge(self, vertex: Vertex):
         """
@@ -121,9 +121,7 @@ class Halfedge:
     edge's vertex that the halfedge originates from.
     Halfedges have a `next` attribute that
     points to the next halfedge, forming closed
-    loops, or sequences, that use here to retrieve
-    the faces from the given edges and vertices,
-    which is the purpose of this module.
+    loops, or sequences, which is the purpose of this module.
     """
 
     _ids = count(0)
@@ -135,7 +133,12 @@ class Halfedge:
         self.nxt = None
 
     def __repr__(self):
-        return str(self.uid)
+        if self.nxt:
+            out = f'(H{self.uid} from E{self.edge.uid}' \
+                f' to E{self.nxt.edge.uid} next H{self.nxt.uid})'
+        else:
+            out = f'(H{self.uid}'
+        return out
 
     def __lt__(self, other):
         return self.uid < other.uid
@@ -164,7 +167,7 @@ class Mesh:
 
     def __repr__(self):
         num = len(self.halfedges)
-        return("Mesh object containing " + str(num) + " halfedges.")
+        return f'Mesh object containing {num} halfedges.'
 
     def geometric_properties(self):
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])

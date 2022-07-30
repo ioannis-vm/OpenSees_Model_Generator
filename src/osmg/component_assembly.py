@@ -78,7 +78,7 @@ class ComponentAssembly:
         return res
 
     def list_of_elastic_beamcolumn_elements(self):
-        return list(self.dict_of_elastic_beamcolumn_elements())
+        return list(self.dict_of_elastic_beamcolumn_elements().values())
 
     def dict_of_disp_beamcolumn_elements(self):
         res = {}
@@ -87,7 +87,7 @@ class ComponentAssembly:
         return res
 
     def list_of_disp_beamcolumn_elements(self):
-        return list(self.dict_of_disp_beamcolumn_elements())
+        return list(self.dict_of_disp_beamcolumn_elements().values())
 
     def dict_of_all_elements(self):
         res = {}
