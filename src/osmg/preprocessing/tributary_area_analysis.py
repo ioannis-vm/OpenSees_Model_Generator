@@ -2,6 +2,7 @@
 Model Generator for OpenSees ~ tributary area analysis
 """
 
+
 #                          __
 #   ____  ____ ___  ____ _/ /
 #  / __ \/ __ `__ \/ __ `/ /
@@ -13,6 +14,7 @@ Model Generator for OpenSees ~ tributary area analysis
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from typing import no_type_check
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
@@ -79,6 +81,7 @@ class TributaryAreaAnaysis:
     data: TributaryAreaAnalysisData = field(
         default_factory=TributaryAreaAnalysisData)
 
+    @no_type_check
     def run(self, load_factor=1.00, massless_load_factor=1.00):
         lvl = self.parent_level
         all_components = list(lvl.components.values())
@@ -274,7 +277,7 @@ class TributaryAreaAnaysis:
                 subloops.append(subloop)
 
             subloop_areas = [float(sg.Polygon(
-                [h.vertex.point for h in subloop]).area())  # type: ignore
+                [h.vertex.point for h in subloop]).area())
                 for subloop in subloops]
             outer = min(subloop_areas)  # Remove the exterior loop
             index = subloop_areas.index(outer)
@@ -300,12 +303,12 @@ class TributaryAreaAnaysis:
                                 edge_polygons[edge.uid].append(
                                     [(float(h.vertex.point.x()),
                                       float(h.vertex.point.y()))
-                                     for h in subloop])  # type: ignore
+                                     for h in subloop])
                             else:
                                 edge_polygons[edge.uid] = [
                                     [(float(h.vertex.point.x()),
                                       float(h.vertex.point.y()))
-                                     for h in subloop]]  # type: ignore
+                                     for h in subloop]]
 
         # # plotting - used while developing the code
         # import pandas as pd

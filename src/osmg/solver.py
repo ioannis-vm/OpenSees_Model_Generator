@@ -867,7 +867,8 @@ class NonlinearAnalysis(Analysis):
     #                 str(elm.uid))
 
     def retrieve_node_displacement(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name]
+                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].node_displacements[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_displacements[uid][i]
@@ -879,7 +880,8 @@ class NonlinearAnalysis(Analysis):
         return res
 
     def retrieve_node_acceleration(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name]
+                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_accelerations[uid][i]
@@ -889,7 +891,8 @@ class NonlinearAnalysis(Analysis):
         return df
 
     def retrieve_node_velocity(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name].
+                        n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_velocities[uid][i]
@@ -899,7 +902,8 @@ class NonlinearAnalysis(Analysis):
         return df
 
     def retrieve_node_abs_acceleration(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name]
+                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, NLTHAnalysis)
         assert self.a_g is not None
@@ -918,7 +922,8 @@ class NonlinearAnalysis(Analysis):
         return df
 
     def retrieve_node_abs_velocity(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name]
+                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, NLTHAnalysis)
         assert self.a_g is not None
@@ -939,7 +944,8 @@ class NonlinearAnalysis(Analysis):
         return df
 
     def retrieve_release_force_defo(self, uid, case_name):
-        res = np.zeros((self.results[case_name].n_steps_success, 6))
+        res = np.zeros((self.results[case_name]
+                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].release_force_defo[uid])
         assert isinstance(self, NLTHAnalysis)
         assert self.a_g is not None
@@ -1632,11 +1638,12 @@ class ModalResponseSpectrumAnalysis:
         vb_modal = np.zeros(self.num_modes)
         modal_q0 = np.zeros(self.num_modes)
         for i in range(self.num_modes):
-            vb_modal[i] = ((spectrum_ifun(ts[i])) * mstars[i]
-                           * mtot * g_const)  # type:ignore
+            vb_modal[i] = ((spectrum_ifun(ts[i]))  # type: ignore
+                           * mstars[i]  # type: ignore
+                           * mtot * g_const)  # type: ignore
             modal_q0[i] = (
-                gammas[i] * (spectrum_ifun(ts[i])
-                             / (2.*np.pi / ts[i])**2
+                gammas[i] * (spectrum_ifun(ts[i])  # type: ignore
+                             / (2.*np.pi / ts[i])**2  # type: ignore
                              * g_const))  # type: ignore
         self.modal_q0 = modal_q0
         self.vb_modal = vb_modal
