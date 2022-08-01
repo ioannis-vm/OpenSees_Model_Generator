@@ -1,0 +1,1 @@
+include src/osmg/*.toml section_data/sections.json
