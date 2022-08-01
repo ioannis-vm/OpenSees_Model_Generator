@@ -271,7 +271,7 @@ class TributaryAreaAnaysis:
                         continue
                 subloop = [halfedge]
                 nxt = halfedge.next
-                while(nxt.vertex.point != halfedge.vertex.point):
+                while nxt.vertex.point != halfedge.vertex.point:
                     subloop.append(nxt)
                     nxt = nxt.next
                 subloops.append(subloop)

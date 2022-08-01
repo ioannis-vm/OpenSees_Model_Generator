@@ -154,8 +154,8 @@ class FiberSection(Section):
         return res
 
     def ops_args(self):
-        return['Fiber', self.uid, '-GJ',
-               self.J*self.section_parts['main'].physical_material.G]
+        return ['Fiber', self.uid, '-GJ',
+                self.J*self.section_parts['main'].physical_material.G]
 
     def weight_per_length(self):
         if self.name[0] == 'W':

@@ -179,7 +179,7 @@ class Mesh:
         xmax = max(coords[:, 0])
         ymin = min(coords[:, 1])
         ymax = max(coords[:, 1])
-        return(np.array([[xmin, ymin], [xmax, ymax]]))
+        return np.array([[xmin, ymin], [xmax, ymax]])
 
 
 ############################################
@@ -414,7 +414,7 @@ def obtain_closed_loops(halfedges):
                 continue
         loop = [halfedge]
         nxt = halfedge.nxt
-        while(nxt != halfedge):
+        while nxt != halfedge:
             loop.append(nxt)
             nxt = nxt.nxt
         loops.append(loop)
