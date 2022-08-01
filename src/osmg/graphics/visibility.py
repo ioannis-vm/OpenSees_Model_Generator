@@ -11,7 +11,6 @@ Model Generator for OpenSees ~ visibility
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 
 
@@ -23,6 +22,7 @@ class ElementVisibility:
     hidden_when_extruded: bool = field(default=False)
     hidden_at_line_plots: bool = field(default=False)
     skip_OpenSees_definition: bool = field(default=False)
+
 
 @dataclass
 class NodeVisibility:

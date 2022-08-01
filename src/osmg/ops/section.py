@@ -22,8 +22,6 @@ from ..mesh import Mesh
 from ..mesh import polygon_area
 from .. import common
 if TYPE_CHECKING:
-    from .element import Element
-    from ..collections import MeshCollection
     from .uniaxialMaterial import uniaxialMaterial
     from ..physical_material import PhysicalMaterial
 
@@ -102,6 +100,7 @@ class ElasticSection(Section):
             res += 'snap_points: None\n'
         return res
 
+
 @dataclass(repr=False)
 class SectionComponent:
     """
@@ -165,13 +164,15 @@ class FiberSection(Section):
             mult = 1.00
         res = 0.00
         for part in self.section_parts.values():
-            coords: nparr = np.array([h.vertex.coords for h in part.outside_shape.halfedges])
+            coords: nparr = np.array(
+                [h.vertex.coords for h in part.outside_shape.halfedges])
             area = polygon_area(coords)
             for hole in part.holes:
-                hole_coords: nparr = np.array([h.vertex.coords for h in hole.halfedges])
+                hole_coords: nparr = np.array(
+                    [h.vertex.coords
+                     for h in part.holes[hole].halfedges])
                 area -= polygon_area(hole_coords)
             density = part.physical_material.density
             # todo: units
             res += area * density * common.G_CONST_IMPERIAL
         return res * mult
-            

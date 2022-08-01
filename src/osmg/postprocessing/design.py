@@ -12,18 +12,21 @@ Model Generator for OpenSees ~ design library
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import Optional
 from dataclasses import dataclass, field
 from ..solver import Analysis
 from .basic_forces import basic_forces
 from ..model import Model
 from ..solver import ModalResponseSpectrumAnalysis
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
+
+nparr = npt.NDArray[np.float64]
 
 
 case_name = str
 component_name = str
+
 
 @dataclass(repr=False)
 class LoadCombination:
@@ -33,7 +36,8 @@ class LoadCombination:
     stuff inside the sub-list are enveloped
     """
     mdl: Model
-    combo: dict[list[component_name, list[tuple[float, Analysis, case_name]]]] = \
+    combo: dict[component_name,
+                list[tuple[float, Analysis, case_name]]] = \
         field(default_factory=dict)
 
     def envelope_basic_forces(self, elm, num_points):
@@ -49,8 +53,10 @@ class LoadCombination:
                 columns=['nx', 'qy', 'qz', 'tx', 'mz', 'my'])
             for component_to_add in component_to_envelope:
                 factor, anl, case_name_str = component_to_add
-                df = basic_forces(
-                    anl, case_name_str, 0, elm, num_points) * factor
+                res = basic_forces(
+                    anl, case_name_str, 0, elm, num_points)
+                assert isinstance(res, pd.DataFrame)
+                df = res * factor
                 df_tot += df
             df_min[df_min > df_tot] = df_tot
             df_max[df_max < df_tot] = df_tot
@@ -58,16 +64,18 @@ class LoadCombination:
         return df_min, df_max
 
     def envelope_node_displacement(self, node):
-        disp_min = np.full(6, np.inf)
-        disp_max = np.full(6, -np.inf)
+        disp_min: nparr = np.full(6, np.inf)
+        disp_max: nparr = np.full(6, -np.inf)
         for component_to_envelope in self.combo.values():
             disp_tot = np.full(6, 0.00)
             for component_to_add in component_to_envelope:
                 factor, anl, case_name_str = component_to_add
                 if isinstance(anl, ModalResponseSpectrumAnalysis):
-                    disp = np.array(anl.combined_node_disp(node.uid) * factor)
+                    disp: nparr = np.array(
+                        anl.combined_node_disp(node.uid) * factor)
                 else:
-                    disp = np.array(anl.results[case_name_str].node_displacements.registry[node.uid][0])
+                    disp = np.array(anl.results[case_name_str]
+                                    .node_displacements[node.uid][0])
                 disp_tot += disp
             disp_min[disp_min > disp_tot] = disp[disp_min > disp_tot]
             disp_max[disp_max < disp_tot] = disp[disp_max < disp_tot]
@@ -82,14 +90,18 @@ class LoadCombination:
             for component_to_add in component_to_envelope:
                 factor, anl, case_name_str = component_to_add
                 if isinstance(anl, ModalResponseSpectrumAnalysis):
-                    disp = np.array(anl.combined_node_disp_diff(node_i.uid, node_j.uid) * factor)
+                    disp: nparr = np.array(anl.combined_node_disp_diff(
+                        node_i.uid, node_j.uid) * factor)
                 else:
-                    disp_i = np.array(anl.results[case_name_str].node_displacements.registry[node_i.uid][0])
-                    disp_j = np.array(anl.results[case_name_str].node_displacements.registry[node_j.uid][0])
+                    disp_i: nparr = np.array(
+                        anl.results[case_name_str]
+                        .node_displacements[node_i.uid][0])
+                    disp_j: nparr = np.array(
+                        anl.results[case_name_str]
+                        .node_displacements[node_j.uid][0])
                     disp = disp_i - disp_j
                 disp_tot += disp
             disp_min[disp_min > disp_tot] = disp[disp_min > disp_tot]
             disp_max[disp_max < disp_tot] = disp[disp_max < disp_tot]
 
         return disp_tot, disp_tot
-

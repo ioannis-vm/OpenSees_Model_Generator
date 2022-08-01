@@ -22,6 +22,8 @@ from ..mesh import sanity_checks
 from ..mesh import define_halfedges
 from ..import common
 
+nparr = npt.NDArray[np.float64]
+
 
 def generate(edges):
     halfedges = define_halfedges(edges)
@@ -64,7 +66,7 @@ def w_mesh(b, h, tw, tf, target_area=None):
     if area_diff < 0:
         # This happens for W14X426
         area_diff = 1e-4
-        
+
     r = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
     # note: 0.9565 is a correction factor to account for
     # the fact that we approximate the arcs with
@@ -76,20 +78,20 @@ def w_mesh(b, h, tw, tf, target_area=None):
         Vertex((-b/2., h/2.-tf)),
         Vertex((-b/2.+k, h/2.-tf)),
         Vertex((-b/2.+k+r * np.cos(3.*np.pi/8.),
-                       h/2.-tf-r + r*np.sin(3.*np.pi/8.))),
+                h/2.-tf-r + r*np.sin(3.*np.pi/8.))),
         Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
-                       h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
+                h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
         Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
-                       h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
+                h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
 
         Vertex((-b/2.+k+r, h/2.-tf-r)),
         Vertex((-b/2.+k+r, -h/2.+tf+r)),
         Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
-                       -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
+                -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
         Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
-                       -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
+                -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
         Vertex((-b/2.+k+r*np.cos(3.*np.pi/8.),
-                       -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
+                -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
 
         Vertex((-b/2.+k, -h/2.+tf)),
         Vertex((-b/2., -(h/2.-tf))),
@@ -107,11 +109,11 @@ def w_mesh(b, h, tw, tf, target_area=None):
         Vertex((+b/2.-k-r, -h/2.+tf+r)),
         Vertex((+b/2.-k-r, +h/2.-tf-r)),
         Vertex((+b/2.-k-r*np.cos(1.*np.pi/8.),
-                       +h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
+                +h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
         Vertex((+b/2.-k-r*np.cos(1.*np.pi/4.),
-                       +h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
+                +h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
         Vertex((+b/2.-k-r*np.cos(3.*np.pi/8.),
-                       +h/2.-tf-r+r*np.sin(3.*np.pi/8.))),
+                +h/2.-tf-r+r*np.sin(3.*np.pi/8.))),
 
         Vertex((+b/2.-k, h/2.-tf)),
         Vertex((b/2., h/2.-tf))
@@ -168,15 +170,15 @@ def HSS_circ_mesh(od: float, tdes: float, n_pts: int):
     """
     e = common.EPSILON
     t_param = np.linspace(0., 2.*np.pi, n_pts)
-    pts_normalized = np.column_stack(
+    pts_normalized: nparr = np.column_stack(
         (np.sin(t_param), -np.cos(t_param)))
     pts_outer = pts_normalized * od
     pts_outer[0, 0] += e
     pts_outer[-1, 0] -= e
-    pts_inner = np.flip(pts_normalized * (od - tdes), axis=0)
+    pts_inner: nparr = np.flip(pts_normalized * (od - tdes), axis=0)
     pts_inner[0, 0] -= e
     pts_inner[-1, 0] += e
-    pts_all = np.concatenate((pts_outer, pts_inner))
+    pts_all: nparr = np.concatenate((pts_outer, pts_inner))
     vertices = []
     for point in pts_all:
         vertices.append(Vertex((point[0], point[1])))
@@ -204,14 +206,14 @@ def rect_mesh(b, h):
     return generate(edges)
 
 
-def generic_snap_points(mesh: Mesh) -> dict:
+def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     """
     Generates generic snap poitns
     for a section object.
     """
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
-    snap_points = {}
+    snap_points: dict[str, nparr] = {}
     snap_points['centroid'] = - np.array([0., 0.])
     snap_points['top_center'] = - np.array([0., y_max])
     snap_points['top_left'] = - np.array([z_min, y_max])

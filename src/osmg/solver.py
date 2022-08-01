@@ -153,7 +153,7 @@ def test_uniaxial_material(
             if total_fail:
                 break
     print('Number of saved analysis steps:', n_steps_success)
-    results = np.column_stack((deformations, forces))
+    results: nparr = np.column_stack((deformations, forces))
     df = pd.DataFrame(results)
     df.columns = ['deformation', 'froce']
     if plot:
@@ -164,13 +164,22 @@ def test_uniaxial_material(
 
 @dataclass(repr=False)
 class Results:
-    node_displacements: Collection = field(init=False)
-    node_velocities: Collection = field(init=False)
-    node_accelerations: Collection = field(init=False)
-    node_reactions: Collection = field(init=False)
-    element_forces: Collection = field(init=False)
-    fiber_stress_strain: Collection = field(init=False)
-    release_force_defo: Collection = field(init=False)
+    node_displacements: Collection[
+        int, dict[int, list[float]]] = field(init=False)
+    node_velocities: Collection[
+        int, dict[int, list[float]]] = field(init=False)
+    node_accelerations: Collection[
+        int, dict[int, list[float]]] = field(init=False)
+    node_reactions: Collection[
+        int, dict[int, list[float]]] = field(init=False)
+    element_forces: Collection[
+        int, dict[int, nparr]] = field(init=False)
+    # fiber_stress_strain: Collection = field(init=False)
+    release_force_defo: Collection[
+        int, dict[int, list[float]]] = field(init=False)
+    periods: Optional[nparr] = field(default=None)
+    n_steps_success: Optional[int] = field(default=None)
+    metadata: Optional[dict[str, object]] = field(default=None)
 
     def __post_init__(self):
         self.node_displacements = Collection(self)
@@ -178,7 +187,7 @@ class Results:
         self.node_accelerations = Collection(self)
         self.node_reactions = Collection(self)
         self.element_forces = Collection(self)
-        self.fiber_stress_strain = Collection(self)
+        # self.fiber_stress_strain = Collection(self)
         self.release_force_defo = Collection(self)
 
 
@@ -249,20 +258,20 @@ class Analysis:
                      .parent_nodes.values()])
             self.results[case_name] = Results()
             for uid in node_uids:
-                self.results[case_name].node_displacements.registry[uid] = {}
-                self.results[case_name].node_velocities.registry[uid] = {}
-                self.results[case_name].node_accelerations.registry[uid] = {}
-                self.results[case_name].node_reactions.registry[uid] = {}
+                self.results[case_name].node_displacements[uid] = {}
+                self.results[case_name].node_velocities[uid] = {}
+                self.results[case_name].node_accelerations[uid] = {}
+                self.results[case_name].node_reactions[uid] = {}
 
             if self.settings.store_forces:
                 for uid in self.mdl.dict_of_elastic_beamcolumn_elements():
-                    self.results[case_name].element_forces.registry[uid] = {}
+                    self.results[case_name].element_forces[uid] = {}
             if self.settings.store_fiber:
                 for uid in self.mdl.dict_of_disp_beamcolumn_elements():
-                    self.results[case_name].element_forces.registry[uid] = {}
+                    self.results[case_name].element_forces[uid] = {}
             if self.settings.store_release_force_defo:
                 for uid in self.mdl.dict_of_zerolength_elements():
-                    self.results[case_name].release_force_defo.registry[uid] = {}
+                    self.results[case_name].release_force_defo[uid] = {}
 
         self.log('Analysis started')
 
@@ -324,11 +333,11 @@ class Analysis:
         for uid, node in all_nodes.items():
             if np.max(np.array(
                     (*self.load_cases[case_name]
-                     .node_mass.registry[node.uid]
+                     .node_mass[node.uid]
                      .val,))) < common.EPSILON:
-              continue
+                continue
             ops.mass(node.uid, *self.load_cases[case_name].node_mass
-                     .registry[node.uid].val)
+                     [node.uid].val)
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Elastic BeamColumn element definition #
@@ -403,8 +412,8 @@ class Analysis:
 
         # node constraints
         for uid in parent_nodes:
-            lvl = self.mdl.levels.registry[parent_node_to_lvl[uid]]
-            nodes = lvl.nodes.registry.values()
+            lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+            nodes = lvl.nodes.values()
             good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
             ops.rigidDiaphragm(
                 3, uid, *[nd.uid for nd in good_nodes])
@@ -415,7 +424,8 @@ class Analysis:
         for elm in self.mdl.list_of_beamcolumn_elements():
             if elm.visibility.skip_OpenSees_definition:
                 continue
-            udl_total = self.load_cases[case_name].line_element_udl.registry[elm.uid].val
+            udl_total = (self.load_cases[case_name]
+                         .line_element_udl[elm.uid].val)
             ops.eleLoad('-ele', elm.uid,
                         '-type', '-beamUniform',
                         udl_total[1],
@@ -423,7 +433,8 @@ class Analysis:
                         udl_total[0])
 
         for nd in self.mdl.list_of_all_nodes():
-            ops.load(nd.uid, *self.load_cases[case_name].node_loads.registry[nd.uid].val)
+            ops.load(nd.uid, *self.load_cases[case_name]
+                     .node_loads[nd.uid].val)
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -435,7 +446,7 @@ class Analysis:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeDisp(nd.uid)
-            self.results[case_name].node_displacements.registry[nd.uid][step] = val
+            self.results[case_name].node_displacements[nd.uid][step] = val
 
     def _read_node_velocities(self, case_name, step, nodes):
         for nd in nodes:
@@ -443,7 +454,7 @@ class Analysis:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeVel(nd.uid)
-            self.results[case_name].node_velocities.registry[nd.uid][step] = val
+            self.results[case_name].node_velocities[nd.uid][step] = val
 
     def _read_node_accelerations(self, case_name, step, nodes):
         for nd in nodes:
@@ -451,14 +462,14 @@ class Analysis:
                 if nd.uid not in self.settings.specific_nodes:
                     continue
             val = ops.nodeAccel(nd.uid)
-            self.results[case_name].node_accelerations.registry[nd.uid][step] = val
+            self.results[case_name].node_accelerations[nd.uid][step] = val
 
     def _read_node_reactions(self, case_name, step, nodes):
         ops.reactions()
         for nd in nodes:
             if True in nd.restraint:
-                val: nparr = np.array(ops.nodeReaction(nd.uid))
-                self.results[case_name].node_reactions.registry[nd.uid][step] = val
+                val = ops.nodeReaction(nd.uid)
+                self.results[case_name].node_reactions[nd.uid][step] = val
 
     def _read_frame_element_forces(self, case_name, step, elems):
         for elm in elems:
@@ -471,11 +482,11 @@ class Analysis:
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
-            T_global2local = np.vstack((x_vec, y_vec, z_vec))
+            T_global2local: nparr = np.vstack((x_vec, y_vec, z_vec))
             ni, qyi, qzi = T_global2local @ forces_global
             ti, myi, mzi = T_global2local @ moments_global_clear
-            forces = np.array((ni, qyi, qzi, ti, myi, mzi))
-            self.results[case_name].element_forces.registry[uid][step] = forces
+            forces: nparr = np.array((ni, qyi, qzi, ti, myi, mzi))
+            self.results[case_name].element_forces[uid][step] = forces
 
 #     def _read_frame_fiber_stress_strain(self):
 #         for elm in self.mdl.list_of_line_elements():
@@ -520,7 +531,7 @@ class Analysis:
             tmat_g2l = transformations.transformation_matrix(
                 vec_x, vec_y, vec_z)
             moment_local = tmat_g2l @ -(np.array(moment_global))
-            self.results[case_name].release_force_defo.registry[release.uid][step] = \
+            self.results[case_name].release_force_defo[release.uid][step] = \
                 [*rot_local, *moment_local]
 
     def _read_OpenSees_results(
@@ -556,15 +567,15 @@ class Analysis:
 
     def global_reactions(self, case_name, step):
         reactions = np.full(6, 0.00)
-        for lvl in self.mdl.levels.registry.values():
-            for nd in lvl.nodes.registry.values():
+        for lvl in self.mdl.levels.values():
+            for nd in lvl.nodes.values():
                 if True in nd.restraint:
                     uid = nd.uid
                     x = nd.coords[0]
                     y = nd.coords[1]
                     z = nd.coords[2]
                     local_reaction = \
-                        self.results[case_name].node_reactions.registry[uid][step]
+                        self.results[case_name].node_reactions[uid][step]
                     global_reaction: nparr = np.array([
                         local_reaction[0],
                         local_reaction[1],
@@ -631,7 +642,7 @@ class ModalAnalysis(Analysis):
                 val = ops.nodeEigenvector(
                         nd.uid,
                         i+1)
-                self.results[case_name].node_displacements.registry[nd.uid][i] = val
+                self.results[case_name].node_displacements[nd.uid][i] = val
 
     def _read_frame_element_forces(self, case_name, elems):
         # note: opensees does not output the element forces that correspond
@@ -640,7 +651,7 @@ class ModalAnalysis(Analysis):
         # displacements to get the element forces.
 
         # note: work in progress. currently this doesn't work.
-        
+
         for case_name in self.load_cases:
             for step in range(self.num_modes):
                 for elm in elems:
@@ -650,34 +661,39 @@ class ModalAnalysis(Analysis):
                     assert isinstance(elm, elasticBeamColumn)
                     # displacements at the two ends (global system)
                     u_i = (self.results[case_name].node_displacements
-                           .registry[elm.eleNodes[0].uid][step][0:3])
+                           [elm.eleNodes[0].uid][step][0:3])
                     r_i = (self.results[case_name].node_displacements
-                           .registry[elm.eleNodes[0].uid][step][3:6])
+                           [elm.eleNodes[0].uid][step][3:6])
                     u_j = (self.results[case_name].node_displacements
-                           .registry[elm.eleNodes[1].uid][step][0:3])
+                           [elm.eleNodes[1].uid][step][0:3])
                     r_j = (self.results[case_name].node_displacements
-                           .registry[elm.eleNodes[1].uid][step][3:6])
+                           [elm.eleNodes[1].uid][step][3:6])
                     offset_i = elm.geomtransf.offset_i
                     offset_j = elm.geomtransf.offset_j
-                    u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
-                    u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
+                    u_i_o = transformations.offset_transformation(
+                        offset_i, np.array(u_i), np.array(r_i))
+                    u_j_o = transformations.offset_transformation(
+                        offset_j, np.array(u_j), np.array(r_j))
 
                     x_vec = elm.geomtransf.x_axis
                     y_vec = elm.geomtransf.y_axis
-                    z_vec = np.cross(x_vec, y_vec)
+                    z_vec: nparr = np.cross(x_vec, y_vec)
 
                     # global -> local transformation matrix
                     T_global2local = \
-                        transformations.transformation_matrix(x_vec, y_vec, z_vec)
+                        transformations.transformation_matrix(
+                            x_vec, y_vec, z_vec)
                     u_i_local = T_global2local @ u_i_o
                     r_i_local = T_global2local @ r_i
                     u_j_local = T_global2local @ u_j_o
                     r_j_local = T_global2local @ r_j
 
                     # # element UDL
-                    udl = self.load_cases[case_name].line_element_udl.registry[elm.uid].val
+                    udl = (self.load_cases[case_name]
+                           .line_element_udl[elm.uid].val)
                     # note: modal analsis doesn't account for applied loads.
-                    # this will cause issues with plotting if loads have been applied.
+                    # this will cause issues with plotting if loads
+                    # have been applied.
                     if np.linalg.norm(udl) > common.EPSILON:
                         raise ValueError('Loads applied at modal load case.')
 
@@ -685,14 +701,14 @@ class ModalAnalysis(Analysis):
                     length = elm.clear_length()
                     ea = elm.section.E * elm.section.A
                     eimaj = elm.section.E * elm.section.Ix
-                    eimin = elm.section.E * elm.section.Iy
+                    # eimin = elm.section.E * elm.section.Iy
                     gj = elm.section.G * elm.section.J
 
                     # deformations
                     dl = u_j_local[0] - u_i_local[0]
                     theta_tor = r_j_local[0] - r_i_local[0]
                     du_xy = u_j_local[1] - u_i_local[1]
-                    du_xz = u_j_local[2] - u_i_local[2]
+                    # du_xz = u_j_local[2] - u_i_local[2]
 
                     # axial load
                     ni = ea / length * dl
@@ -702,16 +718,18 @@ class ModalAnalysis(Analysis):
                         (4.00 * eimaj / length * r_i_local[2]
                          + 2.00 * eimaj / length * r_j_local[2]
                          - 6.00 * eimaj / length**2 * du_xy)
-                    qyi = (6.00 * eimaj / length**2 * (r_i_local[2] + r_j_local[2])
+                    qyi = (6.00 * eimaj / length**2
+                           * (r_i_local[2] + r_j_local[2])
                            - 12.00 * eimaj / length**3 * du_xy)
 
-                    # weak axis bending
-                    # work in progress...
+                    # # weak axis bending
+                    # # work in progress...
                     # myi = \
                     #     -(4.00 * eimin / length * (-r_i_local[1])
                     #      + 2.00 * eimin / length * (-r_j_local[1])
                     #      - 6.00 * eimin / length * (du_xz))
-                    # qzi = (6.00 * eimin / length**2 * ((-r_i_local[2]) + (-r_j_local[2]))
+                    # qzi = (6.00 * eimin / length**2
+                    #        * ((-r_i_local[2]) + (-r_j_local[2]))
                     #        - 12.00 * eimin / length**3 * (du_xz))
                     myi = 0.00
                     qzi = 0.00
@@ -721,9 +739,8 @@ class ModalAnalysis(Analysis):
 
                     # store results
                     (self.results[case_name].element_forces
-                     .registry[elm.uid][step]) = \
+                     [elm.uid][step]) = \
                         np.array((ni, qyi, qzi, ti, myi, mzi))
-        
 
     def run(self):
         self._init_results()
@@ -745,7 +762,8 @@ class ModalAnalysis(Analysis):
             self.results[case_name].periods = 2.00*np.pi / np.sqrt(eigValues)
             self._read_node_displacements(case_name)
             if self.settings.store_forces:
-                self._read_frame_element_forces(case_name, self.mdl.list_of_beamcolumn_elements())
+                self._read_frame_element_forces(
+                    case_name, self.mdl.list_of_beamcolumn_elements())
         if self.settings.pickle_results:
             self._write_results_to_disk()
 
@@ -757,13 +775,13 @@ class ModalAnalysis(Analysis):
         mstars = np.zeros(self.num_modes)
         Mn_tot = 0.
         for ntg in ntgs:
-            node_mass = self.load_cases[case_name].node_mass.registry[ntg].val
+            node_mass = self.load_cases[case_name].node_mass[ntg].val
             Mn_tot += node_mass[dof_dir[direction]]
         for mode in range(self.num_modes):
             Ln = 0.
             Mn = 0.
             for ntg in ntgs:
-                node_mass = self.load_cases[case_name].node_mass.registry[ntg].val
+                node_mass = self.load_cases[case_name].node_mass[ntg].val
                 node_phi = ops.nodeEigenvector(ntg, mode+1)
                 Ln += node_phi[dof_dir[direction]] * \
                     node_mass[dof_dir[direction]]
@@ -807,8 +825,10 @@ class NonlinearAnalysis(Analysis):
     #         y_vec = elm.y_axis
     #         z_vec = elm.z_axis
     #         trans_global2local: nparr = np.vstack((x_vec, y_vec, z_vec))
-    #         forces_global: nparr= np.array(self.element_forces[str(elm.uid)][-1][0:3])
-    #         moments_global_ends: nparr = np.array(self.element_forces[str(elm.uid)][-1][3:6])
+    #         forces_global: nparr = np.array(
+    #             self.element_forces[str(elm.uid)][-1][0:3])
+    #         moments_global_ends: nparr = np.array(
+    #             self.element_forces[str(elm.uid)][-1][3:6])
 
     #         moments_global_clear = \
     #             transformations.offset_transformation(
@@ -848,8 +868,9 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_node_displacement(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].node_displacements.registry[uid][i]
+        num = len(self.results[case_name].node_displacements[uid])
+        for i in range(num):
+            res[i] = self.results[case_name].node_displacements[uid][i]
         df = pd.DataFrame(res, columns=['ux', 'uy', 'uz',
                                         'urx', 'ury', 'urz'])
         df.index.name = 'step'
@@ -859,8 +880,9 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_node_acceleration(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].node_accelerations.registry[uid][i]
+        num = len(self.results[case_name].node_accelerations[uid])
+        for i in range(num):
+            res[i] = self.results[case_name].node_accelerations[uid][i]
         df = pd.DataFrame(res, columns=['ax', 'ay', 'az',
                                         'arx', 'ary', 'arz'])
         df.index.name = 'step'
@@ -868,8 +890,9 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_node_velocity(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].node_velocities.registry[uid][i]
+        num = len(self.results[case_name].node_velocities[uid])
+        for i in range(num):
+            res[i] = self.results[case_name].node_velocities[uid][i]
         df = pd.DataFrame(res, columns=['vx', 'vy', 'vz',
                                         'vrx', 'vry', 'vrz'])
         df.index.name = 'step'
@@ -877,8 +900,11 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_node_abs_acceleration(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].node_accelerations.registry[uid][i]
+        num = len(self.results[case_name].node_accelerations[uid])
+        assert isinstance(self, NLTHAnalysis)
+        assert self.a_g is not None
+        for i in range(num):
+            res[i] = self.results[case_name].node_accelerations[uid][i]
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
@@ -893,8 +919,11 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_node_abs_velocity(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].node_velocities.registry[uid][i]
+        num = len(self.results[case_name].node_velocities[uid])
+        assert isinstance(self, NLTHAnalysis)
+        assert self.a_g is not None
+        for i in range(num):
+            res[i] = self.results[case_name].node_velocities[uid][i]
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
@@ -911,8 +940,11 @@ class NonlinearAnalysis(Analysis):
 
     def retrieve_release_force_defo(self, uid, case_name):
         res = np.zeros((self.results[case_name].n_steps_success, 6))
-        for i in range(self.results[case_name].n_steps_success):
-            res[i] = self.results[case_name].release_force_defo.registry[uid][i]
+        num = len(self.results[case_name].release_force_defo[uid])
+        assert isinstance(self, NLTHAnalysis)
+        assert self.a_g is not None
+        for i in range(num):
+            res[i] = self.results[case_name].release_force_defo[uid][i]
         df = pd.DataFrame(res, columns=['u1', 'u2', 'u3', 'q1', 'q2', 'q3'])
         df.index.name = 'step'
         return df
@@ -921,7 +953,8 @@ class NonlinearAnalysis(Analysis):
 @dataclass
 class PushoverAnalysis(NonlinearAnalysis):
 
-    def _apply_lateral_load(self, case_name, direction, modeshape=None, nd=None):
+    def _apply_lateral_load(
+            self, case_name, direction, modeshape=None, nd=None):
         querry = LoadCaseQuerry(self.mdl, self.load_cases[case_name])
         distribution = querry.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
@@ -946,21 +979,22 @@ class PushoverAnalysis(NonlinearAnalysis):
                     "mode shape in the z direction.")
             modeshape_ampl = modeshape / modeshape[-1]
         else:
-            modeshape_ampl = np.ones(len(self.mdl.levels.registry.values()))
+            modeshape_ampl = np.ones(len(self.mdl.levels.values()))
 
         # if a node is given, apply the incremental load on that node
         if nd:
             ops.load(nd.uid, *(1.00*load_dir))
         else:
-            for i, lvl in enumerate(self.mdl.levels.registry.values()):
+            for i, lvl in enumerate(self.mdl.levels.values()):
                 if lvl.uid == 0:
                     continue
                 if self.load_cases[case_name].parent_nodes:
-                    node_list = [self.load_cases[case_name].parent_nodes[lvl.uid]]
+                    node_list = [self.load_cases[case_name]
+                                 .parent_nodes[lvl.uid]]
                 else:
-                    node_list = lvl.nodes.registry.values()
+                    node_list = list(lvl.nodes.values())
                 masses: nparr = np.array(
-                    [self.load_cases[case_name].node_mass.registry[
+                    [self.load_cases[case_name].node_mass[
                         n.uid].val[0] for n in node_list])
                 masses = masses/np.linalg.norm(masses)
                 for j, nd in enumerate(node_list):
@@ -993,7 +1027,8 @@ class PushoverAnalysis(NonlinearAnalysis):
             self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
             ops.wipeAnalysis()
             ops.loadConst('-time', 0.0)
-            self._apply_lateral_load(case_name, direction, modeshape, loaded_node)
+            self._apply_lateral_load(
+                case_name, direction, modeshape, loaded_node)
 
             ops.numberer(NUMBERER)
             ops.constraints(*CONSTRAINTS)
@@ -1099,7 +1134,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             self.print(f'Number of saved analysis steps: {n_steps_success}')
             metadata = {'successful steps': n_steps_success}
             self.results[case_name].n_steps_success = n_steps_success
-            self.results[case_name].metadata = metadata
+            self.results[case_name].metadata = metadata  # type: ignore
         # done with all cases.
         if self.settings.pickle_results:
             self._write_results_to_disk()
@@ -1115,11 +1150,12 @@ class PushoverAnalysis(NonlinearAnalysis):
             raise ValueError("Direction can be 'x', 'y' or 'z'")
         base_shear_lst = []
         displacement_lst = []
-        for step in range(self.results[case_name].n_steps_success):
+        for step in range(self.results[case_name]
+                          .n_steps_success):  # type:ignore
             base_shear_lst.append(
                 self.global_reactions(case_name, step)[control_DOF])
             displacement_lst.append(
-                self.results[case_name].node_displacements.registry[
+                self.results[case_name].node_displacements[
                     nd.uid][step][control_DOF])
         base_shear: nparr = -np.array(base_shear_lst)
         displacement: nparr = np.array(displacement_lst)
@@ -1274,16 +1310,16 @@ class NLTHAnalysis(NonlinearAnalysis):
         t = np.linspace(0.00, file_time_incr*num_gm_points, num_gm_points)
         if filename_x:
             self.a_g[0] = np.column_stack((t, gm_vals_x))
-            # interp1d(
-            #     t, gm_vals_x, bounds_error=False, fill_value=0.00)
+        else:
+            self.a_g[0] = np.column_stack((t, np.zeros(len(t))))
         if filename_y:
             self.a_g[1] = np.column_stack((t, gm_vals_y))
-            # interp1d(
-            #     t, gm_vals_y, bounds_error=False, fill_value=0.00)
+        else:
+            self.a_g[1] = np.column_stack((t, np.zeros(len(t))))
         if filename_z:
             self.a_g[2] = np.column_stack((t, gm_vals_z))
-            # interp1d(
-            #     t, gm_vals_z, bounds_error=False, fill_value=0.00)
+        else:
+            self.a_g[2] = np.column_stack((t, np.zeros(len(t))))
 
         if finish_time == 0.00:
             target_timestamp = duration
@@ -1384,8 +1420,18 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # # to automate the fastest seup selection process
                 # # debug
                 # systems = ['SparseSYM', 'UmfPack']
-                # algos = ['NewtonLineSearch', 'ModifiedNewton', 'KrylovNewton', 'SecantNewton', 'RaphsonNewton', 'PeriodicNewton', 'BFGS', 'Broyden']
-                # integrs = [('Newmark', 0.50, 0.25), ('HHT', 1.0), ('GeneralizedAlpha', 1., 1.), ('TRBDF2',)]
+                # algos = ['NewtonLineSearch',
+                #          'ModifiedNewton',
+                #          'KrylovNewton',
+                #          'SecantNewton',
+                #          'RaphsonNewton',
+                #          'PeriodicNewton',
+                #          'BFGS',
+                #          'Broyden']
+                # integrs = [('Newmark', 0.50, 0.25),
+                #            ('HHT', 1.0),
+                #            ('GeneralizedAlpha', 1., 1.),
+                #            ('TRBDF2',)]
 
                 # self.print('Testing systems')
 
@@ -1460,11 +1506,9 @@ class NLTHAnalysis(NonlinearAnalysis):
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
-                        self.print()
                         self.print('===========================')
                         self.print('Analysis failed to converge')
                         self.print('===========================')
-                        self.print()
                         self.logger.warning(
                             f"Analysis failed at time {curr_time:.5f}")
                         analysis_failed = True
@@ -1538,10 +1582,10 @@ class NLTHAnalysis(NonlinearAnalysis):
         time = self.time_vector
         uid = node.uid
         results = []
-        for k in range(self.results[case_name].n_steps_success):
-            results.append(self.results[case_name].node_displacements.registry[
+        for k in range(self.results[case_name].n_steps_success):  # type:ignore
+            results.append(self.results[case_name].node_displacements[
                 uid][k][direction])
-        vals = np.array(results)
+        vals: nparr = np.array(results)
         if plotly:
             general_2D.line_plot_interactive(
                 f"Node {uid} displacement history",
@@ -1555,6 +1599,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             plt.xlabel('Time (s)')
             plt.ylabel('Displacement (in)')
             plt.show()
+
 
 @dataclass
 class ModalResponseSpectrumAnalysis:
@@ -1587,10 +1632,12 @@ class ModalResponseSpectrumAnalysis:
         vb_modal = np.zeros(self.num_modes)
         modal_q0 = np.zeros(self.num_modes)
         for i in range(self.num_modes):
-            vb_modal[i] = ((spectrum_ifun(ts[i]))
-                           * mstars[i] * mtot * g_const)
-            modal_q0[i] = gammas[i] * (spectrum_ifun(ts[i])
-                                       / (2.*np.pi / ts[i])**2 * g_const)
+            vb_modal[i] = ((spectrum_ifun(ts[i])) * mstars[i]
+                           * mtot * g_const)  # type:ignore
+            modal_q0[i] = (
+                gammas[i] * (spectrum_ifun(ts[i])
+                             / (2.*np.pi / ts[i])**2
+                             * g_const))  # type: ignore
         self.modal_q0 = modal_q0
         self.vb_modal = vb_modal
         self.anl = anl
@@ -1598,25 +1645,33 @@ class ModalResponseSpectrumAnalysis:
     def combined_node_disp(self, node_uid):
         all_vals = []
         for i in range(self.num_modes):
-            vals = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_uid][i]) * self.modal_q0[i]
+            vals = (np.array(self.anl.results[self.load_case.name]
+                             .node_displacements[node_uid][i])
+                    * self.modal_q0[i])
             all_vals.append(vals)
-        all_vals_np = np.column_stack(all_vals)
+        all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
     def combined_node_disp_diff(self, node_i_uid, node_j_uid):
         all_vals = []
         for i in range(self.num_modes):
-            vals_i = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_i_uid][i]) * self.modal_q0[i]
-            vals_j = np.array(self.anl.results[self.load_case.name].node_displacements.registry[node_j_uid][i]) * self.modal_q0[i]
+            vals_i = (np.array(self.anl.results[self.load_case.name]
+                               .node_displacements[node_i_uid][i])
+                      * self.modal_q0[i])
+            vals_j = (np.array(self.anl.results[self.load_case.name]
+                               .node_displacements[node_j_uid][i])
+                      * self.modal_q0[i])
             vals = vals_i - vals_j
             all_vals.append(vals)
-        all_vals_np = np.column_stack(all_vals)
+        all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
     def combined_basic_forces(self, element_uid):
         all_vals = []
         for i in range(self.num_modes):
-            vals = np.array(self.anl.results[self.load_case.name].element_forces.registry[element_uid][i]) * self.modal_q0[i]
+            vals = (np.array(self.anl.results[self.load_case.name]
+                             .element_forces[element_uid][i])
+                    * self.modal_q0[i])
             all_vals.append(vals)
-        all_vals_np = np.column_stack(all_vals)
+        all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))

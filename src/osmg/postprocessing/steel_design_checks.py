@@ -13,19 +13,18 @@ Model Generator for OpenSees ~ steel design checks
 
 from __future__ import annotations
 from typing import Optional
-from dataclasses import dataclass, field
 
 
 def smrf_scwb(
-        col_sec_properties: dict,
-        col_sec_properties_above: dict,
-        beam_i_sec_properties: dict,
+        col_sec_properties: dict[str, float],
+        col_sec_properties_above: dict[str, float],
+        beam_i_sec_properties: dict[str, float],
         col_axial_load: float,
         beam_udl_i: float,
         rbs_proportion_i: float,
         level_height: float,
         bay_length: float,
-        beam_j_sec_properties: Optional[dict],
+        beam_j_sec_properties: Optional[dict[str, float]],
         beam_udl_j: Optional[float],
         rbs_proportion_j: Optional[float],
         s_h: float,
@@ -47,7 +46,8 @@ def smrf_scwb(
     mc_above = zc_above * (fy - col_axial_load/ac_above)
     # lb
     if beam_j_sec_properties:
-        max_beam_d = max(beam_i_sec_properties['d'], beam_j_sec_properties['d'])
+        max_beam_d = max(beam_i_sec_properties['d'],
+                         beam_j_sec_properties['d'])
     else:
         max_beam_d = beam_i_sec_properties['d']
     vc_star = (mc_below + mc_above) / ((level_height - max_beam_d))
@@ -92,9 +92,10 @@ def smrf_scwb(
 
     return capacity
 
+
 def smrf_pz_doubler_plate_requirement(
-        col_sec_properties: dict,
-        beam_sec_properties: dict,
+        col_sec_properties: dict[str, float],
+        beam_sec_properties: dict[str, float],
         rbs_proportion: float,
         bay_length: float,
         place: str,
@@ -131,5 +132,6 @@ def smrf_pz_doubler_plate_requirement(
         tdoub = max(tdoub, 0.00)
     return tdoub
 
-def steel_W_sec_strength_check(sec_properties, loads):
-    pass
+
+# def steel_W_sec_strength_check(sec_properties, loads):
+#     pass

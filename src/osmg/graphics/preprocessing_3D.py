@@ -13,17 +13,17 @@ https://plotly.com/python/reference/
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from typing import Any
+from typing import Optional
 import sys
 import plotly.graph_objects as go  # type: ignore
 import numpy as np
 import numpy.typing as npt
 from . import graphics_common, graphics_common_3D
-from ..ops.element import elasticBeamColumn
-from ..ops.element import dispBeamColumn
 if TYPE_CHECKING:
     from model import Model
     from ..load_case import LoadCase
+
+nparr = npt.NDArray[np.float64]
 
 
 def add_data__nodes(dt, mdl, load_case):
@@ -45,8 +45,8 @@ def add_data__nodes(dt, mdl, load_case):
         if load_case:
             customdata_lst.append(
                 (node.uid,
-                 *load_case.node_mass.registry[node.uid].val,
-                 *load_case.node_loads.registry[node.uid].val
+                 *load_case.node_mass[node.uid].val,
+                 *load_case.node_loads[node.uid].val
                  )
             )
         else:
@@ -54,7 +54,7 @@ def add_data__nodes(dt, mdl, load_case):
                 (node.uid,
                  )
             )
-    customdata: Any = np.array(customdata_lst, dtype='object')
+    customdata: nparr = np.array(customdata_lst, dtype='object')
     if load_case:
         dt.append({
             "name": "Primary nodes",
@@ -65,7 +65,8 @@ def add_data__nodes(dt, mdl, load_case):
             "z": z,
             "customdata": customdata,
             "text": restraints,
-            "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+            "hovertemplate": 'Coordinates: '
+            '(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
             'Restraint: %{text}<br>' +
             'Mass: (%{customdata[1]:.3g}, ' +
             '%{customdata[2]:.3g}, %{customdata[3]:.3g}, ' +
@@ -74,7 +75,7 @@ def add_data__nodes(dt, mdl, load_case):
             'Load: (%{customdata[7]:.3g}, ' +
             '%{customdata[8]:.3g}, %{customdata[9]:.3g}, ' +
             '%{customdata[10]:.3g}, %{customdata[11]:.3g}, ' +
-            '%{customdata[12]:.3g})' + 
+            '%{customdata[12]:.3g})' +
             '<extra>Node: %{customdata[0]:d}</extra>',
             "marker": {
                 "symbol": [graphics_common_3D.node_marker[sym][0]
@@ -97,7 +98,8 @@ def add_data__nodes(dt, mdl, load_case):
             "z": z,
             "customdata": customdata,
             "text": restraints,
-            "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+            "hovertemplate": 'Coordinates: '
+            '(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
             'Restraint: %{text}<br>' +
             '<extra>Node: %{customdata[0]:d}</extra>',
             "marker": {
@@ -111,7 +113,6 @@ def add_data__nodes(dt, mdl, load_case):
                     "width": 4}
             }
         })
-        
 
 
 def add_data__parent_nodes(dt, load_case: LoadCase):
@@ -120,17 +121,17 @@ def add_data__parent_nodes(dt, load_case: LoadCase):
     x = [node.coords[0] for node in list_of_nodes]
     y = [node.coords[1] for node in list_of_nodes]
     z = [node.coords[2] for node in list_of_nodes]
-    customdata = []
+    customdata_list = []
     restraints = [node.restraint for node in list_of_nodes]
     for node in list_of_nodes:
-        customdata.append(
+        customdata_list.append(
             (node.uid,
-             *load_case.node_mass.registry[node.uid].val,
-             *load_case.node_loads.registry[node.uid].val
+             *load_case.node_mass[node.uid].val,
+             *load_case.node_loads[node.uid].val
              )
         )
 
-    customdata = np.array(customdata, dtype='object')
+    customdata: nparr = np.array(customdata_list, dtype='object')
     dt.append({
         "type": "scatter3d",
         "mode": "markers",
@@ -182,8 +183,8 @@ def add_data__internal_nodes(dt, mdl, load_case):
         if load_case:
             customdata.append(
                 (node.uid,
-                 *load_case.node_mass.registry[node.uid].val,
-                 *load_case.node_loads.registry[node.uid].val
+                 *load_case.node_mass[node.uid].val,
+                 *load_case.node_loads[node.uid].val
                  )
             )
         else:
@@ -201,7 +202,8 @@ def add_data__internal_nodes(dt, mdl, load_case):
             "z": z,
             "customdata": customdata,
             "text": restraints,
-            "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+            "hovertemplate": 'Coordinates: '
+            '(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
             'Restraint: %{text}<br>' +
             'Mass: (%{customdata[1]:.3g}, ' +
             '%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>' +
@@ -213,7 +215,7 @@ def add_data__internal_nodes(dt, mdl, load_case):
                            for sym in restraint_symbols],
                 "color": graphics_common.NODE_INTERNAL_COLOR,
                 "size": [graphics_common_3D.node_marker[sym][1]
-                           for sym in restraint_symbols],
+                         for sym in restraint_symbols],
                 "line": {
                     "color": graphics_common.NODE_INTERNAL_COLOR,
                     "width": 2}
@@ -229,7 +231,8 @@ def add_data__internal_nodes(dt, mdl, load_case):
             "z": z,
             "customdata": customdata,
             "text": restraints,
-            "hovertemplate": 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
+            "hovertemplate": 'Coordinates: '
+            '(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>' +
             'Restraint: %{text}<br>' +
             '<extra>Node: %{customdata[0]:d}</extra>',
             "marker": {
@@ -237,13 +240,12 @@ def add_data__internal_nodes(dt, mdl, load_case):
                            for sym in restraint_symbols],
                 "color": graphics_common.NODE_INTERNAL_COLOR,
                 "size": [graphics_common_3D.node_marker[sym][1]
-                           for sym in restraint_symbols],
+                         for sym in restraint_symbols],
                 "line": {
                     "color": graphics_common.NODE_INTERNAL_COLOR,
                     "width": 2}
             }
         })
-        
 
 
 def add_data__release_nodes(dt, list_of_nodes):
@@ -251,7 +253,6 @@ def add_data__release_nodes(dt, list_of_nodes):
     y = [node.coords[1] for node in list_of_nodes]
     z = [node.coords[2] for node in list_of_nodes]
     customdata = []
-    restraint_types = [node.restraint_type for node in list_of_nodes]
     for node in list_of_nodes:
         customdata.append(
             (node.uid,
@@ -281,10 +282,10 @@ def add_data__diaphragm_lines(dt, lvl):
     if not lvl.parent_node:
         return
     mnode = lvl.parent_node
-    x = []
-    y = []
-    z = []
-    for node in lvl.nodes_primary.registry.values():
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
+    for node in lvl.nodes_primary.values():
         x.extend(
             (node.coords[0], mnode.coords[0], None)
         )
@@ -312,9 +313,9 @@ def add_data__diaphragm_lines(dt, lvl):
 def add_data__bisector_lines(dt, lvl):
     if not lvl.parent_node:
         return
-    x = []
-    y = []
-    z = []
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
     for line in lvl.floor_bisector_lines:
         p1 = line[0]
         p2 = line[1]
@@ -345,10 +346,10 @@ def add_data__frames(dt, mdl, load_case):
     beamcolumn_elems = mdl.list_of_beamcolumn_elements()
     if not beamcolumn_elems:
         return
-    x = []
-    y = []
-    z = []
-    customdata = []
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
+    customdata_list = []
     section_names = []
     for elm in beamcolumn_elems:
         if elm.visibility.hidden_at_line_plots:
@@ -366,38 +367,38 @@ def add_data__frames(dt, mdl, load_case):
             (p_i[2], p_j[2], None)
         )
         if load_case:
-            customdata.append(
+            customdata_list.append(
                 (elm.uid,
-                 *load_case.line_element_udl.registry[elm.uid].val,
+                 *load_case.line_element_udl[elm.uid].val,
                  elm.eleNodes[0].uid,
                  elm.parent_component.uid)
             )
-            customdata.append(
+            customdata_list.append(
                 (elm.uid,
-                 *load_case.line_element_udl.registry[elm.uid].val,
+                 *load_case.line_element_udl[elm.uid].val,
                  elm.eleNodes[1].uid,
                  elm.parent_component.uid)
             )
-            customdata.append(
-                [None]*6
+            customdata_list.append(
+                (None,)*6
             )
         else:
-            customdata.append(
+            customdata_list.append(
                 (elm.uid,
                  elm.eleNodes[0].uid,
                  elm.parent_component.uid)
             )
-            customdata.append(
+            customdata_list.append(
                 (elm.uid,
                  elm.eleNodes[1].uid,
                  elm.parent_component.uid)
             )
-            customdata.append(
-                [None]*3
+            customdata_list.append(
+                (None,)*3
             )
 
     if load_case:
-        customdata = np.array(customdata, dtype='object')
+        customdata: nparr = np.array(customdata_list, dtype='object')
         dt.append({
             "name": "Frame elements",
             "type": "scatter3d",
@@ -419,7 +420,7 @@ def add_data__frames(dt, mdl, load_case):
             }
         })
     else:
-        customdata = np.array(customdata, dtype='object')
+        customdata = np.array(customdata_list, dtype='object')
         dt.append({
             "name": "Frame elements",
             "type": "scatter3d",
@@ -438,22 +439,24 @@ def add_data__frames(dt, mdl, load_case):
                 "color": graphics_common.FRAME_COLOR
             }
         })
-        
+
 
 def add_data__frame_offsets(dt, mdl):
     beamcolumn_elems = mdl.list_of_beamcolumn_elements()
     if not beamcolumn_elems:
         return
 
-    x = []
-    y = []
-    z = []
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
 
     for elm in beamcolumn_elems:
-        p_i = np.array(elm.eleNodes[0].coords)
-        p_io = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.eleNodes[1].coords)
-        p_jo = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
+        p_i: nparr = np.array(elm.eleNodes[0].coords)
+        p_io: nparr = (np.array(elm.eleNodes[0].coords)
+                       + elm.geomtransf.offset_i)
+        p_j: nparr = np.array(elm.eleNodes[1].coords)
+        p_jo: nparr = (np.array(elm.eleNodes[1].coords)
+                       + elm.geomtransf.offset_j)
 
         x.extend((p_i[0], p_io[0], None))
         y.extend((p_i[1], p_io[1], None))
@@ -482,10 +485,10 @@ def add_data__frame_axes(dt, mdl, ref_len):
     if not beamcolumn_elems:
         return
     s = ref_len * 0.025
-    x = []
-    y = []
-    z = []
-    colors = []
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
+    colors: list[Optional[str]] = []
     for elm in beamcolumn_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
@@ -527,14 +530,14 @@ def add_data__zerolength_axes(dt, mdl, ref_len):
     if not zerolength_elements:
         return
     s = ref_len * 0.025
-    x = []
-    y = []
-    z = []
-    colors = []
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
+    colors: list[Optional[str]] = []
     for elm in zerolength_elements:
-        x_vec = elm.vecx
-        y_vec = elm.vecyp
-        z_vec = np.cross(x_vec, y_vec)
+        x_vec: nparr = elm.vecx
+        y_vec: nparr = elm.vecyp
+        z_vec: nparr = np.cross(x_vec, y_vec)
         mid_pos = np.array(elm.eleNodes[0].coords)
         x.extend((mid_pos[0], mid_pos[0]+x_vec[0]*s, None))
         y.extend((mid_pos[1], mid_pos[1]+x_vec[1]*s, None))
@@ -566,13 +569,13 @@ def add_data__zerolength_axes(dt, mdl, ref_len):
 def add_data__global_axes(dt, ref_len):
 
     s = ref_len
-    x = []
-    y = []
-    z = []
-    colors = []
-    x_vec = np.array([1.00, 0.00, 0.00])
-    y_vec = np.array([0.00, 1.00, 0.00])
-    z_vec = np.array([0.00, 0.00, 1.00])
+    x: list[Optional[float]] = []
+    y: list[Optional[float]] = []
+    z: list[Optional[float]] = []
+    colors: list[Optional[str]] = []
+    x_vec: nparr = np.array([1.00, 0.00, 0.00])
+    y_vec: nparr = np.array([0.00, 1.00, 0.00])
+    z_vec: nparr = np.array([0.00, 0.00, 1.00])
 
     x.extend((0.00, x_vec[0]*s, None))
     y.extend((0.00, x_vec[1]*s, None))
@@ -604,12 +607,12 @@ def add_data__extruded_frames_mesh(dt, mdl):
     beamcolumn_elems = mdl.list_of_beamcolumn_elements()
     if not beamcolumn_elems:
         return
-    x_list = []
-    y_list = []
-    z_list = []
-    i_list = []
-    j_list = []
-    k_list = []
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+    i_list: list[Optional[int]] = []
+    j_list: list[Optional[int]] = []
+    k_list: list[Optional[int]] = []
     index = 0
     for elm in beamcolumn_elems:
         if elm.visibility.hidden_when_extruded:
@@ -664,7 +667,7 @@ def add_data__extruded_frames_mesh(dt, mdl):
 
 
 def show(mdl: Model,
-         load_case: LoadCase=None,
+         load_case: Optional[LoadCase] = None,
          extrude=False,
          offsets=True,
          global_axes=True,
@@ -677,12 +680,12 @@ def show(mdl: Model,
          ):
 
     layout = graphics_common_3D.global_layout(camera)
-    dt: list[dict] = []
+    dt: list[dict[str, object]] = []
 
     ref_len = mdl.reference_length()
 
     # plot the nodes
-    
+
     add_data__nodes(dt, mdl, load_case)
     if not extrude:
         add_data__internal_nodes(dt, mdl, load_case)
@@ -693,12 +696,12 @@ def show(mdl: Model,
 
     # # diaphgragm lines
     # if diaphragm_lines:
-    #     for lvl in mdl.levels.registry.values():
+    #     for lvl in mdl.levels.values():
     #         add_data__diaphragm_lines(dt, lvl)
 
     # # bisector lines
     # if tributary_areas:
-    #     for lvl in mdl.levels.registry.values():
+    #     for lvl in mdl.levels.values():
     #         add_data__bisector_lines(dt, lvl)
 
     # plot beamcolumn elements
@@ -727,5 +730,5 @@ def show(mdl: Model,
     fig_datastructure = dict(data=dt, layout=layout)
     fig = go.Figure(fig_datastructure)
 
-    if not "pytest" in sys.modules:
+    if "pytest" not in sys.modules:
         fig.show()

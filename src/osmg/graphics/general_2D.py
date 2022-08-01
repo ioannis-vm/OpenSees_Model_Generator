@@ -4,11 +4,11 @@ Library for consistent all-purpose 2D plots
 
 #                          __
 #   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ / 
-# / /_/ / / / / / / /_/ /_/  
-# \____/_/ /_/ /_/\__, (_)   
-#                /____/      
-#                            
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 #############
@@ -22,6 +22,8 @@ import sys
 import numpy as np
 import numpy.typing as npt
 import plotly.graph_objects as go
+
+nparr = npt.NDArray[np.float64]
 
 
 C_LINE = "#6F1D1B"
@@ -61,7 +63,7 @@ def line_plot_interactive(title_text, x, y, mode,
         ytitle = ylab
 
     num_points = len(x)
-    indices = np.array([i for i in range(num_points)])
+    indices: nparr = np.array([range(num_points)])
     my_hovertemplate = \
         'XY value pair: %{customdata:d}<br>' + \
         xlab + ' = %{x: ' + xhoverformat + '} '
@@ -155,7 +157,7 @@ def line_plot_interactive(title_text, x, y, mode,
             font_family='Cambria'
         )
     )
-    if not "pytest" in sys.modules:
+    if "pytest" not in sys.modules:
         fig.show()
 
 

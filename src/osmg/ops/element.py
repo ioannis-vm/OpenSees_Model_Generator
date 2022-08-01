@@ -12,15 +12,16 @@ Model Generator for OpenSees ~ element
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import Union
 import numpy as np
 import numpy.typing as npt
-from ..component_assembly import ComponentAssembly
 from .uniaxialMaterial import uniaxialMaterial
 from .node import Node
 from .section import ElasticSection
 from .section import FiberSection
 from ..graphics.visibility import ElementVisibility
+from .. import component_assembly
+
 
 nparr = npt.NDArray[np.float64]
 
@@ -34,7 +35,7 @@ class Element:
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
     """
-    parent_component: ComponentAssembly = field(repr=False)
+    parent_component: component_assembly.ComponentAssembly = field(repr=False)
     uid: int
     eleNodes: list[Node]
 
@@ -148,8 +149,7 @@ class elasticBeamColumn(Element):
 @dataclass
 class beamIntegration:
     uid: int
-    parent_section: int = field(repr=False)
-    # todo: fix this typing anno
+    parent_section: Union[ElasticSection, FiberSection] = field(repr=False)
 
 
 @dataclass

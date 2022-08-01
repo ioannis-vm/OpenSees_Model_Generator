@@ -14,11 +14,11 @@ Model Generator for OpenSees ~ level
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
-from .collections import ComponentCollection
+from .collections import Collection
 from .collections import NodeCollection
-from .component_assembly import ComponentAssembly
 if TYPE_CHECKING:
     from .model import Model
+    from .component_assembly import ComponentAssembly
 
 # pylint: disable=unsubscriptable-object
 # pylint: disable=invalid-name
@@ -28,6 +28,8 @@ if TYPE_CHECKING:
 class Level:
     """
     Level Object
+    Levels are part of a model and they contain primary nodes and
+      component assemblies.
     Attributes:
         parent_model (Model)
         uid (int)
@@ -39,11 +41,12 @@ class Level:
     uid: int
     elevation: float
     nodes: NodeCollection = field(init=False, repr=False)
-    components: ComponentCollection = field(init=False, repr=False)
+    components: Collection[
+        int, ComponentAssembly] = field(init=False, repr=False)
 
     def __post_init__(self):
         self.nodes = NodeCollection(self)
-        self.components = ComponentCollection(self)
+        self.components = Collection(self)
 
     def __repr__(self):
         res = ''

@@ -34,7 +34,7 @@ def fix_all(model: Model, **kwargs):
     mats = [fix_mat]*6
     return dirs, mats
 
-    
+
 def release_6(model: Model, **kwargs):
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
@@ -485,7 +485,7 @@ def steel_w_col_pz(
     m1y /= 4.00
     m2y /= 4.00
     m3y /= 4.00
-    
+
     mat = Hysteretic(
         model.uid_generator.new('element'),
         'auto_steel_W_PZ',

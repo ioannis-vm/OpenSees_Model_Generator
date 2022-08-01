@@ -15,11 +15,12 @@ Model Generator for OpenSees ~ plain beamcolumn element generator
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Type
+from typing import Union
+from typing import Callable
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 from ..ops.node import Node
-from ..collections import Collection
 from ..component_assembly import ComponentAssembly
 from .querry import ElmQuerry
 from .node_gen import NodeGenerator
@@ -34,9 +35,8 @@ from ..preprocessing.split_component import split_component
 from ..transformations import local_axes_from_points_and_angle
 from ..transformations import transformation_matrix
 from ..defaults import load_util_rigid_elastic
-from .zerolength_gen import release_6
-from .zerolength_gen import steel_w_col_pz
-from .zerolength_gen import fix_all
+from ..gen.zerolength_gen import steel_w_col_pz
+
 
 if TYPE_CHECKING:
     from ..model import Model
@@ -50,7 +50,7 @@ def retrieve_snap_pt_global_offset(placement, section, p_i, p_j, angle):
     if section.snap_points and (placement != 'centroid'):
         # obtain offset from section (local system)
         dz, dy = section.snap_points[placement]
-        sec_offset_local = np.array([0.00, dy, dz])
+        sec_offset_local: nparr = np.array([0.00, dy, dz])
         # retrieve local coordinate system
         x_axis, y_axis, z_axis = \
             local_axes_from_points_and_angle(
@@ -65,17 +65,16 @@ def retrieve_snap_pt_global_offset(placement, section, p_i, p_j, angle):
 
 
 def beam_placement_lookup(
-        x, y, querry, ndg, lvls, key, user_offset, section_offset, split_existing, snap):
-    lvl = lvls.registry[key]
+        x, y, querry, ndg, lvls, key,
+        user_offset, section_offset, split_existing, snap):
+    lvl = lvls[key]
     node = querry.search_node_lvl(x, y, lvl.uid)
     pinit = np.array((x, y, lvl.elevation)) + user_offset
-    p = pinit + section_offset
     eo = user_offset.copy() + section_offset
     if not node:
         if split_existing:
             node, offset = split_component(split_existing, pinit)
             eo += offset
-            p = np.array((node.coords)) + eo
         else:
             node = ndg.add_node_lvl(x, y, key)
     else:
@@ -87,16 +86,18 @@ def beam_placement_lookup(
             if component.component_purpose == 'steel_W_panel_zone':
                 if snap in ['middle_front', 'middle_back']:
                     result_node = component.external_nodes.named_contents[snap]
-                    eo += np.array((0.00, 0.00, node.coords[2] - result_node.coords[2]))
+                    eo += np.array(
+                        (0.00, 0.00, node.coords[2] - result_node.coords[2]))
                     node = result_node
                     return node, eo
                 elif snap in [
                         'centroid', 'top_center', 'top_left',
                         'top_right', 'center_left', 'center_right',
                         'bottom_center', 'bottom_left', 'bottom_right']:
-                    elm = component.elastic_beamcolumn_elements.named_contents['elm_interior']
+                    elm = component.elastic_beamcolumn_elements.named_contents[
+                        'elm_interior']
                     dz, dy = elm.section.snap_points[snap]
-                    sec_offset_local = -np.array([0.00, dy, dz])
+                    sec_offset_local: nparr = -np.array([0.00, dy, dz])
                     # retrieve local coordinate system
                     x_axis = elm.geomtransf.x_axis
                     y_axis = elm.geomtransf.y_axis
@@ -113,7 +114,7 @@ def beam_placement_lookup(
                     raise ValueError(f'Unsupported snap keyword: {snap}')
 
         # else check if a column-like component assembly exists
-        if key-1 in lvls.registry:
+        if key-1 in lvls:
             node_below = querry.search_node_lvl(
                 x, y, key-1)
             if node_below:
@@ -150,8 +151,6 @@ def beam_placement_lookup(
     return node, eo
 
 
-
-
 @dataclass(repr=False)
 class BeamColumnGenerator:
     model: Model = field(repr=False)
@@ -165,13 +164,13 @@ class BeamColumnGenerator:
             offset_j: nparr,
             transfType: str,
             section: ElasticSection | FiberSection,
-            element_type: Type,
+            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
             angle=0.00) -> elasticBeamColumn | dispBeamColumn:
 
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
         axes = local_axes_from_points_and_angle(
-            p_i, p_j, angle)
+            p_i, p_j, angle)  # type: ignore
         if element_type.__name__ == 'elasticBeamColumn':
             assert isinstance(section, ElasticSection)
             transf = geomTransf(
@@ -180,13 +179,13 @@ class BeamColumnGenerator:
                 offset_i,
                 offset_j,
                 *axes)
-            elm = elasticBeamColumn(
+            elm_el = elasticBeamColumn(
                 parent_component=assembly,
                 uid=self.model.uid_generator.new('element'),
                 eleNodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf)
-            return elm
+            res: Union[elasticBeamColumn, dispBeamColumn] = elm_el
         elif element_type.__name__ == 'dispBeamColumn':
             assert isinstance(section, FiberSection)
             # todo: add elastic section support
@@ -201,14 +200,15 @@ class BeamColumnGenerator:
                 parent_section=section,
                 n_p=5
             )
-            elm = dispBeamColumn(
+            elm_disp = dispBeamColumn(
                 parent_component=assembly,
                 uid=self.model.uid_generator.new('element'),
                 eleNodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
                 integration=beam_integration)
-            return elm
+            res = elm_disp
+        return res
 
     def define_zerolength(
             self,
@@ -217,8 +217,8 @@ class BeamColumnGenerator:
             node_j: Node,
             x_axis: nparr,
             y_axis: nparr,
-            zerolength_gen: str,
-            zerolength_gen_args: dict
+            zerolength_gen: Callable,  # type: ignore
+            zerolength_gen_args: dict[str, object]
     ):
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         elm = ZeroLength(
@@ -305,7 +305,7 @@ class BeamColumnGenerator:
 
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
-        
+
         # instantiate a component assembly
         component = ComponentAssembly(
             uid=self.model.uid_generator.new('component'),
@@ -407,7 +407,9 @@ class BeamColumnGenerator:
             conn_node_i = node_i
             conn_eo_i = eo_i
         if zerolength_gen_j:
-            hinge_location_j = p_i + x_axis * (clear_length - zerolength_gen_args_j['distance'])
+            hinge_location_j = (p_i + x_axis *
+                                (clear_length
+                                 - zerolength_gen_args_j['distance']))
             nh_j_out = Node(self.model.uid_generator.new('node'),
                             [*hinge_location_j])
             nh_j_in = Node(self.model.uid_generator.new('node'),
@@ -456,7 +458,6 @@ class BeamColumnGenerator:
             angle
         )
 
-
     def look_for_panel_zone(
             self,
             node: Node,
@@ -467,10 +468,10 @@ class BeamColumnGenerator:
         result_node = node
         for component in components.values():
             if component.component_purpose == 'steel_W_panel_zone':
-                result_node = component.external_nodes.named_contents['bottom_node']
+                result_node = (component.external_nodes
+                               .named_contents['bottom_node'])
                 break
         return result_node
-
 
     def add_vertical_active(
             self,
@@ -481,7 +482,7 @@ class BeamColumnGenerator:
             transf_type: str,
             n_sub: int,
             section: ElasticSection | FiberSection,
-            element_type: Type,
+            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
             placement='centroid',
             angle=0.00,
             method='generate_plain_component_assembly',
@@ -498,8 +499,8 @@ class BeamColumnGenerator:
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
-            lvl = lvls.registry[key]
-            if key-1 not in lvls.registry:
+            lvl = lvls[key]
+            if key-1 not in lvls:
                 continue
 
             top_node = querry.search_node_lvl(x_coord, y_coord, key)
@@ -555,7 +556,7 @@ class BeamColumnGenerator:
             transf_type: str,
             n_sub: int,
             section: ElasticSection,
-            element_type: Type,
+            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
             placement='centroid',
             angle=0.00,
             split_existing_i=None,
@@ -571,7 +572,7 @@ class BeamColumnGenerator:
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
-            lvl = lvls.registry[key]
+            lvl = lvls[key]
 
             p_i_init = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
             p_j_init = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
@@ -579,11 +580,11 @@ class BeamColumnGenerator:
             if section.snap_points and (placement != 'centroid'):
                 # obtain offset from section (local system)
                 dz, dy = section.snap_points[placement]
-                sec_offset_local = np.array([0.00, dy, dz])
+                sec_offset_local: nparr = np.array([0.00, dy, dz])
                 # retrieve local coordinate system
                 x_axis, y_axis, z_axis = \
                     local_axes_from_points_and_angle(
-                        p_i_init, p_j_init, angle)
+                        p_i_init, p_j_init, angle)  # type: ignore
                 t_glob_to_loc = transformation_matrix(
                     x_axis, y_axis, z_axis)
                 t_loc_to_glob = t_glob_to_loc.T
@@ -624,9 +625,6 @@ class BeamColumnGenerator:
             mthd = getattr(self, method)
             mthd(**args)
 
-
-
-
     def add_pz_active(
             self,
             x_coord: float,
@@ -645,8 +643,8 @@ class BeamColumnGenerator:
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
 
-            lvl = lvls.registry[key]
-            if key-1 not in lvls.registry:
+            lvl = lvls[key]
+            if key-1 not in lvls:
                 continue
 
             top_node = querry.search_node_lvl(x_coord, y_coord, key)
@@ -661,23 +659,30 @@ class BeamColumnGenerator:
             # add it to the level
             lvl.components.add(component)
 
-            p_i = np.array(top_node.coords)
-            p_j = np.array(top_node.coords) + np.array((0.00, 0.00, -beam_depth))
+            p_i: nparr = np.array(top_node.coords)
+            p_j = (np.array(top_node.coords)
+                   + np.array((0.00, 0.00, -beam_depth)))
             x_axis, y_axis, z_axis = \
                 local_axes_from_points_and_angle(
-                    p_i, p_j, angle)
+                    p_i, p_j, angle)  # type: ignore
 
             # determine node locations
             top_h_f_loc = p_i + y_axis * column_depth/2.00
             top_h_b_loc = p_i - y_axis * column_depth/2.00
             top_v_f_loc = p_i + y_axis * column_depth/2.00
             top_v_b_loc = p_i - y_axis * column_depth/2.00
-            mid_v_f_loc = p_i + y_axis * column_depth/2.00 + x_axis * beam_depth/2.00
-            mid_v_b_loc = p_i - y_axis * column_depth/2.00 + x_axis * beam_depth/2.00
-            bottom_h_f_loc = p_i + y_axis * column_depth/2.00 + x_axis * beam_depth
-            bottom_h_b_loc = p_i - y_axis * column_depth/2.00 + x_axis * beam_depth
-            bottom_v_f_loc = p_i + y_axis * column_depth/2.00 + x_axis * beam_depth
-            bottom_v_b_loc = p_i - y_axis * column_depth/2.00 + x_axis * beam_depth
+            mid_v_f_loc = (p_i + y_axis * column_depth/2.00
+                           + x_axis * beam_depth/2.00)
+            mid_v_b_loc = (p_i - y_axis * column_depth/2.00
+                           + x_axis * beam_depth/2.00)
+            bottom_h_f_loc = (p_i + y_axis * column_depth/2.00
+                              + x_axis * beam_depth)
+            bottom_h_b_loc = (p_i - y_axis * column_depth/2.00
+                              + x_axis * beam_depth)
+            bottom_v_f_loc = (p_i + y_axis * column_depth/2.00
+                              + x_axis * beam_depth)
+            bottom_v_b_loc = (p_i - y_axis * column_depth/2.00
+                              + x_axis * beam_depth)
 
             # define nodes
             top_h_f = Node(
@@ -699,8 +704,16 @@ class BeamColumnGenerator:
             )
             top_v_b.visibility.connected_to_zerolength = True
 
-            mid_v_f = ndg.add_node_lvl_xyz(*mid_v_f_loc, lvl.uid)
-            mid_v_b = ndg.add_node_lvl_xyz(*mid_v_b_loc, lvl.uid)
+            mid_v_f = ndg.add_node_lvl_xyz(
+                mid_v_f_loc[0],
+                mid_v_f_loc[1],
+                mid_v_f_loc[2],
+                lvl.uid)
+            mid_v_b = ndg.add_node_lvl_xyz(
+                mid_v_b_loc[0],
+                mid_v_b_loc[1],
+                mid_v_b_loc[2],
+                lvl.uid)
 
             bottom_h_f = Node(
                 self.model.uid_generator.new('node'),
@@ -721,12 +734,15 @@ class BeamColumnGenerator:
             )
             bottom_v_b.visibility.connected_to_zerolength = True
 
-            bottom_mid = ndg.add_node_lvl_xyz(*p_j, lvl.uid)
+            bottom_mid = ndg.add_node_lvl_xyz(
+                p_j[0], p_j[1], p_j[2], lvl.uid)
 
             # define rigid beamcolumn elements
-            if not self.model.elastic_sections.retrieve_by_attr('name', 'rigid_link_section'):
+            if not self.model.elastic_sections.retrieve_by_attr(
+                    'name', 'rigid_link_section'):
                 load_util_rigid_elastic(self.model)
-            rigid_sec = self.model.elastic_sections.retrieve_by_attr('name', 'rigid_link_section')
+            rigid_sec = self.model.elastic_sections.retrieve_by_attr(
+                'name', 'rigid_link_section')
             assert rigid_sec
 
             elm_top_h_f = elasticBeamColumn(
@@ -756,7 +772,7 @@ class BeamColumnGenerator:
                 )
             )
             elm_top_h_b.visibility.hidden_when_extruded = True
-            
+
             elm_bottom_h_f = elasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
@@ -798,7 +814,7 @@ class BeamColumnGenerator:
                 )
             )
             elm_top_v_f.visibility.hidden_when_extruded = True
-            
+
             elm_top_v_b = elasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
@@ -812,7 +828,7 @@ class BeamColumnGenerator:
                 )
             )
             elm_top_v_b.visibility.hidden_when_extruded = True
-            
+
             elm_bottom_v_f = elasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
@@ -826,7 +842,7 @@ class BeamColumnGenerator:
                 )
             )
             elm_bottom_v_f.visibility.hidden_when_extruded = True
-            
+
             elm_bottom_v_b = elasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
@@ -917,7 +933,7 @@ class BeamColumnGenerator:
                     'pz_hardening': pz_hardening
                  }
             )
-            
+
             # fill component assembly
             component.external_nodes.add(top_node)
             component.external_nodes.named_contents['top_node'] = top_node
@@ -927,7 +943,7 @@ class BeamColumnGenerator:
             component.external_nodes.named_contents['middle_front'] = mid_v_f
             component.external_nodes.add(mid_v_b)
             component.external_nodes.named_contents['middle_back'] = mid_v_b
-            
+
             component.internal_nodes.add(top_h_f)
             component.internal_nodes.add(top_h_b)
             component.internal_nodes.add(top_v_f)
@@ -938,9 +954,11 @@ class BeamColumnGenerator:
             component.internal_nodes.add(bottom_v_b)
 
             component.elastic_beamcolumn_elements.add(elm_top_h_f)
-            component.elastic_beamcolumn_elements.named_contents['elm_top_h_f'] = elm_top_h_f
+            (component.elastic_beamcolumn_elements
+             .named_contents['elm_top_h_f']) = elm_top_h_f
             component.elastic_beamcolumn_elements.add(elm_top_h_b)
-            component.elastic_beamcolumn_elements.named_contents['elm_top_h_b'] = elm_top_h_b
+            (component.elastic_beamcolumn_elements
+             .named_contents['elm_top_h_b']) = elm_top_h_b
             component.elastic_beamcolumn_elements.add(elm_bottom_h_f)
             component.elastic_beamcolumn_elements.add(elm_bottom_h_b)
             component.elastic_beamcolumn_elements.add(elm_top_v_f)
@@ -948,10 +966,12 @@ class BeamColumnGenerator:
             component.elastic_beamcolumn_elements.add(elm_bottom_v_f)
             component.elastic_beamcolumn_elements.add(elm_bottom_v_b)
             component.elastic_beamcolumn_elements.add(elm_interior)
-            component.elastic_beamcolumn_elements.named_contents['elm_interior'] = elm_interior
+            (component.elastic_beamcolumn_elements
+             .named_contents['elm_interior']) = elm_interior
 
             component.zerolength_elements.add(zerolen_top_f)
-            component.zerolength_elements.named_contents['nonlinear_spring'] = zerolen_top_f
+            (component.zerolength_elements
+             .named_contents['nonlinear_spring']) = zerolen_top_f
             component.zerolength_elements.add(zerolen_top_b)
             component.zerolength_elements.add(zerolen_bottom_f)
             component.zerolength_elements.add(zerolen_bottom_b)

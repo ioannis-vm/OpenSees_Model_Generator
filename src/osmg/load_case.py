@@ -18,10 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 from . import transformations
-from .collections import NodePointLoadMassCollection
-from .collections import NodeMassCollection
-from .collections import LineElementUDLCollection
-from .collections import TributaryAreaAnalysisCollection
+from . import collections
 from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 from .preprocessing.rigid_diaphragm import RDAnalyzer
 
@@ -36,7 +33,7 @@ nparr = npt.NDArray[np.float64]
 @dataclass
 class PointLoadMass:
     """
-    Point load object. Global coordinate system.
+    Point load/mass object. Global coordinate system.
     Attributes:
         other (list[float])
         floor (list[float])
@@ -112,35 +109,36 @@ class LoadCase:
     """
     name: str
     parent_model: Model
-    node_loads: NodePointLoadMassCollection = field(init=False)
-    node_mass: NodeMassCollection = field(init=False)
-    line_element_udl: LineElementUDLCollection = field(init=False)
-    tributary_area_analysis: TributaryAreaAnalysisCollection = \
-        field(init=False)
+    node_loads: collections.Collection[int, PointLoadMass] = field(init=False)
+    node_mass: collections.Collection[int, PointLoadMass] = field(init=False)
+    line_element_udl: collections.Collection[
+        int, LineElementUDL] = field(init=False)
+    tributary_area_analysis: collections.Collection[
+        int, TributaryAreaAnaysis] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
 
     def __post_init__(self):
-        self.node_loads = NodePointLoadMassCollection(self)
-        self.node_mass = NodeMassCollection(self)
-        self.line_element_udl = LineElementUDLCollection(self)
+        self.node_loads = collections.Collection(self)
+        self.node_mass = collections.Collection(self)
+        self.line_element_udl = collections.Collection(self)
         self.tributary_area_analysis = \
-            TributaryAreaAnalysisCollection(self)
+            collections.Collection(self)
         # initialize loads and mass for each node and element
         for node in self.parent_model.list_of_all_nodes():
-            self.node_loads.registry[node.uid] = PointLoadMass()
-            self.node_mass.registry[node.uid] = PointLoadMass()
+            self.node_loads[node.uid] = PointLoadMass()
+            self.node_mass[node.uid] = PointLoadMass()
         for line_element in (self.parent_model
                              .list_of_beamcolumn_elements()):
-            self.line_element_udl.registry[line_element.uid] = \
+            self.line_element_udl[line_element.uid] = \
                 LineElementUDL(line_element)
         # initialize tributary area analysis for each level
-        for lvlkey, lvl in self.parent_model.levels.registry.items():
-            self.tributary_area_analysis.registry[lvlkey] = \
+        for lvlkey, lvl in self.parent_model.levels.items():
+            self.tributary_area_analysis[lvlkey] = \
                 TributaryAreaAnaysis(self, lvl)
 
     def rigid_diaphragms(self, level_uids: list[int], gather_mass=False):
         for lvl_uid in level_uids:
-            lvl = self.parent_model.levels.registry[lvl_uid]
+            lvl = self.parent_model.levels[lvl_uid]
             rda = RDAnalyzer(self, lvl)
             rda.run(gather_mass)
 

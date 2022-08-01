@@ -1,17 +1,30 @@
 """
-Some defaults
+Model Generator for OpenSees ~ defaults
 """
+
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
+import numpy as np
+import numpy.typing as npt
 from .physical_material import PhysicalMaterial
 from . import common
 from .ops.uniaxialMaterial import Elastic
 from .ops.uniaxialMaterial import Steel02
 from .ops.section import ElasticSection
 from .gen.mesh_shapes import rect_mesh
-import numpy as np
 if TYPE_CHECKING:
     from .model import Model
+
+nparr = npt.NDArray[np.float64]
 
 
 def load_util_rigid_elastic(model: Model):
@@ -57,7 +70,7 @@ def load_default_elastic(model: Model, sec_name: str):
         z_max = +0.15
         z_min = -0.15
         sec.outside_shape = rect_mesh(0.30, 0.50)
-    snap_points = {
+    snap_points: dict[str, nparr] = {
         'centroid': np.array([0., 0.]),
         'top_center': np.array([0., -y_max]),
         'top_left': np.array([-z_min, -y_max]),

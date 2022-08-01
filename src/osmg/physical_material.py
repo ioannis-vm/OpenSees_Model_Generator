@@ -13,7 +13,6 @@ Model Generator for OpenSees ~ physical material
 
 from __future__ import annotations
 from dataclasses import dataclass
-from . import common
 
 
 @dataclass

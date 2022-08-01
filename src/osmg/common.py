@@ -21,7 +21,7 @@ ALPHA = 10000000.00
 
 # gravitational acceleration
 G_CONST_IMPERIAL = 386.22  # in/s**2
-G_CONST_SI = 9.81 # m/s**2
+G_CONST_SI = 9.81  # m/s**2
 
 # quantities to use for extreme stiffnesses
 STIFF_ROT = 1.0e15

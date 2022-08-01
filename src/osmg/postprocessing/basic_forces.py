@@ -15,7 +15,6 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from .. import transformations
 from ..solver import Analysis
 from ..ops.element import elasticBeamColumn
 from ..ops.element import dispBeamColumn
@@ -30,20 +29,19 @@ def basic_forces(
         step: int,
         elm: elasticBeamColumn | dispBeamColumn,
         num_points: int,
-        as_tuple: bool = False) -> nparr:
+        as_tuple: bool = False) -> object:
 
     if isinstance(anl, ModalResponseSpectrumAnalysis):
         forces = anl.combined_basic_forces(elm.uid)
         wx, wy, wz = (0.00, 0.00, 0.00)
     else:
-        forces = anl.results[case_name].element_forces.registry[
+        forces = anl.results[case_name].element_forces[
             elm.uid][step]
-        wx, wy, wz = anl.load_cases[case_name].line_element_udl.registry[elm.uid].val
+        wx, wy, wz = anl.load_cases[case_name].line_element_udl[elm.uid].val
 
     ni, qyi, qzi = forces[0:3]
     ti, myi, mzi = forces[3:6]
 
-    
     p_i = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
     p_j = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)

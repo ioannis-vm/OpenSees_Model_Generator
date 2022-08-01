@@ -13,7 +13,6 @@ Model Generator for OpenSees ~ node generator
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from typing import Optional
 from dataclasses import dataclass
 from ..ops.node import Node
 if TYPE_CHECKING:
@@ -32,7 +31,7 @@ class NodeGenerator:
 
         """
         lvls = self.model.levels
-        level = lvls.registry[lvl]
+        level = lvls[lvl]
         node = Node(
             uid=self.model.uid_generator.new('node'),
             coords=[x, y, level.elevation])
@@ -44,7 +43,7 @@ class NodeGenerator:
 
         """
         lvls = self.model.levels
-        level = lvls.registry[lvl]
+        level = lvls[lvl]
         node = Node(
             uid=self.model.uid_generator.new('node'),
             coords=[x, y, z])
@@ -59,4 +58,3 @@ class NodeGenerator:
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
             self.add_node_lvl(x, y, key)
-

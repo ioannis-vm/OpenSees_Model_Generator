@@ -23,7 +23,12 @@ nparr = npt.NDArray[np.float64]
 @dataclass
 class Line:
     """
-    todo - in progress
+    Finite-length line segment object.
+    Used internally whenever operations involving lines are reuired.
+    Attributes:
+      tag (str)
+      start (numpy.ndarray): starting point
+      end (numpy.ndarray): end point
     """
     tag: str
     start: nparr = field(repr=False)
@@ -38,19 +43,24 @@ class Line:
 
     def length(self):
         """
-        todo - work in progress
+        returns the length of the line.
         """
         return np.linalg.norm(self.end - self.start)
 
     def direction(self):
         """
-        todo - work in progress
+        returns a unit verctor pointing from the start to the end of
+        the line.
         """
         return (self.end - self.start) / self.length()
 
     def intersect(self, other: 'Line'):
         """
-        todo - in progress
+        Calculates the intersection point of this line with another line.
+        Returns None if the lines don't intersect.
+        Note: 'line' is actually a finite-length line segment.
+        Parameters:
+          other (Line): the other line
         """
         ra_dir = self.direction()
         rb_dir = other.direction()
@@ -113,7 +123,7 @@ class Line:
         """
         ra = self.end - self.start
         norm2 = np.dot(ra, ra)
-        if np.abs(norm2)< 1.0e-4:
+        if np.abs(norm2) < 1.0e-4:
             raise ValueError
         rb = (point - self.start)
         cross = np.linalg.norm(np.cross(ra, rb))
@@ -124,14 +134,31 @@ class Line:
             res = False
         return res
 
-    def point_distance(self, point: nparr) -> Optional[nparr]:
+    def point_distance(self, point: nparr) -> Optional[float]:
+        """
+        Calculates the projection of a point on the line.
+        If the projection falls on the line segment, it returns the
+        distance from the point to the line.
+        Arguments:
+          point (numpy.ndarray): the point's coordinates
+        """
         ra = self.end - self.start
         rb = point - self.start
         proj_point = (rb @ ra) / (ra @ ra) * ra
         if self.intersects_pt(proj_point + self.start):
-            return np.linalg.norm(rb - proj_point)
+            res: Optional[float] = float(np.linalg.norm(rb - proj_point))
+        else:
+            res = None
+        return res
 
     def project(self, point: nparr) -> Optional[nparr]:
+        """
+        Calculates the projection of a point on the line.
+        If the projection falls on the line segment, it returns the
+        projected point.
+        Arguments:
+          point (numpy.ndarray): the point's coordinates
+        """
         ra = self.end - self.start
         rb = point - self.start
         proj_point = (rb @ ra) / (ra @ ra) * ra + self.start

@@ -20,16 +20,19 @@ from shapely.geometry import Polygon as shapely_Polygon   # type: ignore
 from shapely.geometry import Point   # type: ignore
 
 from .gen.uid_gen import UIDGenerator
-from .collections import Collection
-from .collections import CollectionActive
-from .collections import LevelCollection
-from .collections import SectionCollection
-from .collections import UniaxialMaterialCollection
-from .collections import PhysicalMaterialCollection
+from . import collections
 from .level import Level
 
 if TYPE_CHECKING:
+    from .ops.node import Node
+    from .ops.element import elasticBeamColumn
+    from .ops.element import dispBeamColumn
+    from .ops.element import ZeroLength
     from .component_assembly import ComponentAssembly
+    from .ops.section import ElasticSection
+    from .ops.section import FiberSection
+    from .ops.uniaxialMaterial import uniaxialMaterial
+    from .physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -66,35 +69,35 @@ class Model:
     """
     Model object.
     Attributes:
-        levels (LevelCollection)
-        elastic_sections (SectionCollection)
-        fiber_sections (SectionCollection)
+        levels (CollectionActive)
+        elastic_sections (Collection)
+        fiber_sections (Collection)
         physical_materials (PhysicalMaterialCollection)
-        component_connectivity (dict[tuple[str, ...], int])
+        component_connectivity (dict[tuple[int, ...], int])
         uid_generator (UIDGenerator)
         settings
     """
     name: str
-    levels: LevelCollection = field(
+    levels: collections.CollectionActive[int, Level] = field(
         init=False)
-    elastic_sections: SectionCollection = field(
+    elastic_sections: collections.Collection[int, ElasticSection] = field(
         init=False)
-    fiber_sections: SectionCollection = field(
+    fiber_sections: collections.Collection[int, FiberSection] = field(
         init=False)
-    uniaxial_materials: UniaxialMaterialCollection = field(
+    uniaxial_materials: collections.Collection[int, uniaxialMaterial] = field(
         init=False)
-    physical_materials: PhysicalMaterialCollection = field(
+    physical_materials: collections.Collection[int, PhysicalMaterial] = field(
         init=False)
     uid_generator: UIDGenerator = field(
         default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
     def __post_init__(self):
-        self.levels = LevelCollection(self)
-        self.elastic_sections = SectionCollection(self)
-        self.fiber_sections = SectionCollection(self)
-        self.uniaxial_materials = UniaxialMaterialCollection(self)
-        self.physical_materials = PhysicalMaterialCollection(self)
+        self.levels = collections.CollectionActive(self)
+        self.elastic_sections = collections.Collection(self)
+        self.fiber_sections = collections.Collection(self)
+        self.uniaxial_materials = collections.Collection(self)
+        self.physical_materials = collections.Collection(self)
 
     def __repr__(self):
         res = ''
@@ -107,17 +110,17 @@ class Model:
         res += f'physical_materials: {self.physical_materials.__srepr__()}\n'
         return res
 
-    def component_connectivity(self) -> dict[tuple[str, ...], int]:
+    def component_connectivity(self) -> dict[tuple[int, ...],
+                                             ComponentAssembly]:
         res = {}
         components = self.list_of_components()
         for component in components:
-            uids = [node.uid for node in component.external_nodes.registry.values()]
+            uids = [node.uid for node in component.external_nodes.values()]
             uids.sort()
             uids_tuple = (*uids,)
             assert uids_tuple not in res, 'Error! Duplicate component found.'
             res[uids_tuple] = component
         return res
-
 
     def add_level(self,
                   uid: int,
@@ -126,35 +129,35 @@ class Model:
         self.levels.add(lvl)
 
     def dict_of_primary_nodes(self):
-        dict_of_nodes = {}
-        for lvl in self.levels.registry.values():
-            dict_of_nodes.update(lvl.nodes.registry)
+        dict_of_nodes: dict[int, Node] = {}
+        for lvl in self.levels.values():
+            dict_of_nodes.update(lvl.nodes)
         return dict_of_nodes
 
     def list_of_primary_nodes(self):
         list_of_nodes = []
-        for lvl in self.levels.registry.values():
-            for node in lvl.nodes.registry.values():
+        for lvl in self.levels.values():
+            for node in lvl.nodes.values():
                 list_of_nodes.append(node)
         return list_of_nodes
 
     def dict_of_internal_nodes(self):
-        dict_of_nodes = {}
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                dict_of_nodes.update(component.internal_nodes.registry)
+        dict_of_nodes: dict[int, Node] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                dict_of_nodes.update(component.internal_nodes)
         return dict_of_nodes
 
     def list_of_internal_nodes(self):
         list_of_nodes = []
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                for inode in component.internal_nodes.registry.values():
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                for inode in component.internal_nodes.values():
                     list_of_nodes.append(inode)
         return list_of_nodes
 
     def dict_of_all_nodes(self):
-        dict_of_nodes = {}
+        dict_of_nodes: dict[int, Node] = {}
         dict_of_nodes.update(self.dict_of_primary_nodes())
         dict_of_nodes.update(self.dict_of_internal_nodes())
         return dict_of_nodes
@@ -166,9 +169,9 @@ class Model:
         return list_of_nodes
 
     def dict_of_components(self):
-        comps = {}
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
+        comps: dict[int, object] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
                 comps[component.uid] = component
         return comps
 
@@ -176,20 +179,20 @@ class Model:
         return list(self.dict_of_components().values())
 
     def dict_of_elastic_beamcolumn_elements(self):
-        elems = {}
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                elems.update(component.elastic_beamcolumn_elements.registry)
+        elems: dict[int, elasticBeamColumn] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                elems.update(component.elastic_beamcolumn_elements)
         return elems
 
     def list_of_elastic_beamcolumn_elements(self):
         return list(self.dict_of_elastic_beamcolumn_elements().values())
 
     def dict_of_disp_beamcolumn_elements(self):
-        elems = {}
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                elems.update(component.disp_beamcolumn_elements.registry)
+        elems: dict[int, dispBeamColumn] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                elems.update(component.disp_beamcolumn_elements)
         return elems
 
     def list_of_disp_beamcolumn_elements(self):
@@ -208,10 +211,10 @@ class Model:
         return elems
 
     def dict_of_zerolength_elements(self):
-        elems = {}
-        for lvl in self.levels.registry.values():
-            for component in lvl.components.registry.values():
-                elems.update(component.zerolength_elements.registry)
+        elems: dict[int, ZeroLength] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                elems.update(component.zerolength_elements)
         return elems
 
     def list_of_zerolength_elements(self):
@@ -239,7 +242,7 @@ class Model:
         res.settings.ndf = self.settings.ndf
         res.settings.ndm = self.settings.ndm
         # make a copy of the levels
-        for lvlkey, lvl in self.levels.registry.items():
+        for lvlkey, lvl in self.levels.items():
             res.add_level(lvlkey, lvl.elevation)
         # giv access to the materials and sections
         res.elastic_sections = self.elastic_sections
@@ -259,8 +262,8 @@ class Model:
         # we just add the same objects to the other model.
         level = component.parent_collection.parent
         other_level = other.levels.retrieve_by_attr('uid', level.uid)
-        for node in component.external_nodes.registry.values():
-            if node.uid not in other_level.nodes.registry:
+        for node in component.external_nodes.values():
+            if node.uid not in other_level.nodes:
                 other_level.nodes.add(node)
         other_level.components.add(component)
 
@@ -274,7 +277,7 @@ class Model:
         shape = shapely_Polygon(coords)
         for component in all_components:
             accept = True
-            nodes = component.external_nodes.registry.values()
+            nodes = component.external_nodes.values()
             for node in nodes:
                 if not shape.contains(Point(node.coords[0:2])):
                     accept = False
@@ -283,4 +286,3 @@ class Model:
                 selected_components.append(component)
         for component in selected_components:
             self.transfer_component(other, component)
-                

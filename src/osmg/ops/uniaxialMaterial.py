@@ -11,7 +11,7 @@ Model Generator for OpenSees ~ element
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 # pylint: disable=invalid-name
 # pylint: disable=too-many-instance-attributes
@@ -25,6 +25,9 @@ class uniaxialMaterial:
     """
     uid: int
     name: str
+
+    def ops_args(self):
+        pass
 
 
 @dataclass
@@ -97,6 +100,7 @@ class Steel02(uniaxialMaterial):
             self.a4,
             self.sigInit
         ]
+
 
 @dataclass
 class Bilin(uniaxialMaterial):
@@ -257,4 +261,3 @@ class Hysteretic(uniaxialMaterial):
             self.damage2,
             self.beta
         ]
-    
