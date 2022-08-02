@@ -1,9 +1,23 @@
-from .. import common
+"""
+Model Generator for OpenSees ~ self weight, self mass
+"""
+
+#                          __
+#   ____  ____ ___  ____ _/ /
+#  / __ \/ __ `__ \/ __ `/ /
+# / /_/ / / / / / / /_/ /_/
+# \____/_/ /_/ /_/\__, (_)
+#                /____/
+#
+# https://github.com/ioannis-vm/OpenSees_Model_Generator
+
 import numpy as np
+from .. import common
 
 
 def self_weight(mdl, lcase, factor=1.00):
     """
+    Assigns the structure's self weight to its members
     """
     for elm in mdl.list_of_beamcolumn_elements():
 
@@ -32,6 +46,7 @@ def self_weight(mdl, lcase, factor=1.00):
 
 def self_mass(mdl, lcase):
     """
+    Assigns the structure's self mass to its members
     """
     for elm in mdl.list_of_beamcolumn_elements():
 

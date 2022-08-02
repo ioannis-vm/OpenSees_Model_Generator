@@ -22,13 +22,10 @@ from ..mesh import Mesh
 from ..mesh import polygon_area
 from .. import common
 if TYPE_CHECKING:
-    from .uniaxialMaterial import uniaxialMaterial
+    from .uniaxial_material import UniaxialMaterial
     from ..physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
-
-# pylint disable=invalid-name
-# pylint: disable=too-many-instance-attributes
 
 
 @dataclass
@@ -57,24 +54,28 @@ class Section:
 @dataclass
 class ElasticSection(Section):
     """
-
+    Elastic Section Object
     """
-    E: float
-    A: float
-    Iy: float
-    Ix: float
-    G: float
-    J: float
-    W: float
+    e_mod: float
+    area: float
+    i_y: float
+    i_x: float
+    g_mod: float
+    j_mod: float
+    sec_w: float
     outside_shape: Optional[Mesh] = field(default=None, repr=False)
     snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
     properties: Optional[dict[str, Any]] = field(default=None, repr=False)
 
     def weight_per_length(self):
+        """
+        Returns the weight per length of a section.
+        For steel W sections, it adds 15% for misc. steel and connections.
+        """
         if self.name[0] == 'W':
-            res = self.W * 1.15  # misc steel and connections
+            res = self.sec_w * 1.15  # misc steel and connections
         else:
-            res = self.W
+            res = self.sec_w
         return res
 
     def __repr__(self):
@@ -83,13 +84,13 @@ class ElasticSection(Section):
         res += f'name: {self.name}\n'
         res += f'uid: {self.uid}\n'
         res += 'Properties:'
-        res += f'  E: {self.E}\n'
-        res += f'  A: {self.A}\n'
-        res += f'  Iy: {self.Iy}\n'
-        res += f'  Ix: {self.Ix}\n'
-        res += f'  G: {self.G}\n'
-        res += f'  J: {self.J}\n'
-        res += f'  W: {self.W}\n'
+        res += f'  E: {self.e_mod}\n'
+        res += f'  A: {self.area}\n'
+        res += f'  Iy: {self.i_y}\n'
+        res += f'  Ix: {self.i_x}\n'
+        res += f'  G: {self.g_mod}\n'
+        res += f'  J: {self.j_mod}\n'
+        res += f'  W: {self.sec_w}\n'
         if self.outside_shape:
             res += 'outside_shape: specified\n'
         else:
@@ -108,7 +109,7 @@ class SectionComponent:
     """
     outside_shape: Mesh
     holes: dict[str, Mesh]
-    ops_material: uniaxialMaterial
+    ops_material: UniaxialMaterial
     physical_material: PhysicalMaterial
 
     def __repr__(self):
@@ -136,9 +137,9 @@ class FiberSection(Section):
     """
     outside_shape: Mesh
     section_parts: dict[str, SectionComponent]
-    J: float
+    j_mod: float
     snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
-    n_x: int = field(default=10)  # todo: this shoule be editable
+    n_x: int = field(default=10)  # TODO: this shoule be editable
     n_y: int = field(default=10)
 
     def __repr__(self):
@@ -154,10 +155,18 @@ class FiberSection(Section):
         return res
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return ['Fiber', self.uid, '-GJ',
-                self.J*self.section_parts['main'].physical_material.G]
+                self.j_mod*self.section_parts['main'].physical_material.g_mod]
 
     def weight_per_length(self):
+        """
+        Returns the weight per length of a section.
+        For steel W sections, it adds 15% for misc. steel and connections.
+        """
         if self.name[0] == 'W':
             mult = 1.15  # misc steel and connections
         else:
@@ -173,6 +182,6 @@ class FiberSection(Section):
                      for h in part.holes[hole].halfedges])
                 area -= polygon_area(hole_coords)
             density = part.physical_material.density
-            # todo: units
+            # TODO: units
             res += area * density * common.G_CONST_IMPERIAL
         return res * mult

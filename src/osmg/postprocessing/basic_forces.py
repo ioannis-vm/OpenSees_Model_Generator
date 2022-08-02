@@ -16,50 +16,54 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from ..solver import Analysis
-from ..ops.element import elasticBeamColumn
-from ..ops.element import dispBeamColumn
+from ..ops.element import ElasticBeamColumn
+from ..ops.element import DispBeamColumn
 from ..solver import ModalResponseSpectrumAnalysis
 
 nparr = npt.NDArray[np.float64]
+
+# pylint: disable=no-else-return
 
 
 def basic_forces(
         anl: Analysis,
         case_name: str,
         step: int,
-        elm: elasticBeamColumn | dispBeamColumn,
+        elm: ElasticBeamColumn | DispBeamColumn,
         num_points: int,
         as_tuple: bool = False) -> object:
-
+    """
+    Returns the basic forces of a specified element
+    """
     if isinstance(anl, ModalResponseSpectrumAnalysis):
         forces = anl.combined_basic_forces(elm.uid)
-        wx, wy, wz = (0.00, 0.00, 0.00)
+        w_x, w_y, w_z = (0.00, 0.00, 0.00)
     else:
         forces = anl.results[case_name].element_forces[
             elm.uid][step]
-        wx, wy, wz = anl.load_cases[case_name].line_element_udl[elm.uid].val
+        w_x, w_y, w_z = anl.load_cases[case_name].line_element_udl[elm.uid].val
 
-    ni, qyi, qzi = forces[0:3]
-    ti, myi, mzi = forces[3:6]
+    n_i, qy_i, qz_i = forces[0:3]
+    t_i, my_i, mz_i = forces[3:6]
 
-    p_i = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
-    p_j = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
+    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
-    t = np.linspace(0.00, len_clr, num=num_points)
+    t_vec = np.linspace(0.00, len_clr, num=num_points)
 
-    nx_vec = - t * wx - ni
-    qy_vec = t * wy + qyi
-    qz_vec = t * wz + qzi
-    tx_vec = np.full(num_points, -ti)
-    mz_vec = t**2 * 0.50 * wy + t * qyi - mzi
-    my_vec = t**2 * 0.50 * wz + t * qzi + myi
+    nx_vec = - t_vec * w_x - n_i
+    qy_vec = t_vec * w_y + qy_i
+    qz_vec = t_vec * w_z + qz_i
+    tx_vec = np.full(num_points, -t_i)
+    mz_vec = t_vec**2 * 0.50 * w_y + t_vec * qy_i - mz_i
+    my_vec = t_vec**2 * 0.50 * w_z + t_vec * qz_i + my_i
 
     if as_tuple:
         return (nx_vec, qy_vec, qz_vec,
                 tx_vec, mz_vec, my_vec)
     else:
-        df = pd.DataFrame.from_dict(
+        dframe = pd.DataFrame.from_dict(
             {'nx': nx_vec,
              'qy': qy_vec,
              'qz': qz_vec,
@@ -67,4 +71,4 @@ def basic_forces(
              'mz': mz_vec,
              'my': my_vec}
         )
-        return df
+        return dframe

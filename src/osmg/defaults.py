@@ -17,8 +17,8 @@ import numpy as np
 import numpy.typing as npt
 from .physical_material import PhysicalMaterial
 from . import common
-from .ops.uniaxialMaterial import Elastic
-from .ops.uniaxialMaterial import Steel02
+from .ops.uniaxial_material import Elastic
+from .ops.uniaxial_material import Steel02
 from .ops.section import ElasticSection
 from .gen.mesh_shapes import rect_mesh
 if TYPE_CHECKING:
@@ -28,36 +28,44 @@ nparr = npt.NDArray[np.float64]
 
 
 def load_util_rigid_elastic(model: Model):
+    """
+    Adds a default rigid elastic beamcolumn element
+    to the model
+    """
     new_uid = model.uid_generator.new('section')
     sec = ElasticSection(
         name='rigid_link_section',
         uid=new_uid,
         outside_shape=None,
         snap_points=None,
-        E=common.STIFF,
-        A=1.00,
-        Iy=1.00,
-        Ix=1.00,
-        G=common.STIFF,
-        J=1.00,
-        W=0.00)
+        e_mod=common.STIFF,
+        area=1.00,
+        i_y=1.00,
+        i_x=1.00,
+        g_mod=common.STIFF,
+        j_mod=1.00,
+        sec_w=0.00)
     model.elastic_sections.add(sec)
 
 
 def load_default_elastic(model: Model, sec_name: str):
+    """
+    Adds default non-rigid elastic beamcolumn element
+    sections to the model
+    """
     new_uid = model.uid_generator.new('section')
     sec = ElasticSection(
         name=sec_name,
         uid=new_uid,
         outside_shape=None,
         snap_points=None,
-        E=1.00,
-        A=1.00,
-        Iy=1.00,
-        Ix=1.00,
-        G=1.00,
-        J=1.00,
-        W=0.00)
+        e_mod=1.00,
+        area=1.00,
+        i_y=1.00,
+        i_x=1.00,
+        g_mod=1.00,
+        j_mod=1.00,
+        sec_w=0.00)
     if model.settings.imperial_units:
         y_max = +10.00
         y_min = -10.00
@@ -86,7 +94,10 @@ def load_default_elastic(model: Model, sec_name: str):
 
 
 def load_default_steel(model: Model):
-    # todo: add SI units some day
+    """
+    Adds a default steel material to the model
+    """
+    # TODO: add SI units some day
     uniaxial_mat = Steel02(
         uid=model.uid_generator.new('uniaxial material'),
         name='default steel',
@@ -120,10 +131,10 @@ def load_default_fix_release(model: Model):
     uniaxial_mat = Elastic(
         uid=model.uid_generator.new('uniaxial material'),
         name='fix',
-        E=common.STIFF_ROT)
+        e_mod=common.STIFF_ROT)
     model.uniaxial_materials.add(uniaxial_mat)
     uniaxial_mat = Elastic(
         uid=model.uid_generator.new('uniaxial material'),
         name='release',
-        E=common.TINY)
+        e_mod=common.TINY)
     model.uniaxial_materials.add(uniaxial_mat)

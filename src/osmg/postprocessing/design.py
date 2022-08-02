@@ -13,19 +13,19 @@ Model Generator for OpenSees ~ design library
 
 from __future__ import annotations
 from dataclasses import dataclass, field
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
 from ..solver import Analysis
 from .basic_forces import basic_forces
 from ..model import Model
 from ..solver import ModalResponseSpectrumAnalysis
-import numpy as np
-import numpy.typing as npt
-import pandas as pd
 
 nparr = npt.NDArray[np.float64]
 
 
-case_name = str
-component_name = str
+CaseName = str
+ComponentName = str
 
 
 @dataclass(repr=False)
@@ -36,11 +36,15 @@ class LoadCombination:
     stuff inside the sub-list are enveloped
     """
     mdl: Model
-    combo: dict[component_name,
-                list[tuple[float, Analysis, case_name]]] = \
+    combo: dict[ComponentName,
+                list[tuple[float, Analysis, CaseName]]] = \
         field(default_factory=dict)
 
     def envelope_basic_forces(self, elm, num_points):
+        """
+        Calculates the envelope of the basic forces for the
+        given load combination
+        """
         df_min = pd.DataFrame(
             np.full((num_points, 6), np.inf),
             columns=['nx', 'qy', 'qz', 'tx', 'mz', 'my'])
@@ -56,14 +60,17 @@ class LoadCombination:
                 res = basic_forces(
                     anl, case_name_str, 0, elm, num_points)
                 assert isinstance(res, pd.DataFrame)
-                df = res * factor
-                df_tot += df
+                dframe = res * factor
+                df_tot += dframe
             df_min[df_min > df_tot] = df_tot
             df_max[df_max < df_tot] = df_tot
 
         return df_min, df_max
 
     def envelope_node_displacement(self, node):
+        """
+        Calculates the enveloped node displacement
+        """
         disp_min: nparr = np.full(6, np.inf)
         disp_max: nparr = np.full(6, -np.inf)
         for component_to_envelope in self.combo.values():
@@ -83,6 +90,10 @@ class LoadCombination:
         return disp_min, disp_max
 
     def envelope_node_displacement_diff(self, node_i, node_j):
+        """
+        Calculates the enveloped displacement difference between
+        two nodes
+        """
         disp_min = np.full(6, np.inf)
         disp_max = np.full(6, -np.inf)
         for component_to_envelope in self.combo.values():

@@ -15,15 +15,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Type
 from dataclasses import dataclass
-from ..ops.section import SectionComponent
+import json
+import pkgutil
 import numpy as np
 import numpy.typing as npt
-import json
+from ..ops.section import SectionComponent
 from ..ops.section import ElasticSection
 from ..ops.section import FiberSection
 from ..gen import mesh_shapes
 from .mesh_shapes import rect_mesh
-import pkgutil
 if TYPE_CHECKING:
     from ..model import Model
     from ..ops.section import Section
@@ -41,22 +41,26 @@ class SectionGenerator:
     def generate_generic_elastic(
             self,
             name: str,
-            ea: float,
-            ei: float,
-            gj: float
+            e_times_a: float,
+            e_times_i: float,
+            g_times_j: float
     ):
+        """
+        Generates a generic elastic section with the specified
+        properties
+        """
         sec = ElasticSection(
             name=name,
             uid=self.model.uid_generator.new('section'),
             outside_shape=None,
             snap_points=None,
-            E=1.00,
-            A=ea,
-            Iy=ei,
-            Ix=ei,
-            G=1.00,
-            J=gj,
-            W=0.00,
+            e_mod=1.00,
+            area=e_times_a,
+            i_y=e_times_i,
+            i_x=e_times_i,
+            g_mod=1.00,
+            j_mod=g_times_j,
+            sec_w=0.00,
         )
         if self.model.settings.imperial_units:
             y_max = +10.00
@@ -85,11 +89,14 @@ class SectionGenerator:
         self.model.elastic_sections.add(sec)
         return sec
 
-    def load_AISC_from_database(
+    def load_aisc_from_database(
             self,
             sec_shape_designation: str, labels: list[str],
             ops_material: str, physical_material: str,
             sec_type: Type[Section]):
+        """
+        Loads a section from the AISC steel section database.
+        """
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
             'name', ops_material)
         phs_mat = self.model.physical_materials.retrieve_by_attr(
@@ -105,12 +112,13 @@ class SectionGenerator:
             except KeyError:
                 raise KeyError(f'Section {label} not found in file.')
             if sec_shape_designation == 'W':
-                b = sec_data['bf']
-                h = sec_data['d']
-                tw = sec_data['tw']
-                tf = sec_data['tf']
+                sec_b = sec_data['bf']
+                sec_h = sec_data['d']
+                sec_tw = sec_data['tw']
+                sec_tf = sec_data['tf']
                 area = sec_data['A']
-                outside_shape = mesh_shapes.w_mesh(b, h, tw, tf, area)
+                outside_shape = mesh_shapes.w_mesh(
+                    sec_b, sec_h, sec_tw, sec_tf, area)
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
                 snap_points: dict[str, nparr] = {

@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 from . import collections
+from .ops import element
 
 
 nparr = npt.NDArray[np.float64]
@@ -39,9 +40,9 @@ class ComponentAssembly:
         required for the connectivity of the elements of the component
         assembly.
         these nodes only exist as part of the component assembly.
-      elastic_beamcolumn_elements (elasticBeamColumnCollection): ...
-      disp_beamcolumn_elements (dispBeamColumnCollection): ...
-      zerolength_elements (zerolengthCollection): ...
+      elastic_beamcolumn_elements (CollectionWithConnectivity): ...
+      disp_beamcolumn_elements (CollectionWithConnectivity): ...
+      zerolength_elements (CollectionWithConnectivity): ...
     """
     uid: int
     parent_collection: collections.Collection[int, ComponentAssembly]
@@ -50,23 +51,26 @@ class ComponentAssembly:
         init=False)
     internal_nodes: collections.NodeCollection = field(
         init=False)
-    elastic_beamcolumn_elements: collections.elasticBeamColumnCollection \
-        = field(init=False)
-    disp_beamcolumn_elements: collections.dispBeamColumnCollection = field(
-        init=False)
-    zerolength_elements: collections.zerolengthCollection = field(
-        init=False)
+    elastic_beamcolumn_elements: (collections.CollectionWithConnectivity[
+        int, element.ElasticBeamColumn]) = field(init=False)
+    disp_beamcolumn_elements: (collections.CollectionWithConnectivity[
+        int, element.DispBeamColumn]) = field(init=False)
+    zerolength_elements: (collections.CollectionWithConnectivity[
+        int, element.ZeroLength]) = field(init=False)
 
     def __post_init__(self):
         self.external_nodes = collections.NodeCollection(self)
         self.internal_nodes = collections.NodeCollection(self)
         self.elastic_beamcolumn_elements = \
-            collections.elasticBeamColumnCollection(self)
+            collections.CollectionWithConnectivity(self)
         self.disp_beamcolumn_elements = \
-            collections.dispBeamColumnCollection(self)
-        self.zerolength_elements = collections.zerolengthCollection(self)
+            collections.CollectionWithConnectivity(self)
+        self.zerolength_elements = collections.CollectionWithConnectivity(self)
 
     def __srepr__(self):
+        """
+        Short version of repr
+        """
         return f'Component assembly, uid: {self.uid}'
 
     def __repr__(self):
@@ -75,41 +79,69 @@ class ComponentAssembly:
         res += f'uid: {self.uid}\n'
         res += f'component_purpose: {self.component_purpose}\n'
         res += 'External Nodes\n'
-        for nd in self.external_nodes.values():
-            res += f'  {nd.uid}, {nd.coords}'
+        for node in self.external_nodes.values():
+            res += f'  {node.uid}, {node.coords}'
         res += 'Internal Nodes\n'
-        for nd in self.internal_nodes.values():
-            res += f'  {nd.uid}, {nd.coords}'
+        for node in self.internal_nodes.values():
+            res += f'  {node.uid}, {node.coords}'
         return res
 
     def dict_of_elastic_beamcolumn_elements(self):
+        """
+        Returns a dictionary of all ElasticBeamColumn objects in the model.
+        The keys are the uids of the objects.
+        """
         res = {}
         for elm in self.elastic_beamcolumn_elements.values():
             res[elm.uid] = elm
         return res
 
     def list_of_elastic_beamcolumn_elements(self):
+        """
+        Returns a list of all ElasticBeamColumn objects in the model.
+        """
         return list(self.dict_of_elastic_beamcolumn_elements().values())
 
     def dict_of_disp_beamcolumn_elements(self):
+        """
+        Returns a dictionary of all DispBeamColumn objects in the model.
+        The keys are the uids of the objects.
+        """
         res = {}
         for elm in self.disp_beamcolumn_elements.values():
             res[elm.uid] = elm
         return res
 
     def list_of_disp_beamcolumn_elements(self):
+        """
+        Returns a list of all DispBeamColumn objects in the model.
+        """
         return list(self.dict_of_disp_beamcolumn_elements().values())
 
-    def dict_of_all_elements(self):
+    def dict_of_beamcolumn_elements(self):
+        """
+        Returns a dictionary of all beamcolumn elements in the model.
+        The keys are the uids of the objects.
+        """
         res = {}
         res.update(self.dict_of_elastic_beamcolumn_elements())
         res.update(self.dict_of_disp_beamcolumn_elements())
         return res
 
     def list_of_all_elements(self):
-        return list(self.dict_of_all_elements().values())
+        """
+        Returns a list of all beamcolumn elements in the model.
+        """
+        return list(self.dict_of_beamcolumn_elements().values())
 
     def element_connectivity(self):
+        """
+        Returns the connectivity of all elements. Elements are
+        connected to external nodes. Each component assembly can be
+        represented by a typle of node uids of its connected nodes in
+        ascending order. This method returns a dictionary having these
+        tuples as keys, and the associated components as values.
+        """
         res = {}
         elms = self.list_of_all_elements()
         for elm in elms:

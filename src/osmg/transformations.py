@@ -34,13 +34,17 @@ def rotation_matrix_3d(
     Courtesy of
     https://stackoverflow.com/questions/6802577/rotation-of-3d-vector
     """
-    a = np.cos(theta / 2.0)
-    b, c, d = -axis * np.sin(theta / 2.0)
-    aa, bb, cc, dd = a * a, b * b, c * c, d * d
-    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
-    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
-                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
-                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
+    v_a = np.cos(theta / 2.0)
+    v_b, v_c, v_d = -axis * np.sin(theta / 2.0)
+    v_aa, v_bb, v_cc, v_dd = v_a * v_a, v_b * v_b, v_c * v_c, v_d * v_d
+    v_bc, v_ad, v_ac, v_ab, v_bd, v_cd = (v_b * v_c, v_a * v_d, v_a * v_c, v_a
+                                          * v_b, v_b * v_d, v_c * v_d)
+    return np.array([[v_aa + v_bb - v_cc - v_dd, 2
+                      * (v_bc + v_ad), 2 * (v_bd - v_ac)],
+                     [2 * (v_bc - v_ad), v_aa + v_cc
+                      - v_bb - v_dd, 2 * (v_cd + v_ab)],
+                     [2 * (v_bd + v_ac), 2 * (v_cd - v_ab),
+                      v_aa + v_dd - v_bb - v_cc]])
 
 
 def transformation_matrix(vec_x: nparr,
@@ -117,8 +121,8 @@ def local_axes_from_points_and_angle(point_i: nparr,
 
 
 def offset_transformation(offset: nparr,
-                          u: nparr,
-                          r: nparr) -> nparr:
+                          u_vec: nparr,
+                          r_vec: nparr) -> nparr:
     """
     Obtain the displacement of the end of a rigid offeset
     by specifying the displacement and rotation of the
@@ -134,4 +138,4 @@ def offset_transformation(offset: nparr,
     t_rigid: nparr = np.array([[0.00, +offset[2], -offset[1]],
                                [-offset[2], 0.00, +offset[0]],
                                [+offset[1], -offset[0], 0.00]])
-    return u + t_rigid @ r
+    return u_vec + t_rigid @ r_vec

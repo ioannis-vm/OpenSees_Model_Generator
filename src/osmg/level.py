@@ -20,9 +20,6 @@ if TYPE_CHECKING:
     from .model import Model
     from .component_assembly import ComponentAssembly
 
-# pylint: disable=unsubscriptable-object
-# pylint: disable=invalid-name
-
 
 @dataclass
 class Level:

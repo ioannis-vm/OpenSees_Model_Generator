@@ -11,6 +11,7 @@ Model Generator for OpenSees ~ load case
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+# pylint: disable=W1512
 
 from __future__ import annotations
 from dataclasses import dataclass, field
@@ -24,7 +25,7 @@ from .preprocessing.rigid_diaphragm import RDAnalyzer
 
 if TYPE_CHECKING:
     from .model import Model
-    from .ops.element import elasticBeamColumn
+    from .ops.element import ElasticBeamColumn
     from .ops.node import Node
 
 nparr = npt.NDArray[np.float64]
@@ -42,6 +43,9 @@ class PointLoadMass:
         default_factory=lambda: np.zeros(shape=6))
 
     def add(self, load: nparr):
+        """
+        Adds some quantity to the existing quantity
+        """
         self.val += load
 
     def __repr__(self):
@@ -55,9 +59,9 @@ class PointLoadMass:
 @dataclass(repr=False)
 class LineElementUDL:
     """
-
+    Line element uniformly distributed load object.
     """
-    parent_line_element: elasticBeamColumn
+    parent_line_element: ElasticBeamColumn
     val: nparr = field(
         default_factory=lambda: np.zeros(shape=3))
 
@@ -84,28 +88,33 @@ class LineElementUDL:
                 the global x, y, and z directions, in the direction of
                 the global axes.
         """
-        T_mat = transformations.transformation_matrix(
+        transf_mat = transformations.transformation_matrix(
             self.parent_line_element.geomtransf.x_axis,
             self.parent_line_element.geomtransf.y_axis,
             self.parent_line_element.geomtransf.z_axis)
-        udl_local = T_mat @ udl
+        udl_local = transf_mat @ udl
         self.val += udl_local
 
     def to_global(self):
         """
-
+        Returns the quantity expressed in the global coordinate system
         """
         udl = self.val
-        T_mat = transformations.transformation_matrix(
+        transf_mat = transformations.transformation_matrix(
             self.parent_line_element.geomtransf.x_axis,
             self.parent_line_element.geomtransf.y_axis,
             self.parent_line_element.geomtransf.z_axis)
-        return T_mat.T @ udl
+        return transf_mat.T @ udl
 
 
 @dataclass(repr=False)
 class LoadCase:
     """
+    Load Case object.
+    Load cases contain information related to the specified loads,
+    mass, parent nodes and rigid diaphragm constraints, etc.
+    Analysis objects can use multiple load cases.
+    Load combination objects utilize load cases as well.
     """
     name: str
     parent_model: Model
@@ -137,6 +146,10 @@ class LoadCase:
                 TributaryAreaAnaysis(self, lvl)
 
     def rigid_diaphragms(self, level_uids: list[int], gather_mass=False):
+        """
+        Processes the geometry of the given levels and applies rigid
+        diaphragm constraints
+        """
         for lvl_uid in level_uids:
             lvl = self.parent_model.levels[lvl_uid]
             rda = RDAnalyzer(self, lvl)

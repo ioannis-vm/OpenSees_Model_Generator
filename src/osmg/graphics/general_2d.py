@@ -35,10 +35,13 @@ C_BACKGROUND = "#FFE6A7"
 C_HOVERLABEL_BG = "#BB9457"
 
 
-def line_plot_interactive(title_text, x, y, mode,
+def line_plot_interactive(title_text, x_vals, y_vals, mode,
                           xlab="x", xunit=None, xhoverformat='.0f',
                           ylab="y", yunit=None, yhoverformat='.0f'):
-    assert len(x) == len(y), "Dimensions don't match"
+    """
+    Gneric polty line plot
+    """
+    assert len(x_vals) == len(y_vals), "Dimensions don't match"
     assert mode in ['spline+markers', 'line'], \
         "mode can either be `spline+markers` or `line`"
 
@@ -62,7 +65,7 @@ def line_plot_interactive(title_text, x, y, mode,
     else:
         ytitle = ylab
 
-    num_points = len(x)
+    num_points = len(x_vals)
     indices: nparr = np.array([range(num_points)])
     my_hovertemplate = \
         'XY value pair: %{customdata:d}<br>' + \
@@ -78,8 +81,8 @@ def line_plot_interactive(title_text, x, y, mode,
         my_hovertemplate += '<extra></extra>'
     fig = go.Figure(
         data=go.Scatter(
-            x=x,
-            y=y,
+            x=x_vals,
+            y=y_vals,
             mode=lmode,
             line_shape=lshape,
             line=dict(color=C_LINE, width=lwidth),

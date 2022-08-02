@@ -11,14 +11,14 @@ Model Generator for OpenSees ~ element
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-from dataclasses import dataclass
-
 # pylint: disable=invalid-name
-# pylint: disable=too-many-instance-attributes
+
+
+from dataclasses import dataclass
 
 
 @dataclass
-class uniaxialMaterial:
+class UniaxialMaterial:
     """
     OpenSees uniaxialMaterial
     https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
@@ -26,51 +26,29 @@ class uniaxialMaterial:
     uid: int
     name: str
 
-    def ops_args(self):
-        pass
-
 
 @dataclass
-class Elastic(uniaxialMaterial):
+class Elastic(UniaxialMaterial):
     """
     OpenSees Elastic
     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
     """
-    E: float
+    e_mod: float
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Elastic',
             self.uid,
-            self.E
+            self.e_mod
         ]
 
 
-# @dataclass
-# class Elastic(uniaxialMaterial):
-#     """
-#     OpenSees Elastic
-#     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
-#     """
-#     E: float
-#     eta: float = field(default=0.00)
-#     Eneg: float = field(init=False)
-
-#     def __post_init__(self):
-#         self.Eneg = self.E
-
-#     def ops_args(self):
-#         return [
-#             'Elastic',
-#             self.uid,
-#             self.E,
-#             self.eta,
-#             self.Eneg
-#         ]
-
-
 @dataclass
-class Steel02(uniaxialMaterial):
+class Steel02(UniaxialMaterial):
     """
     OpenSees Steel02
     https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
@@ -87,6 +65,10 @@ class Steel02(uniaxialMaterial):
     G: float
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Steel02',
             self.uid,
@@ -103,7 +85,7 @@ class Steel02(uniaxialMaterial):
 
 
 @dataclass
-class Bilin(uniaxialMaterial):
+class Bilin(UniaxialMaterial):
     """
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
@@ -134,6 +116,10 @@ class Bilin(uniaxialMaterial):
     nFactor: float
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Bilin',
             self.uid,
@@ -165,7 +151,7 @@ class Bilin(uniaxialMaterial):
 
 
 @dataclass
-class Pinching4(uniaxialMaterial):
+class Pinching4(UniaxialMaterial):
     """
     OpenSees Pinching4 Material
     https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html?highlight=pinching4
@@ -211,6 +197,10 @@ class Pinching4(uniaxialMaterial):
     dmgType: str
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Pinching4',
             self.uid,
@@ -228,7 +218,7 @@ class Pinching4(uniaxialMaterial):
 
 
 @dataclass
-class Hysteretic(uniaxialMaterial):
+class Hysteretic(UniaxialMaterial):
     """
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
@@ -246,6 +236,10 @@ class Hysteretic(uniaxialMaterial):
     beta: float
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Hysteretic',
             self.uid,

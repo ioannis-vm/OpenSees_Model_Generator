@@ -170,10 +170,17 @@ class Mesh:
         return f'Mesh object containing {num} halfedges.'
 
     def geometric_properties(self):
+        """
+        Calculates the geometric properties of the shape defined by
+        the mesh
+        """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         return geometric_properties(coords)
 
     def bounding_box(self):
+        """
+        Returns a bounding box of the mesh
+        """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -200,10 +207,10 @@ def polygon_area(coords: nparr) -> float:
     Returns:
         area (float): The area of the polygon.
     """
-    x = coords[:, 0]
-    y = coords[:, 1]
-    return float(np.sum(x * np.roll(y, -1) -
-                        np.roll(x, -1) * y) / 2.00)
+    x_coords = coords[:, 0]
+    y_coords = coords[:, 1]
+    return float(np.sum(x_coords * np.roll(y_coords, -1) -
+                        np.roll(x_coords, -1) * y_coords) / 2.00)
 
 
 def polygon_centroid(coords: nparr) -> nparr:
@@ -220,15 +227,15 @@ def polygon_centroid(coords: nparr) -> nparr:
         centroid (nparr): The centroid of
                  the polygon.
     """
-    x = coords[:, 0]
-    y = coords[:, 1]
+    x_coords = coords[:, 0]
+    y_coords = coords[:, 1]
     area = polygon_area(coords)
-    x_cent = (np.sum((x + np.roll(x, -1)) *
-                     (x*np.roll(y, -1) -
-                      np.roll(x, -1)*y)))/(6.0*area)
-    y_cent = (np.sum((y + np.roll(y, -1)) *
-                     (x*np.roll(y, -1) -
-                      np.roll(x, -1)*y)))/(6.0*area)
+    x_cent = (np.sum((x_coords + np.roll(x_coords, -1)) *
+                     (x_coords*np.roll(y_coords, -1) -
+                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+    y_cent = (np.sum((y_coords + np.roll(y_coords, -1)) *
+                     (x_coords*np.roll(y_coords, -1) -
+                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
     return np.array((x_cent, y_cent))
 
 
@@ -254,29 +261,29 @@ def polygon_inertia(coords):
         # TODO
         # The terms might not be pedantically accurate
     """
-    x = coords[:, 0]
-    y = coords[:, 1]
+    x_coords = coords[:, 0]
+    y_coords = coords[:, 1]
     area = polygon_area(coords)
-    alpha = x * np.roll(y, -1) - \
-        np.roll(x, -1) * y
+    alpha = x_coords * np.roll(y_coords, -1) - \
+        np.roll(x_coords, -1) * y_coords
     # planar moment of inertia wrt horizontal axis
-    ixx = np.sum((y**2 + y * np.roll(y, -1) +
-                  np.roll(y, -1)**2)*alpha)/12.00
+    ixx = np.sum((y_coords**2 + y_coords * np.roll(y_coords, -1) +
+                  np.roll(y_coords, -1)**2)*alpha)/12.00
     # planar moment of inertia wrt vertical axis
-    iyy = np.sum((x**2 + x * np.roll(x, -1) +
-                  np.roll(x, -1)**2)*alpha)/12.00
+    iyy = np.sum((x_coords**2 + x_coords * np.roll(x_coords, -1) +
+                  np.roll(x_coords, -1)**2)*alpha)/12.00
 
-    ixy = np.sum((x*np.roll(y, -1)
-                  + 2.0*x*y
-                  + 2.0*np.roll(x, -1) * np.roll(y, -1)
-                  + np.roll(x, -1) * y)*alpha)/24.
+    ixy = np.sum((x_coords*np.roll(y_coords, -1)
+                  + 2.0*x_coords*y_coords
+                  + 2.0*np.roll(x_coords, -1) * np.roll(y_coords, -1)
+                  + np.roll(x_coords, -1) * y_coords)*alpha)/24.
     # polar (torsional) moment of inertia
-    ir = ixx + iyy
+    i_r = ixx + iyy
     # mass moment of inertia wrt in-plane rotation
     ir_mass = (ixx + iyy) / area
 
     return {'ixx': ixx, 'iyy': iyy,
-            'ixy': ixy, 'ir': ir, 'ir_mass': ir_mass}
+            'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
 def geometric_properties(coords):
@@ -339,24 +346,24 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     # none of them knows its `next`.
     # We now assign that attribute to all halfedges
 
-    for h in all_halfedges:
+    for halfedge in all_halfedges:
         # We are looking for `h`'s `next`
         # determine the vertex that it starts from
-        v_from = h.vertex
+        v_from = halfedge.vertex
         # determine the vertex that it points to
-        v_to = h.edge.other_vertex(v_from)
+        v_to = halfedge.edge.other_vertex(v_from)
         # get a list of all halfedges leaving that vertex
         candidates_for_next = v_to.halfedges
         # determine which of all these halfedges will be the next
         angles = np.full(len(candidates_for_next), 0.00)
         for i, h_other in enumerate(candidates_for_next):
-            if h_other.edge == h.edge:
+            if h_other.edge == halfedge.edge:
                 angles[i] = 1000.
                 # otherwise we would assign its conjugate as next
             else:
                 angles[i] = ang_reduce(
-                    (h.direction() - np.pi) - h_other.direction())
-        h.nxt = candidates_for_next[np.argmin(angles)]
+                    (halfedge.direction() - np.pi) - h_other.direction())
+        halfedge.nxt = candidates_for_next[np.argmin(angles)]
 
     return all_halfedges
 
@@ -492,16 +499,16 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
                 pieces.append(subregion)
     if plot:
         fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_aspect('equal')
+        ax_1 = fig.add_subplot(111)
+        ax_1.set_aspect('equal')
         patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
-        ax.add_patch(patch)
+        ax_1.add_patch(patch)
         for subregion in pieces:
             patch = PolygonPatch(subregion, alpha=0.5, zorder=2)
-            ax.add_patch(patch)
+            ax_1.add_patch(patch)
         for subregion in pieces:
-            ax.scatter(subregion.centroid.x, subregion.centroid.y)
-        ax.margins(0.10)
+            ax_1.scatter(subregion.centroid.x, subregion.centroid.y)
+        ax_1.margins(0.10)
         plt.show()
     return pieces
 
@@ -524,11 +531,11 @@ def print_halfedge_results(halfedges):
         'next': [],
     }
 
-    for h in halfedges:
-        results['halfedge'].append(h)
-        results['vertex'].append(h.vertex)
-        results['edge'].append(h.edge)
-        results['next'].append(h.nxt)
+    for halfedge in halfedges:
+        results['halfedge'].append(halfedge)
+        results['vertex'].append(halfedge.vertex)
+        results['edge'].append(halfedge.edge)
+        results['next'].append(halfedge.nxt)
 
     print(results)
 
@@ -537,10 +544,10 @@ def plot_loop(halfedge_loop):
     """
     Plots the vertices/edges of a list of halfedges.
     """
-    n = len(halfedge_loop)
-    coords = np.full((n+1, 2), 0.00)
-    for i, h in enumerate(halfedge_loop):
-        coords[i, :] = h.vertex.coords
+    num = len(halfedge_loop)
+    coords = np.full((num+1, 2), 0.00)
+    for i, halfedge in enumerate(halfedge_loop):
+        coords[i, :] = halfedge.vertex.coords
     coords[-1, :] = coords[0, :]
     fig = plt.figure()
     plt.plot(coords[:, 0], coords[:, 1])
@@ -553,10 +560,10 @@ def plot_edges(edges):
     Plots the given edges.
     """
     fig = plt.figure()
-    for i, e in enumerate(edges):
+    for edge in edges:
         coords = np.full((2, 2), 0.00)
-        coords[0, :] = e.v_i.coords
-        coords[1, :] = e.v_j.coords
+        coords[0, :] = edge.v_i.coords
+        coords[1, :] = edge.v_j.coords
         plt.plot(coords[:, 0], coords[:, 1])
     fig.show()
 
@@ -570,16 +577,16 @@ def sanity_checks(external, trivial):
     if trivial:
         print("Warning: Found trivial loop")
         for i, trv in enumerate(trivial):
-            for h in trv:
-                print(h.vertex.coords)
+            for halfedge in trv:
+                print(halfedge.vertex.coords)
             plot_loop(trv)
     #   We expect a single external loop
     if len(external) > 1:
         print("Warning: Found multiple external loops")
         for i, ext in enumerate(external):
             print(i+1)
-            for h in ext:
-                print(h.vertex.coords)
+            for halfedge in ext:
+                print(halfedge.vertex.coords)
             plot_loop(ext)
 
 

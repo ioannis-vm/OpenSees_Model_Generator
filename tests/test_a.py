@@ -5,7 +5,7 @@ Basic Tests
 # import pytest
 from osmg.model import Model
 from osmg.gen.node_gen import NodeGenerator
-from osmg.graphics.preprocessing_3D import show
+from osmg.graphics.preprocessing_3d import show
 
 
 def test_add_levels():

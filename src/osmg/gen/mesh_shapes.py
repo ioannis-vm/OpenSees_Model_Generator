@@ -26,27 +26,33 @@ nparr = npt.NDArray[np.float64]
 
 
 def generate(edges):
+    """
+    Generates halfedges from the given edges
+    """
     halfedges = define_halfedges(edges)
     loops = obtain_closed_loops(halfedges)
-    external, internal, trivial = orient_loops(loops)
+    _, internal, trivial = orient_loops(loops)
     sanity_checks(internal, trivial)
     return Mesh(internal[0])
 
 
 def define_edges(vertices):
+    """
+    Defines edges from an ordered list of vertices
+    """
     n_v = len(vertices)
     edges = []
     for i in range(n_v - 1):
-        vi = vertices[i]
-        vj = vertices[i+1]
-        edges.append(Edge(vi, vj))
-    vi = vertices[-1]
-    vj = vertices[0]
-    edges.append(Edge(vi, vj))
+        v_i = vertices[i]
+        v_j = vertices[i+1]
+        edges.append(Edge(v_i, v_j))
+    v_i = vertices[-1]
+    v_j = vertices[0]
+    edges.append(Edge(v_i, v_j))
     return edges
 
 
-def w_mesh(b, h, tw, tf, target_area=None):
+def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the W section with
@@ -62,67 +68,67 @@ def w_mesh(b, h, tw, tf, target_area=None):
             because trying to do that using
             `T` doesn't work.
     """
-    area_diff = target_area - (b*tf*2.+(h-2*tf)*tw)
+    area_diff = target_area - (sec_b*sec_tf*2.+(sec_h-2*sec_tf)*sec_tw)
     if area_diff < 0:
         # This happens for W14X426
         area_diff = 1e-4
 
-    r = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
+    dist = np.sqrt(area_diff/(2.**2-np.pi)) * 0.9565
     # note: 0.9565 is a correction factor to account for
     # the fact that we approximate the arcs with
     # four line segments, thus putting more material in there
-    k = (b - 2. * r - tw) / 2.
+    k = (sec_b - 2. * dist - sec_tw) / 2.
     vertices = [
-        Vertex((b/2., h/2.)),
-        Vertex((-b/2., h/2.)),
-        Vertex((-b/2., h/2.-tf)),
-        Vertex((-b/2.+k, h/2.-tf)),
-        Vertex((-b/2.+k+r * np.cos(3.*np.pi/8.),
-                h/2.-tf-r + r*np.sin(3.*np.pi/8.))),
-        Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
-                h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
-        Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
-                h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
+        Vertex((sec_b/2., sec_h/2.)),
+        Vertex((-sec_b/2., sec_h/2.)),
+        Vertex((-sec_b/2., sec_h/2.-sec_tf)),
+        Vertex((-sec_b/2.+k, sec_h/2.-sec_tf)),
+        Vertex((-sec_b/2.+k+dist * np.cos(3.*np.pi/8.),
+                sec_h/2.-sec_tf-dist + dist*np.sin(3.*np.pi/8.))),
+        Vertex((-sec_b/2.+k+dist*np.cos(1.*np.pi/4.),
+                sec_h/2.-sec_tf-dist+dist*np.sin(1.*np.pi/4.))),
+        Vertex((-sec_b/2.+k+dist*np.cos(1.*np.pi/8.),
+                sec_h/2.-sec_tf-dist+dist*np.sin(1.*np.pi/8.))),
 
-        Vertex((-b/2.+k+r, h/2.-tf-r)),
-        Vertex((-b/2.+k+r, -h/2.+tf+r)),
-        Vertex((-b/2.+k+r*np.cos(1.*np.pi/8.),
-                -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
-        Vertex((-b/2.+k+r*np.cos(1.*np.pi/4.),
-                -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
-        Vertex((-b/2.+k+r*np.cos(3.*np.pi/8.),
-                -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
+        Vertex((-sec_b/2.+k+dist, sec_h/2.-sec_tf-dist)),
+        Vertex((-sec_b/2.+k+dist, -sec_h/2.+sec_tf+dist)),
+        Vertex((-sec_b/2.+k+dist*np.cos(1.*np.pi/8.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(1.*np.pi/8.))),
+        Vertex((-sec_b/2.+k+dist*np.cos(1.*np.pi/4.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(1.*np.pi/4.))),
+        Vertex((-sec_b/2.+k+dist*np.cos(3.*np.pi/8.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(3.*np.pi/8.))),
 
-        Vertex((-b/2.+k, -h/2.+tf)),
-        Vertex((-b/2., -(h/2.-tf))),
-        Vertex((-b/2., -h/2.)),
-        Vertex((b/2., -h/2.)),
-        Vertex((b/2., -(h/2-tf))),
-        Vertex((+b/2.-k, -h/2.+tf)),
-        Vertex((+b/2.-k-r*np.cos(3.*np.pi/8.),
-                       -h/2.+tf+r-r*np.sin(3.*np.pi/8.))),
-        Vertex((+b/2.-k-r*np.cos(1.*np.pi/4.),
-                       -h/2.+tf+r-r*np.sin(1.*np.pi/4.))),
-        Vertex((+b/2.-k-r*np.cos(1.*np.pi/8.),
-                       -h/2.+tf+r-r*np.sin(1.*np.pi/8.))),
+        Vertex((-sec_b/2.+k, -sec_h/2.+sec_tf)),
+        Vertex((-sec_b/2., -(sec_h/2.-sec_tf))),
+        Vertex((-sec_b/2., -sec_h/2.)),
+        Vertex((sec_b/2., -sec_h/2.)),
+        Vertex((sec_b/2., -(sec_h/2-sec_tf))),
+        Vertex((+sec_b/2.-k, -sec_h/2.+sec_tf)),
+        Vertex((+sec_b/2.-k-dist*np.cos(3.*np.pi/8.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(3.*np.pi/8.))),
+        Vertex((+sec_b/2.-k-dist*np.cos(1.*np.pi/4.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(1.*np.pi/4.))),
+        Vertex((+sec_b/2.-k-dist*np.cos(1.*np.pi/8.),
+                -sec_h/2.+sec_tf+dist-dist*np.sin(1.*np.pi/8.))),
 
-        Vertex((+b/2.-k-r, -h/2.+tf+r)),
-        Vertex((+b/2.-k-r, +h/2.-tf-r)),
-        Vertex((+b/2.-k-r*np.cos(1.*np.pi/8.),
-                +h/2.-tf-r+r*np.sin(1.*np.pi/8.))),
-        Vertex((+b/2.-k-r*np.cos(1.*np.pi/4.),
-                +h/2.-tf-r+r*np.sin(1.*np.pi/4.))),
-        Vertex((+b/2.-k-r*np.cos(3.*np.pi/8.),
-                +h/2.-tf-r+r*np.sin(3.*np.pi/8.))),
+        Vertex((+sec_b/2.-k-dist, -sec_h/2.+sec_tf+dist)),
+        Vertex((+sec_b/2.-k-dist, +sec_h/2.-sec_tf-dist)),
+        Vertex((+sec_b/2.-k-dist*np.cos(1.*np.pi/8.),
+                +sec_h/2.-sec_tf-dist+dist*np.sin(1.*np.pi/8.))),
+        Vertex((+sec_b/2.-k-dist*np.cos(1.*np.pi/4.),
+                +sec_h/2.-sec_tf-dist+dist*np.sin(1.*np.pi/4.))),
+        Vertex((+sec_b/2.-k-dist*np.cos(3.*np.pi/8.),
+                +sec_h/2.-sec_tf-dist+dist*np.sin(3.*np.pi/8.))),
 
-        Vertex((+b/2.-k, h/2.-tf)),
-        Vertex((b/2., h/2.-tf))
+        Vertex((+sec_b/2.-k, sec_h/2.-sec_tf)),
+        Vertex((sec_b/2., sec_h/2.-sec_tf))
     ]
     edges = define_edges(vertices)
     return generate(edges)
 
 
-def HSS_rect_mesh(ht: float, b: float, t: float):
+def hss_rect_mesh(sec_ht: float, sec_b: float, sec_t: float):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the rectangular HSS
@@ -133,51 +139,51 @@ def HSS_rect_mesh(ht: float, b: float, t: float):
         b (float): Overall width
         t (float): Wall thickness
     """
-    a = b / 2.
-    c = ht / 2.
-    u = a - t
-    v = c - t
-    e = common.EPSILON
+    dim_a = sec_b / 2.
+    dim_c = sec_ht / 2.
+    dim_u = dim_a - sec_t
+    dim_v = dim_c - sec_t
+    dim_e = common.EPSILON
     vertices = [
-        Vertex((+e, -c)),
-        Vertex((+a, -c)),
-        Vertex((+a, +c)),
-        Vertex((-a, +c)),
-        Vertex((-a, -c)),
-        Vertex((-e, -c)),
-        Vertex((-e, -v)),
-        Vertex((-u, -v)),
-        Vertex((-u, +v)),
-        Vertex((+u, +v)),
-        Vertex((+u, -v)),
-        Vertex((+e, -v)),
+        Vertex((+dim_e, -dim_c)),
+        Vertex((+dim_a, -dim_c)),
+        Vertex((+dim_a, +dim_c)),
+        Vertex((-dim_a, +dim_c)),
+        Vertex((-dim_a, -dim_c)),
+        Vertex((-dim_e, -dim_c)),
+        Vertex((-dim_e, -dim_v)),
+        Vertex((-dim_u, -dim_v)),
+        Vertex((-dim_u, +dim_v)),
+        Vertex((+dim_u, +dim_v)),
+        Vertex((+dim_u, -dim_v)),
+        Vertex((+dim_e, -dim_v)),
     ]
     edges = define_edges(vertices)
     return generate(edges)
 
 
-def HSS_circ_mesh(od: float, tdes: float, n_pts: int):
+def hss_circ_mesh(o_d: float, t_des: float, n_pts: int):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the circular
     HSS with the specified parameters.
     The origin coincides with the centroid.
     Input:
-        od (float): Outside diameter
-        tdes (float): Design wall thickness
+        o_d (float): Outside diameter
+        t_des (float): Design wall thickness
         n_pts (int) Number of points to approximate
               a circle.
     """
-    e = common.EPSILON
+    dim_e = common.EPSILON
     t_param = np.linspace(0., 2.*np.pi, n_pts)
     pts_normalized: nparr = np.column_stack(
         (np.sin(t_param), -np.cos(t_param)))
-    pts_outer = pts_normalized * od
-    pts_outer[0, 0] += e
-    pts_outer[-1, 0] -= e
-    pts_inner: nparr = np.flip(pts_normalized * (od - tdes), axis=0)
-    pts_inner[0, 0] -= e
-    pts_inner[-1, 0] += e
+    pts_outer = pts_normalized * o_d
+    pts_outer[0, 0] += dim_e
+    pts_outer[-1, 0] -= dim_e
+    pts_inner: nparr = np.flip(pts_normalized * (o_d - t_des), axis=0)
+    pts_inner[0, 0] -= dim_e
+    pts_inner[-1, 0] += dim_e
     pts_all: nparr = np.concatenate((pts_outer, pts_inner))
     vertices = []
     for point in pts_all:
@@ -186,7 +192,7 @@ def HSS_circ_mesh(od: float, tdes: float, n_pts: int):
     return generate(edges)
 
 
-def rect_mesh(b, h):
+def rect_mesh(dim_b, dim_h):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the rectangular section with
@@ -197,10 +203,10 @@ def rect_mesh(b, h):
         h: total height
     """
     vertices = [
-        Vertex((b/2., h/2.)),
-        Vertex((-b/2., h/2.)),
-        Vertex((-b/2., -h/2.)),
-        Vertex((b/2., -h/2.))
+        Vertex((dim_b/2., dim_h/2.)),
+        Vertex((-dim_b/2., dim_h/2.)),
+        Vertex((-dim_b/2., -dim_h/2.)),
+        Vertex((dim_b/2., -dim_h/2.))
     ]
     edges = define_edges(vertices)
     return generate(edges)

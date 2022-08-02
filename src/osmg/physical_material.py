@@ -25,11 +25,14 @@ class PhysicalMaterial:
     name: str
     variety: str
     density: float
-    E: float
-    G: float
-    Fy: float
+    e_mod: float
+    g_mod: float
+    f_y: float
 
     def __srepr__(self):
+        """
+        Short version of repr
+        """
         return f'Physical material: {self.name}, {self.uid}'
 
     def __repr__(self):
@@ -39,6 +42,6 @@ class PhysicalMaterial:
         res += f'uid: {self.uid}\n'
         res += f'variety: {self.variety}\n'
         res += f'density: {self.density}\n'
-        res += f'E: {self.E}\n'
-        res += f'G: {self.G}\n'
+        res += f'E: {self.e_mod}\n'
+        res += f'G: {self.g_mod}\n'
         return res

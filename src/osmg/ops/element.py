@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Union
 import numpy as np
 import numpy.typing as npt
-from .uniaxialMaterial import uniaxialMaterial
+from .uniaxial_material import UniaxialMaterial
 from .node import Node
 from .section import ElasticSection
 from .section import FiberSection
@@ -24,9 +24,6 @@ from .. import component_assembly
 
 
 nparr = npt.NDArray[np.float64]
-
-# pylint: disable=invalid-name
-# pylint: disable=too-many-instance-attributes
 
 
 @dataclass(repr=False)
@@ -37,7 +34,7 @@ class Element:
     """
     parent_component: component_assembly.ComponentAssembly = field(repr=False)
     uid: int
-    eleNodes: list[Node]
+    nodes: list[Node]
 
 
 @dataclass(repr=False)
@@ -46,16 +43,20 @@ class ZeroLength(Element):
     OpenSees ZeroLength element
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     """
-    mats: list[uniaxialMaterial]
+    mats: list[UniaxialMaterial]
     dirs: list[int]
     vecx: nparr
     vecyp: nparr
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'zeroLength',
             self.uid,
-            *[n.uid for n in self.eleNodes],
+            *[n.uid for n in self.nodes],
             '-mat',
             *[m.uid for m in self.mats],
             '-dir',
@@ -70,16 +71,21 @@ class ZeroLength(Element):
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
         res += 'Materials:'
-        for m, d in zip(self.mats, self.dirs):
-            res += f'  {d}: {m.name}\n'
+        for mat, direction in zip(self.mats, self.dirs):
+            res += f'  {direction}: {mat.name}\n'
         res += f'vecx: {self.vecx}\n'
         res += f'vecyp: {self.vecyp}\n'
         return res
 
 
 @dataclass(repr=False)
-class geomTransf:
-    transfType: str
+class GeomTransf:
+    """
+    OpenSees geomTransf object
+    https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
+    https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation
+    """
+    transf_type: str
     uid: int
     offset_i: nparr
     offset_j: nparr
@@ -88,8 +94,12 @@ class geomTransf:
     z_axis: nparr
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
-            self.transfType,
+            self.transf_type,
             self.uid,
             *self.z_axis,
             '-jntOffset',
@@ -99,44 +109,52 @@ class geomTransf:
 
 
 @dataclass(repr=False)
-class elasticBeamColumn(Element):
+class ElasticBeamColumn(Element):
     """
     OpenSees Elastic Beam Column Element
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
     """
     section: ElasticSection
-    geomtransf: geomTransf
+    geomtransf: GeomTransf
     visibility: ElementVisibility = field(
         default_factory=ElementVisibility)
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'elasticBeamColumn',
             self.uid,
-            self.eleNodes[0].uid,
-            self.eleNodes[1].uid,
-            self.section.A,
-            self.section.E,
-            self.section.G,
-            self.section.J,
-            self.section.Iy,
-            self.section.Ix,
+            self.nodes[0].uid,
+            self.nodes[1].uid,
+            self.section.area,
+            self.section.e_mod,
+            self.section.g_mod,
+            self.section.j_mod,
+            self.section.i_y,
+            self.section.i_x,
             self.geomtransf.uid
         ]
 
     def clear_length(self):
-        p_i = np.array(self.eleNodes[0].coords) + self.geomtransf.offset_i
-        p_j = np.array(self.eleNodes[1].coords) + self.geomtransf.offset_j
+        """
+        Returns the clear length of the element (without the rigid
+        offsets)
+        """
+        p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
+        p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
         res = ''
         res += 'elasticBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
-        res += f'node_i.uid: {self.eleNodes[0].uid}\n'
-        res += f'node_j.uid: {self.eleNodes[1].uid}\n'
-        res += f'node_i.coords: {self.eleNodes[0].coords}\n'
-        res += f'node_j.coords: {self.eleNodes[1].coords}\n'
+        res += f'node_i.uid: {self.nodes[0].uid}\n'
+        res += f'node_j.uid: {self.nodes[1].uid}\n'
+        res += f'node_i.coords: {self.nodes[0].coords}\n'
+        res += f'node_j.coords: {self.nodes[1].coords}\n'
         res += f'offset_i: {self.geomtransf.offset_i}\n'
         res += f'offset_j: {self.geomtransf.offset_j}\n'
         res += f'x_axis: {self.geomtransf.x_axis}\n'
@@ -147,16 +165,28 @@ class elasticBeamColumn(Element):
 
 
 @dataclass
-class beamIntegration:
+class BeamIntegration:
+    """
+    OpenSees beamIntegration parent class.
+    https://openseespydoc.readthedocs.io/en/latest/src/beamIntegration.html?highlight=beamintegration
+    """
     uid: int
     parent_section: Union[ElasticSection, FiberSection] = field(repr=False)
 
 
 @dataclass
-class Lobatto(beamIntegration):
+class Lobatto(BeamIntegration):
+    """
+    OpenSees Lobatto beam integration.
+    https://openseespydoc.readthedocs.io/en/latest/src/Lobatto.html
+    """
     n_p: int
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'Lobatto',
             self.uid,
@@ -166,40 +196,48 @@ class Lobatto(beamIntegration):
 
 
 @dataclass
-class dispBeamColumn(Element):
+class DispBeamColumn(Element):
     """
     OpenSees dispBeamColumn element
     https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html
     """
     section: FiberSection
-    geomtransf: geomTransf
-    integration: beamIntegration
+    geomtransf: GeomTransf
+    integration: BeamIntegration
     visibility: ElementVisibility = field(
         default_factory=ElementVisibility)
 
     def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
         return [
             'dispBeamColumn',
             self.uid,
-            self.eleNodes[0].uid,
-            self.eleNodes[1].uid,
+            self.nodes[0].uid,
+            self.nodes[1].uid,
             self.geomtransf.uid,
             self.integration.uid,
         ]
 
     def clear_length(self):
-        p_i = np.array(self.eleNodes[0].coords) + self.geomtransf.offset_i
-        p_j = np.array(self.eleNodes[1].coords) + self.geomtransf.offset_j
+        """
+        Returns the clear length of the element (without the rigid
+        offsets)
+        """
+        p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
+        p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
         res = ''
         res += 'dispBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
-        res += f'node_i.uid: {self.eleNodes[0].uid}\n'
-        res += f'node_j.uid: {self.eleNodes[1].uid}\n'
-        res += f'node_i.coords: {self.eleNodes[0].coords}\n'
-        res += f'node_j.coords: {self.eleNodes[1].coords}\n'
+        res += f'node_i.uid: {self.nodes[0].uid}\n'
+        res += f'node_j.uid: {self.nodes[1].uid}\n'
+        res += f'node_i.coords: {self.nodes[0].coords}\n'
+        res += f'node_j.coords: {self.nodes[1].coords}\n'
         res += f'offset_i: {self.geomtransf.offset_i}\n'
         res += f'offset_j: {self.geomtransf.offset_j}\n'
         res += f'x_axis: {self.geomtransf.x_axis}\n'

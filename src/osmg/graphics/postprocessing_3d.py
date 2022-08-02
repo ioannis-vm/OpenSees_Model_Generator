@@ -19,14 +19,17 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 from .. import transformations
 from . import graphics_common
-from . import graphics_common_3D
-from .preprocessing_3D import add_data__global_axes
+from . import graphics_common_3d
+from .preprocessing_3d import add_data__global_axes
 from ..postprocessing.basic_forces import basic_forces
 
 nparr = npt.NDArray[np.float64]
 
 
 def force_scaling_factor(ref_len, fmax, factor):
+    """
+    Applies a scaling factor to basic forces
+    """
     if fmax == 0.00:
         result = 0.00
     else:
@@ -34,7 +37,7 @@ def force_scaling_factor(ref_len, fmax, factor):
     return result
 
 
-def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
+def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
     """
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
@@ -57,49 +60,49 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     z_vec: nparr = np.cross(x_vec, y_vec)
 
     # global -> local transformation matrix
-    T_global2local = \
+    transf_global2local = \
         transformations.transformation_matrix(x_vec, y_vec, z_vec)
-    T_local2global = T_global2local.T
+    transf_local2global = transf_global2local.T
 
     u_i_global = u_i
     r_i_global = r_i
     u_j_global = u_j
     r_j_global = r_j
 
-    u_i_local = T_global2local @ u_i_global
-    r_i_local = T_global2local @ r_i_global
-    u_j_local = T_global2local @ u_j_global
-    r_j_local = T_global2local @ r_j_global
+    u_i_local = transf_global2local @ u_i_global
+    r_i_local = transf_global2local @ r_i_global
+    u_j_local = transf_global2local @ u_j_global
+    r_j_local = transf_global2local @ r_j_global
 
     # discrete sample location parameter
-    t = np.linspace(0.00, 1.00, num=num_points)
+    t_vec = np.linspace(0.00, 1.00, num=num_points)
     p_i = np.array(element.eleNodes[0].coords) + element.geomtransf.offset_i
     p_j = np.array(element.eleNodes[1].coords) + element.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
     # shape function matrices
-    Nx_mat = np.column_stack((
-        1. - t,
-        t
+    nx_mat = np.column_stack((
+        1. - t_vec,
+        t_vec
     ))
-    Nyz_mat = np.column_stack((
-        1. - 3. * t**2 + 2. * t**3,
-        (t - 2. * t**2 + t**3) * len_clr,
-        3. * t**2 - 2. * t**3,
-        (-t**2 + t**3) * len_clr
+    nyz_mat = np.column_stack((
+        1. - 3. * t_vec**2 + 2. * t_vec**3,
+        (t_vec - 2. * t_vec**2 + t_vec**3) * len_clr,
+        3. * t_vec**2 - 2. * t_vec**3,
+        (-t_vec**2 + t_vec**3) * len_clr
     ))
-    Nyz_derivative_mat = np.column_stack((
-        - 6. * t + 6. * t**2,
-        (1 - 4. * t + 3. * t**2) * len_clr,
-        6. * t - 6. * t**2,
-        (-2. * t + 3. * t**2) * len_clr
+    nyz_derivative_mat = np.column_stack((
+        - 6. * t_vec + 6. * t_vec**2,
+        (1 - 4. * t_vec + 3. * t_vec**2) * len_clr,
+        6. * t_vec - 6. * t_vec**2,
+        (-2. * t_vec + 3. * t_vec**2) * len_clr
     ))
 
     # axial deformation
-    d_x_local = Nx_mat @ np.array([u_i_local[0], u_j_local[0]])
+    d_x_local = nx_mat @ np.array([u_i_local[0], u_j_local[0]])
 
     # bending deformation along the local xy plane
-    d_y_local = Nyz_mat @ np.array([
+    d_y_local = nyz_mat @ np.array([
         u_i_local[1],
         r_i_local[2],
         u_j_local[1],
@@ -107,7 +110,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     ])
 
     # bending deformation along the local xz plane
-    d_z_local = Nyz_mat @ np.array([
+    d_z_local = nyz_mat @ np.array([
         u_i_local[2],
         -r_i_local[1],
         u_j_local[2],
@@ -115,10 +118,10 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     ])
 
     # torsional deformation
-    r_x_local = Nx_mat @ np.array([r_i_local[0], r_j_local[0]])
+    r_x_local = nx_mat @ np.array([r_i_local[0], r_j_local[0]])
 
     # bending rotation around the local z axis
-    r_z_local = Nyz_derivative_mat @ np.array([
+    r_z_local = nyz_derivative_mat @ np.array([
         u_i_local[1],
         r_i_local[2],
         u_j_local[1],
@@ -126,7 +129,7 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     ]) / len_clr
 
     # bending rotation around the local y axis
-    r_y_local = Nyz_derivative_mat @ np.array([
+    r_y_local = nyz_derivative_mat @ np.array([
         -u_i_local[2],
         r_i_local[1],
         -u_j_local[2],
@@ -139,13 +142,16 @@ def interp3D_deformation(element, u_i, r_i, u_j, r_j, num_points):
     # all rotations
     r_local = np.column_stack((r_x_local, r_y_local, r_z_local))
 
-    d_global = (T_local2global @ d_local.T).T
+    d_global = (transf_local2global @ d_local.T).T
 
     return d_global, r_local
 
 
-def interp3D_points(element, d_global, r_local, num_points, scaling):
-
+def interp_3d_points(element, d_global, num_points, scaling):
+    """
+    Calculates intermediate points based on end locations and
+    deformations
+    """
     p_i = np.array(element.eleNodes[0].coords) + element.geomtransf.offset_i
     p_j = np.array(element.eleNodes[1].coords) + element.geomtransf.offset_j
     element_point_samples: nparr = np.column_stack((
@@ -161,10 +167,14 @@ def interp3D_points(element, d_global, r_local, num_points, scaling):
 
 def add_data__extruded_frames_deformed_mesh(analysis,
                                             case_name,
-                                            dt,
+                                            data_dict,
                                             list_of_frames,
                                             step,
                                             scaling):
+    """
+    Adds a trace containing frame element extrusion mesh
+    in its deformed state
+    """
     if not list_of_frames:
         return
     x_list = []
@@ -193,10 +203,10 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         offset_j = elm.geomtransf.offset_j
         u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
         u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
-        d_global, r_local = interp3D_deformation(
+        d_global, r_local = interp_3d_deformation(
             elm, u_i_o, r_i, u_j_o, r_j, num_points)
-        interpolation_points = interp3D_points(
-            elm, d_global, r_local, num_points, scaling)
+        interpolation_points = interp_3d_points(
+            elm, d_global, num_points, scaling)
         x_vec = elm.geomtransf.x_axis
         y_vec = elm.geomtransf.y_axis
         z_vec = elm.geomtransf.z_axis
@@ -264,7 +274,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                 intensity.append(np.linalg.norm(d_global[i+1, :]))
                 intensity.append(np.linalg.norm(d_global[i, :]))
                 index += 4
-    dt.append({
+    data_dict.append({
         "type": "mesh3d",
         "x": x_list,
         "y": y_list,
@@ -403,16 +413,19 @@ def add_data__extruded_frames_deformed_mesh(analysis,
 
 def add_data__frames_deformed(analysis,
                               case_name,
-                              dt,
+                              data_dict,
                               list_of_frames,
                               step,
-                              sub,
                               scaling):
+    """
+    Adds a trace containing frame element centroidal axis lines
+    in their deformed state
+    """
     if not list_of_frames:
         return
-    x: list[Optional[float]] = []
-    y: list[Optional[float]] = []
-    z: list[Optional[float]] = []
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
 
     for elm in list_of_frames:
         if elm.visibility.hidden_at_line_plots:
@@ -431,27 +444,27 @@ def add_data__frames_deformed(analysis,
         offset_j = elm.geomtransf.offset_j
         u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
         u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
-        d_global, r_local = interp3D_deformation(
+        d_global, _ = interp_3d_deformation(
             elm, u_i_o, r_i, u_j_o, r_j, num_points)
-        interpolation_points = interp3D_points(
-            elm, d_global, r_local, num_points, scaling)
+        interpolation_points = interp_3d_points(
+            elm, d_global, num_points, scaling)
         for i in range(len(interpolation_points)-1):
-            x.extend((interpolation_points[i, 0],
-                      interpolation_points[i+1, 0],
-                      None))
-            y.extend((interpolation_points[i, 1],
-                      interpolation_points[i+1, 1],
-                      None))
-            z.extend((interpolation_points[i, 2],
-                      interpolation_points[i+1, 2],
-                      None))
+            x_list.extend((interpolation_points[i, 0],
+                           interpolation_points[i+1, 0],
+                           None))
+            y_list.extend((interpolation_points[i, 1],
+                           interpolation_points[i+1, 1],
+                           None))
+            z_list.extend((interpolation_points[i, 2],
+                           interpolation_points[i+1, 2],
+                           None))
 
-    dt.append({
+    data_dict.append({
         "type": "scatter3d",
         "mode": "lines",
-        "x": x,
-        "y": y,
-        "z": z,
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
         "hoverinfo": "skip",
         "line": {
             "width": 5,
@@ -462,15 +475,19 @@ def add_data__frames_deformed(analysis,
 
 def add_data__frames_offsets_deformed(analysis,
                                       case_name,
-                                      dt,
+                                      data_dict,
                                       list_of_frames,
                                       step,
                                       scaling):
+    """
+    Adds a trace containing frame element rigid offset lines
+    in their deformed state
+    """
     if not list_of_frames:
         return
-    x: list[Optional[float]] = []
-    y: list[Optional[float]] = []
-    z: list[Optional[float]] = []
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
     for elm in list_of_frames:
         if np.array_equal(elm.geomtransf.offset_i, np.zeros(3)):
             if np.array_equal(elm.geomtransf.offset_j, np.zeros(3)):
@@ -504,19 +521,19 @@ def add_data__frames_offsets_deformed(analysis,
         x_j = p_j + u_j * scaling
         x_jo = p_jo + u_jo * scaling
 
-        x.extend((x_i[0], x_io[0], None))
-        y.extend((x_i[1], x_io[1], None))
-        z.extend((x_i[2], x_io[2], None))
-        x.extend((x_j[0], x_jo[0], None))
-        y.extend((x_j[1], x_jo[1], None))
-        z.extend((x_j[2], x_jo[2], None))
+        x_list.extend((x_i[0], x_io[0], None))
+        y_list.extend((x_i[1], x_io[1], None))
+        z_list.extend((x_i[2], x_io[2], None))
+        x_list.extend((x_j[0], x_jo[0], None))
+        y_list.extend((x_j[1], x_jo[1], None))
+        z_list.extend((x_j[2], x_jo[2], None))
 
-    dt.append({
+    data_dict.append({
         "type": "scatter3d",
         "mode": "lines",
-        "x": x,
-        "y": y,
-        "z": z,
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
         "hoverinfo": "skip",
         "line": {
             "width": 8,
@@ -525,31 +542,34 @@ def add_data__frames_offsets_deformed(analysis,
     })
 
 
-def add_data__frames_undeformed(dt, list_of_frames):
-    x: list[Optional[float]] = []
-    y: list[Optional[float]] = []
-    z: list[Optional[float]] = []
+def add_data__frames_undeformed(data_dict, list_of_frames):
+    """
+    Adds a trace containing frame element centroidal axis lines
+    """
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
 
     for elm in list_of_frames:
 
         p_i = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
 
-        x.extend(
+        x_list.extend(
             (p_i[0], p_j[0], None)
         )
-        y.extend(
+        y_list.extend(
             (p_i[1], p_j[1], None)
         )
-        z.extend(
+        z_list.extend(
             (p_i[2], p_j[2], None)
         )
-    dt.append({
+    data_dict.append({
         "type": "scatter3d",
         "mode": "lines",
-        "x": x,
-        "y": y,
-        "z": z,
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
         "hoverinfo": "skip",
         "line": {
             "width": 5,
@@ -558,8 +578,12 @@ def add_data__frames_undeformed(dt, list_of_frames):
     })
 
 
-def add_data__nodes_deformed(analysis, case_name, dt, list_of_nodes, step,
-                             scaling, function):
+def add_data__nodes_deformed(analysis, case_name,
+                             data_dict, list_of_nodes,
+                             step, scaling, function):
+    """
+    Adds a trace containing nodes in their deformed locations
+    """
     ids_list = [int(node.uid) for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
@@ -568,12 +592,12 @@ def add_data__nodes_deformed(analysis, case_name, dt, list_of_nodes, step,
         displacement_data[i, :] = \
             (analysis.results[case_name].node_displacements
              [node.uid][step])
-    r = np.sqrt(displacement_data[:, 0]**2 +
-                displacement_data[:, 1]**2 +
-                displacement_data[:, 2]**2)
-    r = np.reshape(r, (-1, 1))
+    dist = np.sqrt(displacement_data[:, 0]**2 +
+                   displacement_data[:, 1]**2 +
+                   displacement_data[:, 2]**2)
+    dist = np.reshape(dist, (-1, 1))
     ids = np.reshape(np.array(ids_list), (-1, 1))
-    displacement_data = np.concatenate((displacement_data, r, ids), 1)
+    displacement_data = np.concatenate((displacement_data, dist, ids), 1)
     restraint_symbols = []
     for node in list_of_nodes:
         if True in node.restraint:
@@ -581,16 +605,16 @@ def add_data__nodes_deformed(analysis, case_name, dt, list_of_nodes, step,
         else:
             restraint_symbols.append(function)
 
-    marker = [graphics_common_3D.node_marker[sym][0]
+    marker = [graphics_common_3d.node_marker[sym][0]
               for sym in restraint_symbols]
-    size = [graphics_common_3D.node_marker[sym][1]
+    size = [graphics_common_3d.node_marker[sym][1]
             for sym in restraint_symbols]
     if function == 'internal':
         color = graphics_common.NODE_INTERNAL_COLOR
     else:
         color = graphics_common.NODE_PRIMARY_COLOR
 
-    dt.append({
+    data_dict.append({
         "type": "scatter3d",
         "mode": "markers",
         "x": location_data[:, 0] + displacement_data[:, 0] * scaling,
@@ -635,7 +659,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
             elm.eleNodes[1].uid][step][0:3]
         r_j = analysis.results[case_name].node_displacements[
             elm.eleNodes[1].uid][step][3:6]
-        d_global, r_local = interp3D_deformation(
+        d_global, _ = interp_3d_deformation(
             elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
@@ -648,8 +672,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     # never scale things down
     # (usually when this is required, things have gone bad
     #  and we should be able to realize that immediately)
-    if scaling < 1.00:
-        scaling = 1.00
+    scaling = max(scaling, 1.00)
     return scaling
 
 
@@ -657,10 +680,21 @@ def show_deformed_shape(analysis,
                         case_name,
                         step,
                         scaling,
-                        extrude_frames,
+                        extrude,
                         camera=None,
                         subset_model=None):
 
+    """
+    Visualize the model in its deformed state
+    Arguments:
+      analysis (Analysis): an analysis object
+      case_name (str): the name of the load_case to be visualized
+      step (int): the analysis step to be visualized
+      scaling (float): scaling factor for the deformations. If 0.00 is
+        provided, the scaling factor is calculated automatically.
+      extrude (bool): wether to extrude frame elements
+      camera (dict): custom positioning of the camera
+    """
     if subset_model:
         mdl = subset_model
     else:
@@ -669,8 +703,8 @@ def show_deformed_shape(analysis,
     if scaling == 0:
         scaling = get_auto_scaling_deformation(analysis, case_name, mdl, step)
 
-    layout = graphics_common_3D.global_layout(camera)
-    dt: list[dict[str, object]] = []
+    layout = graphics_common_3d.global_layout(camera)
+    data_dict: list[dict[str, object]] = []
 
     list_of_frames = mdl.list_of_beamcolumn_elements()
     # list_of_steel_W_panel_zones = \
@@ -685,35 +719,35 @@ def show_deformed_shape(analysis,
     #     add_data__nodes_deformed(
     #         analysis, dt, list_of_parent_nodes, step, scaling)
 
-    if not extrude_frames:
+    if not extrude:
         # draw the nodes
         add_data__nodes_deformed(
-            analysis, case_name, dt, list_of_primary_nodes,
+            analysis, case_name, data_dict, list_of_primary_nodes,
             step, scaling, 'free')
         add_data__nodes_deformed(
-            analysis, case_name, dt, list_of_internal_nodes,
+            analysis, case_name, data_dict, list_of_internal_nodes,
             step, scaling, 'internal')
     #     add_data__nodes_deformed(
     #         analysis, dt, list_of_release_nodes, step, scaling,
     #         color=graphics_common.NODE_INTERNAL_COLOR,
-    #         marker=graphics_common_3D.node_marker['pinned'][0],
-    #         size=graphics_common_3D.node_marker['pinned'][1])
+    #         marker=graphics_common_3d.node_marker['pinned'][0],
+    #         size=graphics_common_3d.node_marker['pinned'][1])
         # draw the frames as lines
         add_data__frames_offsets_deformed(
-            analysis, case_name, dt, list_of_frames, step, scaling)
+            analysis, case_name, data_dict, list_of_frames, step, scaling)
         add_data__frames_deformed(
-            analysis, case_name, dt, list_of_frames, step, 15, scaling)
+            analysis, case_name, data_dict, list_of_frames, step, scaling)
         # we also add axes so that we can see 2D plots
         ref_len = mdl.reference_length()
-        add_data__global_axes(dt, ref_len)
+        add_data__global_axes(data_dict, ref_len)
     else:
         # draw the extruded frames
         add_data__extruded_frames_deformed_mesh(
-            analysis, case_name, dt, list_of_frames, step, scaling)
+            analysis, case_name, data_dict, list_of_frames, step, scaling)
         # add_data__extruded_steel_W_PZ_deformed_mesh(
         #     analysis, dt, list_of_steel_W_panel_zones, step, scaling)
 
-    fig_datastructure = dict(data=dt, layout=layout)
+    fig_datastructure = dict(data=data_dict, layout=layout)
     fig = go.Figure(fig_datastructure)
     if "pytest" not in sys.modules:
         fig.show()
@@ -736,9 +770,35 @@ def show_basic_forces(analysis,
                       global_axes=False,
                       camera=None,
                       subset_model=None):
-
-    layout = graphics_common_3D.global_layout(camera)
-    dt: list[dict[str, object]] = []
+    """
+    Visualize the model and plot the frame element basic forces
+    Arguments:
+      analysis (Analysis): an analysis object
+      case_name (str): the name of the load_case to be visualized
+      step (int): the analysis step to be visualized
+      scaling_global (float): I don't even remember what this
+        does. It's kind of a mess right now.
+      scaling_n (float):
+      scaling_q (float):
+      scaling_m (float):
+      scaling_t (float):
+      num_points (int): number of points to include in the basic force
+        curves
+      force_conversion (float): Conversion factor to be applied at the
+        hover box data for forces (for unit conversions)
+      moment_conversion (float): Conversion factor to be applied at the
+        hover box data for moments (for unit conversions)
+      global_axes (bool): whether to show global axes
+      camera (dict): custom positioning of the camera
+      subset_model (Model): use this model instead of the one
+        contained in the analysis object.
+        It needs to be a subset of the original model. This can be
+          used to only show the results for some part of a large
+          model.
+    """
+    # TODO: what is going on with the scaling factors?...
+    layout = graphics_common_3d.global_layout(camera)
+    data_dict: list[dict[str, object]] = []
 
     if subset_model:
         mdl = subset_model
@@ -748,11 +808,11 @@ def show_basic_forces(analysis,
 
     # draw the frames
     add_data__frames_undeformed(
-        dt, list_of_line_elements)
+        data_dict, list_of_line_elements)
     # we also add axes so that we can see 2D plots
     ref_len = mdl.reference_length()
     if global_axes:
-        add_data__global_axes(dt, ref_len)
+        add_data__global_axes(data_dict, ref_len)
 
     # Plot options:
     # a: axial
@@ -808,8 +868,7 @@ def show_basic_forces(analysis,
     mz_vecs = {}
     my_vecs = {}
 
-    for i_elem, element in enumerate(
-            list_of_line_elements):
+    for element in list_of_line_elements:
 
         if element.visibility.skip_OpenSees_definition:
             continue
@@ -870,8 +929,7 @@ def show_basic_forces(analysis,
     if scaling_m > 1.0e8:
         scaling_m = 1.00
 
-    for i_elem, element in enumerate(
-            list_of_line_elements):
+    for element in list_of_line_elements:
 
         # retrieve results from the preallocated arrays
         nx_vec = nx_vecs[element.uid]
@@ -890,12 +948,12 @@ def show_basic_forces(analysis,
         p_j = (np.array(element.eleNodes[1].coords)
                + element.geomtransf.offset_j)
         len_clr = np.linalg.norm(p_i - p_j)
-        t = np.linspace(0.00, len_clr, num=num_points)
+        t_vec = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):
 
-            p_start = i_pos + t[i] * x_vec
-            p_end = i_pos + t[i+1] * x_vec
+            p_start = i_pos + t_vec[i] * x_vec
+            p_end = i_pos + t_vec[i+1] * x_vec
 
             # axial load
             p_i = p_start + \
@@ -1103,7 +1161,7 @@ def show_basic_forces(analysis,
         }
     ]
 
-    fig_datastructure = dict(data=dt + dt_a +
+    fig_datastructure = dict(data=data_dict + dt_a +
                              dt_b + dt_c
                              + dt_d + dt_e + dt_f,
                              layout=layout)
@@ -1117,49 +1175,49 @@ def show_basic_forces(analysis,
                         label="None",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*6
+                               [True]*len(data_dict)+[False]*6
                                }]
                     ),
                     dict(
                         label="Axial",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[True]+[False]*5
+                               [True]*len(data_dict)+[True]+[False]*5
                                }]
                     ),
                     dict(
                         label="Shear",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]+[True]+[False]*4
+                               [True]*len(data_dict)+[False]+[True]+[False]*4
                                }]
                     ),
                     dict(
                         label="Moment",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*2+[True]+[False]*3
+                               [True]*len(data_dict)+[False]*2+[True]+[False]*3
                                }]
                     ),
                     dict(
                         label="Torsion",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*3+[True]+[False]*2
+                               [True]*len(data_dict)+[False]*3+[True]+[False]*2
                                }]
                     ),
                     dict(
                         label="Shear (combined)",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*4+[True]+[False]
+                               [True]*len(data_dict)+[False]*4+[True]+[False]
                                }]
                     ),
                     dict(
                         label="Moment (combined)",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*5+[True]
+                               [True]*len(data_dict)+[False]*5+[True]
                                }]
                     )
                 ]
@@ -1190,9 +1248,35 @@ def show_basic_forces_combo(
         global_axes=False,
         camera=None,
         subset_model=None):
-
-    layout = graphics_common_3D.global_layout(camera)
-    dt: list[dict[str, object]] = []
+    """
+    Visualize the model and plot the enveloped frame element basic forces
+    for a load combination.
+    Arguments:
+      combo (LoadCombination): a load combination object
+      step (int): the analysis step to be visualized
+      scaling_global (float): I don't even remember what this
+        does. It's kind of a mess right now.
+      scaling_n (float):
+      scaling_q (float):
+      scaling_m (float):
+      scaling_t (float):
+      num_points (int): number of points to include in the basic force
+        curves
+      force_conversion (float): Conversion factor to be applied at the
+        hover box data for forces (for unit conversions)
+      moment_conversion (float): Conversion factor to be applied at the
+        hover box data for moments (for unit conversions)
+      global_axes (bool): whether to show global axes
+      camera (dict): custom positioning of the camera
+      subset_model (Model): use this model instead of the one
+        contained in the analysis object.
+        It needs to be a subset of the original model. This can be
+          used to only show the results for some part of a large
+          model.
+    """
+    # TODO: merge code repetitions with the previous function
+    layout = graphics_common_3d.global_layout(camera)
+    data_dict: list[dict[str, object]] = []
 
     if subset_model:
         mdl = subset_model
@@ -1202,11 +1286,11 @@ def show_basic_forces_combo(
 
     # draw the frames
     add_data__frames_undeformed(
-        dt, list_of_line_elements)
+        data_dict, list_of_line_elements)
     # we also add axes so that we can see 2D plots
     ref_len = mdl.reference_length()
     if global_axes:
-        add_data__global_axes(dt, ref_len)
+        add_data__global_axes(data_dict, ref_len)
 
     # Plot options:
     # a: axial
@@ -1256,8 +1340,7 @@ def show_basic_forces_combo(
     mz_vecs_max = {}
     my_vecs_max = {}
 
-    for i_elem, element in enumerate(
-            list_of_line_elements):
+    for element in list_of_line_elements:
 
         if element.visibility.skip_OpenSees_definition:
             continue
@@ -1321,8 +1404,7 @@ def show_basic_forces_combo(
     if scaling_m > 1.0e8:
         scaling_m = 1.00
 
-    for i_elem, element in enumerate(
-            list_of_line_elements):
+    for element in list_of_line_elements:
 
         # retrieve results from the preallocated arrays
         nx_vec_min = nx_vecs_min[element.uid]
@@ -1349,12 +1431,12 @@ def show_basic_forces_combo(
         p_j = (np.array(element.eleNodes[1].coords)
                + element.geomtransf.offset_j)
         len_clr = np.linalg.norm(p_i - p_j)
-        t = np.linspace(0.00, len_clr, num=num_points)
+        t_vec = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):
 
-            p_start = i_pos + t[i] * x_vec
-            p_end = i_pos + t[i+1] * x_vec
+            p_start = i_pos + t_vec[i] * x_vec
+            p_end = i_pos + t_vec[i+1] * x_vec
 
             # axial load
             p_i = p_start + \
@@ -1556,7 +1638,7 @@ def show_basic_forces_combo(
         }
     ]
 
-    fig_datastructure = dict(data=dt + dt_a +
+    fig_datastructure = dict(data=data_dict + dt_a +
                              dt_b + dt_c
                              + dt_d,
                              layout=layout)
@@ -1570,35 +1652,35 @@ def show_basic_forces_combo(
                         label="None",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*4
+                               [True]*len(data_dict)+[False]*4
                                }]
                     ),
                     dict(
                         label="Axial",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[True]+[False]*3
+                               [True]*len(data_dict)+[True]+[False]*3
                                }]
                     ),
                     dict(
                         label="Shear",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]+[True]+[False]*2
+                               [True]*len(data_dict)+[False]+[True]+[False]*2
                                }]
                     ),
                     dict(
                         label="Moment",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*2+[True]+[False]
+                               [True]*len(data_dict)+[False]*2+[True]+[False]
                                }]
                     ),
                     dict(
                         label="Torsion",
                         method="update",
                         args=[{"visible":
-                               [True]*len(dt)+[False]*3+[True]
+                               [True]*len(data_dict)+[False]*3+[True]
                                }]
                     )
                 ]

@@ -26,35 +26,37 @@ class NodeGenerator:
     """
     model: Model
 
-    def add_node_lvl(self, x: float, y: float, lvl: int) -> Node:
+    def add_node_lvl(self, x_loc: float, y_loc: float, lvl: int) -> Node:
         """
-
-        """
-        lvls = self.model.levels
-        level = lvls[lvl]
-        node = Node(
-            uid=self.model.uid_generator.new('node'),
-            coords=[x, y, level.elevation])
-        level.nodes.add(node)
-        return node
-
-    def add_node_lvl_xyz(self, x: float, y: float, z: float, lvl: int) -> Node:
-        """
-
+        Adds a node at the specified coordinates and level
         """
         lvls = self.model.levels
         level = lvls[lvl]
         node = Node(
             uid=self.model.uid_generator.new('node'),
-            coords=[x, y, z])
+            coords=[x_loc, y_loc, level.elevation])
         level.nodes.add(node)
         return node
 
-    def add_node_active(self, x, y):
+    def add_node_lvl_xyz(self, x_loc: float, y_loc: float,
+                         z_loc: float, lvl: int) -> Node:
         """
+        Adds a node at the specified coordinates and level
+        having a custo elevation
+        """
+        lvls = self.model.levels
+        level = lvls[lvl]
+        node = Node(
+            uid=self.model.uid_generator.new('node'),
+            coords=[x_loc, y_loc, z_loc])
+        level.nodes.add(node)
+        return node
 
+    def add_node_active(self, x_loc, y_loc):
+        """
+        Adds a node at the specified coordinates to all active levels.
         """
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
         for key in lvls.active:
-            self.add_node_lvl(x, y, key)
+            self.add_node_lvl(x_loc, y_loc, key)

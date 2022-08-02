@@ -11,13 +11,16 @@ Model Generator for OpenSees ~ zero length element uniaxial materials
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+# pylint: disable=unused-argument
+
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
 from ..ops.section import ElasticSection
-from ..ops.uniaxialMaterial import Bilin
-from ..ops.uniaxialMaterial import Pinching4
-from ..ops.uniaxialMaterial import Hysteretic
+from ..ops.uniaxial_material import Bilin
+from ..ops.uniaxial_material import Pinching4
+from ..ops.uniaxial_material import Hysteretic
 
 if TYPE_CHECKING:
     from ..model import Model
@@ -36,6 +39,9 @@ def fix_all(model: Model, **kwargs):
 
 
 def release_6(model: Model, **kwargs):
+    """
+    Frees strong axis bending
+    """
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -44,6 +50,9 @@ def release_6(model: Model, **kwargs):
 
 
 def release_56(model: Model, **kwargs):
+    """
+    Frees both strong and weak axis bending
+    """
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -61,6 +70,18 @@ def imk_6(
         section: ElasticSection,
         physical_material: PhysicalMaterial,
         **kwargs):
+    """
+    Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
+    steel components in support of collapse prediction of steel moment
+    frames under earthquake loading. Journal of Structural
+    Engineering-Reston, 137(11), 1291.
+
+    Elkady, A., & Lignos, D. G. (2014). Modeling of the composite
+    action in fully restrained beam‐to‐column connections:
+    implications in the seismic design and collapse capacity of steel
+    special moment frames. Earthquake Engineering & Structural
+    Dynamics, 43(13), 1935-1954.
+    """
     assert section.name[0] == 'W', \
         "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
@@ -68,11 +89,11 @@ def imk_6(
         "Error: Only imperial units supported."
     assert section.properties
     # Young's modulus
-    mat_e = section.E / 1.e3
+    mat_e = section.e_mod / 1.e3
     # Yield stress
-    mat_fy = physical_material.Fy / 1.e3
+    mat_fy = physical_material.f_y / 1.e3
     # Moment of inertia - strong axis - original section
-    sec_ix = section.Ix
+    sec_ix = section.i_x
     # Section depth
     sec_d = section.properties['d']
     # Flange width
@@ -83,36 +104,36 @@ def imk_6(
     # Plastic modulus (unreduced)
     sec_zx = section.properties['Zx']
     # Clear length
-    elm_H = element_length
+    elm_h = element_length
     # Shear span - 0.5 * elm_H typically.
-    elm_L = loverh * elm_H
+    elm_l = loverh * elm_h
     if rbs_factor:
         # RBS case
         assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
         # checks ~ acceptable range
-        if not (20.00 < sec_d/sec_tw < 55.00):
+        if not 20.00 < sec_d/sec_tw < 55.00:
             print('Warning: sec_d/sec_tw outside regression range')
             print(section.name, '\n')
-        if not (20.00 < lbry < 80.00):
+        if not 20.00 < lbry < 80.00:
             print('Warning: Lb/ry outside regression range')
             print(section.name, '\n')
-        if not (4.00 < (sec_bf/(2.*sec_tf)) < 8.00):
+        if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
             print('Warning: bf/(2 tf) outside regression range')
             print(section.name, '\n')
-        if not (2.5 < elm_L/sec_d < 7.0):
+        if not 2.5 < elm_l/sec_d < 7.0:
             print('Warning: L/d  outside regression range')
             print(section.name, '\n')
-        if not (4.00 < sec_d < 36.00):
+        if not 4.00 < sec_d < 36.00:
             print('Warning: Section d outside regression range')
             print(section.name, '\n')
-        if not (35.00 < mat_fy < 65.00):
+        if not 35.00 < mat_fy < 65.00:
             print('Warning: Fy outside regression range')
             print(section.name, '\n')
         # calculate parameters
         theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
             (sec_bf/(2.*sec_tf))**(-0.10) * \
             lbry**(-0.185) * \
-            (elm_L/sec_d)**0.113 * \
+            (elm_l/sec_d)**0.113 * \
             (25.4 * sec_d / 533.)**(-0.76) * \
             (6.895 * mat_fy / 355.)**(-0.07)
         theta_pc = 9.52 * (sec_d/sec_tw)**(-0.513) * \
@@ -130,7 +151,7 @@ def imk_6(
         # Other-than-RBS case
         theta_p = 0.0865 * (sec_d/sec_tw)**(-0.365) * \
             (sec_bf/(2.*sec_tf))**(-0.14) * \
-            (elm_L/sec_d)**0.34 * \
+            (elm_l/sec_d)**0.34 * \
             (25.4 * sec_d / 533.)**(-0.721) * \
             (6.895 * mat_fy / 355.)**(-0.23)
         theta_pc = 5.63 * (sec_d/sec_tw)**(-0.565) * \
@@ -173,7 +194,7 @@ def imk_6(
         my_minus *= 1.25
         residual_plus = 0.30
         residual_minus = 0.20
-    stiffness = 6.00 * mat_e * sec_ix / elm_H * 1e4
+    stiffness = 6.00 * mat_e * sec_ix / elm_h * 1e4
     beta_plus = (mcmy_plus - 1.) * my_plus / (theta_p_plus) / stiffness
     beta_minus = - (mcmy_minus - 1.) * my_minus \
         / (theta_p_minus) / stiffness
@@ -209,6 +230,10 @@ def release_5_imk_6(
         section: ElasticSection,
         physical_material: PhysicalMaterial,
         **kwargs):
+    """
+    release in the weak axis bending direciton,
+    imk (see imk docstring) in the strong axis bending direction
+    """
     # TODO: avoid code repetition
     assert section.name[0] == 'W', \
         "Error: Only W sections can be used."
@@ -217,11 +242,11 @@ def release_5_imk_6(
         "Error: Only imperial units supported."
     assert section.properties
     # Young's modulus
-    mat_e = section.E / 1.e3
+    mat_e = section.e_mod / 1.e3
     # Yield stress
-    mat_fy = physical_material.Fy / 1.e3
+    mat_fy = physical_material.f_y / 1.e3
     # Moment of inertia - strong axis - original section
-    sec_ix = section.Ix
+    sec_ix = section.i_x
     # Section depth
     sec_d = section.properties['d']
     # Flange width
@@ -232,36 +257,36 @@ def release_5_imk_6(
     # Plastic modulus (unreduced)
     sec_zx = section.properties['Zx']
     # Clear length
-    elm_H = element_length
+    elm_h = element_length
     # Shear span - 0.5 * elm_H typically.
-    elm_L = loverh * elm_H
+    elm_l = loverh * elm_h
     if rbs_factor:
         # RBS case
         assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
         # checks ~ acceptable range
-        if not (20.00 < sec_d/sec_tw < 55.00):
+        if not 20.00 < sec_d/sec_tw < 55.00:
             print('Warning: sec_d/sec_tw outside regression range')
             print(section.name, '\n')
-        if not (20.00 < lbry < 80.00):
+        if not 20.00 < lbry < 80.00:
             print('Warning: Lb/ry outside regression range')
             print(section.name, '\n')
-        if not (4.00 < (sec_bf/(2.*sec_tf)) < 8.00):
+        if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
             print('Warning: bf/(2 tf) outside regression range')
             print(section.name, '\n')
-        if not (2.5 < elm_L/sec_d < 7.0):
+        if not 2.5 < elm_l/sec_d < 7.0:
             print('Warning: L/d  outside regression range')
             print(section.name, '\n')
-        if not (4.00 < sec_d < 36.00):
+        if not 4.00 < sec_d < 36.00:
             print('Warning: Section d outside regression range')
             print(section.name, '\n')
-        if not (35.00 < mat_fy < 65.00):
+        if not 35.00 < mat_fy < 65.00:
             print('Warning: Fy outside regression range')
             print(section.name, '\n')
         # calculate parameters
         theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
             (sec_bf/(2.*sec_tf))**(-0.10) * \
             lbry**(-0.185) * \
-            (elm_L/sec_d)**0.113 * \
+            (elm_l/sec_d)**0.113 * \
             (25.4 * sec_d / 533.)**(-0.76) * \
             (6.895 * mat_fy / 355.)**(-0.07)
         theta_pc = 9.52 * (sec_d/sec_tw)**(-0.513) * \
@@ -279,7 +304,7 @@ def release_5_imk_6(
         # Other-than-RBS case
         theta_p = 0.0865 * (sec_d/sec_tw)**(-0.365) * \
             (sec_bf/(2.*sec_tf))**(-0.14) * \
-            (elm_L/sec_d)**0.34 * \
+            (elm_l/sec_d)**0.34 * \
             (25.4 * sec_d / 533.)**(-0.721) * \
             (6.895 * mat_fy / 355.)**(-0.23)
         theta_pc = 5.63 * (sec_d/sec_tw)**(-0.565) * \
@@ -322,7 +347,7 @@ def release_5_imk_6(
         my_minus *= 1.25
         residual_plus = 0.30
         residual_minus = 0.20
-    stiffness = 6.00 * mat_e * sec_ix / elm_H * 1e4
+    stiffness = 6.00 * mat_e * sec_ix / elm_h * 1e4
     beta_plus = (mcmy_plus - 1.) * my_plus / (theta_p_plus) / stiffness
     beta_minus = - (mcmy_minus - 1.) * my_minus \
         / (theta_p_minus) / stiffness
@@ -354,6 +379,12 @@ def gravity_shear_tab(
         section: ElasticSection,
         physical_material: PhysicalMaterial,
         **kwargs):
+    """
+    Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
+    the overstrength and collapse capacity of steel frame buildings
+    with perimeter special moment frames. Earthquake Engineering &
+    Structural Dynamics, 44(8), 1289-1307.
+    """
     assert section.name[0] == 'W', \
         "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
@@ -362,7 +393,7 @@ def gravity_shear_tab(
     assert section.properties
 
     # Yield stress
-    mat_fy = physical_material.Fy / 1.e3
+    mat_fy = physical_material.f_y / 1.e3
     # Plastic modulus (unreduced)
     sec_zx = section.properties['Zx']
     # Plastic moment of the section
@@ -395,7 +426,7 @@ def gravity_shear_tab(
         gklim = 0.2
         gdlim = 0.1
         gflim = 0.0
-        ge = 10
+        g_e = 10
         dmgtype = 'energy'
     else:
         m_max_pos = 0.35 * sec_mp
@@ -425,7 +456,7 @@ def gravity_shear_tab(
         gklim = 0.2
         gdlim = 0.1
         gflim = 0.0
-        ge = 10
+        g_e = 10
         dmgtype = 'energy'
 
     mat = Pinching4(
@@ -440,7 +471,7 @@ def gravity_shear_tab(
         0.00, 0.00, 0.00, 0.00, gklim,
         0.00, 0.00, 0.00, 0.00, gdlim,
         0.00, 0.00, 0.00, 0.00, gflim,
-        ge, dmgtype)
+        g_e, dmgtype)
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -456,28 +487,33 @@ def steel_w_col_pz(
         pz_doubler_plate_thickness: float,
         pz_hardening: float,
         **kwargs):
+    """
+    Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
+    performance evaluation of steel moment resisting frame
+    structures. Rep. No. 132.
+    """
     assert section.name[0] == 'W', \
         "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
     assert model.settings.imperial_units, \
         "Error: Only imperial units supported."
     assert section.properties
-    fy = physical_material.Fy
+    f_y = physical_material.f_y
     hardening = pz_hardening
-    dc = section.properties['d']
+    d_c = section.properties['d']
     bfc = section.properties['bf']
-    tp = section.properties['tw'] + pz_doubler_plate_thickness
-    tf = section.properties['tf']
-    vy = 0.55 * fy * dc * tp
-    g_mod = physical_material.G
-    ke = 0.95 * g_mod * tp * dc
-    kp = 0.95 * g_mod * bfc * tf**2 / pz_length
-    gamma_1 = vy / ke
+    t_p = section.properties['tw'] + pz_doubler_plate_thickness
+    t_f = section.properties['tf']
+    v_y = 0.55 * f_y * d_c * t_p
+    g_mod = physical_material.g_mod
+    k_e = 0.95 * g_mod * t_p * d_c
+    k_p = 0.95 * g_mod * bfc * t_f**2 / pz_length
+    gamma_1 = v_y / k_e
     gamma_2 = 4.0 * gamma_1
     gamma_3 = 100. * gamma_1
-    m1y = gamma_1 * ke * pz_length
-    m2y = m1y + kp * pz_length * (gamma_2 - gamma_1)
-    m3y = m2y + (hardening * ke
+    m1y = gamma_1 * k_e * pz_length
+    m2y = m1y + k_p * pz_length * (gamma_2 - gamma_1)
+    m3y = m2y + (hardening * k_e
                  * pz_length) * (gamma_3 - gamma_2)
 
     # account for the fact that our panel zones have four nonlinear

@@ -12,6 +12,8 @@ Model Generator for OpenSees ~ plain beamcolumn element generator
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 
+# pylint: disable=dangerous-default-value
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Type
@@ -24,10 +26,10 @@ from ..ops.node import Node
 from ..component_assembly import ComponentAssembly
 from .querry import ElmQuerry
 from .node_gen import NodeGenerator
-from ..ops.element import elasticBeamColumn
-from ..ops.element import dispBeamColumn
+from ..ops.element import ElasticBeamColumn
+from ..ops.element import DispBeamColumn
 from ..ops.element import ZeroLength
-from ..ops.element import geomTransf
+from ..ops.element import GeomTransf
 from ..ops.element import Lobatto
 from ..ops.section import ElasticSection
 from ..ops.section import FiberSection
@@ -47,10 +49,14 @@ nparr = npt.NDArray[np.float64]
 
 
 def retrieve_snap_pt_global_offset(placement, section, p_i, p_j, angle):
+    """
+    Returns the necessary offset to connect an element at a specified
+    snap point of the section
+    """
     if section.snap_points and (placement != 'centroid'):
         # obtain offset from section (local system)
-        dz, dy = section.snap_points[placement]
-        sec_offset_local: nparr = np.array([0.00, dy, dz])
+        d_z, d_y = section.snap_points[placement]
+        sec_offset_local: nparr = np.array([0.00, d_y, d_z])
         # retrieve local coordinate system
         x_axis, y_axis, z_axis = \
             local_axes_from_points_and_angle(
@@ -65,18 +71,23 @@ def retrieve_snap_pt_global_offset(placement, section, p_i, p_j, angle):
 
 
 def beam_placement_lookup(
-        x, y, querry, ndg, lvls, key,
+        x_coord, y_coord, querry, ndg, lvls, key,
         user_offset, section_offset, split_existing, snap):
+    """
+    Performs lookup operations before placing a beam-functioning
+    component assembly to determine how to connect it with
+    respect to the other existing objects in the model.
+    """
     lvl = lvls[key]
-    node = querry.search_node_lvl(x, y, lvl.uid)
-    pinit = np.array((x, y, lvl.elevation)) + user_offset
-    eo = user_offset.copy() + section_offset
+    node = querry.search_node_lvl(x_coord, y_coord, lvl.uid)
+    pinit = np.array((x_coord, y_coord, lvl.elevation)) + user_offset
+    e_o = user_offset.copy() + section_offset
     if not node:
         if split_existing:
             node, offset = split_component(split_existing, pinit)
-            eo += offset
+            e_o += offset
         else:
-            node = ndg.add_node_lvl(x, y, key)
+            node = ndg.add_node_lvl(x_coord, y_coord, key)
     else:
         # first check if a panel zone or other type of joint-like
         # component assembly exists at that node
@@ -86,18 +97,18 @@ def beam_placement_lookup(
             if component.component_purpose == 'steel_W_panel_zone':
                 if snap in ['middle_front', 'middle_back']:
                     result_node = component.external_nodes.named_contents[snap]
-                    eo += np.array(
+                    e_o += np.array(
                         (0.00, 0.00, node.coords[2] - result_node.coords[2]))
                     node = result_node
-                    return node, eo
-                elif snap in [
+                    return node, e_o
+                if snap in [
                         'centroid', 'top_center', 'top_left',
                         'top_right', 'center_left', 'center_right',
                         'bottom_center', 'bottom_left', 'bottom_right']:
                     elm = component.elastic_beamcolumn_elements.named_contents[
                         'elm_interior']
-                    dz, dy = elm.section.snap_points[snap]
-                    sec_offset_local: nparr = -np.array([0.00, dy, dz])
+                    d_z, d_y = elm.section.snap_points[snap]
+                    sec_offset_local: nparr = -np.array([0.00, d_y, d_z])
                     # retrieve local coordinate system
                     x_axis = elm.geomtransf.x_axis
                     y_axis = elm.geomtransf.y_axis
@@ -108,15 +119,14 @@ def beam_placement_lookup(
                     sec_offset_global = (
                         t_loc_to_glob @ sec_offset_local)
                     result_node = node
-                    eo += sec_offset_global
-                    return node, eo
-                else:
-                    raise ValueError(f'Unsupported snap keyword: {snap}')
+                    e_o += sec_offset_global
+                    return node, e_o
+                raise ValueError(f'Unsupported snap keyword: {snap}')
 
         # else check if a column-like component assembly exists
         if key-1 in lvls:
             node_below = querry.search_node_lvl(
-                x, y, key-1)
+                x_coord, y_coord, key-1)
             if node_below:
                 column = querry.search_connectivity(
                     [node, node_below])
@@ -133,8 +143,8 @@ def beam_placement_lookup(
                     elm = elms[0]
                     # obtain offset from section (local system)
                     if elm.section.snap_points:
-                        dz, dy = elm.section.snap_points[snap]
-                        sec_offset_local = -np.array([0.00, dy, dz])
+                        d_z, d_y = elm.section.snap_points[snap]
+                        sec_offset_local = -np.array([0.00, d_y, d_z])
                         # retrieve local coordinate system
                         x_axis = elm.geomtransf.x_axis
                         y_axis = elm.geomtransf.y_axis
@@ -144,15 +154,37 @@ def beam_placement_lookup(
                         t_loc_to_glob = t_glob_to_loc.T
                         sec_offset_global = (
                             t_loc_to_glob @ sec_offset_local)
-                        eo += sec_offset_global
+                        e_o += sec_offset_global
         else:
             raise ValueError(
                 'Error: existing node without any elements to connect to.')
-    return node, eo
+    return node, e_o
+
+
+def look_for_panel_zone(
+        node: Node,
+        lvl: Level,
+        querry: ElmQuerry
+) -> Node:
+    """
+    Determines if a panel zone joint component assembly is present
+    at the specified node.
+    """
+    components = querry.retrieve_components_from_nodes([node], lvl.uid)
+    result_node = node
+    for component in components.values():
+        if component.component_purpose == 'steel_W_panel_zone':
+            result_node = (component.external_nodes
+                           .named_contents['bottom_node'])
+            break
+    return result_node
 
 
 @dataclass(repr=False)
 class BeamColumnGenerator:
+    """
+    This object introduces beamcolumn elements to a model.
+    """
     model: Model = field(repr=False)
 
     def define_beamcolumn(
@@ -162,10 +194,13 @@ class BeamColumnGenerator:
             node_j: Node,
             offset_i: nparr,
             offset_j: nparr,
-            transfType: str,
+            transf_type: str,
             section: ElasticSection | FiberSection,
-            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
-            angle=0.00) -> elasticBeamColumn | dispBeamColumn:
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
+            angle=0.00) -> ElasticBeamColumn | DispBeamColumn:
+        """
+        Adds a beamcolumn element to the model, connecting the specified nodes
+        """
 
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
@@ -173,24 +208,24 @@ class BeamColumnGenerator:
             p_i, p_j, angle)  # type: ignore
         if element_type.__name__ == 'elasticBeamColumn':
             assert isinstance(section, ElasticSection)
-            transf = geomTransf(
-                transfType,
+            transf = GeomTransf(
+                transf_type,
                 self.model.uid_generator.new('transformation'),
                 offset_i,
                 offset_j,
                 *axes)
-            elm_el = elasticBeamColumn(
+            elm_el = ElasticBeamColumn(
                 parent_component=assembly,
                 uid=self.model.uid_generator.new('element'),
-                eleNodes=[node_i, node_j],
+                nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf)
-            res: Union[elasticBeamColumn, dispBeamColumn] = elm_el
+            res: Union[ElasticBeamColumn, DispBeamColumn] = elm_el
         elif element_type.__name__ == 'dispBeamColumn':
             assert isinstance(section, FiberSection)
-            # todo: add elastic section support
-            transf = geomTransf(
-                transfType,
+            # TODO: add elastic section support
+            transf = GeomTransf(
+                transf_type,
                 self.model.uid_generator.new('transformation'),
                 offset_i,
                 offset_j,
@@ -200,10 +235,10 @@ class BeamColumnGenerator:
                 parent_section=section,
                 n_p=5
             )
-            elm_disp = dispBeamColumn(
+            elm_disp = DispBeamColumn(
                 parent_component=assembly,
                 uid=self.model.uid_generator.new('element'),
-                eleNodes=[node_i, node_j],
+                nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
                 integration=beam_integration)
@@ -220,6 +255,9 @@ class BeamColumnGenerator:
             zerolength_gen: Callable,  # type: ignore
             zerolength_gen_args: dict[str, object]
     ):
+        """
+        Defines a zerolength element
+        """
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         elm = ZeroLength(
             assembly,
@@ -245,6 +283,9 @@ class BeamColumnGenerator:
             element_type,
             angle
     ):
+        """
+        Adds beamcolumn elemens in series
+        """
 
         if n_sub > 1:
             p_i = np.array(node_i.coords) + eo_i
@@ -276,7 +317,7 @@ class BeamColumnGenerator:
             element = self.define_beamcolumn(
                 assembly=component,
                 node_i=n_i, node_j=n_j,
-                offset_i=o_i, offset_j=o_j, transfType=transf_type,
+                offset_i=o_i, offset_j=o_j, transf_type=transf_type,
                 section=section,
                 element_type=element_type,
                 angle=angle)
@@ -302,6 +343,10 @@ class BeamColumnGenerator:
             element_type,
             transf_type,
             angle):
+        """
+        Generates a plain component assembly, with line elements in
+        series
+        """
 
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
@@ -347,7 +392,12 @@ class BeamColumnGenerator:
             zerolength_gen_args_i,
             zerolength_gen_j,
             zerolength_gen_args_j):
-
+        """
+        Defines a component assembly that is comprised of
+        beamcolumn elements connected in series with nonlinear springs
+        attached at the ends, followed by another sequence of
+        beamcolumn elements (in order to be able to specify rigid offsets)
+        """
         # instantiate a component assembly
         component = ComponentAssembly(
             uid=self.model.uid_generator.new('component'),
@@ -458,21 +508,6 @@ class BeamColumnGenerator:
             angle
         )
 
-    def look_for_panel_zone(
-            self,
-            node: Node,
-            lvl: Level,
-            querry: ElmQuerry
-    ) -> Node:
-        components = querry.retrieve_components_from_nodes([node], lvl.uid)
-        result_node = node
-        for component in components.values():
-            if component.component_purpose == 'steel_W_panel_zone':
-                result_node = (component.external_nodes
-                               .named_contents['bottom_node'])
-                break
-        return result_node
-
     def add_vertical_active(
             self,
             x_coord: float,
@@ -482,7 +517,7 @@ class BeamColumnGenerator:
             transf_type: str,
             n_sub: int,
             section: ElasticSection | FiberSection,
-            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
             placement='centroid',
             angle=0.00,
             method='generate_plain_component_assembly',
@@ -512,7 +547,7 @@ class BeamColumnGenerator:
                 bottom_node = ndg.add_node_lvl(x_coord, y_coord, key-1)
 
             # check for a panel zone
-            top_node = self.look_for_panel_zone(top_node, lvl, querry)
+            top_node = look_for_panel_zone(top_node, lvl, querry)
 
             p_i = np.array(top_node.coords) + offset_i
             p_j = np.array(bottom_node.coords) + offset_j
@@ -556,7 +591,7 @@ class BeamColumnGenerator:
             transf_type: str,
             n_sub: int,
             section: ElasticSection,
-            element_type: Type[Union[elasticBeamColumn, dispBeamColumn]],
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
             placement='centroid',
             angle=0.00,
             split_existing_i=None,
@@ -579,8 +614,8 @@ class BeamColumnGenerator:
 
             if section.snap_points and (placement != 'centroid'):
                 # obtain offset from section (local system)
-                dz, dy = section.snap_points[placement]
-                sec_offset_local: nparr = np.array([0.00, dy, dz])
+                d_z, d_y = section.snap_points[placement]
+                sec_offset_local: nparr = np.array([0.00, d_y, d_z])
                 # retrieve local coordinate system
                 x_axis, y_axis, z_axis = \
                     local_axes_from_points_and_angle(
@@ -637,6 +672,10 @@ class BeamColumnGenerator:
             pz_doubler_plate_thickness: float,
             pz_hardening: float
     ):
+        """
+        Adds a component assembly representing a steel W-section
+        panel zone joint.
+        """
         ndg = NodeGenerator(self.model)
         querry = ElmQuerry(self.model)
         lvls = self.model.levels
@@ -745,12 +784,12 @@ class BeamColumnGenerator:
                 'name', 'rigid_link_section')
             assert rigid_sec
 
-            elm_top_h_f = elasticBeamColumn(
+            elm_top_h_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [top_node, top_h_f],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -759,12 +798,12 @@ class BeamColumnGenerator:
             )
             elm_top_h_f.visibility.hidden_when_extruded = True
 
-            elm_top_h_b = elasticBeamColumn(
+            elm_top_h_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [top_h_b, top_node],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -773,12 +812,12 @@ class BeamColumnGenerator:
             )
             elm_top_h_b.visibility.hidden_when_extruded = True
 
-            elm_bottom_h_f = elasticBeamColumn(
+            elm_bottom_h_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [bottom_mid, bottom_h_f],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -787,12 +826,12 @@ class BeamColumnGenerator:
             )
             elm_bottom_h_f.visibility.hidden_when_extruded = True
 
-            elm_bottom_h_b = elasticBeamColumn(
+            elm_bottom_h_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [bottom_h_b, bottom_mid],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -801,12 +840,12 @@ class BeamColumnGenerator:
             )
             elm_bottom_h_b.visibility.hidden_when_extruded = True
 
-            elm_top_v_f = elasticBeamColumn(
+            elm_top_v_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [top_v_f, mid_v_f],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -815,12 +854,12 @@ class BeamColumnGenerator:
             )
             elm_top_v_f.visibility.hidden_when_extruded = True
 
-            elm_top_v_b = elasticBeamColumn(
+            elm_top_v_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [top_v_b, mid_v_b],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -829,12 +868,12 @@ class BeamColumnGenerator:
             )
             elm_top_v_b.visibility.hidden_when_extruded = True
 
-            elm_bottom_v_f = elasticBeamColumn(
+            elm_bottom_v_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [mid_v_f, bottom_v_f],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -843,12 +882,12 @@ class BeamColumnGenerator:
             )
             elm_bottom_v_f.visibility.hidden_when_extruded = True
 
-            elm_bottom_v_b = elasticBeamColumn(
+            elm_bottom_v_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [mid_v_b, bottom_v_b],
                 rigid_sec,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
@@ -857,19 +896,19 @@ class BeamColumnGenerator:
             )
             elm_bottom_v_b.visibility.hidden_when_extruded = True
 
-            elm_interior = elasticBeamColumn(
+            elm_interior = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new('element'),
                 [top_node, bottom_mid],
                 section,
-                geomTransf(
+                GeomTransf(
                     'Corotational',
                     self.model.uid_generator.new('transformation'),
                     np.zeros(3), np.zeros(3),
                     x_axis, y_axis, z_axis
                 )
             )
-            elm_interior.visibility.skip_OpenSees_definition = True
+            elm_interior.visibility.skip_opensees_definition = True
             elm_interior.visibility.hidden_at_line_plots = True
 
             # define zerolength elements

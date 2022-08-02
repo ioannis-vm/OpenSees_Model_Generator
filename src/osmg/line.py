@@ -17,6 +17,8 @@ import numpy as np
 import numpy.typing as npt
 from .import common
 
+# pylint: disable=no-else-return
+
 nparr = npt.NDArray[np.float64]
 
 
@@ -121,13 +123,13 @@ class Line:
         Parameters:
             pt (nparr): a point
         """
-        ra = self.end - self.start
-        norm2 = np.dot(ra, ra)
+        r_a = self.end - self.start
+        norm2 = np.dot(r_a, r_a)
         if np.abs(norm2) < 1.0e-4:
             raise ValueError
-        rb = (point - self.start)
-        cross = np.linalg.norm(np.cross(ra, rb))
-        dot_normalized = np.dot(ra, rb)/norm2  # type: ignore
+        r_b = (point - self.start)
+        cross = np.linalg.norm(np.cross(r_a, r_b))
+        dot_normalized = np.dot(r_a, r_b)/norm2  # type: ignore
         if cross < common.EPSILON:
             res = bool(0.00 <= dot_normalized <= 1.00)
         else:
@@ -142,11 +144,11 @@ class Line:
         Arguments:
           point (numpy.ndarray): the point's coordinates
         """
-        ra = self.end - self.start
-        rb = point - self.start
-        proj_point = (rb @ ra) / (ra @ ra) * ra
+        r_a = self.end - self.start
+        r_b = point - self.start
+        proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a
         if self.intersects_pt(proj_point + self.start):
-            res: Optional[float] = float(np.linalg.norm(rb - proj_point))
+            res: Optional[float] = float(np.linalg.norm(r_b - proj_point))
         else:
             res = None
         return res
@@ -159,9 +161,9 @@ class Line:
         Arguments:
           point (numpy.ndarray): the point's coordinates
         """
-        ra = self.end - self.start
-        rb = point - self.start
-        proj_point = (rb @ ra) / (ra @ ra) * ra + self.start
+        r_a = self.end - self.start
+        r_b = point - self.start
+        proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
         if self.intersects_pt(proj_point):
             return proj_point
         else:

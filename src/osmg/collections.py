@@ -21,7 +21,6 @@ import numpy.typing as npt
 from . import common
 from .ops import node
 from .ops import element
-from .ops.element import ZeroLength
 
 
 nparr = npt.NDArray[np.float64]
@@ -30,7 +29,7 @@ TK = TypeVar('TK')
 TV = TypeVar('TV')
 
 
-@dataclass
+@dataclass(repr=False)
 class Collection(dict[TK, TV]):
     """
     Collection of objects.
@@ -50,6 +49,10 @@ class Collection(dict[TK, TV]):
         self[obj.uid] = obj
 
     def retrieve_by_attr(self, attr: Any, val: Any) -> Any:
+        """
+        Retrieve an object from the collection based on an attribute
+        value
+        """
         res = None
         for thing in self.values():
             if hasattr(thing, attr):
@@ -128,54 +131,25 @@ class NodeCollection(Collection[int, node.Node]):
 
 
 @dataclass(repr=False)
-class elasticBeamColumnCollection(Collection[int, element.elasticBeamColumn]):
+class CollectionWithConnectivity(Collection[TK, TV]):
     """
-    Elastic beam column element collection.
+    Collection of elements for which it is important to consider their
+    connectivity.
     Attributes:
         parent (Any)
     """
     named_contents: dict[
-        str, element.elasticBeamColumn] = field(
+        str, element.ElasticBeamColumn] = field(
             default_factory=dict)
 
     def add(self, elm):
-        # update component assembly connectivity
-        uids = [nd.uid for nd in elm.eleNodes]
-        uids.sort()
-        uids_tuple = (*uids,)
-        if uids_tuple in elm.parent_component.element_connectivity():
-            raise ValueError('This should never happen!')
-        super().add(elm)
-
-
-@dataclass(repr=False)
-class dispBeamColumnCollection(Collection[int, element.dispBeamColumn]):
-    """
-    Force-based beam column element collection.
-    Attributes:
-        parent (Any)
-    """
-    named_contents: dict[
-        str, element.dispBeamColumn] = field(
-            default_factory=dict)
-
-    def add(self, elm):
-        # update component assembly connectivity
-        uids = [nd.uid for nd in elm.eleNodes]
-        uids.sort()
-        uids_tuple = (*uids,)
-        if uids_tuple in elm.parent_component.element_connectivity():
-            raise ValueError('This should never happen!')
-        super().add(elm)
-
-
-@dataclass(repr=False)
-class zerolengthCollection(Collection[int, ZeroLength]):
-    named_contents: dict[str, ZeroLength] = field(default_factory=dict)
-
-    def add(self, elm):
-        # update component assembly connectivity
-        uids = [nd.uid for nd in elm.eleNodes]
+        """
+        Adds an element to the collection.
+        The method also checks to see if an object having the same
+        connectivity exists in the collection, and raises an error if
+        it does.
+        """
+        uids = [nd.uid for nd in elm.nodes]
         uids.sort()
         uids_tuple = (*uids,)
         if uids_tuple in elm.parent_component.element_connectivity():
