@@ -731,7 +731,7 @@ class ModalAnalysis(Analysis):
                     etimesa = elm.section.e_mod * elm.section.area
                     etimesi_maj = elm.section.e_mod * elm.section.i_x
                     # eimin = elm.section.e_mod * elm.section.Iy
-                    gtimesj = elm.section.g_mod * elm.section.j_omd
+                    gtimesj = elm.section.g_mod * elm.section.j_mod
 
                     # deformations
                     d_l = u_j_local[0] - u_i_local[0]
