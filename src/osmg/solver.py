@@ -728,10 +728,10 @@ class ModalAnalysis(Analysis):
 
                     # stiffness matrix terms
                     length = elm.clear_length()
-                    etimesa = elm.section.E * elm.section.A
-                    etimesi_maj = elm.section.E * elm.section.Ix
-                    # eimin = elm.section.E * elm.section.Iy
-                    gtimesj = elm.section.G * elm.section.J
+                    etimesa = elm.section.e_mod * elm.section.area
+                    etimesi_maj = elm.section.e_mod * elm.section.i_x
+                    # eimin = elm.section.e_mod * elm.section.Iy
+                    gtimesj = elm.section.g_mod * elm.section.j_omd
 
                     # deformations
                     d_l = u_j_local[0] - u_i_local[0]
