@@ -101,7 +101,7 @@ class SectionGenerator:
             'name', ops_material)
         phs_mat = self.model.physical_materials.retrieve_by_attr(
             'name', physical_material)
-        filename = '../../../section_data/sections.json'
+        filename = '../sections.json'
         contents = pkgutil.get_data(__name__, filename)
         assert isinstance(contents, bytes)
         section_dictionary = json.loads(contents)
