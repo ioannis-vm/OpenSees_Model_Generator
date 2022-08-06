@@ -145,7 +145,7 @@ class ComponentAssembly:
         res = {}
         elms = self.list_of_all_elements()
         for elm in elms:
-            uids = [nd.uid for nd in elm.eleNodes]
+            uids = [nd.uid for nd in elm.nodes]
             uids.sort()
             uids_tuple = (*uids,)
             res[uids_tuple] = elm

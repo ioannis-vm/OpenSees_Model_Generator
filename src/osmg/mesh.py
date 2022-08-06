@@ -305,6 +305,19 @@ def geometric_properties(coords):
 # Defining halfedges given edges #
 ##################################
 
+# auxiliary functions
+
+def ang_reduce(ang):
+    """
+    Brings and angle expressed in radians in the interval [0, 2pi)
+    """
+    while ang < 0:
+        ang += 2.*np.pi
+    while ang >= 2.*np.pi:
+        ang -= 2.*np.pi
+    return ang
+
+
 
 def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     """
@@ -323,13 +336,6 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     Returns:
         halfedges (list[Halfedge]): List of Halfedge objects
     """
-
-    def ang_reduce(ang):
-        while ang < 0:
-            ang += 2.*np.pi
-        while ang >= 2.*np.pi:
-            ang -= 2.*np.pi
-        return ang
 
     all_halfedges = []
     for edge in edges:
@@ -460,6 +466,18 @@ def orient_loops(loops):
 #######################################
 # Breaking a shape into little pieces #
 #######################################
+
+def bisector_subdivision(loop: list[Halfedge]):
+    """
+    Used to subdivide floor areas into tributary areas.
+    """
+    import pdb
+    pdb.set_trace()
+    ar = polygon_area(np.array([h.vertex.coords for h in loop]))
+    
+    print(ar)
+    plot_loop(loop)
+    return loop
 
 
 def subdivide_polygon(outside, holes, n_x, n_y, plot=False):

@@ -395,7 +395,7 @@ class Analysis:
                 for part in parts:
                     mat = part.ops_material
                     if mat.uid not in defined_materials:
-                        ops.uniaxial_material(
+                        ops.uniaxialMaterial(
                             *mat.ops_args())
                         defined_materials[mat.uid] = mat
                     pieces = subdivide_polygon(
@@ -423,7 +423,7 @@ class Analysis:
         for elm in elms:
             for mat in elm.mats:
                 if mat.uid not in defined_materials:
-                    ops.uniaxial_material(
+                    ops.uniaxialMaterial(
                         *mat.ops_args())
                     defined_materials[mat.uid] = mat
             ops.element(*elm.ops_args())
@@ -629,8 +629,12 @@ class StaticAnalysis(Analysis):
             self._define_loads(case_name)
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
-            elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-            disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+            elastic_elems = [
+                elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition]
+            disp_elems = [
+                elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition]
             zerolength_elems = self.mdl.list_of_zerolength_elements()
             step = 0
             ops.system(LN_ANALYSIS_SYSTEM)
@@ -998,11 +1002,8 @@ class NonlinearAnalysis(Analysis):
         Returns the force-deformation of a zerolength element for all
         analysis steps
         """
-        res = np.zeros((self.results[case_name]
-                        .n_steps_success, 6))  # type: ignore
         num = len(self.results[case_name].release_force_defo[uid])
-        assert isinstance(self, NLTHAnalysis)
-        assert self.a_g is not None
+        res = np.zeros((num, 6))
         for i in range(num):
             res[i] = self.results[case_name].release_force_defo[uid][i]
         dframe = pd.DataFrame(res, columns=[
@@ -1098,20 +1099,18 @@ class PushoverAnalysis(NonlinearAnalysis):
         for case_name in self.load_cases:
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
-            elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-            disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+            elastic_elems = [
+                elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition]
+            disp_elems = [
+                elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition]
             zerolength_elems = self.mdl.list_of_zerolength_elements()
 
             self._to_opensees_domain(case_name)
             self._define_loads(case_name)
             self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
-            ops.wipeAnalysis()
-            ops.loadConst('-time', 0.0)
-            self._apply_lateral_load(
-                case_name, direction, modeshape, loaded_node)
 
-            ops.numberer(NUMBERER)
-            ops.constraints(*CONSTRAINTS)
             curr_displ = ops.nodeDisp(control_node.uid, control_dof+1)
             n_steps_success = 0
             self._read_opensees_results(
@@ -1121,6 +1120,13 @@ class PushoverAnalysis(NonlinearAnalysis):
                 elastic_elems,
                 disp_elems,
                 zerolength_elems)
+
+            ops.wipeAnalysis()
+            ops.loadConst('-time', 0.0)
+            self._apply_lateral_load(
+                case_name, direction, modeshape, loaded_node)
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
 
             total_fail = False
             num_subdiv = 0
@@ -1394,8 +1400,12 @@ class NLTHAnalysis(NonlinearAnalysis):
         # will be fixed in the future.
         case_name = list(self.load_cases.keys())[0]
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
-        elastic_elems = self.mdl.list_of_elastic_beamcolumn_elements()
-        disp_elems = self.mdl.list_of_disp_beamcolumn_elements()
+        elastic_elems = [
+            elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+            if not elm.visibility.skip_opensees_definition]
+        disp_elems = [
+            elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
+            if not elm.visibility.skip_opensees_definition]
         zerolength_elems = self.mdl.list_of_zerolength_elements()
 
         damping_type = damping.get('type')

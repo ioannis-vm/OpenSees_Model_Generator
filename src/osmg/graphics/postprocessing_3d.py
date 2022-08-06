@@ -76,8 +76,8 @@ def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # discrete sample location parameter
     t_vec = np.linspace(0.00, 1.00, num=num_points)
-    p_i = np.array(element.eleNodes[0].coords) + element.geomtransf.offset_i
-    p_j = np.array(element.eleNodes[1].coords) + element.geomtransf.offset_j
+    p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
+    p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
     # shape function matrices
@@ -152,8 +152,8 @@ def interp_3d_points(element, d_global, num_points, scaling):
     Calculates intermediate points based on end locations and
     deformations
     """
-    p_i = np.array(element.eleNodes[0].coords) + element.geomtransf.offset_i
-    p_j = np.array(element.eleNodes[1].coords) + element.geomtransf.offset_j
+    p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
+    p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
     element_point_samples: nparr = np.column_stack((
         np.linspace(p_i[0], p_j[0], num=num_points),
         np.linspace(p_i[1], p_j[1], num=num_points),
@@ -191,13 +191,13 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         num_points = 8
         # translations and rotations at the offset ends
         u_i = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[0].uid][step][0:3])
+               [elm.nodes[0].uid][step][0:3])
         r_i = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[0].uid][step][3:6])
+               [elm.nodes[0].uid][step][3:6])
         u_j = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[1].uid][step][0:3])
+               [elm.nodes[1].uid][step][0:3])
         r_j = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[1].uid][step][3:6])
+               [elm.nodes[1].uid][step][3:6])
         # transferring them to the clear element ends
         offset_i = elm.geomtransf.offset_i
         offset_j = elm.geomtransf.offset_j
@@ -432,13 +432,13 @@ def add_data__frames_deformed(analysis,
             continue
         num_points = 8
         u_i = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[0].uid][step][0:3])
+               [elm.nodes[0].uid][step][0:3])
         r_i = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[0].uid][step][3:6])
+               [elm.nodes[0].uid][step][3:6])
         u_j = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[1].uid][step][0:3])
+               [elm.nodes[1].uid][step][0:3])
         r_j = (analysis.results[case_name].node_displacements
-               [elm.eleNodes[1].uid][step][3:6])
+               [elm.nodes[1].uid][step][3:6])
         # transferring them to the clear element ends
         offset_i = elm.geomtransf.offset_i
         offset_j = elm.geomtransf.offset_j
@@ -492,28 +492,28 @@ def add_data__frames_offsets_deformed(analysis,
         if np.array_equal(elm.geomtransf.offset_i, np.zeros(3)):
             if np.array_equal(elm.geomtransf.offset_j, np.zeros(3)):
                 continue
-        p_i: nparr = np.array(elm.eleNodes[0].coords)
-        p_io: nparr = (np.array(elm.eleNodes[0].coords)
+        p_i: nparr = np.array(elm.nodes[0].coords)
+        p_io: nparr = (np.array(elm.nodes[0].coords)
                        + elm.geomtransf.offset_i)
         offset_i = elm.geomtransf.offset_i
         u_i: nparr = np.array(
             analysis.results[case_name].node_displacements
-            [elm.eleNodes[0].uid][step][0:3])
+            [elm.nodes[0].uid][step][0:3])
         r_i: nparr = np.array(
             analysis.results[case_name].node_displacements
-            [elm.eleNodes[0].uid][step][3:6])
+            [elm.nodes[0].uid][step][3:6])
         u_io: nparr = transformations.offset_transformation(offset_i, u_i, r_i)
 
-        p_j: nparr = np.array(elm.eleNodes[1].coords)
-        p_jo: nparr = (np.array(elm.eleNodes[1].coords)
+        p_j: nparr = np.array(elm.nodes[1].coords)
+        p_jo: nparr = (np.array(elm.nodes[1].coords)
                        + elm.geomtransf.offset_j)
         offset_j = elm.geomtransf.offset_j
         u_j: nparr = np.array(
             analysis.results[case_name].node_displacements
-            [elm.eleNodes[1].uid][step][0:3])
+            [elm.nodes[1].uid][step][0:3])
         r_j: nparr = np.array(
             analysis.results[case_name].node_displacements
-            [elm.eleNodes[1].uid][step][3:6])
+            [elm.nodes[1].uid][step][3:6])
         u_jo: nparr = transformations.offset_transformation(offset_j, u_j, r_j)
 
         x_i = p_i + u_i * scaling
@@ -552,8 +552,8 @@ def add_data__frames_undeformed(data_dict, list_of_frames):
 
     for elm in list_of_frames:
 
-        p_i = np.array(elm.eleNodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.eleNodes[1].coords) + elm.geomtransf.offset_j
+        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
 
         x_list.extend(
             (p_i[0], p_j[0], None)
@@ -652,13 +652,13 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     elms = mdl.list_of_beamcolumn_elements()
     for elm in elms:
         u_i = analysis.results[case_name].node_displacements[
-            elm.eleNodes[0].uid][step][0:3]
+            elm.nodes[0].uid][step][0:3]
         r_i = analysis.results[case_name].node_displacements[
-            elm.eleNodes[0].uid][step][3:6]
+            elm.nodes[0].uid][step][3:6]
         u_j = analysis.results[case_name].node_displacements[
-            elm.eleNodes[1].uid][step][0:3]
+            elm.nodes[1].uid][step][0:3]
         r_j = analysis.results[case_name].node_displacements[
-            elm.eleNodes[1].uid][step][3:6]
+            elm.nodes[1].uid][step][3:6]
         d_global, _ = interp_3d_deformation(
             elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
@@ -706,7 +706,9 @@ def show_deformed_shape(analysis,
     layout = graphics_common_3d.global_layout(camera)
     data_dict: list[dict[str, object]] = []
 
-    list_of_frames = mdl.list_of_beamcolumn_elements()
+    list_of_frames = [elm for elm in mdl.list_of_beamcolumn_elements()
+                      if not elm.visibility.skip_opensees_definition]
+
     # list_of_steel_W_panel_zones = \
     #     mdl.list_of_steel_W_panel_zones()
     list_of_primary_nodes = mdl.list_of_primary_nodes()
@@ -804,7 +806,8 @@ def show_basic_forces(analysis,
         mdl = subset_model
     else:
         mdl = analysis.mdl
-    list_of_line_elements = mdl.list_of_beamcolumn_elements()
+    list_of_line_elements = [elm for elm in mdl.list_of_beamcolumn_elements()
+                             if not elm.visibility.skip_opensees_definition]
 
     # draw the frames
     add_data__frames_undeformed(
@@ -870,7 +873,7 @@ def show_basic_forces(analysis,
 
     for element in list_of_line_elements:
 
-        if element.visibility.skip_OpenSees_definition:
+        if element.visibility.skip_opensees_definition:
             continue
 
         forces = basic_forces(
@@ -941,11 +944,11 @@ def show_basic_forces(analysis,
         x_vec = element.geomtransf.x_axis
         y_vec = element.geomtransf.y_axis
         z_vec = element.geomtransf.z_axis
-        i_pos = (np.array(element.eleNodes[0].coords)
+        i_pos = (np.array(element.nodes[0].coords)
                  + element.geomtransf.offset_i)
-        p_i = (np.array(element.eleNodes[0].coords)
+        p_i = (np.array(element.nodes[0].coords)
                + element.geomtransf.offset_i)
-        p_j = (np.array(element.eleNodes[1].coords)
+        p_j = (np.array(element.nodes[1].coords)
                + element.geomtransf.offset_j)
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
@@ -1282,7 +1285,8 @@ def show_basic_forces_combo(
         mdl = subset_model
     else:
         mdl = combo.mdl
-    list_of_line_elements = mdl.list_of_beamcolumn_elements()
+    list_of_line_elements = [elm for elm in mdl.list_of_beamcolumn_elements()
+                             if not elm.visibility.skip_opensees_definition]
 
     # draw the frames
     add_data__frames_undeformed(
@@ -1342,7 +1346,7 @@ def show_basic_forces_combo(
 
     for element in list_of_line_elements:
 
-        if element.visibility.skip_OpenSees_definition:
+        if element.visibility.skip_opensees_definition:
             continue
 
         df_min, df_max = combo.envelope_basic_forces(element, num_points)
@@ -1424,11 +1428,11 @@ def show_basic_forces_combo(
         x_vec = element.geomtransf.x_axis
         y_vec = element.geomtransf.y_axis
         z_vec = element.geomtransf.z_axis
-        i_pos = (np.array(element.eleNodes[0].coords)
+        i_pos = (np.array(element.nodes[0].coords)
                  + element.geomtransf.offset_i)
-        p_i = (np.array(element.eleNodes[0].coords)
+        p_i = (np.array(element.nodes[0].coords)
                + element.geomtransf.offset_i)
-        p_j = (np.array(element.eleNodes[1].coords)
+        p_j = (np.array(element.nodes[1].coords)
                + element.geomtransf.offset_j)
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)

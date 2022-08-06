@@ -150,11 +150,11 @@ class SectionGenerator:
                     sec_el = ElasticSection(
                         label,
                         self.model.uid_generator.new('section'),
-                        phs_mat.E,
+                        phs_mat.e_mod,
                         sec_data['A'],
                         sec_data['Iy'],
                         sec_data['Ix'],
-                        phs_mat.G,
+                        phs_mat.g_mod,
                         sec_data['J'],
                         sec_data['W'] / 12.00,  # lb/in
                         outside_shape,

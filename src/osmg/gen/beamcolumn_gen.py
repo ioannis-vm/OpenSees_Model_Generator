@@ -206,7 +206,7 @@ class BeamColumnGenerator:
         p_j = np.array(node_j.coords) + offset_j
         axes = local_axes_from_points_and_angle(
             p_i, p_j, angle)  # type: ignore
-        if element_type.__name__ == 'elasticBeamColumn':
+        if element_type.__name__ == 'ElasticBeamColumn':
             assert isinstance(section, ElasticSection)
             transf = GeomTransf(
                 transf_type,
@@ -221,7 +221,7 @@ class BeamColumnGenerator:
                 section=section,
                 geomtransf=transf)
             res: Union[ElasticBeamColumn, DispBeamColumn] = elm_el
-        elif element_type.__name__ == 'dispBeamColumn':
+        elif element_type.__name__ == 'DispBeamColumn':
             assert isinstance(section, FiberSection)
             # TODO: add elastic section support
             transf = GeomTransf(
@@ -321,9 +321,9 @@ class BeamColumnGenerator:
                 section=section,
                 element_type=element_type,
                 angle=angle)
-            if element_type.__name__ == 'elasticBeamColumn':
+            if element_type.__name__ == 'ElasticBeamColumn':
                 component.elastic_beamcolumn_elements.add(element)
-            elif element_type.__name__ == 'dispBeamColumn':
+            elif element_type.__name__ == 'DispBeamColumn':
                 component.disp_beamcolumn_elements.add(element)
             else:
                 raise TypeError(

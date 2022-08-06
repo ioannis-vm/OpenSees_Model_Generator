@@ -740,7 +740,7 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
         "k": k_list,
         "hoverinfo": "skip",
         "color": graphics_common.BEAM_MESH_COLOR,
-        "opacity": 0.10
+        "opacity": 0.30
     })
 
 

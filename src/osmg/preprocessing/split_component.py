@@ -32,9 +32,9 @@ def split_component(component, point):
     elms.extend(component.disp_beamcolumn_elements.values())
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
-        p_i = (np.array(elm.eleNodes[0].coords)
+        p_i = (np.array(elm.nodes[0].coords)
                + elm.geomtransf.offset_i)
-        p_j = (np.array(elm.eleNodes[1].coords)
+        p_j = (np.array(elm.nodes[1].coords)
                + elm.geomtransf.offset_j)
         line = Line('', p_i, p_j)
         dist = line.point_distance(point)
@@ -42,9 +42,9 @@ def split_component(component, point):
     np.nan_to_num(distances, copy=False, nan=np.inf)
     i_min = np.argmin(distances)
     closest_elm = elms[i_min]
-    p_i = (np.array(closest_elm.eleNodes[0].coords)
+    p_i = (np.array(closest_elm.nodes[0].coords)
            + closest_elm.geomtransf.offset_i)
-    p_j = (np.array(closest_elm.eleNodes[1].coords)
+    p_j = (np.array(closest_elm.nodes[1].coords)
            + closest_elm.geomtransf.offset_j)
     line = Line('', p_i, p_j)
     split_point = line.project(point)
@@ -62,8 +62,8 @@ def split_component(component, point):
     # otherwise:
 
     # remove existing line element
-    node_i = closest_elm.eleNodes[0]
-    node_j = closest_elm.eleNodes[1]
+    node_i = closest_elm.nodes[0]
+    node_j = closest_elm.nodes[1]
     prev_section = closest_elm.section
     prev_gtransf = closest_elm.geomtransf
     if isinstance(closest_elm, ElasticBeamColumn):
@@ -86,7 +86,7 @@ def split_component(component, point):
     n_i = node_i
     n_j = middle_node
     transf_i = GeomTransf(
-        prev_gtransf.transfType,
+        prev_gtransf.transf_type,
         component.parent_collection.parent.parent_model
         .uid_generator.new('transformation'),
         o_i,
@@ -129,7 +129,7 @@ def split_component(component, point):
     n_i = middle_node
     n_j = node_j
     transf_j = GeomTransf(
-        prev_gtransf.transfType,
+        prev_gtransf.transf_type,
         component.parent_collection.parent.parent_model
         .uid_generator.new('transformation'),
         o_i,

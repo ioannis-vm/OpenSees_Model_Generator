@@ -18,7 +18,6 @@ from typing import no_type_check
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
-import skgeom as sg
 from .. import mesh
 from ..ops.node import Node
 from .. import common
@@ -89,6 +88,17 @@ class TributaryAreaAnaysis:
         """
         Performs tributary area analysis
         """
+
+        try:
+            import skgeom as sg
+        except(ModuleNotFoundError):
+            msg = "One day, a custom implementation of the"
+            msg += "straight skeleton algorithm might be added to osmg.\n"
+            msg += "Until that day, the scikit-geometry package is required.\n"
+            msg += "Please install scikit-geometry.\n"
+            msg += "https://github.com/scikit-geometry/scikit-geometry"
+            print()
+            
         lvl = self.parent_level
         all_components = list(lvl.components.values())
         horizontal_elements = []
@@ -153,14 +163,14 @@ class TributaryAreaAnaysis:
 
             zerolength_elements = list(comp.zerolength_elements.values())
             for zelm in zerolength_elements:
-                zn_map[zelm.eleNodes[1].uid] = zelm.eleNodes[0].uid
+                zn_map[zelm.nodes[1].uid] = zelm.nodes[0].uid
 
             for elm in line_elements:
-                n_i = elm.eleNodes[0]
+                n_i = elm.nodes[0]
                 eo_i = elm.geomtransf.offset_i[0:2]
                 if n_i.uid in zn_map:
                     n_i = comp.internal_nodes[zn_map[n_i.uid]]
-                n_j = elm.eleNodes[1]
+                n_j = elm.nodes[1]
                 eo_j = elm.geomtransf.offset_j[0:2]
                 if n_j.uid in zn_map:
                     n_j = comp.internal_nodes[zn_map[n_j.uid]]
@@ -218,6 +228,8 @@ class TributaryAreaAnaysis:
                 edge_map[edg_interior.uid] = elm
                 edges[edg_interior.uid] = edg_interior
 
+
+                
         # # plotting - used while developing the code
         # import pandas as pd
         # edf = pd.DataFrame(np.zeros((len(edges)*3, 2)))
@@ -256,6 +268,12 @@ class TributaryAreaAnaysis:
         for internal_loop in internal:
             poly = sg.Polygon([h.vertex.coords for h in internal_loop])
             skel = sg.skeleton.create_interior_straight_skeleton(poly)
+            # todo: what we need to get rid of this is to end up with a list
+            # of halfedges defining the subloops.
+
+            # something like:
+            # subloops = mesh.bisector_subdivision(internal_loop)
+            
             subloops: list[list[Halfedge]] = []
 
             def is_in_some_subloop(halfedge, loops):
@@ -401,10 +419,10 @@ class TributaryAreaAnaysis:
                     if not load.massless:
                         half_mass = (load_val/2.00/g_const)
                         lcase.node_mass[
-                            loaded_elm.eleNodes[0].uid].add(
+                            loaded_elm.nodes[0].uid].add(
                                 np.array([half_mass]*3+[0.00]*3))
                         lcase.node_mass[
-                            loaded_elm.eleNodes[1].uid].add(
+                            loaded_elm.nodes[1].uid].add(
                                 np.array([half_mass]*3+[0.00]*3))
 
                 else:
