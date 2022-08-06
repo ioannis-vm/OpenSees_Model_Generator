@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from ..mesh import Edge, Vertex, Halfedge
 
 # pylint: disable=no-member
-
+# pylint: disable=import-outside-toplevel
 
 nparr = npt.NDArray[np.float64]
 PolygonShape = list[tuple[float, float]]
@@ -91,14 +91,14 @@ class TributaryAreaAnaysis:
 
         try:
             import skgeom as sg
-        except(ModuleNotFoundError):
+        except ModuleNotFoundError:
             msg = "One day, a custom implementation of the"
             msg += "straight skeleton algorithm might be added to osmg.\n"
             msg += "Until that day, the scikit-geometry package is required.\n"
             msg += "Please install scikit-geometry.\n"
             msg += "https://github.com/scikit-geometry/scikit-geometry"
             print()
-            
+
         lvl = self.parent_level
         all_components = list(lvl.components.values())
         horizontal_elements = []
@@ -228,8 +228,6 @@ class TributaryAreaAnaysis:
                 edge_map[edg_interior.uid] = elm
                 edges[edg_interior.uid] = edg_interior
 
-
-                
         # # plotting - used while developing the code
         # import pandas as pd
         # edf = pd.DataFrame(np.zeros((len(edges)*3, 2)))
@@ -273,7 +271,7 @@ class TributaryAreaAnaysis:
 
             # something like:
             # subloops = mesh.bisector_subdivision(internal_loop)
-            
+
             subloops: list[list[Halfedge]] = []
 
             def is_in_some_subloop(halfedge, loops):
@@ -371,7 +369,7 @@ class TributaryAreaAnaysis:
         # fig.show()
 
         # apply loads and mass
-        # TODO (future): account for the shape of the loaded area as well
+        # todo (future): account for the shape of the loaded area as well
         mdl = self.parent_level.parent_model
         if mdl.settings.imperial_units:
             g_const = common.G_CONST_IMPERIAL

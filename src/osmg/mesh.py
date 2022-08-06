@@ -318,7 +318,6 @@ def ang_reduce(ang):
     return ang
 
 
-
 def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     """
     Given a list of edges, defines all the halfedges and
@@ -466,18 +465,6 @@ def orient_loops(loops):
 #######################################
 # Breaking a shape into little pieces #
 #######################################
-
-def bisector_subdivision(loop: list[Halfedge]):
-    """
-    Used to subdivide floor areas into tributary areas.
-    """
-    import pdb
-    pdb.set_trace()
-    ar = polygon_area(np.array([h.vertex.coords for h in loop]))
-    
-    print(ar)
-    plot_loop(loop)
-    return loop
 
 
 def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
