@@ -92,12 +92,15 @@ class TributaryAreaAnaysis:
         try:
             import skgeom as sg
         except ModuleNotFoundError:
-            msg = "One day, a custom implementation of the"
+            msg = "One day, a custom implementation of the "
             msg += "straight skeleton algorithm might be added to osmg.\n"
             msg += "Until that day, the scikit-geometry package is required.\n"
             msg += "Please install scikit-geometry.\n"
             msg += "https://github.com/scikit-geometry/scikit-geometry"
+            print("~ skgeom is not installed ~")
             print()
+            print(msg)
+            exit()
 
         lvl = self.parent_level
         all_components = list(lvl.components.values())
