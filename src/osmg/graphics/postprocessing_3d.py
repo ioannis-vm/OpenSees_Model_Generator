@@ -706,8 +706,7 @@ def show_deformed_shape(analysis,
     layout = graphics_common_3d.global_layout(camera)
     data_dict: list[dict[str, object]] = []
 
-    list_of_frames = [elm for elm in mdl.list_of_beamcolumn_elements()
-                      if not elm.visibility.skip_opensees_definition]
+    list_of_frames = mdl.list_of_beamcolumn_elements()
 
     # list_of_steel_W_panel_zones = \
     #     mdl.list_of_steel_W_panel_zones()
@@ -721,33 +720,30 @@ def show_deformed_shape(analysis,
     #     add_data__nodes_deformed(
     #         analysis, dt, list_of_parent_nodes, step, scaling)
 
-    if not extrude:
-        # draw the nodes
-        add_data__nodes_deformed(
-            analysis, case_name, data_dict, list_of_primary_nodes,
-            step, scaling, 'free')
-        add_data__nodes_deformed(
-            analysis, case_name, data_dict, list_of_internal_nodes,
-            step, scaling, 'internal')
+    # draw the nodes
+    add_data__nodes_deformed(
+        analysis, case_name, data_dict, list_of_primary_nodes,
+        step, scaling, 'free')
+    add_data__nodes_deformed(
+        analysis, case_name, data_dict, list_of_internal_nodes,
+        step, scaling, 'internal')
     #     add_data__nodes_deformed(
     #         analysis, dt, list_of_release_nodes, step, scaling,
     #         color=graphics_common.NODE_INTERNAL_COLOR,
     #         marker=graphics_common_3d.node_marker['pinned'][0],
     #         size=graphics_common_3d.node_marker['pinned'][1])
-        # draw the frames as lines
-        add_data__frames_offsets_deformed(
-            analysis, case_name, data_dict, list_of_frames, step, scaling)
-        add_data__frames_deformed(
-            analysis, case_name, data_dict, list_of_frames, step, scaling)
-        # we also add axes so that we can see 2D plots
-        ref_len = mdl.reference_length()
-        add_data__global_axes(data_dict, ref_len)
-    else:
-        # draw the extruded frames
+    # draw the frames as lines
+    add_data__frames_offsets_deformed(
+        analysis, case_name, data_dict, list_of_frames, step, scaling)
+    add_data__frames_deformed(
+        analysis, case_name, data_dict, list_of_frames, step, scaling)
+    # we also add axes so that we can see 2D plots
+    ref_len = mdl.reference_length()
+    add_data__global_axes(data_dict, ref_len)
+
+    if extrude:
         add_data__extruded_frames_deformed_mesh(
             analysis, case_name, data_dict, list_of_frames, step, scaling)
-        # add_data__extruded_steel_W_PZ_deformed_mesh(
-        #     analysis, dt, list_of_steel_W_panel_zones, step, scaling)
 
     fig_datastructure = dict(data=data_dict, layout=layout)
     fig = go.Figure(fig_datastructure)

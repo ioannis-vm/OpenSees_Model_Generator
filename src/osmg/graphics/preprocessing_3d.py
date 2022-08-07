@@ -784,8 +784,7 @@ def show(mdl: Model,
     # plot the nodes
 
     add_data__nodes(data_dict, mdl, load_case)
-    if not extrude:
-        add_data__internal_nodes(data_dict, mdl, load_case)
+    add_data__internal_nodes(data_dict, mdl, load_case)
 
     # global axes
     if global_axes:
