@@ -1,1 +1,3 @@
-include src/osmg/*.toml src/osmg/sections.json
+include *.toml
+include src/osmg/py.typed
+include src/osmg/*.json
