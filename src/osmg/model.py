@@ -133,7 +133,7 @@ class Model:
         Returns the connectivity of all component
         assemblies. Component assemblies are collections of
         lower-level components that are connected to primary
-        nodes. Each component assembly can be represented by a typle
+        nodes. Each component assembly can be represented by a tuple
         of node uids of its connected nodes in ascending order. This
         method returns a dictionary having these tuples as keys, and
         the associated components as values.

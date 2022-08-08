@@ -138,7 +138,7 @@ class ComponentAssembly:
         """
         Returns the connectivity of all elements. Elements are
         connected to external nodes. Each component assembly can be
-        represented by a typle of node uids of its connected nodes in
+        represented by a tuple of node uids of its connected nodes in
         ascending order. This method returns a dictionary having these
         tuples as keys, and the associated components as values.
         """
