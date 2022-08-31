@@ -379,8 +379,8 @@ class Analysis:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
         # keep track of defined elements
-        defined_sections = {}
-        defined_materials = {}
+        defined_sections: dict[int, object] = {}
+        defined_materials: dict[int, object] = {}
 
         elms = self.mdl.dict_of_disp_beamcolumn_elements().values()
 
@@ -391,7 +391,9 @@ class Analysis:
             """
             # if the actual material has not been defined yet,
             if mat.uid not in defined_materials:
-                while hasattr(mat, 'predecessor') and mat.predecessor.uid not in defined_materials:
+                while hasattr(mat, 'predecessor') \
+                      and mat.predecessor.uid \
+                      not in defined_materials:
                     # define predecessor
                     define_material(mat.predecessor, defined_materials)
                 # and also define the actual material
