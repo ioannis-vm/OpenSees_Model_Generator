@@ -384,6 +384,20 @@ class Analysis:
 
         elms = self.mdl.dict_of_disp_beamcolumn_elements().values()
 
+        def define_material(mat, defined_materials):
+            """
+            A cute recursive function that defines materials with
+            predecessors.
+            """
+            # if the actual material has not been defined yet,
+            if mat.uid not in defined_materials:
+                while hasattr(mat, 'predecessor') and mat.predecessor.uid not in defined_materials:
+                    # define predecessor
+                    define_material(mat.predecessor, defined_materials)
+                # and also define the actual material
+                ops.uniaxialMaterial(*mat.ops_args())
+                defined_materials[mat.uid] = mat
+
         for elm in elms:
             sec = elm.section
             parts = sec.section_parts.values()
@@ -394,10 +408,7 @@ class Analysis:
                 defined_sections[sec.uid] = sec
                 for part in parts:
                     mat = part.ops_material
-                    if mat.uid not in defined_materials:
-                        ops.uniaxialMaterial(
-                            *mat.ops_args())
-                        defined_materials[mat.uid] = mat
+                    define_material(mat, defined_materials)
                     pieces = subdivide_polygon(
                         part.outside_shape, part.holes, n_x, n_y)
                     for piece in pieces:
@@ -408,7 +419,6 @@ class Analysis:
                                   z_loc,
                                   area,
                                   part.ops_material.uid)
-                    plt.show()
             ops.beamIntegration(*elm.integration.ops_args())
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
@@ -422,10 +432,7 @@ class Analysis:
         # define zerolength elements
         for elm in elms:
             for mat in elm.mats:
-                if mat.uid not in defined_materials:
-                    ops.uniaxialMaterial(
-                        *mat.ops_args())
-                    defined_materials[mat.uid] = mat
+                define_material(mat, defined_materials)
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
@@ -688,9 +695,6 @@ class ModalAnalysis(Analysis):
         for case_name in self.load_cases:
             for step in range(self.num_modes):
                 for elm in elems:
-                    # if step == 3:
-                    #     import pdb
-                    #     pdb.set_trace()
                     assert isinstance(elm, ElasticBeamColumn)
                     # displacements at the two ends (global system)
                     u_i = (self.results[case_name].node_displacements
