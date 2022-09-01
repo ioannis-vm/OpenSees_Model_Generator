@@ -698,61 +698,61 @@ def show_deformed_shape(analysis,
       extrude (bool): wether to extrude frame elements
       camera (dict): custom positioning of the camera
     """
+
     if subset_model:
+        # if a subset model is specified, only show its components
         mdl = subset_model
     else:
+        # otherwise show the entire model
         mdl = analysis.mdl
-    # calculate a nice scaling factor if 0.00 is passed
-    if scaling == 0:
-        scaling = get_auto_scaling_deformation(analysis, case_name, mdl, step)
 
+    # calculate a nice scaling factor if 0.00 is passed
+    if scaling == 0.00:
+        scaling = get_auto_scaling_deformation(
+            analysis, case_name, mdl, step)
+
+    # instantiate layout and datastructures
     layout = graphics_common_3d.global_layout(camera)
     data_dict: list[dict[str, object]] = []
 
+    # gather lists of associated objects
     list_of_frames = mdl.list_of_beamcolumn_elements()
-
-    # list_of_steel_W_panel_zones = \
-    #     mdl.list_of_steel_W_panel_zones()
     list_of_primary_nodes = mdl.list_of_primary_nodes()
     list_of_internal_nodes = mdl.list_of_internal_nodes()
     # list_of_parent_nodes = mdl.list_of_parent_nodes()
-    # list_of_release_nodes = \
-    #     [x.node_i for x in mdl.list_of_endreleases()]
 
-    # if list_of_parent_nodes:
-    #     add_data__nodes_deformed(
-    #         analysis, dt, list_of_parent_nodes, step, scaling)
+    # add data for the global axes
+    ref_len = mdl.reference_length()
+    add_data__global_axes(data_dict, ref_len)
 
-    # draw the nodes
+    # add data for the nodes
     add_data__nodes_deformed(
         analysis, case_name, data_dict, list_of_primary_nodes,
         step, scaling, 'free')
     add_data__nodes_deformed(
         analysis, case_name, data_dict, list_of_internal_nodes,
         step, scaling, 'internal')
-    #     add_data__nodes_deformed(
-    #         analysis, dt, list_of_release_nodes, step, scaling,
-    #         color=graphics_common.NODE_INTERNAL_COLOR,
-    #         marker=graphics_common_3d.node_marker['pinned'][0],
-    #         size=graphics_common_3d.node_marker['pinned'][1])
-    # draw the frames as lines
+
+    # add data for the frame elements as lines
     add_data__frames_offsets_deformed(
         analysis, case_name, data_dict, list_of_frames, step, scaling)
     add_data__frames_deformed(
         analysis, case_name, data_dict, list_of_frames, step, scaling)
-    # we also add axes so that we can see 2D plots
-    ref_len = mdl.reference_length()
-    add_data__global_axes(data_dict, ref_len)
 
+    # add data for the extruded frame elements
     if extrude:
         add_data__extruded_frames_deformed_mesh(
             analysis, case_name, data_dict, list_of_frames, step, scaling)
 
+    # create the plot
     fig_datastructure = dict(data=data_dict, layout=layout)
     fig = go.Figure(fig_datastructure)
+
+    # show the plot (if it's not a test)
     if "pytest" not in sys.modules:
         fig.show()
 
+    # return plot-related metadata
     metadata = {'scaling': scaling}
     return metadata
 
