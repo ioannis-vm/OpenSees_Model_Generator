@@ -188,6 +188,9 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     for elm in list_of_frames:
         if elm.visibility.hidden_when_extruded:
             continue
+        if elm.section.outside_shape is None:
+            continue
+
         num_points = 8
         # translations and rotations at the offset ends
         u_i = (analysis.results[case_name].node_displacements
