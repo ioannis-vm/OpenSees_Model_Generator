@@ -857,62 +857,78 @@ class NonlinearAnalysis(Analysis):
         if check != 0:
             raise ValueError('Analysis Failed')
 
-    # def _acceptance_criteria(self):
-    #     for elm in self.mdl.list_of_line_elements():
+    # failed attempt
+    # def remove_damaged_elements(self):
+    #     """
+    #     Applies to fiber-section elements that use the Fatigue
+    #     material to simulate damage.
+    #     Elements for which any section has Damage >= 1 to more than a
+    #     set percentage of its fibers are removed.
+    #     Assumes that the section consists of a single part called 'main'
+    #     """
+    #     max_dmg_ratio = 0.30
+    #     candidate_elms = []
 
-    #         if elm.model_as['type'] != 'elastic':
-    #             continue
-    #         mat = elm.section.material
-    #         if mat.name == 'steel':
-    #             capacity_t = mat.parameters['Fy']/mat.parameters['E0']
-    #             capacity_c = -capacity_t
-    #         else:
-    #             raise ValueError('Unsupported material')
-    #         strains = []
-    #         x_vec = elm.x_axis
-    #         y_vec = elm.y_axis
-    #         z_vec = elm.z_axis
-    #         trans_global2local: nparr = np.vstack((x_vec, y_vec, z_vec))
-    #         forces_global: nparr = np.array(
-    #             self.element_forces[str(elm.uid)][-1][0:3])
-    #         moments_global_ends: nparr = np.array(
-    #             self.element_forces[str(elm.uid)][-1][3:6])
+    #     for elm in self.mdl.dict_of_disp_beamcolumn_elements().values():
+    #         part = elm.section.section_parts['main']
+    #         if isinstance(elm.section, FiberSection):
+    #             if isinstance(part.ops_material, Fatigue):
+    #                 candidate_elms.append(elm)
 
-    #         moments_global_clear = \
-    #             transformations.offset_transformation(
-    #                 elm.offset_i, moments_global_ends, forces_global)
-
-    #         ni, qyi, qzi = trans_global2local @ forces_global
-    #         ti, myi, mzi = trans_global2local @ moments_global_clear
-
-    #         wx, wy, wz = elm.udl.total()
-
-    #         len_clr = elm.length_clear
-    #         t = np.linspace(0.00, len_clr, num=9)
-
-    #         nx_vec = - t * wx - ni
-    #         mz_vec = t**2 * 0.50 * wy + t * qyi - mzi
-    #         my_vec = t**2 * 0.50 * wz + t * qzi + myi
-
-    #         prop = elm.section.mesh.geometric_properties()
-    #         area = prop['area']
-    #         iy = prop['inertia']['ixx']
-    #         iz = prop['inertia']['iyy']
-    #         young_mod = elm.section.material.parameters['E0']
-
-    #         for val in elm.section.snap_points.values():
-    #             z, y = val
-    #             stress = nx_vec/area \
-    #                 + my_vec/iz * z \
-    #                 - mz_vec/iy * y
-    #             strain = stress / young_mod
-    #             strains.extend(strain)
-    #         emax = np.max(np.array(strains))
-    #         emin = np.min(np.array(strains))
-    #         if ((emax > capacity_t) or (emin < capacity_c)):
-    #             raise ValueError(
-    #                 "Acceptance criteria failed for element " +
-    #                 str(elm.uid))
+    #     for elm in candidate_elms:
+    #         part = elm.section.section_parts['main']
+    #         mat_uid = part.ops_material.uid
+    #         sec_dmg_percentages = []
+    #         for sec_num in range(1, elm.integration.n_p+1):
+    #             num_damaged_fibers = 0
+    #             pieces = subdivide_polygon(part.outside_shape, part.holes, elm.section.n_x, elm.section.n_y)
+    #             for piece in pieces:
+    #                 z_loc = piece.centroid.x
+    #                 y_loc = piece.centroid.y
+    #                 dmg = ops.eleResponse(elm.uid, 'section', str(sec_num), 'fiber', str(y_loc), str(z_loc), str(mat_uid), 'damage')[0]
+    #                 if dmg > 1.00:
+    #                     num_damaged_fibers += 1
+    #             damage_percentage = float(num_damaged_fibers)/float(len(pieces))
+    #             sec_dmg_percentages.append(damage_percentage)
+    #         max_damage = max(sec_dmg_percentages)
+    #         if max_damage > max_dmg_ratio:
+    #             # need to remove that element
+    #             import pdb
+    #             pdb.set_trace()
+    #             print('ok')
+    #             ops.remove('ele', elm.uid)
+    #             ops.reset()
+    def intervention(self, n_steps_success):
+        if n_steps_success == -1:
+        # if n_steps_success == 2000:
+            elm = self.mdl.dict_of_disp_beamcolumn_elements()[49]
+            part = elm.section.section_parts['main']
+            mat_uid = part.ops_material.uid
+        else:
+            return
+        for sec_num in range(1, elm.integration.n_p+1):
+            zs = []
+            ys = []
+            dmgs = []
+            pieces = subdivide_polygon(part.outside_shape, part.holes, elm.section.n_x, elm.section.n_y)
+            for piece in pieces:
+                z_loc = piece.centroid.x
+                y_loc = piece.centroid.y
+                dmg = ops.eleResponse(elm.uid, 'section', str(sec_num), 'fiber', str(y_loc), str(z_loc), str(mat_uid), 'damage')[0]
+                zs.append(z_loc)
+                ys.append(y_loc)
+                dmgs.append(dmg)
+            print(dmgs)
+            plt.scatter(zs, ys, s=0.1)
+            for i, txt in enumerate(dmgs):
+                plt.annotate(f'{txt:.1f}', (zs[i], ys[i]))
+            plt.title(f'Section {sec_num}/{sec_num}')
+            plt.show()
+        import pdb
+        pdb.set_trace()
+        print()
+                
+                
 
     def retrieve_node_displacement(self, uid, case_name):
         """
