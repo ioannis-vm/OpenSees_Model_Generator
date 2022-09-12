@@ -283,7 +283,9 @@ class BeamColumnGenerator:
             transf_type,
             section,
             element_type,
-            angle
+            angle,
+            camber_2,
+            camber_3
     ):
         """
         Adds beamcolumn elemens in series
@@ -292,10 +294,34 @@ class BeamColumnGenerator:
         if n_sub > 1:
             p_i = np.array(node_i.coords) + eo_i
             p_j = np.array(node_j.coords) + eo_j
+            clear_len = np.linalg.norm(p_j - p_i)
             internal_pt_coords = np.linspace(
                 tuple(p_i),
                 tuple(p_j),
                 num=n_sub+1)
+
+            # initial deformation
+            t_vals = np.linspace(0.00, 1.00, num=n_sub+1)
+            # quadratic initial imperfection
+            # offset_vals = 4.00 * (-t_vals**2 + t_vals)
+            # sinusoidal initial imperfection
+            offset_vals = np.sin(np.pi * t_vals)
+            offset_2 = offset_vals * camber_2 * clear_len
+            offset_3 = offset_vals * camber_3 * clear_len
+            camber_offset: nparr = np.column_stack((
+                np.zeros(n_sub+1),
+                offset_2,
+                offset_3
+            ))
+            x_axis, y_axis, z_axis = \
+                local_axes_from_points_and_angle(
+                    p_i, p_j, angle)
+            t_glob_to_loc = transformation_matrix(
+                x_axis, y_axis, z_axis)
+            t_loc_to_glob = t_glob_to_loc.T
+            camber_offset_global = (t_loc_to_glob @ camber_offset.T).T
+            internal_pt_coords += camber_offset_global
+
             intnodes = []
             for i in range(1, len(internal_pt_coords)-1):
                 intnode = Node(self.model.uid_generator
@@ -344,7 +370,7 @@ class BeamColumnGenerator:
             section,
             element_type,
             transf_type,
-            angle):
+            angle, camber_2, camber_3):
         """
         Generates a plain component assembly, with line elements in
         series
@@ -374,8 +400,11 @@ class BeamColumnGenerator:
             transf_type,
             section,
             element_type,
-            angle
+            angle,
+            camber_2, camber_3
         )
+
+        return component
 
     def generate_hinged_component_assembly(
             self,
@@ -390,6 +419,7 @@ class BeamColumnGenerator:
             element_type,
             transf_type,
             angle,
+            camber_2, camber_3,
             zerolength_gen_i,
             zerolength_gen_args_i,
             zerolength_gen_j,
@@ -438,10 +468,10 @@ class BeamColumnGenerator:
                 eo_i,
                 np.zeros(3),
                 zerolength_gen_args_i['n_sub'],
-                transf_type,
-                section,
-                element_type,
-                angle
+                transf_type_i,
+                section_i,
+                element_type_i,
+                angle, camber_2, camber_3
             )
             zerolen_elm = self.define_zerolength(
                 component,
@@ -476,10 +506,10 @@ class BeamColumnGenerator:
                 np.zeros(3),
                 eo_j,
                 zerolength_gen_args_j['n_sub'],
-                transf_type,
-                section,
-                element_type,
-                angle
+                transf_type_j,
+                section_j,
+                element_type_j,
+                angle, camber_2, camber_3
             )
             zerolen_elm = self.define_zerolength(
                 component,
@@ -507,8 +537,9 @@ class BeamColumnGenerator:
             transf_type,
             section,
             element_type,
-            angle
+            angle, camber_2, camber_3
         )
+        return component
 
     def add_vertical_active(
             self,
@@ -522,6 +553,7 @@ class BeamColumnGenerator:
             element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
             placement='centroid',
             angle=0.00,
+            camber_2=0.00, camber_3=0.00,
             method='generate_plain_component_assembly',
             additional_args={}
     ):
@@ -572,14 +604,17 @@ class BeamColumnGenerator:
                 'section': section,
                 'element_type': element_type,
                 'transf_type': transf_type,
-                'angle': angle
+                'angle': angle,
+                'camber_2': camber_2,
+                'camber_3': camber_3
             }
 
             args.update(additional_args)
             assert hasattr(self, method), \
                 f'Method not available: {method}'
             mthd = getattr(self, method)
-            mthd(**args)
+            defined_component_assemblies[key] = mthd(**args)
+        return defined_component_assemblies
 
     def add_horizontal_active(
             self,
@@ -597,6 +632,7 @@ class BeamColumnGenerator:
             element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
             placement='centroid',
             angle=0.00,
+            camber_2=0.00, camber_3=0.00,
             split_existing_i=None,
             split_existing_j=None,
             method='generate_plain_component_assembly',
@@ -655,14 +691,108 @@ class BeamColumnGenerator:
                 'section': section,
                 'element_type': element_type,
                 'transf_type': transf_type,
-                'angle': angle
+                'angle': angle,
+                'camber_2': camber_2,
+                'camber_3': camber_3
             }
 
             args.update(additional_args)
             assert hasattr(self, method), \
                 f'Method not available: {method}'
             mthd = getattr(self, method)
-            mthd(**args)
+            defined_component_assemblies[key] = mthd(**args)
+        return defined_component_assemblies
+
+    def add_diagonal_active(
+            self,
+            xi_coord: float,
+            yi_coord: float,
+            xj_coord: float,
+            yj_coord: float,
+            offset_i: nparr,
+            offset_j: nparr,
+            snap_i: str,
+            snap_j: str,
+            transf_type: str,
+            n_sub: int,
+            section: ElasticSection,
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
+            placement='centroid',
+            angle=0.00,
+            camber_2=0.00, camber_3=0.00,
+            split_existing_i=None,
+            split_existing_j=None,
+            method='generate_plain_component_assembly',
+            additional_args={}
+    ):
+        """
+        Adds a diagonal beamcolumn element to all active levels.
+        """
+        query = ElmQuery(self.model)
+        ndg = NodeGenerator(self.model)
+        lvls = self.model.levels
+        assert lvls.active, 'No active levels.'
+        defined_component_assemblies: dict[int, ComponentAssembly] = {}
+        for key in lvls.active:
+            lvl = lvls[key]
+            lvl_prev = lvls.get(key-1)
+
+            if not lvl_prev:
+                continue
+
+            p_i_init = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
+            p_j_init = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
+
+            if section.snap_points and (placement != 'centroid'):
+                # obtain offset from section (local system)
+                d_z, d_y = section.snap_points[placement]
+                sec_offset_local: nparr = np.array([0.00, d_y, d_z])
+                # retrieve local coordinate system
+                x_axis, y_axis, z_axis = \
+                    local_axes_from_points_and_angle(
+                        p_i_init, p_j_init, angle)  # type: ignore
+                t_glob_to_loc = transformation_matrix(
+                    x_axis, y_axis, z_axis)
+                t_loc_to_glob = t_glob_to_loc.T
+                sec_offset_global = t_loc_to_glob @ sec_offset_local
+            else:
+                sec_offset_global = np.zeros(3)
+
+            node_i, eo_i = beam_placement_lookup(
+                xi_coord, yi_coord, query, ndg,
+                lvls, key, offset_i,
+                sec_offset_global,
+                split_existing_i,
+                snap_i)
+            node_j, eo_j = beam_placement_lookup(
+                xj_coord, yj_coord, query, ndg,
+                lvls, key-1, offset_j,
+                sec_offset_global,
+                split_existing_j,
+                snap_j)
+
+            args = {
+                'component_purpose': 'diagonal_component',
+                'lvl': lvl,
+                'node_i': node_i,
+                'node_j': node_j,
+                'n_sub': n_sub,
+                'eo_i': eo_i,
+                'eo_j': eo_j,
+                'section': section,
+                'element_type': element_type,
+                'transf_type': transf_type,
+                'angle': angle,
+                'camber_2': camber_2,
+                'camber_3': camber_3
+            }
+
+            args.update(additional_args)
+            assert hasattr(self, method), \
+                f'Method not available: {method}'
+            mthd = getattr(self, method)
+            defined_component_assemblies[key] = mthd(**args)
+        return defined_component_assemblies
 
     def add_pz_active(
             self,
