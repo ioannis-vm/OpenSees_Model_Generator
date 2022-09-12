@@ -18,6 +18,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
 from ..ops.section import ElasticSection
+from ..ops.section import FiberSection
+from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Bilin
 from ..ops.uniaxial_material import Pinching4
 from ..ops.uniaxial_material import Hysteretic
@@ -63,7 +65,7 @@ def release_56(model: Model, **kwargs):
 def imk_6(
         model: Model,
         element_length: float,
-        lbry: float,
+        lboverl: float,
         loverh: float,
         rbs_factor: Optional[float],
         consider_composite: bool,
@@ -103,31 +105,43 @@ def imk_6(
     sec_tw = section.properties['tw']
     # Plastic modulus (unreduced)
     sec_zx = section.properties['Zx']
+    # Radius of gyration
+    sec_ry = section.properties['ry']
     # Clear length
     elm_h = element_length
-    # Shear span - 0.5 * elm_H typically.
+    # Shear span
     elm_l = loverh * elm_h
+    elm_lb = lboverl * elm_l
+    lbry = elm_lb / sec_ry
     if rbs_factor:
         # RBS case
         assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
         # checks ~ acceptable range
         if not 20.00 < sec_d/sec_tw < 55.00:
-            print('Warning: sec_d/sec_tw outside regression range')
+            print(f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
+                  ' outside regression range')
+            print('20.00 < sec_d/sec_tw < 55.00')
             print(section.name, '\n')
         if not 20.00 < lbry < 80.00:
-            print('Warning: Lb/ry outside regression range')
+            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
+            print('20.00 < lbry < 80.00')
             print(section.name, '\n')
         if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
-            print('Warning: bf/(2 tf) outside regression range')
+            print(f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
+                  ' outside regression range')
+            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
             print(section.name, '\n')
         if not 2.5 < elm_l/sec_d < 7.0:
-            print('Warning: L/d  outside regression range')
+            print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
+            print('2.5 < elm_l/sec_d < 7.0')
             print(section.name, '\n')
         if not 4.00 < sec_d < 36.00:
-            print('Warning: Section d outside regression range')
+            print(f'Warning: Section d={sec_d:.2f} outside regression range')
+            print('4.00 < sec_d < 36.00')
             print(section.name, '\n')
         if not 35.00 < mat_fy < 65.00:
-            print('Warning: Fy outside regression range')
+            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
+            print('35.00 < mat_fy < 65.00')
             print(section.name, '\n')
         # calculate parameters
         theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
@@ -199,7 +213,7 @@ def imk_6(
     beta_minus = - (mcmy_minus - 1.) * my_minus \
         / (theta_p_minus) / stiffness
     mat = Bilin(
-        model.uid_generator.new('element'),
+        model.uid_generator.new('uniaxial material'),
         'auto_IMK',
         stiffness,
         beta_plus, beta_minus,
@@ -223,7 +237,7 @@ def imk_6(
 def release_5_imk_6(
         model: Model,
         element_length: float,
-        lbry: float,
+        lboverl: float,
         loverh: float,
         rbs_factor: Optional[float],
         consider_composite: bool,
@@ -231,10 +245,11 @@ def release_5_imk_6(
         physical_material: PhysicalMaterial,
         **kwargs):
     """
-    release in the weak axis bending direciton,
+    release in the weak axis bending direction,
     imk (see imk docstring) in the strong axis bending direction
     """
-    # TODO: avoid code repetition
+    # TODO: avoid code repetition -- by moving uniaxialmaterial
+    # generation to another generator
     assert section.name[0] == 'W', \
         "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
@@ -256,31 +271,43 @@ def release_5_imk_6(
     sec_tw = section.properties['tw']
     # Plastic modulus (unreduced)
     sec_zx = section.properties['Zx']
+    # Radius of gyration
+    sec_ry = section.properties['ry']
     # Clear length
     elm_h = element_length
-    # Shear span - 0.5 * elm_H typically.
+    # Shear span
     elm_l = loverh * elm_h
+    elm_lb = lboverl * elm_l
+    lbry = elm_lb / sec_ry
     if rbs_factor:
         # RBS case
         assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
         # checks ~ acceptable range
         if not 20.00 < sec_d/sec_tw < 55.00:
-            print('Warning: sec_d/sec_tw outside regression range')
+            print(f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
+                  ' outside regression range')
+            print('20.00 < sec_d/sec_tw < 55.00')
             print(section.name, '\n')
         if not 20.00 < lbry < 80.00:
-            print('Warning: Lb/ry outside regression range')
+            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
+            print('20.00 < lbry < 80.00')
             print(section.name, '\n')
         if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
-            print('Warning: bf/(2 tf) outside regression range')
+            print(f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
+                  ' outside regression range')
+            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
             print(section.name, '\n')
         if not 2.5 < elm_l/sec_d < 7.0:
-            print('Warning: L/d  outside regression range')
+            print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
+            print('2.5 < elm_l/sec_d < 7.0')
             print(section.name, '\n')
         if not 4.00 < sec_d < 36.00:
-            print('Warning: Section d outside regression range')
+            print(f'Warning: Section d={sec_d:.2f} outside regression range')
+            print('4.00 < sec_d < 36.00')
             print(section.name, '\n')
         if not 35.00 < mat_fy < 65.00:
-            print('Warning: Fy outside regression range')
+            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
+            print('35.00 < mat_fy < 65.00')
             print(section.name, '\n')
         # calculate parameters
         theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
@@ -352,7 +379,7 @@ def release_5_imk_6(
     beta_minus = - (mcmy_minus - 1.) * my_minus \
         / (theta_p_minus) / stiffness
     mat = Bilin(
-        model.uid_generator.new('element'),
+        model.uid_generator.new('uniaxial material'),
         'auto_IMK',
         stiffness,
         beta_plus, beta_minus,
@@ -460,7 +487,7 @@ def gravity_shear_tab(
         dmgtype = 'energy'
 
     mat = Pinching4(
-        model.uid_generator.new('element'),
+        model.uid_generator.new('uniaxial material'),
         'auto_gravity_shear_tab',
         m1_p, th_1_p, m2_p, th_2_p,
         m3_p, th_3_p, m4_p, th_4_p,
@@ -523,7 +550,7 @@ def steel_w_col_pz(
     m3y /= 4.00
 
     mat = Hysteretic(
-        model.uid_generator.new('element'),
+        model.uid_generator.new('uniaxial material'),
         'auto_steel_W_PZ',
         (m1y, gamma_1),
         (m2y, gamma_2),
@@ -539,4 +566,46 @@ def steel_w_col_pz(
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
     mats = [fix_mat]*5 + [mat]
+    return dirs, mats
+
+
+def steel_brace_gusset(
+        model: Model,
+        physical_mat: PhysicalMaterial,
+        d_brace: float,
+        l_c: float,
+        t_p: float,
+        l_b: float,
+        **kwargs):
+    """
+    Hsiao, P. C., Lehman, D. E., & Roeder, C. W. (2013). A model to
+    simulate special concentrically braced frames beyond brace
+    fracture. Earthquake engineering & structural dynamics, 42(2),
+    183-200.
+    Arguments:
+      model (Model): Model object
+      physical_mat (PhysicalMaterial): physical material object
+      d_brace (float): brace section height
+      l_c (float): brace-to-gusset connection length
+      t_p (float): gusset plate thickness
+      l_b (float): gusset plate average buckling length
+    """
+    var_w = d_brace + 2.00 * l_c
+    var_i = var_w * t_p**3 / 12.00
+    var_z = var_w * t_p**2 / 6.00
+    f_y = physical_mat.f_y
+    var_e = physical_mat.e_mod
+    var_g = physical_mat.g_mod
+    var_my = var_z * f_y
+    var_k_rot = var_e * var_i / l_b
+    var_b = 0.01
+    gusset_mat = Steel02(
+        model.uid_generator.new('uniaxial material'),
+        'auto_steel_gusset',
+        var_my, var_k_rot, var_b, (20.00, 0.925, 0.15),
+        0.0005, 0.014, 0.0005, 0.01, 0.00, var_g)
+    dirs = [1, 2, 3, 4, 5, 6]
+    mat_repo = model.uniaxial_materials
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    mats = [fix_mat]*4 + [gusset_mat, fix_mat]
     return dirs, mats
