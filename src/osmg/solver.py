@@ -700,94 +700,100 @@ class ModalAnalysis(Analysis):
         # to overcome this, we run a separate analysis imposing those
         # displacements to get the element forces.
 
-        # note: work in progress. currently this doesn't fully work
+        for step in range(self.num_modes):
+            for elm in elems:
+                assert isinstance(elm, ElasticBeamColumn)
+                # displacements at the two ends (global system)
+                u_i = (self.results[case_name].node_displacements
+                       [elm.nodes[0].uid][step][0:3])
+                r_i = (self.results[case_name].node_displacements
+                       [elm.nodes[0].uid][step][3:6])
+                u_j = (self.results[case_name].node_displacements
+                       [elm.nodes[1].uid][step][0:3])
+                r_j = (self.results[case_name].node_displacements
+                       [elm.nodes[1].uid][step][3:6])
+                offset_i = elm.geomtransf.offset_i
+                offset_j = elm.geomtransf.offset_j
+                u_i_o = transformations.offset_transformation(
+                    offset_i, np.array(u_i), np.array(r_i))
+                u_j_o = transformations.offset_transformation(
+                    offset_j, np.array(u_j), np.array(r_j))
 
-        for case_name in self.load_cases:
-            for step in range(self.num_modes):
-                for elm in elems:
-                    assert isinstance(elm, ElasticBeamColumn)
-                    # displacements at the two ends (global system)
-                    u_i = (self.results[case_name].node_displacements
-                           [elm.nodes[0].uid][step][0:3])
-                    r_i = (self.results[case_name].node_displacements
-                           [elm.nodes[0].uid][step][3:6])
-                    u_j = (self.results[case_name].node_displacements
-                           [elm.nodes[1].uid][step][0:3])
-                    r_j = (self.results[case_name].node_displacements
-                           [elm.nodes[1].uid][step][3:6])
-                    offset_i = elm.geomtransf.offset_i
-                    offset_j = elm.geomtransf.offset_j
-                    u_i_o = transformations.offset_transformation(
-                        offset_i, np.array(u_i), np.array(r_i))
-                    u_j_o = transformations.offset_transformation(
-                        offset_j, np.array(u_j), np.array(r_j))
+                x_vec = elm.geomtransf.x_axis
+                y_vec = elm.geomtransf.y_axis
+                z_vec: nparr = np.cross(x_vec, y_vec)
 
-                    x_vec = elm.geomtransf.x_axis
-                    y_vec = elm.geomtransf.y_axis
-                    z_vec: nparr = np.cross(x_vec, y_vec)
+                # global -> local transformation matrix
+                transf_global2local = \
+                    transformations.transformation_matrix(
+                        x_vec, y_vec, z_vec)
+                u_i_local = transf_global2local @ u_i_o
+                r_i_local = transf_global2local @ r_i
+                u_j_local = transf_global2local @ u_j_o
+                r_j_local = transf_global2local @ r_j
 
-                    # global -> local transformation matrix
-                    transf_global2local = \
-                        transformations.transformation_matrix(
-                            x_vec, y_vec, z_vec)
-                    u_i_local = transf_global2local @ u_i_o
-                    r_i_local = transf_global2local @ r_i
-                    u_j_local = transf_global2local @ u_j_o
-                    r_j_local = transf_global2local @ r_j
+                # # element UDL
+                udl = (self.load_cases[case_name]
+                       .line_element_udl[elm.uid].val)
+                # note: modal analsis doesn't account for applied loads.
+                # this will cause issues with plotting if loads
+                # have been applied.
+                if np.linalg.norm(udl) > common.EPSILON:
+                    raise ValueError('Loads applied at modal load case.')
 
-                    # # element UDL
-                    udl = (self.load_cases[case_name]
-                           .line_element_udl[elm.uid].val)
-                    # note: modal analsis doesn't account for applied loads.
-                    # this will cause issues with plotting if loads
-                    # have been applied.
-                    if np.linalg.norm(udl) > common.EPSILON:
-                        raise ValueError('Loads applied at modal load case.')
+                # stiffness matrix terms
+                length = elm.clear_length()
+                etimesa = elm.section.e_mod * elm.section.area
+                etimesi_maj = elm.section.e_mod * elm.section.i_x
+                etimesi_min = elm.section.e_mod * elm.section.i_y
+                gtimesj = elm.section.g_mod * elm.section.j_mod
 
-                    # stiffness matrix terms
-                    length = elm.clear_length()
-                    etimesa = elm.section.e_mod * elm.section.area
-                    etimesi_maj = elm.section.e_mod * elm.section.i_x
-                    # eimin = elm.section.e_mod * elm.section.Iy
-                    gtimesj = elm.section.g_mod * elm.section.j_mod
+                deformation_vector = np.concatenate(
+                    (u_i_local, r_i_local, u_j_local, r_j_local))
 
-                    # deformations
-                    d_l = u_j_local[0] - u_i_local[0]
-                    theta_tor = r_j_local[0] - r_i_local[0]
-                    du_xy = u_j_local[1] - u_i_local[1]
-                    # du_xz = u_j_local[2] - u_i_local[2]
+                # axial load
+                n_i = np.array([
+                    [etimesa/length, -etimesa/length]
+                ]) @ deformation_vector[[0, 6]]
 
-                    # axial load
-                    n_i = etimesa / length * d_l
+                # torsion
+                t_i = np.array([
+                    [gtimesj/length, -gtimesj/length]
+                ]) @ deformation_vector[[3, 9]]
 
-                    # strong axis bending
-                    mz_i = \
-                        (4.00 * etimesi_maj / length * r_i_local[2]
-                         + 2.00 * etimesi_maj / length * r_j_local[2]
-                         - 6.00 * etimesi_maj / length**2 * du_xy)
-                    qy_i = (6.00 * etimesi_maj / length**2
-                            * (r_i_local[2] + r_j_local[2])
-                            - 12.00 * etimesi_maj / length**3 * du_xy)
+                # major shear and minor bending
+                f3_m2 = np.array([
+                    [12.00*etimesi_min/length**3,
+                     -6.00*etimesi_min/length**2,
+                     -12.00*etimesi_min/length**3,
+                     -6.00*etimesi_min/length**2],
+                    [-6.00*etimesi_min/length**2,
+                     4.00*etimesi_min/length,
+                     6.00*etimesi_min/length**2,
+                     2.00*etimesi_min/length]
+                ]) @ deformation_vector[[2, 4, 8, 10]]
 
-                    # # weak axis bending
-                    # # work in progress...
-                    # myi = \
-                    #     -(4.00 * eimin / length * (-r_i_local[1])
-                    #      + 2.00 * eimin / length * (-r_j_local[1])
-                    #      - 6.00 * eimin / length * (du_xz))
-                    # qzi = (6.00 * eimin / length**2
-                    #        * ((-r_i_local[2]) + (-r_j_local[2]))
-                    #        - 12.00 * eimin / length**3 * (du_xz))
-                    myi = 0.00
-                    qzi = 0.00
+                # minor shear and major bending
+                f2_m3 = np.array([
+                    [12.00*etimesi_maj/length**3,
+                     6.00*etimesi_maj/length**2,
+                     -12.00*etimesi_maj/length**3,
+                     6.00*etimesi_maj/length**2],
+                    [6.00*etimesi_maj/length**2,
+                     4.00*etimesi_maj/length,
+                     -6.00*etimesi_maj/length**2,
+                     2.00*etimesi_maj/length]
+                ]) @ deformation_vector[[1, 5, 7, 11]]
 
-                    # torsion
-                    t_i = gtimesj / length * theta_tor
+                forces_vector_local = np.array((
+                    n_i[0], f2_m3[0], f3_m2[0],
+                    t_i[0], f3_m2[1], f2_m3[1]))
 
-                    # store results
-                    (self.results[case_name].element_forces
-                     [elm.uid][step]) = \
-                        np.array((n_i, qy_i, qzi, t_i, myi, mz_i))
+                # store results
+                (self.results[case_name].element_forces
+                 # [elm.uid][step]) = \
+                 #    np.array((n_i, qy_i, qzi, t_i, myi, mz_i))
+                 [elm.uid][step]) = forces_vector_local
 
     def run(self):
         """
