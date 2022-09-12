@@ -307,11 +307,9 @@ class Model:
         """
         return list(self.dict_of_zerolength_elements().values())
 
-    def reference_length(self):
+    def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
         """
-        Returns the largest dimension of the
-        bounding box of the building
-        (used in graphics)
+        Returns the axis-aligned bouding box of the building
         """
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
@@ -319,6 +317,17 @@ class Model:
             point: nparr = np.array(node.coords)
             p_min = np.minimum(p_min, point)
             p_max = np.maximum(p_max, point)
+        p_min -= np.full(3, padding)
+        p_max += np.full(3, padding)
+        return p_min, p_max
+
+    def reference_length(self):
+        """
+        Returns the largest dimension of the
+        bounding box of the building
+        (used in graphics)
+        """
+        p_min, p_max = self.bounding_box(padding=0.00)
         ref_len = np.max(p_max - p_min)
         return ref_len
 
