@@ -117,7 +117,7 @@ def test_uniaxial_material(
                 incr_anl = sign * abs(curr_defo - target_defo)
             else:
                 incr_anl = incr * scale[num_subdiv]
-            ops.test('NormDispIncr', norm[num_subdiv],
+            ops.test('EnergyIncr', norm[num_subdiv],
                      steps[num_subdiv], 0)
             ops.algorithm(algor[num_subdiv])
             # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
@@ -655,7 +655,7 @@ class StaticAnalysis(Analysis):
             ops.system(LN_ANALYSIS_SYSTEM)
             ops.numberer(NUMBERER)
             ops.constraints(*CONSTRAINTS)
-            ops.test('NormDispIncr', 1.0e-8, 20, 3)
+            ops.test('EnergyIncr', 1.0e-8, 20, 3)
             ops.algorithm('Newton')
             ops.integrator('LoadControl', 1.0)
             ops.analysis('Static')
@@ -855,7 +855,7 @@ class NonlinearAnalysis(Analysis):
         ops.system(system)
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
-        ops.test('NormDispIncr', 1.0e-6, 100, 3)
+        ops.test('EnergyIncr', 1.0e-6, 100, 3)
         ops.algorithm('RaphsonNewton')
         ops.integrator('LoadControl', 1)
         ops.analysis('Static')
@@ -1194,7 +1194,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                             incr = sign * abs(curr_displ - target_displacement)
                         else:
                             incr = displ_incr * scale[num_subdiv]
-                        ops.test('NormDispIncr', norm[num_subdiv],
+                        ops.test('EnergyIncr', norm[num_subdiv],
                                  steps[num_subdiv], 0)
                         ops.algorithm('RaphsonNewton')
                         # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
@@ -1203,9 +1203,12 @@ class PushoverAnalysis(NonlinearAnalysis):
                                        incr)
                         ops.system(NL_ANALYSIS_SYSTEM)
                         ops.analysis("Static")
+                        if n_steps_success == 100:
+                            import pdb
+                            pdb.set_trace()
+                            ops.remove('ele', 1)
                         flag = ops.analyze(1)
                         if flag != 0:
-                            # analysis failed
                             if num_subdiv == len(scale) - 1:
                                 # can't refine further
                                 self.print('===========================')
@@ -1561,7 +1564,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                 'modal damping defined')
 
         self.log('Starting transient analysis')
-        ops.test('NormDispIncr', 1e-6, 50, 0)
+        ops.test('EnergyIncr', 1e-6, 50, 0)
         ops.algorithm("KrylovNewton")
         # ops.integrator('Newmark', 0.50, 0.25)
         ops.integrator('TRBDF2')
