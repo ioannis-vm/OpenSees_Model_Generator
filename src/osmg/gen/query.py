@@ -36,7 +36,7 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
-class ElmQuerry:
+class ElmQuery:
     """
     Used by all component generators
     """
@@ -48,15 +48,12 @@ class ElmQuerry:
         """
         find component assembly based on connectivity
         """
-        res = None
         uids = [node.uid for node in nodes]
         uids.sort()
         uids_tuple = (*uids,)
         conn_dict = self.model.component_connectivity()
-        conn_dict.get(uids_tuple)
-        if uids_tuple:
-            res = conn_dict[uids_tuple]
-        return res
+        val = conn_dict.get(uids_tuple)
+        return val
 
     def search_node_lvl(self,
                         x_loc: float, y_loc: float,
@@ -115,6 +112,32 @@ class ElmQuerry:
                 retrieved_components[component.uid] = component
         return retrieved_components
 
+    def retrieve_component_from_nodes(
+            self,
+            nodes: list[Node],
+            lvl_uid: Optional[int] = None) -> Optional[ComponentAssembly]:
+        """
+        Retrieves a single component assembly if all of its external
+        nodes match the given list of nodes.
+        """
+        retrieved_component = None
+        if lvl_uid:
+            level = self.model.levels[lvl_uid]
+            candidate_components = level.components.values()
+        else:
+            candidate_components = self.model.list_of_components()
+        given_node_uids = [n.uid for n in nodes]
+        for component in candidate_components:
+            reject = False
+            external_nodes = component.external_nodes.values()
+            for node in external_nodes:
+                if node.uid not in given_node_uids:
+                    reject = True
+                    continue
+            if not reject:
+                retrieved_component = component
+        return retrieved_component
+
     def retrieve_component(self, x_loc, y_loc, lvl):
         """
         Retrieves a component assembly of a level if any of its
@@ -148,9 +171,9 @@ class ElmQuerry:
 
 
 @dataclass
-class LoadCaseQuerry:
+class LoadCaseQuery:
     """
-    Load case querry object.
+    Load case query object.
     """
     model: Model
     loadcase: LoadCase
