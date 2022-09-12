@@ -219,6 +219,9 @@ class DispBeamColumn(Element):
             self.nodes[1].uid,
             self.geomtransf.uid,
             self.integration.uid,
+            # '-iter',  # can change it to forceBeamColumn here for testing!
+            # 50,
+            # 1e-1
         ]
 
     def clear_length(self):

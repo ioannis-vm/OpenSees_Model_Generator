@@ -235,7 +235,7 @@ class BeamColumnGenerator:
             beam_integration = Lobatto(
                 uid=self.model.uid_generator.new('beam integration'),
                 parent_section=section,
-                n_p=5
+                n_p=2
             )
             elm_disp = DispBeamColumn(
                 parent_component=assembly,
