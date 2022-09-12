@@ -198,8 +198,7 @@ class BeamColumnGenerator:
             transf_type: str,
             section: ElasticSection | FiberSection,
             element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
-            angle=0.00,
-            camber_2=0.00, camber_3=0.00) -> ElasticBeamColumn | DispBeamColumn:
+            angle=0.00) -> ElasticBeamColumn | DispBeamColumn:
         """
         Adds a beamcolumn element to the model, connecting the specified nodes
         """

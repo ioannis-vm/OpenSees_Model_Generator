@@ -12,6 +12,8 @@ Model Generator for OpenSees ~ solver
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 # pylint: disable=no-member
+# pylint: disable=dangerous-default-value
+# pylint: disable=unused-argument
 
 
 from __future__ import annotations
@@ -36,8 +38,6 @@ from .mesh import subdivide_polygon
 # from .import components
 from .model import Model
 from .ops.element import ElasticBeamColumn
-from .ops.section import FiberSection
-from .ops.uniaxial_material import Fatigue
 from .import common
 # from .graphics import postprocessing_3d
 from .graphics import general_2d
@@ -216,6 +216,17 @@ class AnalysisStorageSettings:
 @dataclass(repr=False)
 class Analysis:
     """
+    Parent analysis class.
+    Attributes:
+      mdl (Model): a given model
+      load_cases (dict): Dictionary containing load case names and
+        load case objects in which those load cases reside.
+      output_directory (Optional[str]): Where to place the results
+        when it is requested for them to be pickled.
+      silent (bool): Supress printing
+      settings (AnalysisStorageSettings): analysis settings
+      results (Results): analysis results
+      logger(Optional[object]): Logger object
     """
     mdl: Model
     load_cases: dict[str, LoadCase]
@@ -893,14 +904,20 @@ class NonlinearAnalysis(Analysis):
     #         sec_dmg_percentages = []
     #         for sec_num in range(1, elm.integration.n_p+1):
     #             num_damaged_fibers = 0
-    #             pieces = subdivide_polygon(part.outside_shape, part.holes, elm.section.n_x, elm.section.n_y)
+    #             pieces = subdivide_polygon(
+    #                 part.outside_shape, part.holes,
+    #                 elm.section.n_x, elm.section.n_y)
     #             for piece in pieces:
     #                 z_loc = piece.centroid.x
     #                 y_loc = piece.centroid.y
-    #                 dmg = ops.eleResponse(elm.uid, 'section', str(sec_num), 'fiber', str(y_loc), str(z_loc), str(mat_uid), 'damage')[0]
+    #                 dmg = ops.eleResponse(
+    #                     elm.uid, 'section', str(sec_num),
+    #                     'fiber', str(y_loc), str(z_loc), str(mat_uid),
+    #                     'damage')[0]
     #                 if dmg > 1.00:
     #                     num_damaged_fibers += 1
-    #             damage_percentage = float(num_damaged_fibers)/float(len(pieces))
+    #             damage_percentage = float(
+    #                 num_damaged_fibers)/float(len(pieces))
     #             sec_dmg_percentages.append(damage_percentage)
     #         max_damage = max(sec_dmg_percentages)
     #         if max_damage > max_dmg_ratio:
@@ -910,37 +927,41 @@ class NonlinearAnalysis(Analysis):
     #             print('ok')
     #             ops.remove('ele', elm.uid)
     #             ops.reset()
-    def intervention(self, n_steps_success):
-        if n_steps_success == -1:
-        # if n_steps_success == 2000:
-            elm = self.mdl.dict_of_disp_beamcolumn_elements()[49]
-            part = elm.section.section_parts['main']
-            mat_uid = part.ops_material.uid
-        else:
-            return
-        for sec_num in range(1, elm.integration.n_p+1):
-            zs = []
-            ys = []
-            dmgs = []
-            pieces = subdivide_polygon(part.outside_shape, part.holes, elm.section.n_x, elm.section.n_y)
-            for piece in pieces:
-                z_loc = piece.centroid.x
-                y_loc = piece.centroid.y
-                dmg = ops.eleResponse(elm.uid, 'section', str(sec_num), 'fiber', str(y_loc), str(z_loc), str(mat_uid), 'damage')[0]
-                zs.append(z_loc)
-                ys.append(y_loc)
-                dmgs.append(dmg)
-            print(dmgs)
-            plt.scatter(zs, ys, s=0.1)
-            for i, txt in enumerate(dmgs):
-                plt.annotate(f'{txt:.1f}', (zs[i], ys[i]))
-            plt.title(f'Section {sec_num}/{sec_num}')
-            plt.show()
-        import pdb
-        pdb.set_trace()
-        print()
-                
-                
+
+    # def intervention(self, n_steps_success):
+    #     if n_steps_success == -1:
+    #     # if n_steps_success == 2000:
+    #         elm = self.mdl.dict_of_disp_beamcolumn_elements()[49]
+    #         part = elm.section.section_parts['main']
+    #         mat_uid = part.ops_material.uid
+    #     else:
+    #         return
+    #     for sec_num in range(1, elm.integration.n_p+1):
+    #         zs = []
+    #         ys = []
+    #         dmgs = []
+    #         pieces = subdivide_polygon(
+    #             part.outside_shape, part.holes,
+    #             elm.section.n_x, elm.section.n_y)
+    #         for piece in pieces:
+    #             z_loc = piece.centroid.x
+    #             y_loc = piece.centroid.y
+    #             dmg = ops.eleResponse(
+    #                 elm.uid, 'section', str(sec_num),
+    #                 'fiber', str(y_loc), str(z_loc),
+    #                 str(mat_uid), 'damage')[0]
+    #             zs.append(z_loc)
+    #             ys.append(y_loc)
+    #             dmgs.append(dmg)
+    #         print(dmgs)
+    #         plt.scatter(zs, ys, s=0.1)
+    #         for i, txt in enumerate(dmgs):
+    #             plt.annotate(f'{txt:.1f}', (zs[i], ys[i]))
+    #         plt.title(f'Section {sec_num}/{sec_num}')
+    #         plt.show()
+    #     import pdb
+    #     pdb.set_trace()
+    #     print()
 
     def retrieve_node_displacement(self, uid, case_name):
         """
@@ -1172,9 +1193,9 @@ class PushoverAnalysis(NonlinearAnalysis):
             num_subdiv = 0
             num_times = 0
 
-            scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
-            steps = [25, 50, 75, 100, 250, 500]
-            norm = [1.0e-6] * 5 + [1.0e-2]
+            scale = [1.0, 0.1, 0.01]
+            steps = [25, 50, 100]
+            norm = [1.0e-12, 1.0e-12, 1.0e-12]
 
             try:
 
@@ -1209,10 +1230,6 @@ class PushoverAnalysis(NonlinearAnalysis):
                                        incr)
                         ops.system(NL_ANALYSIS_SYSTEM)
                         ops.analysis("Static")
-                        if n_steps_success == 100:
-                            import pdb
-                            pdb.set_trace()
-                            ops.remove('ele', 1)
                         flag = ops.analyze(1)
                         if flag != 0:
                             if num_subdiv == len(scale) - 1:
@@ -1240,7 +1257,6 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 zerolength_elems,
                                 custom_read_results_method,
                                 custom_read_results_method_args)
-                            self.intervention(n_steps_success)
                             curr_displ = ops.nodeDisp(
                                 int(control_node.uid), control_dof+1)
                             print('Target displacement: '

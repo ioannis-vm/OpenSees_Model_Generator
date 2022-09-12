@@ -165,12 +165,13 @@ def interp_3d_points(element, d_global, num_points, scaling):
     return interpolation_points
 
 
-def add_data__extruded_line_elms_deformed_mesh(analysis,
-                                            case_name,
-                                            data_dict,
-                                            list_of_line_elems,
-                                            step,
-                                            scaling):
+def add_data__extruded_line_elms_deformed_mesh(
+        analysis,
+        case_name,
+        data_dict,
+        list_of_line_elems,
+        step,
+        scaling):
     """
     Adds a trace containing frame element extrusion mesh
     in its deformed state
@@ -300,12 +301,13 @@ def add_data__extruded_line_elms_deformed_mesh(analysis,
     })
 
 
-def add_data__line_elms_deformed(analysis,
-                              case_name,
-                              data_dict,
-                              list_of_line_elems,
-                              step,
-                              scaling):
+def add_data__line_elms_deformed(
+        analysis,
+        case_name,
+        data_dict,
+        list_of_line_elems,
+        step,
+        scaling):
     """
     Adds a trace containing frame element centroidal axis lines
     in their deformed state
@@ -362,12 +364,13 @@ def add_data__line_elms_deformed(analysis,
     })
 
 
-def add_data__line_elm_offsets_deformed(analysis,
-                                      case_name,
-                                      data_dict,
-                                      list_of_line_elems,
-                                      step,
-                                      scaling):
+def add_data__line_elm_offsets_deformed(
+        analysis,
+        case_name,
+        data_dict,
+        list_of_line_elems,
+        step,
+        scaling):
     """
     Adds a trace containing frame element rigid offset lines
     in their deformed state
@@ -648,10 +651,12 @@ def show_deformed_shape(analysis,
             add_data__global_axes(frame_data_dict[-1], ref_len)
             # add_data__global_axes(frame_data_dict[0], ref_len)
             add_data__nodes_deformed(
-                analysis, case_name, frame_data_dict[-1], list_of_primary_nodes,
+                analysis, case_name, frame_data_dict[-1],
+                list_of_primary_nodes,
                 j, scaling, 'free')
             add_data__nodes_deformed(
-                analysis, case_name, frame_data_dict[-1], list_of_internal_nodes,
+                analysis, case_name, frame_data_dict[-1],
+                list_of_internal_nodes,
                 j, scaling, 'internal')
             # add data for the frame elements as lines
             add_data__line_elm_offsets_deformed(
@@ -731,25 +736,6 @@ def show_deformed_shape(analysis,
             layout=layout)
         fig = go.Figure(fig_datastructure)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     # show the plot (if it's not a test)
     if "pytest" not in sys.modules:
         fig.show()

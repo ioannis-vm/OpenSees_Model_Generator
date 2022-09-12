@@ -18,7 +18,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
 from ..ops.section import ElasticSection
-from ..ops.section import FiberSection
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Bilin
 from ..ops.uniaxial_material import Pinching4

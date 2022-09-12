@@ -42,7 +42,7 @@ def global_layout(mdl, camera=None):
     # get a proper boudning box form the model
     ref_len = mdl.reference_length()
     p_min, p_max = mdl.bounding_box(padding=2.0*ref_len)
-    
+
     # view_type = "orthographic"
     view_type = "perspective"
     if not camera:

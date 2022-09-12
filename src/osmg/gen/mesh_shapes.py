@@ -20,7 +20,6 @@ from ..mesh import orient_loops
 from ..mesh import obtain_closed_loops
 from ..mesh import sanity_checks
 from ..mesh import define_halfedges
-from ..import common
 
 nparr = npt.NDArray[np.float64]
 

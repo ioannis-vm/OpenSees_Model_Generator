@@ -14,7 +14,6 @@ Model Generator for OpenSees ~ section generator
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Type
-from typing import Optional
 from dataclasses import dataclass
 import json
 import pkgutil
@@ -97,7 +96,7 @@ class SectionGenerator:
             sec_type: Type[Section],
             store_in_model=True,
             return_section=False
-    ) -> Optional[ElasticSection | FiberSection]:
+    ) -> dict[str, ElasticSection | FiberSection]:
         """
         Loads a section from the AISC steel section database.
         """
@@ -110,11 +109,12 @@ class SectionGenerator:
         assert isinstance(contents, bytes)
         section_dictionary = json.loads(contents)
         assert self.model.settings.imperial_units, 'SI not supported'
+        returned_sections: dict[str, ElasticSection | FiberSection] = {}
         for label in labels:
             try:
                 sec_data = section_dictionary[label]
-            except KeyError:
-                raise KeyError(f'Section {label} not found in file.')
+            except KeyError as exc:
+                raise KeyError(f'Section {label} not found in file.') from exc
             if sec_shape_designation == 'W':
                 assert sec_data['Type'] == 'W'
                 sec_b = sec_data['bf']
@@ -144,17 +144,18 @@ class SectionGenerator:
                         ops_mat,
                         phs_mat)
                     sec_fib = FiberSection(
-                        label,
-                        self.model.uid_generator.new('section'),
-                        outside_shape,
-                        {'main': main_part},
-                        sec_data['J'],
-                        snap_points,
-                        properties=sec_data)
+                        name=label,
+                        uid=self.model.uid_generator.new('section'),
+                        outside_shape=outside_shape,
+                        section_parts={'main': main_part},
+                        j_mod=sec_data['J'],
+                        snap_points=snap_points,
+                        properties=sec_data,
+                        n_x=10, n_y=10)
                     if store_in_model:
                         self.model.fiber_sections.add(sec_fib)
                     if return_section:
-                        return sec_fib
+                        returned_sections[sec_fib.name] = sec_fib
                 elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
@@ -172,7 +173,7 @@ class SectionGenerator:
                     if store_in_model:
                         self.model.elastic_sections.add(sec_el)
                     if return_section:
-                        return sec_el
+                        returned_sections[sec_el.name] = sec_el
                 else:
                     raise ValueError(
                         f'Unsupported section type: {sec_type.__name__}')
@@ -189,7 +190,7 @@ class SectionGenerator:
                     sec_b-2.00*sec_t, sec_ht-2.00*sec_t)
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
-                snap_points: dict[str, nparr] = {
+                snap_points = {
                     'centroid': np.array([0., 0.]),
                     'top_center': np.array([0., -y_max]),
                     'top_left': np.array([-z_min, -y_max]),
@@ -213,11 +214,12 @@ class SectionGenerator:
                         {'main': main_part},
                         sec_data['J'],
                         snap_points,
-                        properties=sec_data)
+                        sec_data,
+                        n_x=10, n_y=10)
                     if store_in_model:
                         self.model.fiber_sections.add(sec_fib)
                     if return_section:
-                        return sec_fib
+                        returned_sections[sec_fib.name] = sec_fib
                 elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
@@ -235,7 +237,7 @@ class SectionGenerator:
                     if store_in_model:
                         self.model.elastic_sections.add(sec_el)
                     if return_section:
-                        return sec_el
+                        returned_sections[sec_el.name] = sec_el
                 else:
                     raise ValueError(
                         f'Unsupported section type: {sec_type.__name__}')
@@ -243,3 +245,4 @@ class SectionGenerator:
                 raise ValueError(
                     'Unsupported section designtation:'
                     f' {sec_shape_designation}')
+        return returned_sections

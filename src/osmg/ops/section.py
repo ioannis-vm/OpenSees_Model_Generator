@@ -128,6 +128,10 @@ class SectionComponent:
         return res
 
     def copy_alter_material(self, mat: UniaxialMaterial):
+        """
+        Make a shallow copy of a section component and replace the old
+        material with the given one.
+        """
         new_component = SectionComponent(
             self.outside_shape,
             self.holes,
@@ -147,10 +151,10 @@ class FiberSection(Section):
     outside_shape: Mesh
     section_parts: dict[str, SectionComponent]
     j_mod: float
-    snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
-    properties: Optional[dict[str, Any]] = field(default=None, repr=False)
-    n_x: int = field(default=10)  # TODO: this should be editable
-    n_y: int = field(default=10)
+    snap_points: dict[str, nparr]
+    properties: dict[str, Any]
+    n_x: int
+    n_y: int
 
     def __repr__(self):
         res = ''
@@ -207,8 +211,10 @@ class FiberSection(Section):
             new_part = val.copy_alter_material(mat)
             new_section_parts[key] = new_part
         other_sec = FiberSection(
-            f'auto_{self.name}',
-            new_uid, self.outside_shape, new_section_parts,
-            self.j_mod, self.snap_points, self.properties,
-            self.n_x, self.n_y)
+            name=f'auto_{self.name}',
+            uid=new_uid, outside_shape=self.outside_shape,
+            section_parts=new_section_parts,
+            j_mod=self.j_mod, snap_points=self.snap_points,
+            properties=self.properties,
+            n_x=self.n_x, n_y=self.n_y)
         return other_sec
