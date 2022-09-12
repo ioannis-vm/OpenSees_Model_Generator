@@ -14,6 +14,7 @@ Model Generator for OpenSees ~ section generator
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Type
+from typing import Optional
 from dataclasses import dataclass
 import json
 import pkgutil
@@ -93,7 +94,10 @@ class SectionGenerator:
             self,
             sec_shape_designation: str, labels: list[str],
             ops_material: str, physical_material: str,
-            sec_type: Type[Section]):
+            sec_type: Type[Section],
+            store_in_model=True,
+            return_section=False
+    ) -> Optional[ElasticSection | FiberSection]:
         """
         Loads a section from the AISC steel section database.
         """
@@ -112,6 +116,7 @@ class SectionGenerator:
             except KeyError:
                 raise KeyError(f'Section {label} not found in file.')
             if sec_shape_designation == 'W':
+                assert sec_data['Type'] == 'W'
                 sec_b = sec_data['bf']
                 sec_h = sec_data['d']
                 sec_tw = sec_data['tw']
@@ -144,8 +149,12 @@ class SectionGenerator:
                         outside_shape,
                         {'main': main_part},
                         sec_data['J'],
-                        snap_points)
-                    self.model.fiber_sections.add(sec_fib)
+                        snap_points,
+                        properties=sec_data)
+                    if store_in_model:
+                        self.model.fiber_sections.add(sec_fib)
+                    if return_section:
+                        return sec_fib
                 elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
@@ -160,7 +169,73 @@ class SectionGenerator:
                         outside_shape,
                         snap_points,
                         properties=sec_data)
-                    self.model.elastic_sections.add(sec_el)
+                    if store_in_model:
+                        self.model.elastic_sections.add(sec_el)
+                    if return_section:
+                        return sec_el
+                else:
+                    raise ValueError(
+                        f'Unsupported section type: {sec_type.__name__}')
+            elif sec_shape_designation == 'HSS_rect':
+                assert sec_data['Type'] == 'HSS'
+                # must be rectangle: name will have 2 X's.
+                assert len(label.split('X')) == 3
+                sec_ht = sec_data['Ht']
+                sec_b = sec_data['B']
+                sec_t = sec_data['tdes']
+                outside_shape = mesh_shapes.rect_mesh(
+                    sec_b, sec_ht)
+                hole = mesh_shapes.rect_mesh(
+                    sec_b-2.00*sec_t, sec_ht-2.00*sec_t)
+                bbox = outside_shape.bounding_box()
+                z_min, y_min, z_max, y_max = bbox.flatten()
+                snap_points: dict[str, nparr] = {
+                    'centroid': np.array([0., 0.]),
+                    'top_center': np.array([0., -y_max]),
+                    'top_left': np.array([-z_min, -y_max]),
+                    'top_right': np.array([-z_max, -y_max]),
+                    'center_left': np.array([-z_min, 0.]),
+                    'center_right': np.array([-z_max, 0.]),
+                    'bottom_center': np.array([0., -y_min]),
+                    'bottom_left': np.array([-z_min, -y_min]),
+                    'bottom_right': np.array([-z_max, -y_min])
+                }
+                if sec_type.__name__ == 'FiberSection':
+                    main_part = SectionComponent(
+                        outside_shape,
+                        {'hole': hole},
+                        ops_mat,
+                        phs_mat)
+                    sec_fib = FiberSection(
+                        label,
+                        self.model.uid_generator.new('section'),
+                        outside_shape,
+                        {'main': main_part},
+                        sec_data['J'],
+                        snap_points,
+                        properties=sec_data)
+                    if store_in_model:
+                        self.model.fiber_sections.add(sec_fib)
+                    if return_section:
+                        return sec_fib
+                elif sec_type.__name__ == 'ElasticSection':
+                    sec_el = ElasticSection(
+                        label,
+                        self.model.uid_generator.new('section'),
+                        phs_mat.e_mod,
+                        sec_data['A'],
+                        sec_data['Iy'],
+                        sec_data['Ix'],
+                        phs_mat.g_mod,
+                        sec_data['J'],
+                        sec_data['W'] / 12.00,  # lb/in
+                        outside_shape,
+                        snap_points,
+                        properties=sec_data)
+                    if store_in_model:
+                        self.model.elastic_sections.add(sec_el)
+                    if return_section:
+                        return sec_el
                 else:
                     raise ValueError(
                         f'Unsupported section type: {sec_type.__name__}')
