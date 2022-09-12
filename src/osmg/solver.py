@@ -571,7 +571,9 @@ class Analysis:
             nodes,
             elastic_beamcolumn_elements,
             disp_beamcolumn_elements,
-            zerolength_elements):
+            zerolength_elements,
+            custom_read_results_method,
+            custom_read_results_method_args):
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
         self._read_node_accelerations(case_name, step, nodes)
@@ -581,15 +583,15 @@ class Analysis:
             self._read_frame_element_forces(
                 case_name,
                 step, elastic_beamcolumn_elements)
-            self._read_frame_element_forces(
-                case_name,
-                step, disp_beamcolumn_elements)
         # if self.settings.store_fiber:
         #     self._read_frame_fiber_stress_strain()
         if self.settings.store_release_force_defo:
             self._read_release_moment_rot(
                 case_name,
                 step, zerolength_elements)
+        if custom_read_results_method is not None:
+            custom_read_results_method(
+                **custom_read_results_method_args)
 
     ##################################
     # Numeric Result Post-processing #
@@ -630,7 +632,9 @@ class StaticAnalysis(Analysis):
     Static analysis.  Stores all results (for each load case) in one
     single step.
     """
-    def run(self):
+    def run(self,
+            custom_read_results_method=None,
+            custom_read_results_method_args={}):
         """
         Runs the static analysis.
         """
@@ -662,7 +666,9 @@ class StaticAnalysis(Analysis):
                 nodes,
                 elastic_elems,
                 disp_elems,
-                zerolength_elems)
+                zerolength_elems,
+                custom_read_results_method,
+                custom_read_results_method_args)
             if self.settings.pickle_results:
                 self._write_results_to_disk()
 
@@ -1091,7 +1097,9 @@ class PushoverAnalysis(NonlinearAnalysis):
                                modeshape_ampl[i]))
 
     def run(self, direction, target_displacements,
-            control_node, displ_incr, modeshape=None, loaded_node=None):
+            control_node, displ_incr, modeshape=None, loaded_node=None,
+            custom_read_results_method=None,
+            custom_read_results_method_args={}):
         """
         Run pushover analysis
         Arguments:
@@ -1143,7 +1151,9 @@ class PushoverAnalysis(NonlinearAnalysis):
                 nodes,
                 elastic_elems,
                 disp_elems,
-                zerolength_elems)
+                zerolength_elems,
+                custom_read_results_method,
+                custom_read_results_method_args)
 
             ops.wipeAnalysis()
             ops.loadConst('-time', 0.0)
@@ -1218,8 +1228,10 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 nodes,
                                 elastic_elems,
                                 disp_elems,
-                                zerolength_elems)
-                            # self._acceptance_criteria()
+                                zerolength_elems,
+                                custom_read_results_method,
+                                custom_read_results_method_args)
+                            self.intervention(n_steps_success)
                             curr_displ = ops.nodeDisp(
                                 int(control_node.uid), control_dof+1)
                             print('Target displacement: '
@@ -1240,7 +1252,9 @@ class PushoverAnalysis(NonlinearAnalysis):
                 nodes,
                 elastic_elems,
                 disp_elems,
-                zerolength_elems)
+                zerolength_elems,
+                custom_read_results_method,
+                custom_read_results_method_args)
             self.print(f'Number of saved analysis steps: {n_steps_success}')
             metadata = {'successful steps': n_steps_success}
             self.results[case_name].n_steps_success = n_steps_success
@@ -1398,7 +1412,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             finish_time=0.00,
             skip_steps=1,
             damping={'type': None},
-            print_progress=True):
+            print_progress=True,
+            custom_read_results_method=None,
+            custom_read_results_method_args={}):
         """
         Run the nonlinear time-history analysis
         Args:
@@ -1493,7 +1509,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             nodes,
             elastic_elems,
             disp_elems,
-            zerolength_elems
+            zerolength_elems,
+            custom_read_results_method,
+            custom_read_results_method_args
         )
 
         # time-history analysis
@@ -1683,7 +1701,9 @@ class NLTHAnalysis(NonlinearAnalysis):
                             nodes,
                             elastic_elems,
                             disp_elems,
-                            zerolength_elems
+                            zerolength_elems,
+                            custom_read_results_method,
+                            custom_read_results_method_args
                         )
                         self.time_vector.append(curr_time)
                     if print_progress:
