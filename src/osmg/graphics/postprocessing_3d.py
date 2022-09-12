@@ -165,17 +165,17 @@ def interp_3d_points(element, d_global, num_points, scaling):
     return interpolation_points
 
 
-def add_data__extruded_frames_deformed_mesh(analysis,
+def add_data__extruded_line_elms_deformed_mesh(analysis,
                                             case_name,
                                             data_dict,
-                                            list_of_frames,
+                                            list_of_line_elems,
                                             step,
                                             scaling):
     """
     Adds a trace containing frame element extrusion mesh
     in its deformed state
     """
-    if not list_of_frames:
+    if not list_of_line_elems:
         return
     x_list = []
     y_list = []
@@ -185,7 +185,7 @@ def add_data__extruded_frames_deformed_mesh(analysis,
     k_list = []
     intensity = []
     index = 0
-    for elm in list_of_frames:
+    for elm in list_of_line_elems:
         if elm.visibility.hidden_when_extruded:
             continue
         if elm.section.outside_shape is None:
@@ -272,10 +272,14 @@ def add_data__extruded_frames_deformed_mesh(analysis,
                 i_list.append(index + 0)
                 j_list.append(index + 2)
                 k_list.append(index + 3)
-                intensity.append(np.linalg.norm(d_global[i, :]))
-                intensity.append(np.linalg.norm(d_global[i+1, :]))
-                intensity.append(np.linalg.norm(d_global[i+1, :]))
-                intensity.append(np.linalg.norm(d_global[i, :]))
+                intensity.append(
+                    np.sqrt(d_global[i, :]@d_global[i, :]))
+                intensity.append(
+                    np.sqrt(d_global[i+1, :]@d_global[i+1, :]))
+                intensity.append(
+                    np.sqrt(d_global[i+1, :]@d_global[i+1, :]))
+                intensity.append(
+                    np.sqrt(d_global[i, :]@d_global[i, :]))
                 index += 4
     data_dict.append({
         "type": "mesh3d",
@@ -353,27 +357,27 @@ def add_data__line_elms_deformed(analysis,
         "hoverinfo": "skip",
         "line": {
             "width": 5,
-            "color": graphics_common.BEAM_MESH_COLOR
+            "color": graphics_common.FRAME_COLOR
         }
     })
 
 
-def add_data__frames_offsets_deformed(analysis,
+def add_data__line_elm_offsets_deformed(analysis,
                                       case_name,
                                       data_dict,
-                                      list_of_frames,
+                                      list_of_line_elems,
                                       step,
                                       scaling):
     """
     Adds a trace containing frame element rigid offset lines
     in their deformed state
     """
-    if not list_of_frames:
+    if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
-    for elm in list_of_frames:
+    for elm in list_of_line_elems:
         if np.array_equal(elm.geomtransf.offset_i, np.zeros(3)):
             if np.array_equal(elm.geomtransf.offset_j, np.zeros(3)):
                 continue
@@ -427,7 +431,7 @@ def add_data__frames_offsets_deformed(analysis,
     })
 
 
-def add_data__frames_undeformed(data_dict, list_of_frames):
+def add_data__frames_undeformed(data_dict, list_of_line_elems):
     """
     Adds a trace containing frame element centroidal axis lines
     """
@@ -435,7 +439,7 @@ def add_data__frames_undeformed(data_dict, list_of_frames):
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
 
-    for elm in list_of_frames:
+    for elm in list_of_line_elems:
 
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
@@ -567,7 +571,10 @@ def show_deformed_shape(analysis,
                         scaling,
                         extrude,
                         camera=None,
-                        subset_model=None):
+                        subset_model=None,
+                        animation=True,
+                        init_step=0,
+                        step_skip=0):
 
     """
     Visualize the model in its deformed state
@@ -594,42 +601,155 @@ def show_deformed_shape(analysis,
             analysis, case_name, mdl, step)
 
     # instantiate layout and datastructures
-    layout = graphics_common_3d.global_layout(camera)
+    layout = graphics_common_3d.global_layout(mdl, camera)
     data_dict: list[dict[str, object]] = []
+    frame_data_dict: list[list[dict[str, object]]] = []
 
     # gather lists of associated objects
-    list_of_frames = mdl.list_of_beamcolumn_elements()
+    list_of_line_elems = mdl.list_of_beamcolumn_elements()
     list_of_primary_nodes = mdl.list_of_primary_nodes()
     list_of_internal_nodes = mdl.list_of_internal_nodes()
     # list_of_parent_nodes = mdl.list_of_parent_nodes()
 
     # add data for the global axes
     ref_len = mdl.reference_length()
-    add_data__global_axes(data_dict, ref_len)
 
-    # add data for the nodes
+    add_data__global_axes(data_dict, ref_len)
+    if animation:
+        first_step = init_step
+    else:
+        first_step = step
+
     add_data__nodes_deformed(
         analysis, case_name, data_dict, list_of_primary_nodes,
-        step, scaling, 'free')
+        first_step, scaling, 'free')
     add_data__nodes_deformed(
         analysis, case_name, data_dict, list_of_internal_nodes,
-        step, scaling, 'internal')
-
+        first_step, scaling, 'internal')
     # add data for the frame elements as lines
-    add_data__frames_offsets_deformed(
-        analysis, case_name, data_dict, list_of_frames, step, scaling)
-    add_data__frames_deformed(
-        analysis, case_name, data_dict, list_of_frames, step, scaling)
-
+    add_data__line_elm_offsets_deformed(
+        analysis, case_name, data_dict,
+        list_of_line_elems, first_step, scaling)
+    add_data__line_elms_deformed(
+        analysis, case_name, data_dict,
+        list_of_line_elems, first_step, scaling)
     # add data for the extruded frame elements
     if extrude:
-        add_data__extruded_frames_deformed_mesh(
-            analysis, case_name, data_dict, list_of_frames, step, scaling)
+        add_data__extruded_line_elms_deformed_mesh(
+            analysis, case_name, data_dict,
+            list_of_line_elems, first_step, scaling)
+
+    if animation:
+        step_of_frame = []
+        for j in range(first_step, step, step_skip+1):
+            step_of_frame.append(j)
+        for _, j in enumerate(step_of_frame):
+            frame_data_dict.append([])
+            add_data__global_axes(frame_data_dict[-1], ref_len)
+            # add_data__global_axes(frame_data_dict[0], ref_len)
+            add_data__nodes_deformed(
+                analysis, case_name, frame_data_dict[-1], list_of_primary_nodes,
+                j, scaling, 'free')
+            add_data__nodes_deformed(
+                analysis, case_name, frame_data_dict[-1], list_of_internal_nodes,
+                j, scaling, 'internal')
+            # add data for the frame elements as lines
+            add_data__line_elm_offsets_deformed(
+                analysis, case_name, frame_data_dict[-1],
+                list_of_line_elems, j, scaling)
+            add_data__line_elms_deformed(
+                analysis, case_name, frame_data_dict[-1],
+                list_of_line_elems, j, scaling)
+            # add data for the extruded frame elements
+            if extrude:
+                add_data__extruded_line_elms_deformed_mesh(
+                    analysis, case_name, frame_data_dict[-1],
+                    list_of_line_elems, j, scaling)
 
     # create the plot
-    fig_datastructure = dict(data=data_dict, layout=layout)
-    fig = go.Figure(fig_datastructure)
 
+    def frame_args(duration):
+        return {
+                "frame": {"duration": duration},
+                "mode": "immediate",
+                "fromcurrent": True,
+                "transition": {"duration": duration, "easing": "linear"},
+            }
+
+    if animation:
+        fig_datastructure = dict(
+            data=data_dict,
+            layout=layout,
+            frames=[go.Frame(data=frame_data_dict[j],
+                             name=str(step_of_frame[j]))
+                    for j in range(len(step_of_frame))])
+        fig = go.Figure(fig_datastructure)
+        sliders = [
+                    {
+                        "pad": {"b": 10, "t": 60},
+                        "len": 0.9,
+                        "x": 0.1,
+                        "y": 0,
+                        "steps": [
+                            {
+                                "args": [[f.name], frame_args(0)],
+                                "label": str(k),
+                                "method": "animate",
+                            }
+                            for k, f in enumerate(fig.frames)
+                        ],
+                    }
+                ]
+        # Layout
+        fig.update_layout(
+            updatemenus=[
+                {
+                    "buttons": [
+                        {
+                            "args": [None, frame_args(50)],
+                            "label": "&#9654;",  # play symbol
+                            "method": "animate",
+                        },
+                        {
+                            "args": [[None], frame_args(0)],
+                            "label": "&#9724;",  # pause symbol
+                            "method": "animate",
+                        },
+                    ],
+                    "direction": "left",
+                    "pad": {"r": 10, "t": 70},
+                    "type": "buttons",
+                    "x": 0.1,
+                    "y": 0,
+                }
+            ],
+            sliders=sliders
+        )
+    else:
+        fig_datastructure = dict(
+            data=data_dict,
+            layout=layout)
+        fig = go.Figure(fig_datastructure)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     # show the plot (if it's not a test)
     if "pytest" not in sys.modules:
         fig.show()
@@ -680,8 +800,6 @@ def show_basic_forces(analysis,
           model.
     """
     # TODO: what is going on with the scaling factors?...
-    layout = graphics_common_3d.global_layout(camera)
-    data_dict: list[dict[str, object]] = []
 
     if subset_model:
         mdl = subset_model
@@ -689,6 +807,9 @@ def show_basic_forces(analysis,
         mdl = analysis.mdl
     list_of_line_elements = [elm for elm in mdl.list_of_beamcolumn_elements()
                              if not elm.visibility.skip_opensees_definition]
+
+    layout = graphics_common_3d.global_layout(mdl, camera)
+    data_dict: list[dict[str, object]] = []
 
     # draw the frames
     add_data__frames_undeformed(
@@ -1159,8 +1280,6 @@ def show_basic_forces_combo(
           model.
     """
     # TODO: merge code repetitions with the previous function
-    layout = graphics_common_3d.global_layout(camera)
-    data_dict: list[dict[str, object]] = []
 
     if subset_model:
         mdl = subset_model
@@ -1168,6 +1287,9 @@ def show_basic_forces_combo(
         mdl = combo.mdl
     list_of_line_elements = [elm for elm in mdl.list_of_beamcolumn_elements()
                              if not elm.visibility.skip_opensees_definition]
+
+    layout = graphics_common_3d.global_layout(mdl, camera)
+    data_dict: list[dict[str, object]] = []
 
     # draw the frames
     add_data__frames_undeformed(

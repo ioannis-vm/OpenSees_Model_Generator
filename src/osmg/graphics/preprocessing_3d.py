@@ -661,7 +661,9 @@ def add_data__global_axes(data_dict, ref_len):
     colors.extend(["red"]*3)
     colors.extend(["green"]*3)
     colors.extend(["blue"]*3)
-    data_dict.append({
+    # we add it twice in order for the animations to work
+    # see https://plotly.com/python/animations/
+    data_dict.extend([{
         "type": "scatter3d",
         "mode": "lines",
         "x": x_list,
@@ -672,7 +674,7 @@ def add_data__global_axes(data_dict, ref_len):
             "width": 3,
             "color": colors
         }
-    })
+    }]*2)
 
 
 def add_data__extruded_frames_mesh(data_dict, mdl):
@@ -776,7 +778,7 @@ def show(mdl: Model,
       camera (dict): custom positioning of the camera
     """
 
-    layout = graphics_common_3d.global_layout(camera)
+    layout = graphics_common_3d.global_layout(mdl, camera)
     data_dict: list[dict[str, object]] = []
 
     ref_len = mdl.reference_length()
