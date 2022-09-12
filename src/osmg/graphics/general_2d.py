@@ -57,18 +57,18 @@ def line_plot_interactive(title_text, x_vals, y_vals, mode,
         raise ValueError("oops! This should never run. Strange.")
 
     if xunit:
-        xtitle = xlab + ' (' + xunit + ')'
+        xtitle = f'{xlab} ({xunit})'
     else:
         xtitle = xlab
     if yunit:
-        ytitle = ylab + ' (' + yunit + ')'
+        ytitle = f'{ylab} ({yunit})'
     else:
         ytitle = ylab
 
     num_points = len(x_vals)
     indices: nparr = np.array([range(num_points)])
     my_hovertemplate = \
-        'XY value pair: %{customdata:d}<br>' + \
+        'XY value pair: %{customdata[0]:d}<br>' + \
         xlab + ' = %{x: ' + xhoverformat + '} '
     if xunit:
         my_hovertemplate += xunit + '<br>'
@@ -91,7 +91,7 @@ def line_plot_interactive(title_text, x_vals, y_vals, mode,
                         line=dict(
                             color=C_LINE,
                             width=4)),
-            customdata=indices,
+            customdata=np.reshape(indices, (-1, 1)),
             hovertemplate=my_hovertemplate
         )
     )
@@ -173,5 +173,6 @@ if __name__ == '__main__':
 # y = [0, 10, 20, 30, 35, 38, 40, 41, 42, 43]
 
 # line_plot_interactive('Pushover\nDirection: Y',
-#                       'Displacement', 'Base Shear',
-#                       'in', 'lb', x, y)
+#                       xlab='Displacement', ylab='Base Shear',
+#                       xunit='in', yunit='lb', x_vals=x, y_vals=y,
+#                       mode='spline+markers')
