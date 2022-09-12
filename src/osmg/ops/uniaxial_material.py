@@ -15,6 +15,7 @@ Model Generator for OpenSees ~ element
 
 
 from dataclasses import dataclass
+from dataclasses import field
 
 
 @dataclass
@@ -154,7 +155,7 @@ class Bilin(UniaxialMaterial):
 class Pinching4(UniaxialMaterial):
     """
     OpenSees Pinching4 Material
-    https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html?highlight=pinching4
+    https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
     """
     ePf1: float
     ePf2: float
@@ -254,4 +255,36 @@ class Hysteretic(UniaxialMaterial):
             self.damage1,
             self.damage2,
             self.beta
+        ]
+
+
+@dataclass
+class Fatigue(UniaxialMaterial):
+    """
+    OpenSees Fatigue Material
+    https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
+    """
+    predecessor: UniaxialMaterial
+    e_mod: float = field(default=0.191)
+    var_m: float = field(default=-0.458)
+    var_min: float = field(default=-1.0e16)
+    var_max: float = field(default=+1.0e16)
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
+        return [
+            'Fatigue',
+            self.uid,
+            self.predecessor.uid,
+            '-E0',
+            self.e_mod,
+            '-m',
+            self.var_m,
+            '-min',
+            self.var_min,
+            '-max',
+            self.var_max
         ]

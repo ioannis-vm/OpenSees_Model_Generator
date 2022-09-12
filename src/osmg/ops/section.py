@@ -21,8 +21,8 @@ import numpy.typing as npt
 from ..mesh import Mesh
 from ..mesh import polygon_area
 from .. import common
+from .uniaxial_material import UniaxialMaterial
 if TYPE_CHECKING:
-    from .uniaxial_material import UniaxialMaterial
     from ..physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
@@ -127,6 +127,15 @@ class SectionComponent:
         res += f'physical_material: {self.physical_material.name}\n'
         return res
 
+    def copy_alter_material(self, mat: UniaxialMaterial):
+        new_component = SectionComponent(
+            self.outside_shape,
+            self.holes,
+            mat,
+            self.physical_material
+        )
+        return new_component
+
 
 @dataclass(repr=False)
 class FiberSection(Section):
@@ -139,7 +148,8 @@ class FiberSection(Section):
     section_parts: dict[str, SectionComponent]
     j_mod: float
     snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
-    n_x: int = field(default=10)  # TODO: this shoule be editable
+    properties: Optional[dict[str, Any]] = field(default=None, repr=False)
+    n_x: int = field(default=10)  # TODO: this should be editable
     n_y: int = field(default=10)
 
     def __repr__(self):
@@ -185,3 +195,20 @@ class FiberSection(Section):
             # TODO: units
             res += area * density * common.G_CONST_IMPERIAL
         return res * mult
+
+    def copy_alter_material(self, mat: UniaxialMaterial, new_uid: int):
+        """
+        Returns a shallow copy of the section object in which all
+        opensees_material objects have been replaced with the given
+        material. Required for the modling of steel braced frames.
+        """
+        new_section_parts = {}
+        for key, val in self.section_parts.items():
+            new_part = val.copy_alter_material(mat)
+            new_section_parts[key] = new_part
+        other_sec = FiberSection(
+            f'auto_{self.name}',
+            new_uid, self.outside_shape, new_section_parts,
+            self.j_mod, self.snap_points, self.properties,
+            self.n_x, self.n_y)
+        return other_sec
