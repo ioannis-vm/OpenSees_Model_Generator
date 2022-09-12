@@ -13,7 +13,7 @@ from osmg.ops.section import ElasticSection
 from osmg.gen.beamcolumn_gen import BeamColumnGenerator
 from osmg.ops.element import ElasticBeamColumn
 from osmg.load_case import LoadCase
-from osmg.gen.querry import ElmQuerry
+from osmg.gen.query import ElmQuery
 from osmg.preprocessing.self_weight_mass import self_weight
 from osmg.preprocessing.self_weight_mass import self_mass
 from osmg.solver import PushoverAnalysis
@@ -37,7 +37,7 @@ def test_a():
 
     mcg = BeamColumnGenerator(mdl)
     secg = SectionGenerator(mdl)
-    querry = ElmQuerry(mdl)
+    query = ElmQuery(mdl)
 
     mdl.add_level(0, 0.00)
     mdl.add_level(1, 15.00 * 12.00)
@@ -131,7 +131,7 @@ def test_a():
 
     show(mdl, testcase)
 
-    control_node = querry.search_node_lvl(0.00, 0.00, 1)
+    control_node = query.search_node_lvl(0.00, 0.00, 1)
 
     anl = PushoverAnalysis(mdl, {testcase.name: testcase})
 
