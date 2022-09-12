@@ -287,150 +287,32 @@ def add_data__extruded_frames_deformed_mesh(analysis,
         "j": j_list,
         "k": k_list,
         "intensity": intensity,
-        "colorbar_title": 'Displacement',
+        "colorbar": {
+            "title": "Displacement",
+            "ypad": 300
+        },
         "hoverinfo": "skip",
         "opacity": 0.65
     })
 
 
-# def add_data__extruded_steel_W_PZ_deformed_mesh(
-#         analysis, dt, list_of_endsegments, step, scaling):
-
-#     # determine the mesh3d dictionary
-#     # to append components to it
-#     # instead of creating a new mesh3d
-#     # (to have a consistent colorscale)
-#     idx = 0
-#     for k, item in enumerate(dt):
-#         if item['type'] == 'mesh3d':
-#             idx = k
-#             break
-
-#     imax = max(dt[idx]['i'])
-#     jmax = max(dt[idx]['j'])
-#     kmax = max(dt[idx]['k'])
-#     ijkmax = max((imax, jmax, kmax))
-
-#     index = ijkmax + 1
-
-#     if not list_of_endsegments:
-#         return
-#     x_list = []
-#     y_list = []
-#     z_list = []
-#     i_list = []
-#     j_list = []
-#     k_list = []
-#     intensity = []
-
-#     for elm in list_of_endsegments:
-
-#         num_points = 2
-#         # translations and rotations at the offset ends
-#         u_i = analysis.node_displacements[str(elm.n_external.uid)][step][0:3]
-#         r_i = analysis.node_displacements[str(elm.n_external.uid)][step][3:6]
-#         u_j = analysis.node_displacements[str(elm.n_internal.uid)][step][0:3]
-#         r_j = analysis.node_displacements[str(elm.n_internal.uid)][step][3:6]
-
-#         d_global, r_local = interp3D_deformation(
-#             elm, u_i, r_i, u_j, r_j, num_points)
-
-#         interpolation_points = interp3D_points(
-#             elm, d_global, r_local, num_points, scaling)
-#         x_vec = elm.parent.x_axis
-#         y_vec = elm.parent.y_axis
-#         z_vec = np.cross(x_vec, y_vec)
-#         for i in range(num_points-1):
-#             loc_i_global = interpolation_points[i, :]
-#             loc_j_global = interpolation_points[i+1, :]
-#             rot_i_local = r_local[i, :]
-#             rot_j_local = r_local[i+1, :]
-
-#             loop = elm.parent.section.mesh.halfedges
-#             for halfedge in loop:
-
-#                 z_a = halfedge.vertex.coords[0]
-#                 y_a = halfedge.vertex.coords[1]
-#                 z_b = halfedge.nxt.vertex.coords[0]
-#                 y_b = halfedge.nxt.vertex.coords[1]
-#                 defo_ia_global = z_a * z_vec + y_a * y_vec + \
-#                     (- rot_i_local[2] * y_a * x_vec +
-#                      rot_i_local[1] * z_a * x_vec
-#                      + rot_i_local[0] * y_a * z_vec
-#                      - rot_i_local[0] * z_a * y_vec
-#                      )*scaling
-#                 defo_ja_global = z_a * z_vec + y_a * y_vec + \
-#                     (- rot_j_local[2] * y_a * x_vec +
-#                      rot_j_local[1] * z_a * x_vec
-#                      + rot_j_local[0] * y_a * z_vec
-#                      - rot_j_local[0] * z_a * y_vec
-#                      )*scaling
-#                 defo_ib_global = z_b * z_vec + y_b * y_vec + \
-#                     (- rot_i_local[2] * y_b * x_vec +
-#                      rot_i_local[1] * z_b * x_vec
-#                      + rot_i_local[0] * y_b * z_vec
-#                      - rot_i_local[0] * z_b * y_vec
-#                      )*scaling
-#                 defo_jb_global = z_b * z_vec + y_b * y_vec + \
-#                     (- rot_j_local[2] * y_b * x_vec +
-#                      rot_i_local[1] * z_b * x_vec
-#                      + rot_j_local[0] * y_b * z_vec
-#                      - rot_j_local[0] * z_b * y_vec
-#                      )*scaling
-#                 loc0 = loc_i_global + defo_ia_global
-#                 loc1 = loc_j_global + defo_ja_global
-#                 loc2 = loc_j_global + defo_jb_global
-#                 loc3 = loc_i_global + defo_ib_global
-#                 x_list.append(loc0[0])
-#                 y_list.append(loc0[1])
-#                 z_list.append(loc0[2])
-#                 x_list.append(loc1[0])
-#                 y_list.append(loc1[1])
-#                 z_list.append(loc1[2])
-#                 x_list.append(loc2[0])
-#                 y_list.append(loc2[1])
-#                 z_list.append(loc2[2])
-#                 x_list.append(loc3[0])
-#                 y_list.append(loc3[1])
-#                 z_list.append(loc3[2])
-#                 i_list.append(index + 0)
-#                 j_list.append(index + 1)
-#                 k_list.append(index + 2)
-#                 i_list.append(index + 0)
-#                 j_list.append(index + 2)
-#                 k_list.append(index + 3)
-#                 intensity.append(np.linalg.norm(d_global[0, :]))
-#                 intensity.append(np.linalg.norm(d_global[1, :]))
-#                 intensity.append(np.linalg.norm(d_global[1, :]))
-#                 intensity.append(np.linalg.norm(d_global[0, :]))
-#                 index += 4
-
-#     dt[idx]['x'].extend(x_list)
-#     dt[idx]['y'].extend(y_list)
-#     dt[idx]['z'].extend(z_list)
-#     dt[idx]['i'].extend(i_list)
-#     dt[idx]['j'].extend(j_list)
-#     dt[idx]['k'].extend(k_list)
-#     dt[idx]['intensity'].extend(intensity)
-
-
-def add_data__frames_deformed(analysis,
+def add_data__line_elms_deformed(analysis,
                               case_name,
                               data_dict,
-                              list_of_frames,
+                              list_of_line_elems,
                               step,
                               scaling):
     """
     Adds a trace containing frame element centroidal axis lines
     in their deformed state
     """
-    if not list_of_frames:
+    if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
 
-    for elm in list_of_frames:
+    for elm in list_of_line_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
         num_points = 8
