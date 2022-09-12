@@ -96,6 +96,7 @@ class TributaryAreaAnaysis:
             msg += "straight skeleton algorithm might be added to osmg.\n"
             msg += "Until that day, the scikit-geometry package is required.\n"
             msg += "Please install scikit-geometry.\n"
+            msg += "  $ conda install scikit-geometry -c conda-forge\n"
             msg += "https://github.com/scikit-geometry/scikit-geometry"
             print("~ skgeom is not installed ~")
             print()
