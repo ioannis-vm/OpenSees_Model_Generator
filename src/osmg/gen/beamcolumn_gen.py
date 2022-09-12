@@ -632,13 +632,13 @@ class BeamColumnGenerator:
                 sec_offset_global = np.zeros(3)
 
             node_i, eo_i = beam_placement_lookup(
-                xi_coord, yi_coord, querry, ndg,
+                xi_coord, yi_coord, query, ndg,
                 lvls, key, offset_i,
                 sec_offset_global,
                 split_existing_i,
                 snap_i)
             node_j, eo_j = beam_placement_lookup(
-                xj_coord, yj_coord, querry, ndg,
+                xj_coord, yj_coord, query, ndg,
                 lvls, key, offset_j,
                 sec_offset_global,
                 split_existing_j,

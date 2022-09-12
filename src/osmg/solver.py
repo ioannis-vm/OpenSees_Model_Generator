@@ -36,12 +36,14 @@ from .mesh import subdivide_polygon
 # from .import components
 from .model import Model
 from .ops.element import ElasticBeamColumn
+from .ops.section import FiberSection
+from .ops.uniaxial_material import Fatigue
 from .import common
 # from .graphics import postprocessing_3d
 from .graphics import general_2d
 from .import transformations
 from .collections import Collection
-from .gen.querry import LoadCaseQuerry
+from .gen.query import LoadCaseQuery
 if TYPE_CHECKING:
     from .ops.uniaxial_material import UniaxialMaterial
 
