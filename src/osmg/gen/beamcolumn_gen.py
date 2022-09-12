@@ -450,6 +450,31 @@ class BeamColumnGenerator:
         zerolength_gen_args_i.update({'element_length': clear_length})
         zerolength_gen_args_j.update({'element_length': clear_length})
 
+        if 'section' in zerolength_gen_args_i:
+            section_i = zerolength_gen_args_i['section']
+        else:
+            section_i = section
+        if 'section' in zerolength_gen_args_j:
+            section_j = zerolength_gen_args_j['section']
+        else:
+            section_j = section
+        if 'element_type' in zerolength_gen_args_i:
+            element_type_i = zerolength_gen_args_i['element_type']
+        else:
+            element_type_i = element_type
+        if 'element_type' in zerolength_gen_args_j:
+            element_type_j = zerolength_gen_args_j['element_type']
+        else:
+            element_type_j = element_type
+        if 'transf_type' in zerolength_gen_args_i:
+            transf_type_i = zerolength_gen_args_i['transf_type']
+        else:
+            transf_type_i = transf_type
+        if 'transf_type' in zerolength_gen_args_j:
+            transf_type_j = zerolength_gen_args_j['transf_type']
+        else:
+            transf_type_j = transf_type
+
         # we can have hinges at both ends, or just one of the two ends.
         # ...or even no hinges!
         if zerolength_gen_i:
