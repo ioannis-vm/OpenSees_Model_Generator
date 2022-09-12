@@ -24,7 +24,7 @@ import numpy as np
 import numpy.typing as npt
 from ..ops.node import Node
 from ..component_assembly import ComponentAssembly
-from .querry import ElmQuerry
+from .query import ElmQuery
 from .node_gen import NodeGenerator
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
@@ -71,7 +71,7 @@ def retrieve_snap_pt_global_offset(placement, section, p_i, p_j, angle):
 
 
 def beam_placement_lookup(
-        x_coord, y_coord, querry, ndg, lvls, key,
+        x_coord, y_coord, query, ndg, lvls, key,
         user_offset, section_offset, split_existing, snap):
     """
     Performs lookup operations before placing a beam-functioning
@@ -79,7 +79,7 @@ def beam_placement_lookup(
     respect to the other existing objects in the model.
     """
     lvl = lvls[key]
-    node = querry.search_node_lvl(x_coord, y_coord, lvl.uid)
+    node = query.search_node_lvl(x_coord, y_coord, lvl.uid)
     pinit = np.array((x_coord, y_coord, lvl.elevation)) + user_offset
     e_o = user_offset.copy() + section_offset
     if not node:
@@ -92,10 +92,11 @@ def beam_placement_lookup(
         # first check if a panel zone or other type of joint-like
         # component assembly exists at that node
         result_node = None
-        components = querry.retrieve_components_from_nodes([node], lvl.uid)
+        components = query.retrieve_components_from_nodes([node], lvl.uid)
         for component in components.values():
             if component.component_purpose == 'steel_W_panel_zone':
-                if snap in ['middle_front', 'middle_back']:
+                if snap in ['middle_front', 'middle_back',
+                            'top_node', 'bottom_node']:
                     result_node = component.external_nodes.named_contents[snap]
                     e_o += np.array(
                         (0.00, 0.00, node.coords[2] - result_node.coords[2]))
@@ -125,10 +126,10 @@ def beam_placement_lookup(
 
         # else check if a column-like component assembly exists
         if key-1 in lvls:
-            node_below = querry.search_node_lvl(
+            node_below = query.search_node_lvl(
                 x_coord, y_coord, key-1)
             if node_below:
-                column = querry.search_connectivity(
+                column = query.search_connectivity(
                     [node, node_below])
                 if column:
                     elms = []
@@ -155,22 +156,22 @@ def beam_placement_lookup(
                         sec_offset_global = (
                             t_loc_to_glob @ sec_offset_local)
                         e_o += sec_offset_global
-        else:
-            raise ValueError(
-                'Error: existing node without any elements to connect to.')
+        # else:
+        #     raise ValueError(
+        #         'Error: existing node without any elements to connect to.')
     return node, e_o
 
 
 def look_for_panel_zone(
         node: Node,
         lvl: Level,
-        querry: ElmQuerry
+        query: ElmQuery
 ) -> Node:
     """
     Determines if a panel zone joint component assembly is present
     at the specified node.
     """
-    components = querry.retrieve_components_from_nodes([node], lvl.uid)
+    components = query.retrieve_components_from_nodes([node], lvl.uid)
     result_node = node
     for component in components.values():
         if component.component_purpose == 'steel_W_panel_zone':
@@ -197,7 +198,8 @@ class BeamColumnGenerator:
             transf_type: str,
             section: ElasticSection | FiberSection,
             element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
-            angle=0.00) -> ElasticBeamColumn | DispBeamColumn:
+            angle=0.00,
+            camber_2=0.00, camber_3=0.00) -> ElasticBeamColumn | DispBeamColumn:
         """
         Adds a beamcolumn element to the model, connecting the specified nodes
         """
@@ -530,24 +532,25 @@ class BeamColumnGenerator:
         integer keys.
         """
         ndg = NodeGenerator(self.model)
-        querry = ElmQuerry(self.model)
+        query = ElmQuery(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
+        defined_component_assemblies: dict[int, ComponentAssembly] = {}
         for key in lvls.active:
             lvl = lvls[key]
             if key-1 not in lvls:
                 continue
 
-            top_node = querry.search_node_lvl(x_coord, y_coord, key)
+            top_node = query.search_node_lvl(x_coord, y_coord, key)
             if not top_node:
                 top_node = ndg.add_node_lvl(x_coord, y_coord, key)
 
-            bottom_node = querry.search_node_lvl(x_coord, y_coord, key-1)
+            bottom_node = query.search_node_lvl(x_coord, y_coord, key-1)
             if not bottom_node:
                 bottom_node = ndg.add_node_lvl(x_coord, y_coord, key-1)
 
             # check for a panel zone
-            top_node = look_for_panel_zone(top_node, lvl, querry)
+            top_node = look_for_panel_zone(top_node, lvl, query)
 
             p_i = np.array(top_node.coords) + offset_i
             p_j = np.array(bottom_node.coords) + offset_j
@@ -602,10 +605,11 @@ class BeamColumnGenerator:
         """
         Adds a horizontal beamcolumn element to all active levels.
         """
-        querry = ElmQuerry(self.model)
+        query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
+        defined_component_assemblies: dict[int, ComponentAssembly] = {}
         for key in lvls.active:
             lvl = lvls[key]
 
@@ -677,16 +681,17 @@ class BeamColumnGenerator:
         panel zone joint.
         """
         ndg = NodeGenerator(self.model)
-        querry = ElmQuerry(self.model)
+        query = ElmQuery(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
+        defined_components: dict[int, ComponentAssembly] = {}
         for key in lvls.active:
 
             lvl = lvls[key]
             if key-1 not in lvls:
                 continue
 
-            top_node = querry.search_node_lvl(x_coord, y_coord, key)
+            top_node = query.search_node_lvl(x_coord, y_coord, key)
             if not top_node:
                 top_node = ndg.add_node_lvl(x_coord, y_coord, key)
 

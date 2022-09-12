@@ -1025,8 +1025,8 @@ class PushoverAnalysis(NonlinearAnalysis):
     """
     def _apply_lateral_load(
             self, case_name, direction, modeshape=None, node=None):
-        querry = LoadCaseQuerry(self.mdl, self.load_cases[case_name])
-        distribution = querry.level_masses()
+        query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
+        distribution = query.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
         # define the load pattern
