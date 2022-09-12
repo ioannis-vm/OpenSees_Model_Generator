@@ -1174,3 +1174,6 @@ class BeamColumnGenerator:
             component.zerolength_elements.add(zerolen_top_b)
             component.zerolength_elements.add(zerolen_bottom_f)
             component.zerolength_elements.add(zerolen_bottom_b)
+            defined_components[key] = component
+
+        return defined_components
