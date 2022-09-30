@@ -11,6 +11,7 @@ Common definitions
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from pprint import pprint
 from typing import OrderedDict
 from typing import Any
 
@@ -36,6 +37,21 @@ def methods(obj: object) -> list[str]:
     object_methods = [method_name for method_name in dir(obj)
                       if callable(getattr(obj, method_name))]
     return object_methods
+
+
+def print_methods(obj: object):
+    """
+    Prints the methods of an object
+    """
+    object_methods = methods(obj)
+    pprint(object_methods)
+
+
+def print_dir(obj: object):
+    """
+    Prints the entire output of `dir()` of an object
+    """
+    pprint(dir(obj))
 
 
 def previous_element(dct: OrderedDict[Any, Any], key):
