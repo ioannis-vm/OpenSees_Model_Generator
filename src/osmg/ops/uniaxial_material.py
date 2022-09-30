@@ -288,3 +288,42 @@ class Fatigue(UniaxialMaterial):
             '-max',
             self.var_max
         ]
+
+
+@dataclass
+class MaxStrainRange(UniaxialMaterial):
+    """
+    OpenSees MaxStrainRange Material
+    ~not officially added yet~
+    """
+    predecessor: UniaxialMaterial
+    msr_fracture: float
+    min_fracture: Optional[float] = field(default=None)
+    max_fracture: Optional[float] = field(default=None)
+    tangent_ratio: Optional[float] = field(default=None)
+    def_coeff: Optional[float] = field(default=None)
+    node_tags: Optional[tuple[int, int]] = field(default=None)
+    elements_to_remove: Optional[list[int]] = field(default=None)
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
+        args = [
+            'MaxStrainRange', self.uid,
+            self.predecessor.uid, self.msr_fracture]
+        if self.min_fracture:
+            args.extend(['-min', self.min_fracture])
+        if self.max_fracture:
+            args.extend(['-max', self.max_fracture])
+        if self.tangent_ratio:
+            args.extend(['-tangentRatio', self.tangent_ratio])
+        if self.def_coeff:
+            args.extend(['-defCoeff', self.def_coeff])
+        if self.node_tags:
+            args.extend(['-nodeTags', *self.node_tags])
+        if self.elements_to_remove:
+            args.extend(['-eleTag', *self.elements_to_remove])
+
+        return args
