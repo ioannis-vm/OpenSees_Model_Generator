@@ -225,7 +225,7 @@ class Model:
         model.
         The keys are the uids of the component assemblies.
         """
-        comps: dict[int, object] = {}
+        comps: dict[int, ComponentAssembly] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
                 comps[component.uid] = component

@@ -14,6 +14,7 @@ Model Generator for OpenSees ~ element
 # pylint: disable=invalid-name
 
 
+from typing import Optional
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -56,33 +57,37 @@ class Steel02(UniaxialMaterial):
     """
     Fy: float
     E0: float
-    b: float
-    params: tuple[float, float, float]
-    a1: float
-    a2: float
-    a3: float
-    a4: float
-    sigInit: float
     G: float
+    b: float
+    c_r0: float
+    c_r1: float
+    c_r2: float
+    a1: Optional[float] = field(default=None)
+    a2: Optional[float] = field(default=None)
+    a3: Optional[float] = field(default=None)
+    a4: Optional[float] = field(default=None)
+    sig_init: Optional[float] = field(default=None)
 
     def ops_args(self):
         """
         Returns the arguments required to define the object in
         OpenSees
         """
-        return [
-            'Steel02',
-            self.uid,
-            self.Fy,
-            self.E0,
-            self.b,
-            *self.params,
-            self.a1,
-            self.a2,
-            self.a3,
-            self.a4,
-            self.sigInit
-        ]
+        args = [
+            'Steel02', self.uid, self.Fy, self.E0, self.b, self.c_r0,
+            self.c_r1, self.c_r2]
+        if self.a1:
+            args.append(self.a1)
+        if self.a2:
+            args.append(self.a2)
+        if self.a3:
+            args.append(self.a3)
+        if self.a4:
+            args.append(self.a4)
+        if self.sig_init:
+            args.append(self.sig_init)
+
+        return args
 
 
 @dataclass

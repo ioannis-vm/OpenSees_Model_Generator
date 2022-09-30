@@ -99,18 +99,8 @@ def load_default_steel(model: Model):
     """
     # TODO: add SI units some day
     uniaxial_mat = Steel02(
-        uid=model.uid_generator.new('uniaxial material'),
-        name='default steel',
-        Fy=55000.00,
-        E0=29000000.00,
-        b=0.01,
-        params=(19.0, 0.925, 0.15),
-        a1=0.12,
-        a2=0.90,
-        a3=0.18,
-        a4=0.90,
-        sigInit=0.0,
-        G=11153846.15)
+        model.uid_generator.new('uniaxial material'), 'default steel',
+        55000.00, 29000000.00, 11153846.15, 0.01, 15.0, 0.925, 0.15)
     physical_mat = PhysicalMaterial(
         model.uid_generator.new('physical material'),
         'default steel',

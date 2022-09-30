@@ -85,9 +85,6 @@ class ComponentAssembly:
         res += 'External Nodes\n'
         for node in self.external_nodes.values():
             res += f'  {node.uid}, {node.coords}'
-        res += 'Internal Nodes\n'
-        for node in self.internal_nodes.values():
-            res += f'  {node.uid}, {node.coords}'
         return res
 
     def dict_of_elastic_beamcolumn_elements(self):

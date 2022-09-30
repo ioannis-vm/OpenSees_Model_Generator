@@ -110,6 +110,114 @@ class Edge:
             raise ValueError("The edge is not connected to the given vertex")
         return v_other
 
+    def overlaps_or_crosses(self, other: Edge):
+        """
+        Checks if the edge overlaps or crosses another edge.
+        Edges are allowed to share one vertex (returns False), but
+        not both (returns True).
+        """
+
+        # location of this edge
+        vec_ra: nparr = np.array(self.v_i.coords)
+        # direction of this edge
+        vec_da: nparr = (np.array(self.v_j.coords)
+                         - np.array(self.v_i.coords))
+        # location of other edge
+        vec_rb: nparr = np.array(other.v_i.coords)
+        # direction of other edge
+        vec_db: nparr = (np.array(other.v_j.coords)
+                         - np.array(other.v_i.coords))
+        # verify that the edges have nonzero length
+        assert not np.isclose(vec_da @ vec_da, 0.00)
+        assert not np.isclose(vec_db @ vec_db, 0.00)
+
+        mat_a: nparr = np.column_stack((vec_da, -vec_db))
+        mat_b = vec_rb - vec_ra
+        determinant = np.linalg.det(mat_a)
+
+        if np.isclose(determinant, 0.00):
+
+            # there are infinite solutions
+            # or there are no solutions
+            # i.e., the edges are parallel.
+            # If they are parallel but nor colinear, then they don't
+            # overlap and the method should return False
+            # If they are colinear, then they might overlap. If they
+            # do, the method should return True, otherwise False.
+
+            # first check if they are parallel but not colinear
+            # project start of other vertex onto line of this vertex
+            vec_rb_diff = (vec_rb - vec_ra)
+            vec_proj_pt = ((vec_rb_diff @ vec_da)/(vec_da @ vec_da)
+                           * vec_da + vec_ra)
+            vec_dist = vec_rb - vec_proj_pt
+            distance = np.sqrt(vec_dist @ vec_dist)
+
+            if not np.isclose(distance, 0.00):
+                # The edges are parallel but not collinear, so they
+                # can't be intersecting.
+                return False
+
+            # If the previous statement was not true, we will arrive
+            # here. The edges are colinear. Depending on their
+            # relative position on their common line, they might share
+            # no common points, one common point, or an entire
+            # segment.
+            # To solve this, we define ta to be a scalar that
+            # determines a point on vertex i by evaluating: vec_ra +
+            # ta * vec_da.
+            # ta = 0 ==> on vertex_i, ta = 1 ==> on vertex j, of this
+            # edge.
+            # Similarly, there exists a tb that can be used to
+            # identify a point on vertex j
+            # But insdtead, we determine the location of vertex i and
+            # j of the other edge in terms of ta. That is:
+            # ta = c_i ==> vertex i of other edge, ta = c_j ==> vertex
+            # j of other edge.
+            # We can then determine which of the three cases we are
+            # in, based on the values of c_i and c_j.
+            c_i = (vec_da @ (vec_rb - vec_ra)) / (vec_da @ vec_da)
+            c_j = (vec_da @ ((vec_rb+vec_db) - vec_ra)) / (vec_da @ vec_da)
+            # either they should be both < 0 (which means that the
+            # other edge is "before" this edge), or they should be
+            # both > 1.00 (which means that the other edge is "after"
+            # this edge). Any other case corresponds to an overlap.
+
+            # each of c_i, c_j can either be {<0.00, ==0, 00<1.00, ==1, >1.0}
+            # in each case the answer will depend on what the other one is.
+            # note: we need to account for floating-point precision
+            # when making comparisons.
+            epsilon = common.EPSILON
+            if (
+                    (c_i < 0.00 - epsilon and np.isclose(c_j, 0.00))
+                    or
+                    (c_i > 1.00 + epsilon and np.isclose(c_j, 1.00))
+                    or
+                    (np.isclose(c_i, 1.00) and c_j > 1.00 + epsilon)
+                    or
+                    (np.isclose(c_i, 0.00) and c_j < 0.00 - epsilon)
+            ):
+                # they share one vertex without overlap
+                return False
+            if ((c_i < 0.00 - epsilon and c_j < 0.00 - epsilon) or (
+                    c_i > 1.00 + epsilon and c_j > 1.00 + epsilon)):
+                # definitely no overlap
+                return False
+            # in any other case, they overlap
+            return True
+
+        # Otherwise they are not parallel.
+        # there is at least one solution
+        sol = np.linalg.solve(mat_a, mat_b)
+        # if both constants are between 0 and 1
+        # the edges overlap within their length
+        # otherwise, their extensions overlap, which
+        # is not an issue.
+        if 0.00 < sol[0] < 1.00 and 0.00 < sol[1] < 1.00:
+            return True
+
+        return False
+
 
 class Halfedge:
     """
@@ -515,6 +623,76 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
             ax_1.scatter(subregion.centroid.x, subregion.centroid.y)
         ax_1.margins(0.10)
         plt.show()
+    return pieces
+
+
+def subdivide_hss(sec_h: float, sec_b: float, sec_t: float,
+                  plot=False):
+    """
+    Used to define the fibers of steel HSS fiber sections.
+    Args:
+      sec_h (float): Section height
+      sec_b (float): Section width
+      sec_t (float): Section thickness
+    Returns:
+        pieces (list[shapely_Polygon]): shapely_Polygon
+               objects that represent single fibers.
+    """
+    outside_polygon = shapely_Polygon(
+        np.array(
+            ((sec_h, sec_b),
+             (sec_h, -sec_b),
+             (-sec_h, -sec_b),
+             (-sec_h, sec_b))
+        ))
+    hole_polygon = shapely_Polygon(
+        np.array(
+            ((sec_h-sec_t, sec_b-sec_t),
+             (sec_h-sec_t, -sec_b+sec_t),
+             (-sec_h+sec_t, -sec_b+sec_t),
+             (-sec_h+sec_t, sec_b-sec_t))
+        ))
+    remaining_polygon = outside_polygon.difference(hole_polygon)
+    x_min, y_min, x_max, y_max = outside_polygon.bounds
+    # cutting it into 8 regions
+    pieces = []
+    for ylow, yhigh in zip(
+            (y_min, y_min+sec_t, y_max-sec_t),
+            (y_min+sec_t, y_max-sec_t, y_max)
+    ):
+        for xlow, xhigh in zip(
+                (x_min, x_min+sec_t, x_max-sec_t),
+                (x_min+sec_t, x_max-sec_t, x_max),
+        ):
+            x_array = np.linspace(
+                xlow, xhigh, num=5, endpoint=True)
+            y_array = np.linspace(
+                ylow, yhigh, num=5, endpoint=True)
+            for i in range(len(x_array)-1):
+                for j in range(len(y_array)-1):
+                    tile = shapely_Polygon(
+                        [(x_array[i], y_array[j]),
+                         (x_array[i+1], y_array[j]),
+                         (x_array[i+1], y_array[j+1]),
+                         (x_array[i], y_array[j+1])])
+                    subregion = remaining_polygon.intersection(tile)
+                    if subregion.area != 0.0:
+                        pieces.append(subregion)
+
+    if plot:
+        fig = plt.figure()
+        ax_1 = fig.add_subplot(111)
+        ax_1.set_aspect('equal')
+        # patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
+        # ax_1.add_patch(patch)
+        for subregion in pieces:
+            patch = PolygonPatch(subregion, alpha=0.5, zorder=2)
+            ax_1.add_patch(patch)
+        for subregion in pieces:
+            ax_1.scatter(subregion.centroid.x, subregion.centroid.y)
+        ax_1.margins(0.10)
+        plt.show()
+
     return pieces
 
 

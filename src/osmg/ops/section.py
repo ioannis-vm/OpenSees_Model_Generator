@@ -22,6 +22,7 @@ from ..mesh import Mesh
 from ..mesh import polygon_area
 from .. import common
 from .uniaxial_material import UniaxialMaterial
+from ..import mesh
 if TYPE_CHECKING:
     from ..physical_material import PhysicalMaterial
 
@@ -106,11 +107,20 @@ class ElasticSection(Section):
 class SectionComponent:
     """
     Part of a section object, having a single material.
+
+    Args:
+      outside_shape (Mesh): Mesh defining the outside shape
+      ops_material (UniaxialMaterial): OpenSees material
+      physical_material (PhysicalMaterial): Physical material
+      parent_section (Optional[FiberSection]): Parent section.
+        The parent section is assigned automatically by their
+        parent section iteslf, at its creation time.
     """
     outside_shape: Mesh
     holes: dict[str, Mesh]
     ops_material: UniaxialMaterial
     physical_material: PhysicalMaterial
+    parent_section: Optional[FiberSection] = field(default=None)
 
     def __repr__(self):
         res = ''
@@ -126,6 +136,29 @@ class SectionComponent:
         res += f'ops_material: {self.ops_material.name}\n'
         res += f'physical_material: {self.physical_material.name}\n'
         return res
+
+    def cut_into_tiny_little_pieces(self):
+        """
+        Returns data used to define fibers in OpenSees
+        """
+        # if we have an AISC HSS section, we need to discretize in a
+        # certain way
+        assert self.parent_section
+        sec_name = self.parent_section.name
+        if 'HSS' in sec_name and len(sec_name.split('X')) == 3:
+            # rectangular HSS section!
+            pieces = mesh.subdivide_hss(
+                self.parent_section.properties['Ht'],
+                self.parent_section.properties['B'],
+                self.parent_section.properties['tdes']
+            )
+
+        # fallback: use the default rectangular mesh chopper
+        pieces = mesh.subdivide_polygon(
+            self.outside_shape, self.holes,
+            self.parent_section.n_x,
+            self.parent_section.n_y)
+        return pieces
 
     def copy_alter_material(self, mat: UniaxialMaterial):
         """
@@ -155,6 +188,10 @@ class FiberSection(Section):
     properties: dict[str, Any]
     n_x: int
     n_y: int
+
+    def __post_init__(self):
+        for part in self.section_parts:
+            self.section_parts[part].parent_section = self
 
     def __repr__(self):
         res = ''
@@ -211,10 +248,10 @@ class FiberSection(Section):
             new_part = val.copy_alter_material(mat)
             new_section_parts[key] = new_part
         other_sec = FiberSection(
-            name=f'auto_{self.name}',
-            uid=new_uid, outside_shape=self.outside_shape,
-            section_parts=new_section_parts,
-            j_mod=self.j_mod, snap_points=self.snap_points,
-            properties=self.properties,
-            n_x=self.n_x, n_y=self.n_y)
+            f'auto_{self.name}',
+            new_uid, self.outside_shape,
+            new_section_parts,
+            self.j_mod, self.snap_points,
+            self.properties,
+            self.n_x, self.n_y)
         return other_sec

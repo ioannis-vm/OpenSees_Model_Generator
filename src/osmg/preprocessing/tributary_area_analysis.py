@@ -15,7 +15,10 @@ Model Generator for OpenSees ~ tributary area analysis
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import no_type_check
+from typing import Optional
 from dataclasses import dataclass, field
+import sys
+from tqdm import tqdm
 import numpy as np
 import numpy.typing as npt
 from .. import mesh
@@ -42,8 +45,8 @@ class PolygonLoad:
     """
     name: str
     value: float
-    outside_shape: PolygonShape
-    holes: list[PolygonShape]
+    outside_shape: Optional[PolygonShape]
+    holes: Optional[list[PolygonShape]]
     massless: bool
 
 
@@ -84,16 +87,34 @@ class TributaryAreaAnaysis:
         default_factory=TributaryAreaAnalysisData)
 
     @no_type_check
-    def run(self, load_factor=1.00, massless_load_factor=1.00):
+    def run(self, load_factor=1.00, massless_load_factor=1.00,
+            perform_checks=True):
         """
         Performs tributary area analysis
+        Args:
+          load_factor (float): Factor by which to multiply the surface
+            loads that count as a mass source, found in the load case.
+          massless_load_factor (float): Factor by which to multiply
+            the massless loads found in the load case.
+          perform_checks (bool): Tributary area analysis works by
+            generating a mesh defined by the horizontal elements of
+            the floor plan and analyzing that mesh. The mesh should
+            not contain any edges that cross or overlap with other
+            edges. This can happen, for instance, if beam end offsets
+            have been accidentally misspecified causing beams to
+            overlap with or cross other members. The only shared
+            points between the edges should be the end vertices. By
+            default, we check if that is the case to avoid unexpected
+            behavior. This flag can be used to disable the checks for
+            subsequent analyses to enhance performance if that a prior
+            analysis has verified that the checks are satisfied.
         """
 
         try:
             import skgeom as sg
         except ModuleNotFoundError:
             msg = "One day, a custom implementation of the "
-            msg += "straight skeleton algorithm might be added to osmg.\n"
+            msg += "straight skeleton algorithm might be added to osmg...\n"
             msg += "Until that day, the scikit-geometry package is required.\n"
             msg += "Please install scikit-geometry.\n"
             msg += "  $ conda install scikit-geometry -c conda-forge\n"
@@ -101,7 +122,7 @@ class TributaryAreaAnaysis:
             print("~ skgeom is not installed ~")
             print()
             print(msg)
-            exit()
+            sys.exit()
 
         lvl = self.parent_level
         all_components = list(lvl.components.values())
@@ -132,7 +153,7 @@ class TributaryAreaAnaysis:
         vertex_map = self.data.vertex_map
         zn_map = self.data.zn_map
         pz_node = self.data.pz_node
-        # clear any previous reults
+        # clear any previous results
         edges = {}
         vertices = {}
         edge_map = {}
@@ -259,6 +280,32 @@ class TributaryAreaAnaysis:
         #                   color=['red']*len(vnames))
         # fig = go.Figure(data=fig1.data + fig2.data)
         # fig.show()
+
+        if perform_checks:
+            # verify that no edges overlap
+            all_edges_list = list(edges.values())
+            for index, considered_edge in enumerate(tqdm(
+                    all_edges_list,
+                    desc="Checking plan's edges",
+                    unit='edges'
+            )):
+                if index == len(all_edges_list):
+                    # we are done.
+                    continue
+                remaining_edges = all_edges_list[index+1::]
+                for other_edge in remaining_edges:
+                    # check if the two edges overlap or cross each other
+                    if considered_edge.overlaps_or_crosses(other_edge):
+                        # the two edges overlap or cross each other
+                        msg = "Error: Analysis of the floor plan geometry "
+                        msg += "indicates the presence of "
+                        msg += "overlapping elements.\n"
+                        msg += "Check the model at the following locations:\n"
+                        msg += f"{considered_edge.v_i.coords}"
+                        msg += f"{considered_edge.v_j.coords}"
+                        msg += f"{other_edge.v_i.coords}"
+                        msg += f"{other_edge.v_j.coords}"
+                        raise ValueError(msg)
 
         halfedges = mesh.define_halfedges(list(edges.values()))
         loops = mesh.obtain_closed_loops(halfedges)

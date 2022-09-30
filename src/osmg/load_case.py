@@ -36,8 +36,7 @@ class PointLoadMass:
     """
     Point load/mass object. Global coordinate system.
     Attributes:
-        other (list[float])
-        floor (list[float])
+        val (nparr)
     """
     val: nparr = field(
         default_factory=lambda: np.zeros(shape=6))
@@ -61,6 +60,7 @@ class LineElementUDL:
     """
     Line element uniformly distributed load object.
     """
+    parent_load_case: LoadCase
     parent_line_element: ElasticBeamColumn
     val: nparr = field(
         default_factory=lambda: np.zeros(shape=3))
@@ -88,12 +88,30 @@ class LineElementUDL:
                 the global x, y, and z directions, in the direction of
                 the global axes.
         """
-        transf_mat = transformations.transformation_matrix(
-            self.parent_line_element.geomtransf.x_axis,
-            self.parent_line_element.geomtransf.y_axis,
-            self.parent_line_element.geomtransf.z_axis)
-        udl_local = transf_mat @ udl
-        self.val += udl_local
+        # STOP! if the element has the Corotational transformation, we
+        # can't apply a UDL on it. We need to lump the provided UDL to
+        # its external nodes.  Since the Corotational transformation
+        # also does not support rigid end offests, that lumping
+        # process is always valid without requiring any special
+        # transformation.
+        elm = self.parent_line_element
+        if elm.geomtransf.transf_type == 'Corotational':
+            elm_len = elm.clear_length()
+            force = udl * elm_len / 2.00
+            node_i_uid = elm.nodes[0].uid
+            node_j_uid = elm.nodes[1].uid
+            lcase = self.parent_load_case
+            lcase.node_loads[node_i_uid].add(
+                np.concatenate((force, np.zeros(3))))
+            lcase.node_loads[node_j_uid].add(
+                np.concatenate((force, np.zeros(3))))
+        else:
+            transf_mat = transformations.transformation_matrix(
+                self.parent_line_element.geomtransf.x_axis,
+                self.parent_line_element.geomtransf.y_axis,
+                self.parent_line_element.geomtransf.z_axis)
+            udl_local = transf_mat @ udl
+            self.val += udl_local
 
     def to_global(self):
         """
@@ -139,7 +157,7 @@ class LoadCase:
         for line_element in (self.parent_model
                              .list_of_beamcolumn_elements()):
             self.line_element_udl[line_element.uid] = \
-                LineElementUDL(line_element)
+                LineElementUDL(self, line_element)
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():
             self.tributary_area_analysis[lvlkey] = \

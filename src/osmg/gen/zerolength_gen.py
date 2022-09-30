@@ -17,11 +17,12 @@ Model Generator for OpenSees ~ zero length element uniaxial materials
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
+import numpy as np
 from ..ops.section import ElasticSection
 from ..ops.uniaxial_material import Steel02
-from ..ops.uniaxial_material import Bilin
 from ..ops.uniaxial_material import Pinching4
 from ..ops.uniaxial_material import Hysteretic
+from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:
     from ..model import Model
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
 
 def fix_all(model: Model, **kwargs):
     """
-    useful for debugging.
+    Fixed in all directions
     """
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
@@ -44,6 +45,17 @@ def release_6(model: Model, **kwargs):
     Frees strong axis bending
     """
     dirs = [1, 2, 3, 4, 5]
+    mat_repo = model.uniaxial_materials
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    mats = [fix_mat]*5
+    return dirs, mats
+
+
+def release_5(model: Model, **kwargs):
+    """
+    Frees weak axis bending
+    """
+    dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
     mats = [fix_mat]*5
@@ -83,149 +95,11 @@ def imk_6(
     special moment frames. Earthquake Engineering & Structural
     Dynamics, 43(13), 1935-1954.
     """
-    assert section.name[0] == 'W', \
-        "Error: Only W sections can be used."
-    assert isinstance(section, ElasticSection)
-    assert model.settings.imperial_units, \
-        "Error: Only imperial units supported."
-    assert section.properties
-    # Young's modulus
-    mat_e = section.e_mod / 1.e3
-    # Yield stress
-    mat_fy = physical_material.f_y / 1.e3
-    # Moment of inertia - strong axis - original section
-    sec_ix = section.i_x
-    # Section depth
-    sec_d = section.properties['d']
-    # Flange width
-    sec_bf = section.properties['bf']
-    # Flange and web thicknesses
-    sec_tf = section.properties['tf']
-    sec_tw = section.properties['tw']
-    # Plastic modulus (unreduced)
-    sec_zx = section.properties['Zx']
-    # Radius of gyration
-    sec_ry = section.properties['ry']
-    # Clear length
-    elm_h = element_length
-    # Shear span
-    elm_l = loverh * elm_h
-    elm_lb = lboverl * elm_l
-    lbry = elm_lb / sec_ry
-    if rbs_factor:
-        # RBS case
-        assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
-        # checks ~ acceptable range
-        if not 20.00 < sec_d/sec_tw < 55.00:
-            print(f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
-                  ' outside regression range')
-            print('20.00 < sec_d/sec_tw < 55.00')
-            print(section.name, '\n')
-        if not 20.00 < lbry < 80.00:
-            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
-            print('20.00 < lbry < 80.00')
-            print(section.name, '\n')
-        if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
-            print(f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
-                  ' outside regression range')
-            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
-            print(section.name, '\n')
-        if not 2.5 < elm_l/sec_d < 7.0:
-            print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
-            print('2.5 < elm_l/sec_d < 7.0')
-            print(section.name, '\n')
-        if not 4.00 < sec_d < 36.00:
-            print(f'Warning: Section d={sec_d:.2f} outside regression range')
-            print('4.00 < sec_d < 36.00')
-            print(section.name, '\n')
-        if not 35.00 < mat_fy < 65.00:
-            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
-            print('35.00 < mat_fy < 65.00')
-            print(section.name, '\n')
-        # calculate parameters
-        theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
-            (sec_bf/(2.*sec_tf))**(-0.10) * \
-            lbry**(-0.185) * \
-            (elm_l/sec_d)**0.113 * \
-            (25.4 * sec_d / 533.)**(-0.76) * \
-            (6.895 * mat_fy / 355.)**(-0.07)
-        theta_pc = 9.52 * (sec_d/sec_tw)**(-0.513) * \
-            (sec_bf/(2.*sec_tf))**(-0.863) * \
-            lbry**(-0.108) * \
-            (6.895 * mat_fy / 355.)**(-0.36)
-        lamda = 585. * (sec_d/sec_tw)**(-1.14) * \
-            (sec_bf/(2.*sec_tf))**(-0.632) * \
-            lbry**(-0.205) * \
-            (6.895 * mat_fy / 355.)**(-0.391)
-        rbs_c = sec_bf * (1. - rbs_factor) / 2.
-        z_rbs = sec_zx - 2. * rbs_c * sec_tf * (sec_d - sec_tf)
-        sec_my = 1.06 * z_rbs * mat_fy * 1.e3
-    else:
-        # Other-than-RBS case
-        theta_p = 0.0865 * (sec_d/sec_tw)**(-0.365) * \
-            (sec_bf/(2.*sec_tf))**(-0.14) * \
-            (elm_l/sec_d)**0.34 * \
-            (25.4 * sec_d / 533.)**(-0.721) * \
-            (6.895 * mat_fy / 355.)**(-0.23)
-        theta_pc = 5.63 * (sec_d/sec_tw)**(-0.565) * \
-            (sec_bf/(2.*sec_tf))**(-0.800) * \
-            (25.4 * sec_d / 533.)**(-0.28) *  \
-            (6.895 * mat_fy / 355.)**(-0.43)
-        lamda = 495. * (sec_d/sec_tw)**(-1.34) * \
-            (sec_bf/(2.*sec_tf))**(-0.595) * \
-            (6.895 * mat_fy / 355.)**(-0.36)
-        sec_my = 1.17 * sec_zx * mat_fy * 1.e3
-    theta_u = 0.20
-    residual_plus = 0.40
-    residual_minus = 0.40
-    theta_p_plus = theta_p
-    theta_p_minus = theta_p
-    theta_pc_plus = theta_pc
-    theta_pc_minus = theta_pc
-    d_plus = 1.00
-    d_minus = 1.00
-    mcmy_plus = 1.0001
-    mcmy_minus = 1.0001
-    my_plus = sec_my
-    my_minus = -sec_my
-    if consider_composite:
-        # Elkady, A., & Lignos, D. G. (2014). Modeling of the
-        # composite action in fully restrained beam‐to‐column
-        # connections: implications in the seismic design and
-        # collapse capacity of steel special moment
-        # frames. Earthquake Engineering & Structural Dynamics,
-        # 43(13), 1935-1954.  Table II
-        theta_p_plus *= 1.80
-        theta_p_minus *= 0.95
-        theta_pc_plus *= 1.35
-        theta_pc_minus *= 0.95
-        d_plus *= 1.15
-        d_minus *= 1.00
-        mcmy_plus *= 1.30
-        mcmy_minus *= 1.05
-        my_plus *= 1.35
-        my_minus *= 1.25
-        residual_plus = 0.30
-        residual_minus = 0.20
-    stiffness = 6.00 * mat_e * sec_ix / elm_h * 1e4
-    beta_plus = (mcmy_plus - 1.) * my_plus / (theta_p_plus) / stiffness
-    beta_minus = - (mcmy_minus - 1.) * my_minus \
-        / (theta_p_minus) / stiffness
-    mat = Bilin(
-        model.uid_generator.new('uniaxial material'),
-        'auto_IMK',
-        stiffness,
-        beta_plus, beta_minus,
-        my_plus, my_minus,
-        lamda, lamda, lamda, lamda,
-        1.00, 1.00, 1.00, 1.00,
-        theta_p_plus, theta_p_minus,
-        theta_pc_plus, theta_pc_minus,
-        residual_plus, residual_minus,
-        theta_u, theta_u,
-        d_plus, d_minus,
-        0.00
-    )
+    mat_generator = MaterialGenerator(model)
+    mat = mat_generator.generate_steel_w_imk_material(
+        section, physical_material, element_length,
+        lboverl, loverh, rbs_factor, consider_composite,
+        direction='strong')
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -233,7 +107,7 @@ def imk_6(
     return dirs, mats
 
 
-def release_5_imk_6(
+def imk_56(
         model: Model,
         element_length: float,
         lboverl: float,
@@ -247,155 +121,19 @@ def release_5_imk_6(
     release in the weak axis bending direction,
     imk (see imk docstring) in the strong axis bending direction
     """
-    # TODO: avoid code repetition -- by moving uniaxialmaterial
-    # generation to another generator
-    assert section.name[0] == 'W', \
-        "Error: Only W sections can be used."
-    assert isinstance(section, ElasticSection)
-    assert model.settings.imperial_units, \
-        "Error: Only imperial units supported."
-    assert section.properties
-    # Young's modulus
-    mat_e = section.e_mod / 1.e3
-    # Yield stress
-    mat_fy = physical_material.f_y / 1.e3
-    # Moment of inertia - strong axis - original section
-    sec_ix = section.i_x
-    # Section depth
-    sec_d = section.properties['d']
-    # Flange width
-    sec_bf = section.properties['bf']
-    # Flange and web thicknesses
-    sec_tf = section.properties['tf']
-    sec_tw = section.properties['tw']
-    # Plastic modulus (unreduced)
-    sec_zx = section.properties['Zx']
-    # Radius of gyration
-    sec_ry = section.properties['ry']
-    # Clear length
-    elm_h = element_length
-    # Shear span
-    elm_l = loverh * elm_h
-    elm_lb = lboverl * elm_l
-    lbry = elm_lb / sec_ry
-    if rbs_factor:
-        # RBS case
-        assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
-        # checks ~ acceptable range
-        if not 20.00 < sec_d/sec_tw < 55.00:
-            print(f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
-                  ' outside regression range')
-            print('20.00 < sec_d/sec_tw < 55.00')
-            print(section.name, '\n')
-        if not 20.00 < lbry < 80.00:
-            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
-            print('20.00 < lbry < 80.00')
-            print(section.name, '\n')
-        if not 4.00 < (sec_bf/(2.*sec_tf)) < 8.00:
-            print(f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
-                  ' outside regression range')
-            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
-            print(section.name, '\n')
-        if not 2.5 < elm_l/sec_d < 7.0:
-            print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
-            print('2.5 < elm_l/sec_d < 7.0')
-            print(section.name, '\n')
-        if not 4.00 < sec_d < 36.00:
-            print(f'Warning: Section d={sec_d:.2f} outside regression range')
-            print('4.00 < sec_d < 36.00')
-            print(section.name, '\n')
-        if not 35.00 < mat_fy < 65.00:
-            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
-            print('35.00 < mat_fy < 65.00')
-            print(section.name, '\n')
-        # calculate parameters
-        theta_p = 0.19 * (sec_d/sec_tw)**(-0.314) * \
-            (sec_bf/(2.*sec_tf))**(-0.10) * \
-            lbry**(-0.185) * \
-            (elm_l/sec_d)**0.113 * \
-            (25.4 * sec_d / 533.)**(-0.76) * \
-            (6.895 * mat_fy / 355.)**(-0.07)
-        theta_pc = 9.52 * (sec_d/sec_tw)**(-0.513) * \
-            (sec_bf/(2.*sec_tf))**(-0.863) * \
-            lbry**(-0.108) * \
-            (6.895 * mat_fy / 355.)**(-0.36)
-        lamda = 585. * (sec_d/sec_tw)**(-1.14) * \
-            (sec_bf/(2.*sec_tf))**(-0.632) * \
-            lbry**(-0.205) * \
-            (6.895 * mat_fy / 355.)**(-0.391)
-        rbs_c = sec_bf * (1. - rbs_factor) / 2.
-        z_rbs = sec_zx - 2. * rbs_c * sec_tf * (sec_d - sec_tf)
-        sec_my = 1.06 * z_rbs * mat_fy * 1.e3
-    else:
-        # Other-than-RBS case
-        theta_p = 0.0865 * (sec_d/sec_tw)**(-0.365) * \
-            (sec_bf/(2.*sec_tf))**(-0.14) * \
-            (elm_l/sec_d)**0.34 * \
-            (25.4 * sec_d / 533.)**(-0.721) * \
-            (6.895 * mat_fy / 355.)**(-0.23)
-        theta_pc = 5.63 * (sec_d/sec_tw)**(-0.565) * \
-            (sec_bf/(2.*sec_tf))**(-0.800) * \
-            (25.4 * sec_d / 533.)**(-0.28) *  \
-            (6.895 * mat_fy / 355.)**(-0.43)
-        lamda = 495. * (sec_d/sec_tw)**(-1.34) * \
-            (sec_bf/(2.*sec_tf))**(-0.595) * \
-            (6.895 * mat_fy / 355.)**(-0.36)
-        sec_my = 1.17 * sec_zx * mat_fy * 1.e3
-    theta_u = 0.20
-    residual_plus = 0.40
-    residual_minus = 0.40
-    theta_p_plus = theta_p
-    theta_p_minus = theta_p
-    theta_pc_plus = theta_pc
-    theta_pc_minus = theta_pc
-    d_plus = 1.00
-    d_minus = 1.00
-    mcmy_plus = 1.0001
-    mcmy_minus = 1.0001
-    my_plus = sec_my
-    my_minus = -sec_my
-    if consider_composite:
-        # Elkady, A., & Lignos, D. G. (2014). Modeling of the
-        # composite action in fully restrained beam‐to‐column
-        # connections: implications in the seismic design and
-        # collapse capacity of steel special moment
-        # frames. Earthquake Engineering & Structural Dynamics,
-        # 43(13), 1935-1954.  Table II
-        theta_p_plus *= 1.80
-        theta_p_minus *= 0.95
-        theta_pc_plus *= 1.35
-        theta_pc_minus *= 0.95
-        d_plus *= 1.15
-        d_minus *= 1.00
-        mcmy_plus *= 1.30
-        mcmy_minus *= 1.05
-        my_plus *= 1.35
-        my_minus *= 1.25
-        residual_plus = 0.30
-        residual_minus = 0.20
-    stiffness = 6.00 * mat_e * sec_ix / elm_h * 1e4
-    beta_plus = (mcmy_plus - 1.) * my_plus / (theta_p_plus) / stiffness
-    beta_minus = - (mcmy_minus - 1.) * my_minus \
-        / (theta_p_minus) / stiffness
-    mat = Bilin(
-        model.uid_generator.new('uniaxial material'),
-        'auto_IMK',
-        stiffness,
-        beta_plus, beta_minus,
-        my_plus, my_minus,
-        lamda, lamda, lamda, lamda,
-        1.00, 1.00, 1.00, 1.00,
-        theta_p_plus, theta_p_minus,
-        theta_pc_plus, theta_pc_minus,
-        residual_plus, residual_minus,
-        theta_u, theta_u,
-        d_plus, d_minus,
-        0.00
-    )
-    dirs = [1, 2, 3, 4, 6]
+    mat_generator = MaterialGenerator(model)
+    mat_strong = mat_generator.generate_steel_w_imk_material(
+        section, physical_material, element_length,
+        lboverl, loverh, rbs_factor, consider_composite,
+        direction='strong')
+    mat_weak = mat_generator.generate_steel_w_imk_material(
+        section, physical_material, element_length,
+        lboverl, loverh, rbs_factor, consider_composite,
+        direction='weak')
+    dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
-    mats = [fix_mat]*4 + [mat]
+    mats = [fix_mat]*4 + [mat_weak, mat_strong]
     return dirs, mats
 
 
@@ -577,10 +315,9 @@ def steel_brace_gusset(
         l_b: float,
         **kwargs):
     """
-    Hsiao, P. C., Lehman, D. E., & Roeder, C. W. (2013). A model to
-    simulate special concentrically braced frames beyond brace
-    fracture. Earthquake engineering & structural dynamics, 42(2),
-    183-200.
+    Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
+    analysis model for special concentrically braced frames, Journal
+    of Constructional Steel Research, Vol. 73, pp 80-94.
     Arguments:
       model (Model): Model object
       physical_mat (PhysicalMaterial): physical material object
@@ -589,7 +326,7 @@ def steel_brace_gusset(
       t_p (float): gusset plate thickness
       l_b (float): gusset plate average buckling length
     """
-    var_w = d_brace + 2.00 * l_c
+    var_w = d_brace + 2.00 * l_c * np.tan(30.00/180.00*np.pi)
     var_i = var_w * t_p**3 / 12.00
     var_z = var_w * t_p**2 / 6.00
     f_y = physical_mat.f_y
@@ -601,8 +338,8 @@ def steel_brace_gusset(
     gusset_mat = Steel02(
         model.uid_generator.new('uniaxial material'),
         'auto_steel_gusset',
-        var_my, var_k_rot, var_b, (20.00, 0.925, 0.15),
-        0.0005, 0.014, 0.0005, 0.01, 0.00, var_g)
+        var_my, var_k_rot, var_g, var_b, 20.00, 0.925, 0.15,
+        0.0005, 0.014, 0.0005, 0.01, 0.00)
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')

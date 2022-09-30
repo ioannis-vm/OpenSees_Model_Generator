@@ -34,7 +34,6 @@ import pandas as pd
 import openseespy.opensees as ops  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 from .load_case import LoadCase
-from .mesh import subdivide_polygon
 # from .import components
 from .model import Model
 from .ops.element import ElasticBeamColumn
@@ -416,16 +415,13 @@ class Analysis:
         for elm in elms:
             sec = elm.section
             parts = sec.section_parts.values()
-            n_x = elm.section.n_x
-            n_y = elm.section.n_y
             if sec.uid not in defined_sections:
                 ops.section(*sec.ops_args())
                 defined_sections[sec.uid] = sec
                 for part in parts:
                     mat = part.ops_material
                     define_material(mat, defined_materials)
-                    pieces = subdivide_polygon(
-                        part.outside_shape, part.holes, n_x, n_y)
+                    pieces = part.cut_into_tiny_little_pieces()
                     for piece in pieces:
                         area = piece.area
                         z_loc = piece.centroid.x
@@ -478,20 +474,21 @@ class Analysis:
     def _define_loads(self, case_name):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
-        for elm in self.mdl.list_of_beamcolumn_elements():
-            if elm.visibility.skip_opensees_definition:
-                continue
-            udl_total = (self.load_cases[case_name]
-                         .line_element_udl[elm.uid].val)
-            ops.eleLoad('-ele', elm.uid,
-                        '-type', '-beamUniform',
-                        udl_total[1],
-                        udl_total[2],
-                        udl_total[0])
+        # for elm in self.mdl.list_of_beamcolumn_elements():
+        #     if elm.visibility.skip_opensees_definition:
+        #         continue
+        #     udl_total = (self.load_cases[case_name]
+        #                  .line_element_udl[elm.uid].val)
+        #     if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
+        #         ops.eleLoad('-ele', elm.uid,
+        #                     '-type', '-beamUniform',
+        #                     udl_total[1],
+        #                     udl_total[2],
+        #                     udl_total[0])
 
-        for node in self.mdl.list_of_all_nodes():
-            ops.load(node.uid, *self.load_cases[case_name]
-                     .node_loads[node.uid].val)
+        # for node in self.mdl.list_of_all_nodes():
+        #     ops.load(node.uid, *self.load_cases[case_name]
+        #              .node_loads[node.uid].val)
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -1211,7 +1208,7 @@ class PushoverAnalysis(NonlinearAnalysis):
 
             scale = [1.0, 0.1, 0.01]
             steps = [25, 50, 100]
-            norm = [1.0e-12, 1.0e-12, 1.0e-12]
+            norm = [1.0e-6, 1.0e-1, 1.0e-1]
 
             try:
 
@@ -1237,7 +1234,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                             incr = sign * abs(curr_displ - target_displacement)
                         else:
                             incr = displ_incr * scale[num_subdiv]
-                        ops.test('EnergyIncr', norm[num_subdiv],
+                        ops.test('NormDispIncr', norm[num_subdiv],
                                  steps[num_subdiv], 0)
                         ops.algorithm('RaphsonNewton')
                         # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
@@ -1711,7 +1708,6 @@ class NLTHAnalysis(NonlinearAnalysis):
                 speed = total_step_count / (time.perf_counter() - now)
                 if total_step_count % 50 == 0:
                     # provide run speed statistics
-                    # debug
                     print(f'Average speed: {speed:.2f} steps/s')
                     self.log(f'Average speed: {speed:.2f} steps/s')
                 if check != 0:
@@ -1720,9 +1716,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                         self.print('===========================')
                         self.print('Analysis failed to converge')
                         self.print('===========================')
-                        self.logger.warning(  # type: ignore
-                            "Analysis failed"  # type: ignore
-                            f" at time {curr_time:.5f}")  # type: ignore
+                        if self.logger:
+                            self.logger.warning(  # type: ignore
+                                "Analysis failed"  # type: ignore
+                                f" at time {curr_time:.5f}")  # type: ignore
                         analysis_failed = True
                         break
                     # can still reduce step size
