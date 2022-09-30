@@ -21,6 +21,3 @@ warn_return_any = true
 warn_unreachable = false
 warn_unused_configs = true
 no_implicit_reexport = true
-
-[mypy]
-plugins = numpy.typing.mypy_plugin

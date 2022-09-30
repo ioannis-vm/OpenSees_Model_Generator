@@ -10,7 +10,7 @@ from osmg.graphics.preprocessing_3d import show
 from osmg import defaults
 from osmg.gen.section_gen import SectionGenerator
 from osmg.ops.section import ElasticSection
-from osmg.gen.beamcolumn_gen import BeamColumnGenerator
+from osmg.gen.component_gen import BeamColumnGenerator
 from osmg.ops.element import ElasticBeamColumn
 from osmg.load_case import LoadCase
 from osmg.gen.query import ElmQuery
@@ -140,7 +140,7 @@ def test_a():
     show_deformed_shape(
         anl, testcase.name,
         anl.results[testcase.name].n_steps_success,
-        0.00, True)
+        0.00, True, animation=False)
 
     show_basic_forces(anl, testcase.name, 0, 1.00, 0.00, 0.00, 0.00, 0.00, 3)
 
