@@ -29,6 +29,7 @@ from .node_gen import NodeGenerator
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..ops.element import ZeroLength
+from ..ops.element import TwoNodeLink
 from ..ops.element import GeomTransf
 from ..ops.element import Lobatto
 from ..ops.section import ElasticSection
@@ -38,6 +39,7 @@ from ..transformations import local_axes_from_points_and_angle
 from ..transformations import transformation_matrix
 from ..defaults import load_util_rigid_elastic
 from ..gen.zerolength_gen import steel_w_col_pz
+from ..gen.zerolength_gen import fix_all
 
 
 if TYPE_CHECKING:
@@ -271,6 +273,31 @@ class BeamColumnGenerator:
         )
         return elm
 
+    def define_two_node_link(
+            self,
+            assembly: ComponentAssembly,
+            node_i: Node,
+            node_j: Node,
+            x_axis: nparr,
+            y_axis: nparr,
+            zerolength_gen: Callable,  # type: ignore
+            zerolength_gen_args: dict[str, object]
+    ):
+        """
+        Defines a TwoNodeLink element
+        """
+        dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
+        elm = TwoNodeLink(
+            assembly,
+            self.model.uid_generator.new('element'),
+            [node_i, node_j],
+            mats,
+            dirs,
+            x_axis,
+            y_axis
+        )
+        return elm
+
     def add_beamcolumn_elements_in_series(
             self,
             component,
@@ -449,34 +476,10 @@ class BeamColumnGenerator:
         zerolength_gen_args_i.update({'element_length': clear_length})
         zerolength_gen_args_j.update({'element_length': clear_length})
 
-        if 'section' in zerolength_gen_args_i:
-            section_i = zerolength_gen_args_i['section']
-        else:
-            section_i = section
-        if 'section' in zerolength_gen_args_j:
-            section_j = zerolength_gen_args_j['section']
-        else:
-            section_j = section
-        if 'element_type' in zerolength_gen_args_i:
-            element_type_i = zerolength_gen_args_i['element_type']
-        else:
-            element_type_i = element_type
-        if 'element_type' in zerolength_gen_args_j:
-            element_type_j = zerolength_gen_args_j['element_type']
-        else:
-            element_type_j = element_type
-        if 'transf_type' in zerolength_gen_args_i:
-            transf_type_i = zerolength_gen_args_i['transf_type']
-        else:
-            transf_type_i = transf_type
-        if 'transf_type' in zerolength_gen_args_j:
-            transf_type_j = zerolength_gen_args_j['transf_type']
-        else:
-            transf_type_j = transf_type
-
         # we can have hinges at both ends, or just one of the two ends.
         # ...or even no hinges!
         if zerolength_gen_i:
+
             hinge_location_i = p_i + x_axis * zerolength_gen_args_i['distance']
             nh_i_out = Node(self.model.uid_generator.new('node'),
                             [*hinge_location_i])
@@ -485,18 +488,45 @@ class BeamColumnGenerator:
             nh_i_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_i_out)
             component.internal_nodes.add(nh_i_in)
-            self.add_beamcolumn_elements_in_series(
-                component,
-                node_i,
-                nh_i_out,
-                eo_i,
-                np.zeros(3),
-                zerolength_gen_args_i['n_sub'],
-                transf_type_i,
-                section_i,
-                element_type_i,
-                angle, camber_2, camber_3
-            )
+            if 'element_type' in zerolength_gen_args_i:
+                element_type_i = zerolength_gen_args_i['element_type']
+            else:
+                element_type_i = element_type
+            if element_type_i.__name__ in (
+                    'ElasticBeamColumn', 'DispBeamColumn'):
+                if 'section' in zerolength_gen_args_i:
+                    section_i = zerolength_gen_args_i['section']
+                else:
+                    section_i = section
+                if 'transf_type' in zerolength_gen_args_i:
+                    transf_type_i = zerolength_gen_args_i['transf_type']
+                else:
+                    transf_type_i = transf_type
+                self.add_beamcolumn_elements_in_series(
+                    component,
+                    node_i,
+                    nh_i_out,
+                    eo_i,
+                    np.zeros(3),
+                    zerolength_gen_args_i['n_sub'],
+                    transf_type_i,
+                    section_i,
+                    element_type_i,
+                    angle, 0.00, 0.00
+                )
+            elif element_type_i.__name__ == 'TwoNodeLink':
+                elm = self.define_two_node_link(
+                    component,
+                    node_i,
+                    nh_i_out,
+                    x_axis,
+                    y_axis,
+                    fix_all,
+                    {}
+                )
+                component.twonodelink_elements.add(elm)
+            else:
+                raise ValueError(f'Invalid element_type_i: {element_type_i}')
             zerolen_elm = self.define_zerolength(
                 component,
                 nh_i_out,
@@ -513,6 +543,7 @@ class BeamColumnGenerator:
             conn_node_i = node_i
             conn_eo_i = eo_i
         if zerolength_gen_j:
+
             hinge_location_j = (p_i + x_axis *
                                 (clear_length
                                  - zerolength_gen_args_j['distance']))
@@ -523,18 +554,45 @@ class BeamColumnGenerator:
             nh_j_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_j_out)
             component.internal_nodes.add(nh_j_in)
-            self.add_beamcolumn_elements_in_series(
-                component,
-                nh_j_out,
-                node_j,
-                np.zeros(3),
-                eo_j,
-                zerolength_gen_args_j['n_sub'],
-                transf_type_j,
-                section_j,
-                element_type_j,
-                angle, camber_2, camber_3
-            )
+            if 'element_type' in zerolength_gen_args_j:
+                element_type_j = zerolength_gen_args_j['element_type']
+            else:
+                element_type_j = element_type
+            if element_type_j.__name__ in (
+                    'ElasticBeamColumn', 'DispBeamColumn'):
+                if 'section' in zerolength_gen_args_j:
+                    section_j = zerolength_gen_args_j['section']
+                else:
+                    section_j = section
+                if 'transf_type' in zerolength_gen_args_j:
+                    transf_type_j = zerolength_gen_args_j['transf_type']
+                else:
+                    transf_type_j = transf_type
+                self.add_beamcolumn_elements_in_series(
+                    component,
+                    nh_j_out,
+                    node_j,
+                    np.zeros(3),
+                    eo_j,
+                    zerolength_gen_args_j['n_sub'],
+                    transf_type_j,
+                    section_j,
+                    element_type_j,
+                    angle, 0.00, 0.00
+                )
+            elif element_type_j.__name__ == 'TwoNodeLink':
+                elm = self.define_two_node_link(
+                    component,
+                    nh_j_out,
+                    node_j,
+                    x_axis,
+                    y_axis,
+                    fix_all,
+                    {}
+                )
+                component.twonodelink_elements.add(elm)
+            else:
+                raise ValueError(f'Invalid element_type_j: {element_type_j}')
             zerolen_elm = self.define_zerolength(
                 component,
                 nh_j_out,
