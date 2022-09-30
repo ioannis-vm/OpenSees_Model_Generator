@@ -79,6 +79,47 @@ class ZeroLength(Element):
 
 
 @dataclass(repr=False)
+class TwoNodeLink(Element):
+    """
+    OpenSees TwoNodeLink element
+    https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html
+    """
+    mats: list[UniaxialMaterial]
+    dirs: list[int]
+    vecx: nparr
+    vecyp: nparr
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
+        return [
+            'twoNodeLink',
+            self.uid,
+            *[n.uid for n in self.nodes],
+            '-mat',
+            *[m.uid for m in self.mats],
+            '-dir',
+            *self.dirs,
+            '-orient',
+            *self.vecx,
+            *self.vecyp
+        ]
+
+    def __repr__(self):
+        res = ''
+        res += 'TwoNodeLink element object\n'
+        res += f'uid: {self.uid}'
+        res += 'Materials:'
+        for mat, direction in zip(self.mats, self.dirs):
+            res += f'  {direction}: {mat.name}\n'
+        res += f'vecx: {self.vecx}\n'
+        res += f'vecyp: {self.vecyp}\n'
+        return res
+
+
+@dataclass(repr=False)
 class GeomTransf:
     """
     OpenSees geomTransf object

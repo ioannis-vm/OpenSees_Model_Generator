@@ -451,7 +451,23 @@ class Analysis:
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
-        # node constraints
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # TwoNodeLink element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_twonodelink_elements()
+
+        # define twonodelink elements
+        for elm in elms:
+            for mat in elm.mats:
+                define_material(mat, defined_materials)
+            ops.element(*elm.ops_args())
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~ #
+        # node constraints #
+        # ~~~~~~~~~~~~~~~~ #
+
         for uid in parent_nodes:
             lvl = self.mdl.levels[parent_node_to_lvl[uid]]
             nodes = lvl.nodes.values()

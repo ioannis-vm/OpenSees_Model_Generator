@@ -57,6 +57,8 @@ class ComponentAssembly:
         int, element.DispBeamColumn]) = field(init=False)
     zerolength_elements: (collections.CollectionWithConnectivity[
         int, element.ZeroLength]) = field(init=False)
+    twonodelink_elements: (collections.CollectionWithConnectivity[
+        int, element.TwoNodeLink]) = field(init=False)
 
     def __post_init__(self):
         self.external_nodes = collections.NodeCollection(self)
@@ -66,6 +68,8 @@ class ComponentAssembly:
         self.disp_beamcolumn_elements = \
             collections.CollectionWithConnectivity(self)
         self.zerolength_elements = collections.CollectionWithConnectivity(self)
+        self.twonodelink_elements = (collections
+                                     .CollectionWithConnectivity(self))
 
     def __srepr__(self):
         """

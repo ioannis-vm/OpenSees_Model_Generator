@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from .ops.element import ElasticBeamColumn
     from .ops.element import DispBeamColumn
     from .ops.element import ZeroLength
+    from .ops.element import TwoNodeLink
     from .component_assembly import ComponentAssembly
     from .ops.section import ElasticSection
     from .ops.section import FiberSection
@@ -306,6 +307,23 @@ class Model:
         Returns a list of all zerolength elements in the model.
         """
         return list(self.dict_of_zerolength_elements().values())
+
+    def dict_of_twonodelink_elements(self):
+        """
+        Returns a dictionary of all twonodelink elements in the model.
+        The keys are the uids of the objects.
+        """
+        elems: dict[int, TwoNodeLink] = {}
+        for lvl in self.levels.values():
+            for component in lvl.components.values():
+                elems.update(component.twonodelink_elements)
+        return elems
+
+    def list_of_twonodelink_elements(self):
+        """
+        Returns a list of all twonodelink elements in the model.
+        """
+        return list(self.dict_of_twonodelink_elements().values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
         """

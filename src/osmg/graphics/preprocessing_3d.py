@@ -488,6 +488,67 @@ def add_data__frames(data_dict, mdl, load_case):
         })
 
 
+def add_data__twonodelinks(data_dict, mdl):
+    """
+    Adds a trace containing twonodelink elements
+    Arguments:
+      data_dict (dict): dictionary containing figure data
+      mdl (Model): the model to be visualized
+    """
+    link_elems = mdl.list_of_twonodelink_elements()
+    if not link_elems:
+        return
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+    customdata_list = []
+    for elm in link_elems:
+        p_i = np.array(elm.nodes[0].coords)
+        p_j = np.array(elm.nodes[1].coords)
+        x_list.extend(
+            (p_i[0], p_j[0], None)
+        )
+        y_list.extend(
+            (p_i[1], p_j[1], None)
+        )
+        z_list.extend(
+            (p_i[2], p_j[2], None)
+        )
+        customdata_list.append(
+            (elm.uid,
+             elm.nodes[0].uid,
+             elm.parent_component.uid)
+        )
+        customdata_list.append(
+            (elm.uid,
+             elm.nodes[1].uid,
+             elm.parent_component.uid)
+        )
+        customdata_list.append(
+            (None,)*3
+        )
+
+    customdata = np.array(customdata_list, dtype='object')
+    data_dict.append({
+        "name": "TwoNodeLink elements",
+        "type": "scatter3d",
+        "mode": "lines",
+        "x": x_list,
+        "y": y_list,
+        "z": z_list,
+        # "text": section_names,
+        "customdata": customdata,
+        "hovertemplate": 'Section: %{text}<br>' +
+        '<extra>Element: %{customdata[0]:d}<br>' +
+        'Node @ this end: %{customdata[1]:d}<br>'
+        'Parent: %{customdata[2]}</extra>',
+        "line": {
+            "width": 5,
+            "color": graphics_common.LINK_COLOR
+        }
+    })
+
+
 def add_data__frame_offsets(data_dict, mdl):
     """
     Adds a trace containing frame element rigid offset lines
@@ -814,7 +875,7 @@ def show(mdl: Model,
     # plot the rigid offsets
     if offsets:
         add_data__frame_offsets(data_dict, mdl)
-
+    add_data__twonodelinks(data_dict, mdl)
     # plot the parent nodes
     if parent_nodes:
         if load_case:
