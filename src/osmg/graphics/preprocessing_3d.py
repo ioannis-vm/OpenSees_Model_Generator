@@ -503,8 +503,8 @@ def add_data__twonodelinks(data_dict, mdl):
     z_list: list[Optional[float]] = []
     customdata_list = []
     for elm in link_elems:
-        p_i = np.array(elm.nodes[0].coords)
-        p_j = np.array(elm.nodes[1].coords)
+        p_i: nparr = np.array(elm.nodes[0].coords)
+        p_j: nparr = np.array(elm.nodes[1].coords)
         x_list.extend(
             (p_i[0], p_j[0], None)
         )
@@ -528,7 +528,7 @@ def add_data__twonodelinks(data_dict, mdl):
             (None,)*3
         )
 
-    customdata = np.array(customdata_list, dtype='object')
+    customdata: nparr = np.array(customdata_list, dtype='object')
     data_dict.append({
         "name": "TwoNodeLink elements",
         "type": "scatter3d",
