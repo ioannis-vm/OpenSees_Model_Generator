@@ -73,7 +73,7 @@ class MaterialGenerator:
             self.model.uid_generator.new('uniaxial material'),
             'auto_maxstrainrange_brace_mat',
             steel02_mat,
-            var_msr, tangent_ratio=1.0e-5, def_coeff=0.068,
+            var_msr, tangent_ratio=1.0e-2, def_coeff=0.068,
             node_tags=(node_i_uid, node_j_uid))
 
         return maxstrainrange_mat
