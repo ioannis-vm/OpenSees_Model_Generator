@@ -1756,7 +1756,8 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
-            self.logger.warning("Analysis interrupted")  # type: ignore
+            if self.logger:
+                self.logger.warning("Analysis interrupted")  # type: ignore
 
         metadata = {'successful steps': n_steps_success,
                     'analysis_finished_successfully': not analysis_failed}
