@@ -240,7 +240,8 @@ class Analysis:
         """
         Adds a message to the log file
         """
-        if self.settings.log_file:
+        if self.logger:
+            # logger might not have been initialized yet
             self.logger.info(msg)  # type: ignore
 
     def print(self, thing: Any):
@@ -249,8 +250,17 @@ class Analysis:
         """
         if not self.silent:
             print(thing)
+        if self.logger:
+            # logger might not have been initialized yet
+            self.log(thing)
 
     def _init_results(self):
+
+        # initialize output directory
+        if self.output_directory and not os.path.exists(self.output_directory):
+            os.makedirs(
+                self.output_directory,
+                exist_ok=True)
 
         # initialize logger
         if self.settings.log_file:
@@ -260,12 +270,6 @@ class Analysis:
                 datefmt='%m/%d/%Y %I:%M:%S %p')
             self.logger = logging.getLogger('OpenSees_Model_Generator')
             self.logger.setLevel(logging.DEBUG)
-
-        # initialize output directory
-        if self.output_directory and not os.path.exists(self.output_directory):
-            os.makedirs(
-                self.output_directory,
-                exist_ok=True)
 
         if self.settings.pickle_results and not self.output_directory:
             raise ValueError('Speficy an output directory for the results.')
@@ -1157,6 +1161,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             incremental load is applied entirely on that node.
             Otherwise, the incremental loads are distributed to all nodes.
         """
+        self.log(f'Direction: {direction}')
         if direction == 'x':
             control_dof = 0
         elif direction == 'y':
@@ -1166,9 +1171,11 @@ class PushoverAnalysis(NonlinearAnalysis):
         else:
             raise ValueError("Direction can be 'x', 'y' or 'z'")
 
+        self.log('Initializing containers')
         self._init_results()
 
         for case_name in self.load_cases:
+            self.log(f'Load case: {case_name}')
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
             elastic_elems = [
@@ -1179,8 +1186,11 @@ class PushoverAnalysis(NonlinearAnalysis):
                 if not elm.visibility.skip_opensees_definition]
             zerolength_elems = self.mdl.list_of_zerolength_elements()
 
+            self.log('Defining elements in OpenSees')
             self._to_opensees_domain(case_name)
+            self.log('Defining loads')
             self._define_loads(case_name)
+            self.log('Running gravity analysis')
             self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
 
             curr_displ = ops.nodeDisp(control_node.uid, control_dof+1)
@@ -1195,6 +1205,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 custom_read_results_method,
                 custom_read_results_method_args)
 
+            self.log('Starting pushover analysis')
             ops.wipeAnalysis()
             ops.loadConst('-time', 0.0)
             self._apply_lateral_load(
@@ -1250,6 +1261,11 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 self.print('===========================')
                                 self.print('Analysis failed to converge')
                                 self.print('===========================')
+                                if self.logger:
+                                    self.logger.warning(  # type: ignore
+                                        "Analysis failed"  # type: ignore
+                                        f" at disp {curr_displ:.5f}"
+                                    )  # type: ignore
                                 total_fail = True
                                 break
                             # can still reduce step size
@@ -1709,7 +1725,6 @@ class NLTHAnalysis(NonlinearAnalysis):
                 if total_step_count % 50 == 0:
                     # provide run speed statistics
                     print(f'Average speed: {speed:.2f} steps/s')
-                    self.log(f'Average speed: {speed:.2f} steps/s')
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
