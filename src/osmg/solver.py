@@ -478,21 +478,21 @@ class Analysis:
     def _define_loads(self, case_name):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
-        # for elm in self.mdl.list_of_beamcolumn_elements():
-        #     if elm.visibility.skip_opensees_definition:
-        #         continue
-        #     udl_total = (self.load_cases[case_name]
-        #                  .line_element_udl[elm.uid].val)
-        #     if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
-        #         ops.eleLoad('-ele', elm.uid,
-        #                     '-type', '-beamUniform',
-        #                     udl_total[1],
-        #                     udl_total[2],
-        #                     udl_total[0])
+        for elm in self.mdl.list_of_beamcolumn_elements():
+            if elm.visibility.skip_opensees_definition:
+                continue
+            udl_total = (self.load_cases[case_name]
+                         .line_element_udl[elm.uid].val)
+            if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
+                ops.eleLoad('-ele', elm.uid,
+                            '-type', '-beamUniform',
+                            udl_total[1],
+                            udl_total[2],
+                            udl_total[0])
 
-        # for node in self.mdl.list_of_all_nodes():
-        #     ops.load(node.uid, *self.load_cases[case_name]
-        #              .node_loads[node.uid].val)
+        for node in self.mdl.list_of_all_nodes():
+            ops.load(node.uid, *self.load_cases[case_name]
+                     .node_loads[node.uid].val)
 
     ####################################################
     # Methods that read back information from OpenSees #
