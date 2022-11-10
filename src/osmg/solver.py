@@ -266,6 +266,7 @@ class Analysis:
         if self.settings.log_file:
             logging.basicConfig(
                 filename=self.settings.log_file,
+                filemode='w',
                 format='%(asctime)s %(message)s',
                 datefmt='%m/%d/%Y %I:%M:%S %p')
             self.logger = logging.getLogger('OpenSees_Model_Generator')
