@@ -887,10 +887,10 @@ class NonlinearAnalysis(Analysis):
     """
     def _run_gravity_analysis(self, system):
         self.print(f'Setting system to {system}')
+        ops.test('EnergyIncr', 1.0e-6, 100, 3)
         ops.system(system)
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
-        ops.test('EnergyIncr', 1.0e-6, 100, 3)
         ops.algorithm('RaphsonNewton')
         ops.integrator('LoadControl', 1)
         ops.analysis('Static')
@@ -1575,6 +1575,10 @@ class NLTHAnalysis(NonlinearAnalysis):
         curr_time = 0.00
         self.time_vector.append(curr_time)
 
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
+        ops.system(system)
+
         if damping_type == 'rayleigh':
             self.log('Using Rayleigh damping')
             w_i = 2 * np.pi / damping['periods'][0]
@@ -1584,9 +1588,6 @@ class NLTHAnalysis(NonlinearAnalysis):
             a_mat: nparr = np.array([[1/w_i, w_i], [1/w_j, w_j]])
             b_vec: nparr = np.array([zeta_i, zeta_j])
             x_sol: nparr = np.linalg.solve(a_mat, 2*b_vec)
-            ops.numberer(NUMBERER)
-            ops.constraints(*CONSTRAINTS)
-            ops.system(system)
             ops.rayleigh(x_sol[0], 0.0, 0.0, x_sol[1])
             # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
             # thanks prof. Scott!
@@ -1603,11 +1604,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             self.log(
                 'Running eigenvalue analysis'
                 f' with {num_modes} modes')
-            ops.numberer(NUMBERER)
-            ops.constraints(*CONSTRAINTS)
-            ops.system(system)
             ops.eigen(num_modes)
-            # ops.system(NL_ANALYSIS_SYSTEM)
             # ops.systemSize()
             self.log('Eigenvalue analysis finished')
             ops.modalDamping(damping['ratio'])
@@ -1616,10 +1613,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 'modal damping defined')
 
         self.log('Starting transient analysis')
-        ops.test('EnergyIncr', 1e-6, 50, 0)
-        ops.algorithm("KrylovNewton")
+        ops.test('EnergyIncr', 1.0e-6, 50, 0)
         # ops.integrator('Newmark', 0.50, 0.25)
         ops.integrator('TRBDF2')
+        ops.algorithm("KrylovNewton")
         ops.analysis("Transient")
 
         define_lateral_load_pattern(
@@ -1632,7 +1629,8 @@ class NLTHAnalysis(NonlinearAnalysis):
         num_times = 0
         analysis_failed = False
 
-        scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
+        scale = [1.0, 0.1, 0.01, 0.001]
+        tols = [1.0e-6, 1.0e-6, 1.0e-2, 1.0e4]
 
         total_step_count = 0
         now = time.perf_counter()
@@ -1644,7 +1642,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # # TODO create a method using this code
                 # # to automate the fastest seup selection process
                 # # debug
-                # systems = ['SparseSYM', 'UmfPack']
+                # systems = ['BandGeneral', 'BandSPD', 'ProfileSPD', 'SparseSPD', 'UmfPack', 'SparseSPD', 'UmfPack']
                 # algos = ['NewtonLineSearch',
                 #          'ModifiedNewton',
                 #          'KrylovNewton',
@@ -1677,10 +1675,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_sys = systems[imn]
-                # self.print()
+                # self.print('')
                 # self.print(times)
                 # self.print(best_sys)
-                # self.print()
+                # self.print('')
 
                 # times = []
                 # for algo in algos:
@@ -1695,10 +1693,10 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_algo = algos[imn]
-                # self.print()
+                # self.print('')
                 # self.print(times)
                 # self.print(best_algo)
-                # self.print()
+                # self.print('')
                 # times = []
                 # for integ in integrs:
                 #     ops.system(best_sys)
@@ -1712,11 +1710,12 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # mn = min(times)
                 # imn = times.index(mn)
                 # best_integ = integrs[imn]
-                # self.print()
+                # self.print('')
                 # self.print(times)
                 # self.print(best_integ)
-                # self.print()
+                # self.print('')
 
+                ops.test('EnergyIncr', tols[num_subdiv], 50, 0)
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv])
 
