@@ -1,7 +1,7 @@
 ![Tests](https://github.com/ioannis-vm/OpenSees_Model_Generator/actions/workflows/tests.yml/badge.svg)
 ![PyPI version](https://badge.fury.io/py/osmg.svg)
 ![Anaconda.org](https://anaconda.org/john_vm/osmg/badges/version.svg)
-![Latest release date](https://anaconda.org/john_vm/osmg/badges/version.svg)
+![Latest release date](https://anaconda.org/john_vm/osmg/badges/latest_release_date.svg)
 ![License](https://anaconda.org/john_vm/osmg/badges/license.svg)
 
 # OpenSees Model Generator
