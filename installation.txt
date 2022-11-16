@@ -1,9 +1,17 @@
-Using anaconda is highly recommended.
-Create an environment and activte it.
-`conda activate <envname>`
-Install all required packages from Pypi
-`python -m pip install -r requrements.txt`
-Install scikit geometry from conda forge
-`conda install scikit-geometry -c conda-forge`
-Done.
+Instructions to install this module in development mode.
+Using conda is required.
 
+See [installation instructions](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+Create an environment and activte it.
+`conda create --name <envname> python=3.9 -y`
+`conda activate <envname>`
+Install the required packages
+`conda install --file requirements.txt -y`
+Install development packages
+`python -m pip install -r requirements_dev.txt -y`
+Install openseespy using pip
+`python -m pip install openseespy`
+Install osmg in development mode. All dependencies should be already satisfied from the prior install steps.
+Navigate to the project's root directory (the one containing setup.py).
+`python -m pip install -e .`
+Done!

@@ -1642,7 +1642,9 @@ class NLTHAnalysis(NonlinearAnalysis):
                 # # TODO create a method using this code
                 # # to automate the fastest seup selection process
                 # # debug
-                # systems = ['BandGeneral', 'BandSPD', 'ProfileSPD', 'SparseSPD', 'UmfPack', 'SparseSPD', 'UmfPack']
+                # systems = ['BandGeneral', 'BandSPD', 'ProfileSPD',
+                #            'SparseSPD', 'UmfPack',
+                #            'SparseSPD', 'UmfPack']
                 # algos = ['NewtonLineSearch',
                 #          'ModifiedNewton',
                 #          'KrylovNewton',
