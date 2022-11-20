@@ -20,3 +20,6 @@ Using PyPI:
 > pip install osmg
 Using Anaconda:
 > conda install -c john_vm osmg
+
+# Known issues
+Installing through conda currently doesn't work. Working on a solution.
