@@ -361,19 +361,24 @@ class Analysis:
         for uid, node in internal_nodes.items():
             # (this is super unusual, but who knows..)
             ops.fix(node.uid, *node.restraint)
-        for uid in parent_nodes:
-            n_r = [False, False, True, True, True, False]
-            ops.fix(uid, *n_r)
+        for node in parent_nodes.values():
+            ops.fix(node.uid, *node.restraint)
 
         # lumped nodal mass
         for uid, node in all_nodes.items():
-            if np.max(np.array(
-                    (*self.load_cases[case_name]
-                     .node_mass[node.uid]
-                     .val,))) < common.EPSILON:
-                continue
-            ops.mass(node.uid, *self.load_cases[case_name].node_mass
-                     [node.uid].val)
+            # retrieve osmg node mass
+            specified_mass = (
+                self.load_cases[case_name].node_mass
+                [node.uid].val)
+            # replace zeros with a small mass
+            # (to be able to capture all mode shapes)
+            specified_mass[specified_mass == 0] = common.EPSILON
+            # verify that all mass values are non-negative
+            assert np.size(
+                specified_mass[specified_mass < 0.00]
+            ) == 0
+            # assign mass to the opensees node
+            ops.mass(node.uid, *specified_mass)
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Elastic BeamColumn element definition #

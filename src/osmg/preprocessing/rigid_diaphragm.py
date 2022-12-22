@@ -61,6 +61,7 @@ class RDAnalyzer:
         parent_node = Node(
             lvl.parent_model.uid_generator.new('node'),
             [*center, lvl.elevation])
+        parent_node.restraint = [False, False, True, True, True, False]
         loadcase.parent_nodes[lvl.uid] = parent_node
         loadcase.node_loads[parent_node.uid] = \
             load_case.PointLoadMass()
