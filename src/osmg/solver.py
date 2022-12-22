@@ -25,6 +25,8 @@ import os
 import pickle
 import logging
 import time
+from tqdm import tqdm
+from time import perf_counter
 import numpy as np
 import numpy.typing as npt
 from scipy import integrate  # type: ignore
@@ -481,6 +483,33 @@ class Analysis:
             ops.rigidDiaphragm(
                 3, uid, *[nd.uid for nd in good_nodes])
 
+        # # ~~~~~~~~~~~~~~~ #
+        # # 1-dof appendage #
+        # # ~~~~~~~~~~~~~~~ #
+
+        # # we define a cantilever appendage in order to be able to
+        # # capture all N eigenvalues, since the fast sparse solvers can
+        # # only return up to N-1 eigenvalue-eigenvector pairs. The
+        # # appendage must correspond to the highest frequency mode, so
+        # # that it ends up being the only one that is omitted.
+        # n_i_uid = self.mdl.uid_generator.new('node')
+        # n_j_uid = self.mdl.uid_generator.new('node')
+        # link_uid = self.mdl.uid_generator.new('element')
+        # mat_uid = self.mdl.uid_generator.new('uniaxial material')
+        # ops.node(n_i_uid, 100000.00, 0.00, 0.00)
+        # ops.node(n_j_uid, 100000.00, 0.00, 0.00)
+        # ops.fix(n_i_uid, True, True, True, True, True, True)
+        # ops.mass(
+        #     n_j_uid,
+        #     common.EPSILON, common.EPSILON, common.EPSILON,
+        #     common.EPSILON, common.EPSILON, common.EPSILON)
+        # ops.uniaxialMaterial('Elastic', mat_uid, common.STIFF)
+        # ops.element(
+        #     'zeroLength', link_uid, n_i_uid, n_j_uid,
+        #     '-mat', mat_uid, mat_uid, mat_uid, mat_uid, mat_uid, mat_uid,
+        #     '-dir', 1, 2, 3, 4, 5, 6
+        # )
+
     def _define_loads(self, case_name):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
@@ -891,7 +920,7 @@ class NonlinearAnalysis(Analysis):
     Nonlinear analysis parent class.
     """
     def _run_gravity_analysis(self, system):
-        self.print(f'Setting system to {system}')
+        self.log(f'Setting system to {system} for gravity analysis.')
         ops.test('EnergyIncr', 1.0e-6, 100, 3)
         ops.system(system)
         ops.numberer(NUMBERER)
@@ -901,6 +930,7 @@ class NonlinearAnalysis(Analysis):
         ops.analysis('Static')
         check = ops.analyze(1)
         if check != 0:
+            self.log(f'Gravity analysis failed. Unable to continue...')
             raise ValueError('Analysis Failed')
 
     # failed attempt
@@ -1487,7 +1517,10 @@ class NLTHAnalysis(NonlinearAnalysis):
             damping: Can be any of:
                      {'type': None},
                      {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
-                     {'type': 'modal', 'num_modes': n}
+                     {'type': 'stiffness', 'ratio': r, 'period': t1}
+                     {'type': 'modal', 'num_modes': n, 'ratio': r}
+                     {'type': 'modal+stiffness', 'num_modes': n,
+                              'ratio_modal': r, 'period': t1, 'ratio_stiffness': r}
             print_progress: Controls whether the current time is printed out
         """
 
@@ -1510,12 +1543,14 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         damping_type = damping.get('type')
 
-        if damping_type == 'rayleigh':
+        if damping_type in ('rayleigh', 'stiffness'):
             system = NL_ANALYSIS_SYSTEM
-        elif damping_type == 'modal':
+        elif damping_type in ('modal', 'modal+stiffness'):
             system = MD_ANALYSIS_SYSTEM
-        else:
+        elif damping_type == None:
             system = NL_ANALYSIS_SYSTEM
+        else:
+            raise ValueError(f'Invalid damping dype: {damping_type}.')
 
         nss = []
         if filename_x:
@@ -1623,9 +1658,35 @@ class NLTHAnalysis(NonlinearAnalysis):
                 f'{damping_ratio*100:.2f}% '
                 'modal damping defined')
 
+        if damping_type == 'modal+stiffness':
+
+            num_modes = damping['num_modes']
+            # num_modes = num_modeshapes
+            damping_ratio = damping['ratio_modal']
+            self.log(
+                'Running eigenvalue analysis'
+                f' with {num_modes} modes')
+            ops.eigen(num_modes)
+            # ops.systemSize()
+            self.log('Eigenvalue analysis finished')
+            ops.modalDamping(damping['ratio_modal'])
+            ops.rayleigh(
+                0.00, 0.0, 0.0,
+                damping['ratio_stiffness']
+                * damping['period'] / np.pi)
+            self.log(
+                'modal+stiffness damping defined')
+
         self.log('Starting transient analysis')
         ops.test('EnergyIncr', 1.0e-6, 50, 0)
         # ops.integrator('Newmark', 0.50, 0.25)
+
+        # # back to the fastest solver
+        # # no: when using modal damping, we can't go back to SparseSYM,
+        # # as this produces garbage results
+        # if system != NL_ANALYSIS_SYSTEM:
+        #     ops.system(NL_ANALYSIS_SYSTEM)
+
         ops.integrator('TRBDF2')
         ops.algorithm("KrylovNewton")
         ops.analysis("Transient")
