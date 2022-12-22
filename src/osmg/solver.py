@@ -1638,106 +1638,32 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         num_subdiv = 0
         num_times = 0
+        total_step_count = 0
         analysis_failed = False
 
         scale = [1.0, 0.1, 0.01, 0.001]
         tols = [1.0e-6, 1.0e-6, 1.0e-2, 1.0e4]
 
-        total_step_count = 0
-        now = time.perf_counter()
+        # progress bar
+        if print_progress:
+            pbar = tqdm(
+                total=target_timestamp
+            )
+            pbar.update(curr_time)
+        else:
+            pbar = None
 
         try:
 
             while curr_time + common.EPSILON < target_timestamp:
 
-                # # TODO create a method using this code
-                # # to automate the fastest seup selection process
-                # # debug
-                # systems = ['BandGeneral', 'BandSPD', 'ProfileSPD',
-                #            'SparseSPD', 'UmfPack',
-                #            'SparseSPD', 'UmfPack']
-                # algos = ['NewtonLineSearch',
-                #          'ModifiedNewton',
-                #          'KrylovNewton',
-                #          'SecantNewton',
-                #          'RaphsonNewton',
-                #          'PeriodicNewton',
-                #          'BFGS',
-                #          'Broyden']
-                # integrs = [('Newmark', 0.50, 0.25),
-                #            ('HHT', 1.0),
-                #            ('GeneralizedAlpha', 1., 1.),
-                #            ('TRBDF2',)]
-
-                # self.print('Testing systems')
-
-                # times = []
-                # best_sys = 'UmfPack'
-                # best_algo = 'Newton'
-                # best_integ = ('Newmark', 0.50, 0.25)
-                # for syst in systems:
-                #     ops.system(syst)
-                #     ops.algorithm(best_algo)
-                #     ops.integrator(*best_integ)
-
-                #     tt = time.perf_counter()
-                #     check = ops.analyze(
-                #         20, analysis_time_increment * scale[num_subdiv])
-                #     ttt = time.perf_counter()
-                #     times.append(ttt - tt)
-                # mn = min(times)
-                # imn = times.index(mn)
-                # best_sys = systems[imn]
-                # self.print('')
-                # self.print(times)
-                # self.print(best_sys)
-                # self.print('')
-
-                # times = []
-                # for algo in algos:
-                #     ops.system(best_sys)
-                #     ops.algorithm(algo)
-                #     ops.integrator(*best_integ)
-                #     tt = time.perf_counter()
-                #     check = ops.analyze(
-                #         20, analysis_time_increment * scale[num_subdiv])
-                #     ttt = time.perf_counter()
-                #     times.append(ttt - tt)
-                # mn = min(times)
-                # imn = times.index(mn)
-                # best_algo = algos[imn]
-                # self.print('')
-                # self.print(times)
-                # self.print(best_algo)
-                # self.print('')
-                # times = []
-                # for integ in integrs:
-                #     ops.system(best_sys)
-                #     ops.algorithm(best_algo)
-                #     ops.integrator(*integ)
-                #     tt = time.perf_counter()
-                #     check = ops.analyze(
-                #         20, analysis_time_increment * scale[num_subdiv])
-                #     ttt = time.perf_counter()
-                #     times.append(ttt - tt)
-                # mn = min(times)
-                # imn = times.index(mn)
-                # best_integ = integrs[imn]
-                # self.print('')
-                # self.print(times)
-                # self.print(best_integ)
-                # self.print('')
 
                 ops.test('EnergyIncr', tols[num_subdiv], 50, 0)
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv])
+                total_step_count += 1
 
                 # analysis speed stats
-                total_step_count += 1
-                speed = total_step_count / (time.perf_counter() - now)
-                if total_step_count % 50 == 0:
-                    # provide run speed statistics
-                    print(f'Average speed: {speed:.2f} steps/s')
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
@@ -1756,7 +1682,9 @@ class NLTHAnalysis(NonlinearAnalysis):
                     num_times = 10
                 else:
                     # analysis was successful
-                    curr_time = ops.getTime()
+                    prev_time = curr_time
+                    curr_time = float(ops.getTime())
+                    if pbar is not None: pbar.update(curr_time - prev_time)
                     if num_times != 0:
                         num_times -= 1
                     if total_step_count % skip_steps == 0:
@@ -1786,6 +1714,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             self.print("Analysis interrupted")
             if self.logger:
                 self.logger.warning("Analysis interrupted")  # type: ignore
+
+        if pbar is not None: pbar.close()
 
         metadata = {'successful steps': n_steps_success,
                     'analysis_finished_successfully': not analysis_failed}
