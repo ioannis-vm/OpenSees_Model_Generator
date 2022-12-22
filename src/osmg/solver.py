@@ -222,7 +222,7 @@ class Analysis:
         load case objects in which those load cases reside.
       output_directory (Optional[str]): Where to place the results
         when it is requested for them to be pickled.
-      silent (bool): Supress printing
+      silent (bool): Suppress printing
       settings (AnalysisStorageSettings): analysis settings
       results (Results): analysis results
       logger(Optional[object]): Logger object
@@ -273,7 +273,7 @@ class Analysis:
             self.logger.setLevel(logging.DEBUG)
 
         if self.settings.pickle_results and not self.output_directory:
-            raise ValueError('Speficy an output directory for the results.')
+            raise ValueError('Specify an output directory for the results.')
 
         # initialize result collections
         assert isinstance(self.load_cases, dict)
