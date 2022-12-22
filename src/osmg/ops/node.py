@@ -25,8 +25,6 @@ class Node:
     Attributes:
         uid (int)
         coords (list[float])
-        mass (list[float])
-        load (list[float])
         restraint (list[bool])
     """
     uid: int
@@ -36,7 +34,6 @@ class Node:
 
     def __post_init__(self):
         self.restraint = [False]*6
-        self.mass = [0.00]*6
 
     def __le__(self, other):
         return self.uid < other.uid
