@@ -1700,11 +1700,6 @@ class NLTHAnalysis(NonlinearAnalysis):
                             custom_read_results_method_args
                         )
                         self.time_vector.append(curr_time)
-                    if print_progress:
-                        print('Target timestamp: '
-                              f'{target_timestamp:.2f} s '
-                              f'| Current: {curr_time:.4f} s',
-                              end='\r')
                     if num_subdiv != 0:
                         if num_times == 0:
                             num_subdiv -= 1
