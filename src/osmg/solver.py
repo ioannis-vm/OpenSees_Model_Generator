@@ -769,7 +769,7 @@ class ModalAnalysis(Analysis):
                 # # element UDL
                 udl = (self.load_cases[case_name]
                        .line_element_udl[elm.uid].val)
-                # note: modal analsis doesn't account for applied loads.
+                # note: modal analysis doesn't account for applied loads.
                 # this will cause issues with plotting if loads
                 # have been applied.
                 if np.linalg.norm(udl) > common.EPSILON:
@@ -840,7 +840,7 @@ class ModalAnalysis(Analysis):
             # self.print(len(tags))
             ops.constraints(*CONSTRAINTS)
             ops.system(MD_ANALYSIS_SYSTEM)
-            # note: using SparseSYM results in wrong eigendecomposition
+            # note: using SparseSYM results in wrong eigen decomposition
             num_inertial_nodes = 0
             ndtags = ops.getNodeTags()
             for node in ndtags:
@@ -1154,13 +1154,13 @@ class PushoverAnalysis(NonlinearAnalysis):
         Run pushover analysis
         Arguments:
           direction: can be any of 'x', 'y', 'z'
-          target_displacements (list[float]): a list of target displcaments.
+          target_displacements (list[float]): a list of target displacements.
             each time a target is reached, the analysis continues until
             the next target is reached, flipping the direction as necessary.
           control_node (Node): analysis control node (of which the
-            direciton is querried)
+            direction is queried)
           displ_incr (float): initial displacement increment.
-          modeshape (nparr): array containing a mode shape that is
+          mode shape (nparr): array containing a mode shape that is
             used to distribute the applied incremental loads. If no
             mode shape is specified, the distribution is uniform.
           loaded_node (Node): if a loaded node is specified, all
@@ -1403,7 +1403,7 @@ def define_lateral_load_pattern(
         ops.timeSeries('Path', 2, '-dt', file_time_incr,
                        '-filePath', filename_x,
                        '-factor', common.G_CONST_IMPERIAL)
-        # pattern, direction, timeseries tag
+        # pattern, direction, time series tag
         ops.pattern('UniformExcitation', 2, 1, '-accel', 2)
 
     if filename_y:
@@ -1412,7 +1412,7 @@ def define_lateral_load_pattern(
         ops.timeSeries('Path', 3, '-dt', file_time_incr,
                        '-filePath', filename_y,
                        '-factor', common.G_CONST_IMPERIAL)
-        # pattern, direction, timeseries tag
+        # pattern, direction, time series tag
         ops.pattern('UniformExcitation', 3, 2, '-accel', 3)
 
     if filename_z:
@@ -1421,7 +1421,7 @@ def define_lateral_load_pattern(
         ops.timeSeries('Path', 4, '-dt', file_time_incr,
                        '-filePath', filename_z,
                        '-factor', common.G_CONST_IMPERIAL)
-        # pattern, direction, timeseries tag
+        # pattern, direction, time series tag
         ops.pattern('UniformExcitation', 4, 3, '-accel', 4)
 
     if error:
@@ -1595,7 +1595,13 @@ class NLTHAnalysis(NonlinearAnalysis):
             x_sol: nparr = np.linalg.solve(a_mat, 2*b_vec)
             ops.rayleigh(x_sol[0], 0.0, 0.0, x_sol[1])
             # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
-            # thanks prof. Scott!
+            # --thanks, prof. Scott
+
+        if damping_type == 'stiffness':
+            self.log('Using stiffness proportional damping')
+            ops.rayleigh(
+                0.00, 0.0, 0.0,
+                damping['ratio'] * damping['period'] / np.pi)
 
         if damping_type == 'modal':
             # tags = ops.getNodeTags()
