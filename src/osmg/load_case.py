@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from . import transformations
 from . import collections
 from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
@@ -172,6 +173,41 @@ class LoadCase:
             lvl = self.parent_model.levels[lvl_uid]
             rda = RDAnalyzer(self, lvl)
             rda.run(gather_mass)
+
+    def number_of_free_dofs(self):
+        """
+        Calculates the number of free DOFS of the model, considering
+        all (potentially) defined constraints, restraints and parent
+        nodes.
+        """
+        mdl = self.parent_model
+        all_nodes = mdl.dict_of_all_nodes()
+        # parent_nodes = {node.uid: node for node in self.parent_nodes.values()}
+        # all_nodes.update(parent_nodes)
+        free_dofs = (
+            pd.DataFrame(
+                np.ones((len(all_nodes), 6), dtype=int),
+                index=all_nodes.keys(),
+                columns = [1, 2, 3, 4, 5, 6]
+            )
+            .sort_index(axis='index')
+        )
+        # consider the restraints
+        def restraints(row, all_nodes):
+            uid = row.name
+            node = all_nodes[uid]
+            restraints = node.restraint
+            row[restraints] = 0
+        free_dofs.apply(restraints, axis=1, args=(all_nodes,))
+        # consider the constraints
+        num_diaphragms = 0
+        for uid in self.parent_nodes:
+            num_diaphragms += 1
+            lvl = mdl.levels[uid]
+            constrained_nodes = [n for n in lvl.nodes.values() if n.coords[2] == lvl.elevation]
+            for constrained_node in constrained_nodes:
+                free_dofs.loc[constrained_node.uid, :] = (0, 0, 1, 1, 1, 0)
+        return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self):
         res = ''
