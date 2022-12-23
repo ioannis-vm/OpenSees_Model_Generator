@@ -86,14 +86,27 @@ class Settings:
 class Model:
     """
     Model object.
+    A model object is a representation of a structural model in
+    OpenSees. It is the primary object of osmg.
+    It contains levels, elastic sections, fiber sections,
+    physical materials, and various collections of objects such as
+    nodes, elements, and component assemblies that exist inside each level.
+    Those objects are populated by generator objects. See `osmg.gen`.
     Attributes:
-        levels (CollectionActive)
-        elastic_sections (Collection)
-        fiber_sections (Collection)
-        physical_materials (PhysicalMaterialCollection)
-        component_connectivity (dict[tuple[int, ...], int])
-        uid_generator (UIDGenerator)
-        settings
+        name (str): Name of the model.
+        levels (collections.CollectionActive[int, Level]):
+            Collection of levels in the model.
+        elastic_sections (collections.Collection[int, ElasticSection]):
+            Collection of elastic sections in the model.
+        fiber_sections (collections.Collection[int, FiberSection]):
+            Collection of fiber sections in the model.
+        uniaxial_materials (collections.Collection[int, UniaxialMaterial]):
+            Collection of uniaxial materials in the model.
+        physical_materials (collections.Collection[int, PhysicalMaterial]):
+            Collection of physical materials in the model.
+        uid_generator (UIDGenerator):
+            Object for generating unique IDs for objects in the model.
+        settings (Settings): Settings for the model.
     """
     name: str
     levels: collections.CollectionActive[int, Level] = field(
@@ -154,6 +167,16 @@ class Model:
                   elevation: float):
         """
         Adds a level to the model.
+        Args:
+            uid (int): Unique ID for the level.
+            elevation (float): Elevation of the level.
+        
+        Example:
+            >>> from osmg.model import Model
+            >>> model = Model('test_model')
+            >>> model.add_level(1, 0.0)
+            >>> model.levels.__srepr__()
+            '[Collection of 1 items]'
         """
         lvl = Level(self, uid=uid, elevation=elevation)
         self.levels.add(lvl)

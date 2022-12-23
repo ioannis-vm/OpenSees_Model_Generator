@@ -32,33 +32,85 @@ class Vertex:
     It knows all the edges connected to it.
     It knows all the halfedges leaving from it.
     Each instance has an automatically generated unique id.
+    
+    Attributes:
+        coords (tuple[float, float]): Coordinates of the vertex.
+        edges (List[Edge]): List of edges connected to the vertex.
+        halfedges (List[Halfedge]): List of halfedges leaving from the
+            vertex.
+        uid (int): Unique identifier of the vertex.
+    
+    Example:
+        >>> from osmg.mesh import Vertex
+        >>> v = Vertex((0.0, 0.0))
+
     """
     _ids = count(0)
 
     def __init__(self, coords: tuple[float, float]):
+        """
+        Initializes a new instance of the `Vertex` class.
+        
+        Args:
+            coords (tuple[float, float]): Coordinates of the vertex.
+        """
         self.coords = coords
         self.edges: list[Edge] = []
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
 
     def __eq__(self, other):
+        """
+        Check for equality based on the uid of the vertex.
+        
+        Args:
+            other (Vertex): Other vertex to compare with.
+            
+        Returns:
+            bool: `True` if the two vertices are equal, `False`
+                  otherwise.
+
+        Examples:
+        >>> from osmg.mesh import Vertex
+        >>> v1 = Vertex((0, 0))
+        >>> v2 = Vertex((1, 1))
+        >>> v3 = Vertex((0, 0))
+        >>> v1 == v2
+        False
+        >>> v1 == v3
+        False
+        >>> v1 == v1
+        True
+        
+        """
         return self.uid == other.uid
 
     def __repr__(self):
+        """
+        Returns a string representation of the vertex.
+        
+        Returns:
+            str: String representation of the vertex.
+        """
         return f'(V{self.uid} @ {self.coords}) '
 
 
 class Edge:
     """
     2D oriented Edge.
-    Connected to two vertices v_i and v_j.
-    Has two halfedges, h_i and h_j.
+    Connected to two vertices `v_i` and `v_j`.
+    Has two halfedges, `h_i` and `h_j`.
     Each instance has an automatically generated unique id.
     """
 
     _ids = count(0)
 
     def __init__(self, v_i: Vertex, v_j: Vertex):
+        """
+        Initializes a new edge with the given vertices.
+        If the vertices don't already have an edge connecting them,
+        this edge is added to their list of edges.
+        """
         self.v_i = v_i
         self.v_j = v_j
         self.uid = next(self._ids)
@@ -70,6 +122,10 @@ class Edge:
             self.v_j.edges.append(self)
 
     def __repr__(self):
+        """
+        Returns a string representation of this edge, in the form
+        `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
+        """
         return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
 
     def define_halfedge(self, vertex: Vertex):
@@ -98,9 +154,24 @@ class Edge:
 
     def other_vertex(self, vertex):
         """
-        We have an edge instance.
-        It has two vertices. This method returns
-        the other vertex provided one of the vertices.
+        Returns the vertex of this edge that is not the given vertex.
+        If the given vertex is not connected to this edge, a ValueError
+        is raised.
+
+        Examples:
+            >>> from osmg.mesh import Vertex
+            >>> v1 = Vertex((0, 0))
+            >>> v2 = Vertex((1, 0))
+            >>> v3 = Vertex((2, 0))
+            >>> e = Edge(v2, v3)
+            >>> e.other_vertex(v2).coords
+            (2, 0)
+            >>> e.other_vertex(v3).coords
+            (1, 0)
+            >>> e.other_vertex(v1)
+            Traceback (most recent call last):
+                ...
+            ValueError: The edge is not connected to the given vertex
         """
         if self.v_i == vertex:
             v_other = self.v_j
@@ -112,9 +183,39 @@ class Edge:
 
     def overlaps_or_crosses(self, other: Edge):
         """
-        Checks if the edge overlaps or crosses another edge.
+        Returns True if this edge overlaps or crosses another edge.
         Edges are allowed to share one vertex (returns False), but
         not both (returns True).
+
+        Args:
+            other : Edge
+                The other edge to check for overlap or cross with this edge.
+
+        Returns: bool
+            True if this edge overlaps or crosses the other edge, False otherwise.
+
+        Examples:
+            >>> from osmg.mesh import Vertex, Edge
+            >>> v1, v2, v3, v4 = Vertex((0, 0)), Vertex((0, 1)), Vertex((1, 1)), Vertex((1, 0))
+            >>> e1 = Edge(v1, v2)
+            >>> e2 = Edge(v3, v4)
+            >>> e1.overlaps_or_crosses(e2)
+            False
+            >>> e2.overlaps_or_crosses(e1)
+            False
+            >>> e3 = Edge(v1, v3)
+            >>> e4 = Edge(v2, v4)
+            >>> e3.overlaps_or_crosses(e4)
+            True
+            >>> e4.overlaps_or_crosses(e3)
+            True
+            >>> e5 = Edge(v1, v4)
+            >>> e6 = Edge(v2, v3)
+            >>> e5.overlaps_or_crosses(e6)
+            False
+            >>> e6.overlaps_or_crosses(e5)
+            False
+
         """
 
         # location of this edge
@@ -230,17 +331,42 @@ class Halfedge:
     Halfedges have a `next` attribute that
     points to the next halfedge, forming closed
     loops, or sequences, which is the purpose of this module.
+
+    Examples:
+        >>> from osmg.mesh import Vertex, Edge, Halfedge
+        >>> v1 = Vertex((0, 0))
+        >>> v2 = Vertex((2, 2))
+        >>> edge = Edge(v1, v2)
+        >>> halfedge1 = Halfedge(v1, edge)
+        >>> halfedge2 = Halfedge(v2, edge)
+        >>> halfedge1.nxt = halfedge2
+        >>> halfedge2.nxt = halfedge1
+        >>> print(halfedge1)
+        (H0 from E7 to E7 next H1)
+        >>> print(halfedge2)
+        (H1 from E7 to E7 next H0)
     """
 
     _ids = count(0)
 
     def __init__(self, vertex: Vertex, edge: Edge):
+        """
+        Initializes the halfedge object.
+        
+        Args:
+            vertex: The vertex that the halfedge originates from.
+            edge: The edge that the halfedge is a part of.
+        """
         self.vertex = vertex
         self.edge = edge
         self.uid: int = next(self._ids)
         self.nxt = None
 
     def __repr__(self):
+        """
+        Returns a string representation of the halfedge, in the form
+        `(H0 from E0 to E0 next H1)`
+        """
         if self.nxt:
             out = f'(H{self.uid} from E{self.edge.uid}' \
                 f' to E{self.nxt.edge.uid} next H{self.nxt.uid})'
@@ -249,12 +375,27 @@ class Halfedge:
         return out
 
     def __lt__(self, other):
+        """
+        Comparison function used for sorting. Compares the halfedge ids.
+        """
         return self.uid < other.uid
 
     def direction(self):
         """
         Calculates the angular direction of the halfedge
-        using the arctan2 function
+        using the arctan2 function (in radians).
+
+        Examples:
+        >>> from osmg.mesh import Vertex, Edge, Halfedge
+        >>> v1 = Vertex((0.0, 0.0))
+        >>> v2 = Vertex((2.0, 2.0))
+        >>> edge = Edge(v1, v2)
+        >>> halfedge1 = Halfedge(v1, edge)
+        >>> halfedge2 = Halfedge(v2, edge)
+        >>> halfedge1.direction()
+        0.7853981633974483
+        >>> halfedge2.direction()
+        -2.356194490192345
         """
         drct: nparr = (np.array(self.edge.other_vertex(self.vertex).coords) -
                        np.array(self.vertex.coords))
@@ -314,6 +455,11 @@ def polygon_area(coords: nparr) -> float:
                 automatically.
     Returns:
         area (float): The area of the polygon.
+
+    Example:
+        >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
+        >>> polygon_area(coords)
+        1.0
     """
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
@@ -334,6 +480,11 @@ def polygon_centroid(coords: nparr) -> nparr:
     Returns:
         centroid (nparr): The centroid of
                  the polygon.
+
+    Example:
+        >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
+        >>> polygon_centroid(coords)
+        array([0.5, 0.5])
     """
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
@@ -366,8 +517,20 @@ def polygon_inertia(coords):
         'ixy': (float) - Product of inertia
         'ir': (float)  - Polar moment of inertia
         'ir_mass': (float) - Mass moment of inertia
-        # TODO
-        # The terms might not be pedantically accurate
+
+    Example:
+        >>> coords = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])
+        >>> res = polygon_inertia(coords)
+        >>> res['ixx']
+        -2.0
+        >>> res['iyy']
+        -6.0
+        >>> res['ixy']
+        0.0
+        >>> res['ir']
+        -8.0
+        >>> res['ir_mass']
+        1.3333333333333333
     """
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
@@ -434,14 +597,51 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3
     To understand how it works.
     Description:
-        Each halfedge stores information about its edge, vertex
-        and and next halfedge. Contrary to convention, we don't
-        store the twin (opposite) halfedge here, seince we don't
-        need it anywhere.
+          Each halfedge stores information about its edge, vertex and
+        and next halfedge. Contrary to convention, we don't store the
+        twin (opposite) halfedge here, seince we don't need it
+        anywhere.
+          This function receives a list of Edge objects as input and
+        returns a list of Halfedge objects. The function first creates
+        a Halfedge object for each vertex of each Edge object, using
+        the `define_halfedge` method of the Edge class. These Halfedge
+        objects are stored in a list called all_halfedges. For each
+        Halfedge object, the function also updates the list of
+        halfedges leaving the vertex that the halfedge originates
+        from. For example, if we have two Halfedge objects h1 and h2,
+        both originating from the same vertex v, v.halfedges will be a
+        list containing h1 and h2. (This is useful because it allows
+        us to easily access all the halfedges that originate from a
+        particular vertex, which we need later on in the algorithm.)
+          After all halfedges have been created, the function assigns
+        the next attribute of each halfedge, which points to the next
+        halfedge in the sequence. To do this, it loops through all
+        halfedges and, for each halfedge h, it determines the vertex
+        v_to that h points to, gets a list of all halfedges leaving
+        v_to, and assigns the next attribute of h to the halfedge in
+        that list that has the smallest angular difference with
+        respect to the direction of h.
     Args:
         edges (list[Edge]): List of Edge objects
     Returns:
         halfedges (list[Halfedge]): List of Halfedge objects
+    Examples:
+        >>> from osmg.mesh import Vertex, Edge, Halfedge
+        >>> # define some vertices
+        >>> v1 = Vertex((0.0, 0.0))
+        >>> v2 = Vertex((1.0, 0.0))
+        >>> v3 = Vertex((1.0, 1.0))
+        >>> v4 = Vertex((0.0, 1.0))
+        >>> # define some edges
+        >>> e1 = Edge(v1, v2)
+        >>> e2 = Edge(v2, v3)
+        >>> e3 = Edge(v3, v4)
+        >>> e4 = Edge(v4, v1)
+        >>> # define the halfedges
+        >>> halfedges = define_halfedges([e1, e2, e3, e4])
+        >>> # check that the `next` attribute of each halfedge is correctly assigned
+        >>> for h in halfedges:
+        ...     assert h.nxt.vertex == h.edge.other_vertex(h.vertex)
     """
 
     all_halfedges = []

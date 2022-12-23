@@ -31,6 +31,11 @@ class Element:
     """
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
+    Attributes:
+        parent_component (component_assembly.ComponentAssembly):
+          the parent component assembly that this element belongs to
+        uid (int): the unique identifier of this element
+        nodes (list[Node]): the list of nodes that this element connects
     """
     parent_component: component_assembly.ComponentAssembly = field(repr=False)
     uid: int

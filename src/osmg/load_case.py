@@ -44,7 +44,18 @@ class PointLoadMass:
 
     def add(self, load: nparr):
         """
-        Adds some quantity to the existing quantity
+        Adds some quantity to the existing quantity.
+
+        Examples:
+            >>> from osmg.load_case import PointLoadMass
+            >>> load = np.array([1., 2., 3., 4., 5., 6.])
+            >>> point_load = PointLoadMass()
+            >>> point_load.add(load)
+            >>> point_load.val
+            array([1., 2., 3., 4., 5., 6.])
+            >>> point_load.add(load)
+            >>> point_load.val
+            array([ 2.,  4.,  6.,  8., 10., 12.])
         """
         self.val += load
 
@@ -88,6 +99,8 @@ class LineElementUDL:
                 applied to the clear length of the element, acting on
                 the global x, y, and z directions, in the direction of
                 the global axes.
+        Returns:
+            None
         """
         # STOP! if the element has the Corotational transformation, we
         # can't apply a UDL on it. We need to lump the provided UDL to
@@ -182,16 +195,19 @@ class LoadCase:
         """
         mdl = self.parent_model
         all_nodes = mdl.dict_of_all_nodes()
-        # parent_nodes = {node.uid: node for node in self.parent_nodes.values()}
+        # parent_nodes = {
+        #     node.uid: node
+        #     for node in self.parent_nodes.values()}
         # all_nodes.update(parent_nodes)
         free_dofs = (
             pd.DataFrame(
                 np.ones((len(all_nodes), 6), dtype=int),
                 index=all_nodes.keys(),
-                columns = [1, 2, 3, 4, 5, 6]
+                columns=[1, 2, 3, 4, 5, 6]
             )
             .sort_index(axis='index')
         )
+
         # consider the restraints
         def restraints(row, all_nodes):
             uid = row.name
@@ -204,7 +220,9 @@ class LoadCase:
         for uid in self.parent_nodes:
             num_diaphragms += 1
             lvl = mdl.levels[uid]
-            constrained_nodes = [n for n in lvl.nodes.values() if n.coords[2] == lvl.elevation]
+            constrained_nodes = [
+                n for n in lvl.nodes.values()
+                if n.coords[2] == lvl.elevation]
             for constrained_node in constrained_nodes:
                 free_dofs.loc[constrained_node.uid, :] = (0, 0, 1, 1, 1, 0)
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)

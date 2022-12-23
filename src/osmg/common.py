@@ -11,6 +11,7 @@ Common definitions
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+import re
 from pprint import pprint
 from typing import OrderedDict
 from typing import Any
@@ -32,16 +33,30 @@ TINY = 1.0e-12
 
 def methods(obj: object) -> list[str]:
     """
-    Returns the names of all methods of an object.
+    Returns the names of all methods of an object,
+    excluding the dunder methods.
+
+    Examples:
+        >>> class TestClass:
+        ...     def method_1(self):
+        ...         pass
+        ...     
+        ...     def method_2(self):
+        ...         pass
+        ...
+        >>> obj = TestClass()
+        >>> methods(obj)
+        ['method_1', 'method_2']
     """
     object_methods = [method_name for method_name in dir(obj)
                       if callable(getattr(obj, method_name))]
-    return object_methods
+    pattern = r"__.*__"
+    return [s for s in object_methods if not re.match(pattern, s)]
 
 
 def print_methods(obj: object):
     """
-    Prints the methods of an object
+    Prints the methods of an object.
     """
     object_methods = methods(obj)
     pprint(object_methods)
@@ -56,10 +71,30 @@ def print_dir(obj: object):
 
 def previous_element(dct: OrderedDict[Any, Any], key):
     """
-    Returns the previous object in an OrderedDict
-    given a target key, assuming it is in the OrderedDict.
-    If it is not, it returns None.
-    If the target key is the first object, it returns None.
+    Returns the value of the element that comes before the given key
+    in an ordered dictionary.
+    If the key is not in the dictionary, or if it is the first element
+    in the dictionary, returns None.
+    
+    Args:
+        dct: An ordered dictionary.
+        key: The key of the element whose previous element we want to
+        find.
+    
+    Returns:
+        The value of the element that comes before the given key in
+        the dictionary, or None if there is no such element.
+    
+    Examples:
+        >>> dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
+        >>> previous_element(dct, 2)  # Returns 'a'
+        'a'
+        >>> previous_element(dct, 3)  # Returns 'b'
+        'b'
+        >>> previous_element(dct, 1)  # Returns None
+        
+        >>> previous_element(dct, 4)  # Returns None
+        
     """
     if key in dct:
         key_list = list(dct.keys())

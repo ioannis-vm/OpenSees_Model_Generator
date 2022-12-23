@@ -95,20 +95,40 @@ def load_default_elastic(model: Model, sec_name: str):
 
 def load_default_steel(model: Model):
     """
-    Adds a default steel material to the model
+    Adds a default steel material to the model.
+
+    Note: If different properties are required, the values provided
+    here can be altered, or the materials can be defined at the
+    user-side and added to the model instead of calling this method.
     """
-    # TODO: add SI units some day
-    uniaxial_mat = Steel02(
-        model.uid_generator.new('uniaxial material'), 'default steel',
-        55000.00, 29000000.00, 11153846.15, 0.01, 15.0, 0.925, 0.15)
-    physical_mat = PhysicalMaterial(
-        model.uid_generator.new('physical material'),
-        'default steel',
-        'A992-Fy50',
-        0.2835648148148148/common.G_CONST_IMPERIAL,
-        29000000.00,
-        11153846.15,
-        55000.00)
+    if model.settings.imperial_units:
+        # force: lb, length: in
+        uniaxial_mat = Steel02(
+            model.uid_generator.new('uniaxial material'), 'default steel',
+            55000.00, 29000000.00, 11153846.15, 0.01, 15.0, 0.925, 0.15)
+        physical_mat = PhysicalMaterial(
+            model.uid_generator.new('physical material'),
+            'default steel',
+            'A992-Fy50',
+            0.2835648148148148/common.G_CONST_IMPERIAL,
+            29000000.00,
+            11153846.15,
+            55000.00)
+    else:
+        # force: kN, length: m, but it's just the values above,
+        # converted to SI, instead of the properties of 'typical'
+        # european steel.
+        uniaxial_mat = Steel02(
+            model.uid_generator.new('uniaxial material'), 'default steel',
+            379211.65, 199947961.12, 76903062.09, 0.01, 15.0, 0.925, 0.15)
+        physical_mat = PhysicalMaterial(
+            model.uid_generator.new('physical material'),
+            'default steel',
+            'A992-Fy50',
+            773.37062406/common.G_CONST_IMPERIAL,
+            199947961.12,
+            76903062.09,
+            379211.65)
     model.uniaxial_materials.add(uniaxial_mat)
     model.physical_materials.add(physical_mat)
 

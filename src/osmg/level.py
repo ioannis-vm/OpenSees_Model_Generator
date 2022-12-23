@@ -33,6 +33,20 @@ class Level:
         elevation (float)
         nodes (NodeCollection)
         components (Collection)
+    Examples:
+        >>> from osmg.model import Model
+        >>> model = Model(name='example_model')
+        >>> level = Level(parent_model=model, uid=1, elevation=0.0)
+        >>> level.parent_model.name
+        'example_model'
+        >>> level.uid
+        1
+        >>> level.elevation
+        0.0
+        >>> type(level.nodes)
+        <class 'osmg.collections.NodeCollection'>
+        >>> type(level.components)
+        <class 'osmg.collections.Collection'>
     """
     parent_model: Model = field(repr=False)
     uid: int

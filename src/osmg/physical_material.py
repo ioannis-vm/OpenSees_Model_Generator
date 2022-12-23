@@ -20,6 +20,18 @@ class PhysicalMaterial:
     """
     Physical material.
     We use this for self-weight, plotting enhancements etc.
+
+    Example:
+        >>> mat1 = PhysicalMaterial(1, 'steel', 'structural', 7850, 210000, 81000, 400)
+        >>> print(mat1)
+        Physical material object
+        Name: steel
+        uid: 1
+        variety: structural
+        density: 7850
+        E: 210000
+        G: 81000
+        <BLANKLINE>
     """
     uid: int
     name: str

@@ -45,24 +45,44 @@ class Line:
 
     def length(self):
         """
-        returns the length of the line.
+        Returns the length of the line.
+
+        Example:
+            >>> from osmg.line import Line
+            >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+            >>> l1.length()
+            2.8284271247461903
         """
         return np.linalg.norm(self.end - self.start)
 
     def direction(self):
         """
-        returns a unit verctor pointing from the start to the end of
+        Returns a unit vector pointing from the start to the end of
         the line.
+
+        Example:
+            >>> from osmg.line import Line
+            >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+            >>> l1.direction()
+            array([0.70710678, 0.70710678])
         """
         return (self.end - self.start) / self.length()
 
     def intersect(self, other: 'Line'):
         """
-        Calculates the intersection point of this line with another line.
-        Returns None if the lines don't intersect.
-        Note: 'line' is actually a finite-length line segment.
+        Calculates the intersection point of this line with another
+        line. Returns None if the lines don't intersect.  Note: 'line'
+        is actually a finite-length line segment.
+
         Parameters:
           other (Line): the other line
+
+        Example:
+            >>> from osmg.line import Line
+            >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+            >>> l2 = Line('l2', np.array([1, 0]), np.array([1, 3]))
+            >>> l1.intersect(l2)
+            array([1., 1.])
         """
         ra_dir = self.direction()
         rb_dir = other.direction()
@@ -118,10 +138,22 @@ class Line:
 
     def intersects_pt(self, point: nparr) -> bool:
         """
-        Check whether the given point pt
-        lies on the line
+        Check whether the given point pt lies on the line.
         Parameters:
-            pt (nparr): a point
+            point (nparr): a point
+        Returns:
+            bool: True if the point lies on the line, False otherwise
+        Examples:
+            >>> from osmg.line import Line
+            >>> l = Line('my_line', np.array([0, 0]), np.array([1, 1]))
+            >>> l.intersects_pt(np.array([0.5, 0.5]))
+            True
+            >>> l.intersects_pt(np.array([0, 0]))
+            True
+            >>> l.intersects_pt(np.array([1, 1]))
+            True
+            >>> l.intersects_pt(np.array([2, 2]))
+            False
         """
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
@@ -138,11 +170,27 @@ class Line:
 
     def point_distance(self, point: nparr) -> Optional[float]:
         """
-        Calculates the projection of a point on the line.
-        If the projection falls on the line segment, it returns the
-        distance from the point to the line.
-        Arguments:
-          point (numpy.ndarray): the point's coordinates
+        Calculate the minimum distance between the line segment and a
+        point.  If the point falls on the line but is outside of the
+        line segment, returns None.
+        Parameters:
+            point (nparr): the point
+        Returns:
+            float: the minimum distance
+        Example:
+            >>> line = Line(tag='line', start=np.array([1, 1]), end=np.array([3, 3]))
+            >>> point = np.array([4, 2])
+            >>> line.point_distance(point)
+            1.4142135623730951
+            >>> point = np.array([2, 2])
+            >>> line.point_distance(point)
+            0.0
+            >>> point = np.array([0, 0])
+            >>> line.point_distance(point)
+            
+            >>> point = np.array([4, 4])
+            >>> line.point_distance(point)
+            
         """
         r_a = self.end - self.start
         r_b = point - self.start
@@ -157,9 +205,19 @@ class Line:
         """
         Calculates the projection of a point on the line.
         If the projection falls on the line segment, it returns the
-        projected point.
+        projected point, otherwise it returns None.
         Arguments:
           point (numpy.ndarray): the point's coordinates
+        Example:
+            >>> line = Line('test', np.array([0, 0]), np.array([10, 0]))
+            >>> line.project(np.array([5, 0]))
+            array([5., 0.])
+            >>> line.project(np.array([5, 5]))
+            array([5., 0.])
+            >>> line.project(np.array([-5, 5]))
+            
+            >>> line.project(np.array([15, 5]))
+            
         """
         r_a = self.end - self.start
         r_b = point - self.start

@@ -46,8 +46,42 @@ class SectionGenerator:
             g_times_j: float
     ):
         """
-        Generates a generic elastic section with the specified
-        properties
+        Generates an ElasticSection object with the specified properties.
+
+        Args:
+            name (str): Name of the section.
+            e_times_a (float):
+                The product of the elastic modulus and the area of the
+                section.
+            e_times_i (float):
+                The product of the elastic modulus and the moment of
+                inertia.
+            g_times_j (float):
+                The product of the shear modulus and the torsional
+                moment of inertia.
+
+        Returns:
+            ElasticSection: An ElasticSection object with the
+                specified properties.
+
+        Example:
+            >>> from osmg.gen.section_gen import SectionGenerator
+            >>> from osmg.model import Model
+            >>> model = Model('test_model')
+            >>> sec_gen = SectionGenerator(model)
+            >>> sec = sec_gen.generate_generic_elastic(
+            ...     name="My Elastic Section",
+            ...     e_times_a=100.00, e_times_i=1000.00, g_times_j=500.00)
+            >>> sec.name
+            'My Elastic Section'
+            >>> sec.area
+            100.0
+            >>> sec.i_y
+            1000.0
+            >>> sec.i_x
+            1000.0
+            >>> sec.j_mod
+            500.0
         """
         sec = ElasticSection(
             name=name,
@@ -60,8 +94,9 @@ class SectionGenerator:
             i_x=e_times_i,
             g_mod=1.00,
             j_mod=g_times_j,
-            sec_w=0.00,
+            sec_w=0.00
         )
+        
         if self.model.settings.imperial_units:
             y_max = +10.00
             y_min = -10.00
@@ -99,6 +134,47 @@ class SectionGenerator:
     ) -> dict[str, ElasticSection | FiberSection]:
         """
         Loads a section from the AISC steel section database.
+
+        Args:
+            sec_shape_designation: Designation of the type of section
+                to be loaded.
+            labels: List of labels of the sections to be loaded.
+            ops_material: Name of the uniaxial material to be
+                associated with the section.
+            physical_material: Name of the physical material to be
+                associated with the section.
+            sec_type: Type of section to be created.
+            store_in_model: If True, the created sections are stored
+                in the model.
+            return_section: If True, the created sections are returned.
+        Returns:
+            If `return_section` is True, a dictionary containing the
+            created sections. The keys are the labels of the sections,
+            and the values are the sections themselves.
+        Example:
+            >>> from osmg.gen.section_gen import SectionGenerator
+            >>> from osmg.model import Model
+            >>> from osmg.defaults import load_default_steel
+            >>> from osmg.ops.section import ElasticSection
+            >>> model = Model('test_model')
+            >>> load_default_steel(model)
+            >>> sec_gen = SectionGenerator(model)
+            >>> sec_gen.load_aisc_from_database(
+            ...     'W', ['W14X90'], 'default steel', 'default steel',
+            ...     ElasticSection, store_in_model=True, return_section=True)
+            {'W14X90': ElasticSection object
+            name: W14X90
+            uid: 0
+            Properties:  E: 29000000.0
+              A: 26.5
+              Iy: 362.0
+              Ix: 999.0
+              G: 11153846.15
+              J: 4.06
+              W: 7.5
+            outside_shape: specified
+            snap_points: specified
+            }
         """
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
             'name', ops_material)
