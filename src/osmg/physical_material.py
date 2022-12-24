@@ -22,7 +22,9 @@ class PhysicalMaterial:
     We use this for self-weight, plotting enhancements etc.
 
     Example:
-        >>> mat1 = PhysicalMaterial(1, 'steel', 'structural', 7850, 210000, 81000, 400)
+        >>> mat1 = PhysicalMaterial(
+        ...     1, 'steel', 'structural',
+        ...     7850, 210000, 81000, 400)
         >>> print(mat1)
         Physical material object
         Name: steel
@@ -33,6 +35,7 @@ class PhysicalMaterial:
         G: 81000
         <BLANKLINE>
     """
+
     uid: int
     name: str
     variety: str
@@ -45,15 +48,15 @@ class PhysicalMaterial:
         """
         Short version of repr
         """
-        return f'Physical material: {self.name}, {self.uid}'
+        return f"Physical material: {self.name}, {self.uid}"
 
     def __repr__(self):
-        res = ''
-        res += 'Physical material object\n'
-        res += f'Name: {self.name}\n'
-        res += f'uid: {self.uid}\n'
-        res += f'variety: {self.variety}\n'
-        res += f'density: {self.density}\n'
-        res += f'E: {self.e_mod}\n'
-        res += f'G: {self.g_mod}\n'
+        res = ""
+        res += "Physical material object\n"
+        res += f"Name: {self.name}\n"
+        res += f"uid: {self.uid}\n"
+        res += f"variety: {self.variety}\n"
+        res += f"density: {self.density}\n"
+        res += f"E: {self.e_mod}\n"
+        res += f"G: {self.g_mod}\n"
         return res

@@ -18,6 +18,7 @@ import numpy as np
 from ..ops.node import Node
 from .. import common
 from .. import load_case
+
 if TYPE_CHECKING:
     from ..load_case import LoadCase
     from ..level import Level
@@ -28,6 +29,7 @@ class RDAnalyzer:
     """
     Rigid Diaphragm Analyzer object.
     """
+
     parent_loadcase: LoadCase
     parent_level: Level
 
@@ -55,18 +57,18 @@ class RDAnalyzer:
         total_mass = sum(masses)
         if np.abs(total_mass) <= common.EPSILON:
             raise ValueError(
-                "Can't generate parent node without defined mass.")
+                "Can't generate parent node without defined mass."
+            )
         coords_np = np.array(coords) * np.column_stack((masses, masses))
-        center = np.sum(coords_np/total_mass, axis=0)
+        center = np.sum(coords_np / total_mass, axis=0)
         parent_node = Node(
-            lvl.parent_model.uid_generator.new('node'),
-            [*center, lvl.elevation])
+            lvl.parent_model.uid_generator.new("node"),
+            [*center, lvl.elevation],
+        )
         parent_node.restraint = [False, False, True, True, True, False]
         loadcase.parent_nodes[lvl.uid] = parent_node
-        loadcase.node_loads[parent_node.uid] = \
-            load_case.PointLoadMass()
-        loadcase.node_mass[parent_node.uid] = \
-            load_case.PointLoadMass()
+        loadcase.node_loads[parent_node.uid] = load_case.PointLoadMass()
+        loadcase.node_mass[parent_node.uid] = load_case.PointLoadMass()
         if gather_mass:
             # gather all mass from the nodes of the level to the
             # parent node
@@ -77,8 +79,13 @@ class RDAnalyzer:
             for node in level_nodes:
                 mass = loadcase.node_mass[node.uid].val[0]
                 loadcase.node_mass[node.uid].val = np.zeros(6)
-                dist2 = np.linalg.norm(
-                    np.array(node.coords[0:2])
-                    - np.array(parent_node.coords[0:2]))**2
-                loadcase.node_mass[parent_node.uid].val += \
-                    np.array((mass, mass, 0.00, 0.00, 0.00, mass*dist2))
+                dist2 = (
+                    np.linalg.norm(
+                        np.array(node.coords[0:2])
+                        - np.array(parent_node.coords[0:2])
+                    )
+                    ** 2
+                )
+                loadcase.node_mass[parent_node.uid].val += np.array(
+                    (mass, mass, 0.00, 0.00, 0.00, mass * dist2)
+                )

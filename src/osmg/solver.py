@@ -16,7 +16,7 @@ Model Generator for OpenSees ~ solver
 # pylint: disable=unused-argument
 # pylint: disable=multiple-statements
 # flake8: noqa: E701  # I like multiple statements on one line, sometimes.
-# mypy: disallow-untyped-def
+# mypy: disable-error-code="attr-defined"
 
 
 from __future__ import annotations
@@ -30,44 +30,49 @@ import logging
 from tqdm import tqdm
 import numpy as np
 import numpy.typing as npt
-from scipy import integrate  # type: ignore
-from scipy.interpolate import interp1d  # type: ignore
+from scipy import integrate
+from scipy.interpolate import interp1d
 import plotly.express as px
 import pandas as pd
-import openseespy.opensees as ops  # type: ignore
-import matplotlib.pyplot as plt  # type: ignore
+import openseespy.opensees as ops
+import matplotlib.pyplot as plt
 from .load_case import LoadCase
+
 # from .import components
 from .model import Model
 from .ops.element import ElasticBeamColumn
-from .import common
+from . import common
+
 # from .graphics import postprocessing_3d
 from .graphics import general_2d
-from .import transformations
+from . import transformations
 from .collections import Collection
 from .gen.query import LoadCaseQuery
+
 if TYPE_CHECKING:
     from .ops.uniaxial_material import UniaxialMaterial
 
 nparr = npt.NDArray[np.float64]
 
 
-plt.rc('font', family='serif')
-plt.rc('xtick', labelsize='medium')
-plt.rc('ytick', labelsize='medium')
+plt.rc("font", family="serif")
+plt.rc("xtick", labelsize="medium")
+plt.rc("ytick", labelsize="medium")
 
-LN_ANALYSIS_SYSTEM = 'SparseSYM'
-NL_ANALYSIS_SYSTEM = 'SparseSYM'
-MD_ANALYSIS_SYSTEM = 'UmfPack'
-CONSTRAINTS = ('Transformation',)
-NUMBERER = 'Plain'
+# LN_ANALYSIS_SYSTEM = 'SparseSYM'
+# NL_ANALYSIS_SYSTEM = 'SparseSYM'
+LN_ANALYSIS_SYSTEM = "UmfPack"
+NL_ANALYSIS_SYSTEM = "UmfPack"
+MD_ANALYSIS_SYSTEM = "UmfPack"
+CONSTRAINTS = ("Transformation",)
+NUMBERER = "Plain"
 
 
 def test_uniaxial_material(
-        mat: UniaxialMaterial,
-        input_deformations: list[float],
-        incr: float,
-        plot: bool
+    mat: UniaxialMaterial,
+    input_deformations: list[float],
+    incr: float,
+    plot: bool,
 ):
     """
     Generates force-deformation pairs using the given uniaxial material.
@@ -78,23 +83,22 @@ def test_uniaxial_material(
     deformations = [0.00]
 
     # define model
-    ops.wipe()  # type: ignore
-    ops.model('basic', '-ndm', 1, '-ndf', 1)  # type: ignore
-    ops.node(0, 0.00)  # type: ignore
-    ops.node(1, 0.00)  # type: ignore
-    ops.fix(0, 1)  # type: ignore
-    ops.uniaxial_material(  # type: ignore
-        *mat.ops_args())  # type: ignore
-    ops.element('zeroLength', 0, 0, 1, '-mat', mat.uid, '-dir', 1)  # type: ignore
+    ops.wipe()
+    ops.model("basic", "-ndm", 1, "-ndf", 1)
+    ops.node(0, 0.00)
+    ops.node(1, 0.00)
+    ops.fix(0, 1)
+    ops.uniaxial_material(*mat.ops_args())
+    ops.element("zeroLength", 0, 0, 1, "-mat", mat.uid, "-dir", 1)
     # define load pattern
-    ops.timeSeries('Linear', 1)  # type: ignore
-    ops.pattern('Plain', 1, 1)  # type: ignore
-    ops.load(1, 1.00)  # type: ignore
+    ops.timeSeries("Linear", 1)
+    ops.pattern("Plain", 1, 1)
+    ops.load(1, 1.00)
     # run analysis
-    ops.numberer('Plain')  # type: ignore
-    ops.constraints('Plain')  # type: ignore
+    ops.numberer("Plain")
+    ops.constraints("Plain")
 
-    curr_defo = ops.nodeDisp(1, 1)  # type: ignore
+    curr_defo = ops.nodeDisp(1, 1)
     n_steps_success = 0
     total_fail = False
     num_subdiv = 0
@@ -102,7 +106,7 @@ def test_uniaxial_material(
     scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
     steps = [25, 50, 75, 100, 250, 500]
     norm = [1.0e-6] * 5 + [1.0e-2]
-    algor = ['Newton']*6
+    algor = ["Newton"] * 6
     for target_defo in input_deformations:
         # determine push direction
         if curr_defo < target_defo:
@@ -111,30 +115,28 @@ def test_uniaxial_material(
         else:
             incr = -abs(incr)
             sign = -1.00
-        print('entering loop', target_defo)
+        print("entering loop", target_defo)
         while curr_defo * sign < target_defo * sign:
             # determine increment
-            if abs(curr_defo - target_defo) < \
-               abs(incr) * scale[num_subdiv]:
+            if abs(curr_defo - target_defo) < abs(incr) * scale[num_subdiv]:
                 incr_anl = sign * abs(curr_defo - target_defo)
             else:
                 incr_anl = incr * scale[num_subdiv]
-            ops.test('EnergyIncr', norm[num_subdiv],  # type: ignore
-                     steps[num_subdiv], 0)  # type: ignore
-            ops.algorithm(algor[num_subdiv])  # type: ignore
+            ops.test("EnergyIncr", norm[num_subdiv], steps[num_subdiv], 0)
+            ops.algorithm(algor[num_subdiv])
             # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
-            ops.integrator("DisplacementControl", 1, 1, incr_anl)  # type: ignore
-            ops.system('FullGeneral')  # type: ignore
-            ops.analysis("Static")  # type: ignore
-            flag = ops.analyze(1)  # type: ignore
+            ops.integrator("DisplacementControl", 1, 1, incr_anl)
+            ops.system("FullGeneral")
+            ops.analysis("Static")
+            flag = ops.analyze(1)
             if flag != 0:
                 # analysis failed
                 if num_subdiv == len(scale) - 1:
                     # can't refine further
                     print()
-                    print('===========================')
-                    print('Analysis failed to converge')
-                    print('===========================')
+                    print("===========================")
+                    print("Analysis failed to converge")
+                    print("===========================")
                     print()
                     total_fail = True
                     break
@@ -151,19 +153,19 @@ def test_uniaxial_material(
                     if num_times == 0:
                         num_subdiv -= 1
                         num_times = 10
-                ops.reactions()  # type: ignore
-                curr_defo = ops.nodeDisp(1, 1)  # type: ignore
-                reaction = -ops.nodeReaction(0)[0]  # type: ignore
+                ops.reactions()
+                curr_defo = ops.nodeDisp(1, 1)
+                reaction = -ops.nodeReaction(0)[0]
                 forces.append(reaction)
                 deformations.append(curr_defo)
             if total_fail:
                 break
-    print('Number of saved analysis steps:', n_steps_success)
+    print("Number of saved analysis steps:", n_steps_success)
     results: nparr = np.column_stack((deformations, forces))
     dframe = pd.DataFrame(results)
-    dframe.columns = ['deformation', 'froce']
+    dframe.columns = ["deformation", "froce"]
     if plot:
-        fig = px.line(dframe, x='deformation', y='force', markers=True)
+        fig = px.line(dframe, x="deformation", y="force", markers=True)
         fig.show()
     return dframe
 
@@ -173,21 +175,24 @@ class Results:
     """
     Results object. Stores analysis results.
     """
-    node_displacements: Collection[
-        int, dict[int, list[float]]] = field(init=False)
-    node_velocities: Collection[
-        int, dict[int, list[float]]] = field(init=False)
-    node_accelerations: Collection[
-        int, dict[int, list[float]]] = field(init=False)
-    node_reactions: Collection[
-        int, dict[int, list[float]]] = field(init=False)
-    element_forces: Collection[
-        int, dict[int, nparr]] = field(init=False)
+
+    node_displacements: Collection[int, dict[int, list[float]]] = field(
+        init=False
+    )
+    node_velocities: Collection[int, dict[int, list[float]]] = field(
+        init=False
+    )
+    node_accelerations: Collection[int, dict[int, list[float]]] = field(
+        init=False
+    )
+    node_reactions: Collection[int, dict[int, list[float]]] = field(init=False)
+    element_forces: Collection[int, dict[int, nparr]] = field(init=False)
     # fiber_stress_strain: Collection = field(init=False)
-    release_force_defo: Collection[
-        int, dict[int, list[float]]] = field(init=False)
+    release_force_defo: Collection[int, dict[int, list[float]]] = field(
+        init=False
+    )
     periods: Optional[nparr] = field(default=None)
-    n_steps_success: Optional[int] = field(default=None)
+    n_steps_success: int = field(default=0)
     metadata: Optional[dict[str, object]] = field(default=None)
 
     def __post_init__(self):
@@ -206,6 +211,7 @@ class AnalysisStorageSettings:
     Analysis storage settings object.
     Controls what will be stored and how.
     """
+
     log_file: Optional[str] = field(default=None)
     store_forces: bool = field(default=True)
     store_reactions: bool = field(default=True)
@@ -230,12 +236,14 @@ class Analysis:
       results (Results): analysis results
       logger(Optional[object]): Logger object
     """
+
     mdl: Model
     load_cases: dict[str, LoadCase]
     output_directory: Optional[str] = field(default=None)
     silent: bool = field(default=False)
     settings: AnalysisStorageSettings = field(
-        default_factory=AnalysisStorageSettings)
+        default_factory=AnalysisStorageSettings
+    )
     results: dict[str, Results] = field(default_factory=dict)
     logger: Optional[object] = field(default=None)
 
@@ -245,7 +253,7 @@ class Analysis:
         """
         if self.logger:
             # logger might not have been initialized yet
-            self.logger.info(msg)  # type: ignore
+            self.logger.info(msg)
 
     def print(self, thing: Any):
         """
@@ -261,22 +269,21 @@ class Analysis:
 
         # initialize output directory
         if self.output_directory and not os.path.exists(self.output_directory):
-            os.makedirs(
-                self.output_directory,
-                exist_ok=True)
+            os.makedirs(self.output_directory, exist_ok=True)
 
         # initialize logger
         if self.settings.log_file:
             logging.basicConfig(
                 filename=self.settings.log_file,
-                filemode='w',
-                format='%(asctime)s %(message)s',
-                datefmt='%m/%d/%Y %I:%M:%S %p')
-            self.logger = logging.getLogger('OpenSees_Model_Generator')
+                filemode="w",
+                format="%(asctime)s %(message)s",
+                datefmt="%m/%d/%Y %I:%M:%S %p",
+            )
+            self.logger = logging.getLogger("OpenSees_Model_Generator")
             self.logger.setLevel(logging.DEBUG)
 
         if self.settings.pickle_results and not self.output_directory:
-            raise ValueError('Specify an output directory for the results.')
+            raise ValueError("Specify an output directory for the results.")
 
         # initialize result collections
         assert isinstance(self.load_cases, dict)
@@ -287,8 +294,13 @@ class Analysis:
             else:
                 node_uids.extend(nd.uid for nd in self.mdl.list_of_all_nodes())
                 node_uids.extend(
-                    [n.uid for n in self.load_cases[case_name]
-                     .parent_nodes.values()])
+                    [
+                        n.uid
+                        for n in self.load_cases[
+                            case_name
+                        ].parent_nodes.values()
+                    ]
+                )
             self.results[case_name] = Results()
             for uid in node_uids:
                 self.results[case_name].node_displacements[uid] = {}
@@ -306,22 +318,20 @@ class Analysis:
                 for uid in self.mdl.dict_of_zerolength_elements():
                     self.results[case_name].release_force_defo[uid] = {}
 
-        self.log('Analysis started')
+        self.log("Analysis started")
 
     def _write_results_to_disk(self):
         """
         Pickles the results
         """
-        with open(f'{self.output_directory}/main_results.pcl',
-                  'wb') as file:
+        with open(f"{self.output_directory}/main_results.pcl", "wb") as file:
             pickle.dump(self.results, file)
 
     def read_results_from_disk(self):
         """
         Reads back results from a pickle file
         """
-        with open(f'{self.output_directory}/main_results.pcl',
-                  'rb') as file:
+        with open(f"{self.output_directory}/main_results.pcl", "rb") as file:
             self.results = pickle.load(file)
 
     def _to_opensees_domain(self, case_name):
@@ -330,8 +340,8 @@ class Analysis:
         """
 
         # initialize
-        ops.wipe()  # type: ignore
-        ops.model('basic', '-ndm', 3, '-ndf', 6)  # type: ignore
+        ops.wipe()
+        ops.model("basic", "-ndm", 3, "-ndf", 6)
 
         # ~~~~~~~~~~~~~~~ #
         # Node definition #
@@ -354,34 +364,30 @@ class Analysis:
         all_nodes.update(parent_nodes)
         for uid, node in all_nodes.items():
             if uid in defined_nodes:
-                raise KeyError(f'Node already defined: {uid}')
+                raise KeyError(f"Node already defined: {uid}")
             defined_nodes[uid] = node
-            ops.node(node.uid, *node.coords)  # type: ignore
+            ops.node(node.uid, *node.coords)
 
         # restraints
         for uid, node in primary_nodes.items():
-            ops.fix(node.uid, *node.restraint)  # type: ignore
+            ops.fix(node.uid, *node.restraint)
         for uid, node in internal_nodes.items():
             # (this is super unusual, but who knows..)
-            ops.fix(node.uid, *node.restraint)  # type: ignore
+            ops.fix(node.uid, *node.restraint)
         for node in parent_nodes.values():
-            ops.fix(node.uid, *node.restraint)  # type: ignore
+            ops.fix(node.uid, *node.restraint)
 
         # lumped nodal mass
         for uid, node in all_nodes.items():
             # retrieve osmg node mass
-            specified_mass = (
-                self.load_cases[case_name].node_mass
-                [node.uid].val)
+            specified_mass = self.load_cases[case_name].node_mass[node.uid].val
             # replace zeros with a small mass
             # (to be able to capture all mode shapes)
             specified_mass[specified_mass == 0] = common.EPSILON
             # verify that all mass values are non-negative
-            assert np.size(
-                specified_mass[specified_mass < 0.00]
-            ) == 0
+            assert np.size(specified_mass[specified_mass < 0.00]) == 0
             # assign mass to the opensees node
-            ops.mass(node.uid, *specified_mass)  # type: ignore
+            ops.mass(node.uid, *specified_mass)
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Elastic BeamColumn element definition #
@@ -396,8 +402,8 @@ class Analysis:
         for elm in elms:
             if elm.visibility.skip_opensees_definition:
                 continue
-            ops.geomTransf(*elm.geomtransf.ops_args())  # type: ignore
-            ops.element(*elm.ops_args())  # type: ignore
+            ops.geomTransf(*elm.geomtransf.ops_args())
+            ops.element(*elm.ops_args())
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # Fiber BeamColumn element definition #
@@ -416,20 +422,21 @@ class Analysis:
             """
             # if the actual material has not been defined yet,
             if mat.uid not in defined_materials:
-                while hasattr(mat, 'predecessor') \
-                      and mat.predecessor.uid \
-                      not in defined_materials:
+                while (
+                    hasattr(mat, "predecessor")
+                    and mat.predecessor.uid not in defined_materials
+                ):
                     # define predecessor
                     define_material(mat.predecessor, defined_materials)
                 # and also define the actual material
-                ops.uniaxialMaterial(*mat.ops_args())  # type: ignore
+                ops.uniaxialMaterial(*mat.ops_args())
                 defined_materials[mat.uid] = mat
 
         for elm in elms:
             sec = elm.section
             parts = sec.section_parts.values()
             if sec.uid not in defined_sections:
-                ops.section(*sec.ops_args())  # type: ignore
+                ops.section(*sec.ops_args())
                 defined_sections[sec.uid] = sec
                 for part in parts:
                     mat = part.ops_material
@@ -439,11 +446,10 @@ class Analysis:
                         area = piece.area
                         z_loc = piece.centroid.x
                         y_loc = piece.centroid.y
-                        ops.fiber(y_loc, z_loc, area,  # type: ignore
-                                  part.ops_material.uid)  # type: ignore
-            ops.beamIntegration(*elm.integration.ops_args())  # type: ignore
-            ops.geomTransf(*elm.geomtransf.ops_args())  # type: ignore
-            ops.element(*elm.ops_args())  # type: ignore
+                        ops.fiber(y_loc, z_loc, area, part.ops_material.uid)
+            ops.beamIntegration(*elm.integration.ops_args())
+            ops.geomTransf(*elm.geomtransf.ops_args())
+            ops.element(*elm.ops_args())
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # ZeroLength element definition #
@@ -455,7 +461,7 @@ class Analysis:
         for elm in elms:
             for mat in elm.mats:
                 define_material(mat, defined_materials)
-            ops.element(*elm.ops_args())  # type: ignore
+            ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -468,7 +474,7 @@ class Analysis:
         for elm in elms:
             for mat in elm.mats:
                 define_material(mat, defined_materials)
-            ops.element(*elm.ops_args())  # type: ignore
+            ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
         # ~~~~~~~~~~~~~~~~ #
@@ -479,8 +485,7 @@ class Analysis:
             lvl = self.mdl.levels[parent_node_to_lvl[uid]]
             nodes = lvl.nodes.values()
             good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-            ops.rigidDiaphragm(  # type: ignore
-                3, uid, *[nd.uid for nd in good_nodes])  # type: ignore
+            ops.rigidDiaphragm(3, uid, *[nd.uid for nd in good_nodes])
 
         # # ~~~~~~~~~~~~~~~ #
         # # 1-dof appendage #
@@ -510,21 +515,29 @@ class Analysis:
         # )
 
     def _define_loads(self, case_name):
-        ops.timeSeries('Linear', 1)  # type: ignore
-        ops.pattern('Plain', 1, 1)  # type: ignore
+        ops.timeSeries("Linear", 1)
+        ops.pattern("Plain", 1, 1)
         for elm in self.mdl.list_of_beamcolumn_elements():
             if elm.visibility.skip_opensees_definition:
                 continue
-            udl_total = (self.load_cases[case_name]
-                         .line_element_udl[elm.uid].val)
+            udl_total = (
+                self.load_cases[case_name].line_element_udl[elm.uid].val
+            )
             if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
-                ops.eleLoad(  # type: ignore
-                    '-ele', elm.uid, '-type', '-beamUniform',  # type: ignore
-                    udl_total[1], udl_total[2], udl_total[0])  # type: ignore
+                ops.eleLoad(
+                    "-ele",
+                    elm.uid,
+                    "-type",
+                    "-beamUniform",
+                    udl_total[1],
+                    udl_total[2],
+                    udl_total[0],
+                )
 
         for node in self.mdl.list_of_all_nodes():
-            ops.load(node.uid, *self.load_cases[case_name]  # type: ignore
-                     .node_loads[node.uid].val)  # type: ignore
+            ops.load(
+                node.uid, *self.load_cases[case_name].node_loads[node.uid].val
+            )
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -535,7 +548,7 @@ class Analysis:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
                     continue
-            val = ops.nodeDisp(node.uid)  # type: ignore
+            val = ops.nodeDisp(node.uid)
             self.results[case_name].node_displacements[node.uid][step] = val
 
     def _read_node_velocities(self, case_name, step, nodes):
@@ -543,7 +556,7 @@ class Analysis:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
                     continue
-            val = ops.nodeVel(node.uid)  # type: ignore
+            val = ops.nodeVel(node.uid)
             self.results[case_name].node_velocities[node.uid][step] = val
 
     def _read_node_accelerations(self, case_name, step, nodes):
@@ -551,24 +564,25 @@ class Analysis:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
                     continue
-            val = ops.nodeAccel(node.uid)  # type: ignore
+            val = ops.nodeAccel(node.uid)
             self.results[case_name].node_accelerations[node.uid][step] = val
 
     def _read_node_reactions(self, case_name, step, nodes):
-        ops.reactions()  # type: ignore
+        ops.reactions()
         for node in nodes:
             if True in node.restraint:
-                val = ops.nodeReaction(node.uid)  # type: ignore
+                val = ops.nodeReaction(node.uid)
                 self.results[case_name].node_reactions[node.uid][step] = val
 
     def _read_frame_element_forces(self, case_name, step, elems):
         for elm in elems:
             uid = elm.uid
-            global_values: nparr = np.array(ops.eleForce(uid))  # type: ignore
+            global_values: nparr = np.array(ops.eleForce(uid))
             forces_global = global_values[0:3]
             moments_global_ends = global_values[3:6]
             moments_global_clear = transformations.offset_transformation(
-                elm.geomtransf.offset_i, moments_global_ends, forces_global)
+                elm.geomtransf.offset_i, moments_global_ends, forces_global
+            )
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
@@ -578,37 +592,35 @@ class Analysis:
             forces: nparr = np.array((n_i, qy_i, qz_i, t_i, my_i, mz_i))
             self.results[case_name].element_forces[uid][step] = forces
 
-#     def _read_frame_fiber_stress_strain(self):
-#         for elm in self.mdl.list_of_line_elements():
-#             if elm.model_as['type'] != 'fiber':
-#                 continue
-#             uid = elm.uid
-#             mat_id = elm.section.material.uid
-#             result = []
-#             n_p = elm.n_p
-#             pts = elm.section.snap_points
-#             for pt in pts.keys():
-#                 pt = list(pts.keys())[0]
-#                 z_loc = pts[pt][0]
-#                 y_loc = pts[pt][1]
-#                 stress_strain = []
-#                 for i in range(n_p):
-#                     stress_strain.append(ops.eleResponse(
-#                         int(uid), "section", str(i+1), "-fiber", str(y_loc),
-#                         str(z_loc), str(mat_id), "stressStrain"))
-#                 result.append(stress_strain)
-#             self._store_result(self.fiber_stress_strain, uid, result)
+    #     def _read_frame_fiber_stress_strain(self):
+    #         for elm in self.mdl.list_of_line_elements():
+    #             if elm.model_as['type'] != 'fiber':
+    #                 continue
+    #             uid = elm.uid
+    #             mat_id = elm.section.material.uid
+    #             result = []
+    #             n_p = elm.n_p
+    #             pts = elm.section.snap_points
+    #             for pt in pts.keys():
+    #                 pt = list(pts.keys())[0]
+    #                 z_loc = pts[pt][0]
+    #                 y_loc = pts[pt][1]
+    #                 stress_strain = []
+    #                 for i in range(n_p):
+    #                     stress_strain.append(ops.eleResponse(
+    #                         int(uid), "section", str(i+1), "-fiber", str(y_loc),
+    #                         str(z_loc), str(mat_id), "stressStrain"))
+    #                 result.append(stress_strain)
+    #             self._store_result(self.fiber_stress_strain, uid, result)
 
     def _read_release_moment_rot(self, case_name, step, zerolength_elms):
         for release in zerolength_elms:
             # force_global = ops.eleResponse(
             #     release.uid, 'force')[:3]
-            moment_global = ops.eleResponse(  # type: ignore
-                release.uid, 'force')[3:6]  # type: ignore
+            moment_global = ops.eleResponse(release.uid, "force")[3:6]
             # disp_local = ops.eleResponse(
             #     release.uid, 'deformation')[:3]
-            rot_local = ops.eleResponse(  # type: ignore
-                release.uid, 'deformation')[3:6]  # type: ignore
+            rot_local = ops.eleResponse(release.uid, "deformation")[3:6]
             # note: j quantities are the opposite of those of
             # i by equilibrium
             # no need to store them too
@@ -619,21 +631,25 @@ class Analysis:
             vec_y = release.vecyp
             vec_z: nparr = np.cross(vec_x, vec_y)
             tmat_g2l = transformations.transformation_matrix(
-                vec_x, vec_y, vec_z)
+                vec_x, vec_y, vec_z
+            )
             moment_local = tmat_g2l @ -(np.array(moment_global))
-            self.results[case_name].release_force_defo[release.uid][step] = \
-                [*rot_local, *moment_local]
+            self.results[case_name].release_force_defo[release.uid][step] = [
+                *rot_local,
+                *moment_local,
+            ]
 
     def _read_opensees_results(
-            self,
-            case_name,
-            step,
-            nodes,
-            elastic_beamcolumn_elements,
-            disp_beamcolumn_elements,
-            zerolength_elements,
-            custom_read_results_method,
-            custom_read_results_method_args):
+        self,
+        case_name,
+        step,
+        nodes,
+        elastic_beamcolumn_elements,
+        disp_beamcolumn_elements,
+        zerolength_elements,
+        custom_read_results_method,
+        custom_read_results_method_args,
+    ):
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
         self._read_node_accelerations(case_name, step, nodes)
@@ -641,17 +657,14 @@ class Analysis:
             self._read_node_reactions(case_name, step, nodes)
         if self.settings.store_forces:
             self._read_frame_element_forces(
-                case_name,
-                step, elastic_beamcolumn_elements)
+                case_name, step, elastic_beamcolumn_elements
+            )
         # if self.settings.store_fiber:
         #     self._read_frame_fiber_stress_strain()
         if self.settings.store_release_force_defo:
-            self._read_release_moment_rot(
-                case_name,
-                step, zerolength_elements)
+            self._read_release_moment_rot(case_name, step, zerolength_elements)
         if custom_read_results_method is not None:
-            custom_read_results_method(
-                **custom_read_results_method_args)
+            custom_read_results_method(**custom_read_results_method_args)
 
     ##################################
     # Numeric Result Post-processing #
@@ -669,19 +682,25 @@ class Analysis:
                     x_coord = node.coords[0]
                     y_coord = node.coords[1]
                     z_coord = node.coords[2]
-                    local_reaction = \
-                        self.results[case_name].node_reactions[uid][step]
-                    global_reaction: nparr = np.array([
-                        local_reaction[0],
-                        local_reaction[1],
-                        local_reaction[2],
-                        local_reaction[3] + local_reaction[2] * y_coord
-                        - local_reaction[1] * z_coord,
-                        local_reaction[4] + local_reaction[0] * z_coord
-                        - local_reaction[2] * x_coord,
-                        local_reaction[5] + local_reaction[1] * x_coord
-                        - local_reaction[0] * y_coord
-                    ])
+                    local_reaction = self.results[case_name].node_reactions[
+                        uid
+                    ][step]
+                    global_reaction: nparr = np.array(
+                        [
+                            local_reaction[0],
+                            local_reaction[1],
+                            local_reaction[2],
+                            local_reaction[3]
+                            + local_reaction[2] * y_coord
+                            - local_reaction[1] * z_coord,
+                            local_reaction[4]
+                            + local_reaction[0] * z_coord
+                            - local_reaction[2] * x_coord,
+                            local_reaction[5]
+                            + local_reaction[1] * x_coord
+                            - local_reaction[0] * y_coord,
+                        ]
+                    )
                     reactions += global_reaction
         return reactions
 
@@ -692,9 +711,12 @@ class StaticAnalysis(Analysis):
     Static analysis.  Stores all results (for each load case) in one
     single step.
     """
-    def run(self,
-            custom_read_results_method=None,
-            custom_read_results_method_args={}):
+
+    def run(
+        self,
+        custom_read_results_method=None,
+        custom_read_results_method_args={},
+    ):
         """
         Runs the static analysis.
         """
@@ -705,21 +727,25 @@ class StaticAnalysis(Analysis):
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
             elastic_elems = [
-                elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
-                if not elm.visibility.skip_opensees_definition]
+                elm
+                for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition
+            ]
             disp_elems = [
-                elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
-                if not elm.visibility.skip_opensees_definition]
+                elm
+                for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition
+            ]
             zerolength_elems = self.mdl.list_of_zerolength_elements()
             step = 0
-            ops.system(LN_ANALYSIS_SYSTEM)  # type: ignore
-            ops.numberer(NUMBERER)  # type: ignore
-            ops.constraints(*CONSTRAINTS)  # type: ignore
-            ops.test('EnergyIncr', 1.0e-8, 20, 3)  # type: ignore
-            ops.algorithm('Newton')  # type: ignore
-            ops.integrator('LoadControl', 1.0)  # type: ignore
-            ops.analysis('Static')  # type: ignore
-            ops.analyze(1)  # type: ignore
+            ops.system(LN_ANALYSIS_SYSTEM)
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
+            ops.test("EnergyIncr", 1.0e-8, 20, 3)
+            ops.algorithm("Newton")
+            ops.integrator("LoadControl", 1.0)
+            ops.analysis("Static")
+            ops.analyze(1)
             self._read_opensees_results(
                 case_name,
                 step,
@@ -728,7 +754,8 @@ class StaticAnalysis(Analysis):
                 disp_elems,
                 zerolength_elems,
                 custom_read_results_method,
-                custom_read_results_method_args)
+                custom_read_results_method_args,
+            )
             if self.settings.pickle_results:
                 self._write_results_to_disk()
 
@@ -738,6 +765,7 @@ class ModalAnalysis(Analysis):
     """
     Runs a modal analysis.
     """
+
     num_modes: int = field(default=1, repr=False)
 
     ####################################################
@@ -749,9 +777,7 @@ class ModalAnalysis(Analysis):
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
         for node in nodes:
             for i in range(self.num_modes):
-                val = ops.nodeEigenvector(  # type: ignore
-                        node.uid,  # type: ignore
-                        i+1)  # type: ignore
+                val = ops.nodeEigenvector(node.uid, i + 1)
                 self.results[case_name].node_displacements[node.uid][i] = val
 
     def _read_frame_element_forces_modal(self, case_name, elems):
@@ -764,42 +790,47 @@ class ModalAnalysis(Analysis):
             for elm in elems:
                 assert isinstance(elm, ElasticBeamColumn)
                 # displacements at the two ends (global system)
-                u_i = (self.results[case_name].node_displacements
-                       [elm.nodes[0].uid][step][0:3])
-                r_i = (self.results[case_name].node_displacements
-                       [elm.nodes[0].uid][step][3:6])
-                u_j = (self.results[case_name].node_displacements
-                       [elm.nodes[1].uid][step][0:3])
-                r_j = (self.results[case_name].node_displacements
-                       [elm.nodes[1].uid][step][3:6])
+                u_i = self.results[case_name].node_displacements[
+                    elm.nodes[0].uid
+                ][step][0:3]
+                r_i = self.results[case_name].node_displacements[
+                    elm.nodes[0].uid
+                ][step][3:6]
+                u_j = self.results[case_name].node_displacements[
+                    elm.nodes[1].uid
+                ][step][0:3]
+                r_j = self.results[case_name].node_displacements[
+                    elm.nodes[1].uid
+                ][step][3:6]
                 offset_i = elm.geomtransf.offset_i
                 offset_j = elm.geomtransf.offset_j
                 u_i_o = transformations.offset_transformation(
-                    offset_i, np.array(u_i), np.array(r_i))
+                    offset_i, np.array(u_i), np.array(r_i)
+                )
                 u_j_o = transformations.offset_transformation(
-                    offset_j, np.array(u_j), np.array(r_j))
+                    offset_j, np.array(u_j), np.array(r_j)
+                )
 
                 x_vec = elm.geomtransf.x_axis
                 y_vec = elm.geomtransf.y_axis
                 z_vec: nparr = np.cross(x_vec, y_vec)
 
                 # global -> local transformation matrix
-                transf_global2local = \
-                    transformations.transformation_matrix(
-                        x_vec, y_vec, z_vec)
+                transf_global2local = transformations.transformation_matrix(
+                    x_vec, y_vec, z_vec
+                )
                 u_i_local = transf_global2local @ u_i_o
                 r_i_local = transf_global2local @ r_i
                 u_j_local = transf_global2local @ u_j_o
                 r_j_local = transf_global2local @ r_j
 
                 # # element UDL
-                udl = (self.load_cases[case_name]
-                       .line_element_udl[elm.uid].val)
+                udl = self.load_cases[case_name].line_element_udl[elm.uid].val
                 # note: modal analysis doesn't account for applied loads.
                 # this will cause issues with plotting if loads
                 # have been applied.
                 if np.linalg.norm(udl) > common.EPSILON:
-                    raise ValueError('Loads applied at modal load case.')
+                    raise ValueError("Loads applied at modal load case.")
 
                 # stiffness matrix terms
                 length = elm.clear_length()
@@ -809,51 +840,74 @@ class ModalAnalysis(Analysis):
                 gtimesj = elm.section.g_mod * elm.section.j_mod
 
                 deformation_vector = np.concatenate(
-                    (u_i_local, r_i_local, u_j_local, r_j_local))
+                    (u_i_local, r_i_local, u_j_local, r_j_local)
+                )
 
                 # axial load
-                n_i = np.array([
-                    [etimesa/length, -etimesa/length]
-                ]) @ deformation_vector[[0, 6]]
+                n_i = (
+                    np.array([[etimesa / length, -etimesa / length]])
+                    @ deformation_vector[[0, 6]]
+                )
 
                 # torsion
-                t_i = np.array([
-                    [gtimesj/length, -gtimesj/length]
-                ]) @ deformation_vector[[3, 9]]
+                t_i = (
+                    np.array([[gtimesj / length, -gtimesj / length]])
+                    @ deformation_vector[[3, 9]]
+                )
 
                 # major shear and minor bending
-                f3_m2 = np.array([
-                    [12.00*etimesi_min/length**3,
-                     -6.00*etimesi_min/length**2,
-                     -12.00*etimesi_min/length**3,
-                     -6.00*etimesi_min/length**2],
-                    [-6.00*etimesi_min/length**2,
-                     4.00*etimesi_min/length,
-                     6.00*etimesi_min/length**2,
-                     2.00*etimesi_min/length]
-                ]) @ deformation_vector[[2, 4, 8, 10]]
+                f3_m2 = (
+                    np.array(
+                        [
+                            [
+                                12.00 * etimesi_min / length**3,
+                                -6.00 * etimesi_min / length**2,
+                                -12.00 * etimesi_min / length**3,
+                                -6.00 * etimesi_min / length**2,
+                            ],
+                            [
+                                -6.00 * etimesi_min / length**2,
+                                4.00 * etimesi_min / length,
+                                6.00 * etimesi_min / length**2,
+                                2.00 * etimesi_min / length,
+                            ],
+                        ]
+                    )
+                    @ deformation_vector[[2, 4, 8, 10]]
+                )
 
                 # minor shear and major bending
-                f2_m3 = np.array([
-                    [12.00*etimesi_maj/length**3,
-                     6.00*etimesi_maj/length**2,
-                     -12.00*etimesi_maj/length**3,
-                     6.00*etimesi_maj/length**2],
-                    [6.00*etimesi_maj/length**2,
-                     4.00*etimesi_maj/length,
-                     -6.00*etimesi_maj/length**2,
-                     2.00*etimesi_maj/length]
-                ]) @ deformation_vector[[1, 5, 7, 11]]
+                f2_m3 = (
+                    np.array(
+                        [
+                            [
+                                12.00 * etimesi_maj / length**3,
+                                6.00 * etimesi_maj / length**2,
+                                -12.00 * etimesi_maj / length**3,
+                                6.00 * etimesi_maj / length**2,
+                            ],
+                            [
+                                6.00 * etimesi_maj / length**2,
+                                4.00 * etimesi_maj / length,
+                                -6.00 * etimesi_maj / length**2,
+                                2.00 * etimesi_maj / length,
+                            ],
+                        ]
+                    )
+                    @ deformation_vector[[1, 5, 7, 11]]
+                )
 
-                forces_vector_local = np.array((
-                    n_i[0], f2_m3[0], f3_m2[0],
-                    t_i[0], f3_m2[1], f2_m3[1]))
+                forces_vector_local = np.array(
+                    (n_i[0], f2_m3[0], f3_m2[0], t_i[0], f3_m2[1], f2_m3[1])
+                )
 
                 # store results
-                (self.results[case_name].element_forces
-                 # [elm.uid][step]) = \
-                 #    np.array((n_i, qy_i, qzi, t_i, myi, mz_i))
-                 [elm.uid][step]) = forces_vector_local
+                (
+                    self.results[case_name].element_forces
+                    # [elm.uid][step]) = \
+                    #    np.array((n_i, qy_i, qzi, t_i, myi, mz_i))
+                    [elm.uid][step]
+                ) = forces_vector_local
 
     def run(self):
         """
@@ -864,22 +918,24 @@ class ModalAnalysis(Analysis):
             self._to_opensees_domain(case_name)
             # tags = ops.getNodeTags()
             # self.print(len(tags))
-            ops.constraints(*CONSTRAINTS)  # type: ignore
-            ops.system(MD_ANALYSIS_SYSTEM)  # type: ignore
+            ops.constraints(*CONSTRAINTS)
+            ops.system(MD_ANALYSIS_SYSTEM)
             # note: using SparseSYM results in wrong eigen decomposition
             num_inertial_nodes = 0
-            ndtags = ops.getNodeTags()  # type: ignore
+            ndtags = ops.getNodeTags()
             for node in ndtags:
                 for j in range(6):
-                    if ops.nodeMass(node, j+1) > 0.00:  # type: ignore
+                    if ops.nodeMass(node, j + 1) > 0.00:
                         num_inertial_nodes += 1
-            eigenvalues: nparr = np.array(ops.eigen(  # type: ignore
-                self.num_modes))  # type: ignore
-            self.results[case_name].periods = 2.00*np.pi / np.sqrt(eigenvalues)
+            eigenvalues: nparr = np.array(ops.eigen(self.num_modes))
+            self.results[case_name].periods = (
+                2.00 * np.pi / np.sqrt(eigenvalues)
+            )
             self._read_node_displacements_modal(case_name)
             if self.settings.store_forces:
                 self._read_frame_element_forces_modal(
-                    case_name, self.mdl.list_of_beamcolumn_elements())
+                    case_name, self.mdl.list_of_beamcolumn_elements()
+                )
         if self.settings.pickle_results:
             self._write_results_to_disk()
 
@@ -887,26 +943,28 @@ class ModalAnalysis(Analysis):
         """
         Calculates modal participation factors
         """
-        dof_dir = {'x': 0, 'y': 1, 'z': 2}
-        ntgs = ops.getNodeTags()  # type: ignore
+        dof_dir = {"x": 0, "y": 1, "z": 2}
+        ntgs = ops.getNodeTags()
         gammas = np.zeros(self.num_modes)
         mstars = np.zeros(self.num_modes)
-        mn_tot = 0.
+        mn_tot = 0.0
         for ntg in ntgs:
             node_mass = self.load_cases[case_name].node_mass[ntg].val
             mn_tot += node_mass[dof_dir[direction]]
         for mode in range(self.num_modes):
-            l_n = 0.
-            m_n = 0.
+            l_n = 0.0
+            m_n = 0.0
             for ntg in ntgs:
                 node_mass = self.load_cases[case_name].node_mass[ntg].val
-                node_phi = ops.nodeEigenvector(ntg, mode+1)  # type: ignore
-                l_n += node_phi[dof_dir[direction]] * \
-                    node_mass[dof_dir[direction]]
+                node_phi = ops.nodeEigenvector(ntg, mode + 1)
+                l_n += (
+                    node_phi[dof_dir[direction]]
+                    * node_mass[dof_dir[direction]]
+                )
                 for dof in range(6):
-                    m_n += (node_phi[dof]**2) * node_mass[dof]
-            gammas[mode] = l_n/m_n
-            mstars[mode] = l_n**2/m_n
+                    m_n += (node_phi[dof] ** 2) * node_mass[dof]
+            gammas[mode] = l_n / m_n
+            mstars[mode] = l_n**2 / m_n
         mstars /= mn_tot
         return (gammas, mstars, mn_tot)
 
@@ -916,19 +974,20 @@ class NonlinearAnalysis(Analysis):
     """
     Nonlinear analysis parent class.
     """
+
     def _run_gravity_analysis(self, system):
-        self.log(f'Setting system to {system} for gravity analysis.')
-        ops.test('EnergyIncr', 1.0e-6, 100, 3)  # type: ignore
-        ops.system(system)  # type: ignore
-        ops.numberer(NUMBERER)  # type: ignore
-        ops.constraints(*CONSTRAINTS)  # type: ignore
-        ops.algorithm('RaphsonNewton')  # type: ignore
-        ops.integrator('LoadControl', 1)  # type: ignore
-        ops.analysis('Static')  # type: ignore
-        check = ops.analyze(1)  # type: ignore
+        self.log(f"Setting system to {system} for gravity analysis.")
+        ops.test("EnergyIncr", 1.0e-6, 100, 3)
+        ops.system(system)
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
+        ops.algorithm("RaphsonNewton")
+        ops.integrator("LoadControl", 1)
+        ops.analysis("Static")
+        check = ops.analyze(1)
         if check != 0:
-            self.log('Gravity analysis failed. Unable to continue...')
-            raise ValueError('Analysis Failed')
+            self.log("Gravity analysis failed. Unable to continue...")
+            raise ValueError("Analysis Failed")
 
     # failed attempt
     # def remove_damaged_elements(self):
@@ -1017,42 +1076,44 @@ class NonlinearAnalysis(Analysis):
         """
         Returns the displacement of a node for all analysis steps
         """
-        res = np.zeros((self.results[case_name]
-                        .n_steps_success, 6))  # type: ignore
+        if case_name not in self.results:
+            raise ValueError(f"case_name {case_name} not found in results.")
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_displacements[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_displacements[uid][i]
-        dframe = pd.DataFrame(res, columns=['ux', 'uy', 'uz',
-                                            'urx', 'ury', 'urz'])
-        dframe.index.name = 'step'
+        dframe = pd.DataFrame(
+            res, columns=["ux", "uy", "uz", "urx", "ury", "urz"]
+        )
+        dframe.index.name = "step"
         return dframe
 
     def retrieve_node_acceleration(self, uid, case_name):
         """
         Returns the acceleration of a node for all analysis steps
         """
-        res = np.zeros((self.results[case_name]
-                        .n_steps_success, 6))  # type: ignore
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_accelerations[uid][i]
-        dframe = pd.DataFrame(res, columns=['ax', 'ay', 'az',
-                                            'arx', 'ary', 'arz'])
-        dframe.index.name = 'step'
+        dframe = pd.DataFrame(
+            res, columns=["ax", "ay", "az", "arx", "ary", "arz"]
+        )
+        dframe.index.name = "step"
         return dframe
 
     def retrieve_node_velocity(self, uid, case_name):
         """
         Returns the velocity of a node for all analysis steps
         """
-        res = np.zeros((self.results[case_name].
-                        n_steps_success, 6))  # type: ignore
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
             res[i] = self.results[case_name].node_velocities[uid][i]
-        dframe = pd.DataFrame(res, columns=['vx', 'vy', 'vz',
-                                            'vrx', 'vry', 'vrz'])
-        dframe.index.name = 'step'
+        dframe = pd.DataFrame(
+            res, columns=["vx", "vy", "vz", "vrx", "vry", "vrz"]
+        )
+        dframe.index.name = "step"
         return dframe
 
     def retrieve_node_abs_acceleration(self, uid, case_name):
@@ -1060,8 +1121,7 @@ class NonlinearAnalysis(Analysis):
         Returns the absolute acceleration of a node for all analysis
         steps
         """
-        res = np.zeros((self.results[case_name]
-                        .n_steps_success, 6))  # type: ignore
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, NLTHAnalysis)
         assert self.a_g is not None
@@ -1070,21 +1130,32 @@ class NonlinearAnalysis(Analysis):
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
-                    self.a_g[j][:, 0], self.a_g[j][:, 1],
-                    bounds_error=False, fill_value=0.00)
-                res[:, j] += a_g(self.time_vector)*common.G_CONST_IMPERIAL
+                    self.a_g[j][:, 0],
+                    self.a_g[j][:, 1],
+                    bounds_error=False,
+                    fill_value=0.00,
+                )
+                res[:, j] += a_g(self.time_vector) * common.G_CONST_IMPERIAL
                 # TODO: update to support SI
-        dframe = pd.DataFrame(res, columns=['abs ax', 'abs ay', 'abs az',
-                                            'abs arx', 'abs ary', 'abs arz'])
-        dframe.index.name = 'step'
+        dframe = pd.DataFrame(
+            res,
+            columns=[
+                "abs ax",
+                "abs ay",
+                "abs az",
+                "abs arx",
+                "abs ary",
+                "abs arz",
+            ],
+        )
+        dframe.index.name = "step"
         return dframe
 
     def retrieve_node_abs_velocity(self, uid, case_name):
         """
         Returns the absolute velocity of a node for all analysis steps
         """
-        res = np.zeros((self.results[case_name]
-                        .n_steps_success, 6))  # type: ignore
+        res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, NLTHAnalysis)
         assert self.a_g is not None
@@ -1093,15 +1164,29 @@ class NonlinearAnalysis(Analysis):
         for j in range(3):
             if j in self.a_g:
                 a_g = interp1d(
-                    self.a_g[j][:, 0], self.a_g[j][:, 1],
-                    bounds_error=False, fill_value=0.00)
+                    self.a_g[j][:, 0],
+                    self.a_g[j][:, 1],
+                    bounds_error=False,
+                    fill_value=0.00,
+                )
                 v_g = integrate.cumulative_trapezoid(
-                    a_g(self.time_vector)*common.G_CONST_IMPERIAL,
-                    self.time_vector, initial=0)
+                    a_g(self.time_vector) * common.G_CONST_IMPERIAL,
+                    self.time_vector,
+                    initial=0,
+                )
                 res[:, j] = res[:, j] + v_g
-        dfrmae = pd.DataFrame(res, columns=['abs vx', 'abs vy', 'abs vz',
-                                            'abs vrx', 'abs vry', 'abs vrz'])
-        dfrmae.index.name = 'step'
+        dfrmae = pd.DataFrame(
+            res,
+            columns=[
+                "abs vx",
+                "abs vy",
+                "abs vz",
+                "abs vrx",
+                "abs vry",
+                "abs vrz",
+            ],
+        )
+        dfrmae.index.name = "step"
         return dfrmae
 
     def retrieve_release_force_defo(self, uid, case_name):
@@ -1113,9 +1198,10 @@ class NonlinearAnalysis(Analysis):
         res = np.zeros((num, 6))
         for i in range(num):
             res[i] = self.results[case_name].release_force_defo[uid][i]
-        dframe = pd.DataFrame(res, columns=[
-            'u1', 'u2', 'u3', 'q1', 'q2', 'q3'])
-        dframe.index.name = 'step'
+        dframe = pd.DataFrame(
+            res, columns=["u1", "u2", "u3", "q1", "q2", "q3"]
+        )
+        dframe.index.name = "step"
         return dframe
 
 
@@ -1124,59 +1210,79 @@ class PushoverAnalysis(NonlinearAnalysis):
     """
     Pushover analysis
     """
+
     def _apply_lateral_load(
-            self, case_name, direction, modeshape=None, node=None):
+        self, case_name, direction, modeshape=None, node=None
+    ):
         query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
         distribution = query.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
 
         # define the load pattern
-        ops.timeSeries('Linear', 2)  # type: ignore
-        ops.pattern("Plain", 2, 2)  # type: ignore
+        ops.timeSeries("Linear", 2)
+        ops.pattern("Plain", 2, 2)
 
-        if direction == 'x':
-            load_dir: nparr = np.array([1., 0., 0., 0., 0., 0.])
-        elif direction == 'y':
-            load_dir = np.array([0., 1., 0., 0., 0., 0.])
-        elif direction == 'z':
-            load_dir = np.array([0., 0., 1., 0., 0., 0.])
+        if direction == "x":
+            load_dir: nparr = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        elif direction == "y":
+            load_dir = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+        elif direction == "z":
+            load_dir = np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
         else:
-            raise ValueError('Invalid direction')
+            raise ValueError("Invalid direction")
 
         if modeshape is not None:
-            if direction not in ['x', 'y']:
+            if direction not in ["x", "y"]:
                 raise ValueError(
-                    "Can't apply lateral loads based on the 1st " +
-                    "mode shape in the z direction.")
+                    "Can't apply lateral loads based on the 1st "
+                    + "mode shape in the z direction."
+                )
             modeshape_ampl = modeshape / modeshape[-1]
         else:
             modeshape_ampl = np.ones(len(self.mdl.levels.values()))
 
         # if a node is given, apply the incremental load on that node
         if node:
-            ops.load(node.uid, *(1.00*load_dir))  # type: ignore
+            ops.load(node.uid, *(1.00 * load_dir))
         else:
             for i, lvl in enumerate(self.mdl.levels.values()):
                 if lvl.uid == 0:
                     continue
                 if self.load_cases[case_name].parent_nodes:
-                    node_list = [self.load_cases[case_name]
-                                 .parent_nodes[lvl.uid]]
+                    node_list = [
+                        self.load_cases[case_name].parent_nodes[lvl.uid]
+                    ]
                 else:
                     node_list = list(lvl.nodes.values())
                 masses: nparr = np.array(
-                    [self.load_cases[case_name].node_mass[
-                        n.uid].val[0] for n in node_list])
-                masses = masses/np.linalg.norm(masses)
+                    [
+                        self.load_cases[case_name].node_mass[n.uid].val[0]
+                        for n in node_list
+                    ]
+                )
+                masses = masses / np.linalg.norm(masses)
                 for j, some_node in enumerate(node_list):
-                    ops.load(some_node.uid,  # type: ignore
-                             *(distribution[i]*masses[j]*load_dir *  # type: ignore
-                               modeshape_ampl[i]))  # type: ignore
+                    ops.load(
+                        some_node.uid,
+                        *(
+                            distribution[i]
+                            * masses[j]
+                            * load_dir
+                            * modeshape_ampl[i]
+                        ),
+                    )
 
-    def run(self, direction, target_displacements,
-            control_node, displ_incr, modeshape=None, loaded_node=None,
-            custom_read_results_method=None,
-            custom_read_results_method_args={}):
+    def run(
+        self,
+        direction,
+        target_displacements,
+        control_node,
+        displ_incr,
+        modeshape=None,
+        loaded_node=None,
+        custom_read_results_method=None,
+        custom_read_results_method_args={},
+    ):
         """
         Run pushover analysis
         Arguments:
@@ -1194,39 +1300,43 @@ class PushoverAnalysis(NonlinearAnalysis):
             incremental load is applied entirely on that node.
             Otherwise, the incremental loads are distributed to all nodes.
         """
-        self.log(f'Direction: {direction}')
-        if direction == 'x':
+        self.log(f"Direction: {direction}")
+        if direction == "x":
             control_dof = 0
-        elif direction == 'y':
+        elif direction == "y":
             control_dof = 1
-        elif direction == 'z':
+        elif direction == "z":
             control_dof = 2
         else:
             raise ValueError("Direction can be 'x', 'y' or 'z'")
 
-        self.log('Initializing containers')
+        self.log("Initializing containers")
         self._init_results()
 
         for case_name in self.load_cases:
-            self.log(f'Load case: {case_name}')
+            self.log(f"Load case: {case_name}")
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
             elastic_elems = [
-                elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
-                if not elm.visibility.skip_opensees_definition]
+                elm
+                for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition
+            ]
             disp_elems = [
-                elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
-                if not elm.visibility.skip_opensees_definition]
+                elm
+                for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                if not elm.visibility.skip_opensees_definition
+            ]
             zerolength_elems = self.mdl.list_of_zerolength_elements()
 
-            self.log('Defining elements in OpenSees')
+            self.log("Defining elements in OpenSees")
             self._to_opensees_domain(case_name)
-            self.log('Defining loads')
+            self.log("Defining loads")
             self._define_loads(case_name)
-            self.log('Running gravity analysis')
+            self.log("Running gravity analysis")
             self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
 
-            curr_displ = ops.nodeDisp(control_node.uid, control_dof+1)  # type: ignore
+            curr_displ = ops.nodeDisp(control_node.uid, control_dof + 1)
             n_steps_success = 0
             self._read_opensees_results(
                 case_name,
@@ -1236,15 +1346,17 @@ class PushoverAnalysis(NonlinearAnalysis):
                 disp_elems,
                 zerolength_elems,
                 custom_read_results_method,
-                custom_read_results_method_args)
+                custom_read_results_method_args,
+            )
 
-            self.log('Starting pushover analysis')
-            ops.wipeAnalysis()  # type: ignore
-            ops.loadConst('-time', 0.0)  # type: ignore
+            self.log("Starting pushover analysis")
+            ops.wipeAnalysis()
+            ops.loadConst("-time", 0.0)
             self._apply_lateral_load(
-                case_name, direction, modeshape, loaded_node)
-            ops.numberer(NUMBERER)  # type: ignore
-            ops.constraints(*CONSTRAINTS)  # type: ignore
+                case_name, direction, modeshape, loaded_node
+            )
+            ops.numberer(NUMBERER)
+            ops.constraints(*CONSTRAINTS)
 
             total_fail = False
             num_subdiv = 0
@@ -1269,37 +1381,45 @@ class PushoverAnalysis(NonlinearAnalysis):
                         displ_incr = -abs(displ_incr)
                         sign = -1.00
 
-                    self.print(f'entering loop: {target_displacement}')
+                    self.print(f"entering loop: {target_displacement}")
                     while curr_displ * sign < target_displacement * sign:
 
                         # determine increment
-                        if abs(curr_displ - target_displacement) < \
-                           abs(displ_incr) * scale[num_subdiv]:
+                        if (
+                            abs(curr_displ - target_displacement)
+                            < abs(displ_incr) * scale[num_subdiv]
+                        ):
                             incr = sign * abs(curr_displ - target_displacement)
                         else:
                             incr = displ_incr * scale[num_subdiv]
-                        ops.test('NormDispIncr', norm[num_subdiv],  # type: ignore
-                                 steps[num_subdiv], 0)  # type: ignore
-                        ops.algorithm('RaphsonNewton')  # type: ignore
+                        ops.test(
+                            "NormDispIncr",
+                            norm[num_subdiv],
+                            steps[num_subdiv],
+                            0,
+                        )
+                        ops.algorithm("RaphsonNewton")
                         # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
-                        ops.integrator("DisplacementControl",  # type: ignore
-                                       int(control_node.uid),  # type: ignore
-                                       control_dof + 1,  # type: ignore
-                                       incr)  # type: ignore
-                        ops.system(NL_ANALYSIS_SYSTEM)  # type: ignore
-                        ops.analysis("Static")  # type: ignore
-                        flag = ops.analyze(1)  # type: ignore
+                        ops.integrator(
+                            "DisplacementControl",
+                            int(control_node.uid),
+                            control_dof + 1,
+                            incr,
+                        )
+                        ops.system(NL_ANALYSIS_SYSTEM)
+                        ops.analysis("Static")
+                        flag = ops.analyze(1)
                         if flag != 0:
                             if num_subdiv == len(scale) - 1:
                                 # can't refine further
-                                self.print('===========================')
-                                self.print('Analysis failed to converge')
-                                self.print('===========================')
+                                self.print("===========================")
+                                self.print("Analysis failed to converge")
+                                self.print("===========================")
                                 if self.logger:
-                                    self.logger.warning(  # type: ignore
-                                        "Analysis failed"  # type: ignore
+                                    self.logger.warning(
+                                        "Analysis failed"
                                         f" at disp {curr_displ:.5f}"
-                                    )  # type: ignore
+                                    )
                                 total_fail = True
                                 break
                             # can still reduce step size
@@ -1319,12 +1439,17 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 disp_elems,
                                 zerolength_elems,
                                 custom_read_results_method,
-                                custom_read_results_method_args)  # type: ignore
-                            curr_displ = ops.nodeDisp(  # type: ignore
-                                int(control_node.uid), control_dof+1)  # type: ignore
-                            print('Target displacement: '
-                                  f'{target_displacement:.2f}'
-                                  f' | Current: {curr_displ:.4f}', end='\r')
+                                custom_read_results_method_args,
+                            )
+                            curr_displ = ops.nodeDisp(
+                                int(control_node.uid), control_dof + 1
+                            )
+                            print(
+                                "Target displacement: "
+                                f"{target_displacement:.2f}"
+                                f" | Current: {curr_displ:.4f}",
+                                end="\r",
+                            )
                             if num_subdiv != 0:
                                 if num_times == 0:
                                     num_subdiv -= 1
@@ -1342,11 +1467,12 @@ class PushoverAnalysis(NonlinearAnalysis):
                 disp_elems,
                 zerolength_elems,
                 custom_read_results_method,
-                custom_read_results_method_args)
-            self.print(f'Number of saved analysis steps: {n_steps_success}')
-            metadata = {'successful steps': n_steps_success}
+                custom_read_results_method_args,
+            )
+            self.print(f"Number of saved analysis steps: {n_steps_success}")
+            metadata: dict[str, object] = {"successful steps": n_steps_success}
             self.results[case_name].n_steps_success = n_steps_success
-            self.results[case_name].metadata = metadata  # type: ignore
+            self.results[case_name].metadata = metadata
         # done with all cases.
         if self.settings.pickle_results:
             self._write_results_to_disk()
@@ -1355,23 +1481,27 @@ class PushoverAnalysis(NonlinearAnalysis):
         """
         Returns the force deformation results
         """
-        if direction == 'x':
+        if direction == "x":
             control_dof = 0
-        elif direction == 'y':
+        elif direction == "y":
             control_dof = 1
-        elif direction == 'z':
+        elif direction == "z":
             control_dof = 2
         else:
             raise ValueError("Direction can be 'x', 'y' or 'z'")
         base_shear_lst = []
         displacement_lst = []
-        for step in range(self.results[case_name]
-                          .n_steps_success):  # type:ignore
+        for step in range(
+            self.results[case_name].n_steps_success
+        ):  # type:ignore
             base_shear_lst.append(
-                self.global_reactions(case_name, step)[control_dof])
+                self.global_reactions(case_name, step)[control_dof]
+            )
             displacement_lst.append(
-                self.results[case_name].node_displacements[
-                    node.uid][step][control_dof])
+                self.results[case_name].node_displacements[node.uid][step][
+                    control_dof
+                ]
+            )
         base_shear: nparr = -np.array(base_shear_lst)
         displacement: nparr = np.array(displacement_lst)
         return displacement, base_shear
@@ -1382,12 +1512,20 @@ class PushoverAnalysis(NonlinearAnalysis):
         """
         # TODO: units
         displacement, base_shear = self.table_pushover_curve(
-            case_name, direction, node)
+            case_name, direction, node
+        )
         general_2d.line_plot_interactive(
             "Pushover Analysis Results<br>" + "Direction: " + direction,
-            displacement, base_shear, 'spline+markers',
-            "Displacement", "in", ".0f",
-            "Base Shear", "lb", ".0f")
+            displacement,
+            base_shear,
+            "spline+markers",
+            "Displacement",
+            "in",
+            ".0f",
+            "Base Shear",
+            "lb",
+            ".0f",
+        )
 
     # def plot_brace_hysteresis(self, brace):
     #     drift = []
@@ -1415,10 +1553,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 
 
 def define_lateral_load_pattern(
-        filename_x,
-        filename_y,
-        filename_z,
-        file_time_incr):
+    filename_x, filename_y, filename_z, file_time_incr
+):
     """
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
@@ -1428,38 +1564,56 @@ def define_lateral_load_pattern(
     if filename_x:
         error = False
         # define X-direction TH
-        ops.timeSeries('Path', 2, '-dt', file_time_incr,  # type: ignore
-                       '-filePath', filename_x,  # type: ignore
-                       '-factor', common.G_CONST_IMPERIAL)  # type: ignore
+        ops.timeSeries(
+            "Path",
+            2,
+            "-dt",
+            file_time_incr,
+            "-filePath",
+            filename_x,
+            "-factor",
+            common.G_CONST_IMPERIAL,
+        )
         # pattern, direction, time series tag
-        ops.pattern('UniformExcitation', 2, 1, '-accel', 2)  # type: ignore
+        ops.pattern("UniformExcitation", 2, 1, "-accel", 2)
 
     if filename_y:
         error = False
         # define Y-direction TH
-        ops.timeSeries('Path', 3, '-dt', file_time_incr,  # type: ignore
-                       '-filePath', filename_y,  # type: ignore
-                       '-factor', common.G_CONST_IMPERIAL)  # type: ignore
+        ops.timeSeries(
+            "Path",
+            3,
+            "-dt",
+            file_time_incr,
+            "-filePath",
+            filename_y,
+            "-factor",
+            common.G_CONST_IMPERIAL,
+        )
         # pattern, direction, time series tag
-        ops.pattern('UniformExcitation', 3, 2, '-accel', 3)  # type: ignore
+        ops.pattern("UniformExcitation", 3, 2, "-accel", 3)
 
     if filename_z:
         error = False
         # define Z-direction TH
-        ops.timeSeries('Path', 4, '-dt', file_time_incr,  # type: ignore
-                       '-filePath', filename_z,  # type: ignore
-                       '-factor', common.G_CONST_IMPERIAL)  # type: ignore
+        ops.timeSeries(
+            "Path",
+            4,
+            "-dt",
+            file_time_incr,
+            "-filePath",
+            filename_z,
+            "-factor",
+            common.G_CONST_IMPERIAL,
+        )
         # pattern, direction, time series tag
-        ops.pattern('UniformExcitation', 4, 3, '-accel', 4)  # type: ignore
+        ops.pattern("UniformExcitation", 4, 3, "-accel", 4)
 
     if error:
-        raise ValueError(
-            "No input files specified.")
+        raise ValueError("No input files specified.")
 
 
-def plot_ground_motion(filename, file_time_incr,
-                       gmunit='g',
-                       plotly=False):
+def plot_ground_motion(filename, file_time_incr, gmunit="g", plotly=False):
     """
     Plots a ground motion input file.
     """
@@ -1468,17 +1622,22 @@ def plot_ground_motion(filename, file_time_incr,
     x_vals = np.arange(0.00, n_points * file_time_incr, file_time_incr)
     if plotly:
         general_2d.line_plot_interactive(
-            "Ground motion record<br>" +
-            filename,
-            x_vals, y_vals,
+            "Ground motion record<br>" + filename,
+            x_vals,
+            y_vals,
             "line",
-            "Time", "s", ".3f",
-            "Absolute Acceleration", gmunit, ".4f")
+            "Time",
+            "s",
+            ".3f",
+            "Absolute Acceleration",
+            gmunit,
+            ".4f",
+        )
     else:
         plt.figure()
-        plt.plot(x_vals, y_vals, 'k')
-        plt.xlabel('Time (s)')
-        plt.ylabel(f'Acceleration ({gmunit})')
+        plt.plot(x_vals, y_vals, "k")
+        plt.xlabel("Time (s)")
+        plt.ylabel(f"Acceleration ({gmunit})")
         plt.show()
 
 
@@ -1487,22 +1646,26 @@ class NLTHAnalysis(NonlinearAnalysis):
     """
     Dynamic nonlinear time-history analysis
     """
+
     time_vector: list[float] = field(default_factory=list, repr=False)
     a_g: dict[int, npt.NDArray[np.float64]] = field(
-        default_factory=dict, repr=False)
+        default_factory=dict, repr=False
+    )
 
-    def run(self,
-            analysis_time_increment: float,
-            filename_x: str,
-            filename_y: str,
-            filename_z: str,
-            file_time_incr: float,
-            finish_time=0.00,
-            skip_steps=1,
-            damping={'type': None},
-            print_progress=True,
-            custom_read_results_method=None,
-            custom_read_results_method_args={}):
+    def run(
+        self,
+        analysis_time_increment: float,
+        filename_x: str,
+        filename_y: str,
+        filename_z: str,
+        file_time_incr: float,
+        finish_time=0.00,
+        skip_steps=1,
+        damping={"type": None},
+        print_progress=True,
+        custom_read_results_method=None,
+        custom_read_results_method_args={},
+    ):
         """
         Run the nonlinear time-history analysis
         Args:
@@ -1518,12 +1681,13 @@ class NLTHAnalysis(NonlinearAnalysis):
                      {'type': 'stiffness', 'ratio': r, 'period': t1}
                      {'type': 'modal', 'num_modes': n, 'ratio': r}
                      {'type': 'modal+stiffness', 'num_modes': n,
-                              'ratio_modal': r, 'period': t1, 'ratio_stiffness': r}
+                              'ratio_modal': r, 'period': t1,
+                              'ratio_stiffness': r}
             print_progress: Controls whether the current time is printed out
         """
 
         self._init_results()
-        self.log('Running NLTH analysis')
+        self.log("Running NLTH analysis")
 
         nodes = self.mdl.list_of_all_nodes()
         # note: only runs the first load case provided.
@@ -1532,23 +1696,27 @@ class NLTHAnalysis(NonlinearAnalysis):
         case_name = list(self.load_cases.keys())[0]
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
         elastic_elems = [
-            elm for elm in self.mdl.list_of_elastic_beamcolumn_elements()
-            if not elm.visibility.skip_opensees_definition]
+            elm
+            for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+            if not elm.visibility.skip_opensees_definition
+        ]
         disp_elems = [
-            elm for elm in self.mdl.list_of_disp_beamcolumn_elements()
-            if not elm.visibility.skip_opensees_definition]
+            elm
+            for elm in self.mdl.list_of_disp_beamcolumn_elements()
+            if not elm.visibility.skip_opensees_definition
+        ]
         zerolength_elems = self.mdl.list_of_zerolength_elements()
 
-        damping_type = damping.get('type')
+        damping_type = damping.get("type")
 
-        if damping_type in ('rayleigh', 'stiffness'):
+        if damping_type in ("rayleigh", "stiffness"):
             system = NL_ANALYSIS_SYSTEM
-        elif damping_type in ('modal', 'modal+stiffness'):
+        elif damping_type in ("modal", "modal+stiffness"):
             system = MD_ANALYSIS_SYSTEM
         elif not damping_type:
             system = NL_ANALYSIS_SYSTEM
         else:
-            raise ValueError(f'Invalid damping dype: {damping_type}.')
+            raise ValueError(f"Invalid damping dype: {damping_type}.")
 
         nss = []
         if filename_x:
@@ -1561,14 +1729,16 @@ class NLTHAnalysis(NonlinearAnalysis):
             gm_vals_z = np.genfromtxt(filename_z)
             nss.append(len(gm_vals_z))
 
-        self.log(f'filename_x: {filename_x}')
-        self.log(f'filename_y: {filename_y}')
-        self.log(f'filename_z: {filename_z}')
+        self.log(f"filename_x: {filename_x}")
+        self.log(f"filename_y: {filename_y}")
+        self.log(f"filename_z: {filename_z}")
 
         num_gm_points = np.min(np.array(nss))
         duration = num_gm_points * file_time_incr
 
-        t_vec = np.linspace(0.00, file_time_incr*num_gm_points, num_gm_points)
+        t_vec = np.linspace(
+            0.00, file_time_incr * num_gm_points, num_gm_points
+        )
         if filename_x:
             self.a_g[0] = np.column_stack((t_vec, gm_vals_x))
         else:
@@ -1587,13 +1757,13 @@ class NLTHAnalysis(NonlinearAnalysis):
         else:
             target_timestamp = finish_time
 
-        self.log('Defining model in OpenSees')
+        self.log("Defining model in OpenSees")
         self._to_opensees_domain(case_name)
 
         # gravity analysis
-        self.log('Defining dead loads')
+        self.log("Defining dead loads")
         self._define_loads(case_name)
-        self.log('Starting gravity analysis')
+        self.log("Starting gravity analysis")
         self._run_gravity_analysis(system)
         n_steps_success = 0
         self._read_opensees_results(
@@ -1604,79 +1774,74 @@ class NLTHAnalysis(NonlinearAnalysis):
             disp_elems,
             zerolength_elems,
             custom_read_results_method,
-            custom_read_results_method_args
+            custom_read_results_method_args,
         )
 
         # time-history analysis
-        ops.wipeAnalysis()  # type: ignore
-        ops.loadConst('-time', 0.0)  # type: ignore
+        ops.wipeAnalysis()
+        ops.loadConst("-time", 0.0)
         curr_time = 0.00
         self.time_vector.append(curr_time)
 
-        ops.numberer(NUMBERER)  # type: ignore
-        ops.constraints(*CONSTRAINTS)  # type: ignore
-        ops.system(system)  # type: ignore
+        ops.numberer(NUMBERER)
+        ops.constraints(*CONSTRAINTS)
+        ops.system(system)
 
-        if damping_type == 'rayleigh':
-            self.log('Using Rayleigh damping')
-            w_i = 2 * np.pi / damping['periods'][0]
-            zeta_i = damping['ratio']
-            w_j = 2 * np.pi / damping['periods'][1]
-            zeta_j = damping['ratio']
-            a_mat: nparr = np.array([[1/w_i, w_i], [1/w_j, w_j]])
+        if damping_type == "rayleigh":
+            self.log("Using Rayleigh damping")
+            w_i = 2 * np.pi / damping["periods"][0]
+            zeta_i = damping["ratio"]
+            w_j = 2 * np.pi / damping["periods"][1]
+            zeta_j = damping["ratio"]
+            a_mat: nparr = np.array([[1 / w_i, w_i], [1 / w_j, w_j]])
             b_vec: nparr = np.array([zeta_i, zeta_j])
-            x_sol: nparr = np.linalg.solve(a_mat, 2*b_vec)
-            ops.rayleigh(x_sol[0], 0.0, 0.0, x_sol[1])  # type: ignore
+            x_sol: nparr = np.linalg.solve(a_mat, 2 * b_vec)
+            ops.rayleigh(x_sol[0], 0.0, 0.0, x_sol[1])
             # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
             # --thanks, prof. Scott
 
-        if damping_type == 'stiffness':
-            self.log('Using stiffness proportional damping')
-            ops.rayleigh(  # type: ignore
-                0.00, 0.0, 0.0,  # type: ignore
-                damping['ratio'] * damping['period'] / np.pi)  # type: ignore
+        if damping_type == "stiffness":
+            self.log("Using stiffness proportional damping")
+            ops.rayleigh(
+                0.00, 0.0, 0.0, damping["ratio"] * damping["period"] / np.pi
+            )
 
-        if damping_type == 'modal':
+        if damping_type == "modal":
             # tags = ops.getNodeTags()
             # num_nodes = len(tags) - 4
             # num_modeshapes = 3*num_nodes
             # self.print(len(tags))
 
-            num_modes = damping['num_modes']
+            num_modes = damping["num_modes"]
             # num_modes = num_modeshapes
-            damping_ratio = damping['ratio']
-            self.log(
-                'Running eigenvalue analysis'
-                f' with {num_modes} modes')
-            ops.eigen(num_modes)  # type: ignore
+            damping_ratio = damping["ratio"]
+            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
+            ops.eigen(num_modes)
             # ops.systemSize()
-            self.log('Eigenvalue analysis finished')
-            ops.modalDamping(damping['ratio'])  # type: ignore
-            self.log(
-                f'{damping_ratio*100:.2f}% '
-                'modal damping defined')
+            self.log("Eigenvalue analysis finished")
+            ops.modalDamping(damping["ratio"])
+            self.log(f"{damping_ratio*100:.2f}% " "modal damping defined")
 
-        if damping_type == 'modal+stiffness':
+        if damping_type == "modal+stiffness":
 
-            num_modes = damping['num_modes']
+            num_modes = damping["num_modes"]
             # num_modes = num_modeshapes
-            damping_ratio = damping['ratio_modal']
-            self.log(
-                'Running eigenvalue analysis'
-                f' with {num_modes} modes')
-            ops.eigen(num_modes)  # type: ignore
+            damping_ratio = damping["ratio_modal"]
+            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
+            ops.eigen(num_modes)
             # ops.systemSize()
-            self.log('Eigenvalue analysis finished')
-            ops.modalDamping(damping['ratio_modal'])  # type: ignore
-            ops.rayleigh(  # type: ignore
-                0.00, 0.0, 0.0,  # type: ignore
-                damping['ratio_stiffness']  # type: ignore
-                * damping['period'] / np.pi)  # type: ignore
-            self.log(
-                'modal+stiffness damping defined')
+            self.log("Eigenvalue analysis finished")
+            ops.modalDamping(damping["ratio_modal"])
+            ops.rayleigh(
+                0.00,
+                0.0,
+                0.0,
+                damping["ratio_stiffness"] * damping["period"] / np.pi,
+            )
+            self.log("modal+stiffness damping defined")
 
-        self.log('Starting transient analysis')
-        ops.test('EnergyIncr', 1.0e-6, 50, 0)  # type: ignore
+        self.log("Starting transient analysis")
+        ops.test("EnergyIncr", 1.0e-6, 50, 0)
         # ops.integrator('Newmark', 0.50, 0.25)
 
         # # back to the fastest solver
@@ -1685,15 +1850,13 @@ class NLTHAnalysis(NonlinearAnalysis):
         # if system != NL_ANALYSIS_SYSTEM:
         #     ops.system(NL_ANALYSIS_SYSTEM)
 
-        ops.integrator('TRBDF2')  # type: ignore
-        ops.algorithm("KrylovNewton")  # type: ignore
-        ops.analysis("Transient")  # type: ignore
+        ops.integrator("TRBDF2")
+        ops.algorithm("KrylovNewton")
+        ops.analysis("Transient")
 
         define_lateral_load_pattern(
-            filename_x,
-            filename_y,
-            filename_z,
-            file_time_incr)
+            filename_x, filename_y, filename_z, file_time_incr
+        )
 
         num_subdiv = 0
         num_times = 0
@@ -1705,9 +1868,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         # progress bar
         if print_progress:
-            pbar = tqdm(
-                total=target_timestamp
-            )
+            pbar = tqdm(total=target_timestamp)
             pbar.update(curr_time)
         else:
             pbar = None
@@ -1716,22 +1877,23 @@ class NLTHAnalysis(NonlinearAnalysis):
 
             while curr_time + common.EPSILON < target_timestamp:
 
-                ops.test('EnergyIncr', tols[num_subdiv], 50, 0)  # type: ignore
-                check = ops.analyze(  # type: ignore
-                    1, analysis_time_increment * scale[num_subdiv])  # type: ignore
+                ops.test("EnergyIncr", tols[num_subdiv], 50, 0)
+                check = ops.analyze(
+                    1, analysis_time_increment * scale[num_subdiv]
+                )
                 total_step_count += 1
 
                 # analysis speed stats
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
-                        self.print('===========================')
-                        self.print('Analysis failed to converge')
-                        self.print('===========================')
+                        self.print("===========================")
+                        self.print("Analysis failed to converge")
+                        self.print("===========================")
                         if self.logger:
-                            self.logger.warning(  # type: ignore
-                                "Analysis failed"  # type: ignore
-                                f" at time {curr_time:.5f}")  # type: ignore
+                            self.logger.warning(
+                                "Analysis failed" f" at time {curr_time:.5f}"
+                            )
                         analysis_failed = True
                         break
                     # can still reduce step size
@@ -1741,8 +1903,9 @@ class NLTHAnalysis(NonlinearAnalysis):
                 else:
                     # analysis was successful
                     prev_time = curr_time
-                    curr_time = float(ops.getTime())  # type: ignore
-                    if pbar is not None: pbar.update(curr_time - prev_time)
+                    curr_time = float(ops.getTime())
+                    if pbar is not None:
+                        pbar.update(curr_time - prev_time)
                     if num_times != 0:
                         num_times -= 1
                     if total_step_count % skip_steps == 0:
@@ -1755,7 +1918,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                             disp_elems,
                             zerolength_elems,
                             custom_read_results_method,
-                            custom_read_results_method_args
+                            custom_read_results_method_args,
                         )
                         self.time_vector.append(curr_time)
                     if num_subdiv != 0:
@@ -1766,21 +1929,24 @@ class NLTHAnalysis(NonlinearAnalysis):
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
             if self.logger:
-                self.logger.warning("Analysis interrupted")  # type: ignore
+                self.logger.warning("Analysis interrupted")
 
-        if pbar is not None: pbar.close()
+        if pbar is not None:
+            pbar.close()
 
-        metadata = {'successful steps': n_steps_success,
-                    'analysis_finished_successfully': not analysis_failed}
+        metadata = {
+            "successful steps": n_steps_success,
+            "analysis_finished_successfully": not analysis_failed,
+        }
         self.results[case_name].n_steps_success = len(self.time_vector)
-        self.log('Analysis finished')
+        self.log("Analysis finished")
         if self.settings.pickle_results:
             self._write_results_to_disk()
         return metadata
 
-    def plot_node_displacement_history(self, case_name,
-                                       node, direction,
-                                       plotly=False):
+    def plot_node_displacement_history(
+        self, case_name, node, direction, plotly=False
+    ):
         """
         Plots the displacement history of the specified node.
         """
@@ -1788,21 +1954,28 @@ class NLTHAnalysis(NonlinearAnalysis):
         uid = node.uid
         results = []
         for k in range(self.results[case_name].n_steps_success):  # type:ignore
-            results.append(self.results[case_name].node_displacements[
-                uid][k][direction])
+            results.append(
+                self.results[case_name].node_displacements[uid][k][direction]
+            )
         vals: nparr = np.array(results)
         if plotly:
             general_2d.line_plot_interactive(
                 f"Node {uid} displacement history",
-                time_vec, vals,
+                time_vec,
+                vals,
                 "line",
-                "Time", "s", ".3f",
-                "Rel. Displacement", 'in', ".4f")
+                "Time",
+                "s",
+                ".3f",
+                "Rel. Displacement",
+                "in",
+                ".4f",
+            )
         else:
             plt.figure()
-            plt.plot(time_vec, vals, 'k')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Displacement (in)')
+            plt.plot(time_vec, vals, "k")
+            plt.xlabel("Time (s)")
+            plt.ylabel("Displacement (in)")
             plt.show()
 
 
@@ -1811,6 +1984,7 @@ class ModalResponseSpectrumAnalysis:
     """
     Modal response spectrum analysis
     """
+
     mdl: Model
     load_case: LoadCase
     num_modes: int
@@ -1825,11 +1999,12 @@ class ModalResponseSpectrumAnalysis:
         """
         Run the modal response spectrum analysis
         """
-        spectrum_ifun = interp1d(
-            self.periods, self.spectrum, kind='linear')
+        spectrum_ifun = interp1d(self.periods, self.spectrum, kind="linear")
         anl = ModalAnalysis(
-            self.mdl, {self.load_case.name: self.load_case},
-            num_modes=self.num_modes)
+            self.mdl,
+            {self.load_case.name: self.load_case},
+            num_modes=self.num_modes,
+        )
         anl.settings.pickle_results = False
         anl.settings.store_fiber = False
         anl.settings.store_forces = True
@@ -1837,7 +2012,8 @@ class ModalResponseSpectrumAnalysis:
         anl.run()
         case_name = self.load_case.name
         gammas, mstars, mtot = anl.modal_participation_factors(
-            case_name, self.direction)
+            case_name, self.direction
+        )
         periods = anl.results[case_name].periods
         if self.mdl.settings.imperial_units:
             g_const = common.G_CONST_IMPERIAL
@@ -1846,13 +2022,15 @@ class ModalResponseSpectrumAnalysis:
         vb_modal = np.zeros(self.num_modes)
         modal_q0 = np.zeros(self.num_modes)
         for i in range(self.num_modes):
-            vb_modal[i] = ((spectrum_ifun(periods[i]))  # type: ignore
-                           * mstars[i]  # type: ignore
-                           * mtot * g_const)  # type: ignore
-            modal_q0[i] = (
-                gammas[i] * (spectrum_ifun(periods[i])  # type: ignore
-                             / (2.*np.pi / periods[i])**2  # type: ignore
-                             * g_const))  # type: ignore
+            assert periods is not None
+            vb_modal[i] = (
+                (spectrum_ifun(periods[i])) * mstars[i] * mtot * g_const
+            )
+            modal_q0[i] = gammas[i] * (
+                spectrum_ifun(periods[i])
+                / (2.0 * np.pi / periods[i]) ** 2
+                * g_const
+            )
         self.modal_q0 = modal_q0
         self.vb_modal = vb_modal
         self.anl = anl
@@ -1864,10 +2042,15 @@ class ModalResponseSpectrumAnalysis:
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
-            vals = (np.array(  # type: ignore
-                self.anl.results[self.load_case.name]  # type: ignore
-                .node_displacements[node_uid][i])  # type: ignore
-                    * self.modal_q0[i])  # type: ignore
+            assert self.modal_q0 is not None
+            vals = (
+                np.array(
+                    self.anl.results[self.load_case.name].node_displacements[
+                        node_uid
+                    ][i]
+                )
+                * self.modal_q0[i]
+            )
             all_vals.append(vals)
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
@@ -1880,14 +2063,24 @@ class ModalResponseSpectrumAnalysis:
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
-            vals_i = (np.array(  # type: ignore
-                self.anl.results[self.load_case.name]  # type: ignore
-                .node_displacements[node_i_uid][i])  # type: ignore
-                      * self.modal_q0[i])  # type: ignore
-            vals_j = (np.array(  # type: ignore
-                self.anl.results[self.load_case.name]  # type: ignore
-                .node_displacements[node_j_uid][i])  # type: ignore
-                      * self.modal_q0[i])  # type: ignore
+            assert self.modal_q0 is not None
+            vals_i = (
+                np.array(
+                    self.anl.results[self.load_case.name].node_displacements[
+                        node_i_uid
+                    ][i]
+                )
+                * self.modal_q0[i]
+            )
+            assert self.modal_q0 is not None
+            vals_j = (
+                np.array(
+                    self.anl.results[self.load_case.name].node_displacements[
+                        node_j_uid
+                    ][i]
+                )
+                * self.modal_q0[i]
+            )
             vals = vals_i - vals_j
             all_vals.append(vals)
         all_vals_np: nparr = np.column_stack(all_vals)
@@ -1900,10 +2093,15 @@ class ModalResponseSpectrumAnalysis:
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
-            vals = (np.array(  # type: ignore
-                self.anl.results[self.load_case.name]  # type: ignore
-                .element_forces[element_uid][i])  # type: ignore
-                    * self.modal_q0[i])  # type: ignore
+            assert self.modal_q0 is not None
+            vals = (
+                np.array(
+                    self.anl.results[self.load_case.name].element_forces[
+                        element_uid
+                    ][i]
+                )
+                * self.modal_q0[i]
+            )
             all_vals.append(vals)
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))

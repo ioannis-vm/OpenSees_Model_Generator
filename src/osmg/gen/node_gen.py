@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from ..ops.node import Node
+
 if TYPE_CHECKING:
     from .model import Model
 
@@ -24,6 +25,7 @@ class NodeGenerator:
     """
     Introduces node objects to a model.
     """
+
     model: Model
 
     def add_node_lvl(self, x_loc: float, y_loc: float, lvl: int) -> Node:
@@ -49,18 +51,20 @@ class NodeGenerator:
               uid: 0
               coords: [2.0, 3.0, 0.0]
               restraint: [False, False, False, False, False, False]
-            <BLANKLINE>        
+            <BLANKLINE>
         """
         lvls = self.model.levels
         level = lvls[lvl]
         node = Node(
-            uid=self.model.uid_generator.new('node'),
-            coords=[x_loc, y_loc, level.elevation])
+            uid=self.model.uid_generator.new("node"),
+            coords=[x_loc, y_loc, level.elevation],
+        )
         level.nodes.add(node)
         return node
 
-    def add_node_lvl_xyz(self, x_loc: float, y_loc: float,
-                         z_loc: float, lvl: int) -> Node:
+    def add_node_lvl_xyz(
+        self, x_loc: float, y_loc: float, z_loc: float, lvl: int
+    ) -> Node:
         """
         Adds a node at the specified coordinates and level having a
         custom elevation.
@@ -90,8 +94,9 @@ class NodeGenerator:
         lvls = self.model.levels
         level = lvls[lvl]
         node = Node(
-            uid=self.model.uid_generator.new('node'),
-            coords=[x_loc, y_loc, z_loc])
+            uid=self.model.uid_generator.new("node"),
+            coords=[x_loc, y_loc, z_loc],
+        )
         level.nodes.add(node)
         return node
 
@@ -121,6 +126,6 @@ class NodeGenerator:
             '[Collection of 1 items]'
         """
         lvls = self.model.levels
-        assert lvls.active, 'No active levels.'
+        assert lvls.active, "No active levels."
         for key in lvls.active:
             self.add_node_lvl(x_loc, y_loc, key)

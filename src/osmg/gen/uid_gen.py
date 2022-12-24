@@ -24,13 +24,13 @@ class UIDGenerator:
     def new(self, thing: str):
         """
         Generates a new uid for an object of the given type.
-        
+
         Args:
             object_type (str): The type of object for which to generate a uid.
-            
+
         Returns:
             int: A unique identifier for an object of the given type.
-            
+
         Example:
             >>> from osmg.gen.uid_gen import UIDGenerator
             >>> generator = UIDGenerator()

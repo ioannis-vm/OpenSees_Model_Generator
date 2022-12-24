@@ -18,8 +18,8 @@ from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
-from shapely.geometry import Polygon as shapely_Polygon   # type: ignore
-from shapely.geometry import Point   # type: ignore
+from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
+from shapely.geometry import Point  # type: ignore
 
 from .gen.uid_gen import UIDGenerator
 from . import collections
@@ -40,9 +40,7 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def transfer_component(
-        other: Model,
-        component: ComponentAssembly):
+def transfer_component(other: Model, component: ComponentAssembly):
     """
     Transfers a single component assembly from one model to
     another, assuming the other model was generated with the
@@ -51,7 +49,7 @@ def transfer_component(
     # note: we don't copy the component assemblies and their contents.
     # we just add the same objects to the other model.
     level = component.parent_collection.parent
-    other_level = other.levels.retrieve_by_attr('uid', level.uid)
+    other_level = other.levels.retrieve_by_attr("uid", level.uid)
     for node in component.external_nodes.values():
         if node.uid not in other_level.nodes:
             other_level.nodes.add(node)
@@ -69,16 +67,17 @@ class Settings:
                 m, N, kg
         ndm, ndf: change them to break the code.
     """
+
     imperial_units: bool = field(default=True)  # false for SI
     ndm: int = field(default=3)  # that's all we support
     ndf: int = field(default=6)  # that's all we support
 
     def __repr__(self):
-        res = ''
-        res += '~~~ Model Settings ~~~\n'
-        res += f'  Imperial units: {self.imperial_units}\n'
-        res += f'  ndm           : {self.ndm}\n'
-        res += f'  ndf           : {self.ndf}\n'
+        res = ""
+        res += "~~~ Model Settings ~~~\n"
+        res += f"  Imperial units: {self.imperial_units}\n"
+        res += f"  ndm           : {self.ndm}\n"
+        res += f"  ndf           : {self.ndf}\n"
         return res
 
 
@@ -108,19 +107,22 @@ class Model:
             Object for generating unique IDs for objects in the model.
         settings (Settings): Settings for the model.
     """
+
     name: str
-    levels: collections.CollectionActive[int, Level] = field(
-        init=False)
+    levels: collections.CollectionActive[int, Level] = field(init=False)
     elastic_sections: collections.Collection[int, ElasticSection] = field(
-        init=False)
+        init=False
+    )
     fiber_sections: collections.Collection[int, FiberSection] = field(
-        init=False)
+        init=False
+    )
     uniaxial_materials: collections.Collection[int, UniaxialMaterial] = field(
-        init=False)
+        init=False
+    )
     physical_materials: collections.Collection[int, PhysicalMaterial] = field(
-        init=False)
-    uid_generator: UIDGenerator = field(
-        default_factory=UIDGenerator)
+        init=False
+    )
+    uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
     def __post_init__(self):
@@ -131,18 +133,19 @@ class Model:
         self.physical_materials = collections.Collection(self)
 
     def __repr__(self):
-        res = ''
-        res += '~~~ Model Object ~~~\n'
-        res += f'ID: {id(self)}\n'
-        res += f'levels: {self.levels.__srepr__()}\n'
-        res += f'elastic_sections: {self.elastic_sections.__srepr__()}\n'
-        res += f'fiber_sections: {self.fiber_sections.__srepr__()}\n'
-        res += f'uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n'
-        res += f'physical_materials: {self.physical_materials.__srepr__()}\n'
+        res = ""
+        res += "~~~ Model Object ~~~\n"
+        res += f"ID: {id(self)}\n"
+        res += f"levels: {self.levels.__srepr__()}\n"
+        res += f"elastic_sections: {self.elastic_sections.__srepr__()}\n"
+        res += f"fiber_sections: {self.fiber_sections.__srepr__()}\n"
+        res += f"uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n"
+        res += f"physical_materials: {self.physical_materials.__srepr__()}\n"
         return res
 
-    def component_connectivity(self) -> dict[tuple[int, ...],
-                                             ComponentAssembly]:
+    def component_connectivity(
+        self,
+    ) -> dict[tuple[int, ...], ComponentAssembly]:
         """
         Returns the connectivity of all component
         assemblies. Component assemblies are collections of
@@ -158,19 +161,17 @@ class Model:
             uids = [node.uid for node in component.external_nodes.values()]
             uids.sort()
             uids_tuple = (*uids,)
-            assert uids_tuple not in res, 'Error! Duplicate component found.'
+            assert uids_tuple not in res, "Error! Duplicate component found."
             res[uids_tuple] = component
         return res
 
-    def add_level(self,
-                  uid: int,
-                  elevation: float):
+    def add_level(self, uid: int, elevation: float):
         """
         Adds a level to the model.
         Args:
             uid (int): Unique ID for the level.
             elevation (float): Elevation of the level.
-        
+
         Example:
             >>> from osmg.model import Model
             >>> model = Model('test_model')
@@ -392,10 +393,7 @@ class Model:
         res.uniaxial_materials = self.uniaxial_materials
         return res
 
-    def transfer_by_polygon_selection(
-            self,
-            other: Model,
-            coords: nparr):
+    def transfer_by_polygon_selection(self, other: Model, coords: nparr):
         """
         Uses `transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified

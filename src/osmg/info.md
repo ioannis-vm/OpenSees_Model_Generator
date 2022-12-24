@@ -1,14 +1,5 @@
 #### Running tests
 
-##### using doctest
-
 ```
-$ cd src/osmg
-$ pytest --doctest-modules
-```
-
-#### separate tests
-```
-# from the package root directory
-$ pytest
+$ pytest --cov=osmg --doctest-modules src/osmg
 ```

@@ -18,7 +18,7 @@ from typing import Any
 
 # very big, very small numbers used for
 # comparing floats and hashing
-EPSILON = 1.00E-6
+EPSILON = 1.00e-6
 ALPHA = 10000000.00
 
 # gravitational acceleration
@@ -40,7 +40,7 @@ def methods(obj: object) -> list[str]:
         >>> class TestClass:
         ...     def method_1(self):
         ...         pass
-        ...     
+        ...
         ...     def method_2(self):
         ...         pass
         ...
@@ -48,8 +48,11 @@ def methods(obj: object) -> list[str]:
         >>> methods(obj)
         ['method_1', 'method_2']
     """
-    object_methods = [method_name for method_name in dir(obj)
-                      if callable(getattr(obj, method_name))]
+    object_methods = [
+        method_name
+        for method_name in dir(obj)
+        if callable(getattr(obj, method_name))
+    ]
     pattern = r"__.*__"
     return [s for s in object_methods if not re.match(pattern, s)]
 
@@ -75,16 +78,16 @@ def previous_element(dct: OrderedDict[Any, Any], key):
     in an ordered dictionary.
     If the key is not in the dictionary, or if it is the first element
     in the dictionary, returns None.
-    
+
     Args:
         dct: An ordered dictionary.
         key: The key of the element whose previous element we want to
         find.
-    
+
     Returns:
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
-    
+
     Examples:
         >>> dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
         >>> previous_element(dct, 2)  # Returns 'a'
@@ -92,9 +95,9 @@ def previous_element(dct: OrderedDict[Any, Any], key):
         >>> previous_element(dct, 3)  # Returns 'b'
         'b'
         >>> previous_element(dct, 1)  # Returns None
-        
+
         >>> previous_element(dct, 4)  # Returns None
-        
+
     """
     if key in dct:
         key_list = list(dct.keys())
@@ -102,7 +105,7 @@ def previous_element(dct: OrderedDict[Any, Any], key):
         if idx == 0:
             ans = None
         else:
-            ans = dct[key_list[idx-1]]
+            ans = dct[key_list[idx - 1]]
     else:
         ans = None
     return ans

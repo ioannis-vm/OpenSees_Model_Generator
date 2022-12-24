@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 import numpy as np
 import numpy.typing as npt
-from .import common
+from . import common
 
 # pylint: disable=no-else-return
 
@@ -32,15 +32,16 @@ class Line:
       start (numpy.ndarray): starting point
       end (numpy.ndarray): end point
     """
+
     tag: str
     start: nparr = field(repr=False)
     end: nparr = field(repr=False)
 
     def __repr__(self):
-        res = ''
-        res += 'Line object\n'
-        res += f'  start: {self.start}\n'
-        res += f'  end: {self.end}\n'
+        res = ""
+        res += "Line object\n"
+        res += f"  start: {self.start}\n"
+        res += f"  end: {self.end}\n"
         return res
 
     def length(self):
@@ -68,7 +69,7 @@ class Line:
         """
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: 'Line'):
+    def intersect(self, other: "Line"):
         """
         Calculates the intersection point of this line with another
         line. Returns None if the lines don't intersect.  Note: 'line'
@@ -87,10 +88,7 @@ class Line:
         ra_dir = self.direction()
         rb_dir = other.direction()
         mat: nparr = np.array(
-            [
-                [ra_dir[0], -rb_dir[0]],
-                [ra_dir[1], -rb_dir[1]]
-            ]
+            [[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]]
         )
         if np.abs(np.linalg.det(mat)) <= common.EPSILON:
             # The lines are parallel
@@ -104,7 +102,7 @@ class Line:
                 result = self.start
             elif np.linalg.norm(self.end - other.start) <= common.EPSILON:
                 result = self.end
-            elif np.linalg.norm(self.end - other.end) <= common. EPSILON:
+            elif np.linalg.norm(self.end - other.end) <= common.EPSILON:
                 result = self.end
             else:
                 result = None
@@ -159,9 +157,9 @@ class Line:
         norm2 = np.dot(r_a, r_a)
         if np.abs(norm2) < 1.0e-4:
             raise ValueError
-        r_b = (point - self.start)
+        r_b = point - self.start
         cross = np.linalg.norm(np.cross(r_a, r_b))
-        dot_normalized = np.dot(r_a, r_b)/norm2  # type: ignore
+        dot_normalized = np.dot(r_a, r_b) / norm2  # type: ignore
         if cross < common.EPSILON:
             res = bool(0.00 <= dot_normalized <= 1.00)
         else:
@@ -178,7 +176,9 @@ class Line:
         Returns:
             float: the minimum distance
         Example:
-            >>> line = Line(tag='line', start=np.array([1, 1]), end=np.array([3, 3]))
+            >>> line = Line(tag='line',
+            ...             start=np.array([1, 1]),
+            ...             end=np.array([3, 3]))
             >>> point = np.array([4, 2])
             >>> line.point_distance(point)
             1.4142135623730951
@@ -187,10 +187,10 @@ class Line:
             0.0
             >>> point = np.array([0, 0])
             >>> line.point_distance(point)
-            
+
             >>> point = np.array([4, 4])
             >>> line.point_distance(point)
-            
+
         """
         r_a = self.end - self.start
         r_b = point - self.start
@@ -215,9 +215,9 @@ class Line:
             >>> line.project(np.array([5, 5]))
             array([5., 0.])
             >>> line.project(np.array([-5, 5]))
-            
+
             >>> line.project(np.array([15, 5]))
-            
+
         """
         r_a = self.end - self.start
         r_b = point - self.start

@@ -32,16 +32,16 @@ def self_weight(mdl, lcase, factor=1.00):
             # in that case apply its weight to the connecting nodes
             elm_len = elm.clear_length()
             elm_w = weight_per_length * elm_len * factor
-            lcase.node_loads[
-                elm.nodes[0].uid].add(
-                    [0.00, 0.00, -elm_w/2.00, 0.00, 0.00, 0.00])
-            lcase.node_loads[
-                elm.nodes[1].uid].add(
-                    [0.00, 0.00, -elm_w/2.00, 0.00, 0.00, 0.00])
+            lcase.node_loads[elm.nodes[0].uid].add(
+                [0.00, 0.00, -elm_w / 2.00, 0.00, 0.00, 0.00]
+            )
+            lcase.node_loads[elm.nodes[1].uid].add(
+                [0.00, 0.00, -elm_w / 2.00, 0.00, 0.00, 0.00]
+            )
         else:
-            lcase.line_element_udl[
-                elm.uid].add_glob(np.array(
-                    [0., 0., -weight_per_length*factor]))
+            lcase.line_element_udl[elm.uid].add_glob(
+                np.array([0.0, 0.0, -weight_per_length * factor])
+            )
 
 
 def self_mass(mdl, lcase):
@@ -58,9 +58,6 @@ def self_mass(mdl, lcase):
         weight_per_length = elm.section.weight_per_length()
         mass_per_length = weight_per_length / g_const
         # apply lumped mass at the connecting nodes
-        half_mass = (mass_per_length *
-                     elm.clear_length() / 2.00)
-        lcase.node_mass[
-            elm.nodes[0].uid].add([half_mass]*3+[0.00]*3)
-        lcase.node_mass[
-            elm.nodes[1].uid].add([half_mass]*3+[0.00]*3)
+        half_mass = mass_per_length * elm.clear_length() / 2.00
+        lcase.node_mass[elm.nodes[0].uid].add([half_mass] * 3 + [0.00] * 3)
+        lcase.node_mass[elm.nodes[1].uid].add([half_mass] * 3 + [0.00] * 3)

@@ -44,47 +44,53 @@ class ComponentAssembly:
       disp_beamcolumn_elements (CollectionWithConnectivity): ...
       zerolength_elements (CollectionWithConnectivity): ...
     """
+
     uid: int
     parent_collection: collections.Collection[int, ComponentAssembly]
     component_purpose: str
-    external_nodes: collections.NodeCollection = field(
-        init=False)
-    internal_nodes: collections.NodeCollection = field(
-        init=False)
-    elastic_beamcolumn_elements: (collections.CollectionWithConnectivity[
-        int, element.ElasticBeamColumn]) = field(init=False)
-    disp_beamcolumn_elements: (collections.CollectionWithConnectivity[
-        int, element.DispBeamColumn]) = field(init=False)
-    zerolength_elements: (collections.CollectionWithConnectivity[
-        int, element.ZeroLength]) = field(init=False)
-    twonodelink_elements: (collections.CollectionWithConnectivity[
-        int, element.TwoNodeLink]) = field(init=False)
+    external_nodes: collections.NodeCollection = field(init=False)
+    internal_nodes: collections.NodeCollection = field(init=False)
+    elastic_beamcolumn_elements: (
+        collections.CollectionWithConnectivity[int, element.ElasticBeamColumn]
+    ) = field(init=False)
+    disp_beamcolumn_elements: (
+        collections.CollectionWithConnectivity[int, element.DispBeamColumn]
+    ) = field(init=False)
+    zerolength_elements: (
+        collections.CollectionWithConnectivity[int, element.ZeroLength]
+    ) = field(init=False)
+    twonodelink_elements: (
+        collections.CollectionWithConnectivity[int, element.TwoNodeLink]
+    ) = field(init=False)
 
     def __post_init__(self):
         self.external_nodes = collections.NodeCollection(self)
         self.internal_nodes = collections.NodeCollection(self)
-        self.elastic_beamcolumn_elements = \
+        self.elastic_beamcolumn_elements = (
             collections.CollectionWithConnectivity(self)
-        self.disp_beamcolumn_elements = \
-            collections.CollectionWithConnectivity(self)
+        )
+        self.disp_beamcolumn_elements = collections.CollectionWithConnectivity(
+            self
+        )
         self.zerolength_elements = collections.CollectionWithConnectivity(self)
-        self.twonodelink_elements = (collections
-                                     .CollectionWithConnectivity(self))
+        self.twonodelink_elements = collections.CollectionWithConnectivity(
+            self
+        )
 
     def __srepr__(self):
         """
         Short version of repr
         """
-        return f'Component assembly, uid: {self.uid}'
+        return f"Component assembly, uid: {self.uid}"
 
     def __repr__(self):
-        res = ''
-        res += 'Component assembly object\n'
-        res += f'uid: {self.uid}\n'
-        res += f'component_purpose: {self.component_purpose}\n'
-        res += 'External Nodes\n'
+        res = ""
+        res += "Component assembly object\n"
+        res += f"uid: {self.uid}\n"
+        res += f"component_purpose: {self.component_purpose}\n"
+        res += "External Nodes\n"
         for node in self.external_nodes.values():
-            res += f'  {node.uid}, {node.coords}'
+            res += f"  {node.uid}, {node.coords}"
         return res
 
     def dict_of_elastic_beamcolumn_elements(self):

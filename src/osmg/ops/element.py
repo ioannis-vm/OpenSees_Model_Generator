@@ -37,6 +37,7 @@ class Element:
         uid (int): the unique identifier of this element
         nodes (list[Node]): the list of nodes that this element connects
     """
+
     parent_component: component_assembly.ComponentAssembly = field(repr=False)
     uid: int
     nodes: list[Node]
@@ -48,6 +49,7 @@ class ZeroLength(Element):
     OpenSees ZeroLength element
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     """
+
     mats: list[UniaxialMaterial]
     dirs: list[int]
     vecx: nparr
@@ -59,27 +61,27 @@ class ZeroLength(Element):
         OpenSees
         """
         return [
-            'zeroLength',
+            "zeroLength",
             self.uid,
             *[n.uid for n in self.nodes],
-            '-mat',
+            "-mat",
             *[m.uid for m in self.mats],
-            '-dir',
+            "-dir",
             *self.dirs,
-            '-orient',
+            "-orient",
             *self.vecx,
-            *self.vecyp
+            *self.vecyp,
         ]
 
     def __repr__(self):
-        res = ''
-        res += 'ZeroLength element object\n'
-        res += f'uid: {self.uid}'
-        res += 'Materials:'
+        res = ""
+        res += "ZeroLength element object\n"
+        res += f"uid: {self.uid}"
+        res += "Materials:"
         for mat, direction in zip(self.mats, self.dirs):
-            res += f'  {direction}: {mat.name}\n'
-        res += f'vecx: {self.vecx}\n'
-        res += f'vecyp: {self.vecyp}\n'
+            res += f"  {direction}: {mat.name}\n"
+        res += f"vecx: {self.vecx}\n"
+        res += f"vecyp: {self.vecyp}\n"
         return res
 
 
@@ -89,6 +91,7 @@ class TwoNodeLink(Element):
     OpenSees TwoNodeLink element
     https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html
     """
+
     mats: list[UniaxialMaterial]
     dirs: list[int]
     vecx: nparr
@@ -100,27 +103,27 @@ class TwoNodeLink(Element):
         OpenSees
         """
         return [
-            'twoNodeLink',
+            "twoNodeLink",
             self.uid,
             *[n.uid for n in self.nodes],
-            '-mat',
+            "-mat",
             *[m.uid for m in self.mats],
-            '-dir',
+            "-dir",
             *self.dirs,
-            '-orient',
+            "-orient",
             *self.vecx,
-            *self.vecyp
+            *self.vecyp,
         ]
 
     def __repr__(self):
-        res = ''
-        res += 'TwoNodeLink element object\n'
-        res += f'uid: {self.uid}'
-        res += 'Materials:'
+        res = ""
+        res += "TwoNodeLink element object\n"
+        res += f"uid: {self.uid}"
+        res += "Materials:"
         for mat, direction in zip(self.mats, self.dirs):
-            res += f'  {direction}: {mat.name}\n'
-        res += f'vecx: {self.vecx}\n'
-        res += f'vecyp: {self.vecyp}\n'
+            res += f"  {direction}: {mat.name}\n"
+        res += f"vecx: {self.vecx}\n"
+        res += f"vecyp: {self.vecyp}\n"
         return res
 
 
@@ -131,6 +134,7 @@ class GeomTransf:
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation
     """
+
     transf_type: str
     uid: int
     offset_i: nparr
@@ -148,9 +152,9 @@ class GeomTransf:
             self.transf_type,
             self.uid,
             *self.z_axis,
-            '-jntOffset',
+            "-jntOffset",
             *self.offset_i,
-            *self.offset_j
+            *self.offset_j,
         ]
 
 
@@ -160,10 +164,10 @@ class ElasticBeamColumn(Element):
     OpenSees Elastic Beam Column Element
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
     """
+
     section: ElasticSection
     geomtransf: GeomTransf
-    visibility: ElementVisibility = field(
-        default_factory=ElementVisibility)
+    visibility: ElementVisibility = field(default_factory=ElementVisibility)
 
     def ops_args(self):
         """
@@ -171,7 +175,7 @@ class ElasticBeamColumn(Element):
         OpenSees
         """
         return [
-            'elasticBeamColumn',
+            "elasticBeamColumn",
             self.uid,
             self.nodes[0].uid,
             self.nodes[1].uid,
@@ -181,7 +185,7 @@ class ElasticBeamColumn(Element):
             self.section.j_mod,
             self.section.i_y,
             self.section.i_x,
-            self.geomtransf.uid
+            self.geomtransf.uid,
         ]
 
     def clear_length(self):
@@ -194,19 +198,19 @@ class ElasticBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
-        res = ''
-        res += 'elasticBeamColumn element object\n'
-        res += f'uid: {self.uid}\n'
-        res += f'node_i.uid: {self.nodes[0].uid}\n'
-        res += f'node_j.uid: {self.nodes[1].uid}\n'
-        res += f'node_i.coords: {self.nodes[0].coords}\n'
-        res += f'node_j.coords: {self.nodes[1].coords}\n'
-        res += f'offset_i: {self.geomtransf.offset_i}\n'
-        res += f'offset_j: {self.geomtransf.offset_j}\n'
-        res += f'x_axis: {self.geomtransf.x_axis}\n'
-        res += f'y_axis: {self.geomtransf.y_axis}\n'
-        res += f'z_axis: {self.geomtransf.z_axis}\n'
-        res += f'section.name: {self.section.name}\n'
+        res = ""
+        res += "elasticBeamColumn element object\n"
+        res += f"uid: {self.uid}\n"
+        res += f"node_i.uid: {self.nodes[0].uid}\n"
+        res += f"node_j.uid: {self.nodes[1].uid}\n"
+        res += f"node_i.coords: {self.nodes[0].coords}\n"
+        res += f"node_j.coords: {self.nodes[1].coords}\n"
+        res += f"offset_i: {self.geomtransf.offset_i}\n"
+        res += f"offset_j: {self.geomtransf.offset_j}\n"
+        res += f"x_axis: {self.geomtransf.x_axis}\n"
+        res += f"y_axis: {self.geomtransf.y_axis}\n"
+        res += f"z_axis: {self.geomtransf.z_axis}\n"
+        res += f"section.name: {self.section.name}\n"
         return res
 
 
@@ -216,6 +220,7 @@ class BeamIntegration:
     OpenSees beamIntegration parent class.
     https://openseespydoc.readthedocs.io/en/latest/src/beamIntegration.html?highlight=beamintegration
     """
+
     uid: int
     parent_section: Union[ElasticSection, FiberSection] = field(repr=False)
 
@@ -226,6 +231,7 @@ class Lobatto(BeamIntegration):
     OpenSees Lobatto beam integration.
     https://openseespydoc.readthedocs.io/en/latest/src/Lobatto.html
     """
+
     n_p: int
 
     def ops_args(self):
@@ -233,12 +239,7 @@ class Lobatto(BeamIntegration):
         Returns the arguments required to define the object in
         OpenSees
         """
-        return [
-            'Lobatto',
-            self.uid,
-            self.parent_section.uid,
-            self.n_p
-        ]
+        return ["Lobatto", self.uid, self.parent_section.uid, self.n_p]
 
 
 @dataclass
@@ -247,11 +248,11 @@ class DispBeamColumn(Element):
     OpenSees dispBeamColumn element
     https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html
     """
+
     section: FiberSection
     geomtransf: GeomTransf
     integration: BeamIntegration
-    visibility: ElementVisibility = field(
-        default_factory=ElementVisibility)
+    visibility: ElementVisibility = field(default_factory=ElementVisibility)
 
     def ops_args(self):
         """
@@ -259,7 +260,7 @@ class DispBeamColumn(Element):
         OpenSees
         """
         return [
-            'dispBeamColumn',
+            "dispBeamColumn",
             self.uid,
             self.nodes[0].uid,
             self.nodes[1].uid,
@@ -280,17 +281,17 @@ class DispBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
-        res = ''
-        res += 'dispBeamColumn element object\n'
-        res += f'uid: {self.uid}\n'
-        res += f'node_i.uid: {self.nodes[0].uid}\n'
-        res += f'node_j.uid: {self.nodes[1].uid}\n'
-        res += f'node_i.coords: {self.nodes[0].coords}\n'
-        res += f'node_j.coords: {self.nodes[1].coords}\n'
-        res += f'offset_i: {self.geomtransf.offset_i}\n'
-        res += f'offset_j: {self.geomtransf.offset_j}\n'
-        res += f'x_axis: {self.geomtransf.x_axis}\n'
-        res += f'y_axis: {self.geomtransf.y_axis}\n'
-        res += f'z_axis: {self.geomtransf.z_axis}\n'
-        res += f'section.name: {self.section.name}\n'
+        res = ""
+        res += "dispBeamColumn element object\n"
+        res += f"uid: {self.uid}\n"
+        res += f"node_i.uid: {self.nodes[0].uid}\n"
+        res += f"node_j.uid: {self.nodes[1].uid}\n"
+        res += f"node_i.coords: {self.nodes[0].coords}\n"
+        res += f"node_j.coords: {self.nodes[1].coords}\n"
+        res += f"offset_i: {self.geomtransf.offset_i}\n"
+        res += f"offset_j: {self.geomtransf.offset_j}\n"
+        res += f"x_axis: {self.geomtransf.x_axis}\n"
+        res += f"y_axis: {self.geomtransf.y_axis}\n"
+        res += f"z_axis: {self.geomtransf.z_axis}\n"
+        res += f"section.name: {self.section.name}\n"
         return res

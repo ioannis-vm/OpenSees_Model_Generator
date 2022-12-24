@@ -25,6 +25,7 @@ class UniaxialMaterial:
     OpenSees uniaxialMaterial
     https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
     """
+
     uid: int
     name: str
 
@@ -35,6 +36,7 @@ class Elastic(UniaxialMaterial):
     OpenSees Elastic
     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
     """
+
     e_mod: float
 
     def ops_args(self):
@@ -42,11 +44,7 @@ class Elastic(UniaxialMaterial):
         Returns the arguments required to define the object in
         OpenSees
         """
-        return [
-            'Elastic',
-            self.uid,
-            self.e_mod
-        ]
+        return ["Elastic", self.uid, self.e_mod]
 
 
 @dataclass
@@ -55,6 +53,7 @@ class Steel02(UniaxialMaterial):
     OpenSees Steel02
     https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
     """
+
     Fy: float
     E0: float
     G: float
@@ -74,8 +73,15 @@ class Steel02(UniaxialMaterial):
         OpenSees
         """
         args = [
-            'Steel02', self.uid, self.Fy, self.E0, self.b, self.c_r0,
-            self.c_r1, self.c_r2]
+            "Steel02",
+            self.uid,
+            self.Fy,
+            self.E0,
+            self.b,
+            self.c_r0,
+            self.c_r1,
+            self.c_r2,
+        ]
         if self.a1:
             args.append(self.a1)
         if self.a2:
@@ -96,6 +102,7 @@ class Bilin(UniaxialMaterial):
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
     """
+
     K0: float
     as_Plus: float
     as_Neg: float
@@ -127,7 +134,7 @@ class Bilin(UniaxialMaterial):
         OpenSees
         """
         return [
-            'Bilin',
+            "Bilin",
             self.uid,
             self.K0,
             self.as_Plus,
@@ -152,7 +159,7 @@ class Bilin(UniaxialMaterial):
             self.theta_u_Neg,
             self.D_Plus,
             self.D_Neg,
-            self.nFactor
+            self.nFactor,
         ]
 
 
@@ -162,6 +169,7 @@ class Pinching4(UniaxialMaterial):
     OpenSees Pinching4 Material
     https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
     """
+
     ePf1: float
     ePf2: float
     ePf3: float
@@ -208,18 +216,47 @@ class Pinching4(UniaxialMaterial):
         OpenSees
         """
         return [
-            'Pinching4',
+            "Pinching4",
             self.uid,
-            self.ePf1, self.ePf2, self.ePf3, self.ePf4,
-            self.ePd1, self.ePd2, self.ePd3, self.ePd4,
-            self.eNf1, self.eNf2, self.eNf3, self.eNf4,
-            self.eNd1, self.eNd2, self.eNd3, self.eNd4,
-            self.rDispP, self.fForceP, self.uForceP,
-            self.rDispN, self.fFoceN, self.uForceN,
-            self.gK1, self.gK2, self.gK3, self.gK4, self.gKLim,
-            self.gD1, self.gD2, self.gD3, self.gD4, self.gDLim,
-            self.gF1, self.gF2, self.gF3, self.gF4, self.gFLim,
-            self.gE, self.dmgType
+            self.ePf1,
+            self.ePf2,
+            self.ePf3,
+            self.ePf4,
+            self.ePd1,
+            self.ePd2,
+            self.ePd3,
+            self.ePd4,
+            self.eNf1,
+            self.eNf2,
+            self.eNf3,
+            self.eNf4,
+            self.eNd1,
+            self.eNd2,
+            self.eNd3,
+            self.eNd4,
+            self.rDispP,
+            self.fForceP,
+            self.uForceP,
+            self.rDispN,
+            self.fFoceN,
+            self.uForceN,
+            self.gK1,
+            self.gK2,
+            self.gK3,
+            self.gK4,
+            self.gKLim,
+            self.gD1,
+            self.gD2,
+            self.gD3,
+            self.gD4,
+            self.gDLim,
+            self.gF1,
+            self.gF2,
+            self.gF3,
+            self.gF4,
+            self.gFLim,
+            self.gE,
+            self.dmgType,
         ]
 
 
@@ -229,6 +266,7 @@ class Hysteretic(UniaxialMaterial):
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
     """
+
     p1: tuple[float, float]
     p2: tuple[float, float]
     p3: tuple[float, float]
@@ -247,7 +285,7 @@ class Hysteretic(UniaxialMaterial):
         OpenSees
         """
         return [
-            'Hysteretic',
+            "Hysteretic",
             self.uid,
             *self.p1,
             *self.p2,
@@ -259,7 +297,7 @@ class Hysteretic(UniaxialMaterial):
             self.pinchY,
             self.damage1,
             self.damage2,
-            self.beta
+            self.beta,
         ]
 
 
@@ -269,6 +307,7 @@ class Fatigue(UniaxialMaterial):
     OpenSees Fatigue Material
     https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
     """
+
     predecessor: UniaxialMaterial
     e_mod: float = field(default=0.191)
     var_m: float = field(default=-0.458)
@@ -281,17 +320,17 @@ class Fatigue(UniaxialMaterial):
         OpenSees
         """
         return [
-            'Fatigue',
+            "Fatigue",
             self.uid,
             self.predecessor.uid,
-            '-E0',
+            "-E0",
             self.e_mod,
-            '-m',
+            "-m",
             self.var_m,
-            '-min',
+            "-min",
             self.var_min,
-            '-max',
-            self.var_max
+            "-max",
+            self.var_max,
         ]
 
 
@@ -301,6 +340,7 @@ class MaxStrainRange(UniaxialMaterial):
     OpenSees MaxStrainRange Material
     ~not officially added yet~
     """
+
     predecessor: UniaxialMaterial
     msr_fracture: float
     min_fracture: Optional[float] = field(default=None)
@@ -316,19 +356,22 @@ class MaxStrainRange(UniaxialMaterial):
         OpenSees
         """
         args = [
-            'MaxStrainRange', self.uid,
-            self.predecessor.uid, self.msr_fracture]
+            "MaxStrainRange",
+            self.uid,
+            self.predecessor.uid,
+            self.msr_fracture,
+        ]
         if self.min_fracture:
-            args.extend(['-min', self.min_fracture])
+            args.extend(["-min", self.min_fracture])
         if self.max_fracture:
-            args.extend(['-max', self.max_fracture])
+            args.extend(["-max", self.max_fracture])
         if self.tangent_ratio:
-            args.extend(['-tangentRatio', self.tangent_ratio])
+            args.extend(["-tangentRatio", self.tangent_ratio])
         if self.def_coeff:
-            args.extend(['-defCoeff', self.def_coeff])
+            args.extend(["-defCoeff", self.def_coeff])
         if self.node_tags:
-            args.extend(['-nodeTags', *self.node_tags])
+            args.extend(["-nodeTags", *self.node_tags])
         if self.elements_to_remove:
-            args.extend(['-eleTag', *self.elements_to_remove])
+            args.extend(["-eleTag", *self.elements_to_remove])
 
         return args

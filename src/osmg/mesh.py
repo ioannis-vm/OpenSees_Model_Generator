@@ -19,9 +19,9 @@ from itertools import count
 from descartes.patch import PolygonPatch  # type: ignore
 import numpy as np
 import numpy.typing as npt
-import matplotlib.pyplot as plt   # type: ignore
-from shapely.geometry import Polygon as shapely_Polygon   # type: ignore
-from .import common
+import matplotlib.pyplot as plt  # type: ignore
+from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
+from . import common
 
 nparr = npt.NDArray[np.float64]
 
@@ -32,25 +32,26 @@ class Vertex:
     It knows all the edges connected to it.
     It knows all the halfedges leaving from it.
     Each instance has an automatically generated unique id.
-    
+
     Attributes:
         coords (tuple[float, float]): Coordinates of the vertex.
         edges (List[Edge]): List of edges connected to the vertex.
         halfedges (List[Halfedge]): List of halfedges leaving from the
             vertex.
         uid (int): Unique identifier of the vertex.
-    
+
     Example:
         >>> from osmg.mesh import Vertex
         >>> v = Vertex((0.0, 0.0))
 
     """
+
     _ids = count(0)
 
     def __init__(self, coords: tuple[float, float]):
         """
         Initializes a new instance of the `Vertex` class.
-        
+
         Args:
             coords (tuple[float, float]): Coordinates of the vertex.
         """
@@ -62,10 +63,10 @@ class Vertex:
     def __eq__(self, other):
         """
         Check for equality based on the uid of the vertex.
-        
+
         Args:
             other (Vertex): Other vertex to compare with.
-            
+
         Returns:
             bool: `True` if the two vertices are equal, `False`
                   otherwise.
@@ -81,18 +82,18 @@ class Vertex:
         False
         >>> v1 == v1
         True
-        
+
         """
         return self.uid == other.uid
 
     def __repr__(self):
         """
         Returns a string representation of the vertex.
-        
+
         Returns:
             str: String representation of the vertex.
         """
-        return f'(V{self.uid} @ {self.coords}) '
+        return f"(V{self.uid} @ {self.coords}) "
 
 
 class Edge:
@@ -126,7 +127,7 @@ class Edge:
         Returns a string representation of this edge, in the form
         `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
         """
-        return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
+        return f"(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) "
 
     def define_halfedge(self, vertex: Vertex):
         """
@@ -140,16 +141,15 @@ class Edge:
                 halfedge = Halfedge(self.v_i, self)
                 self.h_i = halfedge
             else:
-                raise ValueError('Halfedge h_i already defined')
+                raise ValueError("Halfedge h_i already defined")
         elif vertex == self.v_j:
             if not self.h_j:
                 halfedge = Halfedge(self.v_j, self)
                 self.h_j = halfedge
             else:
-                raise ValueError('Halfedge h_j already defined')
+                raise ValueError("Halfedge h_j already defined")
         else:
-            raise ValueError(
-                "The edge is not connected to the given vertex.")
+            raise ValueError("The edge is not connected to the given vertex.")
         return halfedge
 
     def other_vertex(self, vertex):
@@ -184,19 +184,24 @@ class Edge:
     def overlaps_or_crosses(self, other: Edge):
         """
         Returns True if this edge overlaps or crosses another edge.
-        Edges are allowed to share one vertex (returns False), but
-        not both (returns True).
+        Edges are allowed to share one vertex (returns False), but not
+        both (returns True).
 
         Args:
             other : Edge
-                The other edge to check for overlap or cross with this edge.
+                The other edge to check for overlap or cross with this
+                edge.
 
         Returns: bool
-            True if this edge overlaps or crosses the other edge, False otherwise.
+            True if this edge overlaps or crosses the other edge,
+            False otherwise.
 
         Examples:
             >>> from osmg.mesh import Vertex, Edge
-            >>> v1, v2, v3, v4 = Vertex((0, 0)), Vertex((0, 1)), Vertex((1, 1)), Vertex((1, 0))
+            >>> v1 = Vertex((0, 0))
+            >>> v2 = Vertex((0, 1))
+            >>> v3 = Vertex((1, 1))
+            >>> v4 = Vertex((1, 0))
             >>> e1 = Edge(v1, v2)
             >>> e2 = Edge(v3, v4)
             >>> e1.overlaps_or_crosses(e2)
@@ -221,13 +226,11 @@ class Edge:
         # location of this edge
         vec_ra: nparr = np.array(self.v_i.coords)
         # direction of this edge
-        vec_da: nparr = (np.array(self.v_j.coords)
-                         - np.array(self.v_i.coords))
+        vec_da: nparr = np.array(self.v_j.coords) - np.array(self.v_i.coords)
         # location of other edge
         vec_rb: nparr = np.array(other.v_i.coords)
         # direction of other edge
-        vec_db: nparr = (np.array(other.v_j.coords)
-                         - np.array(other.v_i.coords))
+        vec_db: nparr = np.array(other.v_j.coords) - np.array(other.v_i.coords)
         # verify that the edges have nonzero length
         assert not np.isclose(vec_da @ vec_da, 0.00)
         assert not np.isclose(vec_db @ vec_db, 0.00)
@@ -248,9 +251,10 @@ class Edge:
 
             # first check if they are parallel but not colinear
             # project start of other vertex onto line of this vertex
-            vec_rb_diff = (vec_rb - vec_ra)
-            vec_proj_pt = ((vec_rb_diff @ vec_da)/(vec_da @ vec_da)
-                           * vec_da + vec_ra)
+            vec_rb_diff = vec_rb - vec_ra
+            vec_proj_pt = (vec_rb_diff @ vec_da) / (
+                vec_da @ vec_da
+            ) * vec_da + vec_ra
             vec_dist = vec_rb - vec_proj_pt
             distance = np.sqrt(vec_dist @ vec_dist)
 
@@ -278,7 +282,7 @@ class Edge:
             # We can then determine which of the three cases we are
             # in, based on the values of c_i and c_j.
             c_i = (vec_da @ (vec_rb - vec_ra)) / (vec_da @ vec_da)
-            c_j = (vec_da @ ((vec_rb+vec_db) - vec_ra)) / (vec_da @ vec_da)
+            c_j = (vec_da @ ((vec_rb + vec_db) - vec_ra)) / (vec_da @ vec_da)
             # either they should be both < 0 (which means that the
             # other edge is "before" this edge), or they should be
             # both > 1.00 (which means that the other edge is "after"
@@ -290,18 +294,16 @@ class Edge:
             # when making comparisons.
             epsilon = common.EPSILON
             if (
-                    (c_i < 0.00 - epsilon and np.isclose(c_j, 0.00))
-                    or
-                    (c_i > 1.00 + epsilon and np.isclose(c_j, 1.00))
-                    or
-                    (np.isclose(c_i, 1.00) and c_j > 1.00 + epsilon)
-                    or
-                    (np.isclose(c_i, 0.00) and c_j < 0.00 - epsilon)
+                (c_i < 0.00 - epsilon and np.isclose(c_j, 0.00))
+                or (c_i > 1.00 + epsilon and np.isclose(c_j, 1.00))
+                or (np.isclose(c_i, 1.00) and c_j > 1.00 + epsilon)
+                or (np.isclose(c_i, 0.00) and c_j < 0.00 - epsilon)
             ):
                 # they share one vertex without overlap
                 return False
-            if ((c_i < 0.00 - epsilon and c_j < 0.00 - epsilon) or (
-                    c_i > 1.00 + epsilon and c_j > 1.00 + epsilon)):
+            if (c_i < 0.00 - epsilon and c_j < 0.00 - epsilon) or (
+                c_i > 1.00 + epsilon and c_j > 1.00 + epsilon
+            ):
                 # definitely no overlap
                 return False
             # in any other case, they overlap
@@ -352,7 +354,7 @@ class Halfedge:
     def __init__(self, vertex: Vertex, edge: Edge):
         """
         Initializes the halfedge object.
-        
+
         Args:
             vertex: The vertex that the halfedge originates from.
             edge: The edge that the halfedge is a part of.
@@ -368,10 +370,12 @@ class Halfedge:
         `(H0 from E0 to E0 next H1)`
         """
         if self.nxt:
-            out = f'(H{self.uid} from E{self.edge.uid}' \
-                f' to E{self.nxt.edge.uid} next H{self.nxt.uid})'
+            out = (
+                f"(H{self.uid} from E{self.edge.uid}"
+                f" to E{self.nxt.edge.uid} next H{self.nxt.uid})"
+            )
         else:
-            out = f'(H{self.uid}'
+            out = f"(H{self.uid}"
         return out
 
     def __lt__(self, other):
@@ -397,8 +401,9 @@ class Halfedge:
         >>> halfedge2.direction()
         -2.356194490192345
         """
-        drct: nparr = (np.array(self.edge.other_vertex(self.vertex).coords) -
-                       np.array(self.vertex.coords))
+        drct: nparr = np.array(
+            self.edge.other_vertex(self.vertex).coords
+        ) - np.array(self.vertex.coords)
         norm = np.linalg.norm(drct)
         drct /= norm
         return np.arctan2(drct[1], drct[0])
@@ -416,7 +421,7 @@ class Mesh:
 
     def __repr__(self):
         num = len(self.halfedges)
-        return f'Mesh object containing {num} halfedges.'
+        return f"Mesh object containing {num} halfedges."
 
     def geometric_properties(self):
         """
@@ -463,8 +468,12 @@ def polygon_area(coords: nparr) -> float:
     """
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
-    return float(np.sum(x_coords * np.roll(y_coords, -1) -
-                        np.roll(x_coords, -1) * y_coords) / 2.00)
+    return float(
+        np.sum(
+            x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
+        )
+        / 2.00
+    )
 
 
 def polygon_centroid(coords: nparr) -> nparr:
@@ -489,12 +498,24 @@ def polygon_centroid(coords: nparr) -> nparr:
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     area = polygon_area(coords)
-    x_cent = (np.sum((x_coords + np.roll(x_coords, -1)) *
-                     (x_coords*np.roll(y_coords, -1) -
-                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
-    y_cent = (np.sum((y_coords + np.roll(y_coords, -1)) *
-                     (x_coords*np.roll(y_coords, -1) -
-                      np.roll(x_coords, -1)*y_coords)))/(6.0*area)
+    x_cent = (
+        np.sum(
+            (x_coords + np.roll(x_coords, -1))
+            * (
+                x_coords * np.roll(y_coords, -1)
+                - np.roll(x_coords, -1) * y_coords
+            )
+        )
+    ) / (6.0 * area)
+    y_cent = (
+        np.sum(
+            (y_coords + np.roll(y_coords, -1))
+            * (
+                x_coords * np.roll(y_coords, -1)
+                - np.roll(x_coords, -1) * y_coords
+            )
+        )
+    ) / (6.0 * area)
     return np.array((x_cent, y_cent))
 
 
@@ -535,26 +556,50 @@ def polygon_inertia(coords):
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     area = polygon_area(coords)
-    alpha = x_coords * np.roll(y_coords, -1) - \
-        np.roll(x_coords, -1) * y_coords
+    alpha = x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
     # planar moment of inertia wrt horizontal axis
-    ixx = np.sum((y_coords**2 + y_coords * np.roll(y_coords, -1) +
-                  np.roll(y_coords, -1)**2)*alpha)/12.00
+    ixx = (
+        np.sum(
+            (
+                y_coords**2
+                + y_coords * np.roll(y_coords, -1)
+                + np.roll(y_coords, -1) ** 2
+            )
+            * alpha
+        )
+        / 12.00
+    )
     # planar moment of inertia wrt vertical axis
-    iyy = np.sum((x_coords**2 + x_coords * np.roll(x_coords, -1) +
-                  np.roll(x_coords, -1)**2)*alpha)/12.00
+    iyy = (
+        np.sum(
+            (
+                x_coords**2
+                + x_coords * np.roll(x_coords, -1)
+                + np.roll(x_coords, -1) ** 2
+            )
+            * alpha
+        )
+        / 12.00
+    )
 
-    ixy = np.sum((x_coords*np.roll(y_coords, -1)
-                  + 2.0*x_coords*y_coords
-                  + 2.0*np.roll(x_coords, -1) * np.roll(y_coords, -1)
-                  + np.roll(x_coords, -1) * y_coords)*alpha)/24.
+    ixy = (
+        np.sum(
+            (
+                x_coords * np.roll(y_coords, -1)
+                + 2.0 * x_coords * y_coords
+                + 2.0 * np.roll(x_coords, -1) * np.roll(y_coords, -1)
+                + np.roll(x_coords, -1) * y_coords
+            )
+            * alpha
+        )
+        / 24.0
+    )
     # polar (torsional) moment of inertia
     i_r = ixx + iyy
     # mass moment of inertia wrt in-plane rotation
     ir_mass = (ixx + iyy) / area
 
-    return {'ixx': ixx, 'iyy': iyy,
-            'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
+    return {"ixx": ixx, "iyy": iyy, "ixy": ixy, "ir": i_r, "ir_mass": ir_mass}
 
 
 def geometric_properties(coords):
@@ -569,7 +614,7 @@ def geometric_properties(coords):
     coords_centered = coords - centroid
     inertia = polygon_inertia(coords_centered)
 
-    return {'area': area, 'centroid': centroid, 'inertia': inertia}
+    return {"area": area, "centroid": centroid, "inertia": inertia}
 
 
 ##################################
@@ -578,14 +623,15 @@ def geometric_properties(coords):
 
 # auxiliary functions
 
+
 def ang_reduce(ang):
     """
     Brings and angle expressed in radians in the interval [0, 2pi)
     """
     while ang < 0:
-        ang += 2.*np.pi
-    while ang >= 2.*np.pi:
-        ang -= 2.*np.pi
+        ang += 2.0 * np.pi
+    while ang >= 2.0 * np.pi:
+        ang -= 2.0 * np.pi
     return ang
 
 
@@ -639,7 +685,8 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         >>> e4 = Edge(v4, v1)
         >>> # define the halfedges
         >>> halfedges = define_halfedges([e1, e2, e3, e4])
-        >>> # check that the `next` attribute of each halfedge is correctly assigned
+        >>> # check that the `next` attribute of each halfedge
+        >>> # is correctly assigned
         >>> for h in halfedges:
         ...     assert h.nxt.vertex == h.edge.other_vertex(h.vertex)
     """
@@ -671,11 +718,12 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         angles = np.full(len(candidates_for_next), 0.00)
         for i, h_other in enumerate(candidates_for_next):
             if h_other.edge == halfedge.edge:
-                angles[i] = 1000.
+                angles[i] = 1000.0
                 # otherwise we would assign its conjugate as next
             else:
                 angles[i] = ang_reduce(
-                    (halfedge.direction() - np.pi) - h_other.direction())
+                    (halfedge.direction() - np.pi) - h_other.direction()
+                )
         halfedge.nxt = candidates_for_next[np.argmin(angles)]
 
     return all_halfedges
@@ -722,11 +770,13 @@ def obtain_closed_loops(halfedges):
         loops (list[list[Halfedge]]) with the
               aforementioned property.
     """
+
     def is_in_some_loop(halfedge, loops):
         for loop in loops:
             if halfedge in loop:
                 return True
         return False
+
     loops: list[list[Halfedge]] = []
     for halfedge in halfedges:
         if loops:
@@ -757,9 +807,10 @@ def orient_loops(loops):
     internal_loops = []
     external_loops = []
     trivial_loops = []
-    loop_areas = [polygon_area(
-        np.array([h.vertex.coords for h in loop]))
-        for loop in loops]
+    loop_areas = [
+        polygon_area(np.array([h.vertex.coords for h in loop]))
+        for loop in loops
+    ]
     for i, area in enumerate(loop_areas):
         if area > common.EPSILON:
             internal_loops.append(loops[i])
@@ -789,11 +840,13 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
                objects that represent single fibers.
     """
     outside_polygon = shapely_Polygon(
-        [h.vertex.coords for h in outside.halfedges])
+        [h.vertex.coords for h in outside.halfedges]
+    )
     hole_polygons = []
     for hole in holes.values():
-        hole_polygons.append(shapely_Polygon(
-            [h.vertex.coords for h in hole.halfedges]))
+        hole_polygons.append(
+            shapely_Polygon([h.vertex.coords for h in hole.halfedges])
+        )
     remaining_polygon = outside_polygon
     for hole_polygon in hole_polygons:
         remaining_polygon = remaining_polygon.difference(hole_polygon)
@@ -801,19 +854,23 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     x_array = np.linspace(x_min, x_max, num=n_x, endpoint=True)
     y_array = np.linspace(y_min, y_max, num=n_y, endpoint=True)
     pieces = []
-    for i in range(len(x_array)-1):
-        for j in range(len(y_array)-1):
-            tile = shapely_Polygon([(x_array[i], y_array[j]),
-                                    (x_array[i+1], y_array[j]),
-                                    (x_array[i+1], y_array[j+1]),
-                                    (x_array[i], y_array[j+1])])
+    for i in range(len(x_array) - 1):
+        for j in range(len(y_array) - 1):
+            tile = shapely_Polygon(
+                [
+                    (x_array[i], y_array[j]),
+                    (x_array[i + 1], y_array[j]),
+                    (x_array[i + 1], y_array[j + 1]),
+                    (x_array[i], y_array[j + 1]),
+                ]
+            )
             subregion = remaining_polygon.intersection(tile)
             if subregion.area != 0.0:
                 pieces.append(subregion)
     if plot:
         fig = plt.figure()
         ax_1 = fig.add_subplot(111)
-        ax_1.set_aspect('equal')
+        ax_1.set_aspect("equal")
         patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
         ax_1.add_patch(patch)
         for subregion in pieces:
@@ -826,8 +883,7 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     return pieces
 
 
-def subdivide_hss(sec_h: float, sec_b: float, sec_t: float,
-                  plot=False):
+def subdivide_hss(sec_h: float, sec_b: float, sec_t: float, plot=False):
     """
     Used to define the fibers of steel HSS fiber sections.
     Args:
@@ -840,41 +896,48 @@ def subdivide_hss(sec_h: float, sec_b: float, sec_t: float,
     """
     outside_polygon = shapely_Polygon(
         np.array(
-            ((sec_h, sec_b),
-             (sec_h, -sec_b),
-             (-sec_h, -sec_b),
-             (-sec_h, sec_b))
-        ))
+            (
+                (sec_h, sec_b),
+                (sec_h, -sec_b),
+                (-sec_h, -sec_b),
+                (-sec_h, sec_b),
+            )
+        )
+    )
     hole_polygon = shapely_Polygon(
         np.array(
-            ((sec_h-sec_t, sec_b-sec_t),
-             (sec_h-sec_t, -sec_b+sec_t),
-             (-sec_h+sec_t, -sec_b+sec_t),
-             (-sec_h+sec_t, sec_b-sec_t))
-        ))
+            (
+                (sec_h - sec_t, sec_b - sec_t),
+                (sec_h - sec_t, -sec_b + sec_t),
+                (-sec_h + sec_t, -sec_b + sec_t),
+                (-sec_h + sec_t, sec_b - sec_t),
+            )
+        )
+    )
     remaining_polygon = outside_polygon.difference(hole_polygon)
     x_min, y_min, x_max, y_max = outside_polygon.bounds
     # cutting it into 8 regions
     pieces = []
     for ylow, yhigh in zip(
-            (y_min, y_min+sec_t, y_max-sec_t),
-            (y_min+sec_t, y_max-sec_t, y_max)
+        (y_min, y_min + sec_t, y_max - sec_t),
+        (y_min + sec_t, y_max - sec_t, y_max),
     ):
         for xlow, xhigh in zip(
-                (x_min, x_min+sec_t, x_max-sec_t),
-                (x_min+sec_t, x_max-sec_t, x_max),
+            (x_min, x_min + sec_t, x_max - sec_t),
+            (x_min + sec_t, x_max - sec_t, x_max),
         ):
-            x_array = np.linspace(
-                xlow, xhigh, num=5, endpoint=True)
-            y_array = np.linspace(
-                ylow, yhigh, num=5, endpoint=True)
-            for i in range(len(x_array)-1):
-                for j in range(len(y_array)-1):
+            x_array = np.linspace(xlow, xhigh, num=5, endpoint=True)
+            y_array = np.linspace(ylow, yhigh, num=5, endpoint=True)
+            for i in range(len(x_array) - 1):
+                for j in range(len(y_array) - 1):
                     tile = shapely_Polygon(
-                        [(x_array[i], y_array[j]),
-                         (x_array[i+1], y_array[j]),
-                         (x_array[i+1], y_array[j+1]),
-                         (x_array[i], y_array[j+1])])
+                        [
+                            (x_array[i], y_array[j]),
+                            (x_array[i + 1], y_array[j]),
+                            (x_array[i + 1], y_array[j + 1]),
+                            (x_array[i], y_array[j + 1]),
+                        ]
+                    )
                     subregion = remaining_polygon.intersection(tile)
                     if subregion.area != 0.0:
                         pieces.append(subregion)
@@ -882,7 +945,7 @@ def subdivide_hss(sec_h: float, sec_b: float, sec_t: float,
     if plot:
         fig = plt.figure()
         ax_1 = fig.add_subplot(111)
-        ax_1.set_aspect('equal')
+        ax_1.set_aspect("equal")
         # patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
         # ax_1.add_patch(patch)
         for subregion in pieces:
@@ -908,17 +971,17 @@ def print_halfedge_results(halfedges):
     debugging.
     """
     results: dict[str, list[Any]] = {
-        'halfedge': [],
-        'vertex': [],
-        'edge': [],
-        'next': [],
+        "halfedge": [],
+        "vertex": [],
+        "edge": [],
+        "next": [],
     }
 
     for halfedge in halfedges:
-        results['halfedge'].append(halfedge)
-        results['vertex'].append(halfedge.vertex)
-        results['edge'].append(halfedge.edge)
-        results['next'].append(halfedge.nxt)
+        results["halfedge"].append(halfedge)
+        results["vertex"].append(halfedge.vertex)
+        results["edge"].append(halfedge.edge)
+        results["next"].append(halfedge.nxt)
 
     print(results)
 
@@ -928,7 +991,7 @@ def plot_loop(halfedge_loop):
     Plots the vertices/edges of a list of halfedges.
     """
     num = len(halfedge_loop)
-    coords = np.full((num+1, 2), 0.00)
+    coords = np.full((num + 1, 2), 0.00)
     for i, halfedge in enumerate(halfedge_loop):
         coords[i, :] = halfedge.vertex.coords
     coords[-1, :] = coords[0, :]
@@ -967,7 +1030,7 @@ def sanity_checks(external, trivial):
     if len(external) > 1:
         print("Warning: Found multiple external loops")
         for i, ext in enumerate(external):
-            print(i+1)
+            print(i + 1)
             for halfedge in ext:
                 print(halfedge.vertex.coords)
             plot_loop(ext)

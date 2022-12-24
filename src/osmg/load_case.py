@@ -39,8 +39,8 @@ class PointLoadMass:
     Attributes:
         val (nparr)
     """
-    val: nparr = field(
-        default_factory=lambda: np.zeros(shape=6))
+
+    val: nparr = field(default_factory=lambda: np.zeros(shape=6))
 
     def add(self, load: nparr):
         """
@@ -60,10 +60,10 @@ class PointLoadMass:
         self.val += load
 
     def __repr__(self):
-        res = ''
-        res += 'Point Load (or mass) object\n'
-        res += 'Components: (global system)\n'
-        res += f'val: {self.val}\n'
+        res = ""
+        res += "Point Load (or mass) object\n"
+        res += "Components: (global system)\n"
+        res += f"val: {self.val}\n"
         return res
 
 
@@ -72,17 +72,17 @@ class LineElementUDL:
     """
     Line element uniformly distributed load object.
     """
+
     parent_load_case: LoadCase
     parent_line_element: ElasticBeamColumn
-    val: nparr = field(
-        default_factory=lambda: np.zeros(shape=3))
+    val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
-        res = ''
-        res += 'LineElementUDL object\n'
-        res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
-        res += 'Components:\n'
-        res += f'  val: {self.val}\n'
+        res = ""
+        res += "LineElementUDL object\n"
+        res += f"parent_line_element.uid: {self.parent_line_element.uid}\n"
+        res += "Components:\n"
+        res += f"  val: {self.val}\n"
         return res
 
     def add_glob(self, udl: nparr):
@@ -109,21 +109,24 @@ class LineElementUDL:
         # process is always valid without requiring any special
         # transformation.
         elm = self.parent_line_element
-        if elm.geomtransf.transf_type == 'Corotational':
+        if elm.geomtransf.transf_type == "Corotational":
             elm_len = elm.clear_length()
             force = udl * elm_len / 2.00
             node_i_uid = elm.nodes[0].uid
             node_j_uid = elm.nodes[1].uid
             lcase = self.parent_load_case
             lcase.node_loads[node_i_uid].add(
-                np.concatenate((force, np.zeros(3))))
+                np.concatenate((force, np.zeros(3)))
+            )
             lcase.node_loads[node_j_uid].add(
-                np.concatenate((force, np.zeros(3))))
+                np.concatenate((force, np.zeros(3)))
+            )
         else:
             transf_mat = transformations.transformation_matrix(
                 self.parent_line_element.geomtransf.x_axis,
                 self.parent_line_element.geomtransf.y_axis,
-                self.parent_line_element.geomtransf.z_axis)
+                self.parent_line_element.geomtransf.z_axis,
+            )
             udl_local = transf_mat @ udl
             self.val += udl_local
 
@@ -135,7 +138,8 @@ class LineElementUDL:
         transf_mat = transformations.transformation_matrix(
             self.parent_line_element.geomtransf.x_axis,
             self.parent_line_element.geomtransf.y_axis,
-            self.parent_line_element.geomtransf.z_axis)
+            self.parent_line_element.geomtransf.z_axis,
+        )
         return transf_mat.T @ udl
 
 
@@ -148,34 +152,37 @@ class LoadCase:
     Analysis objects can use multiple load cases.
     Load combination objects utilize load cases as well.
     """
+
     name: str
     parent_model: Model
     node_loads: collections.Collection[int, PointLoadMass] = field(init=False)
     node_mass: collections.Collection[int, PointLoadMass] = field(init=False)
-    line_element_udl: collections.Collection[
-        int, LineElementUDL] = field(init=False)
+    line_element_udl: collections.Collection[int, LineElementUDL] = field(
+        init=False
+    )
     tributary_area_analysis: collections.Collection[
-        int, TributaryAreaAnaysis] = field(init=False)
+        int, TributaryAreaAnaysis
+    ] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
 
     def __post_init__(self):
         self.node_loads = collections.Collection(self)
         self.node_mass = collections.Collection(self)
         self.line_element_udl = collections.Collection(self)
-        self.tributary_area_analysis = \
-            collections.Collection(self)
+        self.tributary_area_analysis = collections.Collection(self)
         # initialize loads and mass for each node and element
         for node in self.parent_model.list_of_all_nodes():
             self.node_loads[node.uid] = PointLoadMass()
             self.node_mass[node.uid] = PointLoadMass()
-        for line_element in (self.parent_model
-                             .list_of_beamcolumn_elements()):
-            self.line_element_udl[line_element.uid] = \
-                LineElementUDL(self, line_element)
+        for line_element in self.parent_model.list_of_beamcolumn_elements():
+            self.line_element_udl[line_element.uid] = LineElementUDL(
+                self, line_element
+            )
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():
-            self.tributary_area_analysis[lvlkey] = \
-                TributaryAreaAnaysis(self, lvl)
+            self.tributary_area_analysis[lvlkey] = TributaryAreaAnaysis(
+                self, lvl
+            )
 
     def rigid_diaphragms(self, level_uids: list[int], gather_mass=False):
         """
@@ -199,14 +206,11 @@ class LoadCase:
         #     node.uid: node
         #     for node in self.parent_nodes.values()}
         # all_nodes.update(parent_nodes)
-        free_dofs = (
-            pd.DataFrame(
-                np.ones((len(all_nodes), 6), dtype=int),
-                index=all_nodes.keys(),
-                columns=[1, 2, 3, 4, 5, 6]
-            )
-            .sort_index(axis='index')
-        )
+        free_dofs = pd.DataFrame(
+            np.ones((len(all_nodes), 6), dtype=int),
+            index=all_nodes.keys(),
+            columns=[1, 2, 3, 4, 5, 6],
+        ).sort_index(axis="index")
 
         # consider the restraints
         def restraints(row, all_nodes):
@@ -214,6 +218,7 @@ class LoadCase:
             node = all_nodes[uid]
             restraints = node.restraint
             row[restraints] = 0
+
         free_dofs.apply(restraints, axis=1, args=(all_nodes,))
         # consider the constraints
         num_diaphragms = 0
@@ -221,15 +226,15 @@ class LoadCase:
             num_diaphragms += 1
             lvl = mdl.levels[uid]
             constrained_nodes = [
-                n for n in lvl.nodes.values()
-                if n.coords[2] == lvl.elevation]
+                n for n in lvl.nodes.values() if n.coords[2] == lvl.elevation
+            ]
             for constrained_node in constrained_nodes:
                 free_dofs.loc[constrained_node.uid, :] = (0, 0, 1, 1, 1, 0)
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self):
-        res = ''
-        res += 'LoadCase object\n'
-        res += f'name: {self.name}\n'
-        res += f'parent_model: {self.parent_model.name}\n'
+        res = ""
+        res += "LoadCase object\n"
+        res += f"name: {self.name}\n"
+        res += f"parent_model: {self.parent_model.name}\n"
         return res

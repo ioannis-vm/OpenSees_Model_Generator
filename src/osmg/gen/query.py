@@ -24,6 +24,7 @@ import numpy.typing as npt
 from ..line import Line
 from ..load_case import LoadCase
 from .. import common
+
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
     from ..ops.element import ElasticBeamColumn
@@ -40,11 +41,12 @@ class ElmQuery:
     """
     Used by all component generators
     """
+
     model: Model
 
     def search_connectivity(
-            self,
-            nodes: list[Node]) -> Optional[ComponentAssembly]:
+        self, nodes: list[Node]
+    ) -> Optional[ComponentAssembly]:
         """
         find component assembly based on connectivity
         """
@@ -55,12 +57,14 @@ class ElmQuery:
         val = conn_dict.get(uids_tuple)
         return val
 
-    def search_node_lvl(self,
-                        x_loc: float, y_loc: float,
-                        lvl: int,
-                        z_loc: Optional[float] = None,
-                        internal=False
-                        ) -> Optional[Node]:
+    def search_node_lvl(
+        self,
+        x_loc: float,
+        y_loc: float,
+        lvl: int,
+        z_loc: Optional[float] = None,
+        internal=False,
+    ) -> Optional[Node]:
         """
         Looks if a node exists at the given location.
         """
@@ -72,8 +76,7 @@ class ElmQuery:
             candidate_pt: nparr = np.array([x_loc, y_loc, z_loc])
             ndims = 3
         else:
-            candidate_pt = np.array(
-                [x_loc, y_loc])
+            candidate_pt = np.array([x_loc, y_loc])
             ndims = 2
         nodes = level.nodes
         if internal:
@@ -87,9 +90,8 @@ class ElmQuery:
         return res
 
     def retrieve_components_from_nodes(
-            self,
-            nodes: list[Node],
-            lvl_uid: Optional[int] = None) -> dict[int, ComponentAssembly]:
+        self, nodes: list[Node], lvl_uid: Optional[int] = None
+    ) -> dict[int, ComponentAssembly]:
         """
         Retrieves component assemblies if at least one of their
         external nodes matches the given list of nodes.
@@ -113,9 +115,8 @@ class ElmQuery:
         return retrieved_components
 
     def retrieve_component_from_nodes(
-            self,
-            nodes: list[Node],
-            lvl_uid: Optional[int] = None) -> Optional[ComponentAssembly]:
+        self, nodes: list[Node], lvl_uid: Optional[int] = None
+    ) -> Optional[ComponentAssembly]:
         """
         Retrieves a single component assembly if all of its external
         nodes match the given list of nodes.
@@ -149,22 +150,19 @@ class ElmQuery:
             if len(component.external_nodes) != 2:
                 continue
             line_elems: list[Union[ElasticBeamColumn, DispBeamColumn]] = []
-            line_elems.extend(component.elastic_beamcolumn_elements
-                              .values())
-            line_elems.extend(component.disp_beamcolumn_elements
-                              .values())
+            line_elems.extend(component.elastic_beamcolumn_elements.values())
+            line_elems.extend(component.disp_beamcolumn_elements.values())
             for elm in line_elems:
-                p_i = (np.array(elm.nodes[0].coords)
-                       + elm.geomtransf.offset_i)
-                p_j = (np.array(elm.nodes[1].coords)
-                       + elm.geomtransf.offset_j)
+                p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+                p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
                 if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
-                    if np.linalg.norm(
-                            np.array((x_loc, y_loc))
-                            - p_i[0:2]) < common.EPSILON:
+                    if (
+                        np.linalg.norm(np.array((x_loc, y_loc)) - p_i[0:2])
+                        < common.EPSILON
+                    ):
                         return component
                 else:
-                    line = Line('', p_i[0:2], p_j[0:2])
+                    line = Line("", p_i[0:2], p_j[0:2])
                     line.intersects_pt(np.array((x_loc, y_loc)))
                     if line.intersects_pt(np.array((x_loc, y_loc))):
                         return component
@@ -175,6 +173,7 @@ class LoadCaseQuery:
     """
     Load case query object.
     """
+
     model: Model
     loadcase: LoadCase
 
