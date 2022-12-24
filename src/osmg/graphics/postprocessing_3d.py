@@ -170,13 +170,13 @@ def add_data__extruded_line_elms_deformed_mesh(
     """
     if not list_of_line_elems:
         return
-    x_list = []
-    y_list = []
-    z_list = []
-    i_list = []
-    j_list = []
-    k_list = []
-    intensity = []
+    x_list: list[float] = []
+    y_list: list[float] = []
+    z_list: list[float] = []
+    i_list: list[int] = []
+    j_list: list[int] = []
+    k_list: list[int] = []
+    intensity: list[float] = []
     index = 0
     for elm in list_of_line_elems:
         if elm.visibility.hidden_when_extruded:
