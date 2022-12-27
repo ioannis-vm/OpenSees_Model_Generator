@@ -976,14 +976,20 @@ class NonlinearAnalysis(Analysis):
     """
 
     def _run_gravity_analysis(self, system):
-        self.log(f"Setting system to {system} for gravity analysis.")
+        self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
         ops.test("EnergyIncr", 1.0e-6, 100, 3)
+        self.log(f"G: Setting system to {system}")
         ops.system(system)
+        self.log(f"G: Setting numberer to {NUMBERER}")
         ops.numberer(NUMBERER)
+        self.log(f"G: Setting constraints to {[*CONSTRAINTS]}")
         ops.constraints(*CONSTRAINTS)
+        self.log(f"G: Setting algorithm to RaphsonNewton")
         ops.algorithm("RaphsonNewton")
         ops.integrator("LoadControl", 1)
+        self.log(f"G: Setting analysis to Static")
         ops.analysis("Static")
+        self.log(f"G: Analyzing now.")
         check = ops.analyze(1)
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")
@@ -1689,11 +1695,14 @@ class NLTHAnalysis(NonlinearAnalysis):
         self._init_results()
         self.log("Running NLTH analysis")
 
+        self.log(f'Model Name: {self.mdl.name}')
+
         nodes = self.mdl.list_of_all_nodes()
         # note: only runs the first load case provided.
         # nlth should not have load cases.
         # will be fixed in the future.
         case_name = list(self.load_cases.keys())[0]
+        self.log(f'Case Name: {case_name}')
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
         elastic_elems = [
             elm
@@ -1708,6 +1717,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         zerolength_elems = self.mdl.list_of_zerolength_elements()
 
         damping_type = damping.get("type")
+        self.log(f'Damping Type: {damping_type}')
 
         if damping_type in ("rayleigh", "stiffness"):
             system = NL_ANALYSIS_SYSTEM
@@ -1736,6 +1746,8 @@ class NLTHAnalysis(NonlinearAnalysis):
         num_gm_points = np.min(np.array(nss))
         duration = num_gm_points * file_time_incr
 
+        self.log(f'Ground Motion Duration: {duration:.2f} s')
+
         t_vec = np.linspace(
             0.00, file_time_incr * num_gm_points, num_gm_points
         )
@@ -1757,14 +1769,17 @@ class NLTHAnalysis(NonlinearAnalysis):
         else:
             target_timestamp = finish_time
 
+        self.log('')
         self.log("Defining model in OpenSees")
         self._to_opensees_domain(case_name)
 
         # gravity analysis
-        self.log("Defining dead loads")
+        self.log("Defining loads")
         self._define_loads(case_name)
-        self.log("Starting gravity analysis")
+        
+        self.log("Starting gravity analysis (G)")
         self._run_gravity_analysis(system)
+        self.log("Gravity analysis finished successfully")
         n_steps_success = 0
         self._read_opensees_results(
             case_name,
@@ -1777,7 +1792,10 @@ class NLTHAnalysis(NonlinearAnalysis):
             custom_read_results_method_args,
         )
 
-        # time-history analysis
+
+        self.log("")
+        self.log("Starting transient analysis")
+
         ops.wipeAnalysis()
         ops.loadConst("-time", 0.0)
         curr_time = 0.00
@@ -1812,6 +1830,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             # num_modeshapes = 3*num_nodes
             # self.print(len(tags))
 
+            self.log("Using modal damping")
+
             num_modes = damping["num_modes"]
             # num_modes = num_modeshapes
             damping_ratio = damping["ratio"]
@@ -1824,6 +1844,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         if damping_type == "modal+stiffness":
 
+            self.log("Using modal+stiffness damping")
             num_modes = damping["num_modes"]
             # num_modes = num_modeshapes
             damping_ratio = damping["ratio_modal"]
@@ -1842,15 +1863,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         self.log("Starting transient analysis")
         ops.test("EnergyIncr", 1.0e-6, 50, 0)
-        # ops.integrator('Newmark', 0.50, 0.25)
-
-        # # back to the fastest solver
-        # # no: when using modal damping, we can't go back to SparseSYM,
-        # # as this produces garbage results
-        # if system != NL_ANALYSIS_SYSTEM:
-        #     ops.system(NL_ANALYSIS_SYSTEM)
-
-        ops.integrator("TRBDF2")
+        ops.integrator('Newmark', 0.50, 0.25)
         ops.algorithm("KrylovNewton")
         ops.analysis("Transient")
 
@@ -1887,16 +1900,19 @@ class NLTHAnalysis(NonlinearAnalysis):
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
+                        # can't subdivide any further
                         self.print("===========================")
                         self.print("Analysis failed to converge")
                         self.print("===========================")
                         if self.logger:
                             self.logger.warning(
-                                "Analysis failed" f" at time {curr_time:.5f}"
+                                f"Analysis failed at time {curr_time:.5f}"
+                                " and cannot continue."
                             )
                         analysis_failed = True
                         break
-                    # can still reduce step size
+                    
+                    # otherwise, we can still reduce step size
                     num_subdiv += 1
                     # how many times to run with reduced step size
                     num_times = 10
@@ -1931,15 +1947,16 @@ class NLTHAnalysis(NonlinearAnalysis):
             if self.logger:
                 self.logger.warning("Analysis interrupted")
 
+        # remove the progress bar
         if pbar is not None:
             pbar.close()
 
+        self.log("Analysis finished")
         metadata = {
             "successful steps": n_steps_success,
             "analysis_finished_successfully": not analysis_failed,
         }
         self.results[case_name].n_steps_success = len(self.time_vector)
-        self.log("Analysis finished")
         if self.settings.pickle_results:
             self._write_results_to_disk()
         return metadata
