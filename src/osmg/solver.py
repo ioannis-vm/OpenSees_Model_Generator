@@ -1006,7 +1006,6 @@ class NonlinearAnalysis(Analysis):
     #     """
     #     max_dmg_ratio = 0.30
     #     candidate_elms = []
-
     #     for elm in self.mdl.dict_of_disp_beamcolumn_elements().values():
     #         part = elm.section.section_parts['main']
     #         if isinstance(elm.section, FiberSection):
