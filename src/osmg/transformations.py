@@ -54,10 +54,14 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
         nparr: 3x3 transformation matrix representing the rotation.
 
     Example:
-    >>> rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)
-    array([[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],
-           [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
-           [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
+    >>> # this is how to run that function:
+    >>> res = rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)
+    >>> # this is the expected result:
+    >>> expected_res = np.array(
+    ...     [[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],
+    ...      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
+    ...      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
+    >>> assert np.allclose(res, expected_res)
     """
     v_a = np.cos(theta / 2.0)
     v_b, v_c, v_d = -axis * np.sin(theta / 2.0)
@@ -93,20 +97,25 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
     Note: For orthogonal axes, transpose to obtain the inverse transform.
 
     Example:
-        >>> transformation_matrix(
+        >>> # this is how to run that function:
+        >>> res = transformation_matrix(
         ...     np.array([1., 0., 0.]),
         ...     np.array([0., 1., 0.]),
         ...     np.array([0., 0., 1.]))
-        array([[1., 0., 0.],
-               [0., 1., 0.],
-               [0., 0., 1.]])
-        >>> transformation_matrix(
+        >>> expected_result = np.array((
+        ...     [[1., 0., 0.],
+        ...      [0., 1., 0.],
+        ...      [0., 0., 1.]]))
+        >>> assert np.allclose(res, expected_result)
+        >>> res = transformation_matrix(
         ...     np.array([1., 0., 0.]),
         ...     np.array([0., 0., 1.]),
         ...     np.array([0., 1., 0.]))
-        array([[1., 0., 0.],
-               [0., 0., 1.],
-               [0., 1., 0.]])
+        >>> expected_result = np.array((
+        ...     [[1., 0., 0.],
+        ...      [0., 0., 1.],
+        ...      [0., 1., 0.]]))
+        >>> assert np.allclose(res, expected_result)
     """
     tr_global_to_local: nparr = np.vstack((vec_x, vec_y, vec_z))
     return tr_global_to_local
