@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 import os
 import pickle
 import logging
+from time import perf_counter
 from tqdm import tqdm
 import numpy as np
 import numpy.typing as npt
@@ -1860,7 +1861,6 @@ class NLTHAnalysis(NonlinearAnalysis):
             )
             self.log("modal+stiffness damping defined")
 
-        self.log("Starting transient analysis")
         ops.test("EnergyIncr", 1.0e-6, 50, 0)
         ops.integrator('Newmark', 0.50, 0.25)
         ops.algorithm("KrylovNewton")
@@ -1884,6 +1884,11 @@ class NLTHAnalysis(NonlinearAnalysis):
             pbar.update(curr_time)
         else:
             pbar = None
+
+        # store the start time. Used to add log entries on the status
+        # of the analysis every 5 minutes.
+        start_time = perf_counter()
+        the_time = start_time
 
         try:
 
@@ -1919,8 +1924,25 @@ class NLTHAnalysis(NonlinearAnalysis):
                     # analysis was successful
                     prev_time = curr_time
                     curr_time = float(ops.getTime())
+
+                    # progress bar
                     if pbar is not None:
                         pbar.update(curr_time - prev_time)
+                    # log entry for analysis status
+                    if perf_counter() - the_time > 5.00*60.00:  # 5 min
+                        the_time = perf_counter()
+                        # total time running
+                        running_time = the_time - start_time
+                        # nlth seconds ran is `curr_time`
+                        remaining_time = target_timestamp - curr_time
+                        average_speed = curr_time / running_time  # nlth [s] / real [s]
+                        # estimated remaining real time to finish [s]
+                        est_remaining_dur = remaining_time / average_speed
+                        self.log(f'Analysis status: {{curr: {curr_time:.2f}, '
+                                 f'target: {target_timestamp:.2f}, '
+                                 f'num_subdiv: {num_subdiv}, '
+                                 f'~ {est_remaining_dur:.0f} s to finish}}')
+
                     if num_times != 0:
                         num_times -= 1
                     if total_step_count % skip_steps == 0:
