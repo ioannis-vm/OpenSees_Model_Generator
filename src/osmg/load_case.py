@@ -16,6 +16,7 @@ Model Generator for OpenSees ~ load case
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+from typing import Union
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -23,10 +24,10 @@ from . import transformations
 from . import collections
 from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 from .preprocessing.rigid_diaphragm import RDAnalyzer
+from .ops import element
 
 if TYPE_CHECKING:
     from .model import Model
-    from .ops.element import ElasticBeamColumn
     from .ops.node import Node
 
 nparr = npt.NDArray[np.float64]
@@ -74,7 +75,8 @@ class LineElementUDL:
     """
 
     parent_load_case: LoadCase
-    parent_line_element: ElasticBeamColumn
+    parent_line_element: Union[
+        element.ElasticBeamColumn, element.DispBeamColumn]
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
@@ -109,6 +111,8 @@ class LineElementUDL:
         # process is always valid without requiring any special
         # transformation.
         elm = self.parent_line_element
+        assert isinstance(
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.geomtransf.transf_type == "Corotational":
             elm_len = elm.clear_length()
             force = udl * elm_len / 2.00
@@ -174,13 +178,13 @@ class LoadCase:
         for node in self.parent_model.list_of_all_nodes():
             self.node_loads[node.uid] = PointLoadMass()
             self.node_mass[node.uid] = PointLoadMass()
-        for element in self.parent_model.list_of_elements():
+        for elm in self.parent_model.list_of_elements():
             # only proceed for certain elements
-            if element.__class__.__name__ not in {
-                    'ElasticBeamColumn', 'DispBeamColumn'}:
+            if not isinstance(elm, (
+                    element.ElasticBeamColumn, element.DispBeamColumn)):
                 continue
-            self.line_element_udl[element.uid] = LineElementUDL(
-                self, element
+            self.line_element_udl[elm.uid] = LineElementUDL(
+                self, elm
             )
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():

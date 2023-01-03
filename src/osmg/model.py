@@ -259,24 +259,25 @@ class Model:
         """
         return list(self.dict_of_components().values())
 
-    def dict_of_elements(self):
+    def dict_of_elements(self) -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
         """
-        elems: dict[int, element.ElasticBeamColumn] = {}
+        elems: dict[int, element.Element] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
                 elems.update(component.elements)  # type: ignore
         return elems
 
-    def list_of_elements(self):
+    def list_of_elements(self) -> list[element.Element]:
         """
         Returns a list of all element objects in the model.
         """
         return list(self.dict_of_elements().values())
 
-    def dict_of_specific_element(self, element_class):
+    def dict_of_specific_element(
+            self, element_class) -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model of a
         particular element class.
@@ -289,7 +290,7 @@ class Model:
                 res[uid] = elm
         return res
 
-    def list_of_specific_element(self, element_class):
+    def list_of_specific_element(self, element_class) -> list[element.Element]:
         """
         Returns a list of all element objects in the model of a
         particular element class.
@@ -308,7 +309,8 @@ class Model:
             p_max = np.maximum(p_max, point)
         p_min -= np.full(3, padding)
         p_max += np.full(3, padding)
-        return p_min, p_max
+        # type hints gone mad  >.<   ...
+        return p_min, p_max  # type:ignore
 
     def reference_length(self):
         """

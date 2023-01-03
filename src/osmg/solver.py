@@ -79,7 +79,7 @@ def test_uniaxial_material(
     deformations = [0.00]
 
     # define model
-    ops.wipe()
+    ops.wipe()  # type: ignore
     ops.model("basic", "-ndm", 1, "-ndf", 1)
     ops.node(0, 0.00)
     ops.node(1, 0.00)
@@ -396,7 +396,8 @@ class Analysis:
         # keep track of defined elements
         defined_elements = {}
 
-        elms = self.mdl.dict_of_specific_element(element.ElasticBeamColumn).values()
+        elms = list(self.mdl.dict_of_specific_element(
+            element.ElasticBeamColumn).values())
 
         # define line elements
         for elm in elms:
@@ -532,8 +533,12 @@ class Analysis:
         elms_with_udl: list[Union[
             element.ElasticBeamColumn, element.DispBeamColumn
         ]] = []
-        elms_with_udl.extend(self.mdl.list_of_specific_element(element.ElasticBeamColumn))
-        elms_with_udl.extend(self.mdl.list_of_specific_element(element.DispBeamColumn))
+        elms_with_udl.extend(
+            [elm for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
+             if isinstance(elm, element.ElasticBeamColumn)])
+        elms_with_udl.extend(
+            [elm for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
+             if isinstance(elm, element.DispBeamColumn)])
         for elm in elms_with_udl:
             if elm.visibility.skip_opensees_definition:
                 continue
@@ -996,11 +1001,14 @@ class ModalAnalysis(Analysis):
                     element.DispBeamColumn
                 ]] = []
                 line_elements.extend(
-                    self.mdl.list_of_specific_element(element.TrussBar))
+                    [elm for elm in self.mdl.list_of_specific_element(element.TrussBar)
+                     if isinstance(elm, element.TrussBar)])
                 line_elements.extend(
-                    self.mdl.list_of_specific_element(element.ElasticBeamColumn))
+                    [elm for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
+                     if isinstance(elm, element.ElasticBeamColumn)])
                 line_elements.extend(
-                    self.mdl.list_of_specific_element(element.DispBeamColumn))
+                    [elm for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
+                     if isinstance(elm, element.DispBeamColumn)])
                 self._read_frame_element_forces_modal(
                     case_name, line_elements
                 )
@@ -1828,15 +1836,15 @@ class NLTHAnalysis(NonlinearAnalysis):
             0.00, file_time_incr * num_gm_points, num_gm_points
         )
         if filename_x:
-            self.a_g[0] = np.column_stack((t_vec, gm_vals_x))
+            self.a_g[0] = np.column_stack((t_vec, gm_vals_x))  # type: ignore
         else:
             self.a_g[0] = np.column_stack((t_vec, np.zeros(len(t_vec))))
         if filename_y:
-            self.a_g[1] = np.column_stack((t_vec, gm_vals_y))
+            self.a_g[1] = np.column_stack((t_vec, gm_vals_y))  # type: ignore
         else:
             self.a_g[1] = np.column_stack((t_vec, np.zeros(len(t_vec))))
         if filename_z:
-            self.a_g[2] = np.column_stack((t_vec, gm_vals_z))
+            self.a_g[2] = np.column_stack((t_vec, gm_vals_z))  # type: ignore
         else:
             self.a_g[2] = np.column_stack((t_vec, np.zeros(len(t_vec))))
 

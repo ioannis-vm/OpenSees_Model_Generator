@@ -43,6 +43,10 @@ class Element:
     parent_component: ComponentAssembly = field(repr=False)
     uid: int
     nodes: list[Node]
+    visibility: ElementVisibility = field(init=False)
+
+    def __post_init__(self):
+        self.visibility = ElementVisibility()
 
 
 @dataclass(repr=False)
@@ -144,7 +148,6 @@ class TrussBar(Element):
     mat: UniaxialMaterial
     outside_shape: Optional[Mesh] = field(default=None)
     weight_per_length: float = field(default=0.00)
-    visibility: ElementVisibility = field(default_factory=ElementVisibility)
     rho: float = field(default=0.00)
     cflag: int = field(default=0)
     rflag: int = field(default=0)
@@ -238,7 +241,6 @@ class ElasticBeamColumn(Element):
 
     section: ElasticSection
     geomtransf: GeomTransf
-    visibility: ElementVisibility = field(default_factory=ElementVisibility)
 
     def ops_args(self):
         """
@@ -323,7 +325,6 @@ class DispBeamColumn(Element):
     section: FiberSection
     geomtransf: GeomTransf
     integration: BeamIntegration
-    visibility: ElementVisibility = field(default_factory=ElementVisibility)
 
     def ops_args(self):
         """

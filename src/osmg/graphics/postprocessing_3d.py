@@ -317,14 +317,16 @@ def add_data__extruded_line_elms_deformed_mesh(
                     index + 1, index + 2))
                 k_list.extend((
                     index + 2, index + 3))
-                intensity.append(np.sqrt(d_global[i, :] @ d_global[i, :]))
                 intensity.append(
-                    np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :])
+                    float(np.sqrt(d_global[i, :] @ d_global[i, :])))
+                intensity.append(
+                    float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
                 intensity.append(
-                    np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :])
+                    float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
-                intensity.append(np.sqrt(d_global[i, :] @ d_global[i, :]))
+                intensity.append(
+                    float(np.sqrt(d_global[i, :] @ d_global[i, :])))
                 index += 4
     data_dict.append(
         {
@@ -747,6 +749,16 @@ def show_deformed_shape(
             scaling,
         )
 
+    # create the plot
+
+    def frame_args(duration):
+        return {
+            "frame": {"duration": duration},
+            "mode": "immediate",
+            "fromcurrent": True,
+            "transition": {"duration": duration, "easing": "linear"},
+        }
+
     if animation:
         step_of_frame = []
         for j in range(first_step, step, step_skip + 1):
@@ -801,17 +813,6 @@ def show_deformed_shape(
                     scaling,
                 )
 
-    # create the plot
-
-    def frame_args(duration):
-        return {
-            "frame": {"duration": duration},
-            "mode": "immediate",
-            "fromcurrent": True,
-            "transition": {"duration": duration, "easing": "linear"},
-        }
-
-    if animation:
         fig_datastructure = dict(
             data=data_dict,
             layout=layout,
@@ -820,6 +821,7 @@ def show_deformed_shape(
                 for j in range(len(step_of_frame))
             ],
         )
+
         fig = go.Figure(fig_datastructure)
         sliders = [
             {
@@ -862,7 +864,7 @@ def show_deformed_shape(
             ],
             sliders=sliders,
         )
-    else:
+    else:  # (not animation)
         fig_datastructure = dict(data=data_dict, layout=layout)
         fig = go.Figure(fig_datastructure)
 

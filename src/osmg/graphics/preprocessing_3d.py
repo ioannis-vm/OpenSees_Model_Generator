@@ -186,14 +186,12 @@ def add_data__parent_nodes(data_dict, load_case: LoadCase):
             + "<extra>Parent Node: %{customdata[0]:d}</extra>",
             "marker": {
                 "symbol": [
-                    graphics_common_3d.node_marker["parent"][0]
-                    for node in list_of_nodes
-                ],
+                    graphics_common_3d.node_marker[
+                        "parent"][0]]*len(list_of_nodes),
                 "color": graphics_common.NODE_PRIMARY_COLOR,
                 "size": [
-                    graphics_common_3d.node_marker["parent"][1]
-                    for node in list_of_nodes
-                ],
+                    graphics_common_3d.node_marker[
+                        "parent"][1]]*len(list_of_nodes),
                 "line": {
                     "color": graphics_common.NODE_PRIMARY_COLOR,
                     "width": 4,
@@ -429,13 +427,24 @@ def add_data__frames(
     line_elems: list[
         Union[element.ElasticBeamColumn,
               element.DispBeamColumn]] = []
-    line_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    line_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+
+    # >>>
+    # it feels ridiculous to do this, but it's the only way I am
+    # getting rid of type checking warnings.
+    elms_elastic = [
+        elm for elm in mdl.list_of_specific_element(element.ElasticBeamColumn)
+        if isinstance(elm, element.ElasticBeamColumn)]
+    line_elems.extend(elms_elastic)
+    elms_disp = [
+        elm for elm in mdl.list_of_specific_element(element.DispBeamColumn)
+        if isinstance(elm, element.DispBeamColumn)
+    ]
+    line_elems.extend(elms_disp)
+    # <<<
 
     if not line_elems:
         return
+
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
@@ -529,7 +538,8 @@ def add_data__bars(
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
-    line_elems = mdl.list_of_specific_element(element.TrussBar)
+    line_elems = [elm for elm in mdl.list_of_specific_element(element.TrussBar)
+                  if isinstance(elm, element.TrussBar)]
     if not line_elems:
         return
     x_list: list[Optional[float]] = []
