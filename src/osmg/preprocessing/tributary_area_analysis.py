@@ -26,6 +26,7 @@ from ..ops.node import Node
 from .. import common
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
+from ..ops.element import ZeroLength
 
 if TYPE_CHECKING:
     from ..load_case import LoadCase
@@ -190,13 +191,13 @@ class TributaryAreaAnaysis:
 
         for comp in horizontal_elements:
 
-            line_elements = list(
-                comp.elastic_beamcolumn_elements.values()
-            ) + list(
-                comp.disp_beamcolumn_elements.values()
-            )  # type: ignore
+            line_elements = [
+                elm for elm in comp.elements.values()
+                if isinstance(elm, (ElasticBeamColumn, DispBeamColumn))]
 
-            zerolength_elements = list(comp.zerolength_elements.values())
+            zerolength_elements = [
+                elm for elm in comp.elements.values()
+                if isinstance(elm, ZeroLength)]
             for zelm in zerolength_elements:
                 zn_map[zelm.nodes[1].uid] = zelm.nodes[0].uid
 

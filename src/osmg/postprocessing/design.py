@@ -24,10 +24,6 @@ from ..solver import ModalResponseSpectrumAnalysis
 nparr = npt.NDArray[np.float64]
 
 
-CaseName = str
-ComponentName = str
-
-
 @dataclass(repr=False)
 class LoadCombination:
     """
@@ -37,7 +33,7 @@ class LoadCombination:
     """
 
     mdl: Model
-    combo: dict[ComponentName, list[tuple[float, Analysis, CaseName]]] = field(
+    combo: dict[str, list[tuple[float, Analysis, str]]] = field(
         default_factory=dict
     )
 
@@ -91,8 +87,8 @@ class LoadCombination:
                         ][0]
                     )
                 disp_tot += disp
-            disp_min[disp_min > disp_tot] = disp[disp_min > disp_tot]
-            disp_max[disp_max < disp_tot] = disp[disp_max < disp_tot]
+            disp_min[disp_min > disp_tot] = disp_tot[disp_min > disp_tot]
+            disp_max[disp_max < disp_tot] = disp_tot[disp_max < disp_tot]
 
         return disp_min, disp_max
 
@@ -125,7 +121,7 @@ class LoadCombination:
                     )
                     disp = disp_i - disp_j
                 disp_tot += disp
-            disp_min[disp_min > disp_tot] = disp[disp_min > disp_tot]
-            disp_max[disp_max < disp_tot] = disp[disp_max < disp_tot]
+            disp_min[disp_min > disp_tot] = disp_tot[disp_min > disp_tot]
+            disp_max[disp_max < disp_tot] = disp_tot[disp_max < disp_tot]
 
-        return disp_tot, disp_tot
+        return disp_min, disp_max

@@ -27,10 +27,7 @@ from .level import Level
 
 if TYPE_CHECKING:
     from .ops.node import Node
-    from .ops.element import ElasticBeamColumn
-    from .ops.element import DispBeamColumn
-    from .ops.element import ZeroLength
-    from .ops.element import TwoNodeLink
+    from .ops import element
     from .component_assembly import ComponentAssembly
     from .ops.section import ElasticSection
     from .ops.section import FiberSection
@@ -262,92 +259,42 @@ class Model:
         """
         return list(self.dict_of_components().values())
 
-    def dict_of_elastic_beamcolumn_elements(self):
+    def dict_of_elements(self):
         """
-        Returns a dictionary of all ElasticBeamColumn objects in the model.
+        Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
         """
-        elems: dict[int, ElasticBeamColumn] = {}
+        elems: dict[int, element.ElasticBeamColumn] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
-                elems.update(component.elastic_beamcolumn_elements)
+                elems.update(component.elements)
         return elems
 
-    def list_of_elastic_beamcolumn_elements(self):
+    def list_of_elements(self):
         """
-        Returns a list of all ElasticBeamColumn objects in the model.
+        Returns a list of all element objects in the model.
         """
-        return list(self.dict_of_elastic_beamcolumn_elements().values())
+        return list(self.dict_of_elements().values())
 
-    def dict_of_disp_beamcolumn_elements(self):
+    def dict_of_specific_element(self, element_class):
         """
-        Returns a dictionary of all DispBeamColumn objects in the model.
+        Returns a dictionary of all element objects in the model of a
+        particular element class.
         The keys are the uids of the objects.
         """
-        elems: dict[int, DispBeamColumn] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                elems.update(component.disp_beamcolumn_elements)
-        return elems
+        all_elements = self.dict_of_elements()
+        res: dict[int, element.Element] = {}
+        for uid, elm in all_elements.items():
+            if isinstance(elm, element_class):
+                res[uid] = elm
+        return res
 
-    def list_of_disp_beamcolumn_elements(self):
+    def list_of_specific_element(self, element_class):
         """
-        Returns a list of all DispBeamColumn objects in the model.
+        Returns a list of all element objects in the model of a
+        particular element class.
         """
-        return list(self.dict_of_disp_beamcolumn_elements().values())
-
-    def dict_of_beamcolumn_elements(self):
-        """
-        Returns a dictionary of all beamcolumn elements in the model.
-        The keys are the uids of the objects.
-        """
-        elems = {}
-        elems.update(self.dict_of_elastic_beamcolumn_elements())
-        elems.update(self.dict_of_disp_beamcolumn_elements())
-        return elems
-
-    def list_of_beamcolumn_elements(self):
-        """
-        Returns a list of all beamcolumn elements in the model.
-        """
-        elems = []
-        elems.extend(self.list_of_elastic_beamcolumn_elements())
-        elems.extend(self.list_of_disp_beamcolumn_elements())
-        return elems
-
-    def dict_of_zerolength_elements(self):
-        """
-        Returns a dictionary of all zerolength elements in the model.
-        The keys are the uids of the objects.
-        """
-        elems: dict[int, ZeroLength] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                elems.update(component.zerolength_elements)
-        return elems
-
-    def list_of_zerolength_elements(self):
-        """
-        Returns a list of all zerolength elements in the model.
-        """
-        return list(self.dict_of_zerolength_elements().values())
-
-    def dict_of_twonodelink_elements(self):
-        """
-        Returns a dictionary of all twonodelink elements in the model.
-        The keys are the uids of the objects.
-        """
-        elems: dict[int, TwoNodeLink] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                elems.update(component.twonodelink_elements)
-        return elems
-
-    def list_of_twonodelink_elements(self):
-        """
-        Returns a list of all twonodelink elements in the model.
-        """
-        return list(self.dict_of_twonodelink_elements().values())
+        return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
         """

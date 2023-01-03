@@ -22,10 +22,13 @@ from typing import Callable
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
-from ..ops.node import Node
-from ..component_assembly import ComponentAssembly
 from .query import ElmQuery
 from .node_gen import NodeGenerator
+from ..ops.uniaxial_material import UniaxialMaterial
+from ..mesh import Mesh
+from ..ops.node import Node
+from ..component_assembly import ComponentAssembly
+from ..ops.element import TrussBar
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..ops.element import ZeroLength
@@ -40,6 +43,7 @@ from ..transformations import transformation_matrix
 from ..defaults import load_util_rigid_elastic
 from ..gen.zerolength_gen import steel_w_col_pz
 from ..gen.zerolength_gen import fix_all
+from .. import common
 
 
 if TYPE_CHECKING:
@@ -128,7 +132,7 @@ def beam_placement_lookup(
                     "bottom_left",
                     "bottom_right",
                 ]:
-                    elm = component.elastic_beamcolumn_elements.named_contents[
+                    elm = component.elements.named_contents[
                         "elm_interior"
                     ]
                     d_z, d_y = elm.section.snap_points[snap]
@@ -199,6 +203,174 @@ def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
 
 
 @dataclass(repr=False)
+class TrussBarGenerator:
+    """
+    This object introduces bar elements to a model.
+    Bar elements are linear elements that can only carry axial load.
+    """
+
+    model: Model = field(repr=False)
+
+    def add(
+            self,
+            xi_coord: float,
+            yi_coord: float,
+            lvl_key_i: int,
+            offset_i: nparr,
+            snap_i: str,
+            xj_coord: float,
+            yj_coord: float,
+            lvl_key_j: int,
+            offset_j: nparr,
+            snap_j: str,
+            transf_type: str,
+            area: float,
+            mat: UniaxialMaterial,
+            outside_shape: Mesh,
+            weight_per_length=0.00,
+            split_existing_i=None,
+            split_existing_j=None,
+            component_purpose='Truss Element'
+    ) -> ComponentAssembly:
+        """
+        Adds a truss bar element.
+        If offsets are required, they are implemented through the
+        addition of RigidLink elements.
+        """
+        query = ElmQuery(self.model)
+        ndg = NodeGenerator(self.model)
+        lvls = self.model.levels
+
+        lvl_i = lvls[lvl_key_i]
+
+        sec_offset_global = np.zeros(3)
+
+        node_i, eo_i = beam_placement_lookup(
+            xi_coord,
+            yi_coord,
+            query,
+            ndg,
+            lvls,
+            lvl_key_i,
+            offset_i,
+            sec_offset_global,
+            split_existing_i,
+            snap_i,
+        )
+        node_j, eo_j = beam_placement_lookup(
+            xj_coord,
+            yj_coord,
+            query,
+            ndg,
+            lvls,
+            lvl_key_j,
+            offset_j,
+            sec_offset_global,
+            split_existing_j,
+            snap_j,
+        )
+
+        # for braces, even if we specify a snap value that results in
+        # the brace being connected to a different node (this is
+        # typically done at panel zones), we still want the ends of
+        # the brace to be located at the coordinates we specify, which
+        # is different to what is done with the connectivity of beams.
+        # Therefore, if the coordinates of the returned nodes differ
+        # with those that we specified, we add the difference in the
+        # offset, to move the ends of the brace back where we want
+        # them to be. The effect of this is that the rigid offsets
+        # (twonodelinks) will connect to that other node.
+        i_diff = (np.array((xi_coord, yi_coord))
+                  - np.array(node_i.coords[0:2]))
+        if np.linalg.norm(i_diff) > common.EPSILON:
+            eo_i[0:2] += i_diff
+        j_diff = (np.array((xj_coord, yj_coord))
+                  - np.array(node_j.coords[0:2]))
+        if np.linalg.norm(j_diff) > common.EPSILON:
+            eo_j[0:2] += j_diff
+
+        # instantiate a component assembly
+        component = ComponentAssembly(
+            uid=self.model.uid_generator.new("component"),
+            parent_collection=lvl_i.components,
+            component_purpose=component_purpose,
+        )
+        # add it to the level
+        lvl_i.components.add(component)
+        # fill component assembly
+        component.external_nodes.add(node_i)
+        component.external_nodes.add(node_j)
+
+        # if there is an offset at the i-end, create an internal node
+        # and add a rigidlink element to the component assembly
+        if np.linalg.norm(eo_i) > common.EPSILON:
+            int_node_i = Node(
+                self.model.uid_generator.new('node'),
+                [*(np.array(node_i.coords) + eo_i)]
+            )
+            component.internal_nodes.add(int_node_i)
+            n_i = int_node_i
+            x_axis, y_axis, _ = local_axes_from_points_and_angle(
+                np.array(node_i.coords),
+                np.array(int_node_i.coords),
+                0.00)
+            dirs, mats = fix_all(self.model)
+            elm = TwoNodeLink(
+                component,
+                self.model.uid_generator.new("element"),
+                [node_i, int_node_i],
+                mats,
+                dirs,
+                x_axis,
+                y_axis,
+            )
+            component.elements.add(elm)
+        else:
+            n_i = node_i
+        if np.linalg.norm(eo_j) > common.EPSILON:
+            int_node_j = Node(
+                self.model.uid_generator.new('node'),
+                [*(np.array(node_j.coords) + eo_j)]
+            )
+            component.internal_nodes.add(int_node_j)
+            n_j = int_node_j
+            x_axis, y_axis, _ = local_axes_from_points_and_angle(
+                np.array(node_j.coords),
+                np.array(int_node_j.coords),
+                0.00)
+            dirs, mats = fix_all(self.model)
+            elm = TwoNodeLink(
+                component,
+                self.model.uid_generator.new("element"),
+                [node_j, int_node_j],
+                mats,
+                dirs,
+                x_axis,
+                y_axis,
+            )
+            component.elements.add(elm)
+        else:
+            n_j = node_j
+
+        # create the element
+        elm = TrussBar(
+            parent_component=component,
+            uid=self.model.uid_generator.new("element"),
+            nodes=[n_i, n_j],
+            transf_type=transf_type,
+            area=area,
+            mat=mat,
+            outside_shape=outside_shape,
+            weight_per_length=weight_per_length
+        )
+
+        # add it to the component assembly
+        component.elements.add(elm)
+
+        return component
+
+
+@dataclass(repr=False)
 class BeamColumnGenerator:
     """
     This object introduces beamcolumn elements to a model.
@@ -207,19 +379,20 @@ class BeamColumnGenerator:
     model: Model = field(repr=False)
 
     def define_beamcolumn(
-        self,
-        assembly: ComponentAssembly,
-        node_i: Node,
-        node_j: Node,
-        offset_i: nparr,
-        offset_j: nparr,
-        transf_type: str,
-        section: ElasticSection | FiberSection,
-        element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
-        angle=0.00,
+            self,
+            assembly: ComponentAssembly,
+            node_i: Node,
+            node_j: Node,
+            offset_i: nparr,
+            offset_j: nparr,
+            transf_type: str,
+            section: ElasticSection | FiberSection,
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
+            angle=0.00,
     ) -> ElasticBeamColumn | DispBeamColumn:
         """
-        Adds a beamcolumn element to the model, connecting the specified nodes
+        Adds a beamcolumn element to the model, connecting the
+        specified nodes.
         """
 
         p_i = np.array(node_i.coords) + offset_i
@@ -398,14 +571,12 @@ class BeamColumnGenerator:
                 element_type=element_type,
                 angle=angle,
             )
-            if element_type.__name__ == "ElasticBeamColumn":
-                component.elastic_beamcolumn_elements.add(element)
-            elif element_type.__name__ == "DispBeamColumn":
-                component.disp_beamcolumn_elements.add(element)
-            else:
+            if element_type.__name__ not in {
+                    'ElasticBeamColumn', 'DispBeamColumn'}:
                 raise TypeError(
                     "Unsupported element type:" f" {element_type.__name__}"
                 )
+            component.elements.add(element)
 
     def generate_plain_component_assembly(
         self,
@@ -554,7 +725,7 @@ class BeamColumnGenerator:
                 elm = self.define_two_node_link(
                     component, node_i, nh_i_out, x_axis, y_axis, fix_all, {}
                 )
-                component.twonodelink_elements.add(elm)
+                component.elements.add(elm)
             else:
                 raise ValueError(f"Invalid element_type_i: {element_type_i}")
             zerolen_elm = self.define_zerolength(
@@ -566,7 +737,7 @@ class BeamColumnGenerator:
                 zerolength_gen_i,
                 zerolength_gen_args_i,
             )
-            component.zerolength_elements.add(zerolen_elm)
+            component.elements.add(zerolen_elm)
             conn_node_i = nh_i_in
             conn_eo_i = np.zeros(3)
         else:
@@ -620,7 +791,7 @@ class BeamColumnGenerator:
                 elm = self.define_two_node_link(
                     component, nh_j_out, node_j, x_axis, y_axis, fix_all, {}
                 )
-                component.twonodelink_elements.add(elm)
+                component.elements.add(elm)
             else:
                 raise ValueError(f"Invalid element_type_j: {element_type_j}")
             zerolen_elm = self.define_zerolength(
@@ -632,7 +803,7 @@ class BeamColumnGenerator:
                 zerolength_gen_j,
                 zerolength_gen_args_j,
             )
-            component.zerolength_elements.add(zerolen_elm)
+            component.elements.add(zerolen_elm)
             conn_node_j = nh_j_in
             conn_eo_j = np.zeros(3)
         else:
@@ -932,16 +1103,17 @@ class BeamColumnGenerator:
         return defined_component_assemblies
 
     def add_pz_active(
-        self,
-        x_coord: float,
-        y_coord: float,
-        section: ElasticSection,
-        physical_material,
-        angle,
-        column_depth,
-        beam_depth,
-        pz_doubler_plate_thickness: float,
-        pz_hardening: float,
+            self,
+            x_coord: float,
+            y_coord: float,
+            section: ElasticSection,
+            physical_material,
+            angle,
+            column_depth,
+            beam_depth,
+            pz_doubler_plate_thickness: float,
+            pz_hardening: float,
+            only_elastic=False
     ):
         """
         Adds a component assembly representing a steel W-section
@@ -1069,6 +1241,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_top_h_f.visibility.hidden_when_extruded = True
+            elm_top_h_f.visibility.hidden_basic_forces = True
 
             elm_top_h_b = ElasticBeamColumn(
                 component,
@@ -1086,6 +1259,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_top_h_b.visibility.hidden_when_extruded = True
+            elm_top_h_b.visibility.hidden_basic_forces = True
 
             elm_bottom_h_f = ElasticBeamColumn(
                 component,
@@ -1103,6 +1277,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_bottom_h_f.visibility.hidden_when_extruded = True
+            elm_bottom_h_f.visibility.hidden_basic_forces = True
 
             elm_bottom_h_b = ElasticBeamColumn(
                 component,
@@ -1120,6 +1295,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_bottom_h_b.visibility.hidden_when_extruded = True
+            elm_bottom_h_b.visibility.hidden_basic_forces = True
 
             elm_top_v_f = ElasticBeamColumn(
                 component,
@@ -1137,6 +1313,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_top_v_f.visibility.hidden_when_extruded = True
+            elm_top_v_f.visibility.hidden_basic_forces = True
 
             elm_top_v_b = ElasticBeamColumn(
                 component,
@@ -1154,6 +1331,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_top_v_b.visibility.hidden_when_extruded = True
+            elm_top_v_b.visibility.hidden_basic_forces = True
 
             elm_bottom_v_f = ElasticBeamColumn(
                 component,
@@ -1171,6 +1349,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_bottom_v_f.visibility.hidden_when_extruded = True
+            elm_bottom_v_f.visibility.hidden_basic_forces = True
 
             elm_bottom_v_b = ElasticBeamColumn(
                 component,
@@ -1188,6 +1367,7 @@ class BeamColumnGenerator:
                 ),
             )
             elm_bottom_v_b.visibility.hidden_when_extruded = True
+            elm_bottom_v_b.visibility.hidden_basic_forces = True
 
             elm_interior = ElasticBeamColumn(
                 component,
@@ -1221,6 +1401,7 @@ class BeamColumnGenerator:
                     "pz_length": beam_depth,
                     "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
                     "pz_hardening": pz_hardening,
+                    "only_elastic": only_elastic,
                 },
             )
             zerolen_top_b = self.define_zerolength(
@@ -1236,6 +1417,7 @@ class BeamColumnGenerator:
                     "pz_length": beam_depth,
                     "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
                     "pz_hardening": pz_hardening,
+                    "only_elastic": only_elastic,
                 },
             )
             zerolen_bottom_f = self.define_zerolength(
@@ -1251,6 +1433,7 @@ class BeamColumnGenerator:
                     "pz_length": beam_depth,
                     "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
                     "pz_hardening": pz_hardening,
+                    "only_elastic": only_elastic,
                 },
             )
             zerolen_bottom_b = self.define_zerolength(
@@ -1266,6 +1449,7 @@ class BeamColumnGenerator:
                     "pz_length": beam_depth,
                     "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
                     "pz_hardening": pz_hardening,
+                    "only_elastic": only_elastic,
                 },
             )
 
@@ -1288,40 +1472,40 @@ class BeamColumnGenerator:
             component.internal_nodes.add(bottom_v_f)
             component.internal_nodes.add(bottom_v_b)
 
-            component.elastic_beamcolumn_elements.add(elm_top_h_f)
+            component.elements.add(elm_top_h_f)
             (
-                component.elastic_beamcolumn_elements.named_contents[
+                component.elements.named_contents[
                     "elm_top_h_f"
                 ]
             ) = elm_top_h_f
-            component.elastic_beamcolumn_elements.add(elm_top_h_b)
+            component.elements.add(elm_top_h_b)
             (
-                component.elastic_beamcolumn_elements.named_contents[
+                component.elements.named_contents[
                     "elm_top_h_b"
                 ]
             ) = elm_top_h_b
-            component.elastic_beamcolumn_elements.add(elm_bottom_h_f)
-            component.elastic_beamcolumn_elements.add(elm_bottom_h_b)
-            component.elastic_beamcolumn_elements.add(elm_top_v_f)
-            component.elastic_beamcolumn_elements.add(elm_top_v_b)
-            component.elastic_beamcolumn_elements.add(elm_bottom_v_f)
-            component.elastic_beamcolumn_elements.add(elm_bottom_v_b)
-            component.elastic_beamcolumn_elements.add(elm_interior)
+            component.elements.add(elm_bottom_h_f)
+            component.elements.add(elm_bottom_h_b)
+            component.elements.add(elm_top_v_f)
+            component.elements.add(elm_top_v_b)
+            component.elements.add(elm_bottom_v_f)
+            component.elements.add(elm_bottom_v_b)
+            component.elements.add(elm_interior)
             (
-                component.elastic_beamcolumn_elements.named_contents[
+                component.elements.named_contents[
                     "elm_interior"
                 ]
             ) = elm_interior
 
-            component.zerolength_elements.add(zerolen_top_f)
+            component.elements.add(zerolen_top_f)
             (
-                component.zerolength_elements.named_contents[
+                component.elements.named_contents[
                     "nonlinear_spring"
                 ]
             ) = zerolen_top_f
-            component.zerolength_elements.add(zerolen_top_b)
-            component.zerolength_elements.add(zerolen_bottom_f)
-            component.zerolength_elements.add(zerolen_bottom_b)
+            component.elements.add(zerolen_top_b)
+            component.elements.add(zerolen_bottom_f)
+            component.elements.add(zerolen_bottom_b)
             defined_components[key] = component
 
         return defined_components

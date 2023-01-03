@@ -16,6 +16,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from ..solver import Analysis
+from ..ops.element import TrussBar
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..solver import ModalResponseSpectrumAnalysis
@@ -29,7 +30,7 @@ def basic_forces(
     anl: Analysis,
     case_name: str,
     step: int,
-    elm: ElasticBeamColumn | DispBeamColumn,
+    elm: TrussBar | ElasticBeamColumn | DispBeamColumn,
     num_points: int,
     as_tuple: bool = False,
 ) -> object:
@@ -41,13 +42,22 @@ def basic_forces(
         w_x, w_y, w_z = (0.00, 0.00, 0.00)
     else:
         forces = anl.results[case_name].element_forces[elm.uid][step]
-        w_x, w_y, w_z = anl.load_cases[case_name].line_element_udl[elm.uid].val
+        if isinstance(elm, (ElasticBeamColumn, DispBeamColumn)):
+            w_x, w_y, w_z = anl.load_cases[
+                case_name].line_element_udl[elm.uid].val
+        else:
+            w_x, w_y, w_z = (0.00, 0.00, 0.00)
+
+    if isinstance(elm, (ElasticBeamColumn, DispBeamColumn)):
+        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+    else:
+        p_i = np.array(elm.nodes[0].coords)
+        p_j = np.array(elm.nodes[1].coords)
 
     n_i, qy_i, qz_i = forces[0:3]
     t_i, my_i, mz_i = forces[3:6]
 
-    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
     t_vec = np.linspace(0.00, len_clr, num=num_points)

@@ -25,6 +25,7 @@ class ElementVisibility:
     hidden_when_extruded: bool = field(default=False)
     hidden_at_line_plots: bool = field(default=False)
     skip_opensees_definition: bool = field(default=False)
+    hidden_basic_forces: bool = field(default=False)
 
 
 @dataclass

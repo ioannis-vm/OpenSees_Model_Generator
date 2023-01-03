@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 from typing import Optional
 import numpy as np
 from ..ops.section import ElasticSection
+from ..ops.uniaxial_material import Elastic
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Pinching4
 from ..ops.uniaxial_material import Hysteretic
@@ -301,6 +302,7 @@ def steel_w_col_pz(
     pz_length: float,
     pz_doubler_plate_thickness: float,
     pz_hardening: float,
+    only_elastic: False,
     **kwargs,
 ):
     """
@@ -337,21 +339,28 @@ def steel_w_col_pz(
     m2y /= 4.00
     m3y /= 4.00
 
-    mat = Hysteretic(
-        model.uid_generator.new("uniaxial material"),
-        "auto_steel_W_PZ",
-        (m1y, gamma_1),
-        (m2y, gamma_2),
-        (m3y, gamma_3),
-        (-m1y, -gamma_1),
-        (-m2y, -gamma_2),
-        (-m3y, -gamma_3),
-        1.00,
-        1.00,
-        0.00,
-        0.00,
-        0.00,
-    )
+    if only_elastic:
+        mat = Elastic(
+            model.uid_generator.new("uniaxial material"),
+            "auto_steel_W_PZ",
+            m1y/gamma_1
+        )
+    else:
+        mat = Hysteretic(
+            model.uid_generator.new("uniaxial material"),
+            "auto_steel_W_PZ",
+            (m1y, gamma_1),
+            (m2y, gamma_2),
+            (m3y, gamma_3),
+            (-m1y, -gamma_1),
+            (-m2y, -gamma_2),
+            (-m3y, -gamma_3),
+            1.00,
+            1.00,
+            0.00,
+            0.00,
+            0.00,
+        )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")

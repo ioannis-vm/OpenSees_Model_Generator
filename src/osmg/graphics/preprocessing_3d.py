@@ -14,14 +14,17 @@ https://plotly.com/python/reference/
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
+from typing import Union
 import sys
 import plotly.graph_objects as go  # type: ignore
 import numpy as np
 import numpy.typing as npt
 from . import graphics_common, graphics_common_3d
+from ..ops import element
+from ..transformations import local_axes_from_points_and_angle
 
 if TYPE_CHECKING:
-    from model import Model
+    from ..model import Model
     from ..load_case import LoadCase
 
 nparr = npt.NDArray[np.float64]
@@ -413,7 +416,7 @@ def add_data__release_nodes(data_dict, list_of_nodes):
 #     })
 
 
-def add_data__frames(data_dict, mdl, load_case):
+def add_data__frames(data_dict, mdl: Model, load_case: LoadCase):
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
@@ -421,20 +424,28 @@ def add_data__frames(data_dict, mdl, load_case):
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
-    beamcolumn_elems = mdl.list_of_beamcolumn_elements()
-    if not beamcolumn_elems:
+    line_elems: list[
+        Union[element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    line_elems.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    line_elems.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
+
+    if not line_elems:
         return
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
     customdata_list = []
     section_names = []
-    for elm in beamcolumn_elems:
+    for elm in line_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
-        section_names.extend([elm.section.name] * 3)
+        section_name = elm.section.name
+        section_names.extend([section_name] * 3)
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
@@ -507,6 +518,98 @@ def add_data__frames(data_dict, mdl, load_case):
         )
 
 
+def add_data__bars(data_dict, mdl: Model, load_case: LoadCase):
+    """
+    Adds a trace containing frame element centroidal axis lines
+    Arguments:
+      data_dict (dict): dictionary containing figure data
+      mdl (Model): the model to be visualized
+      load_case (LoadCase): the load_case to be visualized
+    """
+    line_elems = mdl.list_of_specific_element(element.TrussBar)
+    if not line_elems:
+        return
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+    customdata_list = []
+    section_areas = []
+    for elm in line_elems:
+        if elm.visibility.hidden_at_line_plots:
+            continue
+        p_i = np.array(elm.nodes[0].coords)
+        p_j = np.array(elm.nodes[1].coords)
+        section_area = elm.area
+
+        section_areas.extend([section_area] * 3)
+        x_list.extend((p_i[0], p_j[0], None))
+        y_list.extend((p_i[1], p_j[1], None))
+        z_list.extend((p_i[2], p_j[2], None))
+        if load_case:
+            customdata_list.append(
+                (
+                    elm.uid,
+                    elm.nodes[0].uid,
+                    elm.parent_component.uid,
+                )
+            )
+            customdata_list.append(
+                (
+                    elm.uid,
+                    elm.nodes[1].uid,
+                    elm.parent_component.uid,
+                )
+            )
+            customdata_list.append((None,) * 6)
+        else:
+            customdata_list.append(
+                (elm.uid, elm.nodes[0].uid, elm.parent_component.uid)
+            )
+            customdata_list.append(
+                (elm.uid, elm.nodes[1].uid, elm.parent_component.uid)
+            )
+            customdata_list.append((None,) * 3)
+
+    if load_case:
+        customdata: nparr = np.array(customdata_list, dtype="object")
+        data_dict.append(
+            {
+                "name": "Truss elements",
+                "type": "scatter3d",
+                "mode": "lines",
+                "x": x_list,
+                "y": y_list,
+                "z": z_list,
+                "text": section_areas,
+                "customdata": customdata,
+                "hovertemplate": "Section area: %{text}<br>"
+                + "<extra>Element: %{customdata[0]:d}<br>"
+                + "Node @ this end: %{customdata[1]:d}<br>"
+                "Parent: %{customdata[2]}</extra>",
+                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+            }
+        )
+    else:
+        customdata = np.array(customdata_list, dtype="object")
+        data_dict.append(
+            {
+                "name": "Truss elements",
+                "type": "scatter3d",
+                "mode": "lines",
+                "x": x_list,
+                "y": y_list,
+                "z": z_list,
+                "text": section_areas,
+                "customdata": customdata,
+                "hovertemplate": "Section area: %{text}<br>"
+                + "<extra>Element: %{customdata[0]:d}<br>"
+                + "Node @ this end: %{customdata[1]:d}<br>"
+                "Parent: %{customdata[2]}</extra>",
+                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+            }
+        )
+
+
 def add_data__twonodelinks(data_dict, mdl):
     """
     Adds a trace containing twonodelink elements
@@ -514,7 +617,11 @@ def add_data__twonodelinks(data_dict, mdl):
       data_dict (dict): dictionary containing figure data
       mdl (Model): the model to be visualized
     """
-    link_elems = mdl.list_of_twonodelink_elements()
+    link_elems = [
+        elm
+        for elm in mdl.list_of_elements()
+        if isinstance(elm, element.TwoNodeLink)]
+
     if not link_elems:
         return
     x_list: list[Optional[float]] = []
@@ -562,7 +669,14 @@ def add_data__frame_offsets(data_dict, mdl):
       data_dict (dict): dictionary containing figure data
       mdl (Model): the model to be visualized
     """
-    beamcolumn_elems = mdl.list_of_beamcolumn_elements()
+    beamcolumn_elems: list[
+        Union[element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
+
     if not beamcolumn_elems:
         return
 
@@ -605,7 +719,15 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
       mdl (Model): the model to be visualized
       ref_len (float): model reference length to scale the axes
     """
-    beamcolumn_elems = mdl.list_of_beamcolumn_elements()
+    beamcolumn_elems: list[
+        Union[element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.TrussBar))
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
     if not beamcolumn_elems:
         return
     scaling = ref_len * 0.025
@@ -748,7 +870,13 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
       data_dict (dict): dictionary containing figure data
       mdl (Model): the model to be visualized
     """
-    beamcolumn_elems = mdl.list_of_beamcolumn_elements()
+    beamcolumn_elems: list[
+        Union[element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
     if not beamcolumn_elems:
         return
     x_list: list[Optional[float]] = []
@@ -768,6 +896,89 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
         if not elm.section.outside_shape:
             continue
         loop = elm.section.outside_shape.halfedges
+        for halfedge in loop:
+            loc0 = (
+                halfedge.vertex.coords[0] * z_vec
+                + halfedge.vertex.coords[1] * y_vec
+                + side_a)
+            loc1 = (
+                halfedge.vertex.coords[0] * z_vec
+                + halfedge.vertex.coords[1] * y_vec
+                + side_b)
+            loc2 = (
+                halfedge.nxt.vertex.coords[0] * z_vec
+                + halfedge.nxt.vertex.coords[1] * y_vec
+                + side_b)
+            loc3 = (
+                halfedge.nxt.vertex.coords[0] * z_vec
+                + halfedge.nxt.vertex.coords[1] * y_vec
+                + side_a)
+            x_list.extend((
+                loc0[0], loc1[0], loc2[0], loc3[0]))
+            y_list.extend((
+                loc0[1], loc1[1], loc2[1], loc3[1]))
+            z_list.extend((
+                loc0[2], loc1[2], loc2[2], loc3[2]))
+            i_list.extend((
+                index + 0, index + 0))
+            j_list.extend((
+                index + 1, index + 2))
+            k_list.extend((
+                index + 2, index + 3))
+            index += 4
+    data_dict.append(
+        {
+            "type": "mesh3d",
+            "x": x_list,
+            "y": y_list,
+            "z": z_list,
+            "i": i_list,
+            "j": j_list,
+            "k": k_list,
+            "hoverinfo": "skip",
+            "color": graphics_common.BEAM_MESH_COLOR,
+            "opacity": 0.30,
+        }
+    )
+
+
+def add_data__extruded_bars_mesh(data_dict, mdl):
+    """
+    Adds a trace containing frame element extrusion mesh
+    Arguments:
+      data_dict (dict): dictionary containing figure data
+      mdl (Model): the model to be visualized
+    """
+    line_elems = mdl.list_of_specific_element(element.TrussBar)
+    if not line_elems:
+        return
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+    i_list: list[Optional[int]] = []
+    j_list: list[Optional[int]] = []
+    k_list: list[Optional[int]] = []
+    index = 0
+    for elm in line_elems:
+
+        if elm.visibility.hidden_when_extruded:
+            continue
+        if not elm.outside_shape:
+            continue
+
+        side_a = np.array(elm.nodes[0].coords)
+        side_b = np.array(elm.nodes[1].coords)
+        x_vec, y_vec, z_vec = local_axes_from_points_and_angle(
+            side_a, side_b, 0.00
+        )
+
+        # cut out the two ends for a nicer visual effect
+        # (after all we can't plot the exact connection geometry)
+        elm_len = elm.clear_length()
+        side_a += x_vec * elm_len * 0.33
+        side_b -= x_vec * elm_len * 0.33
+
+        loop = elm.outside_shape.halfedges
         for halfedge in loop:
             loc0 = (
                 halfedge.vertex.coords[0] * z_vec
@@ -871,12 +1082,14 @@ def show(
 
     # plot beamcolumn elements
     add_data__frames(data_dict, mdl, load_case)
+    add_data__bars(data_dict, mdl, load_case)
     if frame_axes:
         add_data__frame_axes(data_dict, mdl, ref_len)
     if zerolength_axes:
         add_data__zerolength_axes(data_dict, mdl, ref_len)
     if extrude:
         add_data__extruded_frames_mesh(data_dict, mdl)
+        add_data__extruded_bars_mesh(data_dict, mdl)
     # plot the rigid offsets
     if offsets:
         add_data__frame_offsets(data_dict, mdl)

@@ -24,11 +24,10 @@ import numpy.typing as npt
 from ..line import Line
 from ..load_case import LoadCase
 from .. import common
+from ..ops import element
 
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
-    from ..ops.element import ElasticBeamColumn
-    from ..ops.element import DispBeamColumn
     from ..ops.node import Node
     from ..model import Model
 
@@ -142,19 +141,34 @@ class ElmQuery:
     def retrieve_component(self, x_loc, y_loc, lvl):
         """
         Retrieves a component assembly of a level if any of its
-        beamcolumn elements passes trhough the specified point.
+        line elements passes trhough the specified point.
         Returns the first element found.
         """
         level = self.model.levels[lvl]
         for component in level.components.values():
             if len(component.external_nodes) != 2:
                 continue
-            line_elems: list[Union[ElasticBeamColumn, DispBeamColumn]] = []
-            line_elems.extend(component.elastic_beamcolumn_elements.values())
-            line_elems.extend(component.disp_beamcolumn_elements.values())
+            line_elems: list[Union[
+                element.TrussBar,
+                element.ElasticBeamColumn,
+                element.DispBeamColumn]] = []
+            for elm in component.elements:
+                if isinstance(elm, element.TrussBar):
+                    line_elems.append(elm)
+                if isinstance(elm, element.ElasticBeamColumn):
+                    line_elems.append(elm)
+                if isinstance(elm, element.DispBeamColumn):
+                    line_elems.append(elm)
+
             for elm in line_elems:
-                p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-                p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+                if isinstance(elm, element.TrussBar):
+                    p_i = np.array(elm.nodes[0].coords)
+                    p_j = np.array(elm.nodes[1].coords)
+                else:
+                    p_i = np.array(
+                        elm.nodes[0].coords) + elm.geomtransf.offset_i
+                    p_j = np.array(
+                        elm.nodes[1].coords) + elm.geomtransf.offset_j
                 if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
                     if (
                         np.linalg.norm(np.array((x_loc, y_loc)) - p_i[0:2])

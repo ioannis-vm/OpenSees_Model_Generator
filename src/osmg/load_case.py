@@ -174,9 +174,13 @@ class LoadCase:
         for node in self.parent_model.list_of_all_nodes():
             self.node_loads[node.uid] = PointLoadMass()
             self.node_mass[node.uid] = PointLoadMass()
-        for line_element in self.parent_model.list_of_beamcolumn_elements():
-            self.line_element_udl[line_element.uid] = LineElementUDL(
-                self, line_element
+        for element in self.parent_model.list_of_elements():
+            # only proceed for certain elements
+            if element.__class__.__name__ not in {
+                    'ElasticBeamColumn', 'DispBeamColumn'}:
+                continue
+            self.line_element_udl[element.uid] = LineElementUDL(
+                self, element
             )
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():

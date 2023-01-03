@@ -14,6 +14,7 @@ https://plotly.com/python/reference/
 
 import sys
 from typing import Optional
+from typing import Union
 import numpy as np
 import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
@@ -22,6 +23,7 @@ from . import graphics_common
 from . import graphics_common_3d
 from .preprocessing_3d import add_data__global_axes
 from ..postprocessing.basic_forces import basic_forces
+from ..ops import element
 
 nparr = npt.NDArray[np.float64]
 
@@ -37,7 +39,7 @@ def force_scaling_factor(ref_len, fmax, factor):
     return result
 
 
-def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
+def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
     """
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
@@ -55,8 +57,8 @@ def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
          deformed shape with extruded frame elements)
     """
 
-    x_vec: nparr = element.geomtransf.x_axis
-    y_vec: nparr = element.geomtransf.y_axis
+    x_vec: nparr = elm.geomtransf.x_axis
+    y_vec: nparr = elm.geomtransf.y_axis
     z_vec: nparr = np.cross(x_vec, y_vec)
 
     # global -> local transformation matrix
@@ -77,8 +79,8 @@ def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
 
     # discrete sample location parameter
     t_vec = np.linspace(0.00, 1.00, num=num_points)
-    p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-    p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
+    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
     # shape function matrices
@@ -141,13 +143,17 @@ def interp_3d_deformation(element, u_i, r_i, u_j, r_j, num_points):
     return d_global, r_local
 
 
-def interp_3d_points(element, d_global, num_points, scaling):
+def interp_3d_points(elm, d_global, num_points, scaling):
     """
     Calculates intermediate points based on end locations and
-    deformations
+    deformations.
     """
-    p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-    p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
+    if not isinstance(elm, element.TrussBar):
+        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+    else:
+        p_i = np.array(elm.nodes[0].coords)
+        p_j = np.array(elm.nodes[1].coords)
     element_point_samples: nparr = np.column_stack(
         (
             np.linspace(p_i[0], p_j[0], num=num_points),
@@ -181,8 +187,12 @@ def add_data__extruded_line_elms_deformed_mesh(
     for elm in list_of_line_elems:
         if elm.visibility.hidden_when_extruded:
             continue
-        if elm.section.outside_shape is None:
-            continue
+        if isinstance(elm, element.TrussBar):
+            if elm.outside_shape is None:
+                continue
+        else:
+            if elm.section.outside_shape is None:
+                continue
 
         num_points = 8
         # translations and rotations at the offset ends
@@ -199,26 +209,47 @@ def add_data__extruded_line_elms_deformed_mesh(
             step
         ][3:6]
         # transferring them to the clear element ends
-        offset_i = elm.geomtransf.offset_i
-        offset_j = elm.geomtransf.offset_j
+        if isinstance(elm, element.TrussBar):
+            offset_i = np.zeros(3)
+            offset_j = np.zeros(3)
+            x_vec, y_vec, z_vec = (
+                transformations.local_axes_from_points_and_angle(
+                    np.array(elm.nodes[0].coords),
+                    np.array(elm.nodes[1].coords),
+                    0.00))
+            outside_shape = elm.outside_shape
+        else:
+            offset_i = elm.geomtransf.offset_i
+            offset_j = elm.geomtransf.offset_j
+            x_vec = elm.geomtransf.x_axis
+            y_vec = elm.geomtransf.y_axis
+            z_vec = elm.geomtransf.z_axis
+            outside_shape = elm.section.outside_shape
         u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
         u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
-        d_global, r_local = interp_3d_deformation(
-            elm, u_i_o, r_i, u_j_o, r_j, num_points
-        )
-        interpolation_points = interp_3d_points(
-            elm, d_global, num_points, scaling
-        )
-        x_vec = elm.geomtransf.x_axis
-        y_vec = elm.geomtransf.y_axis
-        z_vec = elm.geomtransf.z_axis
+        if isinstance(elm, element.TrussBar):
+            d_global = np.column_stack((
+                np.linspace(u_i[0], u_j[0], num_points),
+                np.linspace(u_i[1], u_j[1], num_points),
+                np.linspace(u_i[2], u_j[2], num_points),
+            ))
+            r_local = np.zeros((num_points, 3))
+            interpolation_points = interp_3d_points(
+                elm, d_global, num_points, scaling
+            )
+        else:
+            d_global, r_local = interp_3d_deformation(
+                elm, u_i_o, r_i, u_j_o, r_j, num_points)
+            interpolation_points = interp_3d_points(
+                elm, d_global, num_points, scaling
+            )
         for i in range(num_points - 1):
             loc_i_global = interpolation_points[i, :]
             loc_j_global = interpolation_points[i + 1, :]
             rot_i_local = r_local[i, :]
             rot_j_local = r_local[i + 1, :]
 
-            loop = elm.section.outside_shape.halfedges
+            loop = outside_shape.halfedges
             for halfedge in loop:
 
                 z_a = halfedge.vertex.coords[0]
@@ -341,14 +372,22 @@ def add_data__line_elms_deformed(
         r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
             step
         ][3:6]
-        # transferring them to the clear element ends
-        offset_i = elm.geomtransf.offset_i
-        offset_j = elm.geomtransf.offset_j
-        u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
-        u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
-        d_global, _ = interp_3d_deformation(
-            elm, u_i_o, r_i, u_j_o, r_j, num_points
-        )
+        if not isinstance(elm, element.TrussBar):
+            # transferring them to the clear element ends
+            offset_i = elm.geomtransf.offset_i
+            offset_j = elm.geomtransf.offset_j
+            u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
+            u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
+            d_global, _ = interp_3d_deformation(
+                elm, u_i_o, r_i, u_j_o, r_j, num_points
+            )
+        else:
+            # for a truss member, just connect the two ends
+            d_global = np.column_stack((
+                np.linspace(u_i[0], u_j[0], num_points),
+                np.linspace(u_i[1], u_j[1], num_points),
+                np.linspace(u_i[2], u_j[2], num_points),
+            ))
         interpolation_points = interp_3d_points(
             elm, d_global, num_points, scaling
         )
@@ -401,6 +440,8 @@ def add_data__line_elm_offsets_deformed(
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
     for elm in list_of_line_elems:
+        if isinstance(elm, element.TrussBar):
+            continue
         if np.array_equal(elm.geomtransf.offset_i, np.zeros(3)):
             if np.array_equal(elm.geomtransf.offset_j, np.zeros(3)):
                 continue
@@ -469,8 +510,12 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
 
     for elm in list_of_line_elems:
 
-        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        if isinstance(elm, element.TrussBar):
+            p_i = np.array(elm.nodes[0].coords)
+            p_j = np.array(elm.nodes[1].coords)
+        else:
+            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
 
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
@@ -563,7 +608,14 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
-    elms = mdl.list_of_beamcolumn_elements()
+    elms: list[
+        Union[element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    elms.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
+
     for elm in elms:
         u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
             step
@@ -635,7 +687,16 @@ def show_deformed_shape(
     frame_data_dict: list[list[dict[str, object]]] = []
 
     # gather lists of associated objects
-    list_of_line_elems = mdl.list_of_beamcolumn_elements()
+    list_of_line_elems: list[
+        Union[element.TrussBar,
+              element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    list_of_line_elems.extend(
+        mdl.list_of_specific_element(element.TrussBar))
+    list_of_line_elems.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    list_of_line_elems.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
     list_of_primary_nodes = mdl.list_of_primary_nodes()
     list_of_internal_nodes = mdl.list_of_internal_nodes()
     # list_of_parent_nodes = mdl.list_of_parent_nodes()
@@ -861,9 +922,21 @@ def show_basic_forces(
         mdl = subset_model
     else:
         mdl = analysis.mdl
+
+    elms: list[
+        Union[element.TrussBar,
+              element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    elms.extend(
+        mdl.list_of_specific_element(element.TrussBar))
+    elms.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
+
     list_of_line_elements = [
         elm
-        for elm in mdl.list_of_beamcolumn_elements()
+        for elm in elms
         if not elm.visibility.skip_opensees_definition
     ]
 
@@ -931,13 +1004,13 @@ def show_basic_forces(
     mz_vecs = {}
     my_vecs = {}
 
-    for element in list_of_line_elements:
+    for elm in list_of_line_elements:
 
-        if element.visibility.skip_opensees_definition:
+        if elm.visibility.hidden_basic_forces:
             continue
 
         forces = basic_forces(
-            analysis, case_name, step, element, num_points, as_tuple=True
+            analysis, case_name, step, elm, num_points, as_tuple=True
         )
         assert isinstance(forces, tuple)
         nx_vec, qy_vec, qz_vec, tx_vec, mz_vec, my_vec = forces
@@ -950,12 +1023,12 @@ def show_basic_forces(
 
         # store results in the preallocated arrays
 
-        nx_vecs[element.uid] = nx_vec * force_conversion
-        qy_vecs[element.uid] = qy_vec * force_conversion
-        qz_vecs[element.uid] = qz_vec * force_conversion
-        tx_vecs[element.uid] = tx_vec * moment_conversion
-        my_vecs[element.uid] = my_vec * moment_conversion
-        mz_vecs[element.uid] = mz_vec * moment_conversion
+        nx_vecs[elm.uid] = nx_vec * force_conversion
+        qy_vecs[elm.uid] = qy_vec * force_conversion
+        qz_vecs[elm.uid] = qz_vec * force_conversion
+        tx_vecs[elm.uid] = tx_vec * moment_conversion
+        my_vecs[elm.uid] = my_vec * moment_conversion
+        mz_vecs[elm.uid] = mz_vec * moment_conversion
 
     # calculate scaling factors
     ref_len = mdl.reference_length()
@@ -993,21 +1066,34 @@ def show_basic_forces(
     if scaling_m > 1.0e8:
         scaling_m = 1.00
 
-    for element in list_of_line_elements:
+    for elm in list_of_line_elements:
+
+        if elm.visibility.hidden_basic_forces:
+            continue
 
         # retrieve results from the preallocated arrays
-        nx_vec = nx_vecs[element.uid]
-        qy_vec = qy_vecs[element.uid]
-        qz_vec = qz_vecs[element.uid]
-        tx_vec = tx_vecs[element.uid]
-        my_vec = my_vecs[element.uid]
-        mz_vec = mz_vecs[element.uid]
-        x_vec = element.geomtransf.x_axis
-        y_vec = element.geomtransf.y_axis
-        z_vec = element.geomtransf.z_axis
-        i_pos = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-        p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-        p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
+        nx_vec = nx_vecs[elm.uid]
+        qy_vec = qy_vecs[elm.uid]
+        qz_vec = qz_vecs[elm.uid]
+        tx_vec = tx_vecs[elm.uid]
+        my_vec = my_vecs[elm.uid]
+        mz_vec = mz_vecs[elm.uid]
+        if isinstance(
+                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            x_vec = elm.geomtransf.x_axis
+            y_vec = elm.geomtransf.y_axis
+            z_vec = elm.geomtransf.z_axis
+            i_pos = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        else:
+            p_i = np.array(elm.nodes[0].coords)
+            p_j = np.array(elm.nodes[1].coords)
+            i_pos = np.array(elm.nodes[0].coords)
+            x_vec, y_vec, z_vec = (
+                transformations.local_axes_from_points_and_angle(
+                    p_i, p_j, 0.00))
+
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
 
@@ -1346,9 +1432,19 @@ def show_basic_forces_combo(
         mdl = subset_model
     else:
         mdl = combo.mdl
+    elms: list[
+        Union[element.TrussBar,
+              element.ElasticBeamColumn,
+              element.DispBeamColumn]] = []
+    elms.extend(
+        mdl.list_of_specific_element(element.TrussBar))
+    elms.extend(
+        mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(
+        mdl.list_of_specific_element(element.DispBeamColumn))
     list_of_line_elements = [
         elm
-        for elm in mdl.list_of_beamcolumn_elements()
+        for elm in elms
         if not elm.visibility.skip_opensees_definition
     ]
 
@@ -1410,27 +1506,27 @@ def show_basic_forces_combo(
     mz_vecs_max = {}
     my_vecs_max = {}
 
-    for element in list_of_line_elements:
+    for elm in list_of_line_elements:
 
-        if element.visibility.skip_opensees_definition:
+        if elm.visibility.hidden_basic_forces:
             continue
 
-        df_min, df_max = combo.envelope_basic_forces(element, num_points)
+        df_min, df_max = combo.envelope_basic_forces(elm, num_points)
 
         # store results in the preallocated arrays
 
-        nx_vecs_min[element.uid] = df_min["nx"].to_numpy() * force_conversion
-        qy_vecs_min[element.uid] = df_min["qy"].to_numpy() * force_conversion
-        qz_vecs_min[element.uid] = df_min["qz"].to_numpy() * force_conversion
-        tx_vecs_min[element.uid] = df_min["tx"].to_numpy() * moment_conversion
-        my_vecs_min[element.uid] = df_min["my"].to_numpy() * moment_conversion
-        mz_vecs_min[element.uid] = df_min["mz"].to_numpy() * moment_conversion
-        nx_vecs_max[element.uid] = df_max["nx"].to_numpy() * force_conversion
-        qy_vecs_max[element.uid] = df_max["qy"].to_numpy() * force_conversion
-        qz_vecs_max[element.uid] = df_max["qz"].to_numpy() * force_conversion
-        tx_vecs_max[element.uid] = df_max["tx"].to_numpy() * moment_conversion
-        my_vecs_max[element.uid] = df_max["my"].to_numpy() * moment_conversion
-        mz_vecs_max[element.uid] = df_max["mz"].to_numpy() * moment_conversion
+        nx_vecs_min[elm.uid] = df_min["nx"].to_numpy() * force_conversion
+        qy_vecs_min[elm.uid] = df_min["qy"].to_numpy() * force_conversion
+        qz_vecs_min[elm.uid] = df_min["qz"].to_numpy() * force_conversion
+        tx_vecs_min[elm.uid] = df_min["tx"].to_numpy() * moment_conversion
+        my_vecs_min[elm.uid] = df_min["my"].to_numpy() * moment_conversion
+        mz_vecs_min[elm.uid] = df_min["mz"].to_numpy() * moment_conversion
+        nx_vecs_max[elm.uid] = df_max["nx"].to_numpy() * force_conversion
+        qy_vecs_max[elm.uid] = df_max["qy"].to_numpy() * force_conversion
+        qz_vecs_max[elm.uid] = df_max["qz"].to_numpy() * force_conversion
+        tx_vecs_max[elm.uid] = df_max["tx"].to_numpy() * moment_conversion
+        my_vecs_max[elm.uid] = df_max["my"].to_numpy() * moment_conversion
+        mz_vecs_max[elm.uid] = df_max["mz"].to_numpy() * moment_conversion
 
     # calculate scaling factors
     ref_len = mdl.reference_length()
@@ -1498,29 +1594,42 @@ def show_basic_forces_combo(
     if scaling_m > 1.0e8:
         scaling_m = 1.00
 
-    for element in list_of_line_elements:
+    for elm in list_of_line_elements:
+
+        if elm.visibility.hidden_basic_forces:
+            continue
 
         # retrieve results from the preallocated arrays
-        nx_vec_min = nx_vecs_min[element.uid]
-        qy_vec_min = qy_vecs_min[element.uid]
-        qz_vec_min = qz_vecs_min[element.uid]
-        tx_vec_min = tx_vecs_min[element.uid]
-        my_vec_min = my_vecs_min[element.uid]
-        mz_vec_min = mz_vecs_min[element.uid]
+        nx_vec_min = nx_vecs_min[elm.uid]
+        qy_vec_min = qy_vecs_min[elm.uid]
+        qz_vec_min = qz_vecs_min[elm.uid]
+        tx_vec_min = tx_vecs_min[elm.uid]
+        my_vec_min = my_vecs_min[elm.uid]
+        mz_vec_min = mz_vecs_min[elm.uid]
 
-        nx_vec_max = nx_vecs_max[element.uid]
-        qy_vec_max = qy_vecs_max[element.uid]
-        qz_vec_max = qz_vecs_max[element.uid]
-        tx_vec_max = tx_vecs_max[element.uid]
-        my_vec_max = my_vecs_max[element.uid]
-        mz_vec_max = mz_vecs_max[element.uid]
+        nx_vec_max = nx_vecs_max[elm.uid]
+        qy_vec_max = qy_vecs_max[elm.uid]
+        qz_vec_max = qz_vecs_max[elm.uid]
+        tx_vec_max = tx_vecs_max[elm.uid]
+        my_vec_max = my_vecs_max[elm.uid]
+        mz_vec_max = mz_vecs_max[elm.uid]
 
-        x_vec = element.geomtransf.x_axis
-        y_vec = element.geomtransf.y_axis
-        z_vec = element.geomtransf.z_axis
-        i_pos = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-        p_i = np.array(element.nodes[0].coords) + element.geomtransf.offset_i
-        p_j = np.array(element.nodes[1].coords) + element.geomtransf.offset_j
+        if isinstance(
+                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            x_vec = elm.geomtransf.x_axis
+            y_vec = elm.geomtransf.y_axis
+            z_vec = elm.geomtransf.z_axis
+            i_pos = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        else:
+            p_i = np.array(elm.nodes[0].coords)
+            p_j = np.array(elm.nodes[1].coords)
+            i_pos = np.array(elm.nodes[0].coords)
+            x_vec, y_vec, z_vec = (
+                transformations.local_axes_from_points_and_angle(
+                    p_i, p_j, 0.00))
+
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
 

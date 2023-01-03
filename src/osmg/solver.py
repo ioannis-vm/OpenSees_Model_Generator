@@ -22,7 +22,7 @@ Model Generator for OpenSees ~ solver
 from __future__ import annotations
 from typing import Optional
 from typing import Any
-from typing import TYPE_CHECKING
+from typing import Union
 from dataclasses import dataclass, field
 import os
 import pickle
@@ -38,20 +38,15 @@ import pandas as pd
 import openseespy.opensees as ops
 import matplotlib.pyplot as plt
 from .load_case import LoadCase
-
-# from .import components
 from .model import Model
-from .ops.element import ElasticBeamColumn
+from .ops import element
 from . import common
-
-# from .graphics import postprocessing_3d
 from .graphics import general_2d
 from . import transformations
 from .collections import Collection
 from .gen.query import LoadCaseQuery
+from .ops import uniaxial_material
 
-if TYPE_CHECKING:
-    from .ops.uniaxial_material import UniaxialMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -70,7 +65,7 @@ NUMBERER = "Plain"
 
 
 def test_uniaxial_material(
-    mat: UniaxialMaterial,
+    mat: uniaxial_material.UniaxialMaterial,
     input_deformations: list[float],
     incr: float,
     plot: bool,
@@ -310,13 +305,17 @@ class Analysis:
                 self.results[case_name].node_reactions[uid] = {}
 
             if self.settings.store_forces:
-                for uid in self.mdl.dict_of_elastic_beamcolumn_elements():
+                for uid in self.mdl.dict_of_specific_element(element.ElasticBeamColumn):
+                    self.results[case_name].element_forces[uid] = {}
+                for uid in self.mdl.dict_of_specific_element(element.DispBeamColumn):
+                    self.results[case_name].element_forces[uid] = {}
+                for uid in self.mdl.dict_of_specific_element(element.TrussBar):
                     self.results[case_name].element_forces[uid] = {}
             if self.settings.store_fiber:
-                for uid in self.mdl.dict_of_disp_beamcolumn_elements():
+                for uid in self.mdl.dict_of_specific_element(element.DispBeamColumn):
                     self.results[case_name].element_forces[uid] = {}
             if self.settings.store_release_force_defo:
-                for uid in self.mdl.dict_of_zerolength_elements():
+                for uid in self.mdl.dict_of_specific_element(element.ZeroLength):
                     self.results[case_name].release_force_defo[uid] = {}
 
         self.log("Analysis started")
@@ -397,7 +396,7 @@ class Analysis:
         # keep track of defined elements
         defined_elements = {}
 
-        elms = self.mdl.dict_of_elastic_beamcolumn_elements().values()
+        elms = self.mdl.dict_of_specific_element(element.ElasticBeamColumn).values()
 
         # define line elements
         for elm in elms:
@@ -414,7 +413,7 @@ class Analysis:
         defined_sections: dict[int, object] = {}
         defined_materials: dict[int, object] = {}
 
-        elms = self.mdl.dict_of_disp_beamcolumn_elements().values()
+        elms = self.mdl.list_of_specific_element(element.DispBeamColumn)
 
         def define_material(mat, defined_materials):
             """
@@ -456,7 +455,7 @@ class Analysis:
         # ZeroLength element definition #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-        elms = self.mdl.list_of_zerolength_elements()
+        elms = self.mdl.list_of_specific_element(element.ZeroLength)
 
         # define zerolength elements
         for elm in elms:
@@ -469,12 +468,24 @@ class Analysis:
         # TwoNodeLink element definition #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 
-        elms = self.mdl.list_of_twonodelink_elements()
+        elms = self.mdl.list_of_specific_element(element.TwoNodeLink)
 
         # define twonodelink elements
         for elm in elms:
             for mat in elm.mats:
                 define_material(mat, defined_materials)
+            ops.element(*elm.ops_args())
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # TrussBar element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.TrussBar)
+
+        # define TrussBar elements
+        for elm in elms:
+            define_material(elm.mat, defined_materials)
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
@@ -518,7 +529,12 @@ class Analysis:
     def _define_loads(self, case_name):
         ops.timeSeries("Linear", 1)
         ops.pattern("Plain", 1, 1)
-        for elm in self.mdl.list_of_beamcolumn_elements():
+        elms_with_udl: list[Union[
+            element.ElasticBeamColumn, element.DispBeamColumn
+        ]] = []
+        elms_with_udl.extend(self.mdl.list_of_specific_element(element.ElasticBeamColumn))
+        elms_with_udl.extend(self.mdl.list_of_specific_element(element.DispBeamColumn))
+        for elm in elms_with_udl:
             if elm.visibility.skip_opensees_definition:
                 continue
             udl_total = (
@@ -581,12 +597,20 @@ class Analysis:
             global_values: nparr = np.array(ops.eleForce(uid))
             forces_global = global_values[0:3]
             moments_global_ends = global_values[3:6]
-            moments_global_clear = transformations.offset_transformation(
-                elm.geomtransf.offset_i, moments_global_ends, forces_global
-            )
-            x_vec = elm.geomtransf.x_axis
-            y_vec = elm.geomtransf.y_axis
-            z_vec = elm.geomtransf.z_axis
+            if isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+                moments_global_clear = transformations.offset_transformation(
+                    elm.geomtransf.offset_i, moments_global_ends, forces_global
+                )
+                x_vec = elm.geomtransf.x_axis
+                y_vec = elm.geomtransf.y_axis
+                z_vec = elm.geomtransf.z_axis
+            else:
+                moments_global_clear = moments_global_ends
+                x_vec, y_vec, z_vec = (
+                    transformations.local_axes_from_points_and_angle(
+                        np.array(elm.nodes[0].coords),
+                        np.array(elm.nodes[1].coords),
+                        0.00))
             transf_global2local: nparr = np.vstack((x_vec, y_vec, z_vec))
             n_i, qy_i, qz_i = transf_global2local @ forces_global
             t_i, my_i, mz_i = transf_global2local @ moments_global_clear
@@ -645,8 +669,7 @@ class Analysis:
         case_name,
         step,
         nodes,
-        elastic_beamcolumn_elements,
-        disp_beamcolumn_elements,
+        line_elements,
         zerolength_elements,
         custom_read_results_method,
         custom_read_results_method_args,
@@ -658,7 +681,7 @@ class Analysis:
             self._read_node_reactions(case_name, step, nodes)
         if self.settings.store_forces:
             self._read_frame_element_forces(
-                case_name, step, elastic_beamcolumn_elements
+                case_name, step, line_elements
             )
         # if self.settings.store_fiber:
         #     self._read_frame_fiber_stress_strain()
@@ -729,15 +752,21 @@ class StaticAnalysis(Analysis):
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
             elastic_elems = [
                 elm
-                for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
                 if not elm.visibility.skip_opensees_definition
             ]
             disp_elems = [
                 elm
-                for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
                 if not elm.visibility.skip_opensees_definition
             ]
-            zerolength_elems = self.mdl.list_of_zerolength_elements()
+            truss_elems = [
+                elm
+                for elm in self.mdl.list_of_specific_element(element.TrussBar)
+                if not elm.visibility.skip_opensees_definition
+            ]
+            line_elems = elastic_elems + disp_elems + truss_elems
+            zerolength_elems = self.mdl.list_of_specific_element(element.ZeroLength)
             step = 0
             ops.system(LN_ANALYSIS_SYSTEM)
             ops.numberer(NUMBERER)
@@ -751,8 +780,7 @@ class StaticAnalysis(Analysis):
                 case_name,
                 step,
                 nodes,
-                elastic_elems,
-                disp_elems,
+                line_elems,
                 zerolength_elems,
                 custom_read_results_method,
                 custom_read_results_method_args,
@@ -789,7 +817,6 @@ class ModalAnalysis(Analysis):
 
         for step in range(self.num_modes):
             for elm in elems:
-                assert isinstance(elm, ElasticBeamColumn)
                 # displacements at the two ends (global system)
                 u_i = self.results[case_name].node_displacements[
                     elm.nodes[0].uid
@@ -803,42 +830,71 @@ class ModalAnalysis(Analysis):
                 r_j = self.results[case_name].node_displacements[
                     elm.nodes[1].uid
                 ][step][3:6]
-                offset_i = elm.geomtransf.offset_i
-                offset_j = elm.geomtransf.offset_j
-                u_i_o = transformations.offset_transformation(
-                    offset_i, np.array(u_i), np.array(r_i)
-                )
-                u_j_o = transformations.offset_transformation(
-                    offset_j, np.array(u_j), np.array(r_j)
-                )
+                if isinstance(elm, element.TrussBar):
+                    offset_i = np.zeros(3)
+                    offset_j = np.zeros(3)
+                    u_i_o = u_i
+                    u_j_o = u_j
+                    x_vec, y_vec, z_vec = (
+                        transformations.local_axes_from_points_and_angle(
+                            np.array(elm.nodes[0].coords),
+                            np.array(elm.nodes[1].coords), 0.00
+                        ))
+                else:
+                    offset_i = elm.geomtransf.offset_i
+                    offset_j = elm.geomtransf.offset_j
+                    u_i_o = transformations.offset_transformation(
+                        offset_i, np.array(u_i), np.array(r_i)
+                    )
+                    u_j_o = transformations.offset_transformation(
+                        offset_j, np.array(u_j), np.array(r_j)
+                    )
+                    x_vec = elm.geomtransf.x_axis
+                    y_vec = elm.geomtransf.y_axis
+                    z_vec: nparr = np.cross(x_vec, y_vec)
 
-                x_vec = elm.geomtransf.x_axis
-                y_vec = elm.geomtransf.y_axis
-                z_vec: nparr = np.cross(x_vec, y_vec)
+                    # element UDL: shouldn't be there in a modal analysis
+                    udl = self.load_cases[case_name].line_element_udl[elm.uid].val
+                    # note: modal analysis doesn't account for applied loads.
+                    # this will cause issues with plotting if loads
+                    # have been applied.
+                    if np.linalg.norm(udl) > common.EPSILON:
+                        raise ValueError("Loads applied at modal load case.")
+                    # (could alternatively just ignore them?..)
 
                 # global -> local transformation matrix
                 transf_global2local = transformations.transformation_matrix(
                     x_vec, y_vec, z_vec
                 )
+
                 u_i_local = transf_global2local @ u_i_o
                 r_i_local = transf_global2local @ r_i
                 u_j_local = transf_global2local @ u_j_o
                 r_j_local = transf_global2local @ r_j
 
-                # # element UDL
-                udl = self.load_cases[case_name].line_element_udl[elm.uid].val
-                # note: modal analysis doesn't account for applied loads.
-                # this will cause issues with plotting if loads
-                # have been applied.
-                if np.linalg.norm(udl) > common.EPSILON:
-                    raise ValueError("Loads applied at modal load case.")
-
                 # stiffness matrix terms
+                if isinstance(elm, element.TrussBar):
+                    if isinstance(elm.mat, uniaxial_material.Elastic):
+                        e_mod = elm.mat.e_mod
+                    else:
+                        print('Ignoring truss element with '
+                              f'{elm.mat.__class__.__name__} material')
+                        e_mod = 0.00
+                    etimesa = e_mod * elm.area
+                    etimesi_maj = 0.00
+                    etimesi_min = 0.00
+                    gtimesj = 0.00
+                elif isinstance(elm, element.ElasticBeamColumn):
+                    etimesa = elm.section.e_mod * elm.section.area
+                    etimesi_maj = elm.section.e_mod * elm.section.i_x
+                    etimesi_min = elm.section.e_mod * elm.section.i_y
+                    gtimesj = elm.section.g_mod * elm.section.j_mod
+                else:
+                    raise ValueError(
+                        'Oops! Need to extend the code '
+                        'to support dispBeamColumn elements')
+
                 length = elm.clear_length()
-                etimesa = elm.section.e_mod * elm.section.area
-                etimesi_maj = elm.section.e_mod * elm.section.i_x
-                etimesi_min = elm.section.e_mod * elm.section.i_y
-                gtimesj = elm.section.g_mod * elm.section.j_mod
 
                 deformation_vector = np.concatenate(
                     (u_i_local, r_i_local, u_j_local, r_j_local)
@@ -934,8 +990,19 @@ class ModalAnalysis(Analysis):
             )
             self._read_node_displacements_modal(case_name)
             if self.settings.store_forces:
+                line_elements: list[Union[
+                    element.TrussBar,
+                    element.ElasticBeamColumn,
+                    element.DispBeamColumn
+                ]] = []
+                line_elements.extend(
+                    self.mdl.list_of_specific_element(element.TrussBar))
+                line_elements.extend(
+                    self.mdl.list_of_specific_element(element.ElasticBeamColumn))
+                line_elements.extend(
+                    self.mdl.list_of_specific_element(element.DispBeamColumn))
                 self._read_frame_element_forces_modal(
-                    case_name, self.mdl.list_of_beamcolumn_elements()
+                    case_name, line_elements
                 )
         if self.settings.pickle_results:
             self._write_results_to_disk()
@@ -985,12 +1052,12 @@ class NonlinearAnalysis(Analysis):
         ops.numberer(NUMBERER)
         self.log(f"G: Setting constraints to {[*CONSTRAINTS]}")
         ops.constraints(*CONSTRAINTS)
-        self.log(f"G: Setting algorithm to RaphsonNewton")
+        self.log("G: Setting algorithm to RaphsonNewton")
         ops.algorithm("RaphsonNewton")
         ops.integrator("LoadControl", 1)
-        self.log(f"G: Setting analysis to Static")
+        self.log("G: Setting analysis to Static")
         ops.analysis("Static")
-        self.log(f"G: Analyzing now.")
+        self.log("G: Analyzing now.")
         check = ops.analyze(1)
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")
@@ -1007,7 +1074,7 @@ class NonlinearAnalysis(Analysis):
     #     """
     #     max_dmg_ratio = 0.30
     #     candidate_elms = []
-    #     for elm in self.mdl.dict_of_disp_beamcolumn_elements().values():
+    #     for elm in self.mdl.dict_of_specific_element(DispBeamColumn).values():
     #         part = elm.section.section_parts['main']
     #         if isinstance(elm.section, FiberSection):
     #             if isinstance(part.ops_material, Fatigue):
@@ -1046,7 +1113,7 @@ class NonlinearAnalysis(Analysis):
     # def intervention(self, n_steps_success):
     #     if n_steps_success == -1:
     #     # if n_steps_success == 2000:
-    #         elm = self.mdl.dict_of_disp_beamcolumn_elements()[49]
+    #         elm = self.mdl.dict_of_disp_specific_element(DispBeamColumn)[49]
     #         part = elm.section.section_parts['main']
     #         mat_uid = part.ops_material.uid
     #     else:
@@ -1325,15 +1392,21 @@ class PushoverAnalysis(NonlinearAnalysis):
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
             elastic_elems = [
                 elm
-                for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+                for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
                 if not elm.visibility.skip_opensees_definition
             ]
             disp_elems = [
                 elm
-                for elm in self.mdl.list_of_disp_beamcolumn_elements()
+                for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
                 if not elm.visibility.skip_opensees_definition
             ]
-            zerolength_elems = self.mdl.list_of_zerolength_elements()
+            truss_elems = [
+                elm
+                for elm in self.mdl.list_of_specific_element(element.TrussBar)
+                if not elm.visibility.skip_opensees_definition
+            ]
+            line_elems = elastic_elems + disp_elems + truss_elems
+            zerolength_elems = self.mdl.list_of_specific_element(element.ZeroLength)
 
             self.log("Defining elements in OpenSees")
             self._to_opensees_domain(case_name)
@@ -1348,8 +1421,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 case_name,
                 n_steps_success,
                 nodes,
-                elastic_elems,
-                disp_elems,
+                line_elems,
                 zerolength_elems,
                 custom_read_results_method,
                 custom_read_results_method_args,
@@ -1441,8 +1513,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 case_name,
                                 n_steps_success,
                                 nodes,
-                                elastic_elems,
-                                disp_elems,
+                                line_elems,
                                 zerolength_elems,
                                 custom_read_results_method,
                                 custom_read_results_method_args,
@@ -1469,8 +1540,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 case_name,
                 n_steps_success,
                 nodes,
-                elastic_elems,
-                disp_elems,
+                line_elems,
                 zerolength_elems,
                 custom_read_results_method,
                 custom_read_results_method_args,
@@ -1706,15 +1776,21 @@ class NLTHAnalysis(NonlinearAnalysis):
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
         elastic_elems = [
             elm
-            for elm in self.mdl.list_of_elastic_beamcolumn_elements()
+            for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
             if not elm.visibility.skip_opensees_definition
         ]
         disp_elems = [
             elm
-            for elm in self.mdl.list_of_disp_beamcolumn_elements()
+            for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
             if not elm.visibility.skip_opensees_definition
         ]
-        zerolength_elems = self.mdl.list_of_zerolength_elements()
+        truss_elems = [
+            elm
+            for elm in self.mdl.list_of_specific_element(element.TrussBar)
+            if not elm.visibility.skip_opensees_definition
+        ]
+        line_elems = elastic_elems + disp_elems + truss_elems
+        zerolength_elems = self.mdl.list_of_specific_element(element.ZeroLength)
 
         damping_type = damping.get("type")
         self.log(f'Damping Type: {damping_type}')
@@ -1776,7 +1852,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         # gravity analysis
         self.log("Defining loads")
         self._define_loads(case_name)
-        
+
         self.log("Starting gravity analysis (G)")
         self._run_gravity_analysis(system)
         self.log("Gravity analysis finished successfully")
@@ -1785,8 +1861,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             case_name,
             n_steps_success,
             nodes,
-            elastic_elems,
-            disp_elems,
+            line_elems,
             zerolength_elems,
             custom_read_results_method,
             custom_read_results_method_args,
@@ -1915,7 +1990,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                             )
                         analysis_failed = True
                         break
-                    
+
                     # otherwise, we can still reduce step size
                     num_subdiv += 1
                     # how many times to run with reduced step size
@@ -1951,8 +2026,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                             case_name,
                             n_steps_success,
                             nodes,
-                            elastic_elems,
-                            disp_elems,
+                            line_elems,
                             zerolength_elems,
                             custom_read_results_method,
                             custom_read_results_method_args,
