@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 from typing import Optional
 import numpy as np
 from ..ops.section import ElasticSection
+from ..ops.uniaxial_material import UniaxialMaterial
 from ..ops.uniaxial_material import Elastic
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Pinching4
@@ -302,7 +303,7 @@ def steel_w_col_pz(
     pz_length: float,
     pz_doubler_plate_thickness: float,
     pz_hardening: float,
-    only_elastic: False,
+    only_elastic: bool=False,
     **kwargs,
 ):
     """
@@ -340,7 +341,7 @@ def steel_w_col_pz(
     m3y /= 4.00
 
     if only_elastic:
-        mat = Elastic(
+        mat: UniaxialMaterial = Elastic(
             model.uid_generator.new("uniaxial material"),
             "auto_steel_W_PZ",
             m1y/gamma_1

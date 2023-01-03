@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
 from typing import Union
+from typing import Any
 import sys
 import plotly.graph_objects as go  # type: ignore
 import numpy as np
@@ -416,7 +417,7 @@ def add_data__release_nodes(data_dict, list_of_nodes):
 #     })
 
 
-def add_data__frames(data_dict, mdl: Model, load_case: LoadCase):
+def add_data__frames(data_dict, mdl: Model, load_case: Optional[LoadCase]=None):
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
@@ -518,7 +519,7 @@ def add_data__frames(data_dict, mdl: Model, load_case: LoadCase):
         )
 
 
-def add_data__bars(data_dict, mdl: Model, load_case: LoadCase):
+def add_data__bars(data_dict, mdl: Model, load_case: Optional[LoadCase]=None):
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
@@ -532,7 +533,7 @@ def add_data__bars(data_dict, mdl: Model, load_case: LoadCase):
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
-    customdata_list = []
+    customdata_list: list[tuple[Any, ...]] = []
     section_areas = []
     for elm in line_elems:
         if elm.visibility.hidden_at_line_plots:
@@ -627,7 +628,7 @@ def add_data__twonodelinks(data_dict, mdl):
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
-    customdata_list = []
+    customdata_list: list[tuple[Any, ...]] = []
     for elm in link_elems:
         p_i: nparr = np.array(elm.nodes[0].coords)
         p_j: nparr = np.array(elm.nodes[1].coords)
@@ -897,6 +898,8 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
             continue
         loop = elm.section.outside_shape.halfedges
         for halfedge in loop:
+            assert halfedge.nxt is not None
+            assert halfedge.nxt.vertex is not None
             loc0 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec

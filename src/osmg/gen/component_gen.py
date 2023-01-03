@@ -315,7 +315,7 @@ class TrussBarGenerator:
                 np.array(int_node_i.coords),
                 0.00)
             dirs, mats = fix_all(self.model)
-            elm = TwoNodeLink(
+            elm_link = TwoNodeLink(
                 component,
                 self.model.uid_generator.new("element"),
                 [node_i, int_node_i],
@@ -324,7 +324,7 @@ class TrussBarGenerator:
                 x_axis,
                 y_axis,
             )
-            component.elements.add(elm)
+            component.elements.add(elm_link)
         else:
             n_i = node_i
         if np.linalg.norm(eo_j) > common.EPSILON:
@@ -339,7 +339,7 @@ class TrussBarGenerator:
                 np.array(int_node_j.coords),
                 0.00)
             dirs, mats = fix_all(self.model)
-            elm = TwoNodeLink(
+            elm_link = TwoNodeLink(
                 component,
                 self.model.uid_generator.new("element"),
                 [node_j, int_node_j],
@@ -348,12 +348,12 @@ class TrussBarGenerator:
                 x_axis,
                 y_axis,
             )
-            component.elements.add(elm)
+            component.elements.add(elm_link)
         else:
             n_j = node_j
 
         # create the element
-        elm = TrussBar(
+        elm_truss = TrussBar(
             parent_component=component,
             uid=self.model.uid_generator.new("element"),
             nodes=[n_i, n_j],
@@ -365,7 +365,7 @@ class TrussBarGenerator:
         )
 
         # add it to the component assembly
-        component.elements.add(elm)
+        component.elements.add(elm_truss)
 
         return component
 

@@ -249,9 +249,10 @@ def add_data__extruded_line_elms_deformed_mesh(
             rot_i_local = r_local[i, :]
             rot_j_local = r_local[i + 1, :]
 
+            assert outside_shape is not None
             loop = outside_shape.halfedges
             for halfedge in loop:
-
+                assert halfedge.nxt is not None
                 z_a = halfedge.vertex.coords[0]
                 y_a = halfedge.vertex.coords[1]
                 z_b = halfedge.nxt.vertex.coords[0]

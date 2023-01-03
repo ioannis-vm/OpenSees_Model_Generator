@@ -818,18 +818,18 @@ class ModalAnalysis(Analysis):
         for step in range(self.num_modes):
             for elm in elems:
                 # displacements at the two ends (global system)
-                u_i = self.results[case_name].node_displacements[
+                u_i = np.array(self.results[case_name].node_displacements[
                     elm.nodes[0].uid
-                ][step][0:3]
-                r_i = self.results[case_name].node_displacements[
+                ][step][0:3])
+                r_i = np.array(self.results[case_name].node_displacements[
                     elm.nodes[0].uid
-                ][step][3:6]
-                u_j = self.results[case_name].node_displacements[
+                ][step][3:6])
+                u_j = np.array(self.results[case_name].node_displacements[
                     elm.nodes[1].uid
-                ][step][0:3]
-                r_j = self.results[case_name].node_displacements[
+                ][step][0:3])
+                r_j = np.array(self.results[case_name].node_displacements[
                     elm.nodes[1].uid
-                ][step][3:6]
+                ][step][3:6])
                 if isinstance(elm, element.TrussBar):
                     offset_i = np.zeros(3)
                     offset_j = np.zeros(3)
@@ -851,7 +851,7 @@ class ModalAnalysis(Analysis):
                     )
                     x_vec = elm.geomtransf.x_axis
                     y_vec = elm.geomtransf.y_axis
-                    z_vec: nparr = np.cross(x_vec, y_vec)
+                    z_vec = np.cross(x_vec, y_vec)
 
                     # element UDL: shouldn't be there in a modal analysis
                     udl = self.load_cases[case_name].line_element_udl[elm.uid].val

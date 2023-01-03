@@ -267,7 +267,7 @@ class Model:
         elems: dict[int, element.ElasticBeamColumn] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
-                elems.update(component.elements)
+                elems.update(component.elements)  # type: ignore
         return elems
 
     def list_of_elements(self):

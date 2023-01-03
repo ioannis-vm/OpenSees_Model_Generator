@@ -152,7 +152,7 @@ class ElmQuery:
                 element.TrussBar,
                 element.ElasticBeamColumn,
                 element.DispBeamColumn]] = []
-            for elm in component.elements:
+            for elm in component.elements.values():
                 if isinstance(elm, element.TrussBar):
                     line_elems.append(elm)
                 if isinstance(elm, element.ElasticBeamColumn):
