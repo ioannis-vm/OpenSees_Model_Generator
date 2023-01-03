@@ -303,7 +303,7 @@ def steel_w_col_pz(
     pz_length: float,
     pz_doubler_plate_thickness: float,
     pz_hardening: float,
-    only_elastic: bool=False,
+    only_elastic: bool = False,
     **kwargs,
 ):
     """

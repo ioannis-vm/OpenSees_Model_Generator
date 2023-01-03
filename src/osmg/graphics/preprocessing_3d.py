@@ -417,7 +417,8 @@ def add_data__release_nodes(data_dict, list_of_nodes):
 #     })
 
 
-def add_data__frames(data_dict, mdl: Model, load_case: Optional[LoadCase]=None):
+def add_data__frames(
+        data_dict, mdl: Model, load_case: Optional[LoadCase] = None):
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
@@ -519,7 +520,8 @@ def add_data__frames(data_dict, mdl: Model, load_case: Optional[LoadCase]=None):
         )
 
 
-def add_data__bars(data_dict, mdl: Model, load_case: Optional[LoadCase]=None):
+def add_data__bars(
+        data_dict, mdl: Model, load_case: Optional[LoadCase] = None):
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
