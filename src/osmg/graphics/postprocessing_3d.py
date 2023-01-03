@@ -3,12 +3,13 @@ The following utility functions are used for data visualization
 https://plotly.com/python/reference/
 """
 
-#                          __
-#   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ /
-# / /_/ / / / / / / /_/ /_/
-# \____/_/ /_/ /_/\__, (_)
-#                /____/
+#
+#   _|_|      _|_|_|  _|      _|    _|_|_|
+# _|    _|  _|        _|_|  _|_|  _|
+# _|    _|    _|_|    _|  _|  _|  _|  _|_|
+# _|    _|        _|  _|      _|  _|    _|
+#   _|_|    _|_|_|    _|      _|    _|_|_|
+#
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 

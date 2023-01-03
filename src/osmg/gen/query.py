@@ -2,15 +2,15 @@
 Model Generator for OpenSees ~ generic
 """
 
-#                          __
-#   ____  ____ ___  ____ _/ /
-#  / __ \/ __ `__ \/ __ `/ /
-# / /_/ / / / / / / /_/ /_/
-# \____/_/ /_/ /_/\__, (_)
-#                /____/
+#
+#   _|_|      _|_|_|  _|      _|    _|_|_|
+# _|    _|  _|        _|_|  _|_|  _|
+# _|    _|    _|_|    _|  _|  _|  _|  _|_|
+# _|    _|        _|  _|      _|  _|    _|
+#   _|_|    _|_|_|    _|      _|    _|_|_|
+#
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 
 # pylint: disable=inconsistent-return-statements
 
