@@ -1,4 +1,4 @@
-![Tests](https://github.com/ioannis-vm/OpenSees_Model_Generator/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/ioannis-vm/OpenSees_Model_Generator/actions/workflows/test_and_deploy.yml/badge.svg)
 ![PyPI version](https://badge.fury.io/py/osmg.svg)
 
 # OpenSees Model Generator
