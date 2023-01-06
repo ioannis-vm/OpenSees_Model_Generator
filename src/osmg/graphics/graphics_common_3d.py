@@ -60,7 +60,7 @@ def global_layout(mdl, camera=None):
             xaxis_visible=False,
             yaxis_visible=False,
             zaxis_visible=False,
-            bgcolor="black",
+            bgcolor="white",
             camera=camera,
             xaxis=dict(range=[p_min[0], p_max[0]], autorange=False),
             yaxis=dict(range=[p_min[1], p_max[1]], autorange=False),

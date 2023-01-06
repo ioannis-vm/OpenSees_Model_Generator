@@ -34,7 +34,6 @@ import numpy as np
 import numpy.typing as npt
 from scipy import integrate
 from scipy.interpolate import interp1d
-import plotly.express as px
 import pandas as pd
 import openseespy.opensees as ops
 import matplotlib.pyplot as plt
@@ -48,123 +47,10 @@ from .collections import Collection
 from .gen.query import LoadCaseQuery
 from .ops import uniaxial_material
 
-
 nparr = npt.NDArray[np.float64]
 
-
-plt.rc("font", family="serif")
-plt.rc("xtick", labelsize="medium")
-plt.rc("ytick", labelsize="medium")
-
-# LN_ANALYSIS_SYSTEM = 'SparseSYM'
-# NL_ANALYSIS_SYSTEM = 'SparseSYM'
-LN_ANALYSIS_SYSTEM = "UmfPack"
-NL_ANALYSIS_SYSTEM = "UmfPack"
-MD_ANALYSIS_SYSTEM = "UmfPack"
 CONSTRAINTS = ("Transformation",)
-NUMBERER = "Plain"
-
-
-def test_uniaxial_material(
-    mat: uniaxial_material.UniaxialMaterial,
-    input_deformations: list[float],
-    incr: float,
-    plot: bool,
-):
-    """
-    Generates force-deformation pairs using the given uniaxial material.
-    Used for testing and validation.
-    """
-
-    forces = [0.00]
-    deformations = [0.00]
-
-    # define model
-    ops.wipe()  # type: ignore
-    ops.model("basic", "-ndm", 1, "-ndf", 1)
-    ops.node(0, 0.00)
-    ops.node(1, 0.00)
-    ops.fix(0, 1)
-    ops.uniaxial_material(*mat.ops_args())
-    ops.element("zeroLength", 0, 0, 1, "-mat", mat.uid, "-dir", 1)
-    # define load pattern
-    ops.timeSeries("Linear", 1)
-    ops.pattern("Plain", 1, 1)
-    ops.load(1, 1.00)
-    # run analysis
-    ops.numberer("Plain")
-    ops.constraints("Plain")
-
-    curr_defo = ops.nodeDisp(1, 1)
-    n_steps_success = 0
-    total_fail = False
-    num_subdiv = 0
-    num_times = 0
-    scale = [1.0, 0.1, 0.01, 0.001, 0.0001, 0.00001]
-    steps = [25, 50, 75, 100, 250, 500]
-    norm = [1.0e-6] * 5 + [1.0e-2]
-    algor = ["Newton"] * 6
-    for target_defo in input_deformations:
-        # determine push direction
-        if curr_defo < target_defo:
-            incr = abs(incr)
-            sign = +1.00
-        else:
-            incr = -abs(incr)
-            sign = -1.00
-        print("entering loop", target_defo)
-        while curr_defo * sign < target_defo * sign:
-            # determine increment
-            if abs(curr_defo - target_defo) < abs(incr) * scale[num_subdiv]:
-                incr_anl = sign * abs(curr_defo - target_defo)
-            else:
-                incr_anl = incr * scale[num_subdiv]
-            ops.test("EnergyIncr", norm[num_subdiv], steps[num_subdiv], 0)
-            ops.algorithm(algor[num_subdiv])
-            # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
-            ops.integrator("DisplacementControl", 1, 1, incr_anl)
-            ops.system("FullGeneral")
-            ops.analysis("Static")
-            flag = ops.analyze(1)
-            if flag != 0:
-                # analysis failed
-                if num_subdiv == len(scale) - 1:
-                    # can't refine further
-                    print()
-                    print("===========================")
-                    print("Analysis failed to converge")
-                    print("===========================")
-                    print()
-                    total_fail = True
-                    break
-                # can still reduce step size
-                num_subdiv += 1
-                # how many times to run with reduced step size
-                num_times = 10
-            else:
-                # analysis was successful
-                n_steps_success += 1
-                if num_times != 0:
-                    num_times -= 1
-                if num_subdiv != 0:
-                    if num_times == 0:
-                        num_subdiv -= 1
-                        num_times = 10
-                ops.reactions()
-                curr_defo = ops.nodeDisp(1, 1)
-                reaction = -ops.nodeReaction(0)[0]
-                forces.append(reaction)
-                deformations.append(curr_defo)
-            if total_fail:
-                break
-    print("Number of saved analysis steps:", n_steps_success)
-    results: nparr = np.column_stack((deformations, forces))
-    dframe = pd.DataFrame(results)
-    dframe.columns = ["deformation", "froce"]
-    if plot:
-        fig = px.line(dframe, x="deformation", y="force", markers=True)
-        fig.show()
-    return dframe
+NUMBERER = "RCM"
 
 
 @dataclass(repr=False)
@@ -216,6 +102,7 @@ class AnalysisStorageSettings:
     store_release_force_defo: bool = field(default=True)
     specific_nodes: list[int] = field(default_factory=list)
     pickle_results: bool = field(default=False)
+    solver: str = field(default='UmfPack')
 
 
 @dataclass(repr=False)
@@ -244,7 +131,7 @@ class Analysis:
     results: dict[str, Results] = field(default_factory=dict)
     logger: Optional[object] = field(default=None)
 
-    def log(self, msg: str):
+    def log(self, msg: str) -> None:
         """
         Adds a message to the log file
         """
@@ -252,7 +139,7 @@ class Analysis:
             # logger might not have been initialized yet
             self.logger.info(msg)
 
-    def print(self, thing: Any):
+    def print(self, thing: Any) -> None:
         """
         Prints a message to stdout
         """
@@ -623,27 +510,6 @@ class Analysis:
             forces: nparr = np.array((n_i, qy_i, qz_i, t_i, my_i, mz_i))
             self.results[case_name].element_forces[uid][step] = forces
 
-    #     def _read_frame_fiber_stress_strain(self):
-    #         for elm in self.mdl.list_of_line_elements():
-    #             if elm.model_as['type'] != 'fiber':
-    #                 continue
-    #             uid = elm.uid
-    #             mat_id = elm.section.material.uid
-    #             result = []
-    #             n_p = elm.n_p
-    #             pts = elm.section.snap_points
-    #             for pt in pts.keys():
-    #                 pt = list(pts.keys())[0]
-    #                 z_loc = pts[pt][0]
-    #                 y_loc = pts[pt][1]
-    #                 stress_strain = []
-    #                 for i in range(n_p):
-    #                     stress_strain.append(ops.eleResponse(
-    #                         int(uid), "section", str(i+1), "-fiber", str(y_loc),
-    #                         str(z_loc), str(mat_id), "stressStrain"))
-    #                 result.append(stress_strain)
-    #             self._store_result(self.fiber_stress_strain, uid, result)
-
     def _read_release_moment_rot(self, case_name, step, zerolength_elms):
         for release in zerolength_elms:
             # force_global = ops.eleResponse(
@@ -677,8 +543,6 @@ class Analysis:
         nodes,
         line_elements,
         zerolength_elements,
-        custom_read_results_method,
-        custom_read_results_method_args,
     ):
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
@@ -693,8 +557,6 @@ class Analysis:
         #     self._read_frame_fiber_stress_strain()
         if self.settings.store_release_force_defo:
             self._read_release_moment_rot(case_name, step, zerolength_elements)
-        if custom_read_results_method is not None:
-            custom_read_results_method(**custom_read_results_method_args)
 
     ##################################
     # Numeric Result Post-processing #
@@ -742,11 +604,7 @@ class StaticAnalysis(Analysis):
     single step.
     """
 
-    def run(
-        self,
-        custom_read_results_method=None,
-        custom_read_results_method_args={},
-    ):
+    def run(self):
         """
         Runs the static analysis.
         """
@@ -774,7 +632,7 @@ class StaticAnalysis(Analysis):
             line_elems = elastic_elems + disp_elems + truss_elems
             zerolength_elems = self.mdl.list_of_specific_element(element.ZeroLength)
             step = 0
-            ops.system(LN_ANALYSIS_SYSTEM)
+            ops.system(self.settings.solver)
             ops.numberer(NUMBERER)
             ops.constraints(*CONSTRAINTS)
             ops.test("EnergyIncr", 1.0e-8, 20, 3)
@@ -788,8 +646,6 @@ class StaticAnalysis(Analysis):
                 nodes,
                 line_elems,
                 zerolength_elems,
-                custom_read_results_method,
-                custom_read_results_method_args,
             )
             if self.settings.pickle_results:
                 self._write_results_to_disk()
@@ -982,7 +838,12 @@ class ModalAnalysis(Analysis):
             # tags = ops.getNodeTags()
             # self.print(len(tags))
             ops.constraints(*CONSTRAINTS)
-            ops.system(MD_ANALYSIS_SYSTEM)
+            if self.settings.solver.lower() in (
+                    'sparsesym', 'sparsespd'):
+                raise ValueError(
+                    f'{self.settings.solver} is unable '
+                    'to run a modal analysis. Use UmfPack.')
+            ops.system(self.settings.solver)
             # note: using SparseSYM results in wrong eigen decomposition
             num_inertial_nodes = 0
             ndtags = ops.getNodeTags()
@@ -1052,10 +913,11 @@ class NonlinearAnalysis(Analysis):
     Nonlinear analysis parent class.
     """
 
-    def _run_gravity_analysis(self, system):
+    def _run_gravity_analysis(self):
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
         ops.test("EnergyIncr", 1.0e-6, 100, 3)
-        self.log(f"G: Setting system to {system}")
+        system = self.settings.solver
+        self.log(f"G: Setting system solver to {system}")
         ops.system(system)
         self.log(f"G: Setting numberer to {NUMBERER}")
         ops.numberer(NUMBERER)
@@ -1071,88 +933,6 @@ class NonlinearAnalysis(Analysis):
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")
             raise ValueError("Analysis Failed")
-
-    # failed attempt
-    # def remove_damaged_elements(self):
-    #     """
-    #     Applies to fiber-section elements that use the Fatigue
-    #     material to simulate damage.
-    #     Elements for which any section has Damage >= 1 to more than a
-    #     set percentage of its fibers are removed.
-    #     Assumes that the section consists of a single part called 'main'
-    #     """
-    #     max_dmg_ratio = 0.30
-    #     candidate_elms = []
-    #     for elm in self.mdl.dict_of_specific_element(DispBeamColumn).values():
-    #         part = elm.section.section_parts['main']
-    #         if isinstance(elm.section, FiberSection):
-    #             if isinstance(part.ops_material, Fatigue):
-    #                 candidate_elms.append(elm)
-
-    #     for elm in candidate_elms:
-    #         part = elm.section.section_parts['main']
-    #         mat_uid = part.ops_material.uid
-    #         sec_dmg_percentages = []
-    #         for sec_num in range(1, elm.integration.n_p+1):
-    #             num_damaged_fibers = 0
-    #             pieces = subdivide_polygon(
-    #                 part.outside_shape, part.holes,
-    #                 elm.section.n_x, elm.section.n_y)
-    #             for piece in pieces:
-    #                 z_loc = piece.centroid.x
-    #                 y_loc = piece.centroid.y
-    #                 dmg = ops.eleResponse(
-    #                     elm.uid, 'section', str(sec_num),
-    #                     'fiber', str(y_loc), str(z_loc), str(mat_uid),
-    #                     'damage')[0]
-    #                 if dmg > 1.00:
-    #                     num_damaged_fibers += 1
-    #             damage_percentage = float(
-    #                 num_damaged_fibers)/float(len(pieces))
-    #             sec_dmg_percentages.append(damage_percentage)
-    #         max_damage = max(sec_dmg_percentages)
-    #         if max_damage > max_dmg_ratio:
-    #             # need to remove that element
-    #             import pdb
-    #             pdb.set_trace()
-    #             print('ok')
-    #             ops.remove('ele', elm.uid)
-    #             ops.reset()
-
-    # def intervention(self, n_steps_success):
-    #     if n_steps_success == -1:
-    #     # if n_steps_success == 2000:
-    #         elm = self.mdl.dict_of_disp_specific_element(DispBeamColumn)[49]
-    #         part = elm.section.section_parts['main']
-    #         mat_uid = part.ops_material.uid
-    #     else:
-    #         return
-    #     for sec_num in range(1, elm.integration.n_p+1):
-    #         zs = []
-    #         ys = []
-    #         dmgs = []
-    #         pieces = subdivide_polygon(
-    #             part.outside_shape, part.holes,
-    #             elm.section.n_x, elm.section.n_y)
-    #         for piece in pieces:
-    #             z_loc = piece.centroid.x
-    #             y_loc = piece.centroid.y
-    #             dmg = ops.eleResponse(
-    #                 elm.uid, 'section', str(sec_num),
-    #                 'fiber', str(y_loc), str(z_loc),
-    #                 str(mat_uid), 'damage')[0]
-    #             zs.append(z_loc)
-    #             ys.append(y_loc)
-    #             dmgs.append(dmg)
-    #         print(dmgs)
-    #         plt.scatter(zs, ys, s=0.1)
-    #         for i, txt in enumerate(dmgs):
-    #             plt.annotate(f'{txt:.1f}', (zs[i], ys[i]))
-    #         plt.title(f'Section {sec_num}/{sec_num}')
-    #         plt.show()
-    #     import pdb
-    #     pdb.set_trace()
-    #     print()
 
     def retrieve_node_displacement(self, uid, case_name):
         """
@@ -1362,8 +1142,6 @@ class PushoverAnalysis(NonlinearAnalysis):
         displ_incr,
         modeshape=None,
         loaded_node=None,
-        custom_read_results_method=None,
-        custom_read_results_method_args={},
     ):
         """
         Run pushover analysis
@@ -1422,7 +1200,7 @@ class PushoverAnalysis(NonlinearAnalysis):
             self.log("Defining loads")
             self._define_loads(case_name)
             self.log("Running gravity analysis")
-            self._run_gravity_analysis(NL_ANALYSIS_SYSTEM)
+            self._run_gravity_analysis()
 
             curr_displ = ops.nodeDisp(control_node.uid, control_dof + 1)
             n_steps_success = 0
@@ -1432,8 +1210,6 @@ class PushoverAnalysis(NonlinearAnalysis):
                 nodes,
                 line_elems,
                 zerolength_elems,
-                custom_read_results_method,
-                custom_read_results_method_args,
             )
 
             self.log("Starting pushover analysis")
@@ -1493,7 +1269,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                             control_dof + 1,
                             incr,
                         )
-                        ops.system(NL_ANALYSIS_SYSTEM)
+                        ops.system(self.settings.solver)
                         ops.analysis("Static")
                         flag = ops.analyze(1)
                         if flag != 0:
@@ -1523,9 +1299,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 n_steps_success,
                                 nodes,
                                 line_elems,
-                                zerolength_elems,
-                                custom_read_results_method,
-                                custom_read_results_method_args,
+                                zerolength_elems
                             )
                             curr_displ = ops.nodeDisp(
                                 int(control_node.uid), control_dof + 1
@@ -1550,10 +1324,7 @@ class PushoverAnalysis(NonlinearAnalysis):
                 n_steps_success,
                 nodes,
                 line_elems,
-                zerolength_elems,
-                custom_read_results_method,
-                custom_read_results_method_args,
-            )
+                zerolength_elems)
             self.print(f"Number of saved analysis steps: {n_steps_success}")
             metadata: dict[str, object] = {"successful steps": n_steps_success}
             self.results[case_name].n_steps_success = n_steps_success
@@ -1611,31 +1382,6 @@ class PushoverAnalysis(NonlinearAnalysis):
             "lb",
             ".0f",
         )
-
-    # def plot_brace_hysteresis(self, brace):
-    #     drift = []
-    #     resisting_force = []
-    #     n_i = brace.node_i.uid
-    #     n_j = brace.node_j.uid
-    #     x_axis = brace.x_axis
-    #     x_axis_horiz: nparr = np.array((x_axis[0], x_axis[1], 0.00))
-    #     x_axis_horiz = x_axis_horiz / np.linalg.norm(x_axis_horiz)
-    #     for step in range(self.results[case_name].n_steps_success):
-    #         disp_i = self.node_displacements[str(n_i)][step][0:3]
-    #         disp_j = self.node_displacements[str(n_j)][step][0:3]
-    #         diff_disp: nparr = np.array(disp_j) - np.array(disp_i)
-    #         disp_prj = np.dot(diff_disp, x_axis)
-    #         drift.append(disp_prj)
-    #         ielm = brace.end_segment_i.internal_elems[-1].uid
-    #         force = self.element_forces[str(ielm)][step][0:3]
-    #         force_prj = - np.dot(force, x_axis_horiz)
-    #         resisting_force.append(force_prj)
-    #     general_2d.line_plot_interactive(
-    #         "Brace Resisting Force",
-    #         drift, resisting_force, 'line',
-    #         'Story drift', 'in', '.0f',
-    #         'Resisting Force', 'lb', '.0f')
-
 
 def define_lateral_load_pattern(
     filename_x, filename_y, filename_z, file_time_incr
@@ -1744,13 +1490,11 @@ class NLTHAnalysis(NonlinearAnalysis):
         filename_y: str,
         filename_z: str,
         file_time_incr: float,
-        finish_time=0.00,
-        skip_steps=1,
-        damping={"type": None},
-        print_progress=True,
-        custom_read_results_method=None,
-        custom_read_results_method_args={},
-    ):
+        finish_time: float = 0.00,
+        skip_steps: int = 1,
+        damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
+        print_progress: bool = True,
+    ) -> dict[str, Union[int, str, float]]:
         """
         Run the nonlinear time-history analysis
         Args:
@@ -1804,15 +1548,6 @@ class NLTHAnalysis(NonlinearAnalysis):
         damping_type = damping.get("type")
         self.log(f'Damping Type: {damping_type}')
 
-        if damping_type in ("rayleigh", "stiffness"):
-            system = NL_ANALYSIS_SYSTEM
-        elif damping_type in ("modal", "modal+stiffness"):
-            system = MD_ANALYSIS_SYSTEM
-        elif not damping_type:
-            system = NL_ANALYSIS_SYSTEM
-        else:
-            raise ValueError(f"Invalid damping dype: {damping_type}.")
-
         nss = []
         if filename_x:
             gm_vals_x = np.genfromtxt(filename_x)
@@ -1863,7 +1598,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         self._define_loads(case_name)
 
         self.log("Starting gravity analysis (G)")
-        self._run_gravity_analysis(system)
+        self._run_gravity_analysis()
         self.log("Gravity analysis finished successfully")
         n_steps_success = 0
         self._read_opensees_results(
@@ -1872,8 +1607,6 @@ class NLTHAnalysis(NonlinearAnalysis):
             nodes,
             line_elems,
             zerolength_elems,
-            custom_read_results_method,
-            custom_read_results_method_args,
         )
 
 
@@ -1887,12 +1620,15 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
-        ops.system(system)
+        ops.system(self.settings.solver)
 
         if damping_type == "rayleigh":
             self.log("Using Rayleigh damping")
+            assert isinstance(damping["periods"], list)
+            assert isinstance(damping["periods"][0], float)
             w_i = 2 * np.pi / damping["periods"][0]
             zeta_i = damping["ratio"]
+            assert isinstance(damping["periods"][1], float)
             w_j = 2 * np.pi / damping["periods"][1]
             zeta_j = damping["ratio"]
             a_mat: nparr = np.array([[1 / w_i, w_i], [1 / w_j, w_j]])
@@ -1904,6 +1640,8 @@ class NLTHAnalysis(NonlinearAnalysis):
 
         if damping_type == "stiffness":
             self.log("Using stiffness proportional damping")
+            assert isinstance(damping["ratio"], float)
+            assert isinstance(damping["period"], float)
             ops.rayleigh(
                 0.00, 0.0, 0.0, damping["ratio"] * damping["period"] / np.pi
             )
@@ -1923,8 +1661,9 @@ class NLTHAnalysis(NonlinearAnalysis):
             ops.eigen(num_modes)
             # ops.systemSize()
             self.log("Eigenvalue analysis finished")
-            ops.modalDamping(damping["ratio"])
-            self.log(f"{damping_ratio*100:.2f}% " "modal damping defined")
+            assert isinstance(damping_ratio, float)
+            ops.modalDamping(damping_ratio)
+            self.log(f"{damping_ratio*100.00:.2f}% " "modal damping defined")
 
         if damping_type == "modal+stiffness":
 
@@ -1937,6 +1676,8 @@ class NLTHAnalysis(NonlinearAnalysis):
             # ops.systemSize()
             self.log("Eigenvalue analysis finished")
             ops.modalDamping(damping["ratio_modal"])
+            assert isinstance(damping["ratio_stiffness"], float)
+            assert isinstance(damping["period"], float)
             ops.rayleigh(
                 0.00,
                 0.0,
@@ -2003,7 +1744,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                     # otherwise, we can still reduce step size
                     num_subdiv += 1
                     # how many times to run with reduced step size
-                    num_times = 10
+                    num_times = 100
                 else:
                     # analysis was successful
                     prev_time = curr_time
@@ -2011,7 +1752,7 @@ class NLTHAnalysis(NonlinearAnalysis):
 
                     # progress bar
                     if pbar is not None:
-                        pbar.update(curr_time - prev_time)
+                        pbar.update(np.around(curr_time - prev_time, decimals=5))
                     # log entry for analysis status
                     if perf_counter() - the_time > 5.00*60.00:  # 5 min
                         the_time = perf_counter()
@@ -2037,14 +1778,12 @@ class NLTHAnalysis(NonlinearAnalysis):
                             nodes,
                             line_elems,
                             zerolength_elems,
-                            custom_read_results_method,
-                            custom_read_results_method_args,
                         )
                         self.time_vector.append(curr_time)
                     if num_subdiv != 0:
                         if num_times == 0:
                             num_subdiv -= 1
-                            num_times = 10
+                            num_times = 100
 
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
@@ -2056,7 +1795,7 @@ class NLTHAnalysis(NonlinearAnalysis):
             pbar.close()
 
         self.log("Analysis finished")
-        metadata = {
+        metadata: dict[str, Union[int, str, float]] = {
             "successful steps": n_steps_success,
             "analysis_finished_successfully": not analysis_failed,
         }

@@ -32,7 +32,9 @@ if TYPE_CHECKING:
     from ..physical_material import PhysicalMaterial
 
 
-def fix_all(model: Model, **kwargs):
+def fix_all(
+        model: Model, **kwargs: dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Fixed in all directions
     """
@@ -43,7 +45,9 @@ def fix_all(model: Model, **kwargs):
     return dirs, mats
 
 
-def release_6(model: Model, **kwargs):
+def release_6(
+        model: Model, **kwargs: dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees strong axis bending
     """
@@ -54,7 +58,9 @@ def release_6(model: Model, **kwargs):
     return dirs, mats
 
 
-def release_5(model: Model, **kwargs):
+def release_5(
+        model: Model, **kwargs: dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees weak axis bending
     """
@@ -65,7 +71,9 @@ def release_5(model: Model, **kwargs):
     return dirs, mats
 
 
-def release_56(model: Model, **kwargs):
+def release_56(
+        model: Model, **kwargs: dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees both strong and weak axis bending
     """
@@ -77,16 +85,16 @@ def release_56(model: Model, **kwargs):
 
 
 def imk_6(
-    model: Model,
-    element_length: float,
-    lboverl: float,
-    loverh: float,
-    rbs_factor: Optional[float],
-    consider_composite: bool,
-    section: ElasticSection,
-    physical_material: PhysicalMaterial,
-    **kwargs,
-):
+        model: Model,
+        element_length: float,
+        lboverl: float,
+        loverh: float,
+        rbs_factor: Optional[float],
+        consider_composite: bool,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        **kwargs: dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
     steel components in support of collapse prediction of steel moment
@@ -118,16 +126,16 @@ def imk_6(
 
 
 def imk_56(
-    model: Model,
-    element_length: float,
-    lboverl: float,
-    loverh: float,
-    rbs_factor: Optional[float],
-    consider_composite: bool,
-    section: ElasticSection,
-    physical_material: PhysicalMaterial,
-    **kwargs,
-):
+        model: Model,
+        element_length: float,
+        lboverl: float,
+        loverh: float,
+        rbs_factor: Optional[float],
+        consider_composite: bool,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        **kwargs:  dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     release in the weak axis bending direction,
     imk (see imk docstring) in the strong axis bending direction
@@ -161,12 +169,12 @@ def imk_56(
 
 
 def gravity_shear_tab(
-    model: Model,
-    consider_composite: bool,
-    section: ElasticSection,
-    physical_material: PhysicalMaterial,
-    **kwargs,
-):
+        model: Model,
+        consider_composite: bool,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        **kwargs:  dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
     the overstrength and collapse capacity of steel frame buildings
@@ -298,15 +306,15 @@ def gravity_shear_tab(
 
 
 def steel_w_col_pz(
-    model: Model,
-    section: ElasticSection,
-    physical_material: PhysicalMaterial,
-    pz_length: float,
-    pz_doubler_plate_thickness: float,
-    pz_hardening: float,
-    only_elastic: bool = False,
-    **kwargs,
-):
+        model: Model,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        pz_length: float,
+        pz_doubler_plate_thickness: float,
+        pz_hardening: float,
+        only_elastic: bool = False,
+        **kwargs:  dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
     performance evaluation of steel moment resisting frame
@@ -371,14 +379,14 @@ def steel_w_col_pz(
 
 
 def steel_brace_gusset(
-    model: Model,
-    physical_mat: PhysicalMaterial,
-    d_brace: float,
-    l_c: float,
-    t_p: float,
-    l_b: float,
-    **kwargs,
-):
+        model: Model,
+        physical_mat: PhysicalMaterial,
+        d_brace: float,
+        l_c: float,
+        t_p: float,
+        l_b: float,
+        **kwargs:  dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
     analysis model for special concentrically braced frames, Journal

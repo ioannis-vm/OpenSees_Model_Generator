@@ -29,10 +29,10 @@ def smrf_scwb(
     beam_udl_j: Optional[float],
     rbs_proportion_j: Optional[float],
     s_h: float,
-    f_y,
-    ry_coeff=1.15,
-    omega_coeff=1.10,
-):
+    f_y: float,
+    ry_coeff: float = 1.15,
+    omega_coeff: float = 1.10,
+) -> float:
     """
     SMRF strong column weak beam check
     """
@@ -113,10 +113,10 @@ def smrf_pz_doubler_plate_requirement(
     bay_length: float,
     place: str,
     s_h: float,
-    f_y,
-    ry_coeff=1.15,
-    omega_coeff=1.10,
-):
+    f_y: float,
+    ry_coeff: float = 1.15,
+    omega_coeff: float = 1.10,
+) -> float:
     """
     Calculates the required doubler plate thickness
     """

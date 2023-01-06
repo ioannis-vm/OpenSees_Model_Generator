@@ -15,6 +15,7 @@ Common definitions
 import re
 from pprint import pprint
 from typing import OrderedDict
+from typing import Optional
 from typing import Any
 
 # very big, very small numbers used for
@@ -58,7 +59,7 @@ def methods(obj: object) -> list[str]:
     return [s for s in object_methods if not re.match(pattern, s)]
 
 
-def print_methods(obj: object):
+def print_methods(obj: object) -> None:
     """
     Prints the methods of an object.
     """
@@ -66,14 +67,14 @@ def print_methods(obj: object):
     pprint(object_methods)
 
 
-def print_dir(obj: object):
+def print_dir(obj: object) -> None:
     """
     Prints the entire output of `dir()` of an object
     """
     pprint(dir(obj))
 
 
-def previous_element(dct: OrderedDict[Any, Any], key):
+def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:
     """
     Returns the value of the element that comes before the given key
     in an ordered dictionary.

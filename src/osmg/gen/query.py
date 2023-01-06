@@ -62,7 +62,7 @@ class ElmQuery:
         y_loc: float,
         lvl: int,
         z_loc: Optional[float] = None,
-        internal=False,
+        internal: bool = False,
     ) -> Optional[Node]:
         """
         Looks if a node exists at the given location.

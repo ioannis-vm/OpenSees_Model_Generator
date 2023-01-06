@@ -70,7 +70,7 @@ class Line:
         """
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: "Line"):
+    def intersect(self, other: "Line") -> nparr:
         """
         Calculates the intersection point of this line with another
         line. Returns None if the lines don't intersect.  Note: 'line'

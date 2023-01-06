@@ -41,7 +41,7 @@ class MaterialGenerator:
         brace_length: float,
         node_i_uid: int,
         node_j_uid: int,
-    ):
+    ) -> MaxStrainRange:
         """
         Sen, A. D., Roeder, C. W., Lehman, D. E., & Berman,
         J. W. (2019). Nonlinear modeling of concentrically braced

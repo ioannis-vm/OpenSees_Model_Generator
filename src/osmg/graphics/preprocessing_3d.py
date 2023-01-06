@@ -23,6 +23,7 @@ import numpy as np
 import numpy.typing as npt
 from . import graphics_common, graphics_common_3d
 from ..ops import element
+from ..ops import node as node_module
 from ..transformations import local_axes_from_points_and_angle
 
 if TYPE_CHECKING:
@@ -36,7 +37,8 @@ def add_data__nodes(data_dict, mdl, load_case):
     """
     Adds a trace containing nodes
     Arguments:
-      data_dict (dict): dictionary containing figure data
+      data_dict (list[dict[str, object]]):
+        list of dictionaries containing figure data
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
@@ -141,11 +143,14 @@ def add_data__nodes(data_dict, mdl, load_case):
         )
 
 
-def add_data__parent_nodes(data_dict, load_case: LoadCase):
+def add_data__parent_nodes(
+        data_dict: list[dict[str, object]],
+        load_case: LoadCase) -> None:
     """
     Adds a trace containing parent nodes
     Arguments:
-      data_dict (dict): dictionary containing figure data
+      data_dict (list[dict[str, object]]):
+        list of dictionaries containing figure data
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
@@ -202,11 +207,14 @@ def add_data__parent_nodes(data_dict, load_case: LoadCase):
     )
 
 
-def add_data__internal_nodes(data_dict, mdl, load_case):
+def add_data__internal_nodes(
+        data_dict: list[dict[str, object]],
+        mdl: Model, load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing internal nodes
     Arguments:
-      data_dict (dict): dictionary containing figure data
+      data_dict (list[dict[str, object]]):
+        list of dictionaries containing figure data
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
@@ -305,20 +313,21 @@ def add_data__internal_nodes(data_dict, mdl, load_case):
         )
 
 
-def add_data__release_nodes(data_dict, list_of_nodes):
+def add_data__release_nodes(
+        data_dict: list[dict[str, object]],
+        list_of_nodes: list[node_module.Node]) -> None:
     """
     Adds a trace containing release nodes
     Arguments:
-      data_dict (dict): dictionary containing figure data
+      data_dict (list[dict[str, object]]):
+        list of dictionaries containing figure data
+      list_of_nodes (list[Node]): List of nodes where a release is present.
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
     z_list = [node.coords[2] for node in list_of_nodes]
-    customdata = []
-    for node in list_of_nodes:
-        customdata.append((node.uid, *node.mass, *node.load_total()))
     data_dict.append(
         {
             "type": "scatter3d",
@@ -417,11 +426,14 @@ def add_data__release_nodes(data_dict, list_of_nodes):
 
 
 def add_data__frames(
-        data_dict, mdl: Model, load_case: Optional[LoadCase] = None):
+        data_dict: list[dict[str, object]],
+        mdl: Model,
+        load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
-      data_dict (dict): dictionary containing figure data
+      data_dict (list[dict[str, object]]):
+        list of dictionaries containing figure data
       mdl (Model): the model to be visualized
       load_case (LoadCase): the load_case to be visualized
     """
@@ -531,7 +543,9 @@ def add_data__frames(
 
 
 def add_data__bars(
-        data_dict, mdl: Model, load_case: Optional[LoadCase] = None):
+        data_dict: list[dict[str, object]],
+        mdl: Model,
+        load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
@@ -1044,14 +1058,14 @@ def add_data__extruded_bars_mesh(data_dict, mdl):
 def show(
     mdl: Model,
     load_case: Optional[LoadCase] = None,
-    extrude=False,
-    offsets=True,
-    global_axes=True,
-    parent_nodes=True,
-    frame_axes=False,
-    zerolength_axes=False,
-    camera=None,
-):
+    extrude: bool = False,
+    offsets: bool = True,
+    global_axes: bool = True,
+    parent_nodes: bool = True,
+    frame_axes: bool = False,
+    zerolength_axes: bool = False,
+    camera: Optional[dict[str, object]] = None,
+) -> None:
     """
     Visualize the model
     Arguments:

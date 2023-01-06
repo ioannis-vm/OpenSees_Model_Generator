@@ -100,7 +100,7 @@ class Collection(dict[TK, TV]):
 
     parent: Any = field(repr=False)
 
-    def add(self, obj):
+    def add(self, obj: Any) -> None:
         """
         Add an object to the collection. The object needs to have
         a unique id attribute, `uid`.
@@ -176,7 +176,7 @@ class CollectionActive(Collection[TK, TV]):
 
     active: list[TK] = field(default_factory=list)
 
-    def set_active(self, uids: list[TK]):
+    def set_active(self, uids: list[TK]) -> None:
         """
         Sets the active objects.
         Args:

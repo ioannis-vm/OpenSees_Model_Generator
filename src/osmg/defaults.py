@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def load_util_rigid_elastic(model: Model):
+def load_util_rigid_elastic(model: Model) -> None:
     """
     Adds a default rigid elastic beamcolumn element
     to the model
@@ -52,7 +52,7 @@ def load_util_rigid_elastic(model: Model):
     model.elastic_sections.add(sec)
 
 
-def load_default_elastic(model: Model, sec_name: str):
+def load_default_elastic(model: Model, sec_name: str) -> None:
     """
     Adds default non-rigid elastic beamcolumn element
     sections to the model
@@ -68,7 +68,7 @@ def load_default_elastic(model: Model, sec_name: str):
     )
 
 
-def load_default_steel(model: Model):
+def load_default_steel(model: Model) -> None:
     """
     Adds a default steel material to the model.
 
@@ -126,7 +126,7 @@ def load_default_steel(model: Model):
     model.physical_materials.add(physical_mat)
 
 
-def load_default_fix_release(model: Model):
+def load_default_fix_release(model: Model) -> None:
     """
     Loads default fix and release elastic uniaxial materials
     used to simulate moment releases using zerolength elements.

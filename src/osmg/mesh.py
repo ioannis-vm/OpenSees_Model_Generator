@@ -130,7 +130,7 @@ class Edge:
         """
         return f"(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) "
 
-    def define_halfedge(self, vertex: Vertex):
+    def define_halfedge(self, vertex: Vertex) -> Halfedge:
         """
         For the current edge instance and given one of its vertices,
         we want the halfedge that points to the direction
@@ -182,7 +182,7 @@ class Edge:
             raise ValueError("The edge is not connected to the given vertex")
         return v_other
 
-    def overlaps_or_crosses(self, other: Edge):
+    def overlaps_or_crosses(self, other: Edge) -> bool:
         """
         Returns True if this edge overlaps or crosses another edge.
         Edges are allowed to share one vertex (returns False), but not
@@ -884,7 +884,10 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     return pieces
 
 
-def subdivide_hss(sec_h: float, sec_b: float, sec_t: float, plot=False):
+def subdivide_hss(
+        sec_h: float, sec_b: float,
+        sec_t: float, plot: bool = False) \
+        -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.
     Args:

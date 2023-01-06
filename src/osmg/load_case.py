@@ -44,7 +44,7 @@ class PointLoadMass:
 
     val: nparr = field(default_factory=lambda: np.zeros(shape=6))
 
-    def add(self, load: nparr):
+    def add(self, load: nparr) -> None:
         """
         Adds some quantity to the existing quantity.
 
@@ -88,7 +88,7 @@ class LineElementUDL:
         res += f"  val: {self.val}\n"
         return res
 
-    def add_glob(self, udl: nparr):
+    def add_glob(self, udl: nparr) -> None:
         """
         Adds a uniformly distributed load
         to the existing udl
@@ -135,7 +135,7 @@ class LineElementUDL:
             udl_local = transf_mat @ udl
             self.val += udl_local
 
-    def to_global(self):
+    def to_global(self) -> nparr:
         """
         Returns the quantity expressed in the global coordinate system
         """
@@ -193,7 +193,9 @@ class LoadCase:
                 self, lvl
             )
 
-    def rigid_diaphragms(self, level_uids: list[int], gather_mass=False):
+    def rigid_diaphragms(
+            self, level_uids: list[int],
+            gather_mass: bool = False) -> None:
         """
         Processes the geometry of the given levels and applies rigid
         diaphragm constraints

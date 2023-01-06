@@ -43,7 +43,7 @@ class SectionGenerator:
 
     def generate_generic_elastic(
         self, name: str, e_times_a: float, e_times_i: float, g_times_j: float
-    ):
+    ) -> ElasticSection:
         """
         Generates an ElasticSection object with the specified properties.
 
@@ -130,8 +130,8 @@ class SectionGenerator:
         ops_material: str,
         physical_material: str,
         sec_type: Type[Section],
-        store_in_model=True,
-        return_section=False,
+        store_in_model: bool = True,
+        return_section: bool = False,
     ) -> dict[str, ElasticSection | FiberSection]:
         """
         Loads a section from the AISC steel section database.

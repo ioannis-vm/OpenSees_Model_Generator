@@ -22,7 +22,7 @@ class UIDGenerator:
     Generates unique identifiers (uids) for various objects.
     """
 
-    def new(self, thing: str):
+    def new(self, thing: str) -> int:
         """
         Generates a new uid for an object of the given type.
 
@@ -46,7 +46,9 @@ class UIDGenerator:
         """
         if hasattr(self, thing):
             res = next(getattr(self, thing))
+            assert isinstance(res, int)
         else:
             setattr(self, thing, count(0))
             res = next(getattr(self, thing))
+            assert isinstance(res, int)
         return res

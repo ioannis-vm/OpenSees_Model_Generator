@@ -16,6 +16,7 @@ Model Generator for OpenSees ~ model
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
+from typing import Type
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
@@ -38,7 +39,9 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def transfer_component(other: Model, component: ComponentAssembly):
+def transfer_component(
+        other: Model,
+        component: ComponentAssembly) -> None:
     """
     Transfers a single component assembly from one model to
     another, assuming the other model was generated with the
@@ -163,7 +166,7 @@ class Model:
             res[uids_tuple] = component
         return res
 
-    def add_level(self, uid: int, elevation: float):
+    def add_level(self, uid: int, elevation: float) -> None:
         """
         Adds a level to the model.
         Args:
@@ -278,7 +281,8 @@ class Model:
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
-            self, element_class) -> dict[int, element.Element]:
+            self, element_class: Type[element.Element]) \
+            -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model of a
         particular element class.
@@ -291,7 +295,9 @@ class Model:
                 res[uid] = elm
         return res
 
-    def list_of_specific_element(self, element_class) -> list[element.Element]:
+    def list_of_specific_element(
+            self, element_class: Type[element.Element]) \
+            -> list[element.Element]:
         """
         Returns a list of all element objects in the model of a
         particular element class.
@@ -343,7 +349,8 @@ class Model:
         res.uniaxial_materials = self.uniaxial_materials
         return res
 
-    def transfer_by_polygon_selection(self, other: Model, coords: nparr):
+    def transfer_by_polygon_selection(
+            self, other: Model, coords: nparr) -> None:
         """
         Uses `transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified
