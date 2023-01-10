@@ -120,10 +120,19 @@ class Collection(dict[TK, TV]):
         """
         res = None
         for thing in self.values():
+            found = False
             if hasattr(thing, attr):
                 other_val = getattr(thing, attr)
                 if other_val == val:
                     res = thing
+                    found = True
+                    break
+            if found:
+                break
+        if res is None:
+            raise ValueError(
+                f'Item having the value "{val}" '
+                f'in the attribute "{attr}" not found in collection.')
         return res
 
     def __srepr__(self):
