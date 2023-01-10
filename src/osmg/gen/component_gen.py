@@ -1019,6 +1019,97 @@ class BeamColumnGenerator:
             defined_component_assemblies[key] = mthd(**args)
         return defined_component_assemblies
 
+    def add_diagonal_active(
+            self,
+            xi_coord: float,
+            yi_coord: float,
+            xj_coord: float,
+            yj_coord: float,
+            offset_i: nparr,
+            offset_j: nparr,
+            snap_i: str,
+            snap_j: str,
+            transf_type: str,
+            n_sub: int,
+            section: ElasticSection,
+            element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
+            placement: str = 'centroid',
+            angle: float = 0.00,
+            camber_2: float = 0.00, camber_3: float = 0.00,
+            split_existing_i: bool = None,
+            split_existing_j: bool = None,
+            method: str = 'generate_plain_component_assembly',
+            additional_args: dict[str, object] = {}
+    ) -> dict[int, ComponentAssembly]:
+        """
+        Adds a diagonal beamcolumn element to all active levels.
+        """
+        query = ElmQuery(self.model)
+        ndg = NodeGenerator(self.model)
+        lvls = self.model.levels
+        assert lvls.active, 'No active levels.'
+        defined_component_assemblies: dict[int, ComponentAssembly] = {}
+        for key in lvls.active:
+            lvl = lvls[key]
+            lvl_prev = lvls.get(key-1)
+
+            if not lvl_prev:
+                continue
+
+            p_i_init = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
+            p_j_init = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
+
+            if section.snap_points and (placement != 'centroid'):
+                # obtain offset from section (local system)
+                d_z, d_y = section.snap_points[placement]
+                sec_offset_local: nparr = np.array([0.00, d_y, d_z])
+                # retrieve local coordinate system
+                x_axis, y_axis, z_axis = \
+                    local_axes_from_points_and_angle(
+                        p_i_init, p_j_init, angle)  # type: ignore
+                t_glob_to_loc = transformation_matrix(
+                    x_axis, y_axis, z_axis)
+                t_loc_to_glob = t_glob_to_loc.T
+                sec_offset_global = t_loc_to_glob @ sec_offset_local
+            else:
+                sec_offset_global = np.zeros(3)
+
+            node_i, eo_i = beam_placement_lookup(
+                xi_coord, yi_coord, query, ndg,
+                lvls, key, offset_i,
+                sec_offset_global,
+                split_existing_i,
+                snap_i)
+            node_j, eo_j = beam_placement_lookup(
+                xj_coord, yj_coord, query, ndg,
+                lvls, key-1, offset_j,
+                sec_offset_global,
+                split_existing_j,
+                snap_j)
+
+            args = {
+                'component_purpose': 'diagonal_component',
+                'lvl': lvl,
+                'node_i': node_i,
+                'node_j': node_j,
+                'n_sub': n_sub,
+                'eo_i': eo_i,
+                'eo_j': eo_j,
+                'section': section,
+                'element_type': element_type,
+                'transf_type': transf_type,
+                'angle': angle,
+                'camber_2': camber_2,
+                'camber_3': camber_3
+            }
+
+            args.update(additional_args)
+            assert hasattr(self, method), \
+                f'Method not available: {method}'
+            mthd = getattr(self, method)
+            defined_component_assemblies[key] = mthd(**args)
+        return defined_component_assemblies
+
     def add_pz_active(
             self,
             x_coord: float,
