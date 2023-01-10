@@ -990,7 +990,7 @@ class BeamColumnGenerator:
                 query,
                 ndg,
                 lvls,
-                key - 1,
+                key,
                 offset_j,
                 sec_offset_global,
                 split_existing_j,
