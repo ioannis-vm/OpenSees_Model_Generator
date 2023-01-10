@@ -12,13 +12,12 @@ Model Generator for OpenSees ~ element
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-# pylint: disable=invalid-name
-
-
 from typing import Optional
 from dataclasses import dataclass
 from dataclasses import field
 
+
+# pylint: disable=invalid-name
 
 @dataclass
 class UniaxialMaterial:
@@ -93,6 +92,128 @@ class Steel02(UniaxialMaterial):
             args.append(self.a4)
         if self.sig_init:
             args.append(self.sig_init)
+
+        return args
+
+
+@dataclass
+class Steel4(UniaxialMaterial):
+    """
+    OpenSees Steel4
+    https://openseespydoc.readthedocs.io/en/latest/src/steel4.html
+    """
+
+    Fy: float
+    E0: float
+    b_k: Optional[float] = field(default=None)
+    R_0: float = field(default=20.00)
+    r_1: float = field(default=0.90)
+    r_2: float = field(default=0.15)
+
+    b_kc: Optional[float] = field(default=False)
+    R_0c: float = field(default=20.00)
+    r_1c: float = field(default=0.90)
+    r_2c: float = field(default=0.15)
+
+    b_i: Optional[float] = field(default=None)
+    b_l: Optional[float] = field(default=None)
+    rho_i: Optional[float] = field(default=None)
+    R_i: Optional[float] = field(default=None)
+    l_yp: Optional[float] = field(default=None)
+    f_u: Optional[float] = field(default=None)
+    R_u: Optional[float] = field(default=None)
+
+    f_uc: Optional[float] = field(default=None)
+    R_uc: Optional[float] = field(default=None)
+    b_ic: Optional[float] = field(default=None)
+    b_lc: Optional[float] = field(default=None)
+    rho_ic: Optional[float] = field(default=None)
+    R_ic: Optional[float] = field(default=None)
+
+    sig_init: Optional[float] = field(default=None)
+    cycNum: Optional[float] = field(default=None)
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+        """
+        # non-symmetric behavior
+        if self.b_kc:
+            assert self.R_0c is not None
+            assert self.r_1c is not None
+            assert self.r_2c is not None
+            assert self.b_k
+            asym = True
+        else:
+            asym = False
+        # ultimate strength limit
+        if self.f_u:
+            ultimate = True
+            if asym:
+                assert self.f_uc is not None
+                assert self.R_uc is not None
+        else:
+            ultimate = False
+        # isotropic hardening
+        if self.b_i:
+            iso = True
+            assert self.b_l is not None
+            assert self.rho_i is not None
+            assert self.R_i is not None
+            assert self.l_yp is not None
+            if asym:
+                assert self.b_lc is not None
+                assert self.rho_ic is not None
+                assert self.R_ic is not None
+        else:
+            iso = False
+        # kinematic hardening
+        if self.b_k:
+            kinematic = True
+            assert self.R_0 is not None
+            assert self.r_1 is not None
+            assert self.r_2 is not None
+            if asym:
+                assert self.R_0c is not None
+                assert self.r_1c is not None
+                assert self.r_2c is not None
+        else:
+            kinematic = False
+
+        #
+        # construct argument list
+        #
+
+        # these are required and will always be there
+        args = [
+            "Steel4",
+            self.uid,
+            self.Fy,
+            self.E0
+        ]
+
+        # optional arguments:
+        if asym:
+            args.extend(['-asym'])
+        if kinematic:
+            args.extend(['-kin', self.b_k, self.R_0, self.r_1, self.r_2])
+            if asym:
+                args.extend([self.b_kc, self.R_0c, self.r_1c, self.r_2c])
+        if iso:
+            args.extend(['-iso', self.b_i, self.rho_i,
+                         self.b_l, self.R_i, self.l_yp])
+            if asym:
+                args.extend([self.b_ic, self.rho_ic,
+                             self.b_lc, self.R_ic])
+        if ultimate:
+            args.extend(['-ult', self.f_u, self.R_u])
+            if asym:
+                args.extend([self.f_uc, self.R_uc])
+        if self.sig_init:
+            args.extend(['-init', self.sig_init])
+        if self.cycNum:
+            args.extend(['-mem', self.cycNum])
 
         return args
 
