@@ -657,7 +657,7 @@ def show_deformed_shape(
     extrude,
     camera=None,
     subset_model=None,
-    animation=True,
+    animation=False,
     init_step=0,
     step_skip=0,
 ):
@@ -672,6 +672,13 @@ def show_deformed_shape(
         provided, the scaling factor is calculated automatically.
       extrude (bool): wether to extrude frame elements
       camera (dict): custom positioning of the camera
+      subset_model (Model): subset model used to only show certain
+        components
+      animation (bool): show all frames up to the one identified with
+        `step`
+      init_step (int): starting step, in case of animation
+      step_skip (int): how many frames to skip to reduce the number of
+        frames in case an animation
     """
 
     if subset_model:
