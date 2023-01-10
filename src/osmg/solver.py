@@ -89,13 +89,14 @@ class Results:
 
 
 @dataclass(repr=False)
-class AnalysisStorageSettings:
+class AnalysisSettings:
     """
     Analysis storage settings object.
     Controls what will be stored and how.
     """
 
     log_file: Optional[str] = field(default=None)
+    silent: bool = field(default=False)
     store_forces: bool = field(default=True)
     store_reactions: bool = field(default=True)
     store_fiber: bool = field(default=True)
@@ -115,7 +116,6 @@ class Analysis:
         load case objects in which those load cases reside.
       output_directory (Optional[str]): Where to place the results
         when it is requested for them to be pickled.
-      silent (bool): Suppress printing
       settings (AnalysisStorageSettings): analysis settings
       results (Results): analysis results
       logger(Optional[object]): Logger object
@@ -124,9 +124,8 @@ class Analysis:
     mdl: Model
     load_cases: dict[str, LoadCase]
     output_directory: Optional[str] = field(default=None)
-    silent: bool = field(default=False)
-    settings: AnalysisStorageSettings = field(
-        default_factory=AnalysisStorageSettings
+    settings: AnalysisSettings = field(
+        default_factory=AnalysisSettings
     )
     results: dict[str, Results] = field(default_factory=dict)
     logger: Optional[object] = field(default=None)
@@ -139,12 +138,12 @@ class Analysis:
             # logger might not have been initialized yet
             self.logger.info(msg)
 
-    def print(self, thing: Any) -> None:
+    def print(self, thing: Any, end: str = '\n') -> None:
         """
         Prints a message to stdout
         """
-        if not self.silent:
-            print(thing)
+        if not self.settings.silent:
+            print(thing, end=end)
         if self.logger:
             # logger might not have been initialized yet
             self.log(thing)
@@ -593,6 +592,7 @@ class Analysis:
                             - local_reaction[0] * y_coord,
                         ]
                     )
+                    # add to the global reactions
                     reactions += global_reaction
         return reactions
 
@@ -739,8 +739,9 @@ class ModalAnalysis(Analysis):
                     if isinstance(elm.mat, uniaxial_material.Elastic):
                         e_mod = elm.mat.e_mod
                     else:
-                        print('Ignoring truss element with '
-                              f'{elm.mat.__class__.__name__} material')
+                        self.print(
+                            'Ignoring truss element with '
+                            f'{elm.mat.__class__.__name__} material')
                         e_mod = 0.00
                     etimesa = e_mod * elm.area
                     etimesi_maj = 0.00
@@ -1197,6 +1198,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 
             self.log("Defining elements in OpenSees")
             self._to_opensees_domain(case_name)
+
+
             self.log("Defining loads")
             self._define_loads(case_name)
             self.log("Running gravity analysis")
@@ -1231,7 +1234,8 @@ class PushoverAnalysis(NonlinearAnalysis):
 
             try:
 
-                for target_displacement in target_displacements:
+                for i_loop, target_displacement \
+                    in enumerate(target_displacements):
 
                     if total_fail:
                         break
@@ -1244,7 +1248,6 @@ class PushoverAnalysis(NonlinearAnalysis):
                         displ_incr = -abs(displ_incr)
                         sign = -1.00
 
-                    self.print(f"entering loop: {target_displacement}")
                     while curr_displ * sign < target_displacement * sign:
 
                         # determine increment
@@ -1301,10 +1304,13 @@ class PushoverAnalysis(NonlinearAnalysis):
                                 line_elems,
                                 zerolength_elems
                             )
+
                             curr_displ = ops.nodeDisp(
                                 int(control_node.uid), control_dof + 1
                             )
-                            print(
+                            self.print(
+                                f"Loop ({i_loop+1}/"
+                                f"{len(target_displacements)}) | "
                                 "Target displacement: "
                                 f"{target_displacement:.2f}"
                                 f" | Current: {curr_displ:.4f}",
