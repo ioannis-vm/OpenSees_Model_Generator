@@ -573,9 +573,20 @@ class Analysis:
                     x_coord = node.coords[0]
                     y_coord = node.coords[1]
                     z_coord = node.coords[2]
-                    local_reaction = self.results[case_name].node_reactions[
-                        uid
-                    ][step]
+                    local_reaction = np.array(
+                        self.results[case_name].node_reactions[
+                            uid
+                        ][step])
+                    # bug fix: It has been observed that sometimes
+                    # OpenSees reports reactions to unrestrained DOFs.
+                    # https://opensees.berkeley.edu/community/
+                    # viewtopic.php?f=12&t=70795
+                    # To overcome this, we replace the reported
+                    # reactions corresponding to unrestrained DOFs
+                    # with zero in the following line
+                    local_reaction[~np.array(node.restraint)] = 0.00
+
+                    # transfer moments to the global coordinate system
                     global_reaction: nparr = np.array(
                         [
                             local_reaction[0],
