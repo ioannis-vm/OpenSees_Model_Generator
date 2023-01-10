@@ -304,56 +304,68 @@ class TrussBarGenerator:
         component.external_nodes.add(node_i)
         component.external_nodes.add(node_j)
 
-        # if there is an offset at the i-end, create an internal node
-        # and add a rigidlink element to the component assembly
-        if np.linalg.norm(eo_i) > common.EPSILON:
-            int_node_i = Node(
-                self.model.uid_generator.new('node'),
-                [*(np.array(node_i.coords) + eo_i)]
-            )
-            component.internal_nodes.add(int_node_i)
-            n_i = int_node_i
-            x_axis, y_axis, _ = local_axes_from_points_and_angle(
-                np.array(node_i.coords),
-                np.array(int_node_i.coords),
-                0.00)
-            dirs, mats = fix_all(self.model)
-            elm_link = TwoNodeLink(
-                component,
-                self.model.uid_generator.new("element"),
-                [node_i, int_node_i],
-                mats,
-                dirs,
-                x_axis,
-                y_axis,
-            )
-            component.elements.add(elm_link)
-        else:
-            n_i = node_i
-        if np.linalg.norm(eo_j) > common.EPSILON:
-            int_node_j = Node(
-                self.model.uid_generator.new('node'),
-                [*(np.array(node_j.coords) + eo_j)]
-            )
-            component.internal_nodes.add(int_node_j)
-            n_j = int_node_j
-            x_axis, y_axis, _ = local_axes_from_points_and_angle(
-                np.array(node_j.coords),
-                np.array(int_node_j.coords),
-                0.00)
-            dirs, mats = fix_all(self.model)
-            elm_link = TwoNodeLink(
-                component,
-                self.model.uid_generator.new("element"),
-                [node_j, int_node_j],
-                mats,
-                dirs,
-                x_axis,
-                y_axis,
-            )
-            component.elements.add(elm_link)
-        else:
-            n_j = node_j
+        def prepare_connection(
+                node_x: Node, eo_x: nparr) \
+                -> Node:
+            """
+            For each end of the bar element, creates a rigid link if
+            an offset exists, and returns the node to which the bar
+            element should connect to. This function is called twice,
+            once for the i-end and once for the j-end.  For purposes
+            of clarity, the index x will be used here, assuming that
+            it will be substituted with i and j.
+            """
+            # if there is an offset at the x-end, create an internal node
+            # and add a rigidlink element to the component assembly
+            if np.linalg.norm(eo_x) > common.EPSILON:
+                int_node_x = Node(
+                    self.model.uid_generator.new('node'),
+                    [*(np.array(node_x.coords) + eo_x)]
+                )
+                component.internal_nodes.add(int_node_x)
+                n_x = int_node_x
+                dirs, mats = fix_all(self.model)
+                # flip the nodes if the element is about to be defined
+                # upside down
+                if np.allclose(
+                        np.array(node_x.coords[0:2]),
+                        np.array(int_node_x.coords[0:2]),
+                ) and int_node_x.coords[2] > node_x.coords[2]:
+                    x_axis, y_axis, _ = local_axes_from_points_and_angle(
+                        np.array(int_node_x.coords),
+                        np.array(node_x.coords),
+                        0.00)
+                    elm_link = TwoNodeLink(
+                        component,
+                        self.model.uid_generator.new("element"),
+                        [node_x, int_node_x],
+                        mats,
+                        dirs,
+                        x_axis,
+                        y_axis,
+                    )
+                else:
+                    x_axis, y_axis, _ = local_axes_from_points_and_angle(
+                        np.array(node_x.coords),
+                        np.array(int_node_x.coords),
+                        0.00)
+                    elm_link = TwoNodeLink(
+                        component,
+                        self.model.uid_generator.new("element"),
+                        [node_x, int_node_x],
+                        mats,
+                        dirs,
+                        x_axis,
+                        y_axis,
+                    )
+                component.elements.add(elm_link)
+            else:
+                n_x = node_x
+            return n_x
+
+        # call the function here for the i and the j ends.
+        n_i = prepare_connection(node_i, eo_i)
+        n_j = prepare_connection(node_j, eo_j)
 
         # create the element
         elm_truss = TrussBar(
