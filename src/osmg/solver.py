@@ -91,7 +91,7 @@ class Results:
 @dataclass(repr=False)
 class AnalysisSettings:
     """
-    Analysis storage settings object.
+    Analysis settings object.
     Controls what will be stored and how.
     """
 
@@ -116,7 +116,7 @@ class Analysis:
         load case objects in which those load cases reside.
       output_directory (Optional[str]): Where to place the results
         when it is requested for them to be pickled.
-      settings (AnalysisStorageSettings): analysis settings
+      settings (AnalysisSettings): analysis settings
       results (Results): analysis results
       logger(Optional[object]): Logger object
     """

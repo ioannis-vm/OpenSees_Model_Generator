@@ -11,7 +11,7 @@ under a Fatigue material, as done in [1] and [2].
     procedure development." (2013).
 [2] Simpson, Barbara Gwynne. Design development for steel strongback
     braced frames to mitigate concentrations of damage. University of
-    aCalifornia, Berkeley, 2018.
+    California, Berkeley, 2018.
 
 """
 

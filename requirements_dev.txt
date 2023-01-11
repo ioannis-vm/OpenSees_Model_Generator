@@ -7,5 +7,6 @@ xdoctest
 coverage
 sphinx
 sphinx-autoapi
+sphinx-rtd_theme
 flake8-rst
 flake8-rst-docstrings
