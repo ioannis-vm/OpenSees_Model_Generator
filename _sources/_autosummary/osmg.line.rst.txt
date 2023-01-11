@@ -2,6 +2,7 @@ osmg.line
 =========
 
 .. automodule:: osmg.line
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.line
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Line
    

@@ -2,6 +2,7 @@ osmg.gen.material\_gen
 ======================
 
 .. automodule:: osmg.gen.material_gen
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.gen.material\_gen
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       MaterialGenerator
    

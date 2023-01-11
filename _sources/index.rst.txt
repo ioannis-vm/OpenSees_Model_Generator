@@ -3,17 +3,25 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentation of the osmg package
+.. toctree::
+   :hidden:
+
+   Home page <self>
+   Getting Started <getting_started>
+   API reference <_autosummary/osmg>
+
+
+Welcome to the documentation for `osmg`!
 =================================
 
-.. toctree::
-   :caption: Contents:
-   :maxdepth: 4	 
+`osmg` is a Python package that provides useful functions and classes
+for the definition and analysis of 3D OpenSees models. `osmg` attempts
+to simplify the process of creating large models of complex
+geometry. It only supports a subset of the functionality of OpenSees,
+but can be easily extended to add more functionality when needed.
 
+To get started with `osmg`, you can install it via pip:
 
-Indices and tables
-==================
+.. code-block:: bash
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   pip install osmg

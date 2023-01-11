@@ -2,6 +2,7 @@ osmg.model
 ==========
 
 .. automodule:: osmg.model
+   :members:
 
    
    
@@ -22,6 +23,8 @@ osmg.model
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Model
       Settings

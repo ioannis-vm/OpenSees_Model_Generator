@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.load_case &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.load_case &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="osmg.load_case.LineElementUDL" href="osmg.load_case.LineElementUDL.html" />
+    <link rel="prev" title="osmg.line.Line" href="osmg.line.Line.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,48 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.gen.html">osmg.gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.load_case</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="osmg.load_case.LineElementUDL.html">osmg.load_case.LineElementUDL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.load_case.LoadCase.html">osmg.load_case.LoadCase</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.load_case.PointLoadMass.html">osmg.load_case.PointLoadMass</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.load_case.LineElementUDL"><code class="docutils literal notranslate"><span class="pre">LineElementUDL</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.load_case.LineElementUDL.add_glob"><code class="docutils literal notranslate"><span class="pre">LineElementUDL.add_glob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.load_case.LineElementUDL.to_global"><code class="docutils literal notranslate"><span class="pre">LineElementUDL.to_global()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.load_case.LoadCase"><code class="docutils literal notranslate"><span class="pre">LoadCase</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.load_case.LoadCase.number_of_free_dofs"><code class="docutils literal notranslate"><span class="pre">LoadCase.number_of_free_dofs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.load_case.LoadCase.rigid_diaphragms"><code class="docutils literal notranslate"><span class="pre">LoadCase.rigid_diaphragms()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.load_case.PointLoadMass"><code class="docutils literal notranslate"><span class="pre">PointLoadMass</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.load_case.PointLoadMass.add"><code class="docutils literal notranslate"><span class="pre">PointLoadMass.add()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.model.html">osmg.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.transformations.html">osmg.transformations</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +177,8 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
       <li>osmg.load_case</li>
     
     
@@ -162,17 +204,109 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/load_case/index.html#osmg.load_case.LineElementUDL" title="osmg.load_case.LineElementUDL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineElementUDL</span></code></a>(parent_load_case, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL" title="osmg.load_case.LineElementUDL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LineElementUDL</span></code></a>(parent_load_case, ...)</p></td>
 <td><p>Line element uniformly distributed load object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/load_case/index.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoadCase</span></code></a>(name, parent_model, parent_nodes, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoadCase</span></code></a>(name, parent_model, parent_nodes, ...)</p></td>
 <td><p>Load Case object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/load_case/index.html#osmg.load_case.PointLoadMass" title="osmg.load_case.PointLoadMass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointLoadMass</span></code></a>(val, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.load_case.PointLoadMass.html#osmg.load_case.PointLoadMass" title="osmg.load_case.PointLoadMass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointLoadMass</span></code></a>(val, ...)</p></td>
 <td><p>Point load/mass object.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.load_case.LineElementUDL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.load_case.</span></span><span class="sig-name descname"><span class="pre">LineElementUDL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_load_case:</span> <span class="pre">~osmg.load_case.LoadCase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_line_element:</span> <span class="pre">~osmg.ops.element.ElasticBeamColumn</span> <span class="pre">|</span> <span class="pre">~osmg.ops.element.DispBeamColumn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val:</span> <span class="pre">~numpy.ndarray[~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~numpy.dtype[~numpy.float64]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.LineElementUDL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line element uniformly distributed load object.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.load_case.LineElementUDL.add_glob">
+<span class="sig-name descname"><span class="pre">add_glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">udl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.load_case.LineElementUDL.add_glob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a uniformly distributed load
+to the existing udl
+The load is defined
+with respect to the global coordinate system
+of the building, and it is converted to the
+local coordinate system prior to adding it.
+:param udl: Array of size 3 containing</p>
+<blockquote>
+<div><p>components of the uniformly distributed load that is
+applied to the clear length of the element, acting on
+the global x, y, and z directions, in the direction of
+the global axes.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.load_case.LineElementUDL.to_global">
+<span class="sig-name descname"><span class="pre">to_global</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.load_case.LineElementUDL.to_global" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the quantity expressed in the global coordinate system</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.load_case.</span></span><span class="sig-name descname"><span class="pre">LoadCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model:</span> <span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes:</span> <span class="pre">dict[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Node]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.LoadCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load Case object.
+Load cases contain information related to the specified loads,
+mass, parent nodes and rigid diaphragm constraints, etc.
+Analysis objects can use multiple load cases.
+Load combination objects utilize load cases as well.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.number_of_free_dofs">
+<span class="sig-name descname"><span class="pre">number_of_free_dofs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.LoadCase.number_of_free_dofs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the number of free DOFS of the model, considering
+all (potentially) defined constraints, restraints and parent
+nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.rigid_diaphragms">
+<span class="sig-name descname"><span class="pre">rigid_diaphragms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_uids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.load_case.LoadCase.rigid_diaphragms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes the geometry of the given levels and applies rigid
+diaphragm constraints</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.load_case.PointLoadMass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.load_case.</span></span><span class="sig-name descname"><span class="pre">PointLoadMass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val:</span> <span class="pre">~numpy.ndarray[~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~numpy.dtype[~numpy.float64]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.PointLoadMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Point load/mass object. Global coordinate system.
+.. attribute:: val</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nparr</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.load_case.PointLoadMass.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.load_case.PointLoadMass.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds some quantity to the existing quantity.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.load_case</span> <span class="kn">import</span> <span class="n">PointLoadMass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">load</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mf">6.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_load</span> <span class="o">=</span> <span class="n">PointLoadMass</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_load</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_load</span><span class="o">.</span><span class="n">val</span>
+<span class="go">array([1., 2., 3., 4., 5., 6.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_load</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">load</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_load</span><span class="o">.</span><span class="n">val</span>
+<span class="go">array([ 2.,  4.,  6.,  8., 10., 12.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -180,12 +314,16 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.load_case.LineElementUDL.html" class="btn btn-neutral float-right" title="osmg.load_case.LineElementUDL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.line.Line.html" class="btn btn-neutral float-left" title="osmg.line.Line" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

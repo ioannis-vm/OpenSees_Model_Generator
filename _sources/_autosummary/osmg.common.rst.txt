@@ -2,6 +2,7 @@ osmg.common
 ===========
 
 .. automodule:: osmg.common
+   :members:
 
    
    

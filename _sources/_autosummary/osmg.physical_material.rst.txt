@@ -2,6 +2,7 @@ osmg.physical\_material
 =======================
 
 .. automodule:: osmg.physical_material
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.physical\_material
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       PhysicalMaterial
    

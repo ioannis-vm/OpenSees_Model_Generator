@@ -2,6 +2,7 @@ osmg.postprocessing.design
 ==========================
 
 .. automodule:: osmg.postprocessing.design
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.postprocessing.design
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       LoadCombination
    

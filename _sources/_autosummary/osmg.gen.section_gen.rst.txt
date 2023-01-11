@@ -2,6 +2,7 @@ osmg.gen.section\_gen
 =====================
 
 .. automodule:: osmg.gen.section_gen
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.gen.section\_gen
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       SectionGenerator
    

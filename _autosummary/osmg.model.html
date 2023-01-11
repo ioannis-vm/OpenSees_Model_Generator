@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.model &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.model &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="osmg.model.Model" href="osmg.model.Model.html" />
+    <link rel="prev" title="osmg.mesh.Vertex" href="osmg.mesh.Vertex.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,63 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.gen.html">osmg.gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="osmg.model.Model.html">osmg.model.Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.model.Settings.html">osmg.model.Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.model.Model"><code class="docutils literal notranslate"><span class="pre">Model</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.levels"><code class="docutils literal notranslate"><span class="pre">Model.levels</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.elastic_sections"><code class="docutils literal notranslate"><span class="pre">Model.elastic_sections</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.fiber_sections"><code class="docutils literal notranslate"><span class="pre">Model.fiber_sections</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.uniaxial_materials"><code class="docutils literal notranslate"><span class="pre">Model.uniaxial_materials</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.physical_materials"><code class="docutils literal notranslate"><span class="pre">Model.physical_materials</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.uid_generator"><code class="docutils literal notranslate"><span class="pre">Model.uid_generator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.settings"><code class="docutils literal notranslate"><span class="pre">Model.settings</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.add_level"><code class="docutils literal notranslate"><span class="pre">Model.add_level()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.bounding_box"><code class="docutils literal notranslate"><span class="pre">Model.bounding_box()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.component_connectivity"><code class="docutils literal notranslate"><span class="pre">Model.component_connectivity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_all_nodes"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_all_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_components"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_components()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_elements"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_internal_nodes"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_internal_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_primary_nodes"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_primary_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.dict_of_specific_element"><code class="docutils literal notranslate"><span class="pre">Model.dict_of_specific_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.initialize_empty_copy"><code class="docutils literal notranslate"><span class="pre">Model.initialize_empty_copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_all_nodes"><code class="docutils literal notranslate"><span class="pre">Model.list_of_all_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_components"><code class="docutils literal notranslate"><span class="pre">Model.list_of_components()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_elements"><code class="docutils literal notranslate"><span class="pre">Model.list_of_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_internal_nodes"><code class="docutils literal notranslate"><span class="pre">Model.list_of_internal_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_primary_nodes"><code class="docutils literal notranslate"><span class="pre">Model.list_of_primary_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.list_of_specific_element"><code class="docutils literal notranslate"><span class="pre">Model.list_of_specific_element()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.reference_length"><code class="docutils literal notranslate"><span class="pre">Model.reference_length()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.model.Model.transfer_by_polygon_selection"><code class="docutils literal notranslate"><span class="pre">Model.transfer_by_polygon_selection()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.model.Settings"><code class="docutils literal notranslate"><span class="pre">Settings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.model.transfer_component"><code class="docutils literal notranslate"><span class="pre">transfer_component()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.transformations.html">osmg.transformations</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +192,8 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
       <li>osmg.model</li>
     
     
@@ -162,7 +219,7 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/model/index.html#osmg.model.transfer_component" title="osmg.model.transfer_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transfer_component</span></code></a>(other, component)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.model.transfer_component" title="osmg.model.transfer_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transfer_component</span></code></a>(other, component)</p></td>
 <td><p>Transfers a single component assembly from one model to another, assuming the other model was generated with the <cite>initialize_empty_copy</cite> method.</p></td>
 </tr>
 </tbody>
@@ -170,14 +227,279 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/model/index.html#osmg.model.Model" title="osmg.model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model</span></code></a>(name, uid_generator, settings)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model</span></code></a>(name, uid_generator, settings)</p></td>
 <td><p>Model object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/model/index.html#osmg.model.Settings" title="osmg.model.Settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Settings</span></code></a>([imperial_units, ndm, ndf])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.model.Settings.html#osmg.model.Settings" title="osmg.model.Settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Settings</span></code></a>([imperial_units, ndm, ndf])</p></td>
 <td><p>General customization of a model.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.model.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid_generator:</span> <span class="pre">~osmg.gen.uid_gen.UIDGenerator</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings:</span> <span class="pre">~osmg.model.Settings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model object.
+A model object is a representation of a structural model in
+OpenSees. It is the primary object of osmg.
+It contains levels, elastic sections, fiber sections,
+physical materials, and various collections of objects such as
+nodes, elements, and component assemblies that exist inside each level.
+Those objects are populated by generator objects. See <cite>osmg.gen</cite>.
+.. attribute:: name</p>
+<blockquote>
+<div><p>Name of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.levels">
+<span class="sig-name descname"><span class="pre">levels</span></span><a class="headerlink" href="#osmg.model.Model.levels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of levels in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.CollectionActive.html#osmg.collections.CollectionActive" title="osmg.collections.CollectionActive">collections.CollectionActive</a>[int, <a class="reference internal" href="osmg.level.Level.html#osmg.level.Level" title="osmg.level.Level">Level</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.elastic_sections">
+<span class="sig-name descname"><span class="pre">elastic_sections</span></span><a class="headerlink" href="#osmg.model.Model.elastic_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of elastic sections in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[int, <a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection">ElasticSection</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.fiber_sections">
+<span class="sig-name descname"><span class="pre">fiber_sections</span></span><a class="headerlink" href="#osmg.model.Model.fiber_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of fiber sections in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[int, <a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection">FiberSection</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.uniaxial_materials">
+<span class="sig-name descname"><span class="pre">uniaxial_materials</span></span><a class="headerlink" href="#osmg.model.Model.uniaxial_materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of uniaxial materials in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[int, <a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial">UniaxialMaterial</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.physical_materials">
+<span class="sig-name descname"><span class="pre">physical_materials</span></span><a class="headerlink" href="#osmg.model.Model.physical_materials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collection of physical materials in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[int, <a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial">PhysicalMaterial</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.uid_generator">
+<span class="sig-name descname"><span class="pre">uid_generator</span></span><a class="headerlink" href="#osmg.model.Model.uid_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object for generating unique IDs for objects in the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.gen.uid_gen.UIDGenerator.html#osmg.gen.uid_gen.UIDGenerator" title="osmg.gen.uid_gen.UIDGenerator">UIDGenerator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.model.Model.settings">
+<span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#osmg.model.Model.settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.model.Settings.html#osmg.model.Settings" title="osmg.model.Settings">Settings</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.add_level">
+<span class="sig-name descname"><span class="pre">add_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.model.Model.add_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a level to the model.
+:param uid: Unique ID for the level.
+:type uid: int
+:param elevation: Elevation of the level.
+:type elevation: float</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s1">&#39;test_model&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">add_level</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">__srepr__</span><span class="p">()</span>
+<span class="go">&#39;[Collection of 1 items]&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.bounding_box">
+<span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.bounding_box" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the axis-aligned bouding box of the building</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.component_connectivity">
+<span class="sig-name descname"><span class="pre">component_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.component_connectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the connectivity of all component
+assemblies. Component assemblies are collections of
+lower-level components that are connected to primary
+nodes. Each component assembly can be represented by a tuple
+of node uids of its connected nodes in ascending order. This
+method returns a dictionary having these tuples as keys, and
+the associated components as values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_all_nodes">
+<span class="sig-name descname"><span class="pre">dict_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.dict_of_all_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all the nodes in the model.
+The keys are the uids of the nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_components">
+<span class="sig-name descname"><span class="pre">dict_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.dict_of_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all the component assemblies in the
+model.
+The keys are the uids of the component assemblies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_elements">
+<span class="sig-name descname"><span class="pre">dict_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.dict_of_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all element objects in the model.
+The keys are the uids of the objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_internal_nodes">
+<span class="sig-name descname"><span class="pre">dict_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.dict_of_internal_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all the internal nodes in the model.
+The keys are the uids of the nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_primary_nodes">
+<span class="sig-name descname"><span class="pre">dict_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.dict_of_primary_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all the primary nodes in the model.
+The keys are the uids of the nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.dict_of_specific_element">
+<span class="sig-name descname"><span class="pre">dict_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.dict_of_specific_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of all element objects in the model of a
+particular element class.
+The keys are the uids of the objects.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.initialize_empty_copy">
+<span class="sig-name descname"><span class="pre">initialize_empty_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.initialize_empty_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes a shallow empty copy of the model.
+Used to create subset models.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_all_nodes">
+<span class="sig-name descname"><span class="pre">list_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.list_of_all_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the nodes in the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_components">
+<span class="sig-name descname"><span class="pre">list_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.list_of_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the component assembiles in the
+model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_elements">
+<span class="sig-name descname"><span class="pre">list_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.list_of_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all element objects in the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_internal_nodes">
+<span class="sig-name descname"><span class="pre">list_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.list_of_internal_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the internal nodes in the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_primary_nodes">
+<span class="sig-name descname"><span class="pre">list_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.list_of_primary_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all the primary nodes in the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.list_of_specific_element">
+<span class="sig-name descname"><span class="pre">list_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.model.Model.list_of_specific_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all element objects in the model of a
+particular element class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.reference_length">
+<span class="sig-name descname"><span class="pre">reference_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Model.reference_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the largest dimension of the
+bounding box of the building
+(used in graphics)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.model.Model.transfer_by_polygon_selection">
+<span class="sig-name descname"><span class="pre">transfer_by_polygon_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.model.Model.transfer_by_polygon_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <cite>transfer_component</cite> to transfer all components of which
+the projection to the XY plane falls inside the specified
+polygon.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.model.Settings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.model.</span></span><span class="sig-name descname"><span class="pre">Settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imperial_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.model.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><dl>
+<dt>General customization of a model.</dt><dd><dl class="simple">
+<dt>imperial_units (bool):</dt><dd><dl class="simple">
+<dt>True for imperial &lt;3:</dt><dd><p>in, lb, lb/(in/s2)</p>
+</dd>
+<dt>False for SI:</dt><dd><p>m, N, kg</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>ndm, ndf: change them to break the code.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.model.transfer_component">
+<span class="sig-prename descclassname"><span class="pre">osmg.model.</span></span><span class="sig-name descname"><span class="pre">transfer_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.model.transfer_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transfers a single component assembly from one model to
+another, assuming the other model was generated with the
+<cite>initialize_empty_copy</cite> method.</p>
+</dd></dl>
+
 </section>
 
 
@@ -185,12 +507,16 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.model.Model.html" class="btn btn-neutral float-right" title="osmg.model.Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.mesh.Vertex.html" class="btn btn-neutral float-left" title="osmg.mesh.Vertex" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

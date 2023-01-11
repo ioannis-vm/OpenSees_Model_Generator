@@ -2,6 +2,7 @@ osmg.graphics.postprocessing\_3d
 ================================
 
 .. automodule:: osmg.graphics.postprocessing_3d
+   :members:
 
    
    

@@ -2,6 +2,7 @@ osmg.gen
 ========
 
 .. automodule:: osmg.gen
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.gen
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.gen.component_gen

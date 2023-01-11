@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.gen.query &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.gen.query &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="osmg.gen.query.ElmQuery" href="osmg.gen.query.ElmQuery.html" />
+    <link rel="prev" title="osmg.gen.node_gen.NodeGenerator" href="osmg.gen.node_gen.NodeGenerator.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,46 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="osmg.gen.html">osmg.gen</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.component_gen.html">osmg.gen.component_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.material_gen.html">osmg.gen.material_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.mesh_shapes.html">osmg.gen.mesh_shapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.node_gen.html">osmg.gen.node_gen</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">osmg.gen.query</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="osmg.gen.query.ElmQuery.html">osmg.gen.query.ElmQuery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="osmg.gen.query.LoadCaseQuery.html">osmg.gen.query.LoadCaseQuery</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.query.ElmQuery"><code class="docutils literal notranslate"><span class="pre">ElmQuery</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.query.LoadCaseQuery"><code class="docutils literal notranslate"><span class="pre">LoadCaseQuery</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.section_gen.html">osmg.gen.section_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.steel.html">osmg.gen.steel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.uid_gen.html">osmg.gen.uid_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.zerolength_gen.html">osmg.gen.zerolength_gen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.model.html">osmg.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.transformations.html">osmg.transformations</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +175,10 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
+          <li><a href="osmg.gen.html">osmg.gen</a> &raquo;</li>
+        
       <li>osmg.gen.query</li>
     
     
@@ -162,14 +204,66 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/query/index.html#osmg.gen.query.ElmQuery" title="osmg.gen.query.ElmQuery"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElmQuery</span></code></a>(model)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.gen.query.ElmQuery.html#osmg.gen.query.ElmQuery" title="osmg.gen.query.ElmQuery"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElmQuery</span></code></a>(model)</p></td>
 <td><p>Used by all component generators</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/gen/query/index.html#osmg.gen.query.LoadCaseQuery" title="osmg.gen.query.LoadCaseQuery"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoadCaseQuery</span></code></a>(model, loadcase)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.gen.query.LoadCaseQuery.html#osmg.gen.query.LoadCaseQuery" title="osmg.gen.query.LoadCaseQuery"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoadCaseQuery</span></code></a>(model, loadcase)</p></td>
 <td><p>Load case query object.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.gen.query.</span></span><span class="sig-name descname"><span class="pre">ElmQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.query.ElmQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used by all component generators</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery.retrieve_component">
+<span class="sig-name descname"><span class="pre">retrieve_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.query.ElmQuery.retrieve_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a component assembly of a level if any of its
+line elements passes trhough the specified point.
+Returns the first element found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery.retrieve_component_from_nodes">
+<span class="sig-name descname"><span class="pre">retrieve_component_from_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.gen.query.ElmQuery.retrieve_component_from_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves a single component assembly if all of its external
+nodes match the given list of nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery.retrieve_components_from_nodes">
+<span class="sig-name descname"><span class="pre">retrieve_components_from_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.query.ElmQuery.retrieve_components_from_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves component assemblies if at least one of their
+external nodes matches the given list of nodes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery.search_connectivity">
+<span class="sig-name descname"><span class="pre">search_connectivity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">Node</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.gen.query.ElmQuery.search_connectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>find component assembly based on connectivity</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.ElmQuery.search_node_lvl">
+<span class="sig-name descname"><span class="pre">search_node_lvl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lvl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">internal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">Node</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.gen.query.ElmQuery.search_node_lvl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks if a node exists at the given location.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.gen.query.LoadCaseQuery">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.gen.query.</span></span><span class="sig-name descname"><span class="pre">LoadCaseQuery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadcase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.query.LoadCaseQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load case query object.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.query.LoadCaseQuery.level_masses">
+<span class="sig-name descname"><span class="pre">level_masses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.query.LoadCaseQuery.level_masses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the total mass of each level.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -177,12 +271,16 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.gen.query.ElmQuery.html" class="btn btn-neutral float-right" title="osmg.gen.query.ElmQuery" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.gen.node_gen.NodeGenerator.html" class="btn btn-neutral float-left" title="osmg.gen.node_gen.NodeGenerator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

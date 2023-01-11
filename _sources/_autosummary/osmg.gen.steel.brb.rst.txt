@@ -2,6 +2,7 @@ osmg.gen.steel.brb
 ==================
 
 .. automodule:: osmg.gen.steel.brb
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.gen.steel.brb
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       BRBGenSettings
       BRBGenerator

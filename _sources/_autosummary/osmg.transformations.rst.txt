@@ -2,6 +2,7 @@ osmg.transformations
 ====================
 
 .. automodule:: osmg.transformations
+   :members:
 
    
    

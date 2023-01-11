@@ -2,6 +2,7 @@ osmg.graphics
 =============
 
 .. automodule:: osmg.graphics
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.graphics
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.graphics.general_2d

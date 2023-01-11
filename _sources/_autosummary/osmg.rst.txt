@@ -2,6 +2,7 @@
 ====
 
 .. automodule:: osmg
+   :members:
 
    
    
@@ -25,6 +26,7 @@
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.collections

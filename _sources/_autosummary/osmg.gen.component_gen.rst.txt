@@ -2,6 +2,7 @@ osmg.gen.component\_gen
 =======================
 
 .. automodule:: osmg.gen.component_gen
+   :members:
 
    
    
@@ -24,6 +25,8 @@ osmg.gen.component\_gen
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       BeamColumnGenerator
       TrussBarGenerator

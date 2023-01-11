@@ -2,6 +2,7 @@ osmg.ops.section
 ================
 
 .. automodule:: osmg.ops.section
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.ops.section
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       ElasticSection
       FiberSection

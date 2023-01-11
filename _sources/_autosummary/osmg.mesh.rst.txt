@@ -2,6 +2,7 @@ osmg.mesh
 =========
 
 .. automodule:: osmg.mesh
+   :members:
 
    
    
@@ -35,6 +36,8 @@ osmg.mesh
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Edge
       Halfedge

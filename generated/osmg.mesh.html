@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.mesh &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.mesh &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -86,9 +85,10 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_autosummary/osmg.html">API reference</a></li>
 </ul>
 
             
@@ -163,46 +163,46 @@ data structure.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.ang_reduce" title="osmg.mesh.ang_reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ang_reduce</span></code></a>(ang)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.ang_reduce" title="osmg.mesh.ang_reduce"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ang_reduce</span></code></a>(ang)</p></td>
 <td><p>Brings and angle expressed in radians in the interval [0, 2pi)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.define_halfedges" title="osmg.mesh.define_halfedges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">define_halfedges</span></code></a>(edges)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.define_halfedges" title="osmg.mesh.define_halfedges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">define_halfedges</span></code></a>(edges)</p></td>
 <td><p>Given a list of edges, defines all the halfedges and associates them with their <cite>next</cite>. See note:     <a class="reference external" href="https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3">https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3</a> To understand how it works. Description:       Each halfedge stores information about its edge, vertex and     and next halfedge. Contrary to convention, we don't store the     twin (opposite) halfedge here, seince we don't need it     anywhere. This function receives a list of Edge objects as input and     returns a list of Halfedge objects. The function first creates     a Halfedge object for each vertex of each Edge object, using     the <cite>define_halfedge</cite> method of the Edge class. These Halfedge     objects are stored in a list called all_halfedges. For each     Halfedge object, the function also updates the list of     halfedges leaving the vertex that the halfedge originates     from. For example, if we have two Halfedge objects h1 and h2,     both originating from the same vertex v, v.halfedges will be a     list containing h1 and h2. (This is useful because it allows     us to easily access all the halfedges that originate from a     particular vertex, which we need later on in the algorithm.)       After all halfedges have been created, the function assigns     the next attribute of each halfedge, which points to the next     halfedge in the sequence. To do this, it loops through all     halfedges and, for each halfedge h, it determines the vertex     v_to that h points to, gets a list of all halfedges leaving     v_to, and assigns the next attribute of h to the halfedge in     that list that has the smallest angular difference with     respect to the direction of h. :param edges: List of Edge objects :type edges: list[Edge].</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.geometric_properties" title="osmg.mesh.geometric_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometric_properties</span></code></a>(coords)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.geometric_properties" title="osmg.mesh.geometric_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geometric_properties</span></code></a>(coords)</p></td>
 <td><p>Aggregates the results of the previous functions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.obtain_closed_loops" title="osmg.mesh.obtain_closed_loops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obtain_closed_loops</span></code></a>(halfedges)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.obtain_closed_loops" title="osmg.mesh.obtain_closed_loops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">obtain_closed_loops</span></code></a>(halfedges)</p></td>
 <td><p>Given a list of halfedges, this function uses their <cite>next</cite> attribute to group them into sequences of closed loops (ordered lists of halfedges of which the <cite>next</cite> halfedge of the last list element points to the first halfedge in the list, and the <cite>next</cite> halfedge of any list element points to the next halfedge in the list.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.orient_loops" title="osmg.mesh.orient_loops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orient_loops</span></code></a>(loops)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.orient_loops" title="osmg.mesh.orient_loops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">orient_loops</span></code></a>(loops)</p></td>
 <td><p>Separates loops to internal (counterclockwise) and external (clockwise).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.plot_edges" title="osmg.mesh.plot_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_edges</span></code></a>(edges)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.plot_edges" title="osmg.mesh.plot_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_edges</span></code></a>(edges)</p></td>
 <td><p>Plots the given edges.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.plot_loop" title="osmg.mesh.plot_loop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loop</span></code></a>(halfedge_loop)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.plot_loop" title="osmg.mesh.plot_loop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_loop</span></code></a>(halfedge_loop)</p></td>
 <td><p>Plots the vertices/edges of a list of halfedges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.polygon_area" title="osmg.mesh.polygon_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_area</span></code></a>(coords)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.polygon_area" title="osmg.mesh.polygon_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_area</span></code></a>(coords)</p></td>
 <td><p>Calculates the area of a polygon. :param coords: A matrix whose columns represent                the coordinates and the rows                represent the points of the polygon. The first point should not be repeated                at the end, as this is done                automatically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.polygon_centroid" title="osmg.mesh.polygon_centroid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_centroid</span></code></a>(coords)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.polygon_centroid" title="osmg.mesh.polygon_centroid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_centroid</span></code></a>(coords)</p></td>
 <td><p>Calculates the centroid of a polygon. :param coords: A matrix whose columns represent                the coordinates and the rows                represent the points of the polygon. The first point should not be repeated                at the end, as this is done                automatically.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.polygon_inertia" title="osmg.mesh.polygon_inertia"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_inertia</span></code></a>(coords)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.polygon_inertia" title="osmg.mesh.polygon_inertia"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_inertia</span></code></a>(coords)</p></td>
 <td><p>Calculates the moments of inertia of a polygon. :param coords: A matrix whose columns represent                the coordinates and the rows                represent the points of the polygon. The first point should not be repeated                at the end, as this is done                automatically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.print_halfedge_results" title="osmg.mesh.print_halfedge_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_halfedge_results</span></code></a>(halfedges)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.print_halfedge_results" title="osmg.mesh.print_halfedge_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_halfedge_results</span></code></a>(halfedges)</p></td>
 <td><p>Prints the ids of the defined halfedges and their vertex, edge and next, for debugging.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.sanity_checks" title="osmg.mesh.sanity_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanity_checks</span></code></a>(external, trivial)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.sanity_checks" title="osmg.mesh.sanity_checks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sanity_checks</span></code></a>(external, trivial)</p></td>
 <td><p>Perform some checks to make sure assumptions are not violated.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.subdivide_hss" title="osmg.mesh.subdivide_hss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_hss</span></code></a>(sec_h, sec_b, sec_t[, plot])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_hss" title="osmg.mesh.subdivide_hss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_hss</span></code></a>(sec_h, sec_b, sec_t[, plot])</p></td>
 <td><p>Used to define the fibers of steel HSS fiber sections.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.subdivide_polygon" title="osmg.mesh.subdivide_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_polygon</span></code></a>(outside, holes, n_x, n_y)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_polygon" title="osmg.mesh.subdivide_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_polygon</span></code></a>(outside, holes, n_x, n_y)</p></td>
 <td><p>Used to define the fibers of fiber sections. :param halfedges: Sequence of halfedges                   that defines the shape of a section. :type halfedges: list[Halfedge] :param n_x: Number of spatial partitions in the x direction :type n_x: int :param n_y: Number of spatial partitions in the y direction :type n_y: int :param plot: Plots the resulting polygons for debugging :type plot: bool.</p></td>
 </tr>
 </tbody>
@@ -210,16 +210,16 @@ data structure.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Edge</span></code></a>(v_i, v_j)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Edge</span></code></a>(v_i, v_j)</p></td>
 <td><p>2D oriented Edge.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Halfedge</span></code></a>(vertex, edge)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Halfedge</span></code></a>(vertex, edge)</p></td>
 <td><p>Halfedge object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a>(halfedges)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a>(halfedges)</p></td>
 <td><p>A container that holds a list of unique halfedges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/mesh/index.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vertex</span></code></a>(coords)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_autosummary/osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vertex</span></code></a>(coords)</p></td>
 <td><p>2D Vertex.</p></td>
 </tr>
 </tbody>
@@ -236,7 +236,7 @@ data structure.</p>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

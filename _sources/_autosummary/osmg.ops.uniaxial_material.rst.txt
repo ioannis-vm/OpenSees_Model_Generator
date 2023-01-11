@@ -2,6 +2,7 @@ osmg.ops.uniaxial\_material
 ===========================
 
 .. automodule:: osmg.ops.uniaxial_material
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.ops.uniaxial\_material
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Bilin
       Elastic

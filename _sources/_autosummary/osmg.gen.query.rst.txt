@@ -2,6 +2,7 @@ osmg.gen.query
 ==============
 
 .. automodule:: osmg.gen.query
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.gen.query
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       ElmQuery
       LoadCaseQuery

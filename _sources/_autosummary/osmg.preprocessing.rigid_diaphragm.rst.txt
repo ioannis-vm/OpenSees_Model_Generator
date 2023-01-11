@@ -2,6 +2,7 @@ osmg.preprocessing.rigid\_diaphragm
 ===================================
 
 .. automodule:: osmg.preprocessing.rigid_diaphragm
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.preprocessing.rigid\_diaphragm
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       RDAnalyzer
    

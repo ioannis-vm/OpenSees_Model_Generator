@@ -2,6 +2,7 @@ osmg.defaults
 =============
 
 .. automodule:: osmg.defaults
+   :members:
 
    
    

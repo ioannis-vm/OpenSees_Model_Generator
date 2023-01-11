@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.graphics.visibility &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.graphics.visibility &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="osmg.graphics.visibility.ElementVisibility" href="osmg.graphics.visibility.ElementVisibility.html" />
+    <link rel="prev" title="osmg.graphics.preprocessing_3d" href="osmg.graphics.preprocessing_3d.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,43 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.gen.html">osmg.gen</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="osmg.graphics.general_2d.html">osmg.graphics.general_2d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.graphics.graphics_common.html">osmg.graphics.graphics_common</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.graphics.graphics_common_3d.html">osmg.graphics.graphics_common_3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.graphics.postprocessing_3d.html">osmg.graphics.postprocessing_3d</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.graphics.preprocessing_3d.html">osmg.graphics.preprocessing_3d</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">osmg.graphics.visibility</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="osmg.graphics.visibility.ElementVisibility.html">osmg.graphics.visibility.ElementVisibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="osmg.graphics.visibility.NodeVisibility.html">osmg.graphics.visibility.NodeVisibility</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.graphics.visibility.ElementVisibility"><code class="docutils literal notranslate"><span class="pre">ElementVisibility</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.graphics.visibility.NodeVisibility"><code class="docutils literal notranslate"><span class="pre">NodeVisibility</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.model.html">osmg.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.transformations.html">osmg.transformations</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +172,10 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
+          <li><a href="osmg.graphics.html">osmg.graphics</a> &raquo;</li>
+        
       <li>osmg.graphics.visibility</li>
     
     
@@ -162,14 +201,29 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/graphics/visibility/index.html#osmg.graphics.visibility.ElementVisibility" title="osmg.graphics.visibility.ElementVisibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElementVisibility</span></code></a>([hidden_when_extruded, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.graphics.visibility.ElementVisibility.html#osmg.graphics.visibility.ElementVisibility" title="osmg.graphics.visibility.ElementVisibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElementVisibility</span></code></a>([hidden_when_extruded, ...])</p></td>
 <td><p>Element visibility object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/graphics/visibility/index.html#osmg.graphics.visibility.NodeVisibility" title="osmg.graphics.visibility.NodeVisibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeVisibility</span></code></a>([connected_to_zerolength])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.graphics.visibility.NodeVisibility.html#osmg.graphics.visibility.NodeVisibility" title="osmg.graphics.visibility.NodeVisibility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeVisibility</span></code></a>([connected_to_zerolength])</p></td>
 <td><p>Node visibility object.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.graphics.visibility.ElementVisibility">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.graphics.visibility.</span></span><span class="sig-name descname"><span class="pre">ElementVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hidden_when_extruded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_at_line_plots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_opensees_definition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_basic_forces</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.visibility.ElementVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Element visibility object.
+Controls whether an element is displayed in the plots
+and whether it is defined in OpenSees or not</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.graphics.visibility.NodeVisibility">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.graphics.visibility.</span></span><span class="sig-name descname"><span class="pre">NodeVisibility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connected_to_zerolength</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.visibility.NodeVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Node visibility object.
+Controls whether a node is displayed in the plots</p>
+</dd></dl>
+
 </section>
 
 
@@ -177,12 +231,16 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.graphics.visibility.ElementVisibility.html" class="btn btn-neutral float-right" title="osmg.graphics.visibility.ElementVisibility" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.graphics.preprocessing_3d.html" class="btn btn-neutral float-left" title="osmg.graphics.preprocessing_3d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

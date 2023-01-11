@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.transformations &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.transformations &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,8 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="osmg.solver.StaticAnalysis" href="osmg.solver.StaticAnalysis.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +86,36 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.gen.html">osmg.gen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.model.html">osmg.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.transformations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.transformations.local_axes_from_points_and_angle"><code class="docutils literal notranslate"><span class="pre">local_axes_from_points_and_angle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.transformations.offset_transformation"><code class="docutils literal notranslate"><span class="pre">offset_transformation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.transformations.rotation_matrix_2d"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_2d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.transformations.rotation_matrix_3d"><code class="docutils literal notranslate"><span class="pre">rotation_matrix_3d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.transformations.transformation_matrix"><code class="docutils literal notranslate"><span class="pre">transformation_matrix()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +164,8 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
       <li>osmg.transformations</li>
     
     
@@ -162,23 +191,226 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.local_axes_from_points_and_angle" title="osmg.transformations.local_axes_from_points_and_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_axes_from_points_and_angle</span></code></a>(point_i, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.transformations.local_axes_from_points_and_angle" title="osmg.transformations.local_axes_from_points_and_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_axes_from_points_and_angle</span></code></a>(point_i, ...)</p></td>
 <td><p>Given a start point, and end point, and an angle, obtain the local coordinate system of a linear element. :param point_i: Start point :type point_i: nparr :param point_j: End point :type point_j: nparr :param ang: Parameter that controls the rotation of the             section around the x-axis. Counterclockwise rotation is             posotive. 0.00 corresponds to:               vertical elements whose local z axis coincides with                                 the local x axis               horizontal elements whose local z axis is horizontal. :type ang: float.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.offset_transformation" title="osmg.transformations.offset_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset_transformation</span></code></a>(offset, u_vec, r_vec)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.transformations.offset_transformation" title="osmg.transformations.offset_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset_transformation</span></code></a>(offset, u_vec, r_vec)</p></td>
 <td><p>Calculate the displacement at the end of a rigid offset by specifying the displacement and rotation of the other end.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.rotation_matrix_2d" title="osmg.transformations.rotation_matrix_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_2d</span></code></a>(ang)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.transformations.rotation_matrix_2d" title="osmg.transformations.rotation_matrix_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_2d</span></code></a>(ang)</p></td>
 <td><p>Return a 2D transformation matrix.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.rotation_matrix_3d" title="osmg.transformations.rotation_matrix_3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_3d</span></code></a>(axis, theta)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.transformations.rotation_matrix_3d" title="osmg.transformations.rotation_matrix_3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_3d</span></code></a>(axis, theta)</p></td>
 <td><p>Return the rotation matrix associated with counterclockwise rotation about the given axis by theta radians.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.transformation_matrix" title="osmg.transformations.transformation_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transformation_matrix</span></code></a>(vec_x, vec_y, vec_z)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.transformations.transformation_matrix" title="osmg.transformations.transformation_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transformation_matrix</span></code></a>(vec_x, vec_y, vec_z)</p></td>
 <td><p>Returns a transformation matrix that transforms points from the coordinate system in which the x, y and z axes are expressed, to the local coordinate system defined by them.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.transformations.local_axes_from_points_and_angle">
+<span class="sig-prename descclassname"><span class="pre">osmg.transformations.</span></span><span class="sig-name descname"><span class="pre">local_axes_from_points_and_angle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ang</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.transformations.local_axes_from_points_and_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a start point, and end point, and an angle,
+obtain the local coordinate system of a linear element.
+:param point_i: Start point
+:type point_i: nparr
+:param point_j: End point
+:type point_j: nparr
+:param ang: Parameter that controls the rotation of the</p>
+<blockquote>
+<div><p>section around the x-axis. Counterclockwise rotation is
+posotive. 0.00 corresponds to:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>vertical elements whose local z axis coincides with</dt><dd><p>the local x axis</p>
+</dd>
+</dl>
+<p>horizontal elements whose local z axis is horizontal.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Local coordinate system</dt><dd><p>vectors. The first element is the local x axis, the second
+element is the local y axis, and the third element is the
+local z axis.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[nparr, nparr, nparr]</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the start point and end point define a vertical element
+    that is defined upside down (i.e., with the start point at a lower
+    height than the end point).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For vertical elements, the local x axis will be the vector connecting
+the start and end points, and the local z axis will be perpendicular
+to the local x axis and lying on the plane defined by the global xy
+plane and the local x axis. For horizontal elements, the local z axis
+will be parallel to the global z axis.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">point_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ang</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span><span class="n">point_i</span><span class="p">,</span> <span class="n">point_j</span><span class="p">,</span> <span class="n">ang</span><span class="p">)</span>
+<span class="go">(array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.transformations.offset_transformation">
+<span class="sig-prename descclassname"><span class="pre">osmg.transformations.</span></span><span class="sig-name descname"><span class="pre">offset_transformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_vec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_vec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.transformations.offset_transformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the displacement at the end of a rigid offset by
+specifying the displacement and rotation of the other end.</p>
+<p>A rigid offset connects two nodes and transmits forces between
+them, but does not allow any relative displacement or rotation
+between the nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<em>nparr</em>) – Vector pointing from the node of the rigid offset where the
+displacement is known to the node where we want to obtain
+the displacement. The vector should be given in the global
+coordinate system.</p></li>
+<li><p><strong>u_vec</strong> (<em>nparr</em>) – Displacement of the node where the displacement is known,
+given in the global coordinate system.</p></li>
+<li><p><strong>r_vec</strong> (<em>nparr</em>) – Rotation of the node where the displacement is known, given
+as a vector of the form [rx, ry, rz] representing the
+rotation around the x, y, and z axes, respectively.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Displacement at the other end of the rigid offset,
+given in the global coordinate system.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nparr</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>Calculate the displacement of the end of a rigid offset with a
+length of 1 meter, given a displacement of [4, 5, 6] and a
+rotation of [7, 8, 9] at the other end:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">offset_transformation</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0002</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0003</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">]))</span>
+<span class="go">array([ 0.01  , -0.0199,  0.0053])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.transformations.rotation_matrix_2d">
+<span class="sig-prename descclassname"><span class="pre">osmg.transformations.</span></span><span class="sig-name descname"><span class="pre">rotation_matrix_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ang</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.transformations.rotation_matrix_2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a 2D transformation matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ang</strong> (<em>float</em>) – Angle in radians to rotate the matrix by.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2x2 transformation matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nparr</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rotation_matrix_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">array([[ 6.123234e-17, -1.000000e+00],</span>
+<span class="go">       [ 1.000000e+00,  6.123234e-17]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If <cite>ang</cite> is not a float.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.transformations.rotation_matrix_3d">
+<span class="sig-prename descclassname"><span class="pre">osmg.transformations.</span></span><span class="sig-name descname"><span class="pre">rotation_matrix_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.transformations.rotation_matrix_3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the rotation matrix associated with counterclockwise
+rotation about the given axis by theta radians.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>nparr</em>) – 3D vector representing the axis of rotation.</p></li>
+<li><p><strong>theta</strong> (<em>float</em>) – Angle of rotation in radians.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>3x3 transformation matrix representing the rotation.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nparr</p>
+</dd>
+</dl>
+<p>Example:
+&gt;&gt;&gt; # this is how to run that function:
+&gt;&gt;&gt; res = rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)
+&gt;&gt;&gt; # this is the expected result:
+&gt;&gt;&gt; expected_res = np.array(
+…     [[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],
+…      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
+…      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
+&gt;&gt;&gt; assert np.allclose(res, expected_res)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.transformations.transformation_matrix">
+<span class="sig-prename descclassname"><span class="pre">osmg.transformations.</span></span><span class="sig-name descname"><span class="pre">transformation_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vec_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.transformations.transformation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a transformation matrix that transforms points from
+the coordinate system in which the x, y and z axes are expressed,
+to the local coordinate system defined by them.
+:param vec_x: Local x axis expressed in the global system
+:type vec_x: nparr
+:param vec_y: (similar)
+:type vec_y: nparr
+:param vec_z: (similar)
+:type vec_z: nparr</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>global to local transformation matrix.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(nparr)</p>
+</dd>
+</dl>
+<p>Note: For orthogonal axes, transpose to obtain the inverse transform.</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># this is how to run that function:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+<span class="gp">... </span>     <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+<span class="gp">... </span>     <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected_result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span>
+<span class="gp">... </span>    <span class="p">[[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+<span class="gp">... </span>     <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+<span class="gp">... </span>     <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 
 
@@ -186,12 +418,15 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.solver.StaticAnalysis.html" class="btn btn-neutral float-left" title="osmg.solver.StaticAnalysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

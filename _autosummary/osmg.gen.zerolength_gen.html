@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.gen.zerolength_gen &mdash; osmg 0.0.20 documentation</title>
+  <title>osmg.gen.zerolength_gen &mdash; osmg 0.0.21 documentation</title>
   
 
   
@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
 
   
   
@@ -41,7 +40,9 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="osmg.graphics" href="osmg.graphics.html" />
+    <link rel="prev" title="osmg.gen.uid_gen.UIDGenerator" href="osmg.gen.uid_gen.UIDGenerator.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,9 +87,51 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.component_assembly.html">osmg.component_assembly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.defaults.html">osmg.defaults</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="osmg.gen.html">osmg.gen</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.component_gen.html">osmg.gen.component_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.material_gen.html">osmg.gen.material_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.mesh_shapes.html">osmg.gen.mesh_shapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.node_gen.html">osmg.gen.node_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.query.html">osmg.gen.query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.section_gen.html">osmg.gen.section_gen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.steel.html">osmg.gen.steel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.gen.uid_gen.html">osmg.gen.uid_gen</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">osmg.gen.zerolength_gen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.fix_all"><code class="docutils literal notranslate"><span class="pre">fix_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.gravity_shear_tab"><code class="docutils literal notranslate"><span class="pre">gravity_shear_tab()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.imk_56"><code class="docutils literal notranslate"><span class="pre">imk_56()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.imk_6"><code class="docutils literal notranslate"><span class="pre">imk_6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.release_5"><code class="docutils literal notranslate"><span class="pre">release_5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.release_56"><code class="docutils literal notranslate"><span class="pre">release_56()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.release_6"><code class="docutils literal notranslate"><span class="pre">release_6()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.steel_brace_gusset"><code class="docutils literal notranslate"><span class="pre">steel_brace_gusset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.gen.zerolength_gen.steel_w_col_pz"><code class="docutils literal notranslate"><span class="pre">steel_w_col_pz()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.mesh.html">osmg.mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.model.html">osmg.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.ops.html">osmg.ops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.physical_material.html">osmg.physical_material</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.postprocessing.html">osmg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.preprocessing.html">osmg.preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.solver.html">osmg.solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="osmg.transformations.html">osmg.transformations</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -137,6 +180,10 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
+          <li><a href="osmg.html">osmg</a> &raquo;</li>
+        
+          <li><a href="osmg.gen.html">osmg.gen</a> &raquo;</li>
+        
       <li>osmg.gen.zerolength_gen</li>
     
     
@@ -162,35 +209,117 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.fix_all" title="osmg.gen.zerolength_gen.fix_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fix_all</span></code></a>(model, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.fix_all" title="osmg.gen.zerolength_gen.fix_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fix_all</span></code></a>(model, **kwargs)</p></td>
 <td><p>Fixed in all directions</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.gravity_shear_tab" title="osmg.gen.zerolength_gen.gravity_shear_tab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_shear_tab</span></code></a>(model, consider_composite, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.gravity_shear_tab" title="osmg.gen.zerolength_gen.gravity_shear_tab"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gravity_shear_tab</span></code></a>(model, consider_composite, ...)</p></td>
 <td><p>Elkady, A., &amp; Lignos, D.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.imk_56" title="osmg.gen.zerolength_gen.imk_56"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imk_56</span></code></a>(model, element_length, lboverl, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.imk_56" title="osmg.gen.zerolength_gen.imk_56"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imk_56</span></code></a>(model, element_length, lboverl, ...)</p></td>
 <td><p>release in the weak axis bending direction, imk (see imk docstring) in the strong axis bending direction</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.imk_6" title="osmg.gen.zerolength_gen.imk_6"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imk_6</span></code></a>(model, element_length, lboverl, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.imk_6" title="osmg.gen.zerolength_gen.imk_6"><code class="xref py py-obj docutils literal notranslate"><span class="pre">imk_6</span></code></a>(model, element_length, lboverl, ...)</p></td>
 <td><p>Lignos, D.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.release_5" title="osmg.gen.zerolength_gen.release_5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_5</span></code></a>(model, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.release_5" title="osmg.gen.zerolength_gen.release_5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_5</span></code></a>(model, **kwargs)</p></td>
 <td><p>Frees weak axis bending</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.release_56" title="osmg.gen.zerolength_gen.release_56"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_56</span></code></a>(model, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.release_56" title="osmg.gen.zerolength_gen.release_56"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_56</span></code></a>(model, **kwargs)</p></td>
 <td><p>Frees both strong and weak axis bending</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.release_6" title="osmg.gen.zerolength_gen.release_6"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_6</span></code></a>(model, **kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.release_6" title="osmg.gen.zerolength_gen.release_6"><code class="xref py py-obj docutils literal notranslate"><span class="pre">release_6</span></code></a>(model, **kwargs)</p></td>
 <td><p>Frees strong axis bending</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.steel_brace_gusset" title="osmg.gen.zerolength_gen.steel_brace_gusset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steel_brace_gusset</span></code></a>(model, physical_mat, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.steel_brace_gusset" title="osmg.gen.zerolength_gen.steel_brace_gusset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steel_brace_gusset</span></code></a>(model, physical_mat, ...)</p></td>
 <td><p>Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved analysis model for special concentrically braced frames, Journal of Constructional Steel Research, Vol.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/gen/zerolength_gen/index.html#osmg.gen.zerolength_gen.steel_w_col_pz" title="osmg.gen.zerolength_gen.steel_w_col_pz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steel_w_col_pz</span></code></a>(model, section, ...[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.zerolength_gen.steel_w_col_pz" title="osmg.gen.zerolength_gen.steel_w_col_pz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">steel_w_col_pz</span></code></a>(model, section, ...[, ...])</p></td>
 <td><p>Gupta, A., &amp; Krawinkler, H.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.fix_all">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">fix_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.fix_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fixed in all directions</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.gravity_shear_tab">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">gravity_shear_tab</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_composite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">ElasticSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.gravity_shear_tab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elkady, A., &amp; Lignos, D. G. (2015). Effect of gravity framing on
+the overstrength and collapse capacity of steel frame buildings
+with perimeter special moment frames. Earthquake Engineering &amp;
+Structural Dynamics, 44(8), 1289-1307.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.imk_56">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">imk_56</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lboverl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loverh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbs_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_composite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">ElasticSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.imk_56" title="Permalink to this definition">¶</a></dt>
+<dd><p>release in the weak axis bending direction,
+imk (see imk docstring) in the strong axis bending direction</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.imk_6">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">imk_6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lboverl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loverh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbs_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_composite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">ElasticSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.imk_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lignos, D. G., &amp; Krawinkler, H. (2011). Deterioration modeling of
+steel components in support of collapse prediction of steel moment
+frames under earthquake loading. Journal of Structural
+Engineering-Reston, 137(11), 1291.</p>
+<p>Elkady, A., &amp; Lignos, D. G. (2014). Modeling of the composite
+action in fully restrained beam‐to‐column connections:
+implications in the seismic design and collapse capacity of steel
+special moment frames. Earthquake Engineering &amp; Structural
+Dynamics, 43(13), 1935-1954.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.release_5">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">release_5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.release_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frees weak axis bending</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.release_56">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">release_56</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.release_56" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frees both strong and weak axis bending</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.release_6">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">release_6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.release_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frees strong axis bending</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.steel_brace_gusset">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">steel_brace_gusset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_brace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.steel_brace_gusset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
+analysis model for special concentrically braced frames, Journal
+of Constructional Steel Research, Vol. 73, pp 80-94.
+:param model: Model object
+:type model: Model
+:param physical_mat: physical material object
+:type physical_mat: PhysicalMaterial
+:param d_brace: brace section height
+:type d_brace: float
+:param l_c: brace-to-gusset connection length
+:type l_c: float
+:param t_p: gusset plate thickness
+:type t_p: float
+:param l_b: gusset plate average buckling length
+:type l_b: float</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.zerolength_gen.steel_w_col_pz">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.zerolength_gen.</span></span><span class="sig-name descname"><span class="pre">steel_w_col_pz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">ElasticSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pz_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pz_doubler_plate_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pz_hardening</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_elastic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.zerolength_gen.steel_w_col_pz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gupta, A., &amp; Krawinkler, H. (1999). Seismic demands for the
+performance evaluation of steel moment resisting frame
+structures. Rep. No. 132.</p>
+</dd></dl>
+
 </section>
 
 
@@ -198,12 +327,16 @@
            
           </div>
           <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="osmg.graphics.html" class="btn btn-neutral float-right" title="osmg.graphics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.gen.uid_gen.UIDGenerator.html" class="btn btn-neutral float-left" title="osmg.gen.uid_gen.UIDGenerator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2023, John Vouvakis Manousakis.
+        &#169; Copyright .
 
     </p>
   </div>

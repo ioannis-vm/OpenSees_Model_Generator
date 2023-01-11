@@ -2,6 +2,7 @@ osmg.gen.steel
 ==============
 
 .. automodule:: osmg.gen.steel
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.gen.steel
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.gen.steel.brb
