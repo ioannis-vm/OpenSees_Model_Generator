@@ -9,11 +9,8 @@ jobs:
   build_docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: |
-          apt-get update && apt-get upgrade
-          apt-get install -y make
+      - name: Checkout repo
+        uses: actions/checkout@v3
       - name: Build docs
         run: cd docs && make html
       - name: Deploy to GitHub Pages
