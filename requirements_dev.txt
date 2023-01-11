@@ -5,3 +5,7 @@ flake8
 tox
 xdoctest
 coverage
+sphinx
+sphinx-autoapi
+flake8-rst
+flake8-rst-docstrings
