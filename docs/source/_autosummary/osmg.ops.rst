@@ -2,6 +2,7 @@ osmg.ops
 ========
 
 .. automodule:: osmg.ops
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.ops
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.ops.element

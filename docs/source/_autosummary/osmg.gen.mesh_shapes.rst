@@ -2,6 +2,7 @@ osmg.gen.mesh\_shapes
 =====================
 
 .. automodule:: osmg.gen.mesh_shapes
+   :members:
 
    
    

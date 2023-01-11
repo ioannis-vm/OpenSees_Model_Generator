@@ -29,12 +29,14 @@ class Level:
     Level Object
     Levels are part of a model and they contain primary nodes and
       component assemblies.
+
     Attributes:
         parent_model (Model)
         uid (int)
         elevation (float)
         nodes (NodeCollection)
         components (Collection)
+
     Examples:
         >>> from osmg.model import Model
         >>> model = Model(name='example_model')

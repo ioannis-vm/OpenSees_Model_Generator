@@ -2,6 +2,7 @@ osmg.preprocessing.split\_component
 ===================================
 
 .. automodule:: osmg.preprocessing.split_component
+   :members:
 
    
    

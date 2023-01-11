@@ -6,12 +6,13 @@ to simplify the definition of BRB elements simulated using a
 corotational truss opensees element and the Steel4 material wrapped
 under a Fatigue material, as done in [1] and [2].
 
-[1] Zsarnoczay, Adam. "Experimental and numerical investigation of
-    buckling restrained braced frames for Eurocode conform design
-    procedure development." (2013).
-[2] Simpson, Barbara Gwynne. Design development for steel strongback
-    braced frames to mitigate concentrations of damage. University of
-    California, Berkeley, 2018.
+1. Zsarnoczay, Adam. "Experimental and numerical investigation of
+buckling restrained braced frames for Eurocode conform design
+procedure development." (2013).
+
+2. Simpson, Barbara Gwynne. Design development for steel strongback
+braced frames to mitigate concentrations of damage. University of
+California, Berkeley, 2018.
 
 """
 
@@ -73,17 +74,7 @@ class BRBGenSettings:
 @dataclass(repr=False)
 class BRBGenerator:
     """
-    The purpose of this component is to use the lower-level `gen`
-    classes to simplify the definition of BRB elements simulated using
-    a corotational truss opensees element and the Steel4 material
-    wrapped under a Fatigue material, as done in [1] and [2].
-    [1] Zsarnoczay, Adam. "Experimental and numerical investigation of
-        buckling restrained braced frames for Eurocode conform design
-        procedure development." (2013).
-    [2] Simpson, Barbara Gwynne. Design development for steel
-        strongback braced frames to mitigate concentrations of
-        damage. University of aCalifornia, Berkeley, 2018.
-
+    Generates and adds BRB elements to a model.
     """
 
     model: Model

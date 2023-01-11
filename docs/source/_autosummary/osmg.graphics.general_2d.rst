@@ -2,6 +2,7 @@ osmg.graphics.general\_2d
 =========================
 
 .. automodule:: osmg.graphics.general_2d
+   :members:
 
    
    

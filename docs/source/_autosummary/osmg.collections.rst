@@ -2,6 +2,7 @@ osmg.collections
 ================
 
 .. automodule:: osmg.collections
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.collections
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Collection
       CollectionActive

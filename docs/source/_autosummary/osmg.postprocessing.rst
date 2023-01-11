@@ -2,6 +2,7 @@ osmg.postprocessing
 ===================
 
 .. automodule:: osmg.postprocessing
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.postprocessing
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.postprocessing.basic_forces

@@ -2,6 +2,7 @@ osmg.graphics.preprocessing\_3d
 ===============================
 
 .. automodule:: osmg.graphics.preprocessing_3d
+   :members:
 
    
    

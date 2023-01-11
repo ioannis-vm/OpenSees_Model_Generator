@@ -2,6 +2,7 @@ osmg.graphics.visibility
 ========================
 
 .. automodule:: osmg.graphics.visibility
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.graphics.visibility
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       ElementVisibility
       NodeVisibility

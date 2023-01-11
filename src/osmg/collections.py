@@ -41,7 +41,7 @@ class Collection(dict[TK, TV]):
         parent (Any)
 
     Examples:
-        # collections require parent objects to which they belong
+        >>> # collections require parent objects to which they belong
         >>> parent = 52
         >>> my_collection = Collection(parent=parent)
         >>> my_collection.parent

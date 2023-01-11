@@ -2,6 +2,7 @@ osmg.load\_case
 ===============
 
 .. automodule:: osmg.load_case
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.load\_case
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       LineElementUDL
       LoadCase

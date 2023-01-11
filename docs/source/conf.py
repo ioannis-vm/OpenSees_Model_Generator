@@ -6,23 +6,28 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../../'))
+
 project = 'osmg'
-copyright = '2023, John Vouvakis Manousakis'
 author = 'John Vouvakis Manousakis'
-release = '0.0.20'
+release = [line.split('=')[1]
+           for line in open('../../setup.cfg')
+           if 'version' in line][0].strip()
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
-    'autoapi.extension',
     'sphinx_rtd_theme'
 ]
-autoapi_type = 'python'
-autoapi_dirs = ['../../src/osmg']
-autoapi_ignore = ['*migrations*', '*/tests/*']
+
+autosummary_generate = True
 
 templates_path = ['_templates']
 exclude_patterns = []

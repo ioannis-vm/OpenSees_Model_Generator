@@ -40,6 +40,8 @@ class Section:
     the axes for plotting follow the
     AutoCAD convention.
 
+    .. code-block:: python
+
             y(green)
             ^         x(red)
             :       .

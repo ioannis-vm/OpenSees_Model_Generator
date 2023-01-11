@@ -5,7 +5,7 @@
 
 ![Screenshot](/img/teaser_image.png)
 
-This module is aims to help users define, analyze, and post-process 3D models using OpenSees, which is an open-source finite-element analysis (FEA) software [\[1\]](https://opensees.berkeley.edu/) [\[2\]](https://opensees.berkeley.edu/wiki/index.php/Main_Page) [\[3\]](https://en.wikipedia.org/wiki/OpenSees). This module, in particular, is utilizing the Python interpreter of OpenSees [\[4\]](https://github.com/zhuminjie/OpenSeesPy) [\[5\]](https://openseespydoc.readthedocs.io/en/latest/). Anyone is free and welcome to use, fork, extend and redistribute the code.
+This module aims to help users define, analyze, and post-process 3D models using OpenSees, which is an open-source finite-element analysis (FEA) software [\[1\]](https://opensees.berkeley.edu/) [\[2\]](https://opensees.berkeley.edu/wiki/index.php/Main_Page) [\[3\]](https://en.wikipedia.org/wiki/OpenSees). This module, in particular, is utilizing the Python interpreter of OpenSees [\[4\]](https://github.com/zhuminjie/OpenSeesPy) [\[5\]](https://openseespydoc.readthedocs.io/en/latest/). Anyone is free and welcome to use, fork, extend and redistribute the code.
 
 Links:  
 [\[1\]](https://opensees.berkeley.edu/) Open System for Earthquake Engineering Simulation - Home Page.  
@@ -14,12 +14,21 @@ Links:
 [\[4\]](https://github.com/zhuminjie/OpenSeesPy) OpenSeesPy GitHub repository.  
 [\[5\]](https://openseespydoc.readthedocs.io/en/latest/) OpenSeesPy documentation.  
 
-### PyPi package
+### Installation
 
 The module is available on PyPi. [View on PyPI](https://pypi.org/project/osmg/).  
 Installation using PyPI:
 > pip install osmg
 
+You may also install it directly from source by cloning the repository and installing it development (editable) mode:
+
+```
+cd where/you/wish/to/install/osmg
+git clone https://github.com/ioannis-vm/OpenSees_Model_Generator
+cd osmg
+python -m pip install -e .
+```
+
 ### Documentation
 
-An API reference is available [on this page](https://ioannis-vm.github.io/OpenSees_Model_Generator/).
+Documentation is available [here](https://ioannis-vm.github.io/OpenSees_Model_Generator/).

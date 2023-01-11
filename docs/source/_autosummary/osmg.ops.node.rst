@@ -2,6 +2,7 @@ osmg.ops.node
 =============
 
 .. automodule:: osmg.ops.node
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.ops.node
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Node
    

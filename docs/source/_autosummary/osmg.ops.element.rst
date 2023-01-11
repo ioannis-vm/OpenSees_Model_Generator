@@ -2,6 +2,7 @@ osmg.ops.element
 ================
 
 .. automodule:: osmg.ops.element
+   :members:
 
    
    
@@ -16,6 +17,8 @@ osmg.ops.element
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       BeamIntegration
       DispBeamColumn

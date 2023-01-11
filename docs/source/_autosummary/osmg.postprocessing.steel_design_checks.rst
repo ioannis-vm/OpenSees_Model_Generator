@@ -2,6 +2,7 @@ osmg.postprocessing.steel\_design\_checks
 =========================================
 
 .. automodule:: osmg.postprocessing.steel_design_checks
+   :members:
 
    
    

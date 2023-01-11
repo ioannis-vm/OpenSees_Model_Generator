@@ -2,6 +2,7 @@ osmg.preprocessing
 ==================
 
 .. automodule:: osmg.preprocessing
+   :members:
 
    
    
@@ -25,6 +26,7 @@ osmg.preprocessing
 
 .. autosummary::
    :toctree:
+   :template: custom-module-template.rst
    :recursive:
 
    osmg.preprocessing.rigid_diaphragm

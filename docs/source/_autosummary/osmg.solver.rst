@@ -2,6 +2,7 @@ osmg.solver
 ===========
 
 .. automodule:: osmg.solver
+   :members:
 
    
    
@@ -23,6 +24,8 @@ osmg.solver
    .. rubric:: Classes
 
    .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
    
       Analysis
       AnalysisSettings

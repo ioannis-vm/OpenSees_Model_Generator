@@ -2,6 +2,7 @@ osmg.gen.zerolength\_gen
 ========================
 
 .. automodule:: osmg.gen.zerolength_gen
+   :members:
 
    
    
