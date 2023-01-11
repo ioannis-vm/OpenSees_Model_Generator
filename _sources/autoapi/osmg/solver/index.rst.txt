@@ -119,7 +119,7 @@ Attributes
 
 .. py:class:: AnalysisSettings
 
-   Analysis storage settings object.
+   Analysis settings object.
    Controls what will be stored and how.
 
    .. py:attribute:: log_file
@@ -195,7 +195,7 @@ Attributes
 
       analysis settings
 
-      :type: AnalysisStorageSettings
+      :type: AnalysisSettings
 
    .. attribute:: results
 
