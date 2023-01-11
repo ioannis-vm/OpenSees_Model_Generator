@@ -1,0 +1,80 @@
+:py:mod:`osmg.ops.node`
+=======================
+
+.. py:module:: osmg.ops.node
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ node
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.ops.node.Node
+
+
+
+
+.. py:class:: Node
+
+   OpenSees node
+   https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
+   .. attribute:: uid
+
+      
+
+      :type: int
+
+   .. attribute:: coords
+
+      
+
+      :type: list[float]
+
+   .. attribute:: restraint
+
+      
+
+      :type: list[bool]
+
+   .. py:attribute:: uid
+      :annotation: :int
+
+      
+
+   .. py:attribute:: coords
+      :annotation: :list[float]
+
+      
+
+   .. py:attribute:: restraint
+      :annotation: :list[bool]
+
+      
+
+   .. py:attribute:: visibility
+      :annotation: :osmg.graphics.visibility.NodeVisibility
+
+      
+
+   .. py:method:: __post_init__()
+
+
+   .. py:method:: __le__(other)
+
+      Return self<=value.
+
+
+   .. py:method:: __repr__()
+
+      Return repr(self).
+
+
+

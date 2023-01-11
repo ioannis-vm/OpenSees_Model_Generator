@@ -1,0 +1,15 @@
+:py:mod:`osmg.gen.steel`
+========================
+
+.. py:module:: osmg.gen.steel
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   brb/index.rst
+
+

@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>osmg.gen.section_gen &#8212; osmg 0.0.20 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-osmg.gen.section_gen">
+<span id="osmg-gen-section-gen"></span><h1><a class="reference internal" href="../../../../generated/osmg.gen.section_gen.html#module-osmg.gen.section_gen" title="osmg.gen.section_gen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">osmg.gen.section_gen</span></code></a><a class="headerlink" href="#module-osmg.gen.section_gen" title="Permalink to this heading">¶</a></h1>
+<p>Model Generator for OpenSees ~ section generator</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">¶</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.section_gen.SectionGenerator" title="osmg.gen.section_gen.SectionGenerator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SectionGenerator</span></code></a></p></td>
+<td><p>Used to populate the section repository of a model.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">¶</a></h3>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.section_gen.nparr" title="osmg.gen.section_gen.nparr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nparr</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="osmg.gen.section_gen.nparr">
+<span class="sig-prename descclassname"><span class="pre">osmg.gen.section_gen.</span></span><span class="sig-name descname"><span class="pre">nparr</span></span><a class="headerlink" href="#osmg.gen.section_gen.nparr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.gen.section_gen.SectionGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.gen.section_gen.</span></span><span class="sig-name descname"><span class="pre">SectionGenerator</span></span><a class="headerlink" href="#osmg.gen.section_gen.SectionGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to populate the section repository of a model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.gen.section_gen.SectionGenerator.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="w"> </span><span class="pre">:osmg.model.Model</span></em><a class="headerlink" href="#osmg.gen.section_gen.SectionGenerator.model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.section_gen.SectionGenerator.generate_generic_elastic">
+<span class="sig-name descname"><span class="pre">generate_generic_elastic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_times_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_times_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_times_j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../ops/section/index.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">osmg.ops.section.ElasticSection</span></a></span></span><a class="headerlink" href="#osmg.gen.section_gen.SectionGenerator.generate_generic_elastic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an ElasticSection object with the specified properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Name of the section.</p></li>
+<li><p><strong>e_times_a</strong> (<em>float</em>) – The product of the elastic modulus and the area of the
+section.</p></li>
+<li><p><strong>e_times_i</strong> (<em>float</em>) – The product of the elastic modulus and the moment of
+inertia.</p></li>
+<li><p><strong>g_times_j</strong> (<em>float</em>) – The product of the shear modulus and the torsional
+moment of inertia.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>An ElasticSection object with the</dt><dd><p>specified properties.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../ops/section/index.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection">ElasticSection</a></p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.gen.section_gen</span> <span class="kn">import</span> <span class="n">SectionGenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s1">&#39;test_model&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec_gen</span> <span class="o">=</span> <span class="n">SectionGenerator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span> <span class="o">=</span> <span class="n">sec_gen</span><span class="o">.</span><span class="n">generate_generic_elastic</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;My Elastic Section&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">e_times_a</span><span class="o">=</span><span class="mf">100.00</span><span class="p">,</span> <span class="n">e_times_i</span><span class="o">=</span><span class="mf">1000.00</span><span class="p">,</span> <span class="n">g_times_j</span><span class="o">=</span><span class="mf">500.00</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;My Elastic Section&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">area</span>
+<span class="go">100.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">i_y</span>
+<span class="go">1000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">i_x</span>
+<span class="go">1000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec</span><span class="o">.</span><span class="n">j_mod</span>
+<span class="go">500.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.gen.section_gen.SectionGenerator.load_aisc_from_database">
+<span class="sig-name descname"><span class="pre">load_aisc_from_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec_shape_designation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ops_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../ops/section/index.html#osmg.ops.section.Section" title="osmg.ops.section.Section"><span class="pre">osmg.ops.section.Section</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_in_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../ops/section/index.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><span class="pre">ElasticSection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../../ops/section/index.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.section_gen.SectionGenerator.load_aisc_from_database" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads a section from the AISC steel section database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sec_shape_designation</strong> – Designation of the type of section
+to be loaded.</p></li>
+<li><p><strong>labels</strong> – List of labels of the sections to be loaded.</p></li>
+<li><p><strong>ops_material</strong> – Name of the uniaxial material to be
+associated with the section.</p></li>
+<li><p><strong>physical_material</strong> – Name of the physical material to be
+associated with the section.</p></li>
+<li><p><strong>sec_type</strong> – Type of section to be created.</p></li>
+<li><p><strong>store_in_model</strong> – If True, the created sections are stored
+in the model.</p></li>
+<li><p><strong>return_section</strong> – If True, the created sections are returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <cite>return_section</cite> is True, a dictionary containing the
+created sections. The keys are the labels of the sections,
+and the values are the sections themselves.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.gen.section_gen</span> <span class="kn">import</span> <span class="n">SectionGenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.defaults</span> <span class="kn">import</span> <span class="n">load_default_steel</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.ops.section</span> <span class="kn">import</span> <span class="n">ElasticSection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="s1">&#39;test_model&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">load_default_steel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec_gen</span> <span class="o">=</span> <span class="n">SectionGenerator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sec_gen</span><span class="o">.</span><span class="n">load_aisc_from_database</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;W14X90&#39;</span><span class="p">],</span> <span class="s1">&#39;default steel&#39;</span><span class="p">,</span> <span class="s1">&#39;default steel&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">ElasticSection</span><span class="p">,</span> <span class="n">store_in_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_section</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">{&#39;W14X90&#39;: ElasticSection object</span>
+<span class="go">name: W14X90</span>
+<span class="go">uid: 0</span>
+<span class="go">Properties:  E: 29000000.0</span>
+<span class="go">  A: 26.5</span>
+<span class="go">  Iy: 362.0</span>
+<span class="go">  Ix: 999.0</span>
+<span class="go">  G: 11153846.15</span>
+<span class="go">  J: 4.06</span>
+<span class="go">  W: 7.5</span>
+<span class="go">outside_shape: specified</span>
+<span class="go">snap_points: specified</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">osmg</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, John Vouvakis Manousakis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../../_sources/autoapi/osmg/gen/section_gen/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

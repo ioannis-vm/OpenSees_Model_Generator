@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>osmg.ops.element &#8212; osmg 0.0.20 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-osmg.ops.element">
+<span id="osmg-ops-element"></span><h1>osmg.ops.element<a class="headerlink" href="#module-osmg.ops.element" title="Permalink to this heading">¶</a></h1>
+<p>Model Generator for OpenSees ~ element</p>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.BeamIntegration" title="osmg.ops.element.BeamIntegration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BeamIntegration</span></code></a>(uid, parent_section)</p></td>
+<td><p>OpenSees beamIntegration parent class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.DispBeamColumn" title="osmg.ops.element.DispBeamColumn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DispBeamColumn</span></code></a>(parent_component, uid, nodes, ...)</p></td>
+<td><p>OpenSees dispBeamColumn element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html">https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.ElasticBeamColumn" title="osmg.ops.element.ElasticBeamColumn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElasticBeamColumn</span></code></a>(parent_component, uid, ...)</p></td>
+<td><p>OpenSees Elastic Beam Column Element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html">https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>(parent_component, uid, nodes)</p></td>
+<td><p>OpenSees element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/element.html">https://openseespydoc.readthedocs.io/en/latest/src/element.html</a> .</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.GeomTransf" title="osmg.ops.element.GeomTransf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeomTransf</span></code></a>(transf_type, uid, offset_i, ...)</p></td>
+<td><p>OpenSees geomTransf object <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html">https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html</a> <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation">https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.Lobatto" title="osmg.ops.element.Lobatto"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Lobatto</span></code></a>(uid, parent_section, n_p)</p></td>
+<td><p>OpenSees Lobatto beam integration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.TrussBar" title="osmg.ops.element.TrussBar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrussBar</span></code></a>(parent_component, uid, nodes, ...)</p></td>
+<td><p>Implements both of the following: OpenSees Truss Element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/trussEle.html">https://openseespydoc.readthedocs.io/en/latest/src/trussEle.html</a> OpenSees Corotational Truss Element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/corotTruss.html">https://openseespydoc.readthedocs.io/en/latest/src/corotTruss.html</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.TwoNodeLink" title="osmg.ops.element.TwoNodeLink"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TwoNodeLink</span></code></a>(parent_component, uid, nodes, ...)</p></td>
+<td><p>OpenSees TwoNodeLink element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html">https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/ops/element/index.html#osmg.ops.element.ZeroLength" title="osmg.ops.element.ZeroLength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ZeroLength</span></code></a>(parent_component, uid, nodes, ...)</p></td>
+<td><p>OpenSees ZeroLength element <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html">https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html</a></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">osmg</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, John Vouvakis Manousakis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/_autosummary/osmg.ops.element.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

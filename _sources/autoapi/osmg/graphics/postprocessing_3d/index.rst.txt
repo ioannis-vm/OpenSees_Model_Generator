@@ -1,0 +1,227 @@
+:py:mod:`osmg.graphics.postprocessing_3d`
+=========================================
+
+.. py:module:: osmg.graphics.postprocessing_3d
+
+.. autoapi-nested-parse::
+
+   The following utility functions are used for data visualization
+   https://plotly.com/python/reference/
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.graphics.postprocessing_3d.force_scaling_factor
+   osmg.graphics.postprocessing_3d.interp_3d_deformation
+   osmg.graphics.postprocessing_3d.interp_3d_points
+   osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh
+   osmg.graphics.postprocessing_3d.add_data__line_elms_deformed
+   osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed
+   osmg.graphics.postprocessing_3d.add_data__frames_undeformed
+   osmg.graphics.postprocessing_3d.add_data__nodes_deformed
+   osmg.graphics.postprocessing_3d.get_auto_scaling_deformation
+   osmg.graphics.postprocessing_3d.show_deformed_shape
+   osmg.graphics.postprocessing_3d.show_basic_forces
+   osmg.graphics.postprocessing_3d.show_basic_forces_combo
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.graphics.postprocessing_3d.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:function:: force_scaling_factor(ref_len, fmax, factor)
+
+   Applies a scaling factor to basic forces
+
+
+.. py:function:: interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points)
+
+   Given the deformations of the ends of a Bernoulli beam,
+   use its shape functions to obtain intermediate points.
+   :param element: A line element
+   :type element: 'model.LineElement'
+   :param u_i: 3 displacements at end i, global system
+   :type u_i: npt.NDArray[np.float64]
+   :param r_i: 3 rotations at end i, global system
+   :type r_i: npt.NDArray[np.float64]
+   :param u_j: similar to u_i, r_i.
+   :param r_j: similar to u_i, r_i.
+   :param num_points: Number of interpolation points
+
+   See note: https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3
+   :returns: Displacements (global system)
+             r_local (npt.NDArray[np.float64]): Rotations (local system)
+             (the rotations are needed for plotting the
+              deformed shape with extruded frame elements)
+   :rtype: d_global (npt.NDArray[np.float64])
+
+
+.. py:function:: interp_3d_points(elm, d_global, num_points, scaling)
+
+   Calculates intermediate points based on end locations and
+   deformations.
+
+
+.. py:function:: add_data__extruded_line_elms_deformed_mesh(analysis, case_name, data_dict, list_of_line_elems, step, scaling)
+
+   Adds a trace containing frame element extrusion mesh
+   in its deformed state
+
+
+.. py:function:: add_data__line_elms_deformed(analysis, case_name, data_dict, list_of_line_elems, step, scaling)
+
+   Adds a trace containing frame element centroidal axis lines
+   in their deformed state
+
+
+.. py:function:: add_data__line_elm_offsets_deformed(analysis, case_name, data_dict, list_of_line_elems, step, scaling)
+
+   Adds a trace containing frame element rigid offset lines
+   in their deformed state
+
+
+.. py:function:: add_data__frames_undeformed(data_dict, list_of_line_elems)
+
+   Adds a trace containing frame element centroidal axis lines
+
+
+.. py:function:: add_data__nodes_deformed(analysis, case_name, data_dict, list_of_nodes, step, scaling, function)
+
+   Adds a trace containing nodes in their deformed locations
+
+
+.. py:function:: get_auto_scaling_deformation(analysis, case_name, mdl, step)
+
+   Automatically calculate a scaling value that
+   makes the maximum displacement appear approximately
+   10% of the largest dimention of the building's bounding box
+
+
+.. py:function:: show_deformed_shape(analysis, case_name, step, scaling, extrude, camera=None, subset_model=None, animation=False, init_step=0, step_skip=0)
+
+   Visualize the model in its deformed state
+   :param analysis: an analysis object
+   :type analysis: Analysis
+   :param case_name: the name of the load_case to be visualized
+   :type case_name: str
+   :param step: the analysis step to be visualized
+   :type step: int
+   :param scaling: scaling factor for the deformations. If 0.00 is
+                   provided, the scaling factor is calculated automatically.
+   :type scaling: float
+   :param extrude: wether to extrude frame elements
+   :type extrude: bool
+   :param camera: custom positioning of the camera
+   :type camera: dict
+   :param subset_model: subset model used to only show certain
+                        components
+   :type subset_model: Model
+   :param animation: show all frames up to the one identified with
+                     `step`
+   :type animation: bool
+   :param init_step: starting step, in case of animation
+   :type init_step: int
+   :param step_skip: how many frames to skip to reduce the number of
+                     frames in case an animation
+   :type step_skip: int
+
+
+.. py:function:: show_basic_forces(analysis, case_name, step, scaling_global, scaling_n, scaling_q, scaling_m, scaling_t, num_points, force_conversion=1.0, moment_conversion=1.0, global_axes=False, camera=None, subset_model=None)
+
+   Visualize the model and plot the frame element basic forces
+   :param analysis: an analysis object
+   :type analysis: Analysis
+   :param case_name: the name of the load_case to be visualized
+   :type case_name: str
+   :param step: the analysis step to be visualized
+   :type step: int
+   :param scaling_global: I don't even remember what this
+                          does. It's kind of a mess right now.
+   :type scaling_global: float
+   :param scaling_n:
+   :type scaling_n: float
+   :param scaling_q:
+   :type scaling_q: float
+   :param scaling_m:
+   :type scaling_m: float
+   :param scaling_t:
+   :type scaling_t: float
+   :param num_points: number of points to include in the basic force
+                      curves
+   :type num_points: int
+   :param force_conversion: Conversion factor to be applied at the
+                            hover box data for forces (for unit conversions)
+   :type force_conversion: float
+   :param moment_conversion: Conversion factor to be applied at the
+                             hover box data for moments (for unit conversions)
+   :type moment_conversion: float
+   :param global_axes: whether to show global axes
+   :type global_axes: bool
+   :param camera: custom positioning of the camera
+   :type camera: dict
+   :param subset_model: use this model instead of the one
+                        contained in the analysis object.
+                        It needs to be a subset of the original model. This can be
+                          used to only show the results for some part of a large
+                          model.
+   :type subset_model: Model
+
+
+.. py:function:: show_basic_forces_combo(combo, scaling_global, scaling_n, scaling_q, scaling_m, scaling_t, num_points, force_conversion=1.0, moment_conversion=1.0, global_axes=False, camera=None, subset_model=None)
+
+   Visualize the model and plot the enveloped frame element basic forces
+   for a load combination.
+   :param combo: a load combination object
+   :type combo: LoadCombination
+   :param step: the analysis step to be visualized
+   :type step: int
+   :param scaling_global: I don't even remember what this
+                          does. It's kind of a mess right now.
+   :type scaling_global: float
+   :param scaling_n:
+   :type scaling_n: float
+   :param scaling_q:
+   :type scaling_q: float
+   :param scaling_m:
+   :type scaling_m: float
+   :param scaling_t:
+   :type scaling_t: float
+   :param num_points: number of points to include in the basic force
+                      curves
+   :type num_points: int
+   :param force_conversion: Conversion factor to be applied at the
+                            hover box data for forces (for unit conversions)
+   :type force_conversion: float
+   :param moment_conversion: Conversion factor to be applied at the
+                             hover box data for moments (for unit conversions)
+   :type moment_conversion: float
+   :param global_axes: whether to show global axes
+   :type global_axes: bool
+   :param camera: custom positioning of the camera
+   :type camera: dict
+   :param subset_model: use this model instead of the one
+                        contained in the analysis object.
+                        It needs to be a subset of the original model. This can be
+                          used to only show the results for some part of a large
+                          model.
+   :type subset_model: Model
+
+

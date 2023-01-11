@@ -1,0 +1,785 @@
+:py:mod:`osmg.ops.uniaxial_material`
+====================================
+
+.. py:module:: osmg.ops.uniaxial_material
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ element
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.ops.uniaxial_material.UniaxialMaterial
+   osmg.ops.uniaxial_material.Elastic
+   osmg.ops.uniaxial_material.Steel02
+   osmg.ops.uniaxial_material.Steel4
+   osmg.ops.uniaxial_material.Bilin
+   osmg.ops.uniaxial_material.Pinching4
+   osmg.ops.uniaxial_material.Hysteretic
+   osmg.ops.uniaxial_material.Fatigue
+   osmg.ops.uniaxial_material.MaxStrainRange
+
+
+
+
+.. py:class:: UniaxialMaterial
+
+   OpenSees uniaxialMaterial
+   https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
+
+   .. py:attribute:: uid
+      :annotation: :int
+
+      
+
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+
+.. py:class:: Elastic
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Elastic
+   https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
+
+   .. py:attribute:: e_mod
+      :annotation: :float
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Steel02
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Steel02
+   https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
+
+   .. py:attribute:: Fy
+      :annotation: :float
+
+      
+
+   .. py:attribute:: E0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: G
+      :annotation: :float
+
+      
+
+   .. py:attribute:: b
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_r0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_r1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_r2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: a1
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: a2
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: a3
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: a4
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: sig_init
+      :annotation: :Optional[float]
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Steel4
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Steel4
+   https://openseespydoc.readthedocs.io/en/latest/src/steel4.html
+
+   .. py:attribute:: Fy
+      :annotation: :float
+
+      
+
+   .. py:attribute:: E0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: b_k
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: r_1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: r_2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: b_kc
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_0c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: r_1c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: r_2c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: b_i
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: b_l
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: rho_i
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_i
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: l_yp
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: f_u
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_u
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: f_uc
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_uc
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: b_ic
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: b_lc
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: rho_ic
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: R_ic
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: sig_init
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: cycNum
+      :annotation: :Optional[float]
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Bilin
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Bilin Material
+   https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
+
+   .. py:attribute:: K0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: as_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: as_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: My_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: My_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Lamda_S
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Lamda_C
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Lamda_A
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Lamda_K
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_S
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_C
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_A
+      :annotation: :float
+
+      
+
+   .. py:attribute:: c_K
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_p_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_p_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_pc_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_pc_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Res_Pos
+      :annotation: :float
+
+      
+
+   .. py:attribute:: Res_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_u_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: theta_u_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: D_Plus
+      :annotation: :float
+
+      
+
+   .. py:attribute:: D_Neg
+      :annotation: :float
+
+      
+
+   .. py:attribute:: nFactor
+      :annotation: :float
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Pinching4
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Pinching4 Material
+   https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
+
+   .. py:attribute:: ePf1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePf2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePf3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePf4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePd1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePd2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePd3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: ePd4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNf1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNf2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNf3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNf4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNd1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNd2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNd3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: eNd4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: rDispP
+      :annotation: :float
+
+      
+
+   .. py:attribute:: fForceP
+      :annotation: :float
+
+      
+
+   .. py:attribute:: uForceP
+      :annotation: :float
+
+      
+
+   .. py:attribute:: rDispN
+      :annotation: :float
+
+      
+
+   .. py:attribute:: fFoceN
+      :annotation: :float
+
+      
+
+   .. py:attribute:: uForceN
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gK1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gK2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gK3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gK4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gKLim
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gD1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gD2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gD3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gD4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gDLim
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gF1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gF2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gF3
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gF4
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gFLim
+      :annotation: :float
+
+      
+
+   .. py:attribute:: gE
+      :annotation: :float
+
+      
+
+   .. py:attribute:: dmgType
+      :annotation: :str
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Hysteretic
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Bilin Material
+   https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
+
+   .. py:attribute:: p1
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: p2
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: p3
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: n1
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: n2
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: n3
+      :annotation: :tuple[float, float]
+
+      
+
+   .. py:attribute:: pinchX
+      :annotation: :float
+
+      
+
+   .. py:attribute:: pinchY
+      :annotation: :float
+
+      
+
+   .. py:attribute:: damage1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: damage2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: beta
+      :annotation: :float
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: Fatigue
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees Fatigue Material
+   https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
+
+   .. py:attribute:: predecessor
+      :annotation: :UniaxialMaterial
+
+      
+
+   .. py:attribute:: e_mod
+      :annotation: :float
+
+      
+
+   .. py:attribute:: var_m
+      :annotation: :float
+
+      
+
+   .. py:attribute:: var_min
+      :annotation: :float
+
+      
+
+   .. py:attribute:: var_max
+      :annotation: :float
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+
+.. py:class:: MaxStrainRange
+
+   Bases: :py:obj:`UniaxialMaterial`
+
+   OpenSees MaxStrainRange Material
+   ~not officially added yet~
+
+   .. py:attribute:: predecessor
+      :annotation: :UniaxialMaterial
+
+      
+
+   .. py:attribute:: msr_fracture
+      :annotation: :float
+
+      
+
+   .. py:attribute:: min_fracture
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: max_fracture
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: tangent_ratio
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: def_coeff
+      :annotation: :Optional[float]
+
+      
+
+   .. py:attribute:: node_tags
+      :annotation: :Optional[tuple[int, int]]
+
+      
+
+   .. py:attribute:: elements_to_remove
+      :annotation: :Optional[list[int]]
+
+      
+
+   .. py:method:: ops_args()
+
+      Returns the arguments required to define the object in
+      OpenSees
+
+
+

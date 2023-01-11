@@ -1,0 +1,106 @@
+:py:mod:`osmg.gen.zerolength_gen`
+=================================
+
+.. py:module:: osmg.gen.zerolength_gen
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ zero length element uniaxial materials
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.gen.zerolength_gen.fix_all
+   osmg.gen.zerolength_gen.release_6
+   osmg.gen.zerolength_gen.release_5
+   osmg.gen.zerolength_gen.release_56
+   osmg.gen.zerolength_gen.imk_6
+   osmg.gen.zerolength_gen.imk_56
+   osmg.gen.zerolength_gen.gravity_shear_tab
+   osmg.gen.zerolength_gen.steel_w_col_pz
+   osmg.gen.zerolength_gen.steel_brace_gusset
+
+
+
+.. py:function:: fix_all(model: osmg.model.Model, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Fixed in all directions
+
+
+.. py:function:: release_6(model: osmg.model.Model, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Frees strong axis bending
+
+
+.. py:function:: release_5(model: osmg.model.Model, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Frees weak axis bending
+
+
+.. py:function:: release_56(model: osmg.model.Model, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Frees both strong and weak axis bending
+
+
+.. py:function:: imk_6(model: osmg.model.Model, element_length: float, lboverl: float, loverh: float, rbs_factor: Optional[float], consider_composite: bool, section: osmg.ops.section.ElasticSection, physical_material: osmg.physical_material.PhysicalMaterial, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
+   steel components in support of collapse prediction of steel moment
+   frames under earthquake loading. Journal of Structural
+   Engineering-Reston, 137(11), 1291.
+
+   Elkady, A., & Lignos, D. G. (2014). Modeling of the composite
+   action in fully restrained beam‐to‐column connections:
+   implications in the seismic design and collapse capacity of steel
+   special moment frames. Earthquake Engineering & Structural
+   Dynamics, 43(13), 1935-1954.
+
+
+.. py:function:: imk_56(model: osmg.model.Model, element_length: float, lboverl: float, loverh: float, rbs_factor: Optional[float], consider_composite: bool, section: osmg.ops.section.ElasticSection, physical_material: osmg.physical_material.PhysicalMaterial, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   release in the weak axis bending direction,
+   imk (see imk docstring) in the strong axis bending direction
+
+
+.. py:function:: gravity_shear_tab(model: osmg.model.Model, consider_composite: bool, section: osmg.ops.section.ElasticSection, physical_material: osmg.physical_material.PhysicalMaterial, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
+   the overstrength and collapse capacity of steel frame buildings
+   with perimeter special moment frames. Earthquake Engineering &
+   Structural Dynamics, 44(8), 1289-1307.
+
+
+.. py:function:: steel_w_col_pz(model: osmg.model.Model, section: osmg.ops.section.ElasticSection, physical_material: osmg.physical_material.PhysicalMaterial, pz_length: float, pz_doubler_plate_thickness: float, pz_hardening: float, only_elastic: bool = False, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
+   performance evaluation of steel moment resisting frame
+   structures. Rep. No. 132.
+
+
+.. py:function:: steel_brace_gusset(model: osmg.model.Model, physical_mat: osmg.physical_material.PhysicalMaterial, d_brace: float, l_c: float, t_p: float, l_b: float, **kwargs: dict[object, object]) -> tuple[list[int], list[osmg.ops.uniaxial_material.UniaxialMaterial]]
+
+   Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
+   analysis model for special concentrically braced frames, Journal
+   of Constructional Steel Research, Vol. 73, pp 80-94.
+   :param model: Model object
+   :type model: Model
+   :param physical_mat: physical material object
+   :type physical_mat: PhysicalMaterial
+   :param d_brace: brace section height
+   :type d_brace: float
+   :param l_c: brace-to-gusset connection length
+   :type l_c: float
+   :param t_p: gusset plate thickness
+   :type t_p: float
+   :param l_b: gusset plate average buckling length
+   :type l_b: float
+
+

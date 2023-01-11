@@ -1,0 +1,553 @@
+:py:mod:`osmg.solver`
+=====================
+
+.. py:module:: osmg.solver
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ solver
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.solver.Results
+   osmg.solver.AnalysisSettings
+   osmg.solver.Analysis
+   osmg.solver.StaticAnalysis
+   osmg.solver.ModalAnalysis
+   osmg.solver.NonlinearAnalysis
+   osmg.solver.PushoverAnalysis
+   osmg.solver.NLTHAnalysis
+   osmg.solver.ModalResponseSpectrumAnalysis
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.solver.define_lateral_load_pattern
+   osmg.solver.plot_ground_motion
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.solver.nparr
+   osmg.solver.CONSTRAINTS
+   osmg.solver.NUMBERER
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:data:: CONSTRAINTS
+   :annotation: = ['Transformation']
+
+   
+
+.. py:data:: NUMBERER
+   :annotation: = RCM
+
+   
+
+.. py:class:: Results
+
+   Results object. Stores analysis results.
+
+   .. py:attribute:: node_displacements
+      :annotation: :osmg.collections.Collection[int, dict[int, list[float]]]
+
+      
+
+   .. py:attribute:: node_velocities
+      :annotation: :osmg.collections.Collection[int, dict[int, list[float]]]
+
+      
+
+   .. py:attribute:: node_accelerations
+      :annotation: :osmg.collections.Collection[int, dict[int, list[float]]]
+
+      
+
+   .. py:attribute:: node_reactions
+      :annotation: :osmg.collections.Collection[int, dict[int, list[float]]]
+
+      
+
+   .. py:attribute:: element_forces
+      :annotation: :osmg.collections.Collection[int, dict[int, nparr]]
+
+      
+
+   .. py:attribute:: release_force_defo
+      :annotation: :osmg.collections.Collection[int, dict[int, list[float]]]
+
+      
+
+   .. py:attribute:: periods
+      :annotation: :Optional[nparr]
+
+      
+
+   .. py:attribute:: n_steps_success
+      :annotation: :int
+
+      
+
+   .. py:attribute:: metadata
+      :annotation: :Optional[dict[str, object]]
+
+      
+
+   .. py:method:: __post_init__()
+
+
+
+.. py:class:: AnalysisSettings
+
+   Analysis storage settings object.
+   Controls what will be stored and how.
+
+   .. py:attribute:: log_file
+      :annotation: :Optional[str]
+
+      
+
+   .. py:attribute:: silent
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: store_forces
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: store_reactions
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: store_fiber
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: store_release_force_defo
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: specific_nodes
+      :annotation: :list[int]
+
+      
+
+   .. py:attribute:: pickle_results
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: solver
+      :annotation: :str
+
+      
+
+
+.. py:class:: Analysis
+
+   Parent analysis class.
+   .. attribute:: mdl
+
+      a given model
+
+      :type: Model
+
+   .. attribute:: load_cases
+
+      Dictionary containing load case names and
+      load case objects in which those load cases reside.
+
+      :type: dict
+
+   .. attribute:: output_directory
+
+      Where to place the results
+      when it is requested for them to be pickled.
+
+      :type: Optional[str]
+
+   .. attribute:: settings
+
+      analysis settings
+
+      :type: AnalysisStorageSettings
+
+   .. attribute:: results
+
+      analysis results
+
+      :type: Results
+
+   .. attribute:: logger
+
+      Logger object
+
+      :type: Optional[object]
+
+   .. py:attribute:: mdl
+      :annotation: :osmg.model.Model
+
+      
+
+   .. py:attribute:: load_cases
+      :annotation: :dict[str, osmg.load_case.LoadCase]
+
+      
+
+   .. py:attribute:: output_directory
+      :annotation: :Optional[str]
+
+      
+
+   .. py:attribute:: settings
+      :annotation: :AnalysisSettings
+
+      
+
+   .. py:attribute:: results
+      :annotation: :dict[str, Results]
+
+      
+
+   .. py:attribute:: logger
+      :annotation: :Optional[object]
+
+      
+
+   .. py:method:: log(msg: str) -> None
+
+      Adds a message to the log file
+
+
+   .. py:method:: print(thing: Any, end: str = '\n') -> None
+
+      Prints a message to stdout
+
+
+   .. py:method:: _init_results()
+
+
+   .. py:method:: _write_results_to_disk()
+
+      Pickles the results
+
+
+   .. py:method:: read_results_from_disk()
+
+      Reads back results from a pickle file
+
+
+   .. py:method:: _to_opensees_domain(case_name)
+
+      Defines the model in OpenSeesPy
+
+
+   .. py:method:: _define_loads(case_name)
+
+
+   .. py:method:: _read_node_displacements(case_name, step, nodes)
+
+
+   .. py:method:: _read_node_velocities(case_name, step, nodes)
+
+
+   .. py:method:: _read_node_accelerations(case_name, step, nodes)
+
+
+   .. py:method:: _read_node_reactions(case_name, step, nodes)
+
+
+   .. py:method:: _read_frame_element_forces(case_name, step, elems)
+
+
+   .. py:method:: _read_release_moment_rot(case_name, step, zerolength_elms)
+
+
+   .. py:method:: _read_opensees_results(case_name, step, nodes, line_elements, zerolength_elements)
+
+
+   .. py:method:: global_reactions(case_name, step)
+
+      Calculates and returns the global reaction forces.
+
+
+
+.. py:class:: StaticAnalysis
+
+   Bases: :py:obj:`Analysis`
+
+   Static analysis.  Stores all results (for each load case) in one
+   single step.
+
+   .. py:method:: run()
+
+      Runs the static analysis.
+
+
+
+.. py:class:: ModalAnalysis
+
+   Bases: :py:obj:`Analysis`
+
+   Runs a modal analysis.
+
+   .. py:attribute:: num_modes
+      :annotation: :int
+
+      
+
+   .. py:method:: _read_node_displacements_modal(case_name)
+
+
+   .. py:method:: _read_frame_element_forces_modal(case_name, elems)
+
+
+   .. py:method:: run()
+
+      Runs the modal analysis.
+
+
+   .. py:method:: modal_participation_factors(case_name, direction)
+
+      Calculates modal participation factors
+
+
+
+.. py:class:: NonlinearAnalysis
+
+   Bases: :py:obj:`Analysis`
+
+   Nonlinear analysis parent class.
+
+   .. py:method:: _run_gravity_analysis()
+
+
+   .. py:method:: retrieve_node_displacement(uid, case_name)
+
+      Returns the displacement of a node for all analysis steps
+
+
+   .. py:method:: retrieve_node_acceleration(uid, case_name)
+
+      Returns the acceleration of a node for all analysis steps
+
+
+   .. py:method:: retrieve_node_velocity(uid, case_name)
+
+      Returns the velocity of a node for all analysis steps
+
+
+   .. py:method:: retrieve_node_abs_acceleration(uid, case_name)
+
+      Returns the absolute acceleration of a node for all analysis
+      steps
+
+
+   .. py:method:: retrieve_node_abs_velocity(uid, case_name)
+
+      Returns the absolute velocity of a node for all analysis steps
+
+
+   .. py:method:: retrieve_release_force_defo(uid, case_name)
+
+      Returns the force-deformation of a zerolength element for all
+      analysis steps
+
+
+
+.. py:class:: PushoverAnalysis
+
+   Bases: :py:obj:`NonlinearAnalysis`
+
+   Pushover analysis
+
+   .. py:method:: _apply_lateral_load(case_name, direction, modeshape=None, node=None)
+
+
+   .. py:method:: run(direction, target_displacements, control_node, displ_incr, modeshape=None, loaded_node=None)
+
+      Run pushover analysis
+      :param direction: can be any of 'x', 'y', 'z'
+      :param target_displacements: a list of target displacements.
+                                   each time a target is reached, the analysis continues until
+                                   the next target is reached, flipping the direction as necessary.
+      :type target_displacements: list[float]
+      :param control_node: analysis control node (of which the
+                           direction is queried)
+      :type control_node: Node
+      :param displ_incr: initial displacement increment.
+      :type displ_incr: float
+      :param mode shape: array containing a mode shape that is
+                         used to distribute the applied incremental loads. If no
+                         mode shape is specified, the distribution is uniform.
+      :type mode shape: nparr
+      :param loaded_node: if a loaded node is specified, all
+                          incremental load is applied entirely on that node.
+                          Otherwise, the incremental loads are distributed to all nodes.
+      :type loaded_node: Node
+
+
+   .. py:method:: table_pushover_curve(case_name, direction, node)
+
+      Returns the force deformation results
+
+
+   .. py:method:: plot_pushover_curve(case_name, direction, node)
+
+      Plots the pushover curve
+
+
+
+.. py:function:: define_lateral_load_pattern(filename_x, filename_y, filename_z, file_time_incr)
+
+   Defines the load pattern for a time-history analysis from
+   previously parsed files with a constant dt
+
+
+.. py:function:: plot_ground_motion(filename, file_time_incr, gmunit='g', plotly=False)
+
+   Plots a ground motion input file.
+
+
+.. py:class:: NLTHAnalysis
+
+   Bases: :py:obj:`NonlinearAnalysis`
+
+   Dynamic nonlinear time-history analysis
+
+   .. py:attribute:: time_vector
+      :annotation: :list[float]
+
+      
+
+   .. py:attribute:: a_g
+      :annotation: :dict[int, numpy.typing.NDArray[numpy.float64]]
+
+      
+
+   .. py:method:: run(analysis_time_increment: float, filename_x: str, filename_y: str, filename_z: str, file_time_incr: float, finish_time: float = 0.0, skip_steps: int = 1, damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {'type': None}, print_progress: bool = True) -> dict[str, Union[int, str, float]]
+
+      Run the nonlinear time-history analysis
+      :param filename_x: Paths where the fixed-step ground acceleration
+                         records are stored (single-column).
+      :param y: Paths where the fixed-step ground acceleration
+                records are stored (single-column).
+      :param z: Paths where the fixed-step ground acceleration
+                records are stored (single-column).
+      :param file_time_incr: The corresponding time increment
+      :param finish_time: Specify a target time (s) to stop the analysis
+                          the default value of 0.00 means that it will
+                          run for the entire duration of the files.
+      :param damping: Can be any of:
+                      {'type': None},
+                      {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
+                      {'type': 'stiffness', 'ratio': r, 'period': t1}
+                      {'type': 'modal', 'num_modes': n, 'ratio': r}
+                      {'type': 'modal+stiffness', 'num_modes': n,
+                               'ratio_modal': r, 'period': t1,
+                               'ratio_stiffness': r}
+      :param print_progress: Controls whether the current time is printed out
+
+
+   .. py:method:: plot_node_displacement_history(case_name, node, direction, plotly=False)
+
+      Plots the displacement history of the specified node.
+
+
+
+.. py:class:: ModalResponseSpectrumAnalysis
+
+   Modal response spectrum analysis
+
+   .. py:attribute:: mdl
+      :annotation: :osmg.model.Model
+
+      
+
+   .. py:attribute:: load_case
+      :annotation: :osmg.load_case.LoadCase
+
+      
+
+   .. py:attribute:: num_modes
+      :annotation: :int
+
+      
+
+   .. py:attribute:: periods
+      :annotation: :nparr
+
+      
+
+   .. py:attribute:: spectrum
+      :annotation: :nparr
+
+      
+
+   .. py:attribute:: direction
+      :annotation: :str
+
+      
+
+   .. py:attribute:: modal_q0
+      :annotation: :Optional[nparr]
+
+      
+
+   .. py:attribute:: vb_modal
+      :annotation: :Optional[nparr]
+
+      
+
+   .. py:attribute:: anl
+      :annotation: :Optional[Analysis]
+
+      
+
+   .. py:method:: run()
+
+      Run the modal response spectrum analysis
+
+
+   .. py:method:: combined_node_disp(node_uid)
+
+      Returns the SRSS-combined node displacement of a node
+
+
+   .. py:method:: combined_node_disp_diff(node_i_uid, node_j_uid)
+
+      Returns the SRSS-combined displacement difference between two
+      nodes
+
+
+   .. py:method:: combined_basic_forces(element_uid)
+
+      Returns the SRSS-combined basic forces of a line element
+
+
+

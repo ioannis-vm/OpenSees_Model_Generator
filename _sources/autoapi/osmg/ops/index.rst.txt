@@ -1,0 +1,18 @@
+:py:mod:`osmg.ops`
+==================
+
+.. py:module:: osmg.ops
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   element/index.rst
+   node/index.rst
+   section/index.rst
+   uniaxial_material/index.rst
+
+

@@ -1,0 +1,63 @@
+:py:mod:`osmg.graphics.visibility`
+==================================
+
+.. py:module:: osmg.graphics.visibility
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ visibility
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.graphics.visibility.ElementVisibility
+   osmg.graphics.visibility.NodeVisibility
+
+
+
+
+.. py:class:: ElementVisibility
+
+   Element visibility object.
+   Controls whether an element is displayed in the plots
+   and whether it is defined in OpenSees or not
+
+   .. py:attribute:: hidden_when_extruded
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: hidden_at_line_plots
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: skip_opensees_definition
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: hidden_basic_forces
+      :annotation: :bool
+
+      
+
+
+.. py:class:: NodeVisibility
+
+   Node visibility object.
+   Controls whether a node is displayed in the plots
+
+   .. py:attribute:: connected_to_zerolength
+      :annotation: :bool
+
+      
+
+

@@ -1,0 +1,90 @@
+:py:mod:`osmg.physical_material`
+================================
+
+.. py:module:: osmg.physical_material
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ physical material
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.physical_material.PhysicalMaterial
+
+
+
+
+.. py:class:: PhysicalMaterial
+
+   Physical material.
+   We use this for self-weight, plotting enhancements etc.
+
+   .. rubric:: Example
+
+   >>> mat1 = PhysicalMaterial(
+   ...     1, 'steel', 'structural',
+   ...     7850, 210000, 81000, 400)
+   >>> print(mat1)
+   Physical material object
+   Name: steel
+   uid: 1
+   variety: structural
+   density: 7850
+   E: 210000
+   G: 81000
+   <BLANKLINE>
+
+   .. py:attribute:: uid
+      :annotation: :int
+
+      
+
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+   .. py:attribute:: variety
+      :annotation: :str
+
+      
+
+   .. py:attribute:: density
+      :annotation: :float
+
+      
+
+   .. py:attribute:: e_mod
+      :annotation: :float
+
+      
+
+   .. py:attribute:: g_mod
+      :annotation: :float
+
+      
+
+   .. py:attribute:: f_y
+      :annotation: :float
+
+      
+
+   .. py:method:: __srepr__()
+
+      Short version of repr
+
+
+   .. py:method:: __repr__()
+
+      Return repr(self).
+
+
+

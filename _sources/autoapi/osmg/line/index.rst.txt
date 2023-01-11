@@ -1,0 +1,195 @@
+:py:mod:`osmg.line`
+===================
+
+.. py:module:: osmg.line
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ line
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.line.Line
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.line.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:class:: Line
+
+   Finite-length line segment object.
+   Used internally whenever operations involving lines are reuired.
+   .. attribute:: tag
+
+      
+
+      :type: str
+
+   .. attribute:: start
+
+      starting point
+
+      :type: numpy.ndarray
+
+   .. attribute:: end
+
+      end point
+
+      :type: numpy.ndarray
+
+   .. py:attribute:: tag
+      :annotation: :str
+
+      
+
+   .. py:attribute:: start
+      :annotation: :nparr
+
+      
+
+   .. py:attribute:: end
+      :annotation: :nparr
+
+      
+
+   .. py:method:: __repr__()
+
+      Return repr(self).
+
+
+   .. py:method:: length()
+
+      Returns the length of the line.
+
+      .. rubric:: Example
+
+      >>> from osmg.line import Line
+      >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+      >>> l1.length()
+      2.8284271247461903
+
+
+   .. py:method:: direction()
+
+      Returns a unit vector pointing from the start to the end of
+      the line.
+
+      .. rubric:: Example
+
+      >>> from osmg.line import Line
+      >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+      >>> l1.direction()
+      array([0.70710678, 0.70710678])
+
+
+   .. py:method:: intersect(other: Line) -> nparr
+
+      Calculates the intersection point of this line with another
+      line. Returns None if the lines don't intersect.  Note: 'line'
+      is actually a finite-length line segment.
+
+      :param other: the other line
+      :type other: Line
+
+      .. rubric:: Example
+
+      >>> from osmg.line import Line
+      >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
+      >>> l2 = Line('l2', np.array([1, 0]), np.array([1, 3]))
+      >>> l1.intersect(l2)
+      array([1., 1.])
+
+
+   .. py:method:: intersects_pt(point: nparr) -> bool
+
+      Check whether the given point pt lies on the line.
+      :param point: a point
+      :type point: nparr
+
+      :returns: True if the point lies on the line, False otherwise
+      :rtype: bool
+
+      .. rubric:: Examples
+
+      >>> from osmg.line import Line
+      >>> l = Line('my_line', np.array([0, 0]), np.array([1, 1]))
+      >>> l.intersects_pt(np.array([0.5, 0.5]))
+      True
+      >>> l.intersects_pt(np.array([0, 0]))
+      True
+      >>> l.intersects_pt(np.array([1, 1]))
+      True
+      >>> l.intersects_pt(np.array([2, 2]))
+      False
+
+
+   .. py:method:: point_distance(point: nparr) -> Optional[float]
+
+      Calculate the minimum distance between the line segment and a
+      point.  If the point falls on the line but is outside of the
+      line segment, returns None.
+      :param point: the point
+      :type point: nparr
+
+      :returns: the minimum distance
+      :rtype: float
+
+      .. rubric:: Example
+
+      >>> line = Line(tag='line',
+      ...             start=np.array([1, 1]),
+      ...             end=np.array([3, 3]))
+      >>> point = np.array([4, 2])
+      >>> line.point_distance(point)
+      1.4142135623730951
+      >>> point = np.array([2, 2])
+      >>> line.point_distance(point)
+      0.0
+      >>> point = np.array([0, 0])
+      >>> line.point_distance(point)
+
+      >>> point = np.array([4, 4])
+      >>> line.point_distance(point)
+
+
+   .. py:method:: project(point: nparr) -> Optional[nparr]
+
+      Calculates the projection of a point on the line.
+      If the projection falls on the line segment, it returns the
+      projected point, otherwise it returns None.
+      :param point: the point's coordinates
+      :type point: numpy.ndarray
+
+      .. rubric:: Example
+
+      >>> line = Line('test', np.array([0, 0]), np.array([10, 0]))
+      >>> line.project(np.array([5, 0]))
+      array([5., 0.])
+      >>> line.project(np.array([5, 5]))
+      array([5., 0.])
+      >>> line.project(np.array([-5, 5]))
+
+      >>> line.project(np.array([15, 5]))
+
+
+

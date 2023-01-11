@@ -1,0 +1,31 @@
+:py:mod:`osmg.gen`
+==================
+
+.. py:module:: osmg.gen
+
+
+Subpackages
+-----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 3
+
+   steel/index.rst
+
+
+Submodules
+----------
+.. toctree::
+   :titlesonly:
+   :maxdepth: 1
+
+   component_gen/index.rst
+   material_gen/index.rst
+   mesh_shapes/index.rst
+   node_gen/index.rst
+   query/index.rst
+   section_gen/index.rst
+   uid_gen/index.rst
+   zerolength_gen/index.rst
+
+

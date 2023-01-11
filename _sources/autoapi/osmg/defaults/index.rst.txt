@@ -1,0 +1,67 @@
+:py:mod:`osmg.defaults`
+=======================
+
+.. py:module:: osmg.defaults
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ defaults
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.defaults.load_util_rigid_elastic
+   osmg.defaults.load_default_elastic
+   osmg.defaults.load_default_steel
+   osmg.defaults.load_default_fix_release
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.defaults.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:function:: load_util_rigid_elastic(model: osmg.model.Model) -> None
+
+   Adds a default rigid elastic beamcolumn element
+   to the model
+
+
+.. py:function:: load_default_elastic(model: osmg.model.Model, sec_name: str) -> None
+
+   Adds default non-rigid elastic beamcolumn element
+   sections to the model
+
+
+.. py:function:: load_default_steel(model: osmg.model.Model) -> None
+
+   Adds a default steel material to the model.
+
+   Note: If different properties are required, the values provided
+   here can be altered, or the materials can be defined at the
+   user-side and added to the model instead of calling this method.
+
+
+.. py:function:: load_default_fix_release(model: osmg.model.Model) -> None
+
+   Loads default fix and release elastic uniaxial materials
+   used to simulate moment releases using zerolength elements.
+
+

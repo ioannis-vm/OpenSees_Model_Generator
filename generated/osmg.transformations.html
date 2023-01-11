@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>osmg.transformations &#8212; osmg 0.0.20 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-osmg.transformations">
+<span id="osmg-transformations"></span><h1>osmg.transformations<a class="headerlink" href="#module-osmg.transformations" title="Permalink to this heading">¶</a></h1>
+<p>Performs coordinate transformations</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.local_axes_from_points_and_angle" title="osmg.transformations.local_axes_from_points_and_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_axes_from_points_and_angle</span></code></a>(point_i, ...)</p></td>
+<td><p>Given a start point, and end point, and an angle, obtain the local coordinate system of a linear element. :param point_i: Start point :type point_i: nparr :param point_j: End point :type point_j: nparr :param ang: Parameter that controls the rotation of the             section around the x-axis. Counterclockwise rotation is             posotive. 0.00 corresponds to:               vertical elements whose local z axis coincides with                                 the local x axis               horizontal elements whose local z axis is horizontal. :type ang: float.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.offset_transformation" title="osmg.transformations.offset_transformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">offset_transformation</span></code></a>(offset, u_vec, r_vec)</p></td>
+<td><p>Calculate the displacement at the end of a rigid offset by specifying the displacement and rotation of the other end.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.rotation_matrix_2d" title="osmg.transformations.rotation_matrix_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_2d</span></code></a>(ang)</p></td>
+<td><p>Return a 2D transformation matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.rotation_matrix_3d" title="osmg.transformations.rotation_matrix_3d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotation_matrix_3d</span></code></a>(axis, theta)</p></td>
+<td><p>Return the rotation matrix associated with counterclockwise rotation about the given axis by theta radians.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../autoapi/osmg/transformations/index.html#osmg.transformations.transformation_matrix" title="osmg.transformations.transformation_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transformation_matrix</span></code></a>(vec_x, vec_y, vec_z)</p></td>
+<td><p>Returns a transformation matrix that transforms points from the coordinate system in which the x, y and z axes are expressed, to the local coordinate system defined by them.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">osmg</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, John Vouvakis Manousakis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/generated/osmg.transformations.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,85 @@
+:py:mod:`osmg.gen.mesh_shapes`
+==============================
+
+.. py:module:: osmg.gen.mesh_shapes
+
+.. autoapi-nested-parse::
+
+   Generates meshes for preconfigured sections
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.gen.mesh_shapes.generate
+   osmg.gen.mesh_shapes.define_edges
+   osmg.gen.mesh_shapes.w_mesh
+   osmg.gen.mesh_shapes.rect_mesh
+   osmg.gen.mesh_shapes.generic_snap_points
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.gen.mesh_shapes.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:function:: generate(edges)
+
+   Generates halfedges from the given edges
+
+
+.. py:function:: define_edges(vertices)
+
+   Defines edges from an ordered list of vertices
+
+
+.. py:function:: w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None)
+
+   Defines a loop of counterclockwise halfedges
+   that form the shape of the W section with
+   the specified parameters.
+   The origin coincides with the centroid.
+   Input:
+       b: total width
+       h: total height
+       tw: web thickness
+       tf: flange thickness
+       target_area: AISC database area
+           to determine fillets,
+           because trying to do that using
+           `T` doesn't work.
+
+
+.. py:function:: rect_mesh(dim_b, dim_h)
+
+   Defines a loop of counterclockwise halfedges
+   that form the shape of the rectangular section with
+   the specified parameters.
+   The origin coincides with the centroid.
+   Input:
+       b: total width
+       h: total height
+
+
+.. py:function:: generic_snap_points(mesh: osmg.mesh.Mesh) -> dict[str, nparr]
+
+   Generates generic snap poitns
+   for a section object.
+
+

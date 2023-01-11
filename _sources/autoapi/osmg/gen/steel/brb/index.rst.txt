@@ -1,0 +1,236 @@
+:py:mod:`osmg.gen.steel.brb`
+============================
+
+.. py:module:: osmg.gen.steel.brb
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ BRB element generator
+
+   The purpose of this component is to use the lower-level `gen` classes
+   to simplify the definition of BRB elements simulated using a
+   corotational truss opensees element and the Steel4 material wrapped
+   under a Fatigue material, as done in [1] and [2].
+
+   [1] Zsarnoczay, Adam. "Experimental and numerical investigation of
+       buckling restrained braced frames for Eurocode conform design
+       procedure development." (2013).
+   [2] Simpson, Barbara Gwynne. Design development for steel strongback
+       braced frames to mitigate concentrations of damage. University of
+       aCalifornia, Berkeley, 2018.
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.gen.steel.brb.BRBGenSettings
+   osmg.gen.steel.brb.BRBGenerator
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.gen.steel.brb.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:class:: BRBGenSettings
+
+   This object holds default values that are used by BRBGenerator
+   objects, to better organize those values and improve the usability
+   of the BRBGenerator objects by allowing their methods to have
+   fewer arguments.
+
+   .. py:attribute:: steel4_b_k
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_b_kc
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_R_0
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_R_0c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_r_1
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_r_1c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_r_2
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_r_2c
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_b_i
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_b_ic
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_rho_i
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_rho_ic
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_b_l
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_b_lc
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_R_i
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_R_ic
+      :annotation: :float
+
+      
+
+   .. py:attribute:: steel4_l_yp
+      :annotation: :float
+
+      
+
+   .. py:attribute:: fatigue_e_mod
+      :annotation: :float
+
+      
+
+   .. py:attribute:: fatigue_var_m
+      :annotation: :float
+
+      
+
+   .. py:attribute:: transf_type
+      :annotation: :str
+
+      
+
+
+.. py:class:: BRBGenerator
+
+   The purpose of this component is to use the lower-level `gen`
+   classes to simplify the definition of BRB elements simulated using
+   a corotational truss opensees element and the Steel4 material
+   wrapped under a Fatigue material, as done in [1] and [2].
+   [1] Zsarnoczay, Adam. "Experimental and numerical investigation of
+       buckling restrained braced frames for Eurocode conform design
+       procedure development." (2013).
+   [2] Simpson, Barbara Gwynne. Design development for steel
+       strongback braced frames to mitigate concentrations of
+       damage. University of aCalifornia, Berkeley, 2018.
+
+
+   .. py:attribute:: model
+      :annotation: :osmg.model.Model
+
+      
+
+   .. py:attribute:: settings
+      :annotation: :BRBGenSettings
+
+      
+
+   .. py:method:: add_brb(xi_coord: float, yi_coord: float, lvl_key_i: int, offset_i: nparr, snap_i: str, xj_coord: float, yj_coord: float, lvl_key_j: int, offset_j: nparr, snap_j: str, area: float, f_y: float, e_0: float, casing_size: float, unit_weight: float) -> None
+
+      Adds a BRB element to the model.
+
+      :param xi_coord: x coordinate of the i-end
+      :type xi_coord: float
+      :param yi_coord: y coordinate of the i-end
+      :type yi_coord: float
+      :param lvl_key_i: Level ID of the i-end
+      :type lvl_key_i: int
+      :param offset_i: Rigid offset at the i-end
+      :type offset_i: nparr
+      :param snap_i: Snap tag for the i-end connectivity used to
+                     automatically determine an offset based on existing
+                     elements.
+      :type snap_i: str
+      :param xj_coord: x coordinate of the j-end
+      :type xj_coord: float
+      :param yj_coord: y coordinate of the j-end
+      :type yj_coord: float
+      :param lvl_key_j: Level ID of the j-end
+      :type lvl_key_j: int
+      :param offset_j: Rigid offset at the j-end
+      :type offset_j: nparr
+      :param snap_j: Snap tag for the j-end connectivity used to
+                     automatically determine an offset based on existing
+                     elements.
+      :type snap_j: str
+      :param area: Core area of the BRB element.
+      :type area: float
+      :param f_y: Steel stress.
+      :type f_y: float
+      :param e_0: Young's modulus, adjusted to account for
+                  non-prismatic shape. See [2], Figure 4.15, and Equations
+                  4.7, 4.8.
+      :type e_0: float
+      :param casing_size: Assuming a square cross-section,
+                          controls the side length. Used for visualization purposes
+                          and to determine the weight of the BRB element, which is
+                          lumped to the connecting nodes. This parameter has no
+                          effect on the force-deformation relationship of the
+                          element.
+      :type casing_size: float
+      :param unit_weight: Weight per unit volume, used together
+                          with the casing_size, assuming a square section and a
+                          workpoint-to-workpoint length, in order to determine the
+                          weight of the BRB, which is lumped to the two connecting
+                          nodes of the Truss element as weight and mass when the
+                          self-weight and self-mass preprocessing methods are
+                          called.
+      :type unit_weight: float
+
+
+

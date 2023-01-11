@@ -1,0 +1,149 @@
+:py:mod:`osmg.component_assembly`
+=================================
+
+.. py:module:: osmg.component_assembly
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ component assembly
+
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   osmg.component_assembly.ComponentAssembly
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.component_assembly.nparr
+
+
+.. py:data:: nparr
+   
+
+   
+
+.. py:class:: ComponentAssembly
+
+   A component assembly represents some part of a structure and holds
+   various lower-level elements such as nodes and beamcolumn
+   elements.
+   .. attribute:: uid
+
+      Unique identifyer of the component assembly
+
+      :type: int
+
+   .. attribute:: parent_collection
+
+      The collection of
+      elements to which the component assembly belongs.
+
+      :type: ComponentCollection
+
+   .. attribute:: component_purpose
+
+      The functionality of the component assembly
+
+      :type: str
+
+   .. attribute:: external_nodes
+
+      the external nodes to which the
+      component assembly is connected.
+      these nodes should exist as part of a level.
+
+      :type: NodeCollection
+
+   .. attribute:: internal_nodes
+
+      internal nodes that are
+      required for the connectivity of the elements of the component
+      assembly.
+      these nodes only exist as part of the component assembly.
+
+      :type: NodeCollection
+
+   .. attribute:: elements
+
+      Collection containing the elements that are part of the
+      component assembly.
+
+      :type: CollectionWithConnectivity
+
+   .. py:attribute:: uid
+      :annotation: :int
+
+      
+
+   .. py:attribute:: parent_collection
+      :annotation: :osmg.collections.Collection[int, ComponentAssembly]
+
+      
+
+   .. py:attribute:: component_purpose
+      :annotation: :str
+
+      
+
+   .. py:attribute:: external_nodes
+      :annotation: :osmg.collections.NodeCollection
+
+      
+
+   .. py:attribute:: internal_nodes
+      :annotation: :osmg.collections.NodeCollection
+
+      
+
+   .. py:attribute:: elements
+      :annotation: :osmg.collections.CollectionWithConnectivity[int, osmg.ops.element.Element]
+
+      
+
+   .. py:method:: __post_init__()
+
+
+   .. py:method:: __srepr__()
+
+      Short version of repr
+
+
+   .. py:method:: __repr__()
+
+      Return repr(self).
+
+
+   .. py:method:: dict_of_elements()
+
+      Returns a dictionary of all element objects in the model.
+      The keys are the uids of the objects.
+
+
+   .. py:method:: list_of_elements()
+
+      Returns a list of all element objects in the model.
+
+
+   .. py:method:: element_connectivity()
+
+      Returns the connectivity of all elements. Elements are
+      connected to external nodes. Each component assembly can be
+      represented by a tuple of node uids of its connected nodes in
+      ascending order. This method returns a dictionary having these
+      tuples as keys, and the associated components as values.
+
+
+

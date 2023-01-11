@@ -1,0 +1,35 @@
+:py:mod:`osmg.preprocessing.self_weight_mass`
+=============================================
+
+.. py:module:: osmg.preprocessing.self_weight_mass
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ self weight, self mass
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.preprocessing.self_weight_mass.self_weight
+   osmg.preprocessing.self_weight_mass.self_mass
+
+
+
+.. py:function:: self_weight(mdl, lcase, factor=1.0)
+
+   Assigns the structure's self weight to its members
+
+
+.. py:function:: self_mass(mdl, lcase)
+
+   Assigns the structure's self mass to its members
+
+

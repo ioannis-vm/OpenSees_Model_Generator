@@ -1,0 +1,35 @@
+:py:mod:`osmg.postprocessing.steel_design_checks`
+=================================================
+
+.. py:module:: osmg.postprocessing.steel_design_checks
+
+.. autoapi-nested-parse::
+
+   Model Generator for OpenSees ~ steel design checks
+
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   osmg.postprocessing.steel_design_checks.smrf_scwb
+   osmg.postprocessing.steel_design_checks.smrf_pz_doubler_plate_requirement
+
+
+
+.. py:function:: smrf_scwb(col_sec_properties: dict[str, float], col_sec_properties_above: dict[str, float], beam_i_sec_properties: dict[str, float], col_axial_load: float, beam_udl_i: float, rbs_proportion_i: float, level_height: float, bay_length: float, beam_j_sec_properties: Optional[dict[str, float]], beam_udl_j: Optional[float], rbs_proportion_j: Optional[float], s_h: float, f_y: float, ry_coeff: float = 1.15, omega_coeff: float = 1.1) -> float
+
+   SMRF strong column weak beam check
+
+
+.. py:function:: smrf_pz_doubler_plate_requirement(col_sec_properties: dict[str, float], beam_sec_properties: dict[str, float], rbs_proportion: float, bay_length: float, place: str, s_h: float, f_y: float, ry_coeff: float = 1.15, omega_coeff: float = 1.1) -> float
+
+   Calculates the required doubler plate thickness
+
+
