@@ -1,0 +1,41 @@
+name: test-use-of-conda
+on:
+  push:
+    paths:
+      - '.github/workflows/so-samtools.yaml'
+      - '.github/workflows/conda.yaml'
+
+jobs:
+  create-env:
+    name: ${{ matrix.os }} 
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+        
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v2
+        
+      - name: create environment with mamba
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          channels: conda-forge,bioconda,defaults
+          auto-activate-base: false
+          activate-environment: so-samtools
+          environment-file: envs/so-samtools.yaml
+      
+      - name: check solution
+        run: |
+          mamba env export
+      
+      - name: test samtools
+        run: |
+          which samtools
+          samtools help
