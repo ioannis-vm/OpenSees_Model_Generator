@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.preprocessing.split_component &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.preprocessing.split_component &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -177,8 +178,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.preprocessing.split_component.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -190,23 +189,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.preprocessing.split_component">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.preprocessing.split_component">
 <span id="osmg-preprocessing-split-component"></span><h1>osmg.preprocessing.split_component<a class="headerlink" href="#module-osmg.preprocessing.split_component" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ split component</p>
+<p>Defines the <a class="reference internal" href="#osmg.preprocessing.split_component.split_component" title="osmg.preprocessing.split_component.split_component"><code class="xref py py-func docutils literal notranslate"><span class="pre">split_component()</span></code></a> method.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.preprocessing.split_component.split_component" title="osmg.preprocessing.split_component.split_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_component</span></code></a>(component, point)</p></td>
-<td><p>Splits a beam-functioning component assembly to accomodate for a node required to connect another component assembly</p></td>
+<td><p>Splits a beam-functioning component assembly to accomodate for a node required to connect another component assembly.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.preprocessing.split_component.split_component">
-<span class="sig-prename descclassname"><span class="pre">osmg.preprocessing.split_component.</span></span><span class="sig-name descname"><span class="pre">split_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.split_component.split_component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Splits a beam-functioning component assembly to
-accomodate for a node required to connect
-another component assembly</p>
+<span class="sig-name descname"><span class="pre">split_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.component_assembly.ComponentAssembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">osmg.ops.node.Node</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/preprocessing/split_component.html#split_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.split_component.split_component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits a beam-functioning component assembly to accomodate for a
+node required to connect another component assembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>component</strong> – Component assembly to split.</p></li>
+<li><p><strong>point</strong> – Point to be used to split the component.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This function might no longer work. Needs to be tested and
+perhaps updated.</p>
+</div>
 </dd></dl>
 
 </section>

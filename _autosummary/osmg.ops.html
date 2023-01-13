@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.ops &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.ops &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -172,8 +173,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.ops.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -185,22 +184,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.ops">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.ops">
 <span id="osmg-ops"></span><h1>osmg.ops<a class="headerlink" href="#module-osmg.ops" title="Permalink to this heading">¶</a></h1>
 <p class="rubric">Modules</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.ops.element.html#module-osmg.ops.element" title="osmg.ops.element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.element</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ element</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.ops.element.html#module-osmg.ops.element" title="osmg.ops.element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.element</span></code></a></p></td>
+<td><p>Defines OpenSees Element interfrace objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.ops.node.html#module-osmg.ops.node" title="osmg.ops.node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.node</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ node</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.ops.node.html#module-osmg.ops.node" title="osmg.ops.node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.node</span></code></a></p></td>
+<td><p>Defines <a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Node</span></code></a> objects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.ops.section.html#module-osmg.ops.section" title="osmg.ops.section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.section</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ section</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.ops.section.html#module-osmg.ops.section" title="osmg.ops.section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.section</span></code></a></p></td>
+<td><p>Defines <a class="reference internal" href="osmg.ops.section.Section.html#osmg.ops.section.Section" title="osmg.ops.section.Section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Section</span></code></a> objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.ops.uniaxial_material.html#module-osmg.ops.uniaxial_material" title="osmg.ops.uniaxial_material"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.uniaxial_material</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ element</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.ops.uniaxial_material.html#module-osmg.ops.uniaxial_material" title="osmg.ops.uniaxial_material"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops.uniaxial_material</span></code></a></p></td>
+<td><p>Defines OpenSees uniaxialMaterial interfrace objects.</p></td>
 </tr>
 </tbody>
 </table>

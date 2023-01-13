@@ -1,0 +1,726 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.ops.uniaxial_material &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.ops.uniaxial_material</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.ops.uniaxial_material</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines OpenSees uniaxialMaterial interfrace objects.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">field</span>
+
+
+<span class="c1"># pylint: disable=invalid-name</span>
+
+<div class="viewcode-block" id="UniaxialMaterial"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">UniaxialMaterial</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees uniaxialMaterial</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">uid</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="Elastic"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Elastic.html#osmg.ops.uniaxial_material.Elastic">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Elastic</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Elastic</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">e_mod</span><span class="p">:</span> <span class="nb">float</span>
+
+<div class="viewcode-block" id="Elastic.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Elastic.html#osmg.ops.uniaxial_material.Elastic.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Elastic&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_mod</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="Steel02"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Steel02.html#osmg.ops.uniaxial_material.Steel02">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Steel02</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Steel02</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/steel02.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Fy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">E0</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">G</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_r0</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_r1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_r2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">a1</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">a2</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">a3</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">a4</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">sig_init</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Steel02.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Steel02.html#osmg.ops.uniaxial_material.Steel02.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;Steel02&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Fy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E0</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_r0</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_r1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_r2</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a3</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">a4</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a4</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_init</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sig_init</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">args</span></div></div>
+
+
+<div class="viewcode-block" id="Steel4"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Steel4.html#osmg.ops.uniaxial_material.Steel4">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Steel4</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Steel4</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/steel4.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Fy</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">E0</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">b_k</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">R_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">20.00</span><span class="p">)</span>
+    <span class="n">r_1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.90</span><span class="p">)</span>
+    <span class="n">r_2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+
+    <span class="n">b_kc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">R_0c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">20.00</span><span class="p">)</span>
+    <span class="n">r_1c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.90</span><span class="p">)</span>
+    <span class="n">r_2c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.15</span><span class="p">)</span>
+
+    <span class="n">b_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">b_l</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">rho_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">R_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">l_yp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">f_u</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">R_u</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">f_uc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">R_uc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">b_ic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">b_lc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">rho_ic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">R_ic</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">sig_init</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">cycNum</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Steel4.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Steel4.html#osmg.ops.uniaxial_material.Steel4.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># non-symmetric behavior</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_kc</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_0c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_1c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_2c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_k</span>
+            <span class="n">asym</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">asym</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># ultimate strength limit</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_u</span><span class="p">:</span>
+            <span class="n">ultimate</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_uc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_uc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ultimate</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># isotropic hardening</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_i</span><span class="p">:</span>
+            <span class="n">iso</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_l</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_yp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_lc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_ic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_ic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">iso</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># kinematic hardening</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_k</span><span class="p">:</span>
+            <span class="n">kinematic</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_0c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_1c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_2c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kinematic</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># construct argument list</span>
+        <span class="c1">#</span>
+
+        <span class="c1"># these are required and will always be there</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;Steel4&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Fy</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">E0</span>
+        <span class="p">]</span>
+
+        <span class="c1"># optional arguments:</span>
+        <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-asym&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">kinematic</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-kin&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">b_kc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_0c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_1c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_2c</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">iso</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-iso&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_i</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">b_l</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">l_yp</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">b_ic</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rho_ic</span><span class="p">,</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">b_lc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_ic</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ultimate</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-ult&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_u</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_u</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">asym</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">f_uc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">R_uc</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_init</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-init&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sig_init</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycNum</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;-mem&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cycNum</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">args</span></div></div>
+
+
+<div class="viewcode-block" id="Bilin"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Bilin.html#osmg.ops.uniaxial_material.Bilin">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Bilin</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Bilin Material</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">K0</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">as_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">as_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">My_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">My_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Lamda_S</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Lamda_C</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Lamda_A</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Lamda_K</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_S</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_C</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_A</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">c_K</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_p_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_p_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_pc_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_pc_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Res_Pos</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">Res_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_u_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">theta_u_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">D_Plus</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">D_Neg</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">nFactor</span><span class="p">:</span> <span class="nb">float</span>
+
+<div class="viewcode-block" id="Bilin.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Bilin.html#osmg.ops.uniaxial_material.Bilin.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;Bilin&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">K0</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">as_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">as_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">My_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">My_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Lamda_S</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Lamda_C</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Lamda_A</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Lamda_K</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_S</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_C</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_A</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">c_K</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_p_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_p_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_pc_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_pc_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Res_Pos</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Res_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_u_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theta_u_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">D_Plus</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">D_Neg</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nFactor</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="Pinching4"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Pinching4.html#osmg.ops.uniaxial_material.Pinching4">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Pinching4</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Pinching4 Material</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ePf1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePf2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePf3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePf4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePd1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePd2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePd3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ePd4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNf1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNf2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNf3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNf4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNd1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNd2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNd3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">eNd4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">rDispP</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fForceP</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">uForceP</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">rDispN</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fFoceN</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">uForceN</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gK1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gK2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gK3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gK4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gKLim</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gD1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gD2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gD3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gD4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gDLim</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gF1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gF2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gF3</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gF4</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gFLim</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">gE</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">dmgType</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="Pinching4.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Pinching4.html#osmg.ops.uniaxial_material.Pinching4.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;Pinching4&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePf1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePf2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePf3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePf4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePd1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePd2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePd3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ePd4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNf1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNf2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNf3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNf4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNd1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNd2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNd3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eNd4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rDispP</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fForceP</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uForceP</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rDispN</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fFoceN</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uForceN</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gK1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gK2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gK3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gK4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gKLim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gD1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gD2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gD3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gD4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gDLim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gF1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gF2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gF3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gF4</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gFLim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gE</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dmgType</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="Hysteretic"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Hysteretic.html#osmg.ops.uniaxial_material.Hysteretic">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Hysteretic</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Bilin Material</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">p1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">p2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">p3</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">n1</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">n2</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">n3</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">pinchX</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">pinchY</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">damage1</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">damage2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span>
+
+<div class="viewcode-block" id="Hysteretic.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Hysteretic.html#osmg.ops.uniaxial_material.Hysteretic.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;Hysteretic&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">p3</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n1</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n2</span><span class="p">,</span>
+            <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">n3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pinchX</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pinchY</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">damage1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">damage2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="Fatigue"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Fatigue.html#osmg.ops.uniaxial_material.Fatigue">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Fatigue</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees Fatigue Material</span>
+<span class="sd">    https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">predecessor</span><span class="p">:</span> <span class="n">UniaxialMaterial</span>
+    <span class="n">e_mod</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mf">0.191</span><span class="p">)</span>
+    <span class="n">var_m</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=-</span><span class="mf">0.458</span><span class="p">)</span>
+    <span class="n">var_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=-</span><span class="mf">1.0e16</span><span class="p">)</span>
+    <span class="n">var_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=+</span><span class="mf">1.0e16</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Fatigue.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.Fatigue.html#osmg.ops.uniaxial_material.Fatigue.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;Fatigue&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predecessor</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="s2">&quot;-E0&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">e_mod</span><span class="p">,</span>
+            <span class="s2">&quot;-m&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var_m</span><span class="p">,</span>
+            <span class="s2">&quot;-min&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="s2">&quot;-max&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var_max</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="MaxStrainRange"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.MaxStrainRange.html#osmg.ops.uniaxial_material.MaxStrainRange">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">MaxStrainRange</span><span class="p">(</span><span class="n">UniaxialMaterial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    OpenSees MaxStrainRange Material</span>
+<span class="sd">    ~not officially added yet~</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">predecessor</span><span class="p">:</span> <span class="n">UniaxialMaterial</span>
+    <span class="n">msr_fracture</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">min_fracture</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">max_fracture</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">tangent_ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">def_coeff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">node_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">elements_to_remove</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MaxStrainRange.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.uniaxial_material.MaxStrainRange.html#osmg.ops.uniaxial_material.MaxStrainRange.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;MaxStrainRange&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predecessor</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">msr_fracture</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_fracture</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-min&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_fracture</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_fracture</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-max&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_fracture</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tangent_ratio</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-tangentRatio&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tangent_ratio</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_coeff</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-defCoeff&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">def_coeff</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_tags</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-nodeTags&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">node_tags</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_remove</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;-eleTag&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">elements_to_remove</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">args</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

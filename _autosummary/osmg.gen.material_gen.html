@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.gen.material_gen &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.gen.material_gen &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -183,8 +184,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.gen.material_gen.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -196,9 +195,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.gen.material_gen">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.gen.material_gen">
 <span id="osmg-gen-material-gen"></span><h1>osmg.gen.material_gen<a class="headerlink" href="#module-osmg.gen.material_gen" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ material generator</p>
+<p>Objects that generate materials.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -209,11 +232,11 @@
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.gen.material_gen.MaterialGenerator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.gen.material_gen.</span></span><span class="sig-name descname"><span class="pre">MaterialGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaterialGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/material_gen.html#MaterialGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object introduces element-specific materials to a model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat">
-<span class="sig-name descname"><span class="pre">generate_steel_hss_rect_brace_maxstrainrange_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">brace_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_i_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_j_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.uniaxial_material.MaxStrainRange.html#osmg.ops.uniaxial_material.MaxStrainRange" title="osmg.ops.uniaxial_material.MaxStrainRange"><span class="pre">MaxStrainRange</span></a></span></span><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">generate_steel_hss_rect_brace_maxstrainrange_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">brace_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_i_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_j_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.uniaxial_material.MaxStrainRange.html#osmg.ops.uniaxial_material.MaxStrainRange" title="osmg.ops.uniaxial_material.MaxStrainRange"><span class="pre">MaxStrainRange</span></a></span></span><a class="reference internal" href="../_modules/osmg/gen/material_gen.html#MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sen, A. D., Roeder, C. W., Lehman, D. E., &amp; Berman,
 J. W. (2019). Nonlinear modeling of concentrically braced
 frames. Journal of Constructional Steel Research, 157,
@@ -222,7 +245,7 @@ frames. Journal of Constructional Steel Research, 157,
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material">
-<span class="sig-name descname"><span class="pre">generate_steel_w_imk_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lboverl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loverh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbs_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_composite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strong'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">generate_steel_w_imk_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">section</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lboverl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loverh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rbs_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">consider_composite</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strong'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/material_gen.html#MaterialGenerator.generate_steel_w_imk_material"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lignos, D. G., &amp; Krawinkler, H. (2011). Deterioration modeling of
 steel components in support of collapse prediction of steel moment
 frames under earthquake loading. Journal of Structural

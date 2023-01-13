@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.graphics.preprocessing_3d &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.graphics.preprocessing_3d &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -192,8 +193,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.graphics.preprocessing_3d.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -205,7 +204,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.graphics.preprocessing_3d">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.graphics.preprocessing_3d">
 <span id="osmg-graphics-preprocessing-3d"></span><h1>osmg.graphics.preprocessing_3d<a class="headerlink" href="#module-osmg.graphics.preprocessing_3d" title="Permalink to this heading">¶</a></h1>
 <p>The following utility functions are used for data visualization
 <a class="reference external" href="https://plotly.com/python/reference/">https://plotly.com/python/reference/</a></p>
@@ -213,229 +236,237 @@
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__bars" title="osmg.graphics.preprocessing_3d.add_data__bars"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__bars</span></code></a>(data_dict, mdl[, load_case])</p></td>
-<td><p>Adds a trace containing frame element centroidal axis lines :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase</p></td>
+<td><p>Adds a trace containing frame element centroidal axis lines :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh" title="osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__extruded_bars_mesh</span></code></a>(data_dict, mdl)</p></td>
-<td><p>Adds a trace containing frame element extrusion mesh :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model</p></td>
+<td><p>Adds a trace containing frame element extrusion mesh :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh" title="osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__extruded_frames_mesh</span></code></a>(data_dict, mdl)</p></td>
-<td><p>Adds a trace containing frame element extrusion mesh :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model</p></td>
+<td><p>Adds a trace containing frame element extrusion mesh :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__frame_axes" title="osmg.graphics.preprocessing_3d.add_data__frame_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__frame_axes</span></code></a>(data_dict, mdl, ref_len)</p></td>
-<td><p>Adds a trace containing frame element local axis lines :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model :param ref_len: model reference length to scale the axes :type ref_len: float</p></td>
+<td><p>Adds a trace containing frame element local axis lines :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>ref_len</strong> -- model reference length to scale the axes</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__frame_offsets" title="osmg.graphics.preprocessing_3d.add_data__frame_offsets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__frame_offsets</span></code></a>(data_dict, mdl)</p></td>
-<td><p>Adds a trace containing frame element rigid offset lines :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model</p></td>
+<td><p>Adds a trace containing frame element rigid offset lines :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__frames" title="osmg.graphics.preprocessing_3d.add_data__frames"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__frames</span></code></a>(data_dict, mdl[, load_case])</p></td>
-<td><p>Adds a trace containing frame element centroidal axis lines :param data_dict: list of dictionaries containing figure data :type data_dict: list[dict[str, object]] :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase</p></td>
+<td><p>Adds a trace containing frame element centroidal axis lines :Parameters: * <strong>data_dict</strong> -- list of dictionaries containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__global_axes" title="osmg.graphics.preprocessing_3d.add_data__global_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__global_axes</span></code></a>(data_dict, ref_len)</p></td>
-<td><p>Adds a trace containing global axes :param data_dict: dictionary containing figure data :type data_dict: dict :param ref_len: model reference length to scale the axes :type ref_len: float</p></td>
+<td><p>Adds a trace containing global axes :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>ref_len</strong> -- model reference length to scale the axes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__internal_nodes" title="osmg.graphics.preprocessing_3d.add_data__internal_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__internal_nodes</span></code></a>(data_dict, mdl[, ...])</p></td>
-<td><p>Adds a trace containing internal nodes :param data_dict: list of dictionaries containing figure data :type data_dict: list[dict[str, object]] :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase</p></td>
+<td><p>Adds a trace containing internal nodes :Parameters: * <strong>data_dict</strong> -- list of dictionaries containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__nodes" title="osmg.graphics.preprocessing_3d.add_data__nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__nodes</span></code></a>(data_dict, mdl, load_case)</p></td>
-<td><p>Adds a trace containing nodes :param data_dict: list of dictionaries containing figure data :type data_dict: list[dict[str, object]] :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase</p></td>
+<td><p>Adds a trace containing nodes :Parameters: * <strong>data_dict</strong> -- list of dictionaries containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__parent_nodes" title="osmg.graphics.preprocessing_3d.add_data__parent_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__parent_nodes</span></code></a>(data_dict, load_case)</p></td>
-<td><p>Adds a trace containing parent nodes :param data_dict: list of dictionaries containing figure data :type data_dict: list[dict[str, object]] :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase</p></td>
+<td><p>Adds a trace containing parent nodes :Parameters: * <strong>data_dict</strong> -- list of dictionaries containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__release_nodes" title="osmg.graphics.preprocessing_3d.add_data__release_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__release_nodes</span></code></a>(data_dict, list_of_nodes)</p></td>
-<td><p>Adds a trace containing release nodes :param data_dict: list of dictionaries containing figure data :type data_dict: list[dict[str, object]] :param list_of_nodes: List of nodes where a release is present.</p></td>
+<td><p>Adds a trace containing release nodes :Parameters: * <strong>data_dict</strong> -- list of dictionaries containing figure data              * <strong>list_of_nodes</strong> -- List of nodes where a release is present. * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__twonodelinks" title="osmg.graphics.preprocessing_3d.add_data__twonodelinks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__twonodelinks</span></code></a>(data_dict, mdl)</p></td>
-<td><p>Adds a trace containing twonodelink elements :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model</p></td>
+<td><p>Adds a trace containing twonodelink elements :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.add_data__zerolength_axes" title="osmg.graphics.preprocessing_3d.add_data__zerolength_axes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__zerolength_axes</span></code></a>(data_dict, mdl, ...)</p></td>
-<td><p>Adds a trace containing zerolength element local axis lines :param data_dict: dictionary containing figure data :type data_dict: dict :param mdl: the model to be visualized :type mdl: Model :param ref_len: model reference length to scale the axes :type ref_len: float</p></td>
+<td><p>Adds a trace containing zerolength element local axis lines :Parameters: * <strong>data_dict</strong> -- dictionary containing figure data              * <strong>mdl</strong> -- the model to be visualized              * <strong>ref_len</strong> -- model reference length to scale the axes</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.preprocessing_3d.show" title="osmg.graphics.preprocessing_3d.show"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code></a>(mdl[, load_case, extrude, offsets, ...])</p></td>
-<td><p>Visualize the model :param mdl: the model to be visualized :type mdl: Model :param load_case: the load_case to be visualized :type load_case: LoadCase :param extrude: wether to extrude frame elements :type extrude: bool :param offsets: whether to show frame element rigid offsets :type offsets: bool :param global_axes: whether to show global axes :type global_axes: bool :param diaphragm_lines: whether to show lines indicating rigid                         diaphragm extent :type diaphragm_lines: bool :param tributary_areas: whether to show tributary area                         boundaries :type tributary_areas: bool :param parent_nodes: whether to plot parent nodes :type parent_nodes: bool :param frame_axes: whether to show the local axes of frame                    elements :type frame_axes: bool :param zerolength_axes: whether to show the local axes of                         zerolength elements :type zerolength_axes: bool :param camera: custom positioning of the camera :type camera: dict</p></td>
+<td><p>Visualize the model :Parameters: * <strong>mdl</strong> -- the model to be visualized              * <strong>load_case</strong> -- the load_case to be visualized              * <strong>extrude</strong> -- wether to extrude frame elements              * <strong>offsets</strong> -- whether to show frame element rigid offsets              * <strong>global_axes</strong> -- whether to show global axes              * <strong>diaphragm_lines</strong> -- whether to show lines indicating rigid                diaphragm extent              * <strong>tributary_areas</strong> -- whether to show tributary area                boundaries              * <strong>parent_nodes</strong> -- whether to plot parent nodes              * <strong>frame_axes</strong> -- whether to show the local axes of frame                elements              * <strong>zerolength_axes</strong> -- whether to show the local axes of                zerolength elements              * <strong>camera</strong> -- custom positioning of the camera</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__bars">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__bars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__bars" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__bars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__bars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__bars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element centroidal axis lines
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__extruded_bars_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__extruded_bars_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__extruded_bars_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element extrusion mesh
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__extruded_frames_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__extruded_frames_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__extruded_frames_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element extrusion mesh
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__frame_axes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__frame_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frame_axes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__frame_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__frame_axes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frame_axes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element local axis lines
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model
-:param ref_len: model reference length to scale the axes
-:type ref_len: float</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>ref_len</strong> – model reference length to scale the axes</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__frame_offsets">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__frame_offsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frame_offsets" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__frame_offsets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__frame_offsets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frame_offsets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element rigid offset lines
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__frames">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frames" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__frames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__frames" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element centroidal axis lines
-:param data_dict: list of dictionaries containing figure data
-:type data_dict: list[dict[str, object]]
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – list of dictionaries containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__global_axes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__global_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__global_axes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__global_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__global_axes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__global_axes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing global axes
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param ref_len: model reference length to scale the axes
-:type ref_len: float</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>ref_len</strong> – model reference length to scale the axes</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__internal_nodes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__internal_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__internal_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__internal_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__internal_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__internal_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing internal nodes
-:param data_dict: list of dictionaries containing figure data
-:type data_dict: list[dict[str, object]]
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – list of dictionaries containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__nodes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing nodes
-:param data_dict: list of dictionaries containing figure data
-:type data_dict: list[dict[str, object]]
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – list of dictionaries containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__parent_nodes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__parent_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__parent_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__parent_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__parent_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__parent_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing parent nodes
-:param data_dict: list of dictionaries containing figure data
-:type data_dict: list[dict[str, object]]
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – list of dictionaries containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__release_nodes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__release_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">osmg.ops.node.Node</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__release_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__release_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><span class="pre">osmg.ops.node.Node</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__release_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__release_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing release nodes
-:param data_dict: list of dictionaries containing figure data
-:type data_dict: list[dict[str, object]]
-:param list_of_nodes: List of nodes where a release is present.
-:type list_of_nodes: list[Node]
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase</p>
+:Parameters: * <strong>data_dict</strong> – list of dictionaries containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>list_of_nodes</strong> – List of nodes where a release is present.</p></li>
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__twonodelinks">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__twonodelinks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__twonodelinks" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__twonodelinks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__twonodelinks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__twonodelinks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing twonodelink elements
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.add_data__zerolength_axes">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__zerolength_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__zerolength_axes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__zerolength_axes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#add_data__zerolength_axes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.add_data__zerolength_axes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing zerolength element local axis lines
-:param data_dict: dictionary containing figure data
-:type data_dict: dict
-:param mdl: the model to be visualized
-:type mdl: Model
-:param ref_len: model reference length to scale the axes
-:type ref_len: float</p>
+:Parameters: * <strong>data_dict</strong> – dictionary containing figure data</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>mdl</strong> – the model to be visualized</p></li>
+<li><p><strong>ref_len</strong> – model reference length to scale the axes</p></li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.preprocessing_3d.show">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.preprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerolength_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.graphics.preprocessing_3d.show" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">show</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zerolength_axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/graphics/preprocessing_3d.html#show"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.preprocessing_3d.show" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the model
-:param mdl: the model to be visualized
-:type mdl: Model
-:param load_case: the load_case to be visualized
-:type load_case: LoadCase
-:param extrude: wether to extrude frame elements
-:type extrude: bool
-:param offsets: whether to show frame element rigid offsets
-:type offsets: bool
-:param global_axes: whether to show global axes
-:type global_axes: bool
-:param diaphragm_lines: whether to show lines indicating rigid</p>
+:Parameters: * <strong>mdl</strong> – the model to be visualized</p>
 <blockquote>
-<div><p>diaphragm extent</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tributary_areas</strong> (<em>bool</em>) – whether to show tributary area
+<div><ul class="simple">
+<li><p><strong>load_case</strong> – the load_case to be visualized</p></li>
+<li><p><strong>extrude</strong> – wether to extrude frame elements</p></li>
+<li><p><strong>offsets</strong> – whether to show frame element rigid offsets</p></li>
+<li><p><strong>global_axes</strong> – whether to show global axes</p></li>
+<li><p><strong>diaphragm_lines</strong> – whether to show lines indicating rigid
+diaphragm extent</p></li>
+<li><p><strong>tributary_areas</strong> – whether to show tributary area
 boundaries</p></li>
-<li><p><strong>parent_nodes</strong> (<em>bool</em>) – whether to plot parent nodes</p></li>
-<li><p><strong>frame_axes</strong> (<em>bool</em>) – whether to show the local axes of frame
+<li><p><strong>parent_nodes</strong> – whether to plot parent nodes</p></li>
+<li><p><strong>frame_axes</strong> – whether to show the local axes of frame
 elements</p></li>
-<li><p><strong>zerolength_axes</strong> (<em>bool</em>) – whether to show the local axes of
+<li><p><strong>zerolength_axes</strong> – whether to show the local axes of
 zerolength elements</p></li>
-<li><p><strong>camera</strong> (<em>dict</em>) – custom positioning of the camera</p></li>
+<li><p><strong>camera</strong> – custom positioning of the camera</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 </section>

@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.preprocessing.self_weight_mass &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.preprocessing.self_weight_mass</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.preprocessing.self_weight_mass</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines methods to assign self-weight and self-mass to a loadcase</span>
+<span class="sd">using a given model.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">common</span>
+<span class="kn">from</span> <span class="nn">..ops</span> <span class="kn">import</span> <span class="n">element</span>
+
+
+<div class="viewcode-block" id="self_weight"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.self_weight_mass.html#osmg.preprocessing.self_weight_mass.self_weight">[docs]</a><span class="k">def</span> <span class="nf">self_weight</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">lcase</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.00</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns the structure&#39;s self weight to its members.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">weight_per_length</span><span class="p">()</span>
+            <span class="c1"># apply weight as UDL</span>
+            <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span><span class="p">:</span>
+                <span class="c1"># in that case apply its weight to the connecting nodes</span>
+                <span class="n">elm_len</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+                <span class="n">elm_w</span> <span class="o">=</span> <span class="n">weight_per_length</span> <span class="o">*</span> <span class="n">elm_len</span> <span class="o">*</span> <span class="n">factor</span>
+                <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">elm_w</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">elm_w</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lcase</span><span class="o">.</span><span class="n">line_element_udl</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add_glob</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">weight_per_length</span> <span class="o">*</span> <span class="n">factor</span><span class="p">])</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
+            <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">weight_per_length</span>
+            <span class="c1"># apply its weight to the connecting nodes</span>
+            <span class="n">elm_len</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+            <span class="n">elm_w</span> <span class="o">=</span> <span class="n">weight_per_length</span> <span class="o">*</span> <span class="n">elm_len</span> <span class="o">*</span> <span class="n">factor</span>
+            <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">elm_w</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">elm_w</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">]</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="self_mass"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.self_weight_mass.html#osmg.preprocessing.self_weight_mass.self_mass">[docs]</a><span class="k">def</span> <span class="nf">self_mass</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">lcase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Assigns the structure&#39;s self mass to its members</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">imperial_units</span><span class="p">:</span>
+        <span class="n">g_const</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_IMPERIAL</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">g_const</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_SI</span>
+
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">():</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">weight_per_length</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
+            <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">weight_per_length</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># don&#39;t consider other types of elements</span>
+            <span class="k">continue</span>
+
+        <span class="n">mass_per_length</span> <span class="o">=</span> <span class="n">weight_per_length</span> <span class="o">/</span> <span class="n">g_const</span>
+        <span class="c1"># apply lumped mass at the connecting nodes</span>
+        <span class="n">half_mass</span> <span class="o">=</span> <span class="n">mass_per_length</span> <span class="o">*</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span> <span class="o">/</span> <span class="mf">2.00</span>
+        <span class="n">lcase</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">([</span><span class="n">half_mass</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.00</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">lcase</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">([</span><span class="n">half_mass</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.00</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

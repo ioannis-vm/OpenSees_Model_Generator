@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.ops.section &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.ops.section &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -184,8 +185,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.ops.section.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -197,14 +196,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.ops.section">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.ops.section">
 <span id="osmg-ops-section"></span><h1>osmg.ops.section<a class="headerlink" href="#module-osmg.ops.section" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ section</p>
+<p>Defines <a class="reference internal" href="osmg.ops.section.Section.html#osmg.ops.section.Section" title="osmg.ops.section.Section"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Section</span></code></a> objects.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ElasticSection</span></code></a>(name, uid, e_mod, area, i_y, ...)</p></td>
-<td><p>Elastic Section Object</p></td>
+<td><p>Elastic Section Object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FiberSection</span></code></a>(name, uid, outside_shape, ...)</p></td>
 <td><p>Fiber section object.</p></td>
@@ -219,26 +242,140 @@
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.ops.section.ElasticSection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.ops.section.</span></span><span class="sig-name descname"><span class="pre">ElasticSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_w</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.ElasticSection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Elastic Section Object</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ElasticSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">g_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_w</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#ElasticSection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.ElasticSection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Elastic Section Object.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.e_mod">
+<span class="sig-name descname"><span class="pre">e_mod</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.e_mod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Young’s modulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.area">
+<span class="sig-name descname"><span class="pre">area</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cross-sectional area.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.i_y">
+<span class="sig-name descname"><span class="pre">i_y</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.i_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moment of inertia for strong-axis bending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.i_x">
+<span class="sig-name descname"><span class="pre">i_x</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.i_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moment of inertia for weak-axis bending.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.g_mod">
+<span class="sig-name descname"><span class="pre">g_mod</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.g_mod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shear modulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.j_mod">
+<span class="sig-name descname"><span class="pre">j_mod</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.j_mod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Torsional moment of inertia.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.sec_w">
+<span class="sig-name descname"><span class="pre">sec_w</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.sec_w" title="Permalink to this definition">¶</a></dt>
+<dd><p>Weight per unit length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.outside_shape">
+<span class="sig-name descname"><span class="pre">outside_shape</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.outside_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mesh defining the outside shape of the section.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh">osmg.mesh.Mesh</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.snap_points">
+<span class="sig-name descname"><span class="pre">snap_points</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.snap_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing coordinates of <cite>snap_points</cite>
+used by component-generating methods to position components
+relative to existing ones. See
+<a class="reference internal" href="osmg.gen.component_gen.html#osmg.gen.component_gen.beam_placement_lookup" title="osmg.gen.component_gen.beam_placement_lookup"><code class="xref py py-func docutils literal notranslate"><span class="pre">beam_placement_lookup()</span></code></a> for example.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)">numpy.ndarray</a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)">numpy.dtype</a>[numpy.float64]]] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><a class="headerlink" href="#osmg.ops.section.ElasticSection.properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing section properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.ElasticSection.weight_per_length">
-<span class="sig-name descname"><span class="pre">weight_per_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.ElasticSection.weight_per_length" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">weight_per_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#ElasticSection.weight_per_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.ElasticSection.weight_per_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the weight per length of a section.
-For steel W sections, it adds 15% for misc. steel and connections.</p>
+For steel W sections, it adds 15% for misc. steel and
+connections.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.ops.section.FiberSection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.ops.section.</span></span><span class="sig-name descname"><span class="pre">FiberSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent" title="osmg.ops.section.SectionComponent"><span class="pre">osmg.ops.section.SectionComponent</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.FiberSection" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FiberSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">section_parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent" title="osmg.ops.section.SectionComponent"><span class="pre">osmg.ops.section.SectionComponent</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j_mod</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#FiberSection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.FiberSection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fiber section object.
 Can consist of multiple materials.
-The primary part of the component must have the key ‘main’.</p>
+The primary part of the component must have the key “main”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.FiberSection.copy_alter_material">
-<span class="sig-name descname"><span class="pre">copy_alter_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a></span></span><a class="headerlink" href="#osmg.ops.section.FiberSection.copy_alter_material" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy_alter_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a></span></span><a class="reference internal" href="../_modules/osmg/ops/section.html#FiberSection.copy_alter_material"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.FiberSection.copy_alter_material" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a shallow copy of the section object in which all
 opensees_material objects have been replaced with the given
 material. Required for the modling of steel braced frames.</p>
@@ -246,14 +383,14 @@ material. Required for the modling of steel braced frames.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.FiberSection.ops_args">
-<span class="sig-name descname"><span class="pre">ops_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.FiberSection.ops_args" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ops_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#FiberSection.ops_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.FiberSection.ops_args" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the arguments required to define the object in
 OpenSees</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.FiberSection.weight_per_length">
-<span class="sig-name descname"><span class="pre">weight_per_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.FiberSection.weight_per_length" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">weight_per_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#FiberSection.weight_per_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.FiberSection.weight_per_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the weight per length of a section.
 For steel W sections, it adds 15% for misc. steel and connections.</p>
 </dd></dl>
@@ -262,7 +399,7 @@ For steel W sections, it adds 15% for misc. steel and connections.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.ops.section.Section">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.ops.section.</span></span><span class="sig-name descname"><span class="pre">Section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.Section" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#Section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.Section" title="Permalink to this definition">¶</a></dt>
 <dd><p>Section object.
 The axes are defined in the same way as they are
 defined in OpenSees. The colors assigned to
@@ -282,15 +419,15 @@ AutoCAD convention.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.ops.section.SectionComponent">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.ops.section.</span></span><span class="sig-name descname"><span class="pre">SectionComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ops_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.SectionComponent" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SectionComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outside_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ops_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_material</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><span class="pre">PhysicalMaterial</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><span class="pre">FiberSection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#SectionComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.SectionComponent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Part of a section object, having a single material.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>outside_shape</strong> (<a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><em>Mesh</em></a>) – Mesh defining the outside shape</p></li>
-<li><p><strong>ops_material</strong> (<a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><em>UniaxialMaterial</em></a>) – OpenSees material</p></li>
-<li><p><strong>physical_material</strong> (<a class="reference internal" href="osmg.physical_material.PhysicalMaterial.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial"><em>PhysicalMaterial</em></a>) – Physical material</p></li>
-<li><p><strong>parent_section</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection"><em>FiberSection</em></a><em>]</em>) – Parent section.
+<li><p><strong>outside_shape</strong> – Mesh defining the outside shape</p></li>
+<li><p><strong>ops_material</strong> – OpenSees material</p></li>
+<li><p><strong>physical_material</strong> – Physical material</p></li>
+<li><p><strong>parent_section</strong> – Parent section.
 The parent section is assigned automatically by their
 parent section iteslf, at its creation time.</p></li>
 </ul>
@@ -298,15 +435,15 @@ parent section iteslf, at its creation time.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.SectionComponent.copy_alter_material">
-<span class="sig-name descname"><span class="pre">copy_alter_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent" title="osmg.ops.section.SectionComponent"><span class="pre">SectionComponent</span></a></span></span><a class="headerlink" href="#osmg.ops.section.SectionComponent.copy_alter_material" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">copy_alter_material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.uniaxial_material.UniaxialMaterial.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial"><span class="pre">UniaxialMaterial</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent" title="osmg.ops.section.SectionComponent"><span class="pre">SectionComponent</span></a></span></span><a class="reference internal" href="../_modules/osmg/ops/section.html#SectionComponent.copy_alter_material"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.SectionComponent.copy_alter_material" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make a shallow copy of a section component and replace the old
 material with the given one.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.ops.section.SectionComponent.cut_into_tiny_little_pieces">
-<span class="sig-name descname"><span class="pre">cut_into_tiny_little_pieces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.section.SectionComponent.cut_into_tiny_little_pieces" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns data used to define fibers in OpenSees</p>
+<span class="sig-name descname"><span class="pre">cut_into_tiny_little_pieces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/section.html#SectionComponent.cut_into_tiny_little_pieces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.section.SectionComponent.cut_into_tiny_little_pieces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns data used to define fibers in OpenSees.</p>
 </dd></dl>
 
 </dd></dl>

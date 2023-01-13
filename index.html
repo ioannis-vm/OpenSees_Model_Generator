@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Welcome to the documentation for osmg! &mdash; osmg 0.0.21 documentation</title>
+  <title>Welcome to the documentation for osmg &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,13 +35,14 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting Started" href="getting_started.html" /> 
+    <link rel="next" title="Tutorials" href="notebooks.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,7 +89,7 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_autosummary/osmg.html">API reference</a></li>
 </ul>
 
@@ -138,13 +139,11 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Welcome to the documentation for <cite>osmg</cite>!</li>
+      <li>Welcome to the documentation for <cite>osmg</cite></li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -157,10 +156,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="toctree-wrapper compound">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="toctree-wrapper compound">
 </div>
 <section id="welcome-to-the-documentation-for-osmg">
-<h1>Welcome to the documentation for <cite>osmg</cite>!<a class="headerlink" href="#welcome-to-the-documentation-for-osmg" title="Permalink to this heading">¶</a></h1>
+<h1>Welcome to the documentation for <cite>osmg</cite><a class="headerlink" href="#welcome-to-the-documentation-for-osmg" title="Permalink to this heading">¶</a></h1>
 <p><cite>osmg</cite> is a Python package that provides useful functions and classes
 for the definition and analysis of 3D OpenSees models. <cite>osmg</cite> attempts
 to simplify the process of creating large models of complex
@@ -178,7 +201,7 @@ but can be easily extended to add more functionality when needed.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="notebooks.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

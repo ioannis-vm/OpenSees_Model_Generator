@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.ops.node &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.ops.node &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -178,8 +179,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.ops.node.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -191,36 +190,64 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.ops.node">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.ops.node">
 <span id="osmg-ops-node"></span><h1>osmg.ops.node<a class="headerlink" href="#module-osmg.ops.node" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ node</p>
+<p>Defines <a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Node</span></code></a> objects.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Node</span></code></a>(uid, coords, visibility)</p></td>
-<td><p>OpenSees node <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node">https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node</a> .</p></td>
+<td><p>OpenSees node <a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node">https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node</a></p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.ops.node.Node">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.ops.node.</span></span><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">uid:</span> <span class="pre">int,</span> <span class="pre">coords:</span> <span class="pre">list[float],</span> <span class="pre">visibility:</span> <span class="pre">~osmg.graphics.visibility.NodeVisibility</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.ops.node.Node" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">uid:</span> <span class="pre">int,</span> <span class="pre">coords:</span> <span class="pre">list[float],</span> <span class="pre">visibility:</span> <span class="pre">~osmg.graphics.visibility.NodeVisibility</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/ops/node.html#Node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.ops.node.Node" title="Permalink to this definition">¶</a></dt>
 <dd><p>OpenSees node
-<a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node">https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node</a>
-.. attribute:: uid</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<a class="reference external" href="https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node">https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.ops.node.Node.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><a class="headerlink" href="#osmg.ops.node.Node.uid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique ID of the node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.ops.node.Node.coords">
 <span class="sig-name descname"><span class="pre">coords</span></span><a class="headerlink" href="#osmg.ops.node.Node.coords" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>List of node coordinates.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[float]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -228,9 +255,11 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.ops.node.Node.restraint">
 <span class="sig-name descname"><span class="pre">restraint</span></span><a class="headerlink" href="#osmg.ops.node.Node.restraint" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>List of boolean values identifying whether the
+corresponding DOF is restrained.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[bool]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>]</p>
 </dd>
 </dl>
 </dd></dl>

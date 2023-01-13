@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.gen.mesh_shapes &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.gen.mesh_shapes &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -186,8 +187,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.gen.mesh_shapes.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -199,82 +198,106 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.gen.mesh_shapes">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.gen.mesh_shapes">
 <span id="osmg-gen-mesh-shapes"></span><h1>osmg.gen.mesh_shapes<a class="headerlink" href="#module-osmg.gen.mesh_shapes" title="Permalink to this heading">¶</a></h1>
-<p>Generates meshes for preconfigured sections</p>
+<p>Generates meshes for preconfigured sections.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.define_edges" title="osmg.gen.mesh_shapes.define_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">define_edges</span></code></a>(vertices)</p></td>
-<td><p>Defines edges from an ordered list of vertices</p></td>
+<td><p>Defines edges from an ordered list of vertices.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generate" title="osmg.gen.mesh_shapes.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(edges)</p></td>
-<td><p>Generates halfedges from the given edges</p></td>
+<td><p>Generates halfedges from the given edges.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generic_snap_points" title="osmg.gen.mesh_shapes.generic_snap_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_snap_points</span></code></a>(mesh)</p></td>
 <td><p>Generates generic snap poitns for a section object.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.rect_mesh" title="osmg.gen.mesh_shapes.rect_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rect_mesh</span></code></a>(dim_b, dim_h)</p></td>
-<td><p>Defines a loop of counterclockwise halfedges that form the shape of the rectangular section with the specified parameters. The origin coincides with the centroid. Input:     b: total width     h: total height.</p></td>
+<td><p>Defines a loop of counterclockwise halfedges that form the shape of the rectangular section with the specified parameters.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.w_mesh" title="osmg.gen.mesh_shapes.w_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">w_mesh</span></code></a>(sec_b, sec_h, sec_tw, sec_tf[, ...])</p></td>
-<td><p>Defines a loop of counterclockwise halfedges that form the shape of the W section with the specified parameters. The origin coincides with the centroid. Input:     b: total width     h: total height     tw: web thickness     tf: flange thickness     target_area: AISC database area         to determine fillets,         because trying to do that using         <cite>T</cite> doesn't work.</p></td>
+<td><p>Defines a loop of counterclockwise halfedges that form the shape of the W section with the specified parameters.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.define_edges">
-<span class="sig-prename descclassname"><span class="pre">osmg.gen.mesh_shapes.</span></span><span class="sig-name descname"><span class="pre">define_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.mesh_shapes.define_edges" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines edges from an ordered list of vertices</p>
+<span class="sig-name descname"><span class="pre">define_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#define_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.define_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines edges from an ordered list of vertices.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.generate">
-<span class="sig-prename descclassname"><span class="pre">osmg.gen.mesh_shapes.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.mesh_shapes.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates halfedges from the given edges</p>
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates halfedges from the given edges.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.generic_snap_points">
-<span class="sig-prename descclassname"><span class="pre">osmg.gen.mesh_shapes.</span></span><span class="sig-name descname"><span class="pre">generic_snap_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.gen.mesh_shapes.generic_snap_points" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates generic snap poitns
-for a section object.</p>
+<span class="sig-name descname"><span class="pre">generic_snap_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><span class="pre">Mesh</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#generic_snap_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.generic_snap_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates generic snap poitns for a section object.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.rect_mesh">
-<span class="sig-prename descclassname"><span class="pre">osmg.gen.mesh_shapes.</span></span><span class="sig-name descname"><span class="pre">rect_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_h</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.mesh_shapes.rect_mesh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rect_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#rect_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.rect_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines a loop of counterclockwise halfedges
 that form the shape of the rectangular section with
 the specified parameters.
-The origin coincides with the centroid.
-Input:</p>
-<blockquote>
-<div><p>b: total width
-h: total height</p>
-</div></blockquote>
+The origin coincides with the centroid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> – total width</p></li>
+<li><p><strong>h</strong> – total height</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.w_mesh">
-<span class="sig-prename descclassname"><span class="pre">osmg.gen.mesh_shapes.</span></span><span class="sig-name descname"><span class="pre">w_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_tw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_tf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.gen.mesh_shapes.w_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines a loop of counterclockwise halfedges
-that form the shape of the W section with
-the specified parameters.
-The origin coincides with the centroid.
-Input:</p>
-<blockquote>
-<div><p>b: total width
-h: total height
-tw: web thickness
-tf: flange thickness
-target_area: AISC database area</p>
-<blockquote>
-<div><p>to determine fillets,
-because trying to do that using
-<cite>T</cite> doesn’t work.</p>
-</div></blockquote>
-</div></blockquote>
+<span class="sig-name descname"><span class="pre">w_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec_b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_tw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_tf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#w_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.w_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a loop of counterclockwise halfedges that form the shape
+of the W section with the specified parameters.  The origin
+coincides with the centroid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>b</strong> – total width</p></li>
+<li><p><strong>h</strong> – total height</p></li>
+<li><p><strong>tw</strong> – web thickness</p></li>
+<li><p><strong>tf</strong> – flange thickness</p></li>
+<li><p><strong>target_area</strong> – AISC database area to determine fillets, because
+trying to do that using <cite>T</cite> doesn’t work.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

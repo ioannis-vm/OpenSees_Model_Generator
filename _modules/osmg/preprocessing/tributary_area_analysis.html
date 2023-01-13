@@ -1,0 +1,708 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.preprocessing.tributary_area_analysis &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.preprocessing.tributary_area_analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.preprocessing.tributary_area_analysis</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines objects associated with tributary area analysis for load</span>
+<span class="sd">distribution.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">no_type_check</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mesh</span>
+<span class="kn">from</span> <span class="nn">..ops.node</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">common</span>
+<span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">ElasticBeamColumn</span>
+<span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">DispBeamColumn</span>
+<span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">ZeroLength</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..load_case</span> <span class="kn">import</span> <span class="n">LoadCase</span>
+    <span class="kn">from</span> <span class="nn">..level</span> <span class="kn">import</span> <span class="n">Level</span>
+    <span class="kn">from</span> <span class="nn">..mesh</span> <span class="kn">import</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Halfedge</span>
+
+<span class="c1"># pylint: disable=no-member</span>
+<span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+<span class="n">PolygonShape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="PolygonLoad"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.tributary_area_analysis.PolygonLoad.html#osmg.preprocessing.tributary_area_analysis.PolygonLoad">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PolygonLoad</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Polygon-shaped loaded region.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PolygonShape</span><span class="p">]</span>
+    <span class="n">holes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">PolygonShape</span><span class="p">]]</span>
+    <span class="n">massless</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+
+<div class="viewcode-block" id="TributaryAreaAnalysisData"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.tributary_area_analysis.TributaryAreaAnalysisData.html#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnalysisData">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TributaryAreaAnalysisData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data generated by the tributary area analysis code.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># collects the defined edges</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Edge</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># collects the defined vertices</span>
+    <span class="n">vertices</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># maps an edge.uid to a node or line element</span>
+    <span class="n">edge_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Node</span> <span class="o">|</span> <span class="n">ElasticBeamColumn</span> <span class="o">|</span> <span class="n">DispBeamColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span>
+    <span class="p">)</span>
+    <span class="c1"># maps an edge.uid to its corresponding tributary area</span>
+    <span class="n">edge_area</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># maps an edge.uid to its corresponding tributary polygon</span>
+    <span class="n">edge_polygons</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">PolygonShape</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># maps a node.uid to a vertex</span>
+    <span class="n">vertex_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># used to map zerolength element-induced coinciding nodes</span>
+    <span class="n">zn_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># used to map panel zone nodes to their primary node</span>
+    <span class="n">pz_node</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Node</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TributaryAreaAnaysis"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.html#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">TributaryAreaAnaysis</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tributary area analysis object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parent_loadcase</span><span class="p">:</span> <span class="n">LoadCase</span>
+    <span class="n">parent_level</span><span class="p">:</span> <span class="n">Level</span>
+    <span class="n">polygon_loads</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PolygonLoad</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">TributaryAreaAnalysisData</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">TributaryAreaAnalysisData</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="TributaryAreaAnaysis.run"><a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.html#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run">[docs]</a>    <span class="nd">@no_type_check</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">load_factor</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">massless_load_factor</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">perform_checks</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs tributary area analysis</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">          load_factor: Factor by which to multiply the surface</span>
+<span class="sd">            loads that count as a mass source, found in the load case.</span>
+<span class="sd">          massless_load_factor: Factor by which to multiply</span>
+<span class="sd">            the massless loads found in the load case.</span>
+<span class="sd">          perform_checks: Tributary area analysis works by</span>
+<span class="sd">            generating a mesh defined by the horizontal elements of</span>
+<span class="sd">            the floor plan and analyzing that mesh. The mesh should</span>
+<span class="sd">            not contain any edges that cross or overlap with other</span>
+<span class="sd">            edges. This can happen, for instance, if beam end offsets</span>
+<span class="sd">            have been accidentally misspecified causing beams to</span>
+<span class="sd">            overlap with or cross other members. The only shared</span>
+<span class="sd">            points between the edges should be the end vertices. By</span>
+<span class="sd">            default, we check if that is the case to avoid unexpected</span>
+<span class="sd">            behavior. This flag can be used to disable the checks for</span>
+<span class="sd">            subsequent analyses to enhance performance if that a prior</span>
+<span class="sd">            analysis has verified that the checks are satisfied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">skgeom</span> <span class="k">as</span> <span class="nn">sg</span>
+        <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;One day, a custom implementation of the &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;straight skeleton algorithm might be added to osmg...</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Until that day, the scikit-geometry package is required.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Please install scikit-geometry.</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;  $ conda install scikit-geometry -c conda-forge</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;https://github.com/scikit-geometry/scikit-geometry&quot;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;~ skgeom is not installed ~&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="n">lvl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_level</span>
+        <span class="n">all_components</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">lvl</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">horizontal_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">panel_zones</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">all_components</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">component</span><span class="o">.</span><span class="n">component_purpose</span> <span class="o">==</span> <span class="s2">&quot;horizontal_component&quot;</span><span class="p">:</span>
+                <span class="n">horizontal_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">component</span><span class="o">.</span><span class="n">component_purpose</span> <span class="o">==</span> <span class="s2">&quot;steel_W_panel_zone&quot;</span><span class="p">:</span>
+                <span class="n">panel_zones</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+
+        <span class="c1"># # plotting - used while developing the code</span>
+        <span class="c1"># subset_model = mdl.initialize_empty_copy(&#39;subset_1&#39;)</span>
+        <span class="c1"># for component in horizontal_elements+panel_zones:</span>
+        <span class="c1">#     mdl.transfer_component(subset_model, component)</span>
+        <span class="c1"># show(subset_model)</span>
+
+        <span class="c1"># define vertices, edges, mapping</span>
+        <span class="c1"># we &quot;flatten&quot; the components in the xy plane.</span>
+        <span class="c1"># for joints, we only consider the top-most line elements</span>
+        <span class="c1"># and we treat them the same as rigid offsets.</span>
+
+        <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edges</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertices</span>
+        <span class="n">edge_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_map</span>
+        <span class="n">edge_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_area</span>
+        <span class="n">edge_polygons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_polygons</span>
+        <span class="n">vertex_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertex_map</span>
+        <span class="n">zn_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zn_map</span>
+        <span class="n">pz_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pz_node</span>
+        <span class="c1"># clear any previous results</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">edge_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">edge_area</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">edge_polygons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">vertex_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">zn_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">pz_node</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">panel_zone</span> <span class="ow">in</span> <span class="n">panel_zones</span><span class="p">:</span>
+            <span class="n">back_nd</span> <span class="o">=</span> <span class="n">panel_zone</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;middle_back&quot;</span><span class="p">]</span>
+            <span class="n">front_nd</span> <span class="o">=</span> <span class="n">panel_zone</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;middle_front&quot;</span><span class="p">]</span>
+            <span class="n">main_nd</span> <span class="o">=</span> <span class="n">panel_zone</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;top_node&quot;</span><span class="p">]</span>
+            <span class="n">back_offset</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">main_nd</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="n">back_nd</span><span class="o">.</span><span class="n">coords</span>
+            <span class="p">)</span>
+            <span class="n">front_offset</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">main_nd</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="n">front_nd</span><span class="o">.</span><span class="n">coords</span>
+            <span class="p">)</span>
+            <span class="n">pz_node</span><span class="p">[</span><span class="n">back_nd</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;substitute_node&quot;</span><span class="p">:</span> <span class="n">main_nd</span><span class="p">,</span>
+                <span class="s2">&quot;additional_offset&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">back_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="n">pz_node</span><span class="p">[</span><span class="n">front_nd</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;substitute_node&quot;</span><span class="p">:</span> <span class="n">main_nd</span><span class="p">,</span>
+                <span class="s2">&quot;additional_offset&quot;</span><span class="p">:</span> <span class="o">-</span><span class="n">front_offset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+            <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">horizontal_elements</span><span class="p">:</span>
+
+            <span class="n">line_elements</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">comp</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">))]</span>
+
+            <span class="n">zerolength_elements</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">comp</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">ZeroLength</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">zelm</span> <span class="ow">in</span> <span class="n">zerolength_elements</span><span class="p">:</span>
+                <span class="n">zn_map</span><span class="p">[</span><span class="n">zelm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">zelm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span>
+
+            <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elements</span><span class="p">:</span>
+                <span class="n">n_i</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">eo_i</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n_i</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">zn_map</span><span class="p">:</span>
+                    <span class="n">n_i</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">internal_nodes</span><span class="p">[</span><span class="n">zn_map</span><span class="p">[</span><span class="n">n_i</span><span class="o">.</span><span class="n">uid</span><span class="p">]]</span>
+                <span class="n">n_j</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">eo_j</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n_j</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">zn_map</span><span class="p">:</span>
+                    <span class="n">n_j</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">internal_nodes</span><span class="p">[</span><span class="n">zn_map</span><span class="p">[</span><span class="n">n_j</span><span class="o">.</span><span class="n">uid</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">n_i</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">pz_node</span><span class="p">:</span>
+                    <span class="n">sub_data</span> <span class="o">=</span> <span class="n">pz_node</span><span class="p">[</span><span class="n">n_i</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+                    <span class="n">n_i</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s2">&quot;substitute_node&quot;</span><span class="p">]</span>
+                    <span class="n">eo_i</span> <span class="o">=</span> <span class="n">eo_i</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">sub_data</span><span class="p">[</span><span class="s2">&quot;additional_offset&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n_j</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">pz_node</span><span class="p">:</span>
+                    <span class="n">sub_data</span> <span class="o">=</span> <span class="n">pz_node</span><span class="p">[</span><span class="n">n_j</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+                    <span class="n">n_j</span> <span class="o">=</span> <span class="n">sub_data</span><span class="p">[</span><span class="s2">&quot;substitute_node&quot;</span><span class="p">]</span>
+                    <span class="n">eo_j</span> <span class="o">=</span> <span class="n">eo_j</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="n">sub_data</span><span class="p">[</span><span class="s2">&quot;additional_offset&quot;</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">n_i</span><span class="o">.</span><span class="n">uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vertex_map</span><span class="p">:</span>
+                    <span class="n">vrt_i</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Vertex</span><span class="p">((</span><span class="n">n_i</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_i</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">vertex_map</span><span class="p">[</span><span class="n">n_i</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_i</span>
+                    <span class="n">vertices</span><span class="p">[</span><span class="n">vrt_i</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vrt_i</span> <span class="o">=</span> <span class="n">vertex_map</span><span class="p">[</span><span class="n">n_i</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">n_j</span><span class="o">.</span><span class="n">uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vertex_map</span><span class="p">:</span>
+                    <span class="n">vrt_j</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Vertex</span><span class="p">((</span><span class="n">n_j</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_j</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">vertex_map</span><span class="p">[</span><span class="n">n_j</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_j</span>
+                    <span class="n">vertices</span><span class="p">[</span><span class="n">vrt_j</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_j</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vrt_j</span> <span class="o">=</span> <span class="n">vertex_map</span><span class="p">[</span><span class="n">n_j</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">eo_i</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+                    <span class="c1"># there is a rigid offset and/or panel zone</span>
+                    <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vrt_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">eo_i</span>
+                    <span class="n">vrt_oi</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Vertex</span><span class="p">((</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">vertices</span><span class="p">[</span><span class="n">vrt_oi</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_oi</span>
+                    <span class="n">edg_oi</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Edge</span><span class="p">(</span><span class="n">vrt_i</span><span class="p">,</span> <span class="n">vrt_oi</span><span class="p">)</span>
+                    <span class="n">edges</span><span class="p">[</span><span class="n">edg_oi</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">edg_oi</span>
+                    <span class="n">edge_map</span><span class="p">[</span><span class="n">edg_oi</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_i</span>
+                    <span class="n">connecting_vertex_i</span> <span class="o">=</span> <span class="n">vrt_oi</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">connecting_vertex_i</span> <span class="o">=</span> <span class="n">vrt_i</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">eo_j</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+                    <span class="c1"># there is a rigid offset and/or panel zone</span>
+                    <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vrt_j</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">eo_j</span>
+                    <span class="n">vrt_oj</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Vertex</span><span class="p">((</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">vertices</span><span class="p">[</span><span class="n">vrt_oj</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrt_oj</span>
+                    <span class="n">edg_oj</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Edge</span><span class="p">(</span><span class="n">vrt_j</span><span class="p">,</span> <span class="n">vrt_oj</span><span class="p">)</span>
+                    <span class="n">edges</span><span class="p">[</span><span class="n">edg_oj</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">edg_oj</span>
+                    <span class="n">edge_map</span><span class="p">[</span><span class="n">edg_oj</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_j</span>
+                    <span class="n">connecting_vertex_j</span> <span class="o">=</span> <span class="n">vrt_oj</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">connecting_vertex_j</span> <span class="o">=</span> <span class="n">vrt_j</span>
+                <span class="n">edg_interior</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Edge</span><span class="p">(</span>
+                    <span class="n">connecting_vertex_i</span><span class="p">,</span> <span class="n">connecting_vertex_j</span>
+                <span class="p">)</span>
+                <span class="n">edge_map</span><span class="p">[</span><span class="n">edg_interior</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elm</span>
+                <span class="n">edges</span><span class="p">[</span><span class="n">edg_interior</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">edg_interior</span>
+
+        <span class="c1"># # plotting - used while developing the code</span>
+        <span class="c1"># import pandas as pd</span>
+        <span class="c1"># edf = pd.DataFrame(np.zeros((len(edges)*3, 2)))</span>
+        <span class="c1"># edf.columns = [&#39;x&#39;, &#39;y&#39;]</span>
+        <span class="c1"># enames = []</span>
+        <span class="c1"># for i, edge_key in enumerate(edges):</span>
+        <span class="c1">#     edge = edges[edge_key]</span>
+        <span class="c1">#     edf.loc[i*3+0, &#39;x&#39;:&#39;y&#39;] = edge.v_i.coords</span>
+        <span class="c1">#     edf.loc[i*3+1, &#39;x&#39;:&#39;y&#39;] = edge.v_j.coords</span>
+        <span class="c1">#     edf.loc[i*3+2, &#39;x&#39;:&#39;y&#39;] = (None, None)</span>
+        <span class="c1">#     enames.extend((f&#39;E{edge.uid} to V{edge.v_i.uid}&#39;,</span>
+        <span class="c1">#                    f&#39;E{edge.uid} to V{edge.v_j.uid}&#39;, None))</span>
+        <span class="c1"># vdf = pd.DataFrame(np.zeros((len(vertices), 2)))</span>
+        <span class="c1"># vdf.columns = [&#39;x&#39;, &#39;y&#39;]</span>
+        <span class="c1"># vnames = []</span>
+        <span class="c1"># for i, vertex_key in enumerate(vertices):</span>
+        <span class="c1">#     vertex = vertices[vertex_key]</span>
+        <span class="c1">#     vdf.loc[i, &#39;x&#39;:&#39;y&#39;] = vertex.coords</span>
+        <span class="c1">#     vnames.append(vertex.uid)</span>
+        <span class="c1"># edf = edf + np.random.normal(0.00, 0.10, edf.shape)</span>
+        <span class="c1"># import plotly.express as px</span>
+        <span class="c1"># import plotly.graph_objects as go</span>
+        <span class="c1"># fig1 = px.line(edf, x=&#39;x&#39;, y=&#39;y&#39;, hover_name=enames)</span>
+        <span class="c1"># fig2 = px.scatter(vdf, x=&#39;x&#39;, y=&#39;y&#39;, hover_name=vnames,</span>
+        <span class="c1">#                   color=[&#39;red&#39;]*len(vnames))</span>
+        <span class="c1"># fig = go.Figure(data=fig1.data + fig2.data)</span>
+        <span class="c1"># fig.show()</span>
+
+        <span class="k">if</span> <span class="n">perform_checks</span><span class="p">:</span>
+            <span class="c1"># verify that no edges overlap</span>
+            <span class="n">all_edges_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">edges</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">considered_edge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">tqdm</span><span class="p">(</span>
+                    <span class="n">all_edges_list</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Checking plan&#39;s edges&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;edges&quot;</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_edges_list</span><span class="p">):</span>
+                    <span class="c1"># we are done.</span>
+                    <span class="k">continue</span>
+                <span class="n">remaining_edges</span> <span class="o">=</span> <span class="n">all_edges_list</span><span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)::]</span>
+                <span class="k">for</span> <span class="n">other_edge</span> <span class="ow">in</span> <span class="n">remaining_edges</span><span class="p">:</span>
+                    <span class="c1"># check if the two edges overlap or cross each other</span>
+                    <span class="k">if</span> <span class="n">considered_edge</span><span class="o">.</span><span class="n">overlaps_or_crosses</span><span class="p">(</span><span class="n">other_edge</span><span class="p">):</span>
+                        <span class="c1"># the two edges overlap or cross each other</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Analysis of the floor plan geometry &quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;indicates the presence of &quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;overlapping elements.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Check the model at the following locations:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">considered_edge</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">considered_edge</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other_edge</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">other_edge</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">halfedges</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">define_halfedges</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">edges</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="n">loops</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">obtain_closed_loops</span><span class="p">(</span><span class="n">halfedges</span><span class="p">)</span>
+        <span class="n">external</span><span class="p">,</span> <span class="n">internal</span><span class="p">,</span> <span class="n">trivial</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">orient_loops</span><span class="p">(</span><span class="n">loops</span><span class="p">)</span>
+        <span class="c1"># Sanity checks.</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">sanity_checks</span><span class="p">(</span><span class="n">external</span><span class="p">,</span> <span class="n">trivial</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">internal_loop</span> <span class="ow">in</span> <span class="n">internal</span><span class="p">:</span>
+            <span class="n">poly</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">internal_loop</span><span class="p">])</span>
+            <span class="n">skel</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">skeleton</span><span class="o">.</span><span class="n">create_interior_straight_skeleton</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+            <span class="c1"># todo: what we need to get rid of this is to end up with a list</span>
+            <span class="c1"># of halfedges defining the subloops.</span>
+
+            <span class="c1"># something like:</span>
+            <span class="c1"># subloops = mesh.bisector_subdivision(internal_loop)</span>
+
+            <span class="n">subloops</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">def</span> <span class="nf">is_in_some_subloop</span><span class="p">(</span><span class="n">halfedge</span><span class="p">,</span> <span class="n">loops</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">other_halfedge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="n">other_halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                            <span class="o">==</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                            <span class="ow">and</span> <span class="n">other_halfedge</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                            <span class="o">==</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                        <span class="p">):</span>
+                            <span class="k">return</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">skel</span><span class="o">.</span><span class="n">halfedges</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">subloops</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_in_some_subloop</span><span class="p">(</span><span class="n">halfedge</span><span class="p">,</span> <span class="n">subloops</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                <span class="n">subloop</span> <span class="o">=</span> <span class="p">[</span><span class="n">halfedge</span><span class="p">]</span>
+                <span class="n">nxt</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">next</span>
+                <span class="k">while</span> <span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span> <span class="o">!=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span><span class="p">:</span>
+                    <span class="n">subloop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nxt</span><span class="p">)</span>
+                    <span class="n">nxt</span> <span class="o">=</span> <span class="n">nxt</span><span class="o">.</span><span class="n">next</span>
+                <span class="n">subloops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subloop</span><span class="p">)</span>
+
+            <span class="n">subloop_areas</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">Polygon</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">subloop</span><span class="p">])</span><span class="o">.</span><span class="n">area</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">subloop</span> <span class="ow">in</span> <span class="n">subloops</span>
+            <span class="p">]</span>
+            <span class="n">outer</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">subloop_areas</span><span class="p">)</span>  <span class="c1"># Remove the exterior loop</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">subloop_areas</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">outer</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">subloops</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">subloop_areas</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subloop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subloops</span><span class="p">):</span>
+                <span class="n">area</span> <span class="o">=</span> <span class="n">subloop_areas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">loop_edges</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">edge</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">internal_loop</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">subloop</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">loop_edges</span><span class="p">:</span>
+                        <span class="n">v_i</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Point2</span><span class="p">(</span><span class="o">*</span><span class="n">edge</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                        <span class="n">v_j</span> <span class="o">=</span> <span class="n">sg</span><span class="o">.</span><span class="n">Point2</span><span class="p">(</span><span class="o">*</span><span class="n">edge</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+                        <span class="n">pt_1</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                        <span class="n">pt_2</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">pt_1</span> <span class="o">==</span> <span class="n">v_i</span> <span class="ow">and</span> <span class="n">pt_2</span> <span class="o">==</span> <span class="n">v_j</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                            <span class="n">pt_1</span> <span class="o">==</span> <span class="n">v_j</span> <span class="ow">and</span> <span class="n">pt_2</span> <span class="o">==</span> <span class="n">v_i</span>
+                        <span class="p">):</span>
+                            <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">edge_area</span><span class="p">:</span>
+                                <span class="n">edge_area</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">+=</span> <span class="n">area</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">edge_area</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span>
+                            <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">uid</span> <span class="ow">in</span> <span class="n">edge_polygons</span><span class="p">:</span>
+                                <span class="n">edge_polygons</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="p">[</span>
+                                        <span class="p">(</span>
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span>
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">()),</span>
+                                        <span class="p">)</span>
+                                        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">subloop</span>
+                                    <span class="p">]</span>
+                                <span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">edge_polygons</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="p">[</span>
+                                        <span class="p">(</span>
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span>
+                                            <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">y</span><span class="p">()),</span>
+                                        <span class="p">)</span>
+                                        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">subloop</span>
+                                    <span class="p">]</span>
+                                <span class="p">]</span>
+
+        <span class="c1"># # plotting - used while developing the code</span>
+        <span class="c1"># import pandas as pd</span>
+        <span class="c1"># import plotly.express as px</span>
+        <span class="c1"># import plotly.graph_objects as go</span>
+
+        <span class="c1"># x_vals = []</span>
+        <span class="c1"># y_vals = []</span>
+        <span class="c1"># colors = []</span>
+        <span class="c1"># for edge in edges.values():</span>
+        <span class="c1">#     x_vals.extend([edge.v_i.coords[0], edge.v_j.coords[0], None])</span>
+        <span class="c1">#     y_vals.extend([edge.v_i.coords[1], edge.v_j.coords[1], None])</span>
+        <span class="c1">#     colors.extend([&#39;black&#39;, &#39;black&#39;, None])</span>
+
+        <span class="c1"># fig1 = go.Figure(go.Scatter(x=x_vals, y=y_vals,</span>
+        <span class="c1">#                             mode=&#39;lines&#39;,</span>
+        <span class="c1">#                             line_color=&#39;black&#39;,</span>
+        <span class="c1">#                             name=&#39;Elements&#39;))</span>
+
+        <span class="c1"># x_vals = []</span>
+        <span class="c1"># y_vals = []</span>
+        <span class="c1"># for edge in edges.values():</span>
+        <span class="c1">#     for poly in edge_polygons[edge.uid]:</span>
+        <span class="c1">#         poly_rot = poly[1:]+poly[:1]</span>
+        <span class="c1">#         for vi, vj in zip(poly, poly_rot):</span>
+        <span class="c1">#             x_vals.extend((vi[0], vj[0], None))</span>
+        <span class="c1">#             y_vals.extend((vi[1], vj[1], None))</span>
+
+        <span class="c1"># fig2 = go.Figure(go.Scatter(x=x_vals, y=y_vals,</span>
+        <span class="c1">#                             mode=&#39;lines&#39;,</span>
+        <span class="c1">#                             line_color=&#39;blue&#39;,</span>
+        <span class="c1">#                             name=&#39;Regions&#39;))</span>
+
+        <span class="c1"># fig = go.Figure(data=fig2.data + fig1.data)</span>
+        <span class="c1"># fig.update_yaxes(</span>
+        <span class="c1">#     scaleanchor = &quot;x&quot;,</span>
+        <span class="c1">#     scaleratio = 1,</span>
+        <span class="c1">#   )</span>
+        <span class="c1"># fig.show()</span>
+
+        <span class="c1"># apply loads and mass</span>
+        <span class="c1"># todo (future): account for the shape of the loaded area as well</span>
+        <span class="n">mdl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_level</span><span class="o">.</span><span class="n">parent_model</span>
+        <span class="k">if</span> <span class="n">mdl</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">imperial_units</span><span class="p">:</span>
+            <span class="n">g_const</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_IMPERIAL</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g_const</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_SI</span>
+        <span class="n">lcase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_loadcase</span>
+        <span class="k">for</span> <span class="n">uid</span><span class="p">,</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">edge_area</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+            <span class="n">loaded_elm</span> <span class="o">=</span> <span class="n">edge_map</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">load</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">polygon_loads</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">load</span><span class="o">.</span><span class="n">massless</span><span class="p">:</span>
+                    <span class="n">cmult</span> <span class="o">=</span> <span class="n">massless_load_factor</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cmult</span> <span class="o">=</span> <span class="n">load_factor</span>
+                <span class="n">surf_load</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">load_val</span> <span class="o">=</span> <span class="n">surf_load</span> <span class="o">*</span> <span class="n">area</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded_elm</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
+                    <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">loaded_elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                            <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">load_val</span> <span class="o">*</span> <span class="n">cmult</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">load</span><span class="o">.</span><span class="n">massless</span><span class="p">:</span>
+                        <span class="n">lcase</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">loaded_elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="n">load_val</span> <span class="o">/</span> <span class="n">g_const</span><span class="p">,</span>
+                                    <span class="n">load_val</span> <span class="o">/</span> <span class="n">g_const</span><span class="p">,</span>
+                                    <span class="n">load_val</span> <span class="o">/</span> <span class="n">g_const</span><span class="p">,</span>
+                                    <span class="mf">0.00</span><span class="p">,</span>
+                                    <span class="mf">0.00</span><span class="p">,</span>
+                                    <span class="mf">0.00</span><span class="p">,</span>
+                                <span class="p">]</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
+                    <span class="n">loaded_elm</span><span class="p">,</span> <span class="p">(</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">length</span> <span class="o">=</span> <span class="n">loaded_elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+                    <span class="n">load_per_length</span> <span class="o">=</span> <span class="n">load_val</span> <span class="o">/</span> <span class="n">length</span>
+                    <span class="n">udl_obj</span> <span class="o">=</span> <span class="n">lcase</span><span class="o">.</span><span class="n">line_element_udl</span><span class="p">[</span><span class="n">loaded_elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
+                    <span class="n">udl_obj</span><span class="o">.</span><span class="n">add_glob</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="n">load_per_length</span> <span class="o">*</span> <span class="n">cmult</span><span class="p">])</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">load</span><span class="o">.</span><span class="n">massless</span><span class="p">:</span>
+                        <span class="n">half_mass</span> <span class="o">=</span> <span class="n">load_val</span> <span class="o">/</span> <span class="mf">2.00</span> <span class="o">/</span> <span class="n">g_const</span>
+                        <span class="n">lcase</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">loaded_elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">half_mass</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.00</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="n">lcase</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">loaded_elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">half_mass</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.00</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+                        <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;This should never happen!&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

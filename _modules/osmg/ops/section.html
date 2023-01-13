@@ -1,0 +1,510 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.ops.section &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.ops.section</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.ops.section</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines :obj:`~osmg.ops.section.Section` objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">..mesh</span> <span class="kn">import</span> <span class="n">Mesh</span>
+<span class="kn">from</span> <span class="nn">..mesh</span> <span class="kn">import</span> <span class="n">polygon_area</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">common</span>
+<span class="kn">from</span> <span class="nn">.uniaxial_material</span> <span class="kn">import</span> <span class="n">UniaxialMaterial</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">mesh</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..physical_material</span> <span class="kn">import</span> <span class="n">PhysicalMaterial</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Section"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.Section.html#osmg.ops.section.Section">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Section</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Section object.</span>
+<span class="sd">    The axes are defined in the same way as they are</span>
+<span class="sd">    defined in OpenSees. The colors assigned to</span>
+<span class="sd">    the axes for plotting follow the</span>
+<span class="sd">    AutoCAD convention.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">            y(green)</span>
+<span class="sd">            ^         x(red)</span>
+<span class="sd">            :       .</span>
+<span class="sd">            :     .</span>
+<span class="sd">            :   .</span>
+<span class="sd">           ===</span>
+<span class="sd">            | -------&gt; z (blue)</span>
+<span class="sd">           ===</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">uid</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="ElasticSection"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ElasticSection</span><span class="p">(</span><span class="n">Section</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Elastic Section Object.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">      e_mod: Young&#39;s modulus.</span>
+<span class="sd">      area: Cross-sectional area.</span>
+<span class="sd">      i_y: Moment of inertia for strong-axis bending.</span>
+<span class="sd">      i_x: Moment of inertia for weak-axis bending.</span>
+<span class="sd">      g_mod: Shear modulus.</span>
+<span class="sd">      j_mod: Torsional moment of inertia.</span>
+<span class="sd">      sec_w: Weight per unit length.</span>
+<span class="sd">      outside_shape: Mesh defining the outside shape of the section.</span>
+<span class="sd">      snap_points: Dictionary containing coordinates of `snap_points`</span>
+<span class="sd">        used by component-generating methods to position components</span>
+<span class="sd">        relative to existing ones. See</span>
+<span class="sd">        :func:`~osmg.gen.component_gen.beam_placement_lookup` for example.</span>
+<span class="sd">      properties: Dictionary containing section properties.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">e_mod</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">area</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">i_y</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">i_x</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">g_mod</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">j_mod</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">sec_w</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">snap_points</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ElasticSection.weight_per_length"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.ElasticSection.html#osmg.ops.section.ElasticSection.weight_per_length">[docs]</a>    <span class="k">def</span> <span class="nf">weight_per_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the weight per length of a section.</span>
+<span class="sd">        For steel W sections, it adds 15% for misc. steel and</span>
+<span class="sd">        connections.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;W&quot;</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sec_w</span> <span class="o">*</span> <span class="mf">1.15</span>  <span class="c1"># misc steel and connections</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sec_w</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;ElasticSection object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;uid: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;Properties:&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  E: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">e_mod</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  A: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  Iy: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">i_y</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  Ix: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">i_x</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  G: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">g_mod</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  J: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">j_mod</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  W: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sec_w</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;outside_shape: specified</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;outside_shape: None</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snap_points</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;snap_points: specified</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;snap_points: None</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="SectionComponent"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">SectionComponent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Part of a section object, having a single material.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">      outside_shape: Mesh defining the outside shape</span>
+<span class="sd">      ops_material: OpenSees material</span>
+<span class="sd">      physical_material: Physical material</span>
+<span class="sd">      parent_section: Parent section.</span>
+<span class="sd">        The parent section is assigned automatically by their</span>
+<span class="sd">        parent section iteslf, at its creation time.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Mesh</span>
+    <span class="n">holes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">]</span>
+    <span class="n">ops_material</span><span class="p">:</span> <span class="n">UniaxialMaterial</span>
+    <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span>
+    <span class="n">parent_section</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FiberSection</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;SectionComponent object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;outside_shape: specified</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;outside_shape: None</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">holes</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;holes: exist</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;holes: no holes</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;ops_material: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ops_material</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;physical_material: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">physical_material</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="SectionComponent.cut_into_tiny_little_pieces"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent.cut_into_tiny_little_pieces">[docs]</a>    <span class="k">def</span> <span class="nf">cut_into_tiny_little_pieces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns data used to define fibers in OpenSees.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if we have an AISC HSS section, we need to discretize in a</span>
+        <span class="c1"># certain way</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span>
+        <span class="n">sec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="s2">&quot;HSS&quot;</span> <span class="ow">in</span> <span class="n">sec_name</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sec_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># rectangular HSS section!</span>
+            <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_hss</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;Ht&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;tdes&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="c1"># fallback: use the default rectangular mesh chopper</span>
+        <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_polygon</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">holes</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_x</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_y</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pieces</span></div>
+
+<div class="viewcode-block" id="SectionComponent.copy_alter_material"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.SectionComponent.html#osmg.ops.section.SectionComponent.copy_alter_material">[docs]</a>    <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SectionComponent</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a shallow copy of a section component and replace the old</span>
+<span class="sd">        material with the given one.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_component</span> <span class="o">=</span> <span class="n">SectionComponent</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">holes</span><span class="p">,</span> <span class="n">mat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">physical_material</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_component</span></div></div>
+
+
+<div class="viewcode-block" id="FiberSection"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">FiberSection</span><span class="p">(</span><span class="n">Section</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fiber section object.</span>
+<span class="sd">    Can consist of multiple materials.</span>
+<span class="sd">    The primary part of the component must have the key &quot;main&quot;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Mesh</span>
+    <span class="n">section_parts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SectionComponent</span><span class="p">]</span>
+    <span class="n">j_mod</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">snap_points</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">n_x</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_y</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="p">[</span><span class="n">part</span><span class="p">]</span><span class="o">.</span><span class="n">parent_section</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;FiberSection object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="n">part</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">snap_points</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;snap_points: specified</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;snap_points: None</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;n_x: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_x</span><span class="si">}</span><span class="s2">, n_y: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_y</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="FiberSection.ops_args"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection.ops_args">[docs]</a>    <span class="k">def</span> <span class="nf">ops_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the arguments required to define the object in</span>
+<span class="sd">        OpenSees</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="s2">&quot;Fiber&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+            <span class="s2">&quot;-GJ&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">j_mod</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">physical_material</span><span class="o">.</span><span class="n">g_mod</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="FiberSection.weight_per_length"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection.weight_per_length">[docs]</a>    <span class="k">def</span> <span class="nf">weight_per_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the weight per length of a section.</span>
+<span class="sd">        For steel W sections, it adds 15% for misc. steel and connections.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;W&quot;</span><span class="p">:</span>
+            <span class="n">mult</span> <span class="o">=</span> <span class="mf">1.15</span>  <span class="c1"># misc steel and connections</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mult</span> <span class="o">=</span> <span class="mf">1.00</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="mf">0.00</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">outside_shape</span><span class="o">.</span><span class="n">halfedges</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">area</span> <span class="o">=</span> <span class="n">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">holes</span><span class="p">:</span>
+                <span class="n">hole_coords</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">holes</span><span class="p">[</span><span class="n">hole</span><span class="p">]</span><span class="o">.</span><span class="n">halfedges</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">area</span> <span class="o">-=</span> <span class="n">polygon_area</span><span class="p">(</span><span class="n">hole_coords</span><span class="p">)</span>
+            <span class="n">density</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">physical_material</span><span class="o">.</span><span class="n">density</span>
+            <span class="c1"># TODO: units</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="n">area</span> <span class="o">*</span> <span class="n">density</span> <span class="o">*</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_IMPERIAL</span>
+        <span class="k">return</span> <span class="n">res</span> <span class="o">*</span> <span class="n">mult</span></div>
+
+<div class="viewcode-block" id="FiberSection.copy_alter_material"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.FiberSection.html#osmg.ops.section.FiberSection.copy_alter_material">[docs]</a>    <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">,</span>
+            <span class="n">new_uid</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FiberSection</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a shallow copy of the section object in which all</span>
+<span class="sd">        opensees_material objects have been replaced with the given</span>
+<span class="sd">        material. Required for the modling of steel braced frames.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new_section_parts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_parts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">new_part</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">copy_alter_material</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+            <span class="n">new_section_parts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_part</span>
+        <span class="n">other_sec</span> <span class="o">=</span> <span class="n">FiberSection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;auto_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">new_uid</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">,</span>
+            <span class="n">new_section_parts</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">j_mod</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snap_points</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_x</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_y</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">other_sec</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

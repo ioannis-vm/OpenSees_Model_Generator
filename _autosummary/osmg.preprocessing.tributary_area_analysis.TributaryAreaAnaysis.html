@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -184,8 +185,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -197,16 +196,40 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="osmg-preprocessing-tributary-area-analysis-tributaryareaanaysis">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="osmg-preprocessing-tributary-area-analysis-tributaryareaanaysis">
 <h1>osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis<a class="headerlink" href="#osmg-preprocessing-tributary-area-analysis-tributaryareaanaysis" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.preprocessing.tributary_area_analysis.</span></span><span class="sig-name descname"><span class="pre">TributaryAreaAnaysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase:</span> <span class="pre">LoadCase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level:</span> <span class="pre">Level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_loads:</span> <span class="pre">list[PolygonLoad]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">TributaryAreaAnalysisData</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Tributary area analysis object</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TributaryAreaAnaysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase:</span> <span class="pre">LoadCase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level:</span> <span class="pre">Level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_loads:</span> <span class="pre">list[PolygonLoad]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">TributaryAreaAnalysisData</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/tributary_area_analysis.html#TributaryAreaAnaysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Tributary area analysis object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase:</span> <span class="pre">LoadCase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level:</span> <span class="pre">Level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_loads:</span> <span class="pre">list[PolygonLoad]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">TributaryAreaAnalysisData</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase:</span> <span class="pre">LoadCase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level:</span> <span class="pre">Level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polygon_loads:</span> <span class="pre">list[PolygonLoad]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">TributaryAreaAnalysisData</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -216,7 +239,7 @@
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run" title="osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code></a>([load_factor, massless_load_factor, ...])</p></td>
-<td><p>Performs tributary area analysis :param load_factor: Factor by which to multiply the surface                     loads that count as a mass source, found in the load case. :type load_factor: float :param massless_load_factor: Factor by which to multiply                              the massless loads found in the load case. :type massless_load_factor: float :param perform_checks: Tributary area analysis works by                        generating a mesh defined by the horizontal elements of                        the floor plan and analyzing that mesh. The mesh should                        not contain any edges that cross or overlap with other                        edges. This can happen, for instance, if beam end offsets                        have been accidentally misspecified causing beams to                        overlap with or cross other members. The only shared                        points between the edges should be the end vertices. By                        default, we check if that is the case to avoid unexpected                        behavior. This flag can be used to disable the checks for                        subsequent analyses to enhance performance if that a prior                        analysis has verified that the checks are satisfied. :type perform_checks: bool.</p></td>
+<td><p>Performs tributary area analysis :Parameters: * <strong>load_factor</strong> -- Factor by which to multiply the surface                loads that count as a mass source, found in the load case. * <strong>massless_load_factor</strong> -- Factor by which to multiply                the massless loads found in the load case. * <strong>perform_checks</strong> -- Tributary area analysis works by                generating a mesh defined by the horizontal elements of                the floor plan and analyzing that mesh. The mesh should                not contain any edges that cross or overlap with other                edges. This can happen, for instance, if beam end offsets                have been accidentally misspecified causing beams to                overlap with or cross other members. The only shared                points between the edges should be the end vertices. By                default, we check if that is the case to avoid unexpected                behavior. This flag can be used to disable the checks for                subsequent analyses to enhance performance if that a prior                analysis has verified that the checks are satisfied.</p></td>
 </tr>
 </tbody>
 </table>
@@ -239,18 +262,17 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massless_load_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perform_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">massless_load_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perform_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/tributary_area_analysis.html#TributaryAreaAnaysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Performs tributary area analysis
-:param load_factor: Factor by which to multiply the surface</p>
+:Parameters: * <strong>load_factor</strong> – Factor by which to multiply the surface</p>
 <blockquote>
+<div><blockquote>
 <div><p>loads that count as a mass source, found in the load case.</p>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>massless_load_factor</strong> (<em>float</em>) – Factor by which to multiply
+<ul class="simple">
+<li><p><strong>massless_load_factor</strong> – Factor by which to multiply
 the massless loads found in the load case.</p></li>
-<li><p><strong>perform_checks</strong> (<em>bool</em>) – Tributary area analysis works by
+<li><p><strong>perform_checks</strong> – Tributary area analysis works by
 generating a mesh defined by the horizontal elements of
 the floor plan and analyzing that mesh. The mesh should
 not contain any edges that cross or overlap with other
@@ -263,8 +285,7 @@ behavior. This flag can be used to disable the checks for
 subsequent analyses to enhance performance if that a prior
 analysis has verified that the checks are satisfied.</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>

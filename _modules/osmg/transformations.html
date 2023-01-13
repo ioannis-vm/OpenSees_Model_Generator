@@ -1,0 +1,451 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.transformations &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.transformations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.transformations</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Coordinate transformation operations.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">common</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="rotation_matrix_2d"><a class="viewcode-back" href="../../_autosummary/osmg.transformations.html#osmg.transformations.rotation_matrix_2d">[docs]</a><span class="k">def</span> <span class="nf">rotation_matrix_2d</span><span class="p">(</span><span class="n">ang</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a 2D transformation matrix.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        ang: Angle in radians to rotate the matrix by.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A 2x2 transformation matrix.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; rotation_matrix_2d(np.pi / 2)</span>
+<span class="sd">        array([[ 6.123234e-17, -1.000000e+00],</span>
+<span class="sd">               [ 1.000000e+00,  6.123234e-17]])</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If `ang` is not a float.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ang</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ang parameter should be a float.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">)],</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">)]])</span></div>
+
+
+<div class="viewcode-block" id="rotation_matrix_3d"><a class="viewcode-back" href="../../_autosummary/osmg.transformations.html#osmg.transformations.rotation_matrix_3d">[docs]</a><span class="k">def</span> <span class="nf">rotation_matrix_3d</span><span class="p">(</span><span class="n">axis</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the rotation matrix associated with counterclockwise</span>
+<span class="sd">    rotation about the given axis by theta radians.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        axis: 3D vector representing the axis of rotation.</span>
+<span class="sd">        theta: Angle of rotation in radians.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        3x3 transformation matrix representing the rotation.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    &gt;&gt;&gt; # this is how to run that function:</span>
+<span class="sd">    &gt;&gt;&gt; res = rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)</span>
+<span class="sd">    &gt;&gt;&gt; # this is the expected result:</span>
+<span class="sd">    &gt;&gt;&gt; expected_res = np.array(</span>
+<span class="sd">    ...     [[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],</span>
+<span class="sd">    ...      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],</span>
+<span class="sd">    ...      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])</span>
+<span class="sd">    &gt;&gt;&gt; assert np.allclose(res, expected_res)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">v_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">v_b</span><span class="p">,</span> <span class="n">v_c</span><span class="p">,</span> <span class="n">v_d</span> <span class="o">=</span> <span class="o">-</span><span class="n">axis</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+    <span class="n">v_aa</span><span class="p">,</span> <span class="n">v_bb</span><span class="p">,</span> <span class="n">v_cc</span><span class="p">,</span> <span class="n">v_dd</span> <span class="o">=</span> <span class="n">v_a</span> <span class="o">*</span> <span class="n">v_a</span><span class="p">,</span> <span class="n">v_b</span> <span class="o">*</span> <span class="n">v_b</span><span class="p">,</span> <span class="n">v_c</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">,</span> <span class="n">v_d</span> <span class="o">*</span> <span class="n">v_d</span>
+    <span class="n">v_bc</span><span class="p">,</span> <span class="n">v_ad</span><span class="p">,</span> <span class="n">v_ac</span><span class="p">,</span> <span class="n">v_ab</span><span class="p">,</span> <span class="n">v_bd</span><span class="p">,</span> <span class="n">v_cd</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">v_b</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">,</span>
+        <span class="n">v_a</span> <span class="o">*</span> <span class="n">v_d</span><span class="p">,</span>
+        <span class="n">v_a</span> <span class="o">*</span> <span class="n">v_c</span><span class="p">,</span>
+        <span class="n">v_a</span> <span class="o">*</span> <span class="n">v_b</span><span class="p">,</span>
+        <span class="n">v_b</span> <span class="o">*</span> <span class="n">v_d</span><span class="p">,</span>
+        <span class="n">v_c</span> <span class="o">*</span> <span class="n">v_d</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span><span class="n">v_aa</span> <span class="o">+</span> <span class="n">v_bb</span> <span class="o">-</span> <span class="n">v_cc</span> <span class="o">-</span> <span class="n">v_dd</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_bc</span> <span class="o">+</span> <span class="n">v_ad</span><span class="p">),</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_bd</span> <span class="o">-</span> <span class="n">v_ac</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_bc</span> <span class="o">-</span> <span class="n">v_ad</span><span class="p">),</span> <span class="n">v_aa</span> <span class="o">+</span> <span class="n">v_cc</span> <span class="o">-</span> <span class="n">v_bb</span> <span class="o">-</span> <span class="n">v_dd</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_cd</span> <span class="o">+</span> <span class="n">v_ab</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_bd</span> <span class="o">+</span> <span class="n">v_ac</span><span class="p">),</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">v_cd</span> <span class="o">-</span> <span class="n">v_ab</span><span class="p">),</span> <span class="n">v_aa</span> <span class="o">+</span> <span class="n">v_dd</span> <span class="o">-</span> <span class="n">v_bb</span> <span class="o">-</span> <span class="n">v_cc</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="transformation_matrix"><a class="viewcode-back" href="../../_autosummary/osmg.transformations.html#osmg.transformations.transformation_matrix">[docs]</a><span class="k">def</span> <span class="nf">transformation_matrix</span><span class="p">(</span><span class="n">vec_x</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">vec_y</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">vec_z</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a transformation matrix that transforms points from</span>
+<span class="sd">    the coordinate system in which the x, y and z axes are expressed,</span>
+<span class="sd">    to the local coordinate system defined by them.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        vec_x: Local x axis expressed in the global system</span>
+<span class="sd">        vec_y: (similar)</span>
+<span class="sd">        vec_z: (similar)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        global to local transformation matrix.</span>
+
+<span class="sd">    Note: For orthogonal axes, transpose to obtain the inverse transform.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; # this is how to run that function:</span>
+<span class="sd">        &gt;&gt;&gt; res = transformation_matrix(</span>
+<span class="sd">        ...     np.array([1., 0., 0.]),</span>
+<span class="sd">        ...     np.array([0., 1., 0.]),</span>
+<span class="sd">        ...     np.array([0., 0., 1.]))</span>
+<span class="sd">        &gt;&gt;&gt; expected_result = np.array((</span>
+<span class="sd">        ...     [[1., 0., 0.],</span>
+<span class="sd">        ...      [0., 1., 0.],</span>
+<span class="sd">        ...      [0., 0., 1.]]))</span>
+<span class="sd">        &gt;&gt;&gt; assert np.allclose(res, expected_result)</span>
+<span class="sd">        &gt;&gt;&gt; res = transformation_matrix(</span>
+<span class="sd">        ...     np.array([1., 0., 0.]),</span>
+<span class="sd">        ...     np.array([0., 0., 1.]),</span>
+<span class="sd">        ...     np.array([0., 1., 0.]))</span>
+<span class="sd">        &gt;&gt;&gt; expected_result = np.array((</span>
+<span class="sd">        ...     [[1., 0., 0.],</span>
+<span class="sd">        ...      [0., 0., 1.],</span>
+<span class="sd">        ...      [0., 1., 0.]]))</span>
+<span class="sd">        &gt;&gt;&gt; assert np.allclose(res, expected_result)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tr_global_to_local</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">vec_x</span><span class="p">,</span> <span class="n">vec_y</span><span class="p">,</span> <span class="n">vec_z</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">tr_global_to_local</span></div>
+
+
+<div class="viewcode-block" id="local_axes_from_points_and_angle"><a class="viewcode-back" href="../../_autosummary/osmg.transformations.html#osmg.transformations.local_axes_from_points_and_angle">[docs]</a><span class="k">def</span> <span class="nf">local_axes_from_points_and_angle</span><span class="p">(</span>
+    <span class="n">point_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">point_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">ang</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nparr</span><span class="p">,</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a start point, and end point, and an angle,</span>
+<span class="sd">    obtain the local coordinate system of a linear element.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        point_i: Start point</span>
+<span class="sd">        point_j: End point</span>
+<span class="sd">        ang : Parameter that controls the rotation of the</span>
+<span class="sd">            section around the x-axis. Counterclockwise rotation is</span>
+<span class="sd">            posotive. 0.00 corresponds to:</span>
+<span class="sd">              vertical elements whose local z axis coincides with</span>
+<span class="sd">                                the local x axis</span>
+<span class="sd">              horizontal elements whose local z axis is horizontal.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Local coordinate system</span>
+<span class="sd">        vectors. The first element is the local x axis, the second</span>
+<span class="sd">        element is the local y axis, and the third element is the</span>
+<span class="sd">        local z axis.</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the start point and end point define a vertical element</span>
+<span class="sd">            that is defined upside down (i.e., with the start point at a lower</span>
+<span class="sd">            height than the end point).</span>
+<span class="sd">    Note:</span>
+<span class="sd">        For vertical elements, the local x axis will be the vector connecting</span>
+<span class="sd">        the start and end points, and the local z axis will be perpendicular</span>
+<span class="sd">        to the local x axis and lying on the plane defined by the global xy</span>
+<span class="sd">        plane and the local x axis. For horizontal elements, the local z axis</span>
+<span class="sd">        will be parallel to the global z axis.</span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; point_i = np.array([0, 0, 0])</span>
+<span class="sd">        &gt;&gt;&gt; point_j = np.array([1, 0, 0])</span>
+<span class="sd">        &gt;&gt;&gt; ang = 0</span>
+<span class="sd">        &gt;&gt;&gt; local_axes_from_points_and_angle(point_i, point_j, ang)</span>
+<span class="sd">        (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># x-axis</span>
+    <span class="n">x_axis</span> <span class="o">=</span> <span class="n">point_j</span> <span class="o">-</span> <span class="n">point_i</span>
+    <span class="n">x_axis</span> <span class="o">=</span> <span class="n">x_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x_axis</span><span class="p">)</span>
+    <span class="c1"># y and z axes</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x_axis</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.00</span><span class="p">])))</span>
+    <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+        <span class="c1"># vertical case</span>
+        <span class="n">z_axis</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">])</span>
+        <span class="n">y_axis</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">z_axis</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># not vertical case.</span>
+        <span class="c1"># check if the element is upside down</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">x_axis</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">])))</span>
+        <span class="k">if</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Vertical element defined upside down&quot;</span><span class="p">)</span>
+        <span class="n">up_direction</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+        <span class="c1"># orthogonalize with respect to x-axis</span>
+        <span class="n">y_axis</span> <span class="o">=</span> <span class="n">up_direction</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">up_direction</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">)</span> <span class="o">*</span> <span class="n">x_axis</span>
+        <span class="c1"># ..and normalize</span>
+        <span class="n">y_axis</span> <span class="o">=</span> <span class="n">y_axis</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">y_axis</span><span class="p">)</span>
+        <span class="n">y_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">rotation_matrix_3d</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">ang</span><span class="p">),</span> <span class="n">y_axis</span><span class="p">)</span>
+        <span class="c1"># z-axis</span>
+        <span class="n">z_axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span>  <span class="c1"># type: ignore</span></div>
+
+
+<div class="viewcode-block" id="offset_transformation"><a class="viewcode-back" href="../../_autosummary/osmg.transformations.html#osmg.transformations.offset_transformation">[docs]</a><span class="k">def</span> <span class="nf">offset_transformation</span><span class="p">(</span><span class="n">offset</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">u_vec</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">r_vec</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the displacement at the end of a rigid offset by</span>
+<span class="sd">    specifying the displacement and rotation of the other end.</span>
+
+<span class="sd">    A rigid offset connects two nodes and transmits forces between</span>
+<span class="sd">    them, but does not allow any relative displacement or rotation</span>
+<span class="sd">    between the nodes.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        offset:</span>
+<span class="sd">          Vector pointing from the node of the rigid offset where the</span>
+<span class="sd">          displacement is known to the node where we want to obtain</span>
+<span class="sd">          the displacement. The vector should be given in the global</span>
+<span class="sd">          coordinate system.</span>
+<span class="sd">        u_vec:</span>
+<span class="sd">          Displacement of the node where the displacement is known,</span>
+<span class="sd">          given in the global coordinate system.</span>
+<span class="sd">        r_vec:</span>
+<span class="sd">          Rotation of the node where the displacement is known, given</span>
+<span class="sd">          as a vector of the form [rx, ry, rz] representing the</span>
+<span class="sd">          rotation around the x, y, and z axes, respectively.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Displacement at the other end of the rigid offset,</span>
+<span class="sd">        given in the global coordinate system.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        Calculate the displacement of the end of a rigid offset with a</span>
+<span class="sd">        length of 1 meter, given a displacement of [4, 5, 6] and a</span>
+<span class="sd">        rotation of [7, 8, 9] at the other end:</span>
+
+<span class="sd">        &gt;&gt;&gt; offset_transformation(np.array([1., 0., 0.]),</span>
+<span class="sd">        ...     np.array([0.01, -0.02, 0.005]),</span>
+<span class="sd">        ...     np.array([0.0002, -0.0003, 0.0001]))</span>
+<span class="sd">        array([ 0.01  , -0.0199,  0.0053])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">t_rigid</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="p">[</span><span class="o">-</span><span class="n">offset</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.00</span><span class="p">,</span> <span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+            <span class="p">[</span><span class="o">+</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.00</span><span class="p">],</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">u_vec</span> <span class="o">+</span> <span class="n">t_rigid</span> <span class="o">@</span> <span class="n">r_vec</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

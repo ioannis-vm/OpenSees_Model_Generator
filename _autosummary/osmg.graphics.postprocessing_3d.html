@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.graphics.postprocessing_3d &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.graphics.postprocessing_3d &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -190,8 +191,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.graphics.postprocessing_3d.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -203,33 +202,56 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.graphics.postprocessing_3d">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.graphics.postprocessing_3d">
 <span id="osmg-graphics-postprocessing-3d"></span><h1>osmg.graphics.postprocessing_3d<a class="headerlink" href="#module-osmg.graphics.postprocessing_3d" title="Permalink to this heading">¶</a></h1>
-<p>The following utility functions are used for data visualization
-<a class="reference external" href="https://plotly.com/python/reference/">https://plotly.com/python/reference/</a></p>
+<p>Defines utility functions used for data visualization.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh" title="osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__extruded_line_elms_deformed_mesh</span></code></a>(...)</p></td>
-<td><p>Adds a trace containing frame element extrusion mesh in its deformed state</p></td>
+<td><p>Adds a trace containing frame element extrusion mesh in its deformed state.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.add_data__frames_undeformed" title="osmg.graphics.postprocessing_3d.add_data__frames_undeformed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__frames_undeformed</span></code></a>(data_dict, ...)</p></td>
 <td><p>Adds a trace containing frame element centroidal axis lines</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed" title="osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__line_elm_offsets_deformed</span></code></a>(...)</p></td>
-<td><p>Adds a trace containing frame element rigid offset lines in their deformed state</p></td>
+<td><p>Adds a trace containing frame element rigid offset lines in their deformed state.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.add_data__line_elms_deformed" title="osmg.graphics.postprocessing_3d.add_data__line_elms_deformed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__line_elms_deformed</span></code></a>(analysis, ...)</p></td>
-<td><p>Adds a trace containing frame element centroidal axis lines in their deformed state</p></td>
+<td><p>Adds a trace containing frame element centroidal axis lines in their deformed state.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.add_data__nodes_deformed" title="osmg.graphics.postprocessing_3d.add_data__nodes_deformed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_data__nodes_deformed</span></code></a>(analysis, ...)</p></td>
-<td><p>Adds a trace containing nodes in their deformed locations</p></td>
+<td><p>Adds a trace containing nodes in their deformed locations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.force_scaling_factor" title="osmg.graphics.postprocessing_3d.force_scaling_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">force_scaling_factor</span></code></a>(ref_len, fmax, factor)</p></td>
-<td><p>Applies a scaling factor to basic forces</p></td>
+<td><p>Applies a scaling factor to basic forces.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.get_auto_scaling_deformation" title="osmg.graphics.postprocessing_3d.get_auto_scaling_deformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_auto_scaling_deformation</span></code></a>(analysis, ...)</p></td>
-<td><p>Automatically calculate a scaling value that makes the maximum displacement appear approximately 10% of the largest dimention of the building's bounding box</p></td>
+<td><p>Automatically calculate a scaling value that makes the maximum displacement appear approximately 10% of the largest dimention of the building's bounding box.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.interp_3d_deformation" title="osmg.graphics.postprocessing_3d.interp_3d_deformation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interp_3d_deformation</span></code></a>(elm, u_i, r_i, u_j, ...)</p></td>
 <td><p>Given the deformations of the ends of a Bernoulli beam, use its shape functions to obtain intermediate points.</p></td>
@@ -238,212 +260,202 @@
 <td><p>Calculates intermediate points based on end locations and deformations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_basic_forces" title="osmg.graphics.postprocessing_3d.show_basic_forces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_basic_forces</span></code></a>(analysis, case_name, step, ...)</p></td>
-<td><p>Visualize the model and plot the frame element basic forces :param analysis: an analysis object :type analysis: Analysis :param case_name: the name of the load_case to be visualized :type case_name: str :param step: the analysis step to be visualized :type step: int :param scaling_global: I don't even remember what this                        does. It's kind of a mess right now. :type scaling_global: float :param scaling_n: :type scaling_n: float :param scaling_q: :type scaling_q: float :param scaling_m: :type scaling_m: float :param scaling_t: :type scaling_t: float :param num_points: number of points to include in the basic force                    curves :type num_points: int :param force_conversion: Conversion factor to be applied at the                          hover box data for forces (for unit conversions) :type force_conversion: float :param moment_conversion: Conversion factor to be applied at the                           hover box data for moments (for unit conversions) :type moment_conversion: float :param global_axes: whether to show global axes :type global_axes: bool :param camera: custom positioning of the camera :type camera: dict :param subset_model: use this model instead of the one                      contained in the analysis object. It needs to be a subset of the original model. This can be                        used to only show the results for some part of a large                        model. :type subset_model: Model.</p></td>
+<td><p>Visualize the model and plot the frame element basic forces :Parameters: * <strong>analysis</strong> -- an analysis object              * <strong>case_name</strong> -- the name of the load_case to be visualized              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling_global</strong> -- I don't even remember what this                does. It's kind of a mess right now. * <strong>scaling_n</strong>              * <strong>scaling_q</strong>              * <strong>scaling_m</strong>              * <strong>scaling_t</strong>              * <strong>num_points</strong> -- number of points to include in the basic force                curves              * <strong>force_conversion</strong> -- Conversion factor to be applied at the                hover box data for forces (for unit conversions)              * <strong>moment_conversion</strong> -- Conversion factor to be applied at the                hover box data for moments (for unit conversions)              * <strong>global_axes</strong> -- whether to show global axes              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- use this model instead of the one                contained in the analysis object. It needs to be a subset of the original model. This can be                  used to only show the results for some part of a large                  model.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_basic_forces_combo" title="osmg.graphics.postprocessing_3d.show_basic_forces_combo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_basic_forces_combo</span></code></a>(combo, ...[, ...])</p></td>
-<td><p>Visualize the model and plot the enveloped frame element basic forces for a load combination. :param combo: a load combination object :type combo: LoadCombination :param step: the analysis step to be visualized :type step: int :param scaling_global: I don't even remember what this                        does. It's kind of a mess right now. :type scaling_global: float :param scaling_n: :type scaling_n: float :param scaling_q: :type scaling_q: float :param scaling_m: :type scaling_m: float :param scaling_t: :type scaling_t: float :param num_points: number of points to include in the basic force                    curves :type num_points: int :param force_conversion: Conversion factor to be applied at the                          hover box data for forces (for unit conversions) :type force_conversion: float :param moment_conversion: Conversion factor to be applied at the                           hover box data for moments (for unit conversions) :type moment_conversion: float :param global_axes: whether to show global axes :type global_axes: bool :param camera: custom positioning of the camera :type camera: dict :param subset_model: use this model instead of the one                      contained in the analysis object. It needs to be a subset of the original model. This can be                        used to only show the results for some part of a large                        model. :type subset_model: Model.</p></td>
+<td><p>Visualize the model and plot the enveloped frame element basic forces for a load combination. :Parameters: * <strong>combo</strong> -- a load combination object              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling_global</strong> -- I don't even remember what this                does. It's kind of a mess right now. * <strong>scaling_n</strong>              * <strong>scaling_q</strong>              * <strong>scaling_m</strong>              * <strong>scaling_t</strong>              * <strong>num_points</strong> -- number of points to include in the basic force                curves              * <strong>force_conversion</strong> -- Conversion factor to be applied at the                hover box data for forces (for unit conversions)              * <strong>moment_conversion</strong> -- Conversion factor to be applied at the                hover box data for moments (for unit conversions)              * <strong>global_axes</strong> -- whether to show global axes              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- use this model instead of the one                contained in the analysis object. It needs to be a subset of the original model. This can be                  used to only show the results for some part of a large                  model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_deformed_shape" title="osmg.graphics.postprocessing_3d.show_deformed_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_deformed_shape</span></code></a>(analysis, case_name, ...)</p></td>
-<td><p>Visualize the model in its deformed state :param analysis: an analysis object :type analysis: Analysis :param case_name: the name of the load_case to be visualized :type case_name: str :param step: the analysis step to be visualized :type step: int :param scaling: scaling factor for the deformations. If 0.00 is                 provided, the scaling factor is calculated automatically. :type scaling: float :param extrude: wether to extrude frame elements :type extrude: bool :param camera: custom positioning of the camera :type camera: dict :param subset_model: subset model used to only show certain                      components :type subset_model: Model :param animation: show all frames up to the one identified with                   <cite>step</cite> :type animation: bool :param init_step: starting step, in case of animation :type init_step: int :param step_skip: how many frames to skip to reduce the number of                   frames in case an animation :type step_skip: int.</p></td>
+<td><p>Visualize the model in its deformed state :Parameters: * <strong>analysis</strong> -- an analysis object              * <strong>case_name</strong> -- the name of the load_case to be visualized              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling</strong> -- scaling factor for the deformations. If 0.00 is                provided, the scaling factor is calculated automatically. * <strong>extrude</strong> -- wether to extrude frame elements              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- subset model used to only show certain                components              * <strong>animation</strong> -- show all frames up to the one identified with                <cite>step</cite>              * <strong>init_step</strong> -- starting step, in case of animation              * <strong>step_skip</strong> -- how many frames to skip to reduce the number of                frames in case an animation.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__extruded_line_elms_deformed_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__extruded_line_elms_deformed_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#add_data__extruded_line_elms_deformed_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element extrusion mesh
-in its deformed state</p>
+in its deformed state.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.add_data__frames_undeformed">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__frames_undeformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__frames_undeformed" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__frames_undeformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#add_data__frames_undeformed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__frames_undeformed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element centroidal axis lines</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__line_elm_offsets_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__line_elm_offsets_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#add_data__line_elm_offsets_deformed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element rigid offset lines
-in their deformed state</p>
+in their deformed state.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.add_data__line_elms_deformed">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__line_elms_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__line_elms_deformed" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_data__line_elms_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_line_elems</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#add_data__line_elms_deformed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__line_elms_deformed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trace containing frame element centroidal axis lines
-in their deformed state</p>
+in their deformed state.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.add_data__nodes_deformed">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">add_data__nodes_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__nodes_deformed" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a trace containing nodes in their deformed locations</p>
+<span class="sig-name descname"><span class="pre">add_data__nodes_deformed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#add_data__nodes_deformed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.add_data__nodes_deformed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a trace containing nodes in their deformed locations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.force_scaling_factor">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">force_scaling_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.force_scaling_factor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies a scaling factor to basic forces</p>
+<span class="sig-name descname"><span class="pre">force_scaling_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#force_scaling_factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.force_scaling_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a scaling factor to basic forces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_len</strong> – <a class="reference internal" href="osmg.model.Model.html#osmg.model.Model.reference_length" title="osmg.model.Model.reference_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">reference_length()</span></code></a> of the
+model.</p></li>
+<li><p><strong>fmax</strong> – Largest value in the basic forces.</p></li>
+<li><p><strong>factor</strong> – Required scaling factor.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.get_auto_scaling_deformation">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">get_auto_scaling_deformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.get_auto_scaling_deformation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Automatically calculate a scaling value that
-makes the maximum displacement appear approximately
-10% of the largest dimention of the building’s bounding box</p>
+<span class="sig-name descname"><span class="pre">get_auto_scaling_deformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#get_auto_scaling_deformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.get_auto_scaling_deformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically calculate a scaling value that makes the maximum
+displacement appear approximately 10% of the largest dimention of
+the building’s bounding box.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.interp_3d_deformation">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">interp_3d_deformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.interp_3d_deformation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp_3d_deformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#interp_3d_deformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.interp_3d_deformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given the deformations of the ends of a Bernoulli beam,
-use its shape functions to obtain intermediate points.
-:param element: A line element
-:type element: ‘model.LineElement’
-:param u_i: 3 displacements at end i, global system
-:type u_i: npt.NDArray[np.float64]
-:param r_i: 3 rotations at end i, global system
-:type r_i: npt.NDArray[np.float64]
-:param u_j: similar to u_i, r_i.
-:param r_j: similar to u_i, r_i.
-:param num_points: Number of interpolation points</p>
-<p>See note: <a class="reference external" href="https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3">https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3</a>
-:returns: Displacements (global system)</p>
-<blockquote>
-<div><p>r_local (npt.NDArray[np.float64]): Rotations (local system)
-(the rotations are needed for plotting the</p>
-<blockquote>
-<div><p>deformed shape with extruded frame elements)</p>
-</div></blockquote>
-</div></blockquote>
+use its shape functions to obtain intermediate points.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> – A line element</p></li>
+<li><p><strong>u_i</strong> – 3 displacements at end i, global system</p></li>
+<li><p><strong>r_i</strong> – 3 rotations at end i, global system</p></li>
+<li><p><strong>u_j, r_j</strong> – similar to u_i, r_i.</p></li>
+<li><p><strong>num_points</strong> – Number of interpolation points</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Displacements (global system)
+r_local: Rotations (local system)</p>
+<blockquote>
+<div><p>(the rotations are needed for plotting the
+deformed shape with extruded frame elements)</p>
+</div></blockquote>
+</p>
+</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>d_global (npt.NDArray[np.float64])</p>
+<dd class="field-odd"><p>d_global</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.interp_3d_points">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">interp_3d_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.interp_3d_points" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp_3d_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#interp_3d_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.interp_3d_points" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates intermediate points based on end locations and
 deformations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_basic_forces">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">show_basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">show_basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_basic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the model and plot the frame element basic forces
-:param analysis: an analysis object
-:type analysis: Analysis
-:param case_name: the name of the load_case to be visualized
-:type case_name: str
-:param step: the analysis step to be visualized
-:type step: int
-:param scaling_global: I don’t even remember what this</p>
+:Parameters: * <strong>analysis</strong> – an analysis object</p>
 <blockquote>
-<div><p>does. It’s kind of a mess right now.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>scaling_n</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_q</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_m</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_t</strong> (<em>float</em>) – </p></li>
-<li><p><strong>num_points</strong> (<em>int</em>) – number of points to include in the basic force
+<div><ul>
+<li><p><strong>case_name</strong> – the name of the load_case to be visualized</p></li>
+<li><p><strong>step</strong> – the analysis step to be visualized</p></li>
+<li><p><strong>scaling_global</strong> – I don’t even remember what this
+does. It’s kind of a mess right now.</p></li>
+<li><p><strong>scaling_n</strong></p></li>
+<li><p><strong>scaling_q</strong></p></li>
+<li><p><strong>scaling_m</strong></p></li>
+<li><p><strong>scaling_t</strong></p></li>
+<li><p><strong>num_points</strong> – number of points to include in the basic force
 curves</p></li>
-<li><p><strong>force_conversion</strong> (<em>float</em>) – Conversion factor to be applied at the
+<li><p><strong>force_conversion</strong> – Conversion factor to be applied at the
 hover box data for forces (for unit conversions)</p></li>
-<li><p><strong>moment_conversion</strong> (<em>float</em>) – Conversion factor to be applied at the
+<li><p><strong>moment_conversion</strong> – Conversion factor to be applied at the
 hover box data for moments (for unit conversions)</p></li>
-<li><p><strong>global_axes</strong> (<em>bool</em>) – whether to show global axes</p></li>
-<li><p><strong>camera</strong> (<em>dict</em>) – custom positioning of the camera</p></li>
-<li><p><strong>subset_model</strong> (<a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><em>Model</em></a>) – <p>use this model instead of the one
+<li><p><strong>global_axes</strong> – whether to show global axes</p></li>
+<li><p><strong>camera</strong> – custom positioning of the camera</p></li>
+<li><p><strong>subset_model</strong> – use this model instead of the one
 contained in the analysis object.
 It needs to be a subset of the original model. This can be</p>
 <blockquote>
 <div><p>used to only show the results for some part of a large
 model.</p>
 </div></blockquote>
-</p></li>
+</li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_basic_forces_combo">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">show_basic_forces_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces_combo" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">show_basic_forces_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_basic_forces_combo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces_combo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the model and plot the enveloped frame element basic forces
 for a load combination.
-:param combo: a load combination object
-:type combo: LoadCombination
-:param step: the analysis step to be visualized
-:type step: int
-:param scaling_global: I don’t even remember what this</p>
+:Parameters: * <strong>combo</strong> – a load combination object</p>
 <blockquote>
-<div><p>does. It’s kind of a mess right now.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>scaling_n</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_q</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_m</strong> (<em>float</em>) – </p></li>
-<li><p><strong>scaling_t</strong> (<em>float</em>) – </p></li>
-<li><p><strong>num_points</strong> (<em>int</em>) – number of points to include in the basic force
+<div><ul>
+<li><p><strong>step</strong> – the analysis step to be visualized</p></li>
+<li><p><strong>scaling_global</strong> – I don’t even remember what this
+does. It’s kind of a mess right now.</p></li>
+<li><p><strong>scaling_n</strong></p></li>
+<li><p><strong>scaling_q</strong></p></li>
+<li><p><strong>scaling_m</strong></p></li>
+<li><p><strong>scaling_t</strong></p></li>
+<li><p><strong>num_points</strong> – number of points to include in the basic force
 curves</p></li>
-<li><p><strong>force_conversion</strong> (<em>float</em>) – Conversion factor to be applied at the
+<li><p><strong>force_conversion</strong> – Conversion factor to be applied at the
 hover box data for forces (for unit conversions)</p></li>
-<li><p><strong>moment_conversion</strong> (<em>float</em>) – Conversion factor to be applied at the
+<li><p><strong>moment_conversion</strong> – Conversion factor to be applied at the
 hover box data for moments (for unit conversions)</p></li>
-<li><p><strong>global_axes</strong> (<em>bool</em>) – whether to show global axes</p></li>
-<li><p><strong>camera</strong> (<em>dict</em>) – custom positioning of the camera</p></li>
-<li><p><strong>subset_model</strong> (<a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><em>Model</em></a>) – <p>use this model instead of the one
+<li><p><strong>global_axes</strong> – whether to show global axes</p></li>
+<li><p><strong>camera</strong> – custom positioning of the camera</p></li>
+<li><p><strong>subset_model</strong> – use this model instead of the one
 contained in the analysis object.
 It needs to be a subset of the original model. This can be</p>
 <blockquote>
 <div><p>used to only show the results for some part of a large
 model.</p>
 </div></blockquote>
-</p></li>
+</li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_deformed_shape">
-<span class="sig-prename descclassname"><span class="pre">osmg.graphics.postprocessing_3d.</span></span><span class="sig-name descname"><span class="pre">show_deformed_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_deformed_shape" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">show_deformed_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_deformed_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_deformed_shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the model in its deformed state
-:param analysis: an analysis object
-:type analysis: Analysis
-:param case_name: the name of the load_case to be visualized
-:type case_name: str
-:param step: the analysis step to be visualized
-:type step: int
-:param scaling: scaling factor for the deformations. If 0.00 is</p>
+:Parameters: * <strong>analysis</strong> – an analysis object</p>
 <blockquote>
-<div><p>provided, the scaling factor is calculated automatically.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>extrude</strong> (<em>bool</em>) – wether to extrude frame elements</p></li>
-<li><p><strong>camera</strong> (<em>dict</em>) – custom positioning of the camera</p></li>
-<li><p><strong>subset_model</strong> (<a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><em>Model</em></a>) – subset model used to only show certain
+<div><ul class="simple">
+<li><p><strong>case_name</strong> – the name of the load_case to be visualized</p></li>
+<li><p><strong>step</strong> – the analysis step to be visualized</p></li>
+<li><p><strong>scaling</strong> – scaling factor for the deformations. If 0.00 is
+provided, the scaling factor is calculated automatically.</p></li>
+<li><p><strong>extrude</strong> – wether to extrude frame elements</p></li>
+<li><p><strong>camera</strong> – custom positioning of the camera</p></li>
+<li><p><strong>subset_model</strong> – subset model used to only show certain
 components</p></li>
-<li><p><strong>animation</strong> (<em>bool</em>) – show all frames up to the one identified with
+<li><p><strong>animation</strong> – show all frames up to the one identified with
 <cite>step</cite></p></li>
-<li><p><strong>init_step</strong> (<em>int</em>) – starting step, in case of animation</p></li>
-<li><p><strong>step_skip</strong> (<em>int</em>) – how many frames to skip to reduce the number of
-frames in case an animation</p></li>
+<li><p><strong>init_step</strong> – starting step, in case of animation</p></li>
+<li><p><strong>step_skip</strong> – how many frames to skip to reduce the number of
+frames in case an animation.</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 </section>

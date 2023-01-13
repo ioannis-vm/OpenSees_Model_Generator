@@ -1,0 +1,1286 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.graphics.preprocessing_3d &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.graphics.preprocessing_3d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.graphics.preprocessing_3d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The following utility functions are used for data visualization</span>
+<span class="sd">https://plotly.com/python/reference/</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">graphics_common</span><span class="p">,</span> <span class="n">graphics_common_3d</span>
+<span class="kn">from</span> <span class="nn">..ops</span> <span class="kn">import</span> <span class="n">element</span>
+<span class="kn">from</span> <span class="nn">..ops</span> <span class="kn">import</span> <span class="n">node</span> <span class="k">as</span> <span class="n">node_module</span>
+<span class="kn">from</span> <span class="nn">..transformations</span> <span class="kn">import</span> <span class="n">local_axes_from_points_and_angle</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..model</span> <span class="kn">import</span> <span class="n">Model</span>
+    <span class="kn">from</span> <span class="nn">..load_case</span> <span class="kn">import</span> <span class="n">LoadCase</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="add_data__nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing nodes</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict:</span>
+<span class="sd">        list of dictionaries containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO: this was written very sloppily, because I was in a rush.</span>
+    <span class="c1"># I need to improve this code, avoid code repetition</span>
+    <span class="c1"># TODO: merge this method with the other methods that plot nodes.</span>
+    <span class="n">list_of_nodes</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_primary_nodes</span><span class="p">()</span>
+    <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">z_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">customdata_lst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">restraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">restraint</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">restraint_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">restraint</span><span class="p">:</span>
+            <span class="n">restraint_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;fixed&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">restraint_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;free&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+            <span class="n">customdata_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">customdata_lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,))</span>
+    <span class="n">customdata</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_lst</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Primary nodes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
+                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Primary nodes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
+                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__parent_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__parent_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__parent_nodes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">load_case</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing parent nodes</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict:</span>
+<span class="sd">        list of dictionaries containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">list_of_nodes</span> <span class="o">=</span> <span class="n">load_case</span><span class="o">.</span><span class="n">parent_nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">z_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">customdata_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">restraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">restraint</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">:</span>
+        <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">customdata</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Parent Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span>
+                        <span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_nodes</span><span class="p">),</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span>
+                        <span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_nodes</span><span class="p">),</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__internal_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__internal_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__internal_nodes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing internal nodes</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict:</span>
+<span class="sd">        list of dictionaries containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">list_of_nodes</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_internal_nodes</span><span class="p">()</span>
+    <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">z_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">customdata</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">restraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">restraint</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">restraint_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">restraint</span><span class="p">:</span>
+            <span class="n">restraint_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;fixed&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">connected_to_zerolength</span><span class="p">:</span>
+            <span class="n">restraint_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;release&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">restraint_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;internal&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+            <span class="n">customdata</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">customdata</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,))</span>
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Internal nodes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
+                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Internal nodes&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
+                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">restraint_symbols</span>
+                    <span class="p">],</span>
+                    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                        <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="p">},</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__release_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__release_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__release_nodes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">list_of_nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">node_module</span><span class="o">.</span><span class="n">Node</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing release nodes</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict:</span>
+<span class="sd">        list of dictionaries containing figure data</span>
+<span class="sd">      list_of_nodes: List of nodes where a release is present.</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">z_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">list_of_nodes</span><span class="p">]</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;markers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="s2">&quot;pinned&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="s2">&quot;pinned&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_INTERNAL_COLOR</span><span class="p">,</span>
+                    <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__frames"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frames">[docs]</a><span class="k">def</span> <span class="nf">add_data__frames</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element centroidal axis lines</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict:</span>
+<span class="sd">        list of dictionaries containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
+              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># &gt;&gt;&gt;</span>
+    <span class="c1"># it feels ridiculous to do this, but it&#39;s the only way I am</span>
+    <span class="c1"># getting rid of type checking warnings.</span>
+    <span class="n">elms_elastic</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)]</span>
+    <span class="n">line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">elms_elastic</span><span class="p">)</span>
+    <span class="n">elms_disp</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">elms_disp</span><span class="p">)</span>
+    <span class="c1"># &lt;&lt;&lt;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">line_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">customdata_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">section_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elems</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
+        <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span>
+        <span class="n">section_name</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">section_names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">section_name</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">line_element_udl</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">load_case</span><span class="o">.</span><span class="n">line_element_udl</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="n">customdata</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Frame elements&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_names</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;UDL (local): (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[4]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[5]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">customdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Frame elements&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_names</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__bars"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__bars">[docs]</a><span class="k">def</span> <span class="nf">add_data__bars</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element centroidal axis lines</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">line_elems</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
+                  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">line_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">customdata_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">section_areas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elems</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">section_area</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">area</span>
+
+        <span class="n">section_areas</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">section_area</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                    <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="n">customdata</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Truss elements&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_areas</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">customdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+        <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Truss elements&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_areas</span><span class="p">,</span>
+                <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__twonodelinks"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a><span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing twonodelink elements</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">link_elems</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">elm</span>
+        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TwoNodeLink</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">link_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">customdata_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">link_elems</span><span class="p">:</span>
+        <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">elm</span><span class="o">.</span><span class="n">parent_component</span><span class="o">.</span><span class="n">uid</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">customdata_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">customdata</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">customdata_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;TwoNodeLink elements&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="c1"># &quot;text&quot;: section_names,</span>
+            <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+            <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">LINK_COLOR</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__frame_offsets"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element rigid offset lines</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
+              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">p_io</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
+        <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">p_jo</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span>
+
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_io</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_io</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_io</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_jo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_jo</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">p_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_jo</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rigid offsets&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">OFFSET_COLOR</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__frame_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element local axis lines</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      ref_len: model reference length to scale the axes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
+              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span> <span class="o">*</span> <span class="mf">0.025</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">x_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
+        <span class="n">y_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
+        <span class="n">z_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
+        <span class="n">l_clear</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+        <span class="n">i_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
+        <span class="n">mid_pos</span> <span class="o">=</span> <span class="n">i_pos</span> <span class="o">+</span> <span class="n">x_vec</span> <span class="o">*</span> <span class="n">l_clear</span> <span class="o">/</span> <span class="mf">2.00</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Frame axes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__zerolength_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing zerolength element local axis lines</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      ref_len: model reference length to scale the axes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">zerolength_elements</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_zerolength_elements</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">zerolength_elements</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span> <span class="o">*</span> <span class="mf">0.025</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">zerolength_elements</span><span class="p">:</span>
+        <span class="n">x_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">vecx</span>
+        <span class="n">y_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">vecyp</span>
+        <span class="n">z_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">)</span>
+        <span class="n">mid_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">mid_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Zerolength axes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__global_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing global axes</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      ref_len: model reference length to scale the axes</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">])</span>
+    <span class="n">y_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">])</span>
+    <span class="n">z_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">])</span>
+
+    <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">x_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">z_vec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">colors</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="c1"># we add it twice in order for the animations to work</span>
+    <span class="c1"># see https://plotly.com/python/animations/</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+                <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+                <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+                <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors</span><span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+        <span class="o">*</span> <span class="mi">2</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__extruded_frames_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element extrusion mesh</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
+              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">j_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">side_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
+        <span class="n">side_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span>
+        <span class="n">y_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
+        <span class="n">z_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">outside_shape</span><span class="o">.</span><span class="n">halfedges</span>
+        <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">loc0</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+            <span class="n">loc1</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+            <span class="n">loc2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+            <span class="n">loc3</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mesh3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">i_list</span><span class="p">,</span>
+            <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="n">j_list</span><span class="p">,</span>
+            <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="n">k_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">BEAM_MESH_COLOR</span><span class="p">,</span>
+            <span class="s2">&quot;opacity&quot;</span><span class="p">:</span> <span class="mf">0.30</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__extruded_bars_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing frame element extrusion mesh</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      mdl: the model to be visualized</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">line_elems</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">line_elems</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">j_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elems</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">side_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">side_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
+            <span class="n">side_a</span><span class="p">,</span> <span class="n">side_b</span><span class="p">,</span> <span class="mf">0.00</span>
+        <span class="p">)</span>
+
+        <span class="c1"># cut out the two ends for a nicer visual effect</span>
+        <span class="c1"># (after all we can&#39;t plot the exact connection geometry)</span>
+        <span class="n">elm_len</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+        <span class="n">side_a</span> <span class="o">+=</span> <span class="n">x_vec</span> <span class="o">*</span> <span class="n">elm_len</span> <span class="o">*</span> <span class="mf">0.33</span>
+        <span class="n">side_b</span> <span class="o">-=</span> <span class="n">x_vec</span> <span class="o">*</span> <span class="n">elm_len</span> <span class="o">*</span> <span class="mf">0.33</span>
+
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span><span class="o">.</span><span class="n">halfedges</span>
+        <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+            <span class="n">loc0</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+            <span class="n">loc1</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+            <span class="n">loc2</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+            <span class="n">loc3</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
+                <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
+                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
+                <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">4</span>
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;mesh3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">i_list</span><span class="p">,</span>
+            <span class="s2">&quot;j&quot;</span><span class="p">:</span> <span class="n">j_list</span><span class="p">,</span>
+            <span class="s2">&quot;k&quot;</span><span class="p">:</span> <span class="n">k_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">BEAM_MESH_COLOR</span><span class="p">,</span>
+            <span class="s2">&quot;opacity&quot;</span><span class="p">:</span> <span class="mf">0.30</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span>
+    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">offsets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">global_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">frame_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">zerolength_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize the model</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      mdl: the model to be visualized</span>
+<span class="sd">      load_case: the load_case to be visualized</span>
+<span class="sd">      extrude: wether to extrude frame elements</span>
+<span class="sd">      offsets: whether to show frame element rigid offsets</span>
+<span class="sd">      global_axes: whether to show global axes</span>
+<span class="sd">      diaphragm_lines: whether to show lines indicating rigid</span>
+<span class="sd">        diaphragm extent</span>
+<span class="sd">      tributary_areas: whether to show tributary area</span>
+<span class="sd">        boundaries</span>
+<span class="sd">      parent_nodes: whether to plot parent nodes</span>
+<span class="sd">      frame_axes: whether to show the local axes of frame</span>
+<span class="sd">        elements</span>
+<span class="sd">      zerolength_axes: whether to show the local axes of</span>
+<span class="sd">        zerolength elements</span>
+<span class="sd">      camera: custom positioning of the camera</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">ref_len</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reference_length</span><span class="p">()</span>
+
+    <span class="c1"># plot the nodes</span>
+
+    <span class="n">add_data__nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
+    <span class="n">add_data__internal_nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
+
+    <span class="c1"># global axes</span>
+    <span class="k">if</span> <span class="n">global_axes</span><span class="p">:</span>
+        <span class="n">add_data__global_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">)</span>
+
+    <span class="c1"># # diaphgragm lines</span>
+    <span class="c1"># if diaphragm_lines:</span>
+    <span class="c1">#     for lvl in mdl.levels.values():</span>
+    <span class="c1">#         add_data__diaphragm_lines(data_dict, lvl)</span>
+
+    <span class="c1"># # bisector lines</span>
+    <span class="c1"># if tributary_areas:</span>
+    <span class="c1">#     for lvl in mdl.levels.values():</span>
+    <span class="c1">#         add_data__bisector_lines(data_dict, lvl)</span>
+
+    <span class="c1"># plot beamcolumn elements</span>
+    <span class="n">add_data__frames</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
+    <span class="n">add_data__bars</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">frame_axes</span><span class="p">:</span>
+        <span class="n">add_data__frame_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">zerolength_axes</span><span class="p">:</span>
+        <span class="n">add_data__zerolength_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">extrude</span><span class="p">:</span>
+        <span class="n">add_data__extruded_frames_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+        <span class="n">add_data__extruded_bars_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+    <span class="c1"># plot the rigid offsets</span>
+    <span class="k">if</span> <span class="n">offsets</span><span class="p">:</span>
+        <span class="n">add_data__frame_offsets</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+    <span class="n">add_data__twonodelinks</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">)</span>
+    <span class="c1"># plot the parent nodes</span>
+    <span class="k">if</span> <span class="n">parent_nodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+            <span class="n">add_data__parent_nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
+
+    <span class="n">fig_datastructure</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span><span class="n">fig_datastructure</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

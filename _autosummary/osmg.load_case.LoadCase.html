@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.load_case.LoadCase &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.load_case.LoadCase &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -179,8 +180,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.load_case.LoadCase.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -192,12 +191,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="osmg-load-case-loadcase">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="osmg-load-case-loadcase">
 <h1>osmg.load_case.LoadCase<a class="headerlink" href="#osmg-load-case-loadcase" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.load_case.LoadCase">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.load_case.</span></span><span class="sig-name descname"><span class="pre">LoadCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model:</span> <span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes:</span> <span class="pre">dict[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Node]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.LoadCase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LoadCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model:</span> <span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes:</span> <span class="pre">dict[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Node]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/load_case.html#LoadCase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.LoadCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Load Case object.
 Load cases contain information related to the specified loads,
 mass, parent nodes and rigid diaphragm constraints, etc.
@@ -205,7 +228,7 @@ Analysis objects can use multiple load cases.
 Load combination objects utilize load cases as well.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.load_case.LoadCase.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model:</span> <span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes:</span> <span class="pre">dict[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Node]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.load_case.LoadCase.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_model:</span> <span class="pre">Model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_nodes:</span> <span class="pre">dict[int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Node]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#osmg.load_case.LoadCase.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -218,7 +241,7 @@ Load combination objects utilize load cases as well.</p>
 <td><p>Calculates the number of free DOFS of the model, considering all (potentially) defined constraints, restraints and parent nodes.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.load_case.LoadCase.rigid_diaphragms" title="osmg.load_case.LoadCase.rigid_diaphragms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rigid_diaphragms</span></code></a>(level_uids[, gather_mass])</p></td>
-<td><p>Processes the geometry of the given levels and applies rigid diaphragm constraints</p></td>
+<td><p>Processes the geometry of the given levels and applies rigid diaphragm constraints.</p></td>
 </tr>
 </tbody>
 </table>
@@ -250,7 +273,7 @@ Load combination objects utilize load cases as well.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.load_case.LoadCase.number_of_free_dofs">
-<span class="sig-name descname"><span class="pre">number_of_free_dofs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.load_case.LoadCase.number_of_free_dofs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">number_of_free_dofs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/load_case.html#LoadCase.number_of_free_dofs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.LoadCase.number_of_free_dofs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the number of free DOFS of the model, considering
 all (potentially) defined constraints, restraints and parent
 nodes.</p>
@@ -258,9 +281,9 @@ nodes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.load_case.LoadCase.rigid_diaphragms">
-<span class="sig-name descname"><span class="pre">rigid_diaphragms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_uids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.load_case.LoadCase.rigid_diaphragms" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rigid_diaphragms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_uids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gather_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/load_case.html#LoadCase.rigid_diaphragms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.LoadCase.rigid_diaphragms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes the geometry of the given levels and applies rigid
-diaphragm constraints</p>
+diaphragm constraints.</p>
 </dd></dl>
 
 </dd></dl>

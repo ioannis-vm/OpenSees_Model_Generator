@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.component_assembly.ComponentAssembly &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.component_assembly.ComponentAssembly &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -175,8 +176,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.component_assembly.ComponentAssembly.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -188,24 +187,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="osmg-component-assembly-componentassembly">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="osmg-component-assembly-componentassembly">
 <h1>osmg.component_assembly.ComponentAssembly<a class="headerlink" href="#osmg-component-assembly-componentassembly" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.component_assembly.</span></span><span class="sig-name descname"><span class="pre">ComponentAssembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_purpose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ComponentAssembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_purpose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/component_assembly.html#ComponentAssembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A component assembly represents some part of a structure and holds
 various lower-level elements such as nodes and beamcolumn
-elements.
-.. attribute:: uid</p>
-<blockquote>
-<div><p>Unique identifyer of the component assembly</p>
+elements.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.uid">
+<span class="sig-name descname"><span class="pre">uid</span></span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.uid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique identifier of the component assembly</p>
 <dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
 </dd>
 </dl>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.parent_collection">
 <span class="sig-name descname"><span class="pre">parent_collection</span></span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.parent_collection" title="Permalink to this definition">¶</a></dt>
@@ -213,7 +238,7 @@ elements.
 elements to which the component assembly belongs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ComponentCollection</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly">osmg.component_assembly.ComponentAssembly</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,7 +249,7 @@ elements to which the component assembly belongs.</p>
 <dd><p>The functionality of the component assembly</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -237,7 +262,7 @@ component assembly is connected.
 these nodes should exist as part of a level.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.NodeCollection.html#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection">NodeCollection</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.NodeCollection.html#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection">osmg.collections.NodeCollection</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -251,7 +276,7 @@ assembly.
 these nodes only exist as part of the component assembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.NodeCollection.html#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection">NodeCollection</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.NodeCollection.html#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection">osmg.collections.NodeCollection</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -263,14 +288,14 @@ these nodes only exist as part of the component assembly.</p>
 component assembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.CollectionWithConnectivity.html#osmg.collections.CollectionWithConnectivity" title="osmg.collections.CollectionWithConnectivity">CollectionWithConnectivity</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.CollectionWithConnectivity.html#osmg.collections.CollectionWithConnectivity" title="osmg.collections.CollectionWithConnectivity">osmg.collections.CollectionWithConnectivity</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.ops.element.Element.html#osmg.ops.element.Element" title="osmg.ops.element.Element">osmg.ops.element.Element</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_purpose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">component_purpose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -293,7 +318,7 @@ component assembly.</p>
 <p class="rubric">Attributes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly.uid" title="osmg.component_assembly.ComponentAssembly.uid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uid</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.component_assembly.ComponentAssembly.parent_collection" title="osmg.component_assembly.ComponentAssembly.parent_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parent_collection</span></code></a></p></td>
@@ -315,14 +340,14 @@ component assembly.</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.dict_of_elements">
-<span class="sig-name descname"><span class="pre">dict_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.dict_of_elements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/component_assembly.html#ComponentAssembly.dict_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.dict_of_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all element objects in the model.
 The keys are the uids of the objects.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.element_connectivity">
-<span class="sig-name descname"><span class="pre">element_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.element_connectivity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">element_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/component_assembly.html#ComponentAssembly.element_connectivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.element_connectivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the connectivity of all elements. Elements are
 connected to external nodes. Each component assembly can be
 represented by a tuple of node uids of its connected nodes in
@@ -332,7 +357,7 @@ tuples as keys, and the associated components as values.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.component_assembly.ComponentAssembly.list_of_elements">
-<span class="sig-name descname"><span class="pre">list_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.list_of_elements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/component_assembly.html#ComponentAssembly.list_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.component_assembly.ComponentAssembly.list_of_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of all element objects in the model.</p>
 </dd></dl>
 

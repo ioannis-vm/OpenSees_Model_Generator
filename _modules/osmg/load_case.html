@@ -1,0 +1,467 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.load_case &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.load_case</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.load_case</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines :obj:`~osmg.load_case.LoadCase` objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="c1"># pylint: disable=W1512</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">transformations</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">collections</span>
+<span class="kn">from</span> <span class="nn">.preprocessing.tributary_area_analysis</span> <span class="kn">import</span> <span class="n">TributaryAreaAnaysis</span>
+<span class="kn">from</span> <span class="nn">.preprocessing.rigid_diaphragm</span> <span class="kn">import</span> <span class="n">RDAnalyzer</span>
+<span class="kn">from</span> <span class="nn">.ops</span> <span class="kn">import</span> <span class="n">element</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.model</span> <span class="kn">import</span> <span class="n">Model</span>
+    <span class="kn">from</span> <span class="nn">.ops.node</span> <span class="kn">import</span> <span class="n">Node</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="PointLoadMass"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.PointLoadMass.html#osmg.load_case.PointLoadMass">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PointLoadMass</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Point load/mass object. Global coordinate system.</span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        val: Value for each DOF.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">val</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
+
+<div class="viewcode-block" id="PointLoadMass.add"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.PointLoadMass.html#osmg.load_case.PointLoadMass.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds some quantity to the existing quantity.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from osmg.load_case import PointLoadMass</span>
+<span class="sd">            &gt;&gt;&gt; load = np.array([1., 2., 3., 4., 5., 6.])</span>
+<span class="sd">            &gt;&gt;&gt; point_load = PointLoadMass()</span>
+<span class="sd">            &gt;&gt;&gt; point_load.add(load)</span>
+<span class="sd">            &gt;&gt;&gt; point_load.val</span>
+<span class="sd">            array([1., 2., 3., 4., 5., 6.])</span>
+<span class="sd">            &gt;&gt;&gt; point_load.add(load)</span>
+<span class="sd">            &gt;&gt;&gt; point_load.val</span>
+<span class="sd">            array([ 2.,  4.,  6.,  8., 10., 12.])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">+=</span> <span class="n">load</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;Point Load (or mass) object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;Components: (global system)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;val: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="LineElementUDL"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">LineElementUDL</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Line element uniformly distributed load object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parent_load_case</span><span class="p">:</span> <span class="n">LoadCase</span>
+    <span class="n">parent_line_element</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]</span>
+    <span class="n">val</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;LineElementUDL object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;parent_line_element.uid: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;Components:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  val: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="LineElementUDL.add_glob"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL.add_glob">[docs]</a>    <span class="k">def</span> <span class="nf">add_glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udl</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a uniformly distributed load to the existing udl The load</span>
+<span class="sd">        is defined with respect to the global coordinate system of the</span>
+<span class="sd">        building, and it is converted to the local coordinate system</span>
+<span class="sd">        prior to adding it.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">          udl: Array of size 3 containing</span>
+<span class="sd">            components of the uniformly distributed load that is</span>
+<span class="sd">            applied to the clear length of the element, acting on</span>
+<span class="sd">            the global x, y, and z directions, in the direction of</span>
+<span class="sd">            the global axes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># STOP! if the element has the Corotational transformation, we</span>
+        <span class="c1"># can&#39;t apply a UDL on it. We need to lump the provided UDL to</span>
+        <span class="c1"># its external nodes.  Since the Corotational transformation</span>
+        <span class="c1"># also does not support rigid end offests, that lumping</span>
+        <span class="c1"># process is always valid without requiring any special</span>
+        <span class="c1"># transformation.</span>
+        <span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">transf_type</span> <span class="o">==</span> <span class="s2">&quot;Corotational&quot;</span><span class="p">:</span>
+            <span class="n">elm_len</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">clear_length</span><span class="p">()</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">udl</span> <span class="o">*</span> <span class="n">elm_len</span> <span class="o">/</span> <span class="mf">2.00</span>
+            <span class="n">node_i_uid</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span>
+            <span class="n">node_j_uid</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span>
+            <span class="n">lcase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_load_case</span>
+            <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node_i_uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">force</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+            <span class="p">)</span>
+            <span class="n">lcase</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node_j_uid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">force</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">transf_mat</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">udl_local</span> <span class="o">=</span> <span class="n">transf_mat</span> <span class="o">@</span> <span class="n">udl</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">+=</span> <span class="n">udl_local</span></div>
+
+<div class="viewcode-block" id="LineElementUDL.to_global"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the quantity expressed in the global coordinate</span>
+<span class="sd">        system.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">udl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span>
+        <span class="n">transf_mat</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_line_element</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">transf_mat</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">udl</span></div></div>
+
+
+<div class="viewcode-block" id="LoadCase"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">LoadCase</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load Case object.</span>
+<span class="sd">    Load cases contain information related to the specified loads,</span>
+<span class="sd">    mass, parent nodes and rigid diaphragm constraints, etc.</span>
+<span class="sd">    Analysis objects can use multiple load cases.</span>
+<span class="sd">    Load combination objects utilize load cases as well.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">parent_model</span><span class="p">:</span> <span class="n">Model</span>
+    <span class="n">node_loads</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">PointLoadMass</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">node_mass</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">PointLoadMass</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">line_element_udl</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">LineElementUDL</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">init</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">tributary_area_analysis</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span>
+        <span class="nb">int</span><span class="p">,</span> <span class="n">TributaryAreaAnaysis</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Node</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_loads</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_mass</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line_element_udl</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tributary_area_analysis</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># initialize loads and mass for each node and element</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">list_of_all_nodes</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">PointLoadMass</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">node_mass</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">PointLoadMass</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">():</span>
+            <span class="c1"># only proceed for certain elements</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">line_element_udl</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">LineElementUDL</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">elm</span>
+            <span class="p">)</span>
+        <span class="c1"># initialize tributary area analysis for each level</span>
+        <span class="k">for</span> <span class="n">lvlkey</span><span class="p">,</span> <span class="n">lvl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tributary_area_analysis</span><span class="p">[</span><span class="n">lvlkey</span><span class="p">]</span> <span class="o">=</span> <span class="n">TributaryAreaAnaysis</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="n">lvl</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="LoadCase.rigid_diaphragms"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase.rigid_diaphragms">[docs]</a>    <span class="k">def</span> <span class="nf">rigid_diaphragms</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">level_uids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="n">gather_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Processes the geometry of the given levels and applies rigid</span>
+<span class="sd">        diaphragm constraints.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">lvl_uid</span> <span class="ow">in</span> <span class="n">level_uids</span><span class="p">:</span>
+            <span class="n">lvl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="n">lvl_uid</span><span class="p">]</span>
+            <span class="n">rda</span> <span class="o">=</span> <span class="n">RDAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lvl</span><span class="p">)</span>
+            <span class="n">rda</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">gather_mass</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LoadCase.number_of_free_dofs"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase.number_of_free_dofs">[docs]</a>    <span class="k">def</span> <span class="nf">number_of_free_dofs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the number of free DOFS of the model, considering</span>
+<span class="sd">        all (potentially) defined constraints, restraints and parent</span>
+<span class="sd">        nodes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mdl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span>
+        <span class="n">all_nodes</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">dict_of_all_nodes</span><span class="p">()</span>
+        <span class="c1"># parent_nodes = {</span>
+        <span class="c1">#     node.uid: node</span>
+        <span class="c1">#     for node in self.parent_nodes.values()}</span>
+        <span class="c1"># all_nodes.update(parent_nodes)</span>
+        <span class="n">free_dofs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">),</span> <span class="mi">6</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">all_nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+
+        <span class="c1"># consider the restraints</span>
+        <span class="k">def</span> <span class="nf">restraints</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">all_nodes</span><span class="p">):</span>
+            <span class="n">uid</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">all_nodes</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+            <span class="n">restraints</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">restraint</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">restraints</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">free_dofs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">restraints</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">all_nodes</span><span class="p">,))</span>
+        <span class="c1"># consider the constraints</span>
+        <span class="n">num_diaphragms</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">uid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_nodes</span><span class="p">:</span>
+            <span class="n">num_diaphragms</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">lvl</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+            <span class="n">constrained_nodes</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">lvl</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">lvl</span><span class="o">.</span><span class="n">elevation</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">constrained_node</span> <span class="ow">in</span> <span class="n">constrained_nodes</span><span class="p">:</span>
+                <span class="n">free_dofs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">constrained_node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">free_dofs</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="n">num_diaphragms</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="s2">&quot;LoadCase object</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;parent_model: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

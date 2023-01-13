@@ -7,12 +7,12 @@
    :hidden:
 
    Home page <self>
-   Getting Started <getting_started>
+   Tutorials <notebooks>
    API reference <_autosummary/osmg>
 
 
-Welcome to the documentation for `osmg`!
-=================================
+Welcome to the documentation for `osmg`
+=======================================
 
 `osmg` is a Python package that provides useful functions and classes
 for the definition and analysis of 3D OpenSees models. `osmg` attempts

@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.graphics.general_2d &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.graphics.general_2d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.graphics.general_2d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Library for consistent all-purpose 2D plots</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="c1">#############</span>
+<span class="c1"># Resources #</span>
+<span class="c1">#############</span>
+<span class="c1">#</span>
+<span class="c1"># https://coolors.co/  &lt;- amazing color palette generator</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<span class="n">C_LINE</span> <span class="o">=</span> <span class="s2">&quot;#6F1D1B&quot;</span>
+<span class="n">C_AXIS_LINE</span> <span class="o">=</span> <span class="s2">&quot;#432818&quot;</span>
+<span class="n">C_TITLE_COLOR</span> <span class="o">=</span> <span class="s2">&quot;#432818&quot;</span>
+<span class="n">C_LABEL_COLOR</span> <span class="o">=</span> <span class="s2">&quot;#432818&quot;</span>
+<span class="n">C_GRID</span> <span class="o">=</span> <span class="s2">&quot;#BB9457&quot;</span>
+<span class="n">C_BACKGROUND</span> <span class="o">=</span> <span class="s2">&quot;#FFE6A7&quot;</span>
+<span class="n">C_HOVERLABEL_BG</span> <span class="o">=</span> <span class="s2">&quot;#BB9457&quot;</span>
+
+
+<div class="viewcode-block" id="line_plot_interactive"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.general_2d.html#osmg.graphics.general_2d.line_plot_interactive">[docs]</a><span class="k">def</span> <span class="nf">line_plot_interactive</span><span class="p">(</span>
+    <span class="n">title_text</span><span class="p">,</span>
+    <span class="n">x_vals</span><span class="p">,</span>
+    <span class="n">y_vals</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">,</span>
+    <span class="n">xlab</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+    <span class="n">xunit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">xhoverformat</span><span class="o">=</span><span class="s2">&quot;.0f&quot;</span><span class="p">,</span>
+    <span class="n">ylab</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span>
+    <span class="n">yunit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">yhoverformat</span><span class="o">=</span><span class="s2">&quot;.0f&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gneric polty line plot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_vals</span><span class="p">),</span> <span class="s2">&quot;Dimensions don&#39;t match&quot;</span>
+    <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s2">&quot;spline+markers&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line&quot;</span><span class="p">,</span>
+    <span class="p">],</span> <span class="s2">&quot;mode can either be `spline+markers` or `line`&quot;</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;line&quot;</span><span class="p">:</span>
+        <span class="n">lshape</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span>
+        <span class="n">lmode</span> <span class="o">=</span> <span class="s2">&quot;lines&quot;</span>
+        <span class="n">lwidth</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;spline+markers&quot;</span><span class="p">:</span>
+        <span class="n">lshape</span> <span class="o">=</span> <span class="s2">&quot;spline&quot;</span>
+        <span class="n">lmode</span> <span class="o">=</span> <span class="s2">&quot;lines+markers&quot;</span>
+        <span class="n">lwidth</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;oops! This should never run. Strange.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xunit</span><span class="p">:</span>
+        <span class="n">xtitle</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xlab</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">xunit</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xtitle</span> <span class="o">=</span> <span class="n">xlab</span>
+    <span class="k">if</span> <span class="n">yunit</span><span class="p">:</span>
+        <span class="n">ytitle</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ylab</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">yunit</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ytitle</span> <span class="o">=</span> <span class="n">ylab</span>
+
+    <span class="n">num_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span>
+    <span class="n">indices</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">range</span><span class="p">(</span><span class="n">num_points</span><span class="p">)])</span>
+    <span class="n">my_hovertemplate</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;XY value pair: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+        <span class="o">+</span> <span class="n">xlab</span>
+        <span class="o">+</span> <span class="s2">&quot; = %{x: &quot;</span>
+        <span class="o">+</span> <span class="n">xhoverformat</span>
+        <span class="o">+</span> <span class="s2">&quot;} &quot;</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">xunit</span><span class="p">:</span>
+        <span class="n">my_hovertemplate</span> <span class="o">+=</span> <span class="n">xunit</span> <span class="o">+</span> <span class="s2">&quot;&lt;br&gt;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">my_hovertemplate</span> <span class="o">+=</span> <span class="s2">&quot;&lt;br&gt;&quot;</span>
+    <span class="n">my_hovertemplate</span> <span class="o">+=</span> <span class="n">ylab</span> <span class="o">+</span> <span class="s2">&quot; = %{y:&quot;</span> <span class="o">+</span> <span class="n">yhoverformat</span> <span class="o">+</span> <span class="s2">&quot;} &quot;</span>
+    <span class="k">if</span> <span class="n">yunit</span><span class="p">:</span>
+        <span class="n">my_hovertemplate</span> <span class="o">+=</span> <span class="n">yunit</span> <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">my_hovertemplate</span> <span class="o">+=</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y_vals</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">lmode</span><span class="p">,</span>
+            <span class="n">line_shape</span><span class="o">=</span><span class="n">lshape</span><span class="p">,</span>
+            <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">C_LINE</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">lwidth</span><span class="p">),</span>
+            <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">C_BACKGROUND</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">C_LINE</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="n">customdata</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+            <span class="n">hovertemplate</span><span class="o">=</span><span class="n">my_hovertemplate</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">showline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">gridcolor</span><span class="o">=</span><span class="n">C_GRID</span><span class="p">,</span>
+            <span class="n">showticklabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">linecolor</span><span class="o">=</span><span class="n">C_BACKGROUND</span><span class="p">,</span>
+            <span class="n">zerolinecolor</span><span class="o">=</span><span class="n">C_AXIS_LINE</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">ticks</span><span class="o">=</span><span class="s2">&quot;outside&quot;</span><span class="p">,</span>
+            <span class="n">tickcolor</span><span class="o">=</span><span class="n">C_GRID</span><span class="p">,</span>
+            <span class="n">tickfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">family</span><span class="o">=</span><span class="s2">&quot;Cambria&quot;</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">C_AXIS_LINE</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">showline</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">gridcolor</span><span class="o">=</span><span class="n">C_GRID</span><span class="p">,</span>
+            <span class="n">showticklabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">linecolor</span><span class="o">=</span><span class="n">C_BACKGROUND</span><span class="p">,</span>
+            <span class="n">zerolinecolor</span><span class="o">=</span><span class="n">C_AXIS_LINE</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">ticks</span><span class="o">=</span><span class="s2">&quot;outside&quot;</span><span class="p">,</span>
+            <span class="n">tickcolor</span><span class="o">=</span><span class="n">C_GRID</span><span class="p">,</span>
+            <span class="n">tickfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">family</span><span class="o">=</span><span class="s2">&quot;Cambria&quot;</span><span class="p">,</span>
+                <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">C_AXIS_LINE</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">plot_bgcolor</span><span class="o">=</span><span class="n">C_BACKGROUND</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span>
+            <span class="n">yref</span><span class="o">=</span><span class="s2">&quot;paper&quot;</span><span class="p">,</span>
+            <span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span>
+            <span class="n">xanchor</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+            <span class="n">yanchor</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="n">title_text</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s2">&quot;Cambria&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">28</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">C_TITLE_COLOR</span><span class="p">),</span>
+            <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">annotations</span><span class="o">=</span><span class="n">annotations</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+        <span class="n">xaxis_title</span><span class="o">=</span><span class="n">xtitle</span><span class="p">,</span>
+        <span class="n">yaxis_title</span><span class="o">=</span><span class="n">ytitle</span><span class="p">,</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s2">&quot;Cambria&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">C_LABEL_COLOR</span><span class="p">),</span>
+        <span class="n">hoverlabel</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="n">C_HOVERLABEL_BG</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;Cambria&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># # (Test)</span>
+<span class="c1"># x = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</span>
+<span class="c1"># y = [0, 10, 20, 30, 35, 38, 40, 41, 42, 43]</span>
+
+<span class="c1"># line_plot_interactive(&#39;Pushover\nDirection: Y&#39;,</span>
+<span class="c1">#                       xlab=&#39;Displacement&#39;, ylab=&#39;Base Shear&#39;,</span>
+<span class="c1">#                       xunit=&#39;in&#39;, yunit=&#39;lb&#39;, x_vals=x, y_vals=y,</span>
+<span class="c1">#                       mode=&#39;spline+markers&#39;)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

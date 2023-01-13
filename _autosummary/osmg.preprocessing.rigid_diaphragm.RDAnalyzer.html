@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.preprocessing.rigid_diaphragm.RDAnalyzer &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.preprocessing.rigid_diaphragm.RDAnalyzer &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -180,8 +181,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.preprocessing.rigid_diaphragm.RDAnalyzer.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -193,16 +192,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="osmg-preprocessing-rigid-diaphragm-rdanalyzer">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="osmg-preprocessing-rigid-diaphragm-rdanalyzer">
 <h1>osmg.preprocessing.rigid_diaphragm.RDAnalyzer<a class="headerlink" href="#osmg-preprocessing-rigid-diaphragm-rdanalyzer" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.preprocessing.rigid_diaphragm.RDAnalyzer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.preprocessing.rigid_diaphragm.</span></span><span class="sig-name descname"><span class="pre">RDAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.level.Level.html#osmg.level.Level" title="osmg.level.Level"><span class="pre">Level</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Rigid Diaphragm Analyzer object.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RDAnalyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.level.Level.html#osmg.level.Level" title="osmg.level.Level"><span class="pre">Level</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/rigid_diaphragm.html#RDAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Rigid Diaphragm Analyzer object. Used to apply rigid diaphragm
+constraints and optionally gather mass from the nodes of the level
+to the primary nodes</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.preprocessing.rigid_diaphragm.RDAnalyzer.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.level.Level.html#osmg.level.Level" title="osmg.level.Level"><span class="pre">Level</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer.__init__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_loadcase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.level.Level.html#osmg.level.Level" title="osmg.level.Level"><span class="pre">Level</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -229,10 +254,9 @@
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.preprocessing.rigid_diaphragm.RDAnalyzer.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gather_mass</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies rigid diaphragm constraints and optionally
-gathers mass from the nodes of the level to the
-primary nodes</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gather_mass</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/rigid_diaphragm.html#RDAnalyzer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.rigid_diaphragm.RDAnalyzer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies rigid diaphragm constraints and optionally gathers
+mass from the nodes of the level to the primary nodes</p>
 </dd></dl>
 
 </dd></dl>

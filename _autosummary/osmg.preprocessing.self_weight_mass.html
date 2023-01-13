@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.preprocessing.self_weight_mass &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.preprocessing.self_weight_mass &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -178,8 +179,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.preprocessing.self_weight_mass.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -191,9 +190,34 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.preprocessing.self_weight_mass">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.preprocessing.self_weight_mass">
 <span id="osmg-preprocessing-self-weight-mass"></span><h1>osmg.preprocessing.self_weight_mass<a class="headerlink" href="#module-osmg.preprocessing.self_weight_mass" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ self weight, self mass</p>
+<p>Defines methods to assign self-weight and self-mass to a loadcase
+using a given model.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -201,20 +225,20 @@
 <td><p>Assigns the structure's self mass to its members</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.preprocessing.self_weight_mass.self_weight" title="osmg.preprocessing.self_weight_mass.self_weight"><code class="xref py py-obj docutils literal notranslate"><span class="pre">self_weight</span></code></a>(mdl, lcase[, factor])</p></td>
-<td><p>Assigns the structure's self weight to its members</p></td>
+<td><p>Assigns the structure's self weight to its members.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.preprocessing.self_weight_mass.self_mass">
-<span class="sig-prename descclassname"><span class="pre">osmg.preprocessing.self_weight_mass.</span></span><span class="sig-name descname"><span class="pre">self_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.self_weight_mass.self_mass" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">self_mass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/self_weight_mass.html#self_mass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.self_weight_mass.self_mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns the structure’s self mass to its members</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.preprocessing.self_weight_mass.self_weight">
-<span class="sig-prename descclassname"><span class="pre">osmg.preprocessing.self_weight_mass.</span></span><span class="sig-name descname"><span class="pre">self_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.preprocessing.self_weight_mass.self_weight" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assigns the structure’s self weight to its members</p>
+<span class="sig-name descname"><span class="pre">self_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lcase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/preprocessing/self_weight_mass.html#self_weight"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.preprocessing.self_weight_mass.self_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns the structure’s self weight to its members.</p>
 </dd></dl>
 
 </section>

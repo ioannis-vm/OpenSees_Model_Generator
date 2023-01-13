@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg.solver &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg.solver &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -117,6 +118,7 @@
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.Results.html">osmg.solver.Results</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.StaticAnalysis.html">osmg.solver.StaticAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#osmg.solver.Analysis"><code class="docutils literal notranslate"><span class="pre">Analysis</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Analysis.mdl"><code class="docutils literal notranslate"><span class="pre">Analysis.mdl</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Analysis.load_cases"><code class="docutils literal notranslate"><span class="pre">Analysis.load_cases</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Analysis.output_directory"><code class="docutils literal notranslate"><span class="pre">Analysis.output_directory</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Analysis.settings"><code class="docutils literal notranslate"><span class="pre">Analysis.settings</span></code></a></li>
@@ -161,7 +163,18 @@
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.PushoverAnalysis.table_pushover_curve"><code class="docutils literal notranslate"><span class="pre">PushoverAnalysis.table_pushover_curve()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#osmg.solver.Results"><code class="docutils literal notranslate"><span class="pre">Results</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osmg.solver.Results"><code class="docutils literal notranslate"><span class="pre">Results</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.node_displacements"><code class="docutils literal notranslate"><span class="pre">Results.node_displacements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.node_velocities"><code class="docutils literal notranslate"><span class="pre">Results.node_velocities</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.node_accelerations"><code class="docutils literal notranslate"><span class="pre">Results.node_accelerations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.node_reactions"><code class="docutils literal notranslate"><span class="pre">Results.node_reactions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.element_forces"><code class="docutils literal notranslate"><span class="pre">Results.element_forces</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.release_foce_defo"><code class="docutils literal notranslate"><span class="pre">Results.release_foce_defo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.periods"><code class="docutils literal notranslate"><span class="pre">Results.periods</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.n_steps_success"><code class="docutils literal notranslate"><span class="pre">Results.n_steps_success</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#osmg.solver.Results.metadata"><code class="docutils literal notranslate"><span class="pre">Results.metadata</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#osmg.solver.StaticAnalysis"><code class="docutils literal notranslate"><span class="pre">StaticAnalysis</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.StaticAnalysis.run"><code class="docutils literal notranslate"><span class="pre">StaticAnalysis.run()</span></code></a></li>
 </ul>
@@ -229,8 +242,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.solver.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -242,9 +253,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg.solver">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg.solver">
 <span id="osmg-solver"></span><h1>osmg.solver<a class="headerlink" href="#module-osmg.solver" title="Permalink to this heading">¶</a></h1>
-<p>Model Generator for OpenSees ~ solver</p>
+<p>Defines Analysis objects.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -269,7 +304,7 @@
 <td><p>Runs a modal analysis.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="osmg.solver.ModalResponseSpectrumAnalysis.html#osmg.solver.ModalResponseSpectrumAnalysis" title="osmg.solver.ModalResponseSpectrumAnalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModalResponseSpectrumAnalysis</span></code></a>(mdl, ...[, ...])</p></td>
-<td><p>Modal response spectrum analysis</p></td>
+<td><p>Modal response spectrum analysis.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="osmg.solver.NLTHAnalysis.html#osmg.solver.NLTHAnalysis" title="osmg.solver.NLTHAnalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NLTHAnalysis</span></code></a>(mdl, load_cases, ...)</p></td>
 <td><p>Dynamic nonlinear time-history analysis</p></td>
@@ -281,7 +316,7 @@
 <td><p>Pushover analysis</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="osmg.solver.Results.html#osmg.solver.Results" title="osmg.solver.Results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Results</span></code></a>([periods, n_steps_success, metadata])</p></td>
-<td><p>Results object.</p></td>
+<td><p>Stores analysis results.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="osmg.solver.StaticAnalysis.html#osmg.solver.StaticAnalysis" title="osmg.solver.StaticAnalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StaticAnalysis</span></code></a>(mdl, load_cases, ...)</p></td>
 <td><p>Static analysis.</p></td>
@@ -290,17 +325,19 @@
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.Analysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">Analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.Analysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parent analysis class.
-.. attribute:: mdl</p>
-<blockquote>
-<div><p>a given model</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#Analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parent analysis class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Analysis.mdl">
+<span class="sig-name descname"><span class="pre">mdl</span></span><a class="headerlink" href="#osmg.solver.Analysis.mdl" title="Permalink to this definition">¶</a></dt>
+<dd><p>a given model</p>
 <dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Model</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model">osmg.model.Model</a></p>
 </dd>
 </dl>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.solver.Analysis.load_cases">
 <span class="sig-name descname"><span class="pre">load_cases</span></span><a class="headerlink" href="#osmg.solver.Analysis.load_cases" title="Permalink to this definition">¶</a></dt>
@@ -308,7 +345,7 @@
 load case objects in which those load cases reside.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase">osmg.load_case.LoadCase</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,7 +357,7 @@ load case objects in which those load cases reside.</p>
 when it is requested for them to be pickled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[str]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,7 +368,7 @@ when it is requested for them to be pickled.</p>
 <dd><p>analysis settings</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.solver.AnalysisSettings.html#osmg.solver.AnalysisSettings" title="osmg.solver.AnalysisSettings">AnalysisSettings</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.solver.AnalysisSettings.html#osmg.solver.AnalysisSettings" title="osmg.solver.AnalysisSettings">osmg.solver.AnalysisSettings</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,7 +379,7 @@ when it is requested for them to be pickled.</p>
 <dd><p>analysis results</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.solver.Results.html#osmg.solver.Results" title="osmg.solver.Results">Results</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference internal" href="osmg.solver.Results.html#osmg.solver.Results" title="osmg.solver.Results">osmg.solver.Results</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -353,57 +390,57 @@ when it is requested for them to be pickled.</p>
 <dd><p>Logger object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[object]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.Analysis.global_reactions">
-<span class="sig-name descname"><span class="pre">global_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.Analysis.global_reactions" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">global_reactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#Analysis.global_reactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Analysis.global_reactions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates and returns the global reaction forces.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.Analysis.log">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.solver.Analysis.log" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a message to the log file</p>
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/solver.html#Analysis.log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Analysis.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a message to the log file.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.Analysis.print">
-<span class="sig-name descname"><span class="pre">print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#osmg.solver.Analysis.print" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints a message to stdout</p>
+<span class="sig-name descname"><span class="pre">print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">thing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\n'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/solver.html#Analysis.print"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Analysis.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a message to stdout.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.Analysis.read_results_from_disk">
-<span class="sig-name descname"><span class="pre">read_results_from_disk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.Analysis.read_results_from_disk" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads back results from a pickle file</p>
+<span class="sig-name descname"><span class="pre">read_results_from_disk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#Analysis.read_results_from_disk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Analysis.read_results_from_disk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads back results from a pickle file.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.AnalysisSettings">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">AnalysisSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_forces:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_reactions:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_fiber:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_release_force_defo:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_nodes:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_results:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'UmfPack'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.AnalysisSettings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_forces:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_reactions:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_fiber:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_release_force_defo:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_nodes:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_results:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'UmfPack'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#AnalysisSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.AnalysisSettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analysis settings object.
 Controls what will be stored and how.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.ModalAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">ModalAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">num_modes:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModalAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">num_modes:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a modal analysis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalAnalysis.modal_participation_factors">
-<span class="sig-name descname"><span class="pre">modal_participation_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalAnalysis.modal_participation_factors" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">modal_participation_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalAnalysis.modal_participation_factors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalAnalysis.modal_participation_factors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates modal participation factors</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalAnalysis.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs the modal analysis.</p>
 </dd></dl>
 
@@ -411,121 +448,115 @@ Controls what will be stored and how.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.ModalResponseSpectrumAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">ModalResponseSpectrumAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_modes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modal_q0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vb_modal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.solver.Analysis.html#osmg.solver.Analysis" title="osmg.solver.Analysis"><span class="pre">Analysis</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis" title="Permalink to this definition">¶</a></dt>
-<dd><p>Modal response spectrum analysis</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModalResponseSpectrumAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mdl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.model.Model.html#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><span class="pre">LoadCase</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_modes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectrum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">modal_q0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vb_modal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.solver.Analysis.html#osmg.solver.Analysis" title="osmg.solver.Analysis"><span class="pre">Analysis</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalResponseSpectrumAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modal response spectrum analysis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalResponseSpectrumAnalysis.combined_basic_forces">
-<span class="sig-name descname"><span class="pre">combined_basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_uid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_basic_forces" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the SRSS-combined basic forces of a line element</p>
+<span class="sig-name descname"><span class="pre">combined_basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_uid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalResponseSpectrumAnalysis.combined_basic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_basic_forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the SRSS-combined basic forces of a line element.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp">
-<span class="sig-name descname"><span class="pre">combined_node_disp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_uid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the SRSS-combined node displacement of a node</p>
+<span class="sig-name descname"><span class="pre">combined_node_disp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_uid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalResponseSpectrumAnalysis.combined_node_disp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the SRSS-combined node displacement of a node.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp_diff">
-<span class="sig-name descname"><span class="pre">combined_node_disp_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_i_uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_j_uid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp_diff" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">combined_node_disp_diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_i_uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_j_uid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalResponseSpectrumAnalysis.combined_node_disp_diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.combined_node_disp_diff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the SRSS-combined displacement difference between two
-nodes</p>
+nodes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.ModalResponseSpectrumAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the modal response spectrum analysis</p>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#ModalResponseSpectrumAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.ModalResponseSpectrumAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the modal response spectrum analysis.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.NLTHAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">NLTHAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">time_vector:</span> <span class="pre">list[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">a_g:</span> <span class="pre">dict[int,</span> <span class="pre">numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[numpy.float64]]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NLTHAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NLTHAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">time_vector:</span> <span class="pre">list[float]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">a_g:</span> <span class="pre">dict[int,</span> <span class="pre">numpy.ndarray[typing.Any,</span> <span class="pre">numpy.dtype[numpy.float64]]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NLTHAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NLTHAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dynamic nonlinear time-history analysis</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NLTHAnalysis.plot_node_displacement_history">
-<span class="sig-name descname"><span class="pre">plot_node_displacement_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NLTHAnalysis.plot_node_displacement_history" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_node_displacement_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NLTHAnalysis.plot_node_displacement_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NLTHAnalysis.plot_node_displacement_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the displacement history of the specified node.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NLTHAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis_time_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">finish_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">damping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NoneType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'type':</span> <span class="pre">None}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#osmg.solver.NLTHAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis_time_increment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">finish_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">damping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NoneType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'type':</span> <span class="pre">None}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_progress</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/solver.html#NLTHAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NLTHAnalysis.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the nonlinear time-history analysis
-:param filename_x: Paths where the fixed-step ground acceleration</p>
+:Parameters: * <strong>filename_x, y, z</strong> – Paths where the fixed-step ground acceleration</p>
 <blockquote>
+<div><blockquote>
 <div><p>records are stored (single-column).</p>
 </div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>y</strong> – Paths where the fixed-step ground acceleration
-records are stored (single-column).</p></li>
-<li><p><strong>z</strong> – Paths where the fixed-step ground acceleration
-records are stored (single-column).</p></li>
+<ul>
 <li><p><strong>file_time_incr</strong> – The corresponding time increment</p></li>
 <li><p><strong>finish_time</strong> – Specify a target time (s) to stop the analysis
 the default value of 0.00 means that it will
 run for the entire duration of the files.</p></li>
-<li><p><strong>damping</strong> – <p>Can be any of:
+<li><p><strong>damping</strong> – Can be any of:
 {‘type’: None},
 {‘type’: ‘rayleigh’, ‘ratio’: r, ‘periods’: [t1, t2]},
 {‘type’: ‘stiffness’, ‘ratio’: r, ‘period’: t1}
 {‘type’: ‘modal’, ‘num_modes’: n, ‘ratio’: r}
 {‘type’: ‘modal+stiffness’, ‘num_modes’: n,</p>
 <blockquote>
-<div><p>’ratio_modal’: r, ‘period’: t1,
+<div><p>‘ratio_modal’: r, ‘period’: t1,
 ‘ratio_stiffness’: r}</p>
 </div></blockquote>
-</p></li>
+</li>
 <li><p><strong>print_progress</strong> – Controls whether the current time is printed out</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">NonlinearAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NonlinearAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Nonlinear analysis parent class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_node_abs_acceleration">
-<span class="sig-name descname"><span class="pre">retrieve_node_abs_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_abs_acceleration" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_node_abs_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_node_abs_acceleration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_abs_acceleration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the absolute acceleration of a node for all analysis
 steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_node_abs_velocity">
-<span class="sig-name descname"><span class="pre">retrieve_node_abs_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_abs_velocity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_node_abs_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_node_abs_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_abs_velocity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the absolute velocity of a node for all analysis steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_node_acceleration">
-<span class="sig-name descname"><span class="pre">retrieve_node_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_acceleration" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_node_acceleration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_node_acceleration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_acceleration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the acceleration of a node for all analysis steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_node_displacement">
-<span class="sig-name descname"><span class="pre">retrieve_node_displacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_displacement" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_node_displacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_node_displacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_displacement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the displacement of a node for all analysis steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_node_velocity">
-<span class="sig-name descname"><span class="pre">retrieve_node_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_velocity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_node_velocity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_node_velocity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_node_velocity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the velocity of a node for all analysis steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.NonlinearAnalysis.retrieve_release_force_defo">
-<span class="sig-name descname"><span class="pre">retrieve_release_force_defo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_release_force_defo" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">retrieve_release_force_defo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#NonlinearAnalysis.retrieve_release_force_defo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.NonlinearAnalysis.retrieve_release_force_defo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the force-deformation of a zerolength element for all
 analysis steps</p>
 </dd></dl>
@@ -534,44 +565,41 @@ analysis steps</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.PushoverAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">PushoverAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.PushoverAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PushoverAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#PushoverAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.PushoverAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pushover analysis</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.PushoverAnalysis.plot_pushover_curve">
-<span class="sig-name descname"><span class="pre">plot_pushover_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.PushoverAnalysis.plot_pushover_curve" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_pushover_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#PushoverAnalysis.plot_pushover_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.PushoverAnalysis.plot_pushover_curve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the pushover curve</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.PushoverAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_displacements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displ_incr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modeshape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaded_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.PushoverAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_displacements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_node</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displ_incr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modeshape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaded_node</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#PushoverAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.PushoverAnalysis.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run pushover analysis
-:param direction: can be any of ‘x’, ‘y’, ‘z’
-:param target_displacements: a list of target displacements.</p>
+:Parameters: * <strong>direction</strong> – can be any of ‘x’, ‘y’, ‘z’</p>
 <blockquote>
-<div><p>each time a target is reached, the analysis continues until
-the next target is reached, flipping the direction as necessary.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>control_node</strong> (<a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><em>Node</em></a>) – analysis control node (of which the
-direction is queried)</p></li>
-<li><p><strong>displ_incr</strong> (<em>float</em>) – initial displacement increment.</p></li>
-<li><p><strong>shape</strong> (<em>mode</em>) – array containing a mode shape that is
-used to distribute the applied incremental loads. If no
-mode shape is specified, the distribution is uniform.</p></li>
-<li><p><strong>loaded_node</strong> (<a class="reference internal" href="osmg.ops.node.Node.html#osmg.ops.node.Node" title="osmg.ops.node.Node"><em>Node</em></a>) – if a loaded node is specified, all
-incremental load is applied entirely on that node.
-Otherwise, the incremental loads are distributed to all nodes.</p></li>
+<div><ul class="simple">
+<li><p><strong>target_displacements</strong> – a list of target displacements.  each
+time a target is reached, the analysis continues until the
+next target is reached, flipping the direction as
+necessary.</p></li>
+<li><p><strong>control_node</strong> – analysis control node (of which the direction
+is queried)</p></li>
+<li><p><strong>displ_incr</strong> – initial displacement increment.</p></li>
+<li><p><strong>mode shape</strong> – array containing a mode shape that is used to
+distribute the applied incremental loads. If no mode shape
+is specified, the distribution is uniform.</p></li>
+<li><p><strong>loaded_node</strong> – if a loaded node is specified, all incremental
+load is applied entirely on that node.  Otherwise, the
+incremental loads are distributed to all nodes.</p></li>
 </ul>
-</dd>
-</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.PushoverAnalysis.table_pushover_curve">
-<span class="sig-name descname"><span class="pre">table_pushover_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.PushoverAnalysis.table_pushover_curve" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">table_pushover_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#PushoverAnalysis.table_pushover_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.PushoverAnalysis.table_pushover_curve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the force deformation results</p>
 </dd></dl>
 
@@ -579,18 +607,118 @@ Otherwise, the incremental loads are distributed to all nodes.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.Results">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">Results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps_success</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.Results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Results object. Stores analysis results.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">periods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps_success</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#Results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores analysis results.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.node_displacements">
+<span class="sig-name descname"><span class="pre">node_displacements</span></span><a class="headerlink" href="#osmg.solver.Results.node_displacements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displacements, stored in a dictionary. The
+keys correspond to the node UIDs. Each value is a dictionary,
+of which the keys are the analysis step. Each value of that is
+list containing the displacement of each DOF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.node_velocities">
+<span class="sig-name descname"><span class="pre">node_velocities</span></span><a class="headerlink" href="#osmg.solver.Results.node_velocities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to node_displacements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.node_accelerations">
+<span class="sig-name descname"><span class="pre">node_accelerations</span></span><a class="headerlink" href="#osmg.solver.Results.node_accelerations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to node_displacements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.node_reactions">
+<span class="sig-name descname"><span class="pre">node_reactions</span></span><a class="headerlink" href="#osmg.solver.Results.node_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to node displacements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a>]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.element_forces">
+<span class="sig-name descname"><span class="pre">element_forces</span></span><a class="headerlink" href="#osmg.solver.Results.element_forces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic forces of beamcolumn elements. The nested
+structure is similar to that of node_displacements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection">osmg.collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)">numpy.ndarray</a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)">numpy.dtype</a>[numpy.float64]]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.release_foce_defo">
+<span class="sig-name descname"><span class="pre">release_foce_defo</span></span><a class="headerlink" href="#osmg.solver.Results.release_foce_defo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force-deformation pairs of zerolength
+elements. The nested structure is similar to that of
+node_displacements.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.periods">
+<span class="sig-name descname"><span class="pre">periods</span></span><a class="headerlink" href="#osmg.solver.Results.periods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional, stores the periods for modal analyses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)">numpy.ndarray</a>[Any, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)">numpy.dtype</a>[numpy.float64]] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.n_steps_success">
+<span class="sig-name descname"><span class="pre">n_steps_success</span></span><a class="headerlink" href="#osmg.solver.Results.n_steps_success" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of steps of the analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Results.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#osmg.solver.Results.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional metadata that depend on the type of analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a>] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.StaticAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">StaticAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.StaticAnalysis" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StaticAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">mdl:</span> <span class="pre">~osmg.model.Model,</span> <span class="pre">load_cases:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.load_case.LoadCase],</span> <span class="pre">output_directory:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">settings:</span> <span class="pre">~osmg.solver.AnalysisSettings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">results:</span> <span class="pre">dict[str,</span> <span class="pre">osmg.solver.Results]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">logger:</span> <span class="pre">object</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#StaticAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.StaticAnalysis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Static analysis.  Stores all results (for each load case) in one
 single step.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.solver.StaticAnalysis.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.StaticAnalysis.run" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#StaticAnalysis.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.StaticAnalysis.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs the static analysis.</p>
 </dd></dl>
 
@@ -598,14 +726,14 @@ single step.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.solver.define_lateral_load_pattern">
-<span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">define_lateral_load_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.define_lateral_load_pattern" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">define_lateral_load_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#define_lateral_load_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.define_lateral_load_pattern" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the load pattern for a time-history analysis from
 previously parsed files with a constant dt</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.solver.plot_ground_motion">
-<span class="sig-prename descclassname"><span class="pre">osmg.solver.</span></span><span class="sig-name descname"><span class="pre">plot_ground_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#osmg.solver.plot_ground_motion" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot_ground_motion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmunit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#plot_ground_motion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.plot_ground_motion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots a ground motion input file.</p>
 </dd></dl>
 

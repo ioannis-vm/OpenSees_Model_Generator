@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>osmg &mdash; osmg 0.0.21 documentation</title>
+  <title>osmg &mdash; osmg 0.1.0 documentation</title>
   
 
   
@@ -35,6 +35,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -42,7 +43,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="osmg.collections" href="osmg.collections.html" />
-    <link rel="prev" title="Getting Started" href="../getting_started.html" /> 
+    <link rel="prev" title="Running an analysis" href="../notebooks/3_Run_an_Analysis.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -164,8 +165,6 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="../_sources/_autosummary/osmg.rst.txt" rel="nofollow"> View page source</a>
-          
         
       </li>
     
@@ -177,61 +176,85 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <section id="module-osmg">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="module-osmg">
 <span id="osmg"></span><h1>osmg<a class="headerlink" href="#module-osmg" title="Permalink to this heading">¶</a></h1>
 <p class="rubric">Modules</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.collections.html#module-osmg.collections" title="osmg.collections"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.collections</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ collections Collections are designated containers of objects of a particular type.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.collections.html#module-osmg.collections" title="osmg.collections"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.collections</span></code></a></p></td>
+<td><p>Collections are designated containers of objects of a particular type.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.common.html#module-osmg.common" title="osmg.common"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.common</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.common.html#module-osmg.common" title="osmg.common"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.common</span></code></a></p></td>
 <td><p>Common definitions</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.component_assembly.html#module-osmg.component_assembly" title="osmg.component_assembly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.component_assembly</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ component assembly</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.component_assembly.html#module-osmg.component_assembly" title="osmg.component_assembly"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.component_assembly</span></code></a></p></td>
+<td><p>Collection of objects which, as a group, represent some part of a structure.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.defaults.html#module-osmg.defaults" title="osmg.defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.defaults</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ defaults</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.defaults.html#module-osmg.defaults" title="osmg.defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.defaults</span></code></a></p></td>
+<td><p>Introduces some default objects to a model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.gen.html#module-osmg.gen" title="osmg.gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.gen</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.gen.html#module-osmg.gen" title="osmg.gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.gen</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.graphics.html#module-osmg.graphics" title="osmg.graphics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.graphics</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.graphics.html#module-osmg.graphics" title="osmg.graphics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.graphics</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.level.html#module-osmg.level" title="osmg.level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.level</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.level.html#module-osmg.level" title="osmg.level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.level</span></code></a></p></td>
 <td><p>Model Generator for OpenSees ~ level</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.line.html#module-osmg.line" title="osmg.line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.line</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ line</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.line.html#module-osmg.line" title="osmg.line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.line</span></code></a></p></td>
+<td><p>Defines <a class="reference internal" href="osmg.line.Line.html#osmg.line.Line" title="osmg.line.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a> objects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.load_case.html#module-osmg.load_case" title="osmg.load_case"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.load_case</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ load case</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.load_case.html#module-osmg.load_case" title="osmg.load_case"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.load_case</span></code></a></p></td>
+<td><p>Defines <a class="reference internal" href="osmg.load_case.LoadCase.html#osmg.load_case.LoadCase" title="osmg.load_case.LoadCase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoadCase</span></code></a> objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.mesh.html#module-osmg.mesh" title="osmg.mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.mesh</span></code></a></p></td>
-<td><p>Enables functionality by utilizing the <cite>halfedge</cite> data structure.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.mesh.html#module-osmg.mesh" title="osmg.mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.mesh</span></code></a></p></td>
+<td><p>Defines objects used in mesing operations.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.model.html#module-osmg.model" title="osmg.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.model</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ model</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.model.html#module-osmg.model" title="osmg.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.model</span></code></a></p></td>
+<td><p>Defines Model objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.ops.html#module-osmg.ops" title="osmg.ops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.ops.html#module-osmg.ops" title="osmg.ops"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.ops</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.physical_material.html#module-osmg.physical_material" title="osmg.physical_material"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.physical_material</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ physical material</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.physical_material.html#module-osmg.physical_material" title="osmg.physical_material"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.physical_material</span></code></a></p></td>
+<td><p>Defines PhysicalMaterial objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.postprocessing.html#module-osmg.postprocessing" title="osmg.postprocessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.postprocessing</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.postprocessing.html#module-osmg.postprocessing" title="osmg.postprocessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.postprocessing</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.preprocessing.html#module-osmg.preprocessing" title="osmg.preprocessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.preprocessing</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.preprocessing.html#module-osmg.preprocessing" title="osmg.preprocessing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.preprocessing</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../generated/osmg.solver.html#module-osmg.solver" title="osmg.solver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.solver</span></code></a></p></td>
-<td><p>Model Generator for OpenSees ~ solver</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="osmg.solver.html#module-osmg.solver" title="osmg.solver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.solver</span></code></a></p></td>
+<td><p>Defines Analysis objects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../generated/osmg.transformations.html#module-osmg.transformations" title="osmg.transformations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.transformations</span></code></a></p></td>
-<td><p>Performs coordinate transformations</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="osmg.transformations.html#module-osmg.transformations" title="osmg.transformations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">osmg.transformations</span></code></a></p></td>
+<td><p>Coordinate transformation operations.</p></td>
 </tr>
 </tbody>
 </table>
@@ -244,7 +267,7 @@
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="osmg.collections.html" class="btn btn-neutral float-right" title="osmg.collections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../notebooks/3_Run_an_Analysis.html" class="btn btn-neutral float-left" title="Running an analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

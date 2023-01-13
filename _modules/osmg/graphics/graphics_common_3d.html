@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.graphics.graphics_common_3d &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.graphics.graphics_common_3d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.graphics.graphics_common_3d</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Common utility functions used for 3D data visualization</span>
+<span class="sd">https://plotly.com/python/reference/</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># pio.renderers.default = &#39;browser&#39;</span>
+
+<span class="c1"># # used for production plots</span>
+<span class="c1"># node_marker = {</span>
+<span class="c1">#     &#39;fixed&#39;: (&quot;square&quot;, 8),</span>
+<span class="c1">#     &#39;pinned&#39;: (&quot;circle-open&quot;, 2),</span>
+<span class="c1">#     &#39;free&#39;: (&quot;circle&quot;, 3),</span>
+<span class="c1">#     &#39;parent&#39;: (&quot;circle-open&quot;, 15),</span>
+<span class="c1">#     &#39;internal&#39;: (&quot;x&quot;, 2),</span>
+<span class="c1">#     &#39;111011&#39;: (&quot;circle-open&quot;, 3),</span>
+<span class="c1"># }</span>
+
+<span class="c1"># used for development plots</span>
+<span class="n">node_marker</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;fixed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;free&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;internal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="global_layout"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.graphics_common_3d.html#osmg.graphics.graphics_common_3d.global_layout">[docs]</a><span class="k">def</span> <span class="nf">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Some general definitions that are often needed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get a proper boudning box form the model</span>
+    <span class="n">ref_len</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reference_length</span><span class="p">()</span>
+    <span class="n">p_min</span><span class="p">,</span> <span class="n">p_max</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">(</span><span class="n">padding</span><span class="o">=</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">ref_len</span><span class="p">)</span>
+
+    <span class="c1"># view_type = &quot;orthographic&quot;</span>
+    <span class="n">view_type</span> <span class="o">=</span> <span class="s2">&quot;perspective&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">camera</span><span class="p">:</span>
+        <span class="n">camera</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">up</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">center</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">eye</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+            <span class="n">projection</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">view_type</span><span class="p">},</span>
+        <span class="p">)</span>
+    <span class="n">ref_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_max</span> <span class="o">-</span> <span class="n">p_min</span><span class="p">)</span>  <span class="c1"># used in aspect ratio calcs</span>
+    <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
+        <span class="n">scene</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xaxis_visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">yaxis_visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">zaxis_visible</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">bgcolor</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+            <span class="n">camera</span><span class="o">=</span><span class="n">camera</span><span class="p">,</span>
+            <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">p_min</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p_max</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">autorange</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">p_min</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">p_max</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">autorange</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">zaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="n">p_min</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p_max</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">autorange</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="c1"># it&#39;s interesting that we have to do this to get the</span>
+            <span class="c1"># axes aspect ratio right.. but hey! it works</span>
+            <span class="n">aspectratio</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">p_max</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_min</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">ref_len</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">),</span>
+                <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="n">p_max</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_min</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">ref_len</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">),</span>
+                <span class="n">z</span><span class="o">=</span><span class="p">(</span><span class="n">p_max</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_min</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span><span class="n">ref_len</span> <span class="o">/</span> <span class="mf">4.0</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="c1"># note:</span>
+            <span class="c1"># aspectmode=&#39;data&#39;: was causing issues with</span>
+            <span class="c1"># the camera &#39;moving&#39; across different animation frames</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

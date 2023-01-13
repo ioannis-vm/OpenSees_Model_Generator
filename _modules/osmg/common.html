@@ -1,0 +1,316 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.common &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.common</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.common</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Common definitions</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="c1"># very big, very small numbers used for</span>
+<span class="c1"># comparing floats and hashing</span>
+<span class="n">EPSILON</span> <span class="o">=</span> <span class="mf">1.00e-6</span>
+<span class="n">ALPHA</span> <span class="o">=</span> <span class="mf">10000000.00</span>
+
+<span class="c1"># gravitational acceleration</span>
+<span class="n">G_CONST_IMPERIAL</span> <span class="o">=</span> <span class="mf">386.22</span>  <span class="c1"># in/s**2</span>
+<span class="n">G_CONST_SI</span> <span class="o">=</span> <span class="mf">9.81</span>  <span class="c1"># m/s**2</span>
+
+<span class="c1"># quantities to use for extreme stiffnesses</span>
+<span class="n">STIFF_ROT</span> <span class="o">=</span> <span class="mf">1.0e15</span>
+<span class="n">STIFF</span> <span class="o">=</span> <span class="mf">1.0e15</span>  <span class="c1"># note: too high a value causes convergence problems</span>
+<span class="n">TINY</span> <span class="o">=</span> <span class="mf">1.0e-12</span>
+
+
+<div class="viewcode-block" id="methods"><a class="viewcode-back" href="../../_autosummary/osmg.common.html#osmg.common.methods">[docs]</a><span class="k">def</span> <span class="nf">methods</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the names of all methods of an object,</span>
+<span class="sd">    excluding the dunder methods.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; class TestClass:</span>
+<span class="sd">        ...     def method_1(self):</span>
+<span class="sd">        ...         pass</span>
+<span class="sd">        ...</span>
+<span class="sd">        ...     def method_2(self):</span>
+<span class="sd">        ...         pass</span>
+<span class="sd">        ...</span>
+<span class="sd">        &gt;&gt;&gt; obj = TestClass()</span>
+<span class="sd">        &gt;&gt;&gt; methods(obj)</span>
+<span class="sd">        [&#39;method_1&#39;, &#39;method_2&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">object_methods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">method_name</span>
+        <span class="k">for</span> <span class="n">method_name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">method_name</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;__.*__&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">object_methods</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">s</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="print_methods"><a class="viewcode-back" href="../../_autosummary/osmg.common.html#osmg.common.print_methods">[docs]</a><span class="k">def</span> <span class="nf">print_methods</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints the methods of an object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">object_methods</span> <span class="o">=</span> <span class="n">methods</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">pprint</span><span class="p">(</span><span class="n">object_methods</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="print_dir"><a class="viewcode-back" href="../../_autosummary/osmg.common.html#osmg.common.print_dir">[docs]</a><span class="k">def</span> <span class="nf">print_dir</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints the entire output of `dir()` of an object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pprint</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="previous_element"><a class="viewcode-back" href="../../_autosummary/osmg.common.html#osmg.common.previous_element">[docs]</a><span class="k">def</span> <span class="nf">previous_element</span><span class="p">(</span><span class="n">dct</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the value of the element that comes before the given key</span>
+<span class="sd">    in an ordered dictionary.</span>
+<span class="sd">    If the key is not in the dictionary, or if it is the first element</span>
+<span class="sd">    in the dictionary, returns None.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        dct: An ordered dictionary.</span>
+<span class="sd">        key: The key of the element whose previous element we want to</span>
+<span class="sd">        find.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The value of the element that comes before the given key in</span>
+<span class="sd">        the dictionary, or None if there is no such element.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; dct = OrderedDict([(1, &#39;a&#39;), (2, &#39;b&#39;), (3, &#39;c&#39;)])</span>
+<span class="sd">        &gt;&gt;&gt; previous_element(dct, 2)  # Returns &#39;a&#39;</span>
+<span class="sd">        &#39;a&#39;</span>
+<span class="sd">        &gt;&gt;&gt; previous_element(dct, 3)  # Returns &#39;b&#39;</span>
+<span class="sd">        &#39;b&#39;</span>
+<span class="sd">        &gt;&gt;&gt; previous_element(dct, 1)  # Returns None</span>
+
+<span class="sd">        &gt;&gt;&gt; previous_element(dct, 4)  # Returns None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+        <span class="n">key_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dct</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">key_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="n">dct</span><span class="p">[</span><span class="n">key_list</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ans</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

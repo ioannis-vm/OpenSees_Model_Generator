@@ -1,0 +1,1297 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>osmg.mesh &mdash; osmg 0.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> osmg
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">osmg</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>osmg.mesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for osmg.mesh</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines objects used in mesing operations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#   _|_|      _|_|_|  _|      _|    _|_|_|</span>
+<span class="c1"># _|    _|  _|        _|_|  _|_|  _|</span>
+<span class="c1"># _|    _|    _|_|    _|  _|  _|  _|  _|_|</span>
+<span class="c1"># _|    _|        _|  _|      _|  _|    _|</span>
+<span class="c1">#   _|_|    _|_|_|    _|      _|    _|_|_|</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">count</span>
+<span class="kn">from</span> <span class="nn">descartes.patch</span> <span class="kn">import</span> <span class="n">PolygonPatch</span>  <span class="c1"># type: ignore</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span> <span class="k">as</span> <span class="n">shapely_Polygon</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">common</span>
+
+<span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Vertex.html#osmg.mesh.Vertex">[docs]</a><span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2D Vertex.</span>
+<span class="sd">    It knows all the edges connected to it.</span>
+<span class="sd">    It knows all the halfedges leaving from it.</span>
+<span class="sd">    Each instance has an automatically generated unique id.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        coords: Coordinates of the vertex.</span>
+<span class="sd">        edges: List of edges connected to the vertex.</span>
+<span class="sd">        halfedges: List of halfedges leaving from the vertex.</span>
+<span class="sd">        uid: Unique identifier of the vertex.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex</span>
+<span class="sd">        &gt;&gt;&gt; v = Vertex((0.0, 0.0))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Vertex.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Vertex.html#osmg.mesh.Vertex.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a new instance of the `Vertex` class.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            coords: Coordinates of the vertex.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Edge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check for equality based on the uid of the vertex.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            other: Other vertex to compare with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: `True` if the two vertices are equal, `False`</span>
+<span class="sd">                  otherwise.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex</span>
+<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
+<span class="sd">        &gt;&gt;&gt; v2 = Vertex((1, 1))</span>
+<span class="sd">        &gt;&gt;&gt; v3 = Vertex((0, 0))</span>
+<span class="sd">        &gt;&gt;&gt; v1 == v2</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; v1 == v3</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; v1 == v1</span>
+<span class="sd">        True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">uid</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a string representation of the vertex.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: String representation of the vertex.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> @ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">) &quot;</span></div>
+
+
+<div class="viewcode-block" id="Edge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge">[docs]</a><span class="k">class</span> <span class="nc">Edge</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    2D oriented Edge.</span>
+<span class="sd">    Connected to two vertices `v_i` and `v_j`.</span>
+<span class="sd">    Has two halfedges, `h_i` and `h_j`.</span>
+<span class="sd">    Each instance has an automatically generated unique id.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Edge.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_i</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">v_j</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a new edge with the given vertices.</span>
+<span class="sd">        If the vertices don&#39;t already have an edge connecting them,</span>
+<span class="sd">        this edge is added to their list of edges.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span> <span class="o">=</span> <span class="n">v_i</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span> <span class="o">=</span> <span class="n">v_j</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h_j</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a string representation of this edge, in the form</span>
+<span class="sd">        `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(E</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> @ V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">, V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">) &quot;</span>
+
+<div class="viewcode-block" id="Edge.define_halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.define_halfedge">[docs]</a>    <span class="k">def</span> <span class="nf">define_halfedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Halfedge</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For the current edge instance and given one of its vertices,</span>
+<span class="sd">        we want the halfedge that points to the direction</span>
+<span class="sd">        away from the given vertex.</span>
+<span class="sd">        We create it if it does not exist.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">vertex</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_i</span><span class="p">:</span>
+                <span class="n">halfedge</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h_i</span> <span class="o">=</span> <span class="n">halfedge</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Halfedge h_i already defined&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">vertex</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_j</span><span class="p">:</span>
+                <span class="n">halfedge</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h_j</span> <span class="o">=</span> <span class="n">halfedge</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Halfedge h_j already defined&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The edge is not connected to the given vertex.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">halfedge</span></div>
+
+<div class="viewcode-block" id="Edge.other_vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.other_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">other_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the vertex of this edge that is not the given vertex.</span>
+<span class="sd">        If the given vertex is not connected to this edge, a ValueError</span>
+<span class="sd">        is raised.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex</span>
+<span class="sd">            &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
+<span class="sd">            &gt;&gt;&gt; v2 = Vertex((1, 0))</span>
+<span class="sd">            &gt;&gt;&gt; v3 = Vertex((2, 0))</span>
+<span class="sd">            &gt;&gt;&gt; e = Edge(v2, v3)</span>
+<span class="sd">            &gt;&gt;&gt; e.other_vertex(v2).coords</span>
+<span class="sd">            (2, 0)</span>
+<span class="sd">            &gt;&gt;&gt; e.other_vertex(v3).coords</span>
+<span class="sd">            (1, 0)</span>
+<span class="sd">            &gt;&gt;&gt; e.other_vertex(v1)</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">                ...</span>
+<span class="sd">            ValueError: The edge is not connected to the given vertex</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span> <span class="o">==</span> <span class="n">vertex</span><span class="p">:</span>
+            <span class="n">v_other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span> <span class="o">==</span> <span class="n">vertex</span><span class="p">:</span>
+            <span class="n">v_other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The edge is not connected to the given vertex&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">v_other</span></div>
+
+<div class="viewcode-block" id="Edge.overlaps_or_crosses"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.overlaps_or_crosses">[docs]</a>    <span class="k">def</span> <span class="nf">overlaps_or_crosses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Edge</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns True if this edge overlaps or crosses another edge.</span>
+<span class="sd">        Edges are allowed to share one vertex (returns False), but not</span>
+<span class="sd">        both (returns True).</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            other : Edge</span>
+<span class="sd">                The other edge to check for overlap or cross with this</span>
+<span class="sd">                edge.</span>
+
+<span class="sd">        Returns: bool</span>
+<span class="sd">            True if this edge overlaps or crosses the other edge,</span>
+<span class="sd">            False otherwise.</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex, Edge</span>
+<span class="sd">            &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
+<span class="sd">            &gt;&gt;&gt; v2 = Vertex((0, 1))</span>
+<span class="sd">            &gt;&gt;&gt; v3 = Vertex((1, 1))</span>
+<span class="sd">            &gt;&gt;&gt; v4 = Vertex((1, 0))</span>
+<span class="sd">            &gt;&gt;&gt; e1 = Edge(v1, v2)</span>
+<span class="sd">            &gt;&gt;&gt; e2 = Edge(v3, v4)</span>
+<span class="sd">            &gt;&gt;&gt; e1.overlaps_or_crosses(e2)</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; e2.overlaps_or_crosses(e1)</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; e3 = Edge(v1, v3)</span>
+<span class="sd">            &gt;&gt;&gt; e4 = Edge(v2, v4)</span>
+<span class="sd">            &gt;&gt;&gt; e3.overlaps_or_crosses(e4)</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; e4.overlaps_or_crosses(e3)</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; e5 = Edge(v1, v4)</span>
+<span class="sd">            &gt;&gt;&gt; e6 = Edge(v2, v3)</span>
+<span class="sd">            &gt;&gt;&gt; e5.overlaps_or_crosses(e6)</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; e6.overlaps_or_crosses(e5)</span>
+<span class="sd">            False</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># location of this edge</span>
+        <span class="n">vec_ra</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># direction of this edge</span>
+        <span class="n">vec_da</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># location of other edge</span>
+        <span class="n">vec_rb</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># direction of other edge</span>
+        <span class="n">vec_db</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="c1"># verify that the edges have nonzero length</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vec_da</span> <span class="o">@</span> <span class="n">vec_da</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">vec_db</span> <span class="o">@</span> <span class="n">vec_db</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
+
+        <span class="n">mat_a</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">vec_da</span><span class="p">,</span> <span class="o">-</span><span class="n">vec_db</span><span class="p">))</span>
+        <span class="n">mat_b</span> <span class="o">=</span> <span class="n">vec_rb</span> <span class="o">-</span> <span class="n">vec_ra</span>
+        <span class="n">determinant</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">mat_a</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">determinant</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">):</span>
+
+            <span class="c1"># there are infinite solutions</span>
+            <span class="c1"># or there are no solutions</span>
+            <span class="c1"># i.e., the edges are parallel.</span>
+            <span class="c1"># If they are parallel but nor colinear, then they don&#39;t</span>
+            <span class="c1"># overlap and the method should return False</span>
+            <span class="c1"># If they are colinear, then they might overlap. If they</span>
+            <span class="c1"># do, the method should return True, otherwise False.</span>
+
+            <span class="c1"># first check if they are parallel but not colinear</span>
+            <span class="c1"># project start of other vertex onto line of this vertex</span>
+            <span class="n">vec_rb_diff</span> <span class="o">=</span> <span class="n">vec_rb</span> <span class="o">-</span> <span class="n">vec_ra</span>
+            <span class="n">vec_proj_pt</span> <span class="o">=</span> <span class="p">(</span><span class="n">vec_rb_diff</span> <span class="o">@</span> <span class="n">vec_da</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="n">vec_da</span> <span class="o">@</span> <span class="n">vec_da</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">vec_da</span> <span class="o">+</span> <span class="n">vec_ra</span>
+            <span class="n">vec_dist</span> <span class="o">=</span> <span class="n">vec_rb</span> <span class="o">-</span> <span class="n">vec_proj_pt</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vec_dist</span> <span class="o">@</span> <span class="n">vec_dist</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">):</span>
+                <span class="c1"># The edges are parallel but not collinear, so they</span>
+                <span class="c1"># can&#39;t be intersecting.</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="c1"># If the previous statement was not true, we will arrive</span>
+            <span class="c1"># here. The edges are colinear. Depending on their</span>
+            <span class="c1"># relative position on their common line, they might share</span>
+            <span class="c1"># no common points, one common point, or an entire</span>
+            <span class="c1"># segment.</span>
+            <span class="c1"># To solve this, we define ta to be a scalar that</span>
+            <span class="c1"># determines a point on vertex i by evaluating: vec_ra +</span>
+            <span class="c1"># ta * vec_da.</span>
+            <span class="c1"># ta = 0 ==&gt; on vertex_i, ta = 1 ==&gt; on vertex j, of this</span>
+            <span class="c1"># edge.</span>
+            <span class="c1"># Similarly, there exists a tb that can be used to</span>
+            <span class="c1"># identify a point on vertex j</span>
+            <span class="c1"># But insdtead, we determine the location of vertex i and</span>
+            <span class="c1"># j of the other edge in terms of ta. That is:</span>
+            <span class="c1"># ta = c_i ==&gt; vertex i of other edge, ta = c_j ==&gt; vertex</span>
+            <span class="c1"># j of other edge.</span>
+            <span class="c1"># We can then determine which of the three cases we are</span>
+            <span class="c1"># in, based on the values of c_i and c_j.</span>
+            <span class="n">c_i</span> <span class="o">=</span> <span class="p">(</span><span class="n">vec_da</span> <span class="o">@</span> <span class="p">(</span><span class="n">vec_rb</span> <span class="o">-</span> <span class="n">vec_ra</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">vec_da</span> <span class="o">@</span> <span class="n">vec_da</span><span class="p">)</span>
+            <span class="n">c_j</span> <span class="o">=</span> <span class="p">(</span><span class="n">vec_da</span> <span class="o">@</span> <span class="p">((</span><span class="n">vec_rb</span> <span class="o">+</span> <span class="n">vec_db</span><span class="p">)</span> <span class="o">-</span> <span class="n">vec_ra</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">vec_da</span> <span class="o">@</span> <span class="n">vec_da</span><span class="p">)</span>
+            <span class="c1"># either they should be both &lt; 0 (which means that the</span>
+            <span class="c1"># other edge is &quot;before&quot; this edge), or they should be</span>
+            <span class="c1"># both &gt; 1.00 (which means that the other edge is &quot;after&quot;</span>
+            <span class="c1"># this edge). Any other case corresponds to an overlap.</span>
+
+            <span class="c1"># each of c_i, c_j can either be {&lt;0.00, ==0, 00&lt;1.00, ==1, &gt;1.0}</span>
+            <span class="c1"># in each case the answer will depend on what the other one is.</span>
+            <span class="c1"># note: we need to account for floating-point precision</span>
+            <span class="c1"># when making comparisons.</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">c_i</span> <span class="o">&lt;</span> <span class="mf">0.00</span> <span class="o">-</span> <span class="n">epsilon</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">c_j</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">&gt;</span> <span class="mf">1.00</span> <span class="o">+</span> <span class="n">epsilon</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">c_j</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">c_i</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c_j</span> <span class="o">&gt;</span> <span class="mf">1.00</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">c_i</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c_j</span> <span class="o">&lt;</span> <span class="mf">0.00</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1"># they share one vertex without overlap</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">c_i</span> <span class="o">&lt;</span> <span class="mf">0.00</span> <span class="o">-</span> <span class="n">epsilon</span> <span class="ow">and</span> <span class="n">c_j</span> <span class="o">&lt;</span> <span class="mf">0.00</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">c_i</span> <span class="o">&gt;</span> <span class="mf">1.00</span> <span class="o">+</span> <span class="n">epsilon</span> <span class="ow">and</span> <span class="n">c_j</span> <span class="o">&gt;</span> <span class="mf">1.00</span> <span class="o">+</span> <span class="n">epsilon</span>
+            <span class="p">):</span>
+                <span class="c1"># definitely no overlap</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="c1"># in any other case, they overlap</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Otherwise they are not parallel.</span>
+        <span class="c1"># there is at least one solution</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">mat_a</span><span class="p">,</span> <span class="n">mat_b</span><span class="p">)</span>
+        <span class="c1"># if both constants are between 0 and 1</span>
+        <span class="c1"># the edges overlap within their length</span>
+        <span class="c1"># otherwise, their extensions overlap, which</span>
+        <span class="c1"># is not an issue.</span>
+        <span class="k">if</span> <span class="mf">0.00</span> <span class="o">&lt;</span> <span class="n">sol</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.00</span> <span class="ow">and</span> <span class="mf">0.00</span> <span class="o">&lt;</span> <span class="n">sol</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.00</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div></div>
+
+
+<div class="viewcode-block" id="Halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge">[docs]</a><span class="k">class</span> <span class="nc">Halfedge</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Halfedge object.</span>
+<span class="sd">    Every edge has two halfedges.</span>
+<span class="sd">    A halfedge has a direction, pointing from one</span>
+<span class="sd">    of the corresponding edge&#39;s vertices to the other.</span>
+<span class="sd">    The `vertex` attribute corresponds to the</span>
+<span class="sd">    edge&#39;s vertex that the halfedge originates from.</span>
+<span class="sd">    Halfedges have a `next` attribute that</span>
+<span class="sd">    points to the next halfedge, forming closed</span>
+<span class="sd">    loops, or sequences, which is the purpose of this module.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
+<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
+<span class="sd">        &gt;&gt;&gt; v2 = Vertex((2, 2))</span>
+<span class="sd">        &gt;&gt;&gt; edge = Edge(v1, v2)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge1 = Halfedge(v1, edge)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge2 = Halfedge(v2, edge)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge1.nxt = halfedge2</span>
+<span class="sd">        &gt;&gt;&gt; halfedge2.nxt = halfedge1</span>
+<span class="sd">        &gt;&gt;&gt; print(halfedge1)</span>
+<span class="sd">        (H0 from E7 to E7 next H1)</span>
+<span class="sd">        &gt;&gt;&gt; print(halfedge2)</span>
+<span class="sd">        (H1 from E7 to E7 next H0)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Halfedge.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">edge</span><span class="p">:</span> <span class="n">Edge</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the halfedge object.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            vertex: The vertex that the halfedge originates from.</span>
+<span class="sd">            edge: The edge that the halfedge is a part of.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="n">vertex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edge</span> <span class="o">=</span> <span class="n">edge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a string representation of the halfedge, in the form</span>
+<span class="sd">        `(H0 from E0 to E0 next H1)`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nxt</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;(H</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> from E</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; to E</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> next H</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(H</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Comparison function used for sorting. Compares the halfedge ids.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uid</span>
+
+<div class="viewcode-block" id="Halfedge.direction"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge.direction">[docs]</a>    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the angular direction of the halfedge</span>
+<span class="sd">        using the arctan2 function (in radians).</span>
+
+<span class="sd">        Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
+<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0.0, 0.0))</span>
+<span class="sd">        &gt;&gt;&gt; v2 = Vertex((2.0, 2.0))</span>
+<span class="sd">        &gt;&gt;&gt; edge = Edge(v1, v2)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge1 = Halfedge(v1, edge)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge2 = Halfedge(v2, edge)</span>
+<span class="sd">        &gt;&gt;&gt; halfedge1.direction()</span>
+<span class="sd">        0.7853981633974483</span>
+<span class="sd">        &gt;&gt;&gt; halfedge2.direction()</span>
+<span class="sd">        -2.356194490192345</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">drct</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">other_vertex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="p">)</span><span class="o">.</span><span class="n">coords</span>
+        <span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">drct</span><span class="p">)</span>
+        <span class="n">drct</span> <span class="o">/=</span> <span class="n">norm</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">drct</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">drct</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A container that holds a list of unique halfedges.</span>
+<span class="sd">    Vertices and edges can be retrieved from those.</span>
+<span class="sd">    The mesh is assumed to be flat (2D).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Mesh.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfedges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span> <span class="o">=</span> <span class="n">halfedges</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Mesh object containing </span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2"> halfedges.&quot;</span>
+
+<div class="viewcode-block" id="Mesh.geometric_properties"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.geometric_properties">[docs]</a>    <span class="k">def</span> <span class="nf">geometric_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the geometric properties of the shape defined by</span>
+<span class="sd">        the mesh</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">geometric_properties</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mesh.bounding_box"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a bounding box of the mesh</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">])</span>
+        <span class="n">xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">],</span> <span class="p">[</span><span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">]])</span></div></div>
+
+
+<span class="c1">############################################</span>
+<span class="c1"># Geometric Properties of Polygonal Shapes #</span>
+<span class="c1">############################################</span>
+
+
+<div class="viewcode-block" id="polygon_area"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_area">[docs]</a><span class="k">def</span> <span class="nf">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the area of a polygon.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        coords: A matrix whose columns represent</span>
+<span class="sd">                the coordinates and the rows</span>
+<span class="sd">                represent the points of the polygon.</span>
+<span class="sd">                The first point should not be repeated</span>
+<span class="sd">                at the end, as this is done</span>
+<span class="sd">                automatically.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        area: The area of the polygon.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])</span>
+<span class="sd">        &gt;&gt;&gt; polygon_area(coords)</span>
+<span class="sd">        1.0</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_coords</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="mf">2.00</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="polygon_centroid"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_centroid">[docs]</a><span class="k">def</span> <span class="nf">polygon_centroid</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the centroid of a polygon.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        coords: A matrix whose columns represent</span>
+<span class="sd">                the coordinates and the rows</span>
+<span class="sd">                represent the points of the polygon.</span>
+<span class="sd">                The first point should not be repeated</span>
+<span class="sd">                at the end, as this is done</span>
+<span class="sd">                automatically.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        centroid: The centroid of the polygon.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])</span>
+<span class="sd">        &gt;&gt;&gt; polygon_centroid(coords)</span>
+<span class="sd">        array([0.5, 0.5])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">x_cent</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">x_coords</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_coords</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">*</span> <span class="n">area</span><span class="p">)</span>
+    <span class="n">y_cent</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">y_coords</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_coords</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">*</span> <span class="n">area</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">x_cent</span><span class="p">,</span> <span class="n">y_cent</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="polygon_inertia"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_inertia">[docs]</a><span class="k">def</span> <span class="nf">polygon_inertia</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the moments of inertia of a polygon.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        coords: A matrix whose columns represent</span>
+<span class="sd">                the coordinates and the rows</span>
+<span class="sd">                represent the points of the polygon.</span>
+<span class="sd">                The first point should not be repeated</span>
+<span class="sd">                at the end, as this is done</span>
+<span class="sd">                automatically.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dictionary, containing:</span>
+<span class="sd">        &#39;ixx&#39;: (float) - Moment of inertia around</span>
+<span class="sd">                         the x axis</span>
+<span class="sd">        &#39;iyy&#39;: (float) - Moment of inertia around</span>
+<span class="sd">                         the y axis</span>
+<span class="sd">        &#39;ixy&#39;: (float) - Product of inertia</span>
+<span class="sd">        &#39;ir&#39;: (float)  - Polar moment of inertia</span>
+<span class="sd">        &#39;ir_mass&#39;: (float) - Mass moment of inertia</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; coords = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])</span>
+<span class="sd">        &gt;&gt;&gt; res = polygon_inertia(coords)</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ixx&#39;]</span>
+<span class="sd">        -2.0</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;iyy&#39;]</span>
+<span class="sd">        -6.0</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ixy&#39;]</span>
+<span class="sd">        0.0</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ir&#39;]</span>
+<span class="sd">        -8.0</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ir_mass&#39;]</span>
+<span class="sd">        1.3333333333333333</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_coords</span>
+    <span class="c1"># planar moment of inertia wrt horizontal axis</span>
+    <span class="n">ixx</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">y_coords</span><span class="o">**</span><span class="mi">2</span>
+                <span class="o">+</span> <span class="n">y_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">alpha</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="mf">12.00</span>
+    <span class="p">)</span>
+    <span class="c1"># planar moment of inertia wrt vertical axis</span>
+    <span class="n">iyy</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">x_coords</span><span class="o">**</span><span class="mi">2</span>
+                <span class="o">+</span> <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">alpha</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="mf">12.00</span>
+    <span class="p">)</span>
+
+    <span class="n">ixy</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">x_coords</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">x_coords</span> <span class="o">*</span> <span class="n">y_coords</span>
+                <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_coords</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">y_coords</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">alpha</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="mf">24.0</span>
+    <span class="p">)</span>
+    <span class="c1"># polar (torsional) moment of inertia</span>
+    <span class="n">i_r</span> <span class="o">=</span> <span class="n">ixx</span> <span class="o">+</span> <span class="n">iyy</span>
+    <span class="c1"># mass moment of inertia wrt in-plane rotation</span>
+    <span class="n">ir_mass</span> <span class="o">=</span> <span class="p">(</span><span class="n">ixx</span> <span class="o">+</span> <span class="n">iyy</span><span class="p">)</span> <span class="o">/</span> <span class="n">area</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;ixx&quot;</span><span class="p">:</span> <span class="n">ixx</span><span class="p">,</span> <span class="s2">&quot;iyy&quot;</span><span class="p">:</span> <span class="n">iyy</span><span class="p">,</span> <span class="s2">&quot;ixy&quot;</span><span class="p">:</span> <span class="n">ixy</span><span class="p">,</span> <span class="s2">&quot;ir&quot;</span><span class="p">:</span> <span class="n">i_r</span><span class="p">,</span> <span class="s2">&quot;ir_mass&quot;</span><span class="p">:</span> <span class="n">ir_mass</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="geometric_properties"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.geometric_properties">[docs]</a><span class="k">def</span> <span class="nf">geometric_properties</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aggregates the results of the previous functions.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># repeat the first row at the end to close the shape</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">coords</span><span class="p">,</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="n">polygon_centroid</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+    <span class="n">coords_centered</span> <span class="o">=</span> <span class="n">coords</span> <span class="o">-</span> <span class="n">centroid</span>
+    <span class="n">inertia</span> <span class="o">=</span> <span class="n">polygon_inertia</span><span class="p">(</span><span class="n">coords_centered</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="n">area</span><span class="p">,</span> <span class="s2">&quot;centroid&quot;</span><span class="p">:</span> <span class="n">centroid</span><span class="p">,</span> <span class="s2">&quot;inertia&quot;</span><span class="p">:</span> <span class="n">inertia</span><span class="p">}</span></div>
+
+
+<span class="c1">##################################</span>
+<span class="c1"># Defining halfedges given edges #</span>
+<span class="c1">##################################</span>
+
+<span class="c1"># auxiliary functions</span>
+
+
+<div class="viewcode-block" id="ang_reduce"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.ang_reduce">[docs]</a><span class="k">def</span> <span class="nf">ang_reduce</span><span class="p">(</span><span class="n">ang</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Brings and angle expressed in radians in the interval [0, 2pi)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">while</span> <span class="n">ang</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ang</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">while</span> <span class="n">ang</span> <span class="o">&gt;=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+        <span class="n">ang</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">return</span> <span class="n">ang</span></div>
+
+
+<div class="viewcode-block" id="define_halfedges"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.define_halfedges">[docs]</a><span class="k">def</span> <span class="nf">define_halfedges</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Edge</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of edges, defines all the halfedges and</span>
+<span class="sd">    associates them with their `next`.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        See https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3</span>
+
+<span class="sd">        Each halfedge stores information about its edge, vertex and</span>
+<span class="sd">        and next halfedge. Contrary to convention, we don&#39;t store the</span>
+<span class="sd">        twin (opposite) halfedge here, seince we don&#39;t need it</span>
+<span class="sd">        anywhere.</span>
+
+<span class="sd">        This function receives a list of Edge objects as input and</span>
+<span class="sd">        returns a list of Halfedge objects. The function first creates</span>
+<span class="sd">        a Halfedge object for each vertex of each Edge object, using</span>
+<span class="sd">        the `define_halfedge` method of the Edge class. These Halfedge</span>
+<span class="sd">        objects are stored in a list called all_halfedges. For each</span>
+<span class="sd">        Halfedge object, the function also updates the list of</span>
+<span class="sd">        halfedges leaving the vertex that the halfedge originates</span>
+<span class="sd">        from. For example, if we have two Halfedge objects h1 and h2,</span>
+<span class="sd">        both originating from the same vertex v, v.halfedges will be a</span>
+<span class="sd">        list containing h1 and h2. (This is useful because it allows</span>
+<span class="sd">        us to easily access all the halfedges that originate from a</span>
+<span class="sd">        particular vertex, which we need later on in the algorithm.)</span>
+
+<span class="sd">        After all halfedges have been created, the function assigns</span>
+<span class="sd">        the next attribute of each halfedge, which points to the next</span>
+<span class="sd">        halfedge in the sequence. To do this, it loops through all</span>
+<span class="sd">        halfedges and, for each halfedge h, it determines the vertex</span>
+<span class="sd">        v_to that h points to, gets a list of all halfedges leaving</span>
+<span class="sd">        v_to, and assigns the next attribute of h to the halfedge in</span>
+<span class="sd">        that list that has the smallest angular difference with</span>
+<span class="sd">        respect to the direction of h.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        edges: List of Edge objects</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        halfedges: List of Halfedge objects</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
+<span class="sd">        &gt;&gt;&gt; # define some vertices</span>
+<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0.0, 0.0))</span>
+<span class="sd">        &gt;&gt;&gt; v2 = Vertex((1.0, 0.0))</span>
+<span class="sd">        &gt;&gt;&gt; v3 = Vertex((1.0, 1.0))</span>
+<span class="sd">        &gt;&gt;&gt; v4 = Vertex((0.0, 1.0))</span>
+<span class="sd">        &gt;&gt;&gt; # define some edges</span>
+<span class="sd">        &gt;&gt;&gt; e1 = Edge(v1, v2)</span>
+<span class="sd">        &gt;&gt;&gt; e2 = Edge(v2, v3)</span>
+<span class="sd">        &gt;&gt;&gt; e3 = Edge(v3, v4)</span>
+<span class="sd">        &gt;&gt;&gt; e4 = Edge(v4, v1)</span>
+<span class="sd">        &gt;&gt;&gt; # define the halfedges</span>
+<span class="sd">        &gt;&gt;&gt; halfedges = define_halfedges([e1, e2, e3, e4])</span>
+<span class="sd">        &gt;&gt;&gt; # check that the `next` attribute of each halfedge</span>
+<span class="sd">        &gt;&gt;&gt; # is correctly assigned</span>
+<span class="sd">        &gt;&gt;&gt; for h in halfedges:</span>
+<span class="sd">        ...     assert h.nxt.vertex == h.edge.other_vertex(h.vertex)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">all_halfedges</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="n">v_i</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">v_i</span>
+        <span class="n">v_j</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">v_j</span>
+        <span class="n">h_i</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">define_halfedge</span><span class="p">(</span><span class="n">v_i</span><span class="p">)</span>
+        <span class="n">h_j</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">define_halfedge</span><span class="p">(</span><span class="n">v_j</span><span class="p">)</span>
+        <span class="n">all_halfedges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h_i</span><span class="p">)</span>
+        <span class="n">all_halfedges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h_j</span><span class="p">)</span>
+        <span class="n">v_i</span><span class="o">.</span><span class="n">halfedges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h_i</span><span class="p">)</span>
+        <span class="n">v_j</span><span class="o">.</span><span class="n">halfedges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h_j</span><span class="p">)</span>
+
+    <span class="c1"># at this point we have defined all halfedges, but</span>
+    <span class="c1"># none of them knows its `next`.</span>
+    <span class="c1"># We now assign that attribute to all halfedges</span>
+
+    <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">all_halfedges</span><span class="p">:</span>
+        <span class="c1"># We are looking for `h`&#39;s `next`</span>
+        <span class="c1"># determine the vertex that it starts from</span>
+        <span class="n">v_from</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span>
+        <span class="c1"># determine the vertex that it points to</span>
+        <span class="n">v_to</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">edge</span><span class="o">.</span><span class="n">other_vertex</span><span class="p">(</span><span class="n">v_from</span><span class="p">)</span>
+        <span class="c1"># get a list of all halfedges leaving that vertex</span>
+        <span class="n">candidates_for_next</span> <span class="o">=</span> <span class="n">v_to</span><span class="o">.</span><span class="n">halfedges</span>
+        <span class="c1"># determine which of all these halfedges will be the next</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates_for_next</span><span class="p">),</span> <span class="mf">0.00</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h_other</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">candidates_for_next</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">h_other</span><span class="o">.</span><span class="n">edge</span> <span class="o">==</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">edge</span><span class="p">:</span>
+                <span class="n">angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1000.0</span>
+                <span class="c1"># otherwise we would assign its conjugate as next</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">angles</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ang_reduce</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">-</span> <span class="n">h_other</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span>
+                <span class="p">)</span>
+        <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="n">candidates_for_next</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">angles</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">all_halfedges</span></div>
+
+    <span class="c1"># # debug</span>
+    <span class="c1"># import matplotlib.pyplot as plt</span>
+    <span class="c1"># fig = plt.figure()</span>
+    <span class="c1"># ax = fig.add_subplot(111)</span>
+    <span class="c1"># ax.set_aspect(&#39;equal&#39;)</span>
+    <span class="c1"># for edge in edges:</span>
+    <span class="c1">#     p1 = edge.v_i.coords</span>
+    <span class="c1">#     p2 = edge.v_j.coords</span>
+    <span class="c1">#     coords = np.row_stack((p1, p2))</span>
+    <span class="c1">#     ax.plot(coords[:, 0], coords[:, 1])</span>
+    <span class="c1"># for h in halfedges:</span>
+    <span class="c1">#     if h.nxt:</span>
+    <span class="c1">#         h_nxt = h.nxt</span>
+    <span class="c1">#         e = h.edge</span>
+    <span class="c1">#         if h_nxt.edge:</span>
+    <span class="c1">#             e_nxt = h_nxt.edge</span>
+    <span class="c1">#             p1 = (np.array(e.v_i.coords)</span>
+    <span class="c1">#                   + np.array(e.v_j.coords))/2.</span>
+    <span class="c1">#             p2 = (np.array(e_nxt.v_i.coords)</span>
+    <span class="c1">#                   + np.array(e_nxt.v_j.coords))/2.</span>
+    <span class="c1">#             dx = p2 - p1</span>
+    <span class="c1">#             ax.arrow(*p1, *dx)</span>
+    <span class="c1"># plt.show()</span>
+
+
+<div class="viewcode-block" id="obtain_closed_loops"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.obtain_closed_loops">[docs]</a><span class="k">def</span> <span class="nf">obtain_closed_loops</span><span class="p">(</span><span class="n">halfedges</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a list of halfedges,</span>
+<span class="sd">    this function uses their `next` attribute to</span>
+<span class="sd">    group them into sequences of closed loops</span>
+<span class="sd">    (ordered lists of halfedges of which the</span>
+<span class="sd">    `next` halfedge of the last list element</span>
+<span class="sd">    points to the first halfedge in the list, and</span>
+<span class="sd">    the `next` halfedge of any list element</span>
+<span class="sd">    points to the next halfedge in the list.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        halfedges: list of halfedges</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        loops with the aforementioned property.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_in_some_loop</span><span class="p">(</span><span class="n">halfedge</span><span class="p">,</span> <span class="n">loops</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">loops</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">halfedges</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">loops</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_in_some_loop</span><span class="p">(</span><span class="n">halfedge</span><span class="p">,</span> <span class="n">loops</span><span class="p">):</span>
+                <span class="k">continue</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="p">[</span><span class="n">halfedge</span><span class="p">]</span>
+        <span class="n">nxt</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span>
+        <span class="k">while</span> <span class="n">nxt</span> <span class="o">!=</span> <span class="n">halfedge</span><span class="p">:</span>
+            <span class="n">loop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nxt</span><span class="p">)</span>
+            <span class="n">nxt</span> <span class="o">=</span> <span class="n">nxt</span><span class="o">.</span><span class="n">nxt</span>
+        <span class="n">loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loops</span></div>
+
+
+<div class="viewcode-block" id="orient_loops"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.orient_loops">[docs]</a><span class="k">def</span> <span class="nf">orient_loops</span><span class="p">(</span><span class="n">loops</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Separates loops to internal (counterclockwise)</span>
+<span class="sd">    and external (clockwise). Also gathers trivial</span>
+<span class="sd">    loops, i.e. halfedge sequences that define polygons</span>
+<span class="sd">    that have no area (e.g. h1 -&gt; h2 -&gt; h1).</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        loops (list[list[Halfedge]]) (see `obtain_closed_loops`)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        external_loops (list[list[Halfedge]])</span>
+<span class="sd">        internal_loops (list[list[Halfedge]])</span>
+<span class="sd">        trivial_loops (list[list[Halfedge]])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">internal_loops</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">external_loops</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">trivial_loops</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">loop_areas</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">polygon_area</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">loops</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">area</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">loop_areas</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">area</span> <span class="o">&gt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+            <span class="n">internal_loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loops</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">area</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
+            <span class="n">external_loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loops</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trivial_loops</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loops</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">external_loops</span><span class="p">,</span> <span class="n">internal_loops</span><span class="p">,</span> <span class="n">trivial_loops</span></div>
+
+
+<span class="c1">#######################################</span>
+<span class="c1"># Breaking a shape into little pieces #</span>
+<span class="c1">#######################################</span>
+
+
+<div class="viewcode-block" id="subdivide_polygon"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_polygon">[docs]</a><span class="k">def</span> <span class="nf">subdivide_polygon</span><span class="p">(</span><span class="n">outside</span><span class="p">,</span> <span class="n">holes</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to define the fibers of fiber sections.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        halfedges: Sequence of halfedges that defines the shape of a</span>
+<span class="sd">                  section.</span>
+<span class="sd">        n_x: Number of spatial partitions in the x direction</span>
+<span class="sd">        n_y: Number of spatial partitions in the y direction</span>
+<span class="sd">        plot: Plots the resulting polygons for debugging</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pieces: shapely_Polygon objects that represent single fibers.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">outside_polygon</span> <span class="o">=</span> <span class="n">shapely_Polygon</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">outside</span><span class="o">.</span><span class="n">halfedges</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">hole_polygons</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="n">holes</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="n">hole_polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">shapely_Polygon</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hole</span><span class="o">.</span><span class="n">halfedges</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="n">remaining_polygon</span> <span class="o">=</span> <span class="n">outside_polygon</span>
+    <span class="k">for</span> <span class="n">hole_polygon</span> <span class="ow">in</span> <span class="n">hole_polygons</span><span class="p">:</span>
+        <span class="n">remaining_polygon</span> <span class="o">=</span> <span class="n">remaining_polygon</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">hole_polygon</span><span class="p">)</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">outside_polygon</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">x_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_x</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n_y</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_array</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">tile</span> <span class="o">=</span> <span class="n">shapely_Polygon</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                    <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">subregion</span> <span class="o">=</span> <span class="n">remaining_polygon</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">subregion</span><span class="o">.</span><span class="n">area</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subregion</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax_1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="n">ax_1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+        <span class="n">patch</span> <span class="o">=</span> <span class="n">PolygonPatch</span><span class="p">(</span><span class="n">remaining_polygon</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ax_1</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subregion</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">:</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="n">PolygonPatch</span><span class="p">(</span><span class="n">subregion</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">ax_1</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subregion</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">:</span>
+            <span class="n">ax_1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">subregion</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">subregion</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ax_1</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="mf">0.10</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">pieces</span></div>
+
+
+<div class="viewcode-block" id="subdivide_hss"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_hss">[docs]</a><span class="k">def</span> <span class="nf">subdivide_hss</span><span class="p">(</span>
+        <span class="n">sec_h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">sec_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Used to define the fibers of steel HSS fiber sections.</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">      sec_h: Section height</span>
+<span class="sd">      sec_b: Section width</span>
+<span class="sd">      sec_t: Section thickness</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        pieces: shapely_Polygon objects that represent single fibers.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">outside_polygon</span> <span class="o">=</span> <span class="n">shapely_Polygon</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="n">sec_h</span><span class="p">,</span> <span class="n">sec_b</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">sec_h</span><span class="p">,</span> <span class="o">-</span><span class="n">sec_b</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">sec_h</span><span class="p">,</span> <span class="o">-</span><span class="n">sec_b</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">sec_h</span><span class="p">,</span> <span class="n">sec_b</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">hole_polygon</span> <span class="o">=</span> <span class="n">shapely_Polygon</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span><span class="n">sec_h</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">sec_b</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">sec_h</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">,</span> <span class="o">-</span><span class="n">sec_b</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">sec_h</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="o">-</span><span class="n">sec_b</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">sec_h</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">sec_b</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">remaining_polygon</span> <span class="o">=</span> <span class="n">outside_polygon</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">hole_polygon</span><span class="p">)</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">outside_polygon</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="c1"># cutting it into 8 regions</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ylow</span><span class="p">,</span> <span class="n">yhigh</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_min</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">y_min</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">y_max</span><span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="n">xlow</span><span class="p">,</span> <span class="n">xhigh</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_min</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">x_min</span> <span class="o">+</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">-</span> <span class="n">sec_t</span><span class="p">,</span> <span class="n">x_max</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">x_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">xlow</span><span class="p">,</span> <span class="n">xhigh</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">y_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ylow</span><span class="p">,</span> <span class="n">yhigh</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x_array</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_array</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">tile</span> <span class="o">=</span> <span class="n">shapely_Polygon</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="n">x_array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_array</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]),</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">subregion</span> <span class="o">=</span> <span class="n">remaining_polygon</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">subregion</span><span class="o">.</span><span class="n">area</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
+                        <span class="n">pieces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subregion</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax_1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="n">ax_1</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+        <span class="c1"># patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)</span>
+        <span class="c1"># ax_1.add_patch(patch)</span>
+        <span class="k">for</span> <span class="n">subregion</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">:</span>
+            <span class="n">patch</span> <span class="o">=</span> <span class="n">PolygonPatch</span><span class="p">(</span><span class="n">subregion</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">ax_1</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subregion</span> <span class="ow">in</span> <span class="n">pieces</span><span class="p">:</span>
+            <span class="n">ax_1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">subregion</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">subregion</span><span class="o">.</span><span class="n">centroid</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ax_1</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="mf">0.10</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">pieces</span></div>
+
+
+<span class="c1">#############</span>
+<span class="c1"># Debugging #</span>
+<span class="c1">#############</span>
+
+
+<div class="viewcode-block" id="print_halfedge_results"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.print_halfedge_results">[docs]</a><span class="k">def</span> <span class="nf">print_halfedge_results</span><span class="p">(</span><span class="n">halfedges</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints the ids of the defined halfedges and their vertex, edge and</span>
+<span class="sd">    next, for debugging.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;halfedge&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;vertex&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;edge&quot;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s2">&quot;next&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">halfedges</span><span class="p">:</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;halfedge&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">halfedge</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;vertex&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">edge</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;next&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="plot_loop"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.plot_loop">[docs]</a><span class="k">def</span> <span class="nf">plot_loop</span><span class="p">(</span><span class="n">halfedge_loop</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the vertices/edges of a list of halfedges.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">halfedge_loop</span><span class="p">)</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">num</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mf">0.00</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">halfedge_loop</span><span class="p">):</span>
+        <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span>
+    <span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_edges"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.plot_edges">[docs]</a><span class="k">def</span> <span class="nf">plot_edges</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plots the given edges.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mf">0.00</span><span class="p">)</span>
+        <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">coords</span>
+        <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">coords</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="sanity_checks"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.sanity_checks">[docs]</a><span class="k">def</span> <span class="nf">sanity_checks</span><span class="p">(</span><span class="n">external</span><span class="p">,</span> <span class="n">trivial</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform some checks to make sure</span>
+<span class="sd">    assumptions are not violated.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#   We expect no trivial loops</span>
+    <span class="k">if</span> <span class="n">trivial</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Found trivial loop&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">trv</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trivial</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">trv</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+            <span class="n">plot_loop</span><span class="p">(</span><span class="n">trv</span><span class="p">)</span>
+    <span class="c1">#   We expect a single external loop</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">external</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Found multiple external loops&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ext</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">external</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">ext</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+            <span class="n">plot_loop</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main()__&quot;</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright .
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
