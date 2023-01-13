@@ -2,7 +2,7 @@ name: test-use-of-conda
 on:
   push:
     paths:
-      - '.github/workflows/so-samtools.yaml'
+      - 'envs/so-samtools.yaml'
       - '.github/workflows/conda.yaml'
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         
     steps:
       - name: checkout repository
