@@ -961,9 +961,13 @@ class ModalAnalysis(Analysis):
 
 
 @dataclass
-class NonlinearAnalysis(Analysis):
+class GravityPlusAnalysis(Analysis):
     """
-    Nonlinear analysis parent class.
+    When performing nonlinear static or dynamic analysis, it is common
+    to first apply gravitly loads on the model and then proceed with
+    some other analysis, like static pushover or transient dynamic
+    analysis. This parent class is used to define analysis objects
+    that follow this practice.
 
     """
 
@@ -1047,7 +1051,7 @@ class NonlinearAnalysis(Analysis):
 
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
-        assert isinstance(self, NLTHAnalysis)
+        assert isinstance(self, THAnalysis)
         assert self.a_g is not None
         for i in range(num):
             res[i] = self.results[case_name].node_accelerations[uid][i]
@@ -1083,7 +1087,7 @@ class NonlinearAnalysis(Analysis):
 
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
-        assert isinstance(self, NLTHAnalysis)
+        assert isinstance(self, THAnalysis)
         assert self.a_g is not None
         for i in range(num):
             res[i] = self.results[case_name].node_velocities[uid][i]
@@ -1134,7 +1138,7 @@ class NonlinearAnalysis(Analysis):
 
 
 @dataclass
-class PushoverAnalysis(NonlinearAnalysis):
+class PushoverAnalysis(GravityPlusAnalysis):
     """
     Pushover analysis
 
@@ -1555,9 +1559,9 @@ def plot_ground_motion(filename, file_time_incr, gmunit="g", plotly=False):
 
 
 @dataclass
-class NLTHAnalysis(NonlinearAnalysis):
+class THAnalysis(GravityPlusAnalysis):
     """
-    Dynamic nonlinear time-history analysis
+    Dynamic time-history analysis
 
     """
 
@@ -1579,7 +1583,7 @@ class NLTHAnalysis(NonlinearAnalysis):
         print_progress: bool = True,
     ) -> dict[str, Union[int, str, float]]:
         """
-        Run the nonlinear time-history analysis
+        Run the time-history analysis
         Arguments:
             filename_x, y, z: Paths where the fixed-step ground acceleration
                               records are stored (single-column).

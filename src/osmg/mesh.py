@@ -410,16 +410,16 @@ class Halfedge:
         using the arctan2 function (in radians).
 
         Examples:
-        >>> from osmg.mesh import Vertex, Edge, Halfedge
-        >>> v1 = Vertex((0.0, 0.0))
-        >>> v2 = Vertex((2.0, 2.0))
-        >>> edge = Edge(v1, v2)
-        >>> halfedge1 = Halfedge(v1, edge)
-        >>> halfedge2 = Halfedge(v2, edge)
-        >>> halfedge1.direction()
-        0.7853981633974483
-        >>> halfedge2.direction()
-        -2.356194490192345
+            >>> from osmg.mesh import Vertex, Edge, Halfedge
+            >>> v1 = Vertex((0.0, 0.0))
+            >>> v2 = Vertex((2.0, 2.0))
+            >>> edge = Edge(v1, v2)
+            >>> halfedge1 = Halfedge(v1, edge)
+            >>> halfedge2 = Halfedge(v2, edge)
+            >>> halfedge1.direction()
+            0.7853981633974483
+            >>> halfedge2.direction()
+            -2.356194490192345
 
         """
 

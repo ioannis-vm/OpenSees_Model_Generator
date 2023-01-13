@@ -266,7 +266,7 @@ More analysis methods are available, including static pushover and transient tim
 """
 
 # %%
-nlth_anl = solver.NLTHAnalysis(mdl, {testcase.name: testcase})
+nlth_anl = solver.THAnalysis(mdl, {testcase.name: testcase})
 
 # Tweak settings to use a fast solver
 nlth_anl.settings.solver = 'SparseSYM'
@@ -297,11 +297,9 @@ nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plot
 
 # %% [markdown]
 """
-### Other types of structural analysis
+### Other types of structural analysis and ideas for future development
 
-- The analysis objects themselves are going to be renamed soon, because the terms `linear` and `nonlinear` are used unjustifiably. One can use a linear model to run a NLTHAnalyisis and vice versa. The new names will be closer to what OpenSees calls them.
-
-- Currently it is unlcear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, including linear statis and modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the design procedures.  
+- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the design procedures.
 
 - Planned future support includes modal response history analysis.
 

@@ -15,49 +15,6 @@
 
 # %% [markdown]
 """
-# Welcome
-
-This document provides a general overview of `OpenSees_Model_Generator (osmg)`.
-
-Opensees_Model_Generator is a python module aimed to simplify the definition of 3D models in OpenSees by automating various "offline calculations", such as orienting line elements in 3D space,  subdividing line elements, distributing loads based on tributary area analysis, and other such operations. The module aims to promote the use of OpenSees for research applications and form a community of researchers who benefit from its capabilities and contribute to its development.
-
-The source code of this module should be thought of as a higher-level interface to OpenSees.
-Users of the module are expected to understand the source code and be willing to make changes to it to meet their goals.
-
-## Workflow
-
-The general workflow enabled by the module is the following:
-1. Instantiate model objects and define their components
-2. Perform preprocessing operations
-3. Define load_case and analysis objects
-4. Run the analyses
-5. Post-process the analysis results
-
-Actual interaction with OpenSees only happens at step #4.
-
-## Install
-
-It is recommended to use a virtual environment to manage the dependencies of this module. I use Anaconda.
-
-Here is how to [install Aanaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
-
-
-
-### Install from PyPI
-
-```
-# create a conda environment
-$ conda create --name your_env_name_here python=3.11
-$ conda activate your_env_name_here
-$ python -m pip install osmg
-```
-
-Optional:
-In case you would like to run tributary area analyses for load distribution calculations, `scikit-geometry` needs to be installed.
-```
-$ conda install scikit-geometry -c conda-forge
-```
-
 
 ### Development mode
 

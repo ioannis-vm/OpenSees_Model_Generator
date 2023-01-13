@@ -136,3 +136,4 @@ notes
 *#
 /.links/
 /conda/
+*_autosummary/*
