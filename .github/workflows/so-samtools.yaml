@@ -1,4 +1,6 @@
-push:
+name: so-samtools
+on:
+  push:
     paths:
       - 'envs/so-samtools.yaml'
       - '.github/workflows/so-samtools.yaml'
