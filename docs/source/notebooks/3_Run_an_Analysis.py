@@ -210,7 +210,8 @@ help(show_deformed_shape)
 
 # %%
 show_deformed_shape(static_anl, testcase.name, 0, 0.00, True)
-
+# I'm not sure why it's not showing here in the docs, it should work
+# on your machine!
 
 # %%
 help(show_basic_forces)
