@@ -9,6 +9,7 @@ sphinx
 sphinx-autoapi
 sphinx-rtd_theme
 nbsphinx
+pandoc
 sphinx_autodoc_typehints
 flake8-rst
 flake8-rst-docstrings
