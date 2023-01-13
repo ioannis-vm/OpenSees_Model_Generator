@@ -4,3 +4,4 @@ channels:
   - defaults
 dependencies:
   - scikit-geometry
+  - pandoc
