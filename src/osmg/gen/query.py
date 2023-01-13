@@ -1,5 +1,7 @@
 """
-Model Generator for OpenSees ~ generic
+Objects used to retrieve other objects, or information related to
+them, based on certain criteria.
+
 """
 
 #
@@ -38,7 +40,12 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class ElmQuery:
     """
-    Used by all component generators
+    Used to retrieve nodes and component
+    assemblies.
+
+    Attributes:
+      model: Model to be searched.
+
     """
 
     model: Model
@@ -47,7 +54,16 @@ class ElmQuery:
         self, nodes: list[Node]
     ) -> Optional[ComponentAssembly]:
         """
-        find component assembly based on connectivity
+        Finds component assembly objects based on the nodes the are
+        connected to.
+
+        Arguments:
+          nodes: List containing nodes. If a component assembly is
+            connected to those nodes, it is returned, otherwise the
+            method returns None. If the component assembly is
+            partially connected to the nodes (e.g. connected to them,
+            but also to other nodes), it is not returned.
+
         """
         uids = [node.uid for node in nodes]
         uids.sort()
@@ -65,7 +81,13 @@ class ElmQuery:
         internal: bool = False,
     ) -> Optional[Node]:
         """
-        Looks if a node exists at the given location.
+        Looks if a primary node exists at the specified location.
+
+        Arguments:
+          x_loc: x-coordinate
+          y_loc: y-coordinate
+          lvl: Key of the level to be searched.
+
         """
         lvls = self.model.levels
         level = lvls[lvl]
@@ -94,6 +116,12 @@ class ElmQuery:
         """
         Retrieves component assemblies if at least one of their
         external nodes matches the given list of nodes.
+
+        Arguments:
+          nodes: List of primary nodes.
+          lvl_uid: ID of the level to be searched. If None is
+            specified, the method searches all levels.
+
         """
         retrieved_components = {}
         if lvl_uid:
@@ -119,6 +147,12 @@ class ElmQuery:
         """
         Retrieves a single component assembly if all of its external
         nodes match the given list of nodes.
+
+        Arguments:
+          nodes: List of primary nodes.
+          lvl_uid: Key of the level to be searched. If None is
+            specified, the method searches all levels.
+
         """
         retrieved_component = None
         if lvl_uid:
@@ -138,11 +172,21 @@ class ElmQuery:
                 retrieved_component = component
         return retrieved_component
 
-    def retrieve_component(self, x_loc, y_loc, lvl):
+    def retrieve_component(
+            self, x_loc: float, y_loc: float, lvl: int) \
+            -> Optional[ComponentAssembly]:
         """
         Retrieves a component assembly of a level if any of its
         line elements passes trhough the specified point.
-        Returns the first element found.
+
+        Arguments:
+          x_loc: x-coordinate
+          y_loc: y-coordinate
+          lvl: Key of the level to be searched.
+
+        Returns:
+          The first element found, None otherwise.
+
         """
         level = self.model.levels[lvl]
         for component in level.components.values():
@@ -180,12 +224,19 @@ class ElmQuery:
                     line.intersects_pt(np.array((x_loc, y_loc)))
                     if line.intersects_pt(np.array((x_loc, y_loc))):
                         return component
+        return None
 
 
 @dataclass
 class LoadCaseQuery:
     """
-    Load case query object.
+    Load case query objects retrieve information associated with load
+    cases.
+
+    Attributes:
+      model: Model object to be searched.
+      loadcase: LoadCase object to be searched.
+
     """
 
     model: Model
@@ -194,6 +245,7 @@ class LoadCaseQuery:
     def level_masses(self):
         """
         Returns the total mass of each level.
+
         """
         mdl = self.model
         num_lvls = len(mdl.levels)

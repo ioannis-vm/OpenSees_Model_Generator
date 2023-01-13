@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ physical material
+Defines PhysicalMaterial objects.
 """
 
 #
@@ -35,6 +35,7 @@ class PhysicalMaterial:
         E: 210000
         G: 81000
         <BLANKLINE>
+
     """
 
     uid: int
@@ -47,8 +48,10 @@ class PhysicalMaterial:
 
     def __srepr__(self):
         """
-        Short version of repr
+        Short version of repr.
+
         """
+
         return f"Physical material: {self.name}, {self.uid}"
 
     def __repr__(self):

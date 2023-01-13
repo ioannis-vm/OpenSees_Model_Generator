@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ element
+Defines OpenSees Element interfrace objects.
 """
 
 #
@@ -34,11 +34,13 @@ class Element:
     """
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
+
     Attributes:
-        parent_component (component_assembly.ComponentAssembly):
-          the parent component assembly that this element belongs to
-        uid (int): the unique identifier of this element
-        nodes (list[Node]): the list of nodes that this element connects
+        parent_component:
+          the parent component assembly that this element belongs to.
+        uid: the unique identifier of this element.
+        nodes: the list of nodes that this element connects.
+
     """
 
     parent_component: ComponentAssembly = field(repr=False)
@@ -55,6 +57,7 @@ class ZeroLength(Element):
     """
     OpenSees ZeroLength element
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
+
     """
 
     mats: list[UniaxialMaterial]
@@ -66,7 +69,9 @@ class ZeroLength(Element):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "zeroLength",
             self.uid,
@@ -97,6 +102,7 @@ class TwoNodeLink(Element):
     """
     OpenSees TwoNodeLink element
     https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html
+
     """
 
     mats: list[UniaxialMaterial]
@@ -108,7 +114,9 @@ class TwoNodeLink(Element):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "twoNodeLink",
             self.uid,
@@ -157,7 +165,9 @@ class TrussBar(Element):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         elm_name = {
             'Linear': 'Truss',
             'Corotational': 'corotTruss'
@@ -182,7 +192,9 @@ class TrussBar(Element):
         """
         Returns the clear length of the element (without the rigid
         offsets)
+
         """
+
         p_i = np.array(self.nodes[0].coords)
         p_j = np.array(self.nodes[1].coords)
         return np.linalg.norm(p_i - p_j)
@@ -208,6 +220,7 @@ class GeomTransf:
     OpenSees geomTransf object
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation
+
     """
 
     transf_type: str
@@ -222,7 +235,9 @@ class GeomTransf:
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             self.transf_type,
             self.uid,
@@ -238,6 +253,7 @@ class ElasticBeamColumn(Element):
     """
     OpenSees Elastic Beam Column Element
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
+
     """
 
     section: ElasticSection
@@ -247,7 +263,9 @@ class ElasticBeamColumn(Element):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "elasticBeamColumn",
             self.uid,
@@ -266,7 +284,9 @@ class ElasticBeamColumn(Element):
         """
         Returns the clear length of the element (without the rigid
         offsets)
+
         """
+
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
@@ -293,6 +313,7 @@ class BeamIntegration:
     """
     OpenSees beamIntegration parent class.
     https://openseespydoc.readthedocs.io/en/latest/src/beamIntegration.html?highlight=beamintegration
+
     """
 
     uid: int
@@ -304,6 +325,7 @@ class Lobatto(BeamIntegration):
     """
     OpenSees Lobatto beam integration.
     https://openseespydoc.readthedocs.io/en/latest/src/Lobatto.html
+
     """
 
     n_p: int
@@ -312,7 +334,9 @@ class Lobatto(BeamIntegration):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return ["Lobatto", self.uid, self.parent_section.uid, self.n_p]
 
 
@@ -321,6 +345,7 @@ class DispBeamColumn(Element):
     """
     OpenSees dispBeamColumn element
     https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html
+
     """
 
     section: FiberSection
@@ -331,7 +356,9 @@ class DispBeamColumn(Element):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "dispBeamColumn",
             self.uid,
@@ -348,7 +375,9 @@ class DispBeamColumn(Element):
         """
         Returns the clear length of the element (without the rigid
         offsets)
+
         """
+
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)

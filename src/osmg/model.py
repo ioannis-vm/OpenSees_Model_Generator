@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ model
+Defines Model objects.
+
 """
 
 #
@@ -45,8 +46,10 @@ def transfer_component(
     """
     Transfers a single component assembly from one model to
     another, assuming the other model was generated with the
-    `initialize_empty_copy` method.
+    :func:`~Model.initialize_empty_copy` method.
+
     """
+
     # note: we don't copy the component assemblies and their contents.
     # we just add the same objects to the other model.
     level = component.parent_collection.parent
@@ -61,12 +64,15 @@ def transfer_component(
 class Settings:
     """
     General customization of a model.
-        imperial_units (bool):
-            True for imperial <3:
+        imperial_units:
+            True for imperial:
                 in, lb, lb/(in/s2)
             False for SI:
                 m, N, kg
-        ndm, ndf: change them to break the code.
+        ndm, ndf: Number of dimensions and degrees of freedom.
+          Currently only ndm=3, ndf=6 is supported. This might be
+          extended in the future if needed.
+
     """
 
     imperial_units: bool = field(default=True)  # false for SI
@@ -92,21 +98,23 @@ class Model:
     physical materials, and various collections of objects such as
     nodes, elements, and component assemblies that exist inside each level.
     Those objects are populated by generator objects. See `osmg.gen`.
+
     Attributes:
-        name (str): Name of the model.
-        levels (collections.CollectionActive[int, Level]):
+        name: Name of the model.
+        levels:
             Collection of levels in the model.
-        elastic_sections (collections.Collection[int, ElasticSection]):
+        elastic_sections:
             Collection of elastic sections in the model.
-        fiber_sections (collections.Collection[int, FiberSection]):
+        fiber_sections:
             Collection of fiber sections in the model.
-        uniaxial_materials (collections.Collection[int, UniaxialMaterial]):
+        uniaxial_materials:
             Collection of uniaxial materials in the model.
-        physical_materials (collections.Collection[int, PhysicalMaterial]):
+        physical_materials:
             Collection of physical materials in the model.
-        uid_generator (UIDGenerator):
+        uid_generator:
             Object for generating unique IDs for objects in the model.
-        settings (Settings): Settings for the model.
+        settings: Settings for the model.
+
     """
 
     name: str
@@ -155,7 +163,9 @@ class Model:
         of node uids of its connected nodes in ascending order. This
         method returns a dictionary having these tuples as keys, and
         the associated components as values.
+
         """
+
         res = {}
         components = self.list_of_components()
         for component in components:
@@ -169,9 +179,9 @@ class Model:
     def add_level(self, uid: int, elevation: float) -> None:
         """
         Adds a level to the model.
-        Args:
-            uid (int): Unique ID for the level.
-            elevation (float): Elevation of the level.
+        Arguments:
+            uid: Unique ID for the level.
+            elevation: Elevation of the level.
 
         Example:
             >>> from osmg.model import Model
@@ -179,7 +189,9 @@ class Model:
             >>> model.add_level(1, 0.0)
             >>> model.levels.__srepr__()
             '[Collection of 1 items]'
+
         """
+
         lvl = Level(self, uid=uid, elevation=elevation)
         self.levels.add(lvl)
 
@@ -196,7 +208,9 @@ class Model:
     def list_of_primary_nodes(self):
         """
         Returns a list of all the primary nodes in the model.
+
         """
+
         list_of_nodes = []
         for lvl in self.levels.values():
             for node in lvl.nodes.values():
@@ -207,7 +221,9 @@ class Model:
         """
         Returns a dictionary of all the internal nodes in the model.
         The keys are the uids of the nodes.
+
         """
+
         dict_of_nodes: dict[int, Node] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -217,7 +233,9 @@ class Model:
     def list_of_internal_nodes(self):
         """
         Returns a list of all the internal nodes in the model.
+
         """
+
         list_of_nodes = []
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -229,7 +247,9 @@ class Model:
         """
         Returns a dictionary of all the nodes in the model.
         The keys are the uids of the nodes.
+
         """
+
         dict_of_nodes: dict[int, Node] = {}
         dict_of_nodes.update(self.dict_of_primary_nodes())
         dict_of_nodes.update(self.dict_of_internal_nodes())
@@ -238,7 +258,9 @@ class Model:
     def list_of_all_nodes(self):
         """
         Returns a list of all the nodes in the model.
+
         """
+
         list_of_nodes = []
         list_of_nodes.extend(self.list_of_primary_nodes())
         list_of_nodes.extend(self.list_of_internal_nodes())
@@ -249,7 +271,9 @@ class Model:
         Returns a dictionary of all the component assemblies in the
         model.
         The keys are the uids of the component assemblies.
+
         """
+
         comps: dict[int, ComponentAssembly] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -260,14 +284,18 @@ class Model:
         """
         Returns a list of all the component assembiles in the
         model.
+
         """
+
         return list(self.dict_of_components().values())
 
     def dict_of_elements(self) -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
+
         """
+
         elems: dict[int, element.Element] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -277,7 +305,9 @@ class Model:
     def list_of_elements(self) -> list[element.Element]:
         """
         Returns a list of all element objects in the model.
+
         """
+
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
@@ -287,7 +317,9 @@ class Model:
         Returns a dictionary of all element objects in the model of a
         particular element class.
         The keys are the uids of the objects.
+
         """
+
         all_elements = self.dict_of_elements()
         res: dict[int, element.Element] = {}
         for uid, elm in all_elements.items():
@@ -301,13 +333,17 @@ class Model:
         """
         Returns a list of all element objects in the model of a
         particular element class.
+
         """
+
         return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
         """
         Returns the axis-aligned bouding box of the building
+
         """
+
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():
@@ -324,7 +360,9 @@ class Model:
         Returns the largest dimension of the
         bounding box of the building
         (used in graphics)
+
         """
+
         p_min, p_max = self.bounding_box(padding=0.00)
         ref_len = np.max(p_max - p_min)
         return ref_len
@@ -333,7 +371,9 @@ class Model:
         """
         Initializes a shallow empty copy of the model.
         Used to create subset models.
+
         """
+
         res = Model(name)
         # copy the settings attributes
         res.settings.imperial_units = self.settings.imperial_units
@@ -352,10 +392,12 @@ class Model:
     def transfer_by_polygon_selection(
             self, other: Model, coords: nparr) -> None:
         """
-        Uses `transfer_component` to transfer all components of which
+        Uses :func:`~transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified
         polygon.
+
         """
+
         all_components = self.list_of_components()
         selected_components = []
         shape = shapely_Polygon(coords)

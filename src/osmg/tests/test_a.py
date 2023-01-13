@@ -1,5 +1,6 @@
 """
-Basic Tests
+Basic Test Suite.
+
 """
 
 # import pytest
@@ -30,6 +31,7 @@ def test_a():
     Basic functionality tests
     Simple frame model
     Imperial units
+
     """
 
     mdl = Model("test_model")

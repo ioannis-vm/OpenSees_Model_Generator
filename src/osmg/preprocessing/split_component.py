@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ split component
+Defines the :func:`~split_component` method.
+
 """
 
 #
@@ -13,24 +14,43 @@ Model Generator for OpenSees ~ split component
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import numpy as np
+import numpy.typing as npt
 from ..line import Line
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..ops.element import GeomTransf
+from ..ops.section import ElasticSection
+from ..ops.section import FiberSection
 from ..ops.node import Node
+from ..component_assembly import ComponentAssembly
 from .. import common
 from ..ops.element import Lobatto
 
 
-def split_component(component, point):
+nparr = npt.NDArray[np.float64]
+
+
+def split_component(
+        component: ComponentAssembly, point: nparr) \
+        -> tuple[Node, nparr]:
     """
-    Splits a beam-functioning component assembly to
-    accomodate for a node required to connect
-    another component assembly
+    Splits a beam-functioning component assembly to accomodate for a
+    node required to connect another component assembly.
+
+    Arguments:
+      component: Component assembly to split.
+      point: Point to be used to split the component.
+
+    WARNING:
+      This function might no longer work. Needs to be tested and
+      perhaps updated.
+
     """
+
     elms = []
-    elms.extend(component.elastic_beamcolumn_elements.values())
-    elms.extend(component.disp_beamcolumn_elements.values())
+    elms.extend(
+        [elm for elm in component.elements.values()
+         if isinstance(elm, (ElasticBeamColumn, DispBeamColumn))])
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -69,12 +89,7 @@ def split_component(component, point):
     node_j = closest_elm.nodes[1]
     prev_section = closest_elm.section
     prev_gtransf = closest_elm.geomtransf
-    if isinstance(closest_elm, ElasticBeamColumn):
-        component.elastic_beamcolumn_elements.pop(closest_elm.uid)
-    elif isinstance(closest_elm, DispBeamColumn):
-        component.disp_beamcolumn_elements.pop(closest_elm.uid)
-    else:
-        raise ValueError("Unsupported element type")
+    component.elements.pop(closest_elm.uid)
 
     # add split node
     middle_node = Node(
@@ -102,6 +117,7 @@ def split_component(component, point):
         prev_gtransf.z_axis,
     )
     if isinstance(closest_elm, ElasticBeamColumn):
+        assert isinstance(prev_section, ElasticSection)
         elm_i = ElasticBeamColumn(
             component,
             component.parent_collection.parent.parent_model.uid_generator.new(
@@ -111,7 +127,7 @@ def split_component(component, point):
             prev_section,
             transf_i,
         )
-        component.elastic_beamcolumn_elements.add(elm_i)
+        component.elements.add(elm_i)
     elif isinstance(closest_elm, DispBeamColumn):
         assert isinstance(closest_elm.integration, Lobatto)
         beam_integration = Lobatto(
@@ -124,6 +140,7 @@ def split_component(component, point):
             parent_section=prev_section,
             n_p=closest_elm.integration.n_p,
         )
+        assert isinstance(prev_section, FiberSection)
         elm_i = DispBeamColumn(  # type: ignore
             component,
             (
@@ -137,7 +154,7 @@ def split_component(component, point):
             transf_i,
             beam_integration,
         )
-        component.disp_beamcolumn_elements.add(elm_i)
+        component.elements.add(elm_i)
     # part j
     o_i = np.zeros(3)
     o_j = prev_gtransf.offset_j
@@ -158,6 +175,7 @@ def split_component(component, point):
         prev_gtransf.z_axis,
     )
     if isinstance(closest_elm, ElasticBeamColumn):
+        assert isinstance(prev_section, ElasticSection)
         elm_j = ElasticBeamColumn(
             component,
             (
@@ -170,7 +188,7 @@ def split_component(component, point):
             prev_section,
             transf_j,
         )
-        component.elastic_beamcolumn_elements.add(elm_j)
+        component.elements.add(elm_j)
     elif isinstance(closest_elm, DispBeamColumn):
         assert isinstance(closest_elm.integration, Lobatto)
         beam_integration = Lobatto(
@@ -183,6 +201,7 @@ def split_component(component, point):
             parent_section=prev_section,
             n_p=closest_elm.integration.n_p,
         )
+        assert isinstance(prev_section, FiberSection)
         elm_j = DispBeamColumn(  # type: ignore
             component,
             (
@@ -196,7 +215,7 @@ def split_component(component, point):
             transf_j,
             beam_integration,
         )
-        component.disp_beamcolumn_elements.add(elm_j)
+        component.elements.add(elm_j)
 
     # calculate offset and return
     offset = point - np.array(middle_node.coords)

@@ -54,7 +54,8 @@ files = {}
 for thing in not_backup:
     files[thing] = list_python_files(thing)
 
-# find the latest available version that was last edited yesterday
+
+# replace occurrence in all files
 
 backup_files_dict = {}
 for file_list in files.values():
@@ -77,14 +78,37 @@ for file_list in files.values():
         else:
             backup_files_dict[file] = None
         
+# # find the latest available version that was last edited yesterday
 
-# restore the current file with that file
-for update, source in backup_files_dict.items():
-    if update is not None and source is not None:
-        with open(source, 'r', encoding='utf-8') as f:
-            contents = f.read()
-        with open(update, 'w', encoding='utf-8') as f:
-            f.write(contents)
+# backup_files_dict = {}
+# for file_list in files.values():
+#     for file in file_list:
+#         df = backup_files(file)
+#         if len(df) != 0:
+#             # find the target backup version
+#             sub = df.index[df.index<dt_target]
+#             if len(sub) != 0:
+#                 backup_date = sub[-1]
+#                 date_diff = dt_target - backup_date
+#                 # diff must be less than one day
+#                 if date_diff < datetime.timedelta(days=5):
+#                     backup_file = df.loc[backup_date, 0]
+#                     backup_files_dict[file] = backup_file
+#                 else:
+#                     backup_files_dict[file] = None
+#             else:
+#                 backup_files_dict[file] = None
+#         else:
+#             backup_files_dict[file] = None
+        
+
+# # restore the current file with that file
+# for update, source in backup_files_dict.items():
+#     if update is not None and source is not None:
+#         with open(source, 'r', encoding='utf-8') as f:
+#             contents = f.read()
+#         with open(update, 'w', encoding='utf-8') as f:
+#             f.write(contents)
 
 
 # # undo restore -- replace from backup

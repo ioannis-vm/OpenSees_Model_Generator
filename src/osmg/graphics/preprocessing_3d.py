@@ -37,11 +37,13 @@ def add_data__nodes(data_dict, mdl, load_case):
     """
     Adds a trace containing nodes
     Arguments:
-      data_dict (list[dict[str, object]]):
+      data_dict:
         list of dictionaries containing figure data
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+
     """
+
     # TODO: this was written very sloppily, because I was in a rush.
     # I need to improve this code, avoid code repetition
     # TODO: merge this method with the other methods that plot nodes.
@@ -149,11 +151,13 @@ def add_data__parent_nodes(
     """
     Adds a trace containing parent nodes
     Arguments:
-      data_dict (list[dict[str, object]]):
+      data_dict:
         list of dictionaries containing figure data
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+
     """
+
     list_of_nodes = load_case.parent_nodes.values()
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
@@ -213,11 +217,13 @@ def add_data__internal_nodes(
     """
     Adds a trace containing internal nodes
     Arguments:
-      data_dict (list[dict[str, object]]):
+      data_dict:
         list of dictionaries containing figure data
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+
     """
+
     list_of_nodes = mdl.list_of_internal_nodes()
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
@@ -319,11 +325,11 @@ def add_data__release_nodes(
     """
     Adds a trace containing release nodes
     Arguments:
-      data_dict (list[dict[str, object]]):
+      data_dict:
         list of dictionaries containing figure data
-      list_of_nodes (list[Node]): List of nodes where a release is present.
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      list_of_nodes: List of nodes where a release is present.
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
     """
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
@@ -349,82 +355,6 @@ def add_data__release_nodes(
     )
 
 
-# def add_data__diaphragm_lines(data_dict, lvl):
-#     """
-#     Adds a trace containing rigid diaphragm indicator lines
-#     Arguments:
-#       data_dict (dict): dictionary containing figure data
-#       lvl (Level): a level
-#     """
-#     if not lvl.parent_node:
-#         return
-#     parent_node = lvl.parent_node
-#     x_list: list[Optional[float]] = []
-#     y_list: list[Optional[float]] = []
-#     z_list: list[Optional[float]] = []
-#     for node in lvl.nodes_primary.values():
-#         x_list.extend(
-#             (node.coords[0], parent_node.coords[0], None)
-#         )
-#         y_list.extend(
-#             (node.coords[1], parent_node.coords[1], None)
-#         )
-#         z_list.extend(
-#             (node.coords[2], parent_node.coords[2], None)
-#         )
-#     data_dict.append({
-#         "type": "scatter3d",
-#         "mode": "lines",
-#         "x": x_list,
-#         "y": y_list,
-#         "z": z_list,
-#         "hoverinfo": "skip",
-#         "line": {
-#             "width": 4,
-#             "dash": "dash",
-#             "color": graphics_common.GRID_COLOR
-#         }
-#     })
-
-
-# def add_data__bisector_lines(data_dict, lvl):
-#     """
-#     Adds a trace containing tributary area bisector lines
-#     Arguments:
-#       data_dict (dict): dictionary containing figure data
-#       lvl (Level): a level
-#     """
-#     if not lvl.parent_node:
-#         return
-#     x_list: list[Optional[float]] = []
-#     y_list: list[Optional[float]] = []
-#     z_list: list[Optional[float]] = []
-#     for line in lvl.floor_bisector_lines:
-#         p_1 = line[0]
-#         p_2 = line[1]
-#         x_list.extend(
-#             (p_1[0], p_2[0], None)
-#         )
-#         y_list.extend(
-#             (p_1[1], p_2[1], None)
-#         )
-#         z_list.extend(
-#             (lvl.elevation, lvl.elevation, None)
-#         )
-#     data_dict.append({
-#         "type": "scatter3d",
-#         "mode": "lines",
-#         "x": x_list,
-#         "y": y_list,
-#         "z": z_list,
-#         "hoverinfo": "skip",
-#         "line": {
-#             "width": 4,
-#             "color": graphics_common.BISECTOR_COLOR
-#         }
-#     })
-
-
 def add_data__frames(
         data_dict: list[dict[str, object]],
         mdl: Model,
@@ -432,10 +362,10 @@ def add_data__frames(
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
-      data_dict (list[dict[str, object]]):
+      data_dict:
         list of dictionaries containing figure data
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
     """
     line_elems: list[
         Union[element.ElasticBeamColumn,
@@ -549,10 +479,12 @@ def add_data__bars(
     """
     Adds a trace containing frame element centroidal axis lines
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+
     """
+
     line_elems = [elm for elm in mdl.list_of_specific_element(element.TrussBar)
                   if isinstance(elm, element.TrussBar)]
     if not line_elems:
@@ -642,9 +574,11 @@ def add_data__twonodelinks(data_dict, mdl):
     """
     Adds a trace containing twonodelink elements
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+
     """
+
     link_elems = [
         elm
         for elm in mdl.list_of_elements()
@@ -694,9 +628,11 @@ def add_data__frame_offsets(data_dict, mdl):
     """
     Adds a trace containing frame element rigid offset lines
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+
     """
+
     beamcolumn_elems: list[
         Union[element.ElasticBeamColumn,
               element.DispBeamColumn]] = []
@@ -743,10 +679,12 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
     """
     Adds a trace containing frame element local axis lines
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
-      ref_len (float): model reference length to scale the axes
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+      ref_len: model reference length to scale the axes
+
     """
+
     beamcolumn_elems: list[
         Union[element.ElasticBeamColumn,
               element.DispBeamColumn]] = []
@@ -802,10 +740,12 @@ def add_data__zerolength_axes(data_dict, mdl, ref_len):
     """
     Adds a trace containing zerolength element local axis lines
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
-      ref_len (float): model reference length to scale the axes
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+      ref_len: model reference length to scale the axes
+
     """
+
     zerolength_elements = mdl.list_of_zerolength_elements()
     if not zerolength_elements:
         return
@@ -849,9 +789,11 @@ def add_data__global_axes(data_dict, ref_len):
     """
     Adds a trace containing global axes
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      ref_len (float): model reference length to scale the axes
+      data_dict: dictionary containing figure data
+      ref_len: model reference length to scale the axes
+
     """
+
     scaling = ref_len
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
@@ -895,9 +837,11 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
     """
     Adds a trace containing frame element extrusion mesh
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+
     """
+
     beamcolumn_elems: list[
         Union[element.ElasticBeamColumn,
               element.DispBeamColumn]] = []
@@ -976,9 +920,11 @@ def add_data__extruded_bars_mesh(data_dict, mdl):
     """
     Adds a trace containing frame element extrusion mesh
     Arguments:
-      data_dict (dict): dictionary containing figure data
-      mdl (Model): the model to be visualized
+      data_dict: dictionary containing figure data
+      mdl: the model to be visualized
+
     """
+
     line_elems = mdl.list_of_specific_element(element.TrussBar)
     if not line_elems:
         return
@@ -1069,21 +1015,22 @@ def show(
     """
     Visualize the model
     Arguments:
-      mdl (Model): the model to be visualized
-      load_case (LoadCase): the load_case to be visualized
-      extrude (bool): wether to extrude frame elements
-      offsets (bool): whether to show frame element rigid offsets
-      global_axes (bool): whether to show global axes
-      diaphragm_lines (bool): whether to show lines indicating rigid
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+      extrude: wether to extrude frame elements
+      offsets: whether to show frame element rigid offsets
+      global_axes: whether to show global axes
+      diaphragm_lines: whether to show lines indicating rigid
         diaphragm extent
-      tributary_areas (bool): whether to show tributary area
+      tributary_areas: whether to show tributary area
         boundaries
-      parent_nodes (bool): whether to plot parent nodes
-      frame_axes (bool): whether to show the local axes of frame
+      parent_nodes: whether to plot parent nodes
+      frame_axes: whether to show the local axes of frame
         elements
-      zerolength_axes (bool): whether to show the local axes of
+      zerolength_axes: whether to show the local axes of
         zerolength elements
-      camera (dict): custom positioning of the camera
+      camera: custom positioning of the camera
+
     """
 
     layout = graphics_common_3d.global_layout(mdl, camera)

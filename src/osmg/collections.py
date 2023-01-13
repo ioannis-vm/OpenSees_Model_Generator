@@ -1,6 +1,6 @@
 """
-Model Generator for OpenSees ~ collections
 Collections are designated containers of objects of a particular type.
+
 """
 
 #
@@ -15,6 +15,7 @@ Collections are designated containers of objects of a particular type.
 
 from __future__ import annotations
 from typing import Any
+from typing import List
 from typing import TypeVar
 from dataclasses import dataclass, field
 import numpy as np
@@ -38,7 +39,7 @@ class Collection(dict[TK, TV]):
     Collection of objects.
 
     Attributes:
-        parent (Any)
+        parent: Object to which the Collection belongs.
 
     Examples:
         >>> # collections require parent objects to which they belong
@@ -105,6 +106,9 @@ class Collection(dict[TK, TV]):
         Add an object to the collection. The object needs to have
         a unique id attribute, `uid`.
 
+        Arguments:
+          obj: Object to be added.
+
         """
         if not hasattr(obj, "uid"):
             raise KeyError("Object does not have a uid attribute")
@@ -112,10 +116,15 @@ class Collection(dict[TK, TV]):
             raise KeyError(f"uid {obj.uid} already exists")
         self[obj.uid] = obj
 
-    def retrieve_by_attr(self, attr: Any, val: Any) -> Any:
+    def retrieve_by_attr(self, attr: str, val: Any) -> Any:
         """
         Retrieve an object from the collection based on an attribute
-        value.
+        value. If more than one instances satisfy the criterion, the
+        function returns the first occurrence.
+
+        Arguments:
+          attr: The name of the attribute.
+          val: The value that the attribute should have.
 
         """
         res = None
@@ -137,7 +146,7 @@ class Collection(dict[TK, TV]):
 
     def __srepr__(self):
         """
-        Short version of repr
+        Concise version of `repr`.
 
         """
         return f"[Collection of {len(self)} items]"
@@ -155,6 +164,10 @@ class Collection(dict[TK, TV]):
 class CollectionActive(Collection[TK, TV]):
     """
     Collection with support for currently active objects.
+
+    Attributes:
+      active: List of unique IDs that correspond to the active
+        objects.
 
     Examples:
         >>> from osmg.level import Level
@@ -181,15 +194,18 @@ class CollectionActive(Collection[TK, TV]):
         Traceback (most recent call last):
             ....
         KeyError: 'uid 2 not present in collection.'
+
     """
 
-    active: list[TK] = field(default_factory=list)
+    active: List[TK] = field(default_factory=list)
 
-    def set_active(self, uids: list[TK]) -> None:
+    def set_active(self, uids: List[TK]) -> None:
         """
         Sets the active objects.
-        Args:
-            uids (list[int]): uids of the objects to set as active
+
+        Arguments:
+            uids: uids of the objects to set as active
+
         """
         for uid in uids:
             if uid not in self:
@@ -199,8 +215,10 @@ class CollectionActive(Collection[TK, TV]):
     def set_active_all(self):
         """
         Sets the active objects.
-        Args:
-            uids (list[int]): uids of the objects to set as active
+
+        Arguments:
+            uids: uids of the objects to set as active
+
         """
         self.active = []
         for key in self:
@@ -211,8 +229,9 @@ class CollectionActive(Collection[TK, TV]):
 class NodeCollection(Collection[int, node.Node]):
     """
     Node collection.
+
     Attributes:
-        parent (Any)
+        parent: Object to which the Collection belongs.
 
     Examples:
         >>> from osmg.ops.node import Node
@@ -233,6 +252,7 @@ class NodeCollection(Collection[int, node.Node]):
         >>> retrieved_node = my_collection.search_xy(1.00, 1.00)
         >>> id(retrieved_node) == id(n_2)  # should be the same object
         True
+
     """
 
     named_contents: dict[str, node.Node] = field(default_factory=dict)
@@ -260,8 +280,10 @@ class CollectionWithConnectivity(Collection[TK, TV]):
     """
     Collection of elements for which it is important to consider their
     connectivity.
+
     Attributes:
-        parent (Any)
+        parent: Object to which the Collection belongs.
+
     """
 
     named_contents: dict[str, element.ElasticBeamColumn] = field(
@@ -274,6 +296,10 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         The method also checks to see if an object having the same
         connectivity exists in the collection, and raises an error if
         it does.
+
+        Arguments:
+          obj: Object to be added.
+
         """
         uids = [nd.uid for nd in obj.nodes]
         uids.sort()

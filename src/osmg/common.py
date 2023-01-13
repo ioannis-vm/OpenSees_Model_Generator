@@ -81,7 +81,7 @@ def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:
     If the key is not in the dictionary, or if it is the first element
     in the dictionary, returns None.
 
-    Args:
+    Arguments:
         dct: An ordered dictionary.
         key: The key of the element whose previous element we want to
         find.

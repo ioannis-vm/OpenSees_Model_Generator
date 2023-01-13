@@ -1,18 +1,5 @@
 """
-Model Generator for OpenSees ~ BRB element generator
-
-The purpose of this component is to use the lower-level `gen` classes
-to simplify the definition of BRB elements simulated using a
-corotational truss opensees element and the Steel4 material wrapped
-under a Fatigue material, as done in [1] and [2].
-
-1. Zsarnoczay, Adam. "Experimental and numerical investigation of
-buckling restrained braced frames for Eurocode conform design
-procedure development." (2013).
-
-2. Simpson, Barbara Gwynne. Design development for steel strongback
-braced frames to mitigate concentrations of damage. University of
-California, Berkeley, 2018.
+BRB element generator.
 
 """
 
@@ -48,6 +35,7 @@ class BRBGenSettings:
     objects, to better organize those values and improve the usability
     of the BRBGenerator objects by allowing their methods to have
     fewer arguments.
+
     """
     steel4_b_k: float = field(default=0.003)
     steel4_b_kc: float = field(default=0.023)
@@ -74,7 +62,19 @@ class BRBGenSettings:
 @dataclass(repr=False)
 class BRBGenerator:
     """
-    Generates and adds BRB elements to a model.
+    Uses the lower-level `gen` classes to simplify the definition of
+    BRB elements simulated using a corotational truss opensees element
+    and the Steel4 material wrapped under a Fatigue material, as done
+    in [1] and [2].
+
+    1. Zsarnoczay, Adam. "Experimental and numerical investigation of
+    buckling restrained braced frames for Eurocode conform design
+    procedure development." (2013).
+
+    2. Simpson, Barbara Gwynne. Design development for steel
+    strongback braced frames to mitigate concentrations of
+    damage. University of California, Berkeley, 2018.
+
     """
 
     model: Model
@@ -102,32 +102,32 @@ class BRBGenerator:
         Adds a BRB element to the model.
 
         Parameters:
-          xi_coord (float): x coordinate of the i-end
-          yi_coord (float): y coordinate of the i-end
-          lvl_key_i (int): Level ID of the i-end
-          offset_i (nparr): Rigid offset at the i-end
-          snap_i (str): Snap tag for the i-end connectivity used to
+          xi_coord: x coordinate of the i-end
+          yi_coord: y coordinate of the i-end
+          lvl_key_i: Level ID of the i-end
+          offset_i: Rigid offset at the i-end
+          snap_i: Snap tag for the i-end connectivity used to
             automatically determine an offset based on existing
             elements.
-          xj_coord (float): x coordinate of the j-end
-          yj_coord (float): y coordinate of the j-end
-          lvl_key_j (int): Level ID of the j-end
-          offset_j (nparr): Rigid offset at the j-end
-          snap_j (str): Snap tag for the j-end connectivity used to
+          xj_coord: x coordinate of the j-end
+          yj_coord: y coordinate of the j-end
+          lvl_key_j: Level ID of the j-end
+          offset_j: Rigid offset at the j-end
+          snap_j: Snap tag for the j-end connectivity used to
             automatically determine an offset based on existing
             elements.
-          area (float): Core area of the BRB element.
-          f_y (float): Steel stress.
-          e_0 (float): Young's modulus, adjusted to account for
+          area: Core area of the BRB element.
+          f_y: Steel stress.
+          e_0: Young's modulus, adjusted to account for
             non-prismatic shape. See [2], Figure 4.15, and Equations
             4.7, 4.8.
-          casing_size (float): Assuming a square cross-section,
+          casing_size: Assuming a square cross-section,
             controls the side length. Used for visualization purposes
             and to determine the weight of the BRB element, which is
             lumped to the connecting nodes. This parameter has no
             effect on the force-deformation relationship of the
             element.
-          unit_weight (float): Weight per unit volume, used together
+          unit_weight: Weight per unit volume, used together
             with the casing_size, assuming a square section and a
             workpoint-to-workpoint length, in order to determine the
             weight of the BRB, which is lumped to the two connecting

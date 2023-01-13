@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ uid generator
+Objects that generate unique IDs
+
 """
 
 #
@@ -20,17 +21,18 @@ from itertools import count
 class UIDGenerator:
     """
     Generates unique identifiers (uids) for various objects.
+
     """
 
     def new(self, thing: str) -> int:
         """
         Generates a new uid for an object of the given type.
 
-        Args:
-            object_type (str): The type of object for which to generate a uid.
+        Arguments:
+            object_type: The type of object for which to generate a uid.
 
         Returns:
-            int: A unique identifier for an object of the given type.
+            A unique identifier for an object of the given type.
 
         Example:
             >>> from osmg.gen.uid_gen import UIDGenerator
@@ -43,6 +45,7 @@ class UIDGenerator:
             0
             >>> generator.new('element')
             1
+
         """
         if hasattr(self, thing):
             res = next(getattr(self, thing))

@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ basic forces
+Defines the :func:`~osmg.postprocessing.basic_forces.basic_forces`
+method.
 """
 
 #
@@ -36,8 +37,21 @@ def basic_forces(
     as_tuple: bool = False,
 ) -> object:
     """
-    Returns the basic forces of a specified element
+    Returns the basic forces of a specified element.
+
+    Arguments:
+    anl: Analysis object.
+    case_name: Name of loadcase to look for results.
+    step: Analysis step to look for results.
+    elm: Element of which the basic forces are required.
+    num_points: Number of points along the length of the element for
+      which to report the basic forces (oftentimes called `stations`
+      in analysis software.)
+    as_tupe: Whether to return the results in the form of a pandas
+      DataFrame or a tuple.
+
     """
+
     if isinstance(anl, ModalResponseSpectrumAnalysis):
         forces = anl.combined_basic_forces(elm.uid)
         w_x, w_y, w_z = (0.00, 0.00, 0.00)

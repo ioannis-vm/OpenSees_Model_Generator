@@ -1,5 +1,6 @@
 """
-Generates meshes for preconfigured sections
+Generates meshes for preconfigured sections.
+
 """
 
 #
@@ -27,8 +28,10 @@ nparr = npt.NDArray[np.float64]
 
 def generate(edges):
     """
-    Generates halfedges from the given edges
+    Generates halfedges from the given edges.
+
     """
+
     halfedges = define_halfedges(edges)
     loops = obtain_closed_loops(halfedges)
     _, internal, trivial = orient_loops(loops)
@@ -38,8 +41,10 @@ def generate(edges):
 
 def define_edges(vertices):
     """
-    Defines edges from an ordered list of vertices
+    Defines edges from an ordered list of vertices.
+
     """
+
     n_v = len(vertices)
     edges = []
     for i in range(n_v - 1):
@@ -54,19 +59,18 @@ def define_edges(vertices):
 
 def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
     """
-    Defines a loop of counterclockwise halfedges
-    that form the shape of the W section with
-    the specified parameters.
-    The origin coincides with the centroid.
-    Input:
-        b: total width
-        h: total height
-        tw: web thickness
-        tf: flange thickness
-        target_area: AISC database area
-            to determine fillets,
-            because trying to do that using
-            `T` doesn't work.
+    Defines a loop of counterclockwise halfedges that form the shape
+    of the W section with the specified parameters.  The origin
+    coincides with the centroid.
+
+    Arguments:
+      b: total width
+      h: total height
+      tw: web thickness
+      tf: flange thickness
+      target_area: AISC database area to determine fillets, because
+        trying to do that using `T` doesn't work.
+
     """
     area_diff = target_area - (
         sec_b * sec_tf * 2.0 + (sec_h - 2 * sec_tf) * sec_tw
@@ -207,10 +211,13 @@ def rect_mesh(dim_b, dim_h):
     that form the shape of the rectangular section with
     the specified parameters.
     The origin coincides with the centroid.
-    Input:
+
+    Arguments:
         b: total width
         h: total height
+
     """
+
     vertices = [
         Vertex((dim_b / 2.0, dim_h / 2.0)),
         Vertex((-dim_b / 2.0, dim_h / 2.0)),
@@ -223,9 +230,10 @@ def rect_mesh(dim_b, dim_h):
 
 def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     """
-    Generates generic snap poitns
-    for a section object.
+    Generates generic snap poitns for a section object.
+
     """
+
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
     snap_points: dict[str, nparr] = {}

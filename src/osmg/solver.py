@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ solver
+Defines Analysis objects.
 """
 
 #
@@ -56,7 +56,25 @@ NUMBERER = "RCM"
 @dataclass(repr=False)
 class Results:
     """
-    Results object. Stores analysis results.
+    Stores analysis results.
+
+    Attributes:
+      node_displacements: Displacements, stored in a dictionary. The
+        keys correspond to the node UIDs. Each value is a dictionary,
+        of which the keys are the analysis step. Each value of that is
+        list containing the displacement of each DOF.
+      node_velocities: Similar to node_displacements.
+      node_accelerations: Similar to node_displacements.
+      node_reactions: Similar to node displacements.
+      element_forces: Basic forces of beamcolumn elements. The nested
+        structure is similar to that of node_displacements.
+      release_foce_defo: Force-deformation pairs of zerolength
+        elements. The nested structure is similar to that of
+        node_displacements.
+      periods: Optional, stores the periods for modal analyses.
+      n_steps_success: Total number of steps of the analysis.
+      metadata: Optional metadata that depend on the type of analysis.
+
     """
 
     node_displacements: Collection[int, dict[int, list[float]]] = field(
@@ -110,15 +128,17 @@ class AnalysisSettings:
 class Analysis:
     """
     Parent analysis class.
+
     Attributes:
-      mdl (Model): a given model
-      load_cases (dict): Dictionary containing load case names and
+      mdl: a given model
+      load_cases: Dictionary containing load case names and
         load case objects in which those load cases reside.
-      output_directory (Optional[str]): Where to place the results
+      output_directory: Where to place the results
         when it is requested for them to be pickled.
-      settings (AnalysisSettings): analysis settings
-      results (Results): analysis results
-      logger(Optional[object]): Logger object
+      settings: analysis settings
+      results: analysis results
+      logger: Logger object
+
     """
 
     mdl: Model
@@ -132,16 +152,20 @@ class Analysis:
 
     def log(self, msg: str) -> None:
         """
-        Adds a message to the log file
+        Adds a message to the log file.
+
         """
+
         if self.logger:
             # logger might not have been initialized yet
             self.logger.info(msg)
 
     def print(self, thing: Any, end: str = '\n') -> None:
         """
-        Prints a message to stdout
+        Prints a message to stdout.
+
         """
+
         if not self.settings.silent:
             print(thing, end=end)
         if self.logger:
@@ -209,21 +233,26 @@ class Analysis:
 
     def _write_results_to_disk(self):
         """
-        Pickles the results
+        Pickles the results.
+
         """
+
         with open(f"{self.output_directory}/main_results.pcl", "wb") as file:
             pickle.dump(self.results, file)
 
     def read_results_from_disk(self):
         """
-        Reads back results from a pickle file
+        Reads back results from a pickle file.
+
         """
+
         with open(f"{self.output_directory}/main_results.pcl", "rb") as file:
             self.results = pickle.load(file)
 
     def _to_opensees_domain(self, case_name):
         """
-        Defines the model in OpenSeesPy
+        Defines the model in OpenSeesPy.
+
         """
 
         # initialize
@@ -307,7 +336,9 @@ class Analysis:
             """
             A cute recursive function that defines materials with
             predecessors.
+
             """
+
             # if the actual material has not been defined yet,
             if mat.uid not in defined_materials:
                 while (
@@ -564,7 +595,9 @@ class Analysis:
     def global_reactions(self, case_name, step):
         """
         Calculates and returns the global reaction forces.
+
         """
+
         reactions = np.full(6, 0.00)
         for lvl in self.mdl.levels.values():
             for node in lvl.nodes.values():
@@ -613,12 +646,15 @@ class StaticAnalysis(Analysis):
     """
     Static analysis.  Stores all results (for each load case) in one
     single step.
+
     """
 
     def run(self):
         """
         Runs the static analysis.
+
         """
+
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -666,6 +702,7 @@ class StaticAnalysis(Analysis):
 class ModalAnalysis(Analysis):
     """
     Runs a modal analysis.
+
     """
 
     num_modes: int = field(default=1, repr=False)
@@ -843,7 +880,9 @@ class ModalAnalysis(Analysis):
     def run(self):
         """
         Runs the modal analysis.
+
         """
+
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -892,7 +931,9 @@ class ModalAnalysis(Analysis):
     def modal_participation_factors(self, case_name, direction):
         """
         Calculates modal participation factors
+
         """
+
         dof_dir = {"x": 0, "y": 1, "z": 2}
         ntgs = ops.getNodeTags()
         gammas = np.zeros(self.num_modes)
@@ -923,6 +964,7 @@ class ModalAnalysis(Analysis):
 class NonlinearAnalysis(Analysis):
     """
     Nonlinear analysis parent class.
+
     """
 
     def _run_gravity_analysis(self):
@@ -949,7 +991,9 @@ class NonlinearAnalysis(Analysis):
     def retrieve_node_displacement(self, uid, case_name):
         """
         Returns the displacement of a node for all analysis steps
+
         """
+
         if case_name not in self.results:
             raise ValueError(f"case_name {case_name} not found in results.")
         res = np.zeros((self.results[case_name].n_steps_success, 6))
@@ -965,7 +1009,9 @@ class NonlinearAnalysis(Analysis):
     def retrieve_node_acceleration(self, uid, case_name):
         """
         Returns the acceleration of a node for all analysis steps
+
         """
+
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
@@ -979,7 +1025,9 @@ class NonlinearAnalysis(Analysis):
     def retrieve_node_velocity(self, uid, case_name):
         """
         Returns the velocity of a node for all analysis steps
+
         """
+
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
@@ -994,7 +1042,9 @@ class NonlinearAnalysis(Analysis):
         """
         Returns the absolute acceleration of a node for all analysis
         steps
+
         """
+
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, NLTHAnalysis)
@@ -1028,7 +1078,9 @@ class NonlinearAnalysis(Analysis):
     def retrieve_node_abs_velocity(self, uid, case_name):
         """
         Returns the absolute velocity of a node for all analysis steps
+
         """
+
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, NLTHAnalysis)
@@ -1067,7 +1119,9 @@ class NonlinearAnalysis(Analysis):
         """
         Returns the force-deformation of a zerolength element for all
         analysis steps
+
         """
+
         num = len(self.results[case_name].release_force_defo[uid])
         res = np.zeros((num, 6))
         for i in range(num):
@@ -1083,6 +1137,7 @@ class NonlinearAnalysis(Analysis):
 class PushoverAnalysis(NonlinearAnalysis):
     """
     Pushover analysis
+
     """
 
     def _apply_lateral_load(
@@ -1159,19 +1214,22 @@ class PushoverAnalysis(NonlinearAnalysis):
         Run pushover analysis
         Arguments:
           direction: can be any of 'x', 'y', 'z'
-          target_displacements (list[float]): a list of target displacements.
-            each time a target is reached, the analysis continues until
-            the next target is reached, flipping the direction as necessary.
-          control_node (Node): analysis control node (of which the
-            direction is queried)
-          displ_incr (float): initial displacement increment.
-          mode shape (nparr): array containing a mode shape that is
-            used to distribute the applied incremental loads. If no
-            mode shape is specified, the distribution is uniform.
-          loaded_node (Node): if a loaded node is specified, all
-            incremental load is applied entirely on that node.
-            Otherwise, the incremental loads are distributed to all nodes.
+          target_displacements: a list of target displacements.  each
+            time a target is reached, the analysis continues until the
+            next target is reached, flipping the direction as
+            necessary.
+          control_node: analysis control node (of which the direction
+            is queried)
+          displ_incr: initial displacement increment.
+          mode shape: array containing a mode shape that is used to
+            distribute the applied incremental loads. If no mode shape
+            is specified, the distribution is uniform.
+          loaded_node: if a loaded node is specified, all incremental
+            load is applied entirely on that node.  Otherwise, the
+            incremental loads are distributed to all nodes.
+
         """
+
         self.log(f"Direction: {direction}")
         if direction == "x":
             control_dof = 0
@@ -1353,7 +1411,9 @@ class PushoverAnalysis(NonlinearAnalysis):
     def table_pushover_curve(self, case_name, direction, node):
         """
         Returns the force deformation results
+
         """
+
         if direction == "x":
             control_dof = 0
         elif direction == "y":
@@ -1382,7 +1442,9 @@ class PushoverAnalysis(NonlinearAnalysis):
     def plot_pushover_curve(self, case_name, direction, node):
         """
         Plots the pushover curve
+
         """
+
         # TODO: units
         displacement, base_shear = self.table_pushover_curve(
             case_name, direction, node
@@ -1406,6 +1468,7 @@ def define_lateral_load_pattern(
     """
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
+
     """
 
     error = True
@@ -1464,7 +1527,9 @@ def define_lateral_load_pattern(
 def plot_ground_motion(filename, file_time_incr, gmunit="g", plotly=False):
     """
     Plots a ground motion input file.
+
     """
+
     y_vals = np.loadtxt(filename)
     n_points = len(y_vals)
     x_vals = np.arange(0.00, n_points * file_time_incr, file_time_incr)
@@ -1493,6 +1558,7 @@ def plot_ground_motion(filename, file_time_incr, gmunit="g", plotly=False):
 class NLTHAnalysis(NonlinearAnalysis):
     """
     Dynamic nonlinear time-history analysis
+
     """
 
     time_vector: list[float] = field(default_factory=list, repr=False)
@@ -1514,7 +1580,7 @@ class NLTHAnalysis(NonlinearAnalysis):
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the nonlinear time-history analysis
-        Args:
+        Arguments:
             filename_x, y, z: Paths where the fixed-step ground acceleration
                               records are stored (single-column).
             file_time_incr:   The corresponding time increment
@@ -1530,6 +1596,7 @@ class NLTHAnalysis(NonlinearAnalysis):
                               'ratio_modal': r, 'period': t1,
                               'ratio_stiffness': r}
             print_progress: Controls whether the current time is printed out
+
         """
 
         self._init_results()
@@ -1826,7 +1893,9 @@ class NLTHAnalysis(NonlinearAnalysis):
     ):
         """
         Plots the displacement history of the specified node.
+
         """
+
         time_vec = self.time_vector
         uid = node.uid
         results = []
@@ -1859,7 +1928,8 @@ class NLTHAnalysis(NonlinearAnalysis):
 @dataclass
 class ModalResponseSpectrumAnalysis:
     """
-    Modal response spectrum analysis
+    Modal response spectrum analysis.
+
     """
 
     mdl: Model
@@ -1874,8 +1944,10 @@ class ModalResponseSpectrumAnalysis:
 
     def run(self):
         """
-        Run the modal response spectrum analysis
+        Run the modal response spectrum analysis.
+
         """
+
         spectrum_ifun = interp1d(self.periods, self.spectrum, kind="linear")
         anl = ModalAnalysis(
             self.mdl,
@@ -1914,8 +1986,10 @@ class ModalResponseSpectrumAnalysis:
 
     def combined_node_disp(self, node_uid):
         """
-        Returns the SRSS-combined node displacement of a node
+        Returns the SRSS-combined node displacement of a node.
+
         """
+
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -1935,8 +2009,10 @@ class ModalResponseSpectrumAnalysis:
     def combined_node_disp_diff(self, node_i_uid, node_j_uid):
         """
         Returns the SRSS-combined displacement difference between two
-        nodes
+        nodes.
+
         """
+
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -1965,8 +2041,10 @@ class ModalResponseSpectrumAnalysis:
 
     def combined_basic_forces(self, element_uid):
         """
-        Returns the SRSS-combined basic forces of a line element
+        Returns the SRSS-combined basic forces of a line element.
+
         """
+
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):

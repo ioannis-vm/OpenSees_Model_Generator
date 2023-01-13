@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ line
+Defines :obj:`~osmg.line.Line` objects.
 """
 
 #
@@ -28,10 +28,12 @@ class Line:
     """
     Finite-length line segment object.
     Used internally whenever operations involving lines are reuired.
+
     Attributes:
-      tag (str)
-      start (numpy.ndarray): starting point
-      end (numpy.ndarray): end point
+      tag: line tag.
+      start: starting point.
+      end: end point.
+
     """
 
     tag: str
@@ -54,7 +56,9 @@ class Line:
             >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
             >>> l1.length()
             2.8284271247461903
+
         """
+
         return np.linalg.norm(self.end - self.start)
 
     def direction(self):
@@ -67,7 +71,9 @@ class Line:
             >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
             >>> l1.direction()
             array([0.70710678, 0.70710678])
+
         """
+
         return (self.end - self.start) / self.length()
 
     def intersect(self, other: "Line") -> nparr:
@@ -77,7 +83,7 @@ class Line:
         is actually a finite-length line segment.
 
         Parameters:
-          other (Line): the other line
+          other: the other line
 
         Example:
             >>> from osmg.line import Line
@@ -85,7 +91,9 @@ class Line:
             >>> l2 = Line('l2', np.array([1, 0]), np.array([1, 3]))
             >>> l1.intersect(l2)
             array([1., 1.])
+
         """
+
         ra_dir = self.direction()
         rb_dir = other.direction()
         mat: nparr = np.array(
@@ -138,10 +146,12 @@ class Line:
     def intersects_pt(self, point: nparr) -> bool:
         """
         Check whether the given point pt lies on the line.
+
         Parameters:
-            point (nparr): a point
-        Returns:
-            bool: True if the point lies on the line, False otherwise
+            point: a point
+
+        Returns: True if the point lies on the line, False otherwise
+
         Examples:
             >>> from osmg.line import Line
             >>> l = Line('my_line', np.array([0, 0]), np.array([1, 1]))
@@ -153,7 +163,9 @@ class Line:
             True
             >>> l.intersects_pt(np.array([2, 2]))
             False
+
         """
+
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
         if np.abs(norm2) < 1.0e-4:
@@ -172,10 +184,12 @@ class Line:
         Calculate the minimum distance between the line segment and a
         point.  If the point falls on the line but is outside of the
         line segment, returns None.
+
         Parameters:
-            point (nparr): the point
-        Returns:
-            float: the minimum distance
+            point: the point
+
+        Returns: the minimum distance
+
         Example:
             >>> line = Line(tag='line',
             ...             start=np.array([1, 1]),
@@ -193,6 +207,7 @@ class Line:
             >>> line.point_distance(point)
 
         """
+
         r_a = self.end - self.start
         r_b = point - self.start
         proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a
@@ -207,8 +222,10 @@ class Line:
         Calculates the projection of a point on the line.
         If the projection falls on the line segment, it returns the
         projected point, otherwise it returns None.
+
         Arguments:
-          point (numpy.ndarray): the point's coordinates
+          point: the point's coordinates
+
         Example:
             >>> line = Line('test', np.array([0, 0]), np.array([10, 0]))
             >>> line.project(np.array([5, 0]))
@@ -220,6 +237,7 @@ class Line:
             >>> line.project(np.array([15, 5]))
 
         """
+
         r_a = self.end - self.start
         r_b = point - self.start
         proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start

@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ section
+Defines :obj:`~osmg.ops.section.Section` objects.
 """
 
 #
@@ -60,7 +60,23 @@ class Section:
 @dataclass
 class ElasticSection(Section):
     """
-    Elastic Section Object
+    Elastic Section Object.
+
+    Attributes:
+      e_mod: Young's modulus.
+      area: Cross-sectional area.
+      i_y: Moment of inertia for strong-axis bending.
+      i_x: Moment of inertia for weak-axis bending.
+      g_mod: Shear modulus.
+      j_mod: Torsional moment of inertia.
+      sec_w: Weight per unit length.
+      outside_shape: Mesh defining the outside shape of the section.
+      snap_points: Dictionary containing coordinates of `snap_points`
+        used by component-generating methods to position components
+        relative to existing ones. See
+        :func:`~osmg.gen.component_gen.beam_placement_lookup` for example.
+      properties: Dictionary containing section properties.
+
     """
 
     e_mod: float
@@ -77,8 +93,11 @@ class ElasticSection(Section):
     def weight_per_length(self):
         """
         Returns the weight per length of a section.
-        For steel W sections, it adds 15% for misc. steel and connections.
+        For steel W sections, it adds 15% for misc. steel and
+        connections.
+
         """
+
         if self.name[0] == "W":
             res = self.sec_w * 1.15  # misc steel and connections
         else:
@@ -114,13 +133,14 @@ class SectionComponent:
     """
     Part of a section object, having a single material.
 
-    Args:
-      outside_shape (Mesh): Mesh defining the outside shape
-      ops_material (UniaxialMaterial): OpenSees material
-      physical_material (PhysicalMaterial): Physical material
-      parent_section (Optional[FiberSection]): Parent section.
+    Arguments:
+      outside_shape: Mesh defining the outside shape
+      ops_material: OpenSees material
+      physical_material: Physical material
+      parent_section: Parent section.
         The parent section is assigned automatically by their
         parent section iteslf, at its creation time.
+
     """
 
     outside_shape: Mesh
@@ -146,8 +166,10 @@ class SectionComponent:
 
     def cut_into_tiny_little_pieces(self):
         """
-        Returns data used to define fibers in OpenSees
+        Returns data used to define fibers in OpenSees.
+
         """
+
         # if we have an AISC HSS section, we need to discretize in a
         # certain way
         assert self.parent_section
@@ -174,7 +196,9 @@ class SectionComponent:
         """
         Make a shallow copy of a section component and replace the old
         material with the given one.
+
         """
+
         new_component = SectionComponent(
             self.outside_shape, self.holes, mat, self.physical_material
         )
@@ -186,7 +210,8 @@ class FiberSection(Section):
     """
     Fiber section object.
     Can consist of multiple materials.
-    The primary part of the component must have the key 'main'.
+    The primary part of the component must have the key "main".
+
     """
 
     outside_shape: Mesh
@@ -217,7 +242,9 @@ class FiberSection(Section):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "Fiber",
             self.uid,
@@ -229,7 +256,9 @@ class FiberSection(Section):
         """
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and connections.
+
         """
+
         if self.name[0] == "W":
             mult = 1.15  # misc steel and connections
         else:
@@ -257,7 +286,9 @@ class FiberSection(Section):
         Returns a shallow copy of the section object in which all
         opensees_material objects have been replaced with the given
         material. Required for the modling of steel braced frames.
+
         """
+
         new_section_parts = {}
         for key, val in self.section_parts.items():
             new_part = val.copy_alter_material(mat)

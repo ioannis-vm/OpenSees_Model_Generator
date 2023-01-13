@@ -1,5 +1,6 @@
 """
-Performs coordinate transformations
+Coordinate transformation operations.
+
 """
 
 #
@@ -21,13 +22,13 @@ nparr = npt.NDArray[np.float64]
 
 def rotation_matrix_2d(ang: float) -> nparr:
     """
-    Return a 2D transformation matrix.
+    Returns a 2D transformation matrix.
 
     Parameters:
-        ang (float): Angle in radians to rotate the matrix by.
+        ang: Angle in radians to rotate the matrix by.
 
     Returns:
-        nparr: A 2x2 transformation matrix.
+        A 2x2 transformation matrix.
 
     Example:
         >>> rotation_matrix_2d(np.pi / 2)
@@ -36,7 +37,9 @@ def rotation_matrix_2d(ang: float) -> nparr:
 
     Raises:
         TypeError: If `ang` is not a float.
+
     """
+
     if not isinstance(ang, float):
         raise TypeError("ang parameter should be a float.")
     return np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
@@ -44,15 +47,15 @@ def rotation_matrix_2d(ang: float) -> nparr:
 
 def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
     """
-    Return the rotation matrix associated with counterclockwise
+    Returns the rotation matrix associated with counterclockwise
     rotation about the given axis by theta radians.
 
     Parameters:
-        axis (nparr): 3D vector representing the axis of rotation.
-        theta (float): Angle of rotation in radians.
+        axis: 3D vector representing the axis of rotation.
+        theta: Angle of rotation in radians.
 
     Returns:
-        nparr: 3x3 transformation matrix representing the rotation.
+        3x3 transformation matrix representing the rotation.
 
     Example:
     >>> # this is how to run that function:
@@ -63,7 +66,9 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
     ...      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
     ...      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
     >>> assert np.allclose(res, expected_res)
+
     """
+
     v_a = np.cos(theta / 2.0)
     v_b, v_c, v_d = -axis * np.sin(theta / 2.0)
     v_aa, v_bb, v_cc, v_dd = v_a * v_a, v_b * v_b, v_c * v_c, v_d * v_d
@@ -89,12 +94,15 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
     Returns a transformation matrix that transforms points from
     the coordinate system in which the x, y and z axes are expressed,
     to the local coordinate system defined by them.
-    Args:
-        vec_x (nparr): Local x axis expressed in the global system
-        vec_y (nparr): (similar)
-        vec_z (nparr): (similar)
+
+    Arguments:
+        vec_x: Local x axis expressed in the global system
+        vec_y: (similar)
+        vec_z: (similar)
+
     Returns:
-        (nparr): global to local transformation matrix.
+        global to local transformation matrix.
+
     Note: For orthogonal axes, transpose to obtain the inverse transform.
 
     Example:
@@ -117,7 +125,9 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
         ...      [0., 0., 1.],
         ...      [0., 1., 0.]]))
         >>> assert np.allclose(res, expected_result)
+
     """
+
     tr_global_to_local: nparr = np.vstack((vec_x, vec_y, vec_z))
     return tr_global_to_local
 
@@ -128,20 +138,21 @@ def local_axes_from_points_and_angle(
     """
     Given a start point, and end point, and an angle,
     obtain the local coordinate system of a linear element.
-    Args:
-        point_i (nparr): Start point
-        point_j (nparr): End point
-        ang (float): Parameter that controls the rotation of the
+
+    Arguments:
+        point_i: Start point
+        point_j: End point
+        ang : Parameter that controls the rotation of the
             section around the x-axis. Counterclockwise rotation is
             posotive. 0.00 corresponds to:
               vertical elements whose local z axis coincides with
                                 the local x axis
               horizontal elements whose local z axis is horizontal.
     Returns:
-        tuple[nparr, nparr, nparr]: Local coordinate system
-            vectors. The first element is the local x axis, the second
-            element is the local y axis, and the third element is the
-            local z axis.
+        Local coordinate system
+        vectors. The first element is the local x axis, the second
+        element is the local y axis, and the third element is the
+        local z axis.
     Raises:
         ValueError: If the start point and end point define a vertical element
             that is defined upside down (i.e., with the start point at a lower
@@ -158,7 +169,9 @@ def local_axes_from_points_and_angle(
         >>> ang = 0
         >>> local_axes_from_points_and_angle(point_i, point_j, ang)
         (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))
+
     """
+
     # x-axis
     x_axis = point_j - point_i
     x_axis = x_axis / np.linalg.norm(x_axis)
@@ -195,22 +208,22 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
     them, but does not allow any relative displacement or rotation
     between the nodes.
 
-    Args:
-        offset (nparr):
+    Arguments:
+        offset:
           Vector pointing from the node of the rigid offset where the
           displacement is known to the node where we want to obtain
           the displacement. The vector should be given in the global
           coordinate system.
-        u_vec (nparr):
+        u_vec:
           Displacement of the node where the displacement is known,
           given in the global coordinate system.
-        r_vec (nparr):
+        r_vec:
           Rotation of the node where the displacement is known, given
           as a vector of the form [rx, ry, rz] representing the
           rotation around the x, y, and z axes, respectively.
 
     Returns:
-        nparr: Displacement at the other end of the rigid offset,
+        Displacement at the other end of the rigid offset,
         given in the global coordinate system.
 
     Example:
@@ -222,6 +235,7 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
         ...     np.array([0.01, -0.02, 0.005]),
         ...     np.array([0.0002, -0.0003, 0.0001]))
         array([ 0.01  , -0.0199,  0.0053])
+
     """
 
     t_rigid: nparr = np.array(

@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ component assembly
+Collection of objects which, as a group, represent some part of a
+structure.
 """
 
 #
@@ -29,21 +30,23 @@ class ComponentAssembly:
     A component assembly represents some part of a structure and holds
     various lower-level elements such as nodes and beamcolumn
     elements.
+
     Attributes:
-      uid (int): Unique identifyer of the component assembly
-      parent_collection (ComponentCollection): The collection of
+      uid: Unique identifier of the component assembly
+      parent_collection: The collection of
         elements to which the component assembly belongs.
-      component_purpose (str): The functionality of the component assembly
-      external_nodes (NodeCollection): the external nodes to which the
+      component_purpose: The functionality of the component assembly
+      external_nodes: the external nodes to which the
         component assembly is connected.
         these nodes should exist as part of a level.
-      internal_nodes (NodeCollection): internal nodes that are
+      internal_nodes: internal nodes that are
         required for the connectivity of the elements of the component
         assembly.
         these nodes only exist as part of the component assembly.
-      elements (CollectionWithConnectivity):
+      elements:
         Collection containing the elements that are part of the
         component assembly.
+
     """
 
     uid: int
@@ -82,7 +85,9 @@ class ComponentAssembly:
         """
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
+
         """
+
         res = {}
         for elm in self.elements.values():
             res[elm.uid] = elm
@@ -91,7 +96,9 @@ class ComponentAssembly:
     def list_of_elements(self):
         """
         Returns a list of all element objects in the model.
+
         """
+
         return list(self.dict_of_elements().values())
 
     def element_connectivity(self):
@@ -101,7 +108,9 @@ class ComponentAssembly:
         represented by a tuple of node uids of its connected nodes in
         ascending order. This method returns a dictionary having these
         tuples as keys, and the associated components as values.
+
         """
+
         res = {}
         elms = self.list_of_elements()
         for elm in elms:

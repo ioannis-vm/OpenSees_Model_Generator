@@ -1,6 +1,6 @@
 """
-The following utility functions are used for data visualization
-https://plotly.com/python/reference/
+Defines utility functions used for data visualization.
+
 """
 
 #
@@ -31,7 +31,14 @@ nparr = npt.NDArray[np.float64]
 
 def force_scaling_factor(ref_len, fmax, factor):
     """
-    Applies a scaling factor to basic forces
+    Applies a scaling factor to basic forces.
+
+    Arguments:
+      ref_len: :func:`~osmg.model.Model.reference_length` of the
+        model.
+      fmax: Largest value in the basic forces.
+      factor: Required scaling factor.
+
     """
     if fmax == 0.00:
         result = 0.00
@@ -44,18 +51,20 @@ def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
     """
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
-    Args:
-        element ('model.LineElement'): A line element
-        u_i (npt.NDArray[np.float64]): 3 displacements at end i, global system
-        r_i (npt.NDArray[np.float64]): 3 rotations at end i, global system
+
+    Arguments:
+        element: A line element
+        u_i: 3 displacements at end i, global system
+        r_i: 3 rotations at end i, global system
         u_j, r_j: similar to u_i, r_i.
         num_points: Number of interpolation points
-    See note: https://notability.com/n/0wlJ17mt81uuVWAYVoFfV3
+
     Returns:
-        d_global (npt.NDArray[np.float64]): Displacements (global system)
-        r_local (npt.NDArray[np.float64]): Rotations (local system)
-        (the rotations are needed for plotting the
-         deformed shape with extruded frame elements)
+        d_global: Displacements (global system)
+        r_local: Rotations (local system)
+          (the rotations are needed for plotting the
+          deformed shape with extruded frame elements)
+
     """
 
     x_vec: nparr = elm.geomtransf.x_axis
@@ -148,7 +157,9 @@ def interp_3d_points(elm, d_global, num_points, scaling):
     """
     Calculates intermediate points based on end locations and
     deformations.
+
     """
+
     if not isinstance(elm, element.TrussBar):
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
@@ -173,8 +184,10 @@ def add_data__extruded_line_elms_deformed_mesh(
 ):
     """
     Adds a trace containing frame element extrusion mesh
-    in its deformed state
+    in its deformed state.
+
     """
+
     if not list_of_line_elems:
         return
     x_list: list[float] = []
@@ -352,8 +365,10 @@ def add_data__line_elms_deformed(
 ):
     """
     Adds a trace containing frame element centroidal axis lines
-    in their deformed state
+    in their deformed state.
+
     """
+
     if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
@@ -436,8 +451,10 @@ def add_data__line_elm_offsets_deformed(
 ):
     """
     Adds a trace containing frame element rigid offset lines
-    in their deformed state
+    in their deformed state.
+
     """
+
     if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
@@ -507,7 +524,9 @@ def add_data__line_elm_offsets_deformed(
 def add_data__frames_undeformed(data_dict, list_of_line_elems):
     """
     Adds a trace containing frame element centroidal axis lines
+
     """
+
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
@@ -541,7 +560,8 @@ def add_data__nodes_deformed(
     analysis, case_name, data_dict, list_of_nodes, step, scaling, function
 ):
     """
-    Adds a trace containing nodes in their deformed locations
+    Adds a trace containing nodes in their deformed locations.
+
     """
     ids_list = [int(node.uid) for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
@@ -605,10 +625,12 @@ def add_data__nodes_deformed(
 
 def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     """
-    Automatically calculate a scaling value that
-    makes the maximum displacement appear approximately
-    10% of the largest dimention of the building's bounding box
+    Automatically calculate a scaling value that makes the maximum
+    displacement appear approximately 10% of the largest dimention of
+    the building's bounding box.
+
     """
+
     ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
@@ -665,20 +687,21 @@ def show_deformed_shape(
     """
     Visualize the model in its deformed state
     Arguments:
-      analysis (Analysis): an analysis object
-      case_name (str): the name of the load_case to be visualized
-      step (int): the analysis step to be visualized
-      scaling (float): scaling factor for the deformations. If 0.00 is
+      analysis: an analysis object
+      case_name: the name of the load_case to be visualized
+      step: the analysis step to be visualized
+      scaling: scaling factor for the deformations. If 0.00 is
         provided, the scaling factor is calculated automatically.
-      extrude (bool): wether to extrude frame elements
-      camera (dict): custom positioning of the camera
-      subset_model (Model): subset model used to only show certain
+      extrude: wether to extrude frame elements
+      camera: custom positioning of the camera
+      subset_model: subset model used to only show certain
         components
-      animation (bool): show all frames up to the one identified with
+      animation: show all frames up to the one identified with
         `step`
-      init_step (int): starting step, in case of animation
-      step_skip (int): how many frames to skip to reduce the number of
-        frames in case an animation
+      init_step: starting step, in case of animation
+      step_skip: how many frames to skip to reduce the number of
+        frames in case an animation.
+
     """
 
     if subset_model:
@@ -904,24 +927,24 @@ def show_basic_forces(
     """
     Visualize the model and plot the frame element basic forces
     Arguments:
-      analysis (Analysis): an analysis object
-      case_name (str): the name of the load_case to be visualized
-      step (int): the analysis step to be visualized
-      scaling_global (float): I don't even remember what this
+      analysis: an analysis object
+      case_name: the name of the load_case to be visualized
+      step: the analysis step to be visualized
+      scaling_global: I don't even remember what this
         does. It's kind of a mess right now.
-      scaling_n (float):
-      scaling_q (float):
-      scaling_m (float):
-      scaling_t (float):
-      num_points (int): number of points to include in the basic force
+      scaling_n:
+      scaling_q:
+      scaling_m:
+      scaling_t:
+      num_points: number of points to include in the basic force
         curves
-      force_conversion (float): Conversion factor to be applied at the
+      force_conversion: Conversion factor to be applied at the
         hover box data for forces (for unit conversions)
-      moment_conversion (float): Conversion factor to be applied at the
+      moment_conversion: Conversion factor to be applied at the
         hover box data for moments (for unit conversions)
-      global_axes (bool): whether to show global axes
-      camera (dict): custom positioning of the camera
-      subset_model (Model): use this model instead of the one
+      global_axes: whether to show global axes
+      camera: custom positioning of the camera
+      subset_model: use this model instead of the one
         contained in the analysis object.
         It needs to be a subset of the original model. This can be
           used to only show the results for some part of a large
@@ -1415,28 +1438,30 @@ def show_basic_forces_combo(
     Visualize the model and plot the enveloped frame element basic forces
     for a load combination.
     Arguments:
-      combo (LoadCombination): a load combination object
-      step (int): the analysis step to be visualized
-      scaling_global (float): I don't even remember what this
+      combo: a load combination object
+      step: the analysis step to be visualized
+      scaling_global: I don't even remember what this
         does. It's kind of a mess right now.
-      scaling_n (float):
-      scaling_q (float):
-      scaling_m (float):
-      scaling_t (float):
-      num_points (int): number of points to include in the basic force
+      scaling_n:
+      scaling_q:
+      scaling_m:
+      scaling_t:
+      num_points: number of points to include in the basic force
         curves
-      force_conversion (float): Conversion factor to be applied at the
+      force_conversion: Conversion factor to be applied at the
         hover box data for forces (for unit conversions)
-      moment_conversion (float): Conversion factor to be applied at the
+      moment_conversion: Conversion factor to be applied at the
         hover box data for moments (for unit conversions)
-      global_axes (bool): whether to show global axes
-      camera (dict): custom positioning of the camera
-      subset_model (Model): use this model instead of the one
+      global_axes: whether to show global axes
+      camera: custom positioning of the camera
+      subset_model: use this model instead of the one
         contained in the analysis object.
         It needs to be a subset of the original model. This can be
           used to only show the results for some part of a large
           model.
+
     """
+
     # TODO: merge code repetitions with the previous function
 
     if subset_model:

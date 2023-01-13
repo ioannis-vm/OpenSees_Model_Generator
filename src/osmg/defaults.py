@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ defaults
+Introduces some default objects to a model.
+
 """
 
 #
@@ -33,8 +34,10 @@ nparr = npt.NDArray[np.float64]
 def load_util_rigid_elastic(model: Model) -> None:
     """
     Adds a default rigid elastic beamcolumn element
-    to the model
+    to the model.
+
     """
+
     new_uid = model.uid_generator.new("section")
     sec = ElasticSection(
         name="rigid_link_section",
@@ -55,8 +58,10 @@ def load_util_rigid_elastic(model: Model) -> None:
 def load_default_elastic(model: Model, sec_name: str) -> None:
     """
     Adds default non-rigid elastic beamcolumn element
-    sections to the model
+    sections to the model.
+
     """
+
     # intantiate a section generator object for the model
     sgen = SectionGenerator(model)
     # generate a default elastic section and add it to the model
@@ -75,7 +80,9 @@ def load_default_steel(model: Model) -> None:
     Note: If different properties are required, the values provided
     here can be altered, or the materials can be defined at the
     user-side and added to the model instead of calling this method.
+
     """
+
     if model.settings.imperial_units:
         # force: lb, length: in
         uniaxial_mat = Steel02(
@@ -130,7 +137,9 @@ def load_default_fix_release(model: Model) -> None:
     """
     Loads default fix and release elastic uniaxial materials
     used to simulate moment releases using zerolength elements.
+
     """
+
     uniaxial_mat = Elastic(
         uid=model.uid_generator.new("uniaxial material"),
         name="fix",

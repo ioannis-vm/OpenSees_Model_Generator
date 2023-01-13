@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ element
+Defines OpenSees uniaxialMaterial interfrace objects.
+
 """
 
 #
@@ -24,6 +25,7 @@ class UniaxialMaterial:
     """
     OpenSees uniaxialMaterial
     https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
+
     """
 
     uid: int
@@ -35,6 +37,7 @@ class Elastic(UniaxialMaterial):
     """
     OpenSees Elastic
     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
+
     """
 
     e_mod: float
@@ -52,6 +55,7 @@ class Steel02(UniaxialMaterial):
     """
     OpenSees Steel02
     https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
+
     """
 
     Fy: float
@@ -71,7 +75,9 @@ class Steel02(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         args = [
             "Steel02",
             self.uid,
@@ -101,6 +107,7 @@ class Steel4(UniaxialMaterial):
     """
     OpenSees Steel4
     https://openseespydoc.readthedocs.io/en/latest/src/steel4.html
+
     """
 
     Fy: float
@@ -137,7 +144,9 @@ class Steel4(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         # non-symmetric behavior
         if self.b_kc:
             assert self.R_0c is not None
@@ -223,6 +232,7 @@ class Bilin(UniaxialMaterial):
     """
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
+
     """
 
     K0: float
@@ -254,7 +264,9 @@ class Bilin(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "Bilin",
             self.uid,
@@ -290,6 +302,7 @@ class Pinching4(UniaxialMaterial):
     """
     OpenSees Pinching4 Material
     https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
+
     """
 
     ePf1: float
@@ -336,7 +349,9 @@ class Pinching4(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "Pinching4",
             self.uid,
@@ -387,6 +402,7 @@ class Hysteretic(UniaxialMaterial):
     """
     OpenSees Bilin Material
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
+
     """
 
     p1: tuple[float, float]
@@ -405,7 +421,9 @@ class Hysteretic(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "Hysteretic",
             self.uid,
@@ -428,6 +446,7 @@ class Fatigue(UniaxialMaterial):
     """
     OpenSees Fatigue Material
     https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
+
     """
 
     predecessor: UniaxialMaterial
@@ -440,7 +459,9 @@ class Fatigue(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         return [
             "Fatigue",
             self.uid,
@@ -461,6 +482,7 @@ class MaxStrainRange(UniaxialMaterial):
     """
     OpenSees MaxStrainRange Material
     ~not officially added yet~
+
     """
 
     predecessor: UniaxialMaterial
@@ -476,7 +498,9 @@ class MaxStrainRange(UniaxialMaterial):
         """
         Returns the arguments required to define the object in
         OpenSees
+
         """
+
         args = [
             "MaxStrainRange",
             self.uid,

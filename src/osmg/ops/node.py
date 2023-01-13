@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ node
+Defines :obj:`~osmg.ops.node.Node` objects.
 """
 
 #
@@ -23,10 +23,13 @@ class Node:
     """
     OpenSees node
     https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
+
     Attributes:
-        uid (int)
-        coords (list[float])
-        restraint (list[bool])
+        uid: Unique ID of the node.
+        coords: List of node coordinates.
+        restraint: List of boolean values identifying whether the
+          corresponding DOF is restrained.
+
     """
 
     uid: int

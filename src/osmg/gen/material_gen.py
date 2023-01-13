@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ material generator
+Objects that generate materials.
+
 """
 
 #
@@ -47,6 +48,7 @@ class MaterialGenerator:
         J. W. (2019). Nonlinear modeling of concentrically braced
         frames. Journal of Constructional Steel Research, 157,
         103-120.
+
         """
 
         param_b = 0.001
@@ -115,7 +117,9 @@ class MaterialGenerator:
         implications in the seismic design and collapse capacity of steel
         special moment frames. Earthquake Engineering & Structural
         Dynamics, 43(13), 1935-1954.
+
         """
+
         assert section.name[0] == "W", "Error: Only W sections can be used."
         assert isinstance(section, ElasticSection)
         assert (

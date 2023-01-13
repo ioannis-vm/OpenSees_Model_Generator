@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ section generator
+Objects that generate sections.
+
 """
 
 #
@@ -37,6 +38,10 @@ nparr = npt.NDArray[np.float64]
 class SectionGenerator:
     """
     Used to populate the section repository of a model.
+
+    Attributes:
+      model: Model to act upon
+
     """
 
     model: Model
@@ -47,15 +52,15 @@ class SectionGenerator:
         """
         Generates an ElasticSection object with the specified properties.
 
-        Args:
-            name (str): Name of the section.
-            e_times_a (float):
+        Arguments:
+            name: Name of the section.
+            e_times_a:
                 The product of the elastic modulus and the area of the
                 section.
-            e_times_i (float):
+            e_times_i:
                 The product of the elastic modulus and the moment of
                 inertia.
-            g_times_j (float):
+            g_times_j:
                 The product of the shear modulus and the torsional
                 moment of inertia.
 
@@ -81,7 +86,9 @@ class SectionGenerator:
             1000.0
             >>> sec.j_mod
             500.0
+
         """
+
         sec = ElasticSection(
             name=name,
             uid=self.model.uid_generator.new("section"),
@@ -136,7 +143,7 @@ class SectionGenerator:
         """
         Loads a section from the AISC steel section database.
 
-        Args:
+        Arguments:
             sec_shape_designation: Designation of the type of section
                 to be loaded.
             labels: List of labels of the sections to be loaded.
@@ -148,10 +155,12 @@ class SectionGenerator:
             store_in_model: If True, the created sections are stored
                 in the model.
             return_section: If True, the created sections are returned.
+
         Returns:
             If `return_section` is True, a dictionary containing the
             created sections. The keys are the labels of the sections,
             and the values are the sections themselves.
+
         Example:
             >>> from osmg.gen.section_gen import SectionGenerator
             >>> from osmg.model import Model
@@ -176,7 +185,9 @@ class SectionGenerator:
             outside_shape: specified
             snap_points: specified
             }
+
         """
+
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
             "name", ops_material
         )

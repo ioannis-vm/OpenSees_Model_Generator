@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ rigid diaphragm
+Defines the RDAnalyzer object.
 """
 
 #
@@ -28,7 +28,10 @@ if TYPE_CHECKING:
 @dataclass(repr=False)
 class RDAnalyzer:
     """
-    Rigid Diaphragm Analyzer object.
+    Rigid Diaphragm Analyzer object. Used to apply rigid diaphragm
+    constraints and optionally gather mass from the nodes of the level
+    to the primary nodes
+
     """
 
     parent_loadcase: LoadCase
@@ -36,10 +39,11 @@ class RDAnalyzer:
 
     def run(self, gather_mass):
         """
-        Applies rigid diaphragm constraints and optionally
-        gathers mass from the nodes of the level to the
-        primary nodes
+        Applies rigid diaphragm constraints and optionally gathers
+        mass from the nodes of the level to the primary nodes
+
         """
+
         lvl = self.parent_level
         loadcase = self.parent_loadcase
         # gather all nodes of the level

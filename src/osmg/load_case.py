@@ -1,5 +1,5 @@
 """
-Model Generator for OpenSees ~ load case
+Defines :obj:`~osmg.load_case.LoadCase` objects.
 """
 
 #
@@ -39,7 +39,8 @@ class PointLoadMass:
     """
     Point load/mass object. Global coordinate system.
     Attributes:
-        val (nparr)
+        val: Value for each DOF.
+
     """
 
     val: nparr = field(default_factory=lambda: np.zeros(shape=6))
@@ -58,7 +59,9 @@ class PointLoadMass:
             >>> point_load.add(load)
             >>> point_load.val
             array([ 2.,  4.,  6.,  8., 10., 12.])
+
         """
+
         self.val += load
 
     def __repr__(self):
@@ -73,6 +76,7 @@ class PointLoadMass:
 class LineElementUDL:
     """
     Line element uniformly distributed load object.
+
     """
 
     parent_load_case: LoadCase
@@ -90,21 +94,23 @@ class LineElementUDL:
 
     def add_glob(self, udl: nparr) -> None:
         """
-        Adds a uniformly distributed load
-        to the existing udl
-        The load is defined
-        with respect to the global coordinate system
-        of the building, and it is converted to the
-        local coordinate system prior to adding it.
-        Args:
-            udl (nparr): Array of size 3 containing
-                components of the uniformly distributed load that is
-                applied to the clear length of the element, acting on
-                the global x, y, and z directions, in the direction of
-                the global axes.
+        Adds a uniformly distributed load to the existing udl The load
+        is defined with respect to the global coordinate system of the
+        building, and it is converted to the local coordinate system
+        prior to adding it.
+
+        Arguments:
+          udl: Array of size 3 containing
+            components of the uniformly distributed load that is
+            applied to the clear length of the element, acting on
+            the global x, y, and z directions, in the direction of
+            the global axes.
+
         Returns:
-            None
+          None
+
         """
+
         # STOP! if the element has the Corotational transformation, we
         # can't apply a UDL on it. We need to lump the provided UDL to
         # its external nodes.  Since the Corotational transformation
@@ -137,7 +143,9 @@ class LineElementUDL:
 
     def to_global(self) -> nparr:
         """
-        Returns the quantity expressed in the global coordinate system
+        Returns the quantity expressed in the global coordinate
+        system.
+
         """
         udl = self.val
         transf_mat = transformations.transformation_matrix(
@@ -156,6 +164,7 @@ class LoadCase:
     mass, parent nodes and rigid diaphragm constraints, etc.
     Analysis objects can use multiple load cases.
     Load combination objects utilize load cases as well.
+
     """
 
     name: str
@@ -198,8 +207,10 @@ class LoadCase:
             gather_mass: bool = False) -> None:
         """
         Processes the geometry of the given levels and applies rigid
-        diaphragm constraints
+        diaphragm constraints.
+
         """
+
         for lvl_uid in level_uids:
             lvl = self.parent_model.levels[lvl_uid]
             rda = RDAnalyzer(self, lvl)
@@ -210,7 +221,9 @@ class LoadCase:
         Calculates the number of free DOFS of the model, considering
         all (potentially) defined constraints, restraints and parent
         nodes.
+
         """
+
         mdl = self.parent_model
         all_nodes = mdl.dict_of_all_nodes()
         # parent_nodes = {

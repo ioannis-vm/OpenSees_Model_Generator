@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ node generator
+Objects that introduce nodes to a model.
+
 """
 
 #
@@ -24,7 +25,11 @@ if TYPE_CHECKING:
 @dataclass(repr=False)
 class NodeGenerator:
     """
-    Introduces node objects to a model.
+    NodeGenerator objects introduce node objects to a model.
+
+    Attributes:
+      model: Model to act upon.
+
     """
 
     model: Model
@@ -33,26 +38,27 @@ class NodeGenerator:
         """
         Adds a node at the specified coordinates and level.
 
-        Args:
-            x_loc: x coordinate of the node.
-            y_loc: y coordinate of the node.
-            lvl: Level at which the node should be added.
+        Arguments:
+          x_loc: x coordinate of the node.
+          y_loc: y coordinate of the node.
+          lvl: Level at which the node should be added.
 
         Returns:
-            The node object that was added.
+          The node object that was added.
 
         Example:
-            >>> from osmg.model import Model
-            >>> from osmg.gen.node_gen import NodeGenerator
-            >>> model = Model('test_model')
-            >>> model.add_level(0, 0.00)
-            >>> generator = NodeGenerator(model)
-            >>> generator.add_node_lvl(2.00, 3.00, 0)
-            Node object
-              uid: 0
-              coords: [2.0, 3.0, 0.0]
-              restraint: [False, False, False, False, False, False]
-            <BLANKLINE>
+          >>> from osmg.model import Model
+          >>> from osmg.gen.node_gen import NodeGenerator
+          >>> model = Model('test_model')
+          >>> model.add_level(0, 0.00)
+          >>> generator = NodeGenerator(model)
+          >>> generator.add_node_lvl(2.00, 3.00, 0)
+          Node object
+            uid: 0
+            coords: [2.0, 3.0, 0.0]
+            restraint: [False, False, False, False, False, False]
+          <BLANKLINE>
+
         """
         lvls = self.model.levels
         level = lvls[lvl]
@@ -70,7 +76,7 @@ class NodeGenerator:
         Adds a node at the specified coordinates and level having a
         custom elevation.
 
-        Args:
+        Arguments:
             x_loc: x coordinate of the node.
             y_loc: y coordinate of the node.
             z_loc: Elevation of the node.
@@ -91,6 +97,7 @@ class NodeGenerator:
               coords: [2.0, 3.0, 4.0]
               restraint: [False, False, False, False, False, False]
             <BLANKLINE>
+
         """
         lvls = self.model.levels
         level = lvls[lvl]
@@ -105,7 +112,7 @@ class NodeGenerator:
         """
         Adds a node[/s] at the specified coordinates to all active levels.
 
-        Args:
+        Arguments:
             x_loc: x coordinate of the node[/s].
             y_loc: y coordinate of the node[/s].
 
@@ -125,6 +132,7 @@ class NodeGenerator:
             '[Collection of 1 items]'
             >>> model.levels[2].nodes.__srepr__()
             '[Collection of 1 items]'
+
         """
         lvls = self.model.levels
         assert lvls.active, "No active levels."

@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ self weight, self mass
+Defines methods to assign self-weight and self-mass to a loadcase
+using a given model.
 """
 
 #
@@ -19,8 +20,10 @@ from ..ops import element
 
 def self_weight(mdl, lcase, factor=1.00):
     """
-    Assigns the structure's self weight to its members
+    Assigns the structure's self weight to its members.
+
     """
+
     for elm in mdl.list_of_elements():
 
         if isinstance(
@@ -57,6 +60,7 @@ def self_weight(mdl, lcase, factor=1.00):
 def self_mass(mdl, lcase):
     """
     Assigns the structure's self mass to its members
+
     """
 
     if mdl.settings.imperial_units:

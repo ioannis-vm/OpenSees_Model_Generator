@@ -1,5 +1,6 @@
 """
-Model Generator for OpenSees ~ zero length element uniaxial materials
+Objects that generate ZeroLength elements.
+
 """
 
 #
@@ -36,8 +37,10 @@ def fix_all(
         model: Model, **kwargs: dict[object, object]) \
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    Fixed in all directions
+    Fixed in all directions.
+
     """
+
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
@@ -49,8 +52,10 @@ def release_6(
         model: Model, **kwargs: dict[object, object]) \
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    Frees strong axis bending
+    Frees strong axis bending.
+
     """
+
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
@@ -62,8 +67,10 @@ def release_5(
         model: Model, **kwargs: dict[object, object]) \
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    Frees weak axis bending
+    Frees weak axis bending.
+
     """
+
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
@@ -75,8 +82,10 @@ def release_56(
         model: Model, **kwargs: dict[object, object]) \
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    Frees both strong and weak axis bending
+    Frees both strong and weak axis bending.
+
     """
+
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
@@ -106,7 +115,9 @@ def imk_6(
     implications in the seismic design and collapse capacity of steel
     special moment frames. Earthquake Engineering & Structural
     Dynamics, 43(13), 1935-1954.
+
     """
+
     mat_generator = MaterialGenerator(model)
     mat = mat_generator.generate_steel_w_imk_material(
         section,
@@ -138,8 +149,11 @@ def imk_56(
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
     release in the weak axis bending direction,
-    imk (see imk docstring) in the strong axis bending direction
+    :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
+    direction
+
     """
+
     mat_generator = MaterialGenerator(model)
     mat_strong = mat_generator.generate_steel_w_imk_material(
         section,
@@ -180,7 +194,9 @@ def gravity_shear_tab(
     the overstrength and collapse capacity of steel frame buildings
     with perimeter special moment frames. Earthquake Engineering &
     Structural Dynamics, 44(8), 1289-1307.
+
     """
+
     assert section.name[0] == "W", "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
     assert (
@@ -319,7 +335,9 @@ def steel_w_col_pz(
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
     performance evaluation of steel moment resisting frame
     structures. Rep. No. 132.
+
     """
+
     assert section.name[0] == "W", "Error: Only W sections can be used."
     assert isinstance(section, ElasticSection)
     assert (
@@ -391,14 +409,17 @@ def steel_brace_gusset(
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
     analysis model for special concentrically braced frames, Journal
     of Constructional Steel Research, Vol. 73, pp 80-94.
+
     Arguments:
-      model (Model): Model object
-      physical_mat (PhysicalMaterial): physical material object
-      d_brace (float): brace section height
-      l_c (float): brace-to-gusset connection length
-      t_p (float): gusset plate thickness
-      l_b (float): gusset plate average buckling length
+      model: Model object
+      physical_mat: physical material object
+      d_brace: brace section height
+      l_c: brace-to-gusset connection length
+      t_p: gusset plate thickness
+      l_b: gusset plate average buckling length
+
     """
+
     var_w = d_brace + 2.00 * l_c * np.tan(30.00 / 180.00 * np.pi)
     var_i = var_w * t_p**3 / 12.00
     var_z = var_w * t_p**2 / 6.00
