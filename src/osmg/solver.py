@@ -1569,9 +1569,9 @@ class NLTHAnalysis(NonlinearAnalysis):
     def run(
         self,
         analysis_time_increment: float,
-        filename_x: str,
-        filename_y: str,
-        filename_z: str,
+        filename_x: Optional[str],
+        filename_y: Optional[str],
+        filename_z: Optional[str],
         file_time_incr: float,
         finish_time: float = 0.00,
         skip_steps: int = 1,

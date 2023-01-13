@@ -268,6 +268,8 @@ More analysis methods are available, including static pushover and transient tim
 # %%
 nlth_anl = solver.NLTHAnalysis(mdl, {testcase.name: testcase})
 
+# Tweak settings to use a fast solver
+nlth_anl.settings.solver = 'SparseSYM'
 
 # %%
 help(nlth_anl.run)

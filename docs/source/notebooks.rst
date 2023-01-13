@@ -5,6 +5,6 @@ Tutorials
    :caption: osmg tutorials 
    :maxdepth: 1
 
-   notebooks/1_Getting_Started
-   notebooks/2_Define_a_Model
-   notebooks/3_Run_an_Analysis
+   notebooks/doc_1_getting_started
+   notebooks/doc_2_define_a_model
+   notebooks/doc_3_run_an_analysis
