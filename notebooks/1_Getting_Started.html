@@ -284,6 +284,7 @@ $ python -m pip install -e .
 </tr>
 </tbody>
 </table>
+<p>Well, metric might not work as expected for a while. Making sure it does is on my TODO list. Check your results.</p>
 </section>
 <section id="IDE-or-Jupyter-Notebooks?">
 <h3>IDE or Jupyter Notebooks?<a class="headerlink" href="#IDE-or-Jupyter-Notebooks?" title="Permalink to this heading">¶</a></h3>
@@ -295,12 +296,18 @@ $ python -m pip install -e .
 <section id="Tips">
 <h2>Tips<a class="headerlink" href="#Tips" title="Permalink to this heading">¶</a></h2>
 <p>How to make sense of all this code?</p>
-<p>To figure out the required syntax, these example files as well as the tests of the module will be helpful. For a deep-dive into the execution steps, other than reading the source files and the docstrings, an effective way is to run the examples using <a class="reference external" href="https://docs.python.org/3/library/pdb.html">the python debugger</a>. Just add</p>
+<p>To figure out the required syntax, these example files and the documentation of the module will be helpful. For a deep-dive into the execution steps, other than reading the source files and the docstrings, an effective way is to run the examples using <a class="reference external" href="https://docs.python.org/3/library/pdb.html">the python debugger</a>. Just add</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>import pdb
 pdb.set_trace()
 </pre></div>
 </div>
-<p>at any line where you would like to stop the execution, and then follow the execution step by step. This is another instance where an IDE can be more effective than jupyter notebooks. Taking notes in the process might also help.</p>
+<p>at any line where you would like to stop the execution, and then follow the execution step by step. This is another instance where an IDE can be more effective than jupyter notebooks. There is also pydoc for offline documentation. On the terminal, try:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pydoc osmg
+pydoc osmg.model.Model
+pydoc numpy.array
+</pre></div>
+</div>
+<p>Taking notes in the process might also help.</p>
 </section>
 </section>
 
