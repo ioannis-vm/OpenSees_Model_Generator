@@ -1,7 +1,6 @@
-name: so-samtools
+name: osmg
 channels:
   - conda-forge
-  - bioconda
   - defaults
 dependencies:
-  - samtools
+  - scikit-geometry
