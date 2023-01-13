@@ -13,3 +13,4 @@ sphinx_autodoc_typehints
 flake8-rst
 flake8-rst-docstrings
 jupyter
+jupytext
