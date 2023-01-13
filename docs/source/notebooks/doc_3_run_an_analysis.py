@@ -282,6 +282,7 @@ nlth_anl.run(
     'groundmotions/1ya.txt',
     None,
     0.005,
+    finish_time=10.00,
     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
     print_progress=True
 )
