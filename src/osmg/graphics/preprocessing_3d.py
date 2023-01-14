@@ -580,7 +580,9 @@ def add_data__bars(
         )
 
 
-def add_data__twonodelinks(data_dict, mdl):
+def add_data__twonodelinks(
+        data_dict: list[dict[str, object]],
+        mdl: Model) -> None:
     """
     Adds a trace containing twonodelink elements
 
@@ -635,7 +637,9 @@ def add_data__twonodelinks(data_dict, mdl):
     )
 
 
-def add_data__frame_offsets(data_dict, mdl):
+def add_data__frame_offsets(
+        data_dict: list[dict[str, object]],
+        mdl: Model) -> None:
     """
     Adds a trace containing frame element rigid offset lines
 
@@ -646,8 +650,7 @@ def add_data__frame_offsets(data_dict, mdl):
     """
 
     beamcolumn_elems: list[
-        Union[element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
+        element.Element] = []
     beamcolumn_elems.extend(
         mdl.list_of_specific_element(element.ElasticBeamColumn))
     beamcolumn_elems.extend(
@@ -661,6 +664,8 @@ def add_data__frame_offsets(data_dict, mdl):
     z_list: list[Optional[float]] = []
 
     for elm in beamcolumn_elems:
+        assert isinstance(
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         p_i: nparr = np.array(elm.nodes[0].coords)
         p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j: nparr = np.array(elm.nodes[1].coords)
@@ -687,7 +692,10 @@ def add_data__frame_offsets(data_dict, mdl):
     )
 
 
-def add_data__frame_axes(data_dict, mdl, ref_len):
+def add_data__frame_axes(
+        data_dict: list[dict[str, object]],
+        mdl: Model,
+        ref_len: float) -> None:
     """
     Adds a trace containing frame element local axis lines
 
@@ -698,9 +706,7 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
 
     """
 
-    beamcolumn_elems: list[
-        Union[element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
+    beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(
         mdl.list_of_specific_element(element.TrussBar))
     beamcolumn_elems.extend(
@@ -715,6 +721,8 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
     z_list: list[Optional[float]] = []
     colors: list[Optional[str]] = []
     for elm in beamcolumn_elems:
+        assert isinstance(
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_at_line_plots:
             continue
         x_vec = elm.geomtransf.x_axis
@@ -749,7 +757,9 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
     )
 
 
-def add_data__zerolength_axes(data_dict, mdl, ref_len):
+def add_data__zerolength_axes(
+        data_dict: list[dict[str, object]],
+        mdl: Model, ref_len: float) -> None:
     """
     Adds a trace containing zerolength element local axis lines
 
@@ -760,7 +770,9 @@ def add_data__zerolength_axes(data_dict, mdl, ref_len):
 
     """
 
-    zerolength_elements = mdl.list_of_zerolength_elements()
+    zerolength_elements: list[element.Element] = []
+    zerolength_elements.extend(
+        mdl.list_of_specific_element(element.ZeroLength))
     if not zerolength_elements:
         return
     scaling = ref_len * 0.025
@@ -769,6 +781,7 @@ def add_data__zerolength_axes(data_dict, mdl, ref_len):
     z_list: list[Optional[float]] = []
     colors: list[Optional[str]] = []
     for elm in zerolength_elements:
+        assert isinstance(elm, element.ZeroLength)
         x_vec: nparr = elm.vecx
         y_vec: nparr = elm.vecyp
         z_vec: nparr = np.cross(x_vec, y_vec)
@@ -799,7 +812,9 @@ def add_data__zerolength_axes(data_dict, mdl, ref_len):
     )
 
 
-def add_data__global_axes(data_dict, ref_len):
+def add_data__global_axes(
+        data_dict: list[dict[str, object]],
+        ref_len: float) -> None:
     """
     Adds a trace containing global axes
 
@@ -848,7 +863,107 @@ def add_data__global_axes(data_dict, ref_len):
     )
 
 
-def add_data__extruded_frames_mesh(data_dict, mdl):
+def add_data__diaphragm_lines(
+        data_dict: list[dict[str, object]],
+        loadcase: LoadCase) -> None:
+    """
+    Adds a trace containing lines indicating rigid diaphragm
+    constraints.
+
+    Arguments:
+      data_dict: dictionary containing figure data
+      loadcase: loadcase
+
+    """
+
+    # if parent nodes don't exist, we don't have rigid diaphragms
+    pnodes = loadcase.parent_nodes
+    if not pnodes:
+        return
+
+    # otherwise, rigid diaphragms exist and we will plot lines, so we
+    # prepare containers
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+
+    # for each level that has a parent node, draw the lines
+    mdl = loadcase.parent_model
+    for lvl_uid, pnode in pnodes.items():
+
+        level = mdl.levels[lvl_uid]
+        level_primary_nodes = level.nodes.values()
+        for node in level_primary_nodes:
+            if node.coords[2] == level.elevation:
+                x_list.extend((node.coords[0], pnode.coords[0], None))
+                y_list.extend((node.coords[1], pnode.coords[1], None))
+                z_list.extend((level.elevation, level.elevation, None))
+
+    data_dict.append(
+        {
+            "name": "Rigid Diaphragms",
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x_list,
+            "y": y_list,
+            "z": z_list,
+            "hoverinfo": "skip",
+            "line": {"width": 2, "color": graphics_common.GRID_COLOR},
+        }
+    )
+
+
+def add_data__tributary_area_boundaries(
+        data_dict: list[dict[str, object]],
+        loadcase: LoadCase) -> None:
+    """
+    Adds a trace containing lines indicating tributary area boundaries
+    that are used for load distribution.
+
+    Arguments:
+      data_dict: dictionary containing figure data
+      loadcase: loadcase
+
+    """
+
+    trib_area_analysis_collection = loadcase.tributary_area_analysis
+
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+
+    for analysis in trib_area_analysis_collection.values():
+
+        level = analysis.parent_level
+        data = analysis.data
+        edge_polygons = data.edge_polygons
+
+        for polygon_list in edge_polygons.values():
+            for polygon in polygon_list:
+                x_vals = [v[0] for v in polygon]
+                y_vals = [v[1] for v in polygon]
+                x_vals.append(x_vals[0])
+                y_vals.append(y_vals[0])
+                x_list.extend((*x_vals, None))
+                y_list.extend((*y_vals, None))
+                z_list.extend((*[level.elevation]*len(x_vals), None))
+
+    data_dict.append(
+        {
+            "name": "Trib. Area",
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x_list,
+            "y": y_list,
+            "z": z_list,
+            "hoverinfo": "skip",
+            "line": {"width": 2, "color": graphics_common.BISECTOR_COLOR},
+        }
+    )
+
+
+def add_data__extruded_frames_mesh(
+        data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
     Adds a trace containing frame element extrusion mesh
 
@@ -858,9 +973,7 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
 
     """
 
-    beamcolumn_elems: list[
-        Union[element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
+    beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(
         mdl.list_of_specific_element(element.ElasticBeamColumn))
     beamcolumn_elems.extend(
@@ -875,6 +988,8 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
     k_list: list[Optional[int]] = []
     index = 0
     for elm in beamcolumn_elems:
+        assert isinstance(
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_when_extruded:
             continue
         side_a = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -932,7 +1047,8 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
     )
 
 
-def add_data__extruded_bars_mesh(data_dict, mdl):
+def add_data__extruded_bars_mesh(
+        data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
     Adds a trace containing frame element extrusion mesh
 
@@ -954,6 +1070,7 @@ def add_data__extruded_bars_mesh(data_dict, mdl):
     index = 0
     for elm in line_elems:
 
+        assert isinstance(elm, element.TrussBar)
         if elm.visibility.hidden_when_extruded:
             continue
         if not elm.outside_shape:
@@ -973,6 +1090,7 @@ def add_data__extruded_bars_mesh(data_dict, mdl):
 
         loop = elm.outside_shape.halfedges
         for halfedge in loop:
+            assert halfedge.nxt
             loc0 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec
@@ -1019,16 +1137,17 @@ def add_data__extruded_bars_mesh(data_dict, mdl):
 
 
 def show(
-    mdl: Model,
-    load_case: Optional[LoadCase] = None,
-    extrude: bool = False,
-    offsets: bool = True,
-    global_axes: bool = True,
-    parent_nodes: bool = True,
-    frame_axes: bool = False,
-    zerolength_axes: bool = False,
-    camera: Optional[dict[str, object]] = None,
-) -> None:
+        mdl: Model,
+        load_case: Optional[LoadCase] = None,
+        extrude: bool = False,
+        offsets: bool = True,
+        global_axes: bool = True,
+        parent_nodes: bool = True,
+        frame_axes: bool = False,
+        zerolength_axes: bool = False,
+        diaphragm_lines: bool = True,
+        tributary_area_boundaries: bool = True,
+        camera: Optional[dict[str, object]] = None) -> None:
     """
     Visualize the model
 
@@ -1040,8 +1159,8 @@ def show(
       global_axes: whether to show global axes
       diaphragm_lines: whether to show lines indicating rigid
         diaphragm extent
-      tributary_areas: whether to show tributary area
-        boundaries
+      tributary_area_boundaries: whether to show tributary area
+        boundary lines
       parent_nodes: whether to plot parent nodes
       frame_axes: whether to show the local axes of frame
         elements
@@ -1065,15 +1184,15 @@ def show(
     if global_axes:
         add_data__global_axes(data_dict, ref_len)
 
-    # # diaphgragm lines
-    # if diaphragm_lines:
-    #     for lvl in mdl.levels.values():
-    #         add_data__diaphragm_lines(data_dict, lvl)
+    # lines indicating rigid diaphragms
+    if load_case:
+        if diaphragm_lines:
+            add_data__diaphragm_lines(data_dict, load_case)
 
-    # # bisector lines
-    # if tributary_areas:
-    #     for lvl in mdl.levels.values():
-    #         add_data__bisector_lines(data_dict, lvl)
+    # tributary area boundary lines
+    if load_case:
+        if tributary_area_boundaries:
+            add_data__tributary_area_boundaries(data_dict, load_case)
 
     # plot beamcolumn elements
     add_data__frames(data_dict, mdl, load_case)

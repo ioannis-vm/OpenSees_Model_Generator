@@ -75,7 +75,7 @@ class TributaryAreaAnalysisData:
     # maps an edge.uid to its corresponding tributary area
     edge_area: dict[int, float] = field(default_factory=dict)
     # maps an edge.uid to its corresponding tributary polygon
-    edge_polygons: dict[int, PolygonShape] = field(default_factory=dict)
+    edge_polygons: dict[int, list[PolygonShape]] = field(default_factory=dict)
     # maps a node.uid to a vertex
     vertex_map: dict[int, Vertex] = field(default_factory=dict)
     # used to map zerolength element-induced coinciding nodes
@@ -160,6 +160,16 @@ class TributaryAreaAnaysis:
         # for joints, we only consider the top-most line elements
         # and we treat them the same as rigid offsets.
 
+        # clear any previous results
+        self.data.edges = {}
+        self.data.vertices = {}
+        self.data.edge_map = {}
+        self.data.edge_area = {}
+        self.data.edge_polygons = {}
+        self.data.vertex_map = {}
+        self.data.zn_map = {}
+        self.data.pz_node = {}
+
         edges = self.data.edges
         vertices = self.data.vertices
         edge_map = self.data.edge_map
@@ -168,15 +178,6 @@ class TributaryAreaAnaysis:
         vertex_map = self.data.vertex_map
         zn_map = self.data.zn_map
         pz_node = self.data.pz_node
-        # clear any previous results
-        edges = {}
-        vertices = {}
-        edge_map = {}
-        edge_area = {}
-        edge_polygons = {}
-        vertex_map = {}
-        zn_map = {}
-        pz_node = {}
 
         for panel_zone in panel_zones:
             back_nd = panel_zone.external_nodes.named_contents["middle_back"]

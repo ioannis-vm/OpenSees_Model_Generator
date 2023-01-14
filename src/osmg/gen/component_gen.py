@@ -1032,7 +1032,7 @@ class BeamColumnGenerator:
             )
 
             args = {
-                "component_purpose": "diagonal_component",
+                "component_purpose": "horizontal_component",
                 "lvl": lvl,
                 "node_i": node_i,
                 "node_j": node_j,
