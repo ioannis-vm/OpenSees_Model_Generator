@@ -15,6 +15,7 @@ osmg.graphics.preprocessing\_3d
    .. autosummary::
    
       add_data__bars
+      add_data__diaphragm_lines
       add_data__extruded_bars_mesh
       add_data__extruded_frames_mesh
       add_data__frame_axes
@@ -25,6 +26,7 @@ osmg.graphics.preprocessing\_3d
       add_data__nodes
       add_data__parent_nodes
       add_data__release_nodes
+      add_data__tributary_area_boundaries
       add_data__twonodelinks
       add_data__zerolength_axes
       show

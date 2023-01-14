@@ -738,7 +738,9 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__twonodelinks"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a><span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__twonodelinks"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a><span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing twonodelink elements</span>
 
@@ -793,7 +795,9 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frame_offsets"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__frame_offsets"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element rigid offset lines</span>
 
@@ -804,8 +808,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -819,6 +822,8 @@
     <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
         <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">p_io</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
         <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
@@ -845,7 +850,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frame_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__frame_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+        <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element local axis lines</span>
 
@@ -856,9 +864,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -873,6 +879,8 @@
     <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">x_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
@@ -907,7 +915,9 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__zerolength_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__zerolength_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing zerolength element local axis lines</span>
 
@@ -918,7 +928,9 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">zerolength_elements</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_zerolength_elements</span><span class="p">()</span>
+    <span class="n">zerolength_elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">zerolength_elements</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ZeroLength</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">zerolength_elements</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span> <span class="o">*</span> <span class="mf">0.025</span>
@@ -927,6 +939,7 @@
     <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">zerolength_elements</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ZeroLength</span><span class="p">)</span>
         <span class="n">x_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">vecx</span>
         <span class="n">y_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">vecyp</span>
         <span class="n">z_vec</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">)</span>
@@ -957,7 +970,9 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__global_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__global_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing global axes</span>
 
@@ -1006,7 +1021,107 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__extruded_frames_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__diaphragm_lines"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__diaphragm_lines">[docs]</a><span class="k">def</span> <span class="nf">add_data__diaphragm_lines</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing lines indicating rigid diaphragm</span>
+<span class="sd">    constraints.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      loadcase: loadcase</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># if parent nodes don&#39;t exist, we don&#39;t have rigid diaphragms</span>
+    <span class="n">pnodes</span> <span class="o">=</span> <span class="n">loadcase</span><span class="o">.</span><span class="n">parent_nodes</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pnodes</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># otherwise, rigid diaphragms exist and we will plot lines, so we</span>
+    <span class="c1"># prepare containers</span>
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># for each level that has a parent node, draw the lines</span>
+    <span class="n">mdl</span> <span class="o">=</span> <span class="n">loadcase</span><span class="o">.</span><span class="n">parent_model</span>
+    <span class="k">for</span> <span class="n">lvl_uid</span><span class="p">,</span> <span class="n">pnode</span> <span class="ow">in</span> <span class="n">pnodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+        <span class="n">level</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="n">lvl_uid</span><span class="p">]</span>
+        <span class="n">level_primary_nodes</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">level_primary_nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">:</span>
+                <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pnode</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">node</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pnode</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">,</span> <span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rigid Diaphragms&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">GRID_COLOR</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__tributary_area_boundaries"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__tributary_area_boundaries">[docs]</a><span class="k">def</span> <span class="nf">add_data__tributary_area_boundaries</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+        <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a trace containing lines indicating tributary area boundaries</span>
+<span class="sd">    that are used for load distribution.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">      data_dict: dictionary containing figure data</span>
+<span class="sd">      loadcase: loadcase</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">trib_area_analysis_collection</span> <span class="o">=</span> <span class="n">loadcase</span><span class="o">.</span><span class="n">tributary_area_analysis</span>
+
+    <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="n">trib_area_analysis_collection</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+
+        <span class="n">level</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">parent_level</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">edge_polygons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_polygons</span>
+
+        <span class="k">for</span> <span class="n">polygon_list</span> <span class="ow">in</span> <span class="n">edge_polygons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">polygon</span> <span class="ow">in</span> <span class="n">polygon_list</span><span class="p">:</span>
+                <span class="n">x_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">polygon</span><span class="p">]</span>
+                <span class="n">y_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">polygon</span><span class="p">]</span>
+                <span class="n">x_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">y_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="n">x_vals</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="n">y_vals</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">x_vals</span><span class="p">),</span> <span class="kc">None</span><span class="p">))</span>
+
+    <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Trib. Area&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;scatter3d&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mode&quot;</span><span class="p">:</span> <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+            <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y_list</span><span class="p">,</span>
+            <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
+            <span class="s2">&quot;hoverinfo&quot;</span><span class="p">:</span> <span class="s2">&quot;skip&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">BISECTOR_COLOR</span><span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_data__extruded_frames_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
 
@@ -1016,9 +1131,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -1033,6 +1146,8 @@
     <span class="n">k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">side_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
@@ -1090,7 +1205,8 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__extruded_bars_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__extruded_bars_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span>
+        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
 
@@ -1112,6 +1228,7 @@
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elems</span><span class="p">:</span>
 
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">:</span>
@@ -1131,6 +1248,7 @@
 
         <span class="n">loop</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span><span class="o">.</span><span class="n">halfedges</span>
         <span class="k">for</span> <span class="n">halfedge</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span>
             <span class="n">loc0</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
@@ -1177,16 +1295,17 @@
 
 
 <div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span>
-    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">offsets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">global_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">frame_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">zerolength_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">offsets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">global_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">frame_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">zerolength_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">diaphragm_lines</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">tributary_area_boundaries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model</span>
 
@@ -1198,8 +1317,8 @@
 <span class="sd">      global_axes: whether to show global axes</span>
 <span class="sd">      diaphragm_lines: whether to show lines indicating rigid</span>
 <span class="sd">        diaphragm extent</span>
-<span class="sd">      tributary_areas: whether to show tributary area</span>
-<span class="sd">        boundaries</span>
+<span class="sd">      tributary_area_boundaries: whether to show tributary area</span>
+<span class="sd">        boundary lines</span>
 <span class="sd">      parent_nodes: whether to plot parent nodes</span>
 <span class="sd">      frame_axes: whether to show the local axes of frame</span>
 <span class="sd">        elements</span>
@@ -1223,15 +1342,15 @@
     <span class="k">if</span> <span class="n">global_axes</span><span class="p">:</span>
         <span class="n">add_data__global_axes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">)</span>
 
-    <span class="c1"># # diaphgragm lines</span>
-    <span class="c1"># if diaphragm_lines:</span>
-    <span class="c1">#     for lvl in mdl.levels.values():</span>
-    <span class="c1">#         add_data__diaphragm_lines(data_dict, lvl)</span>
+    <span class="c1"># lines indicating rigid diaphragms</span>
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">diaphragm_lines</span><span class="p">:</span>
+            <span class="n">add_data__diaphragm_lines</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
 
-    <span class="c1"># # bisector lines</span>
-    <span class="c1"># if tributary_areas:</span>
-    <span class="c1">#     for lvl in mdl.levels.values():</span>
-    <span class="c1">#         add_data__bisector_lines(data_dict, lvl)</span>
+    <span class="c1"># tributary area boundary lines</span>
+    <span class="k">if</span> <span class="n">load_case</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tributary_area_boundaries</span><span class="p">:</span>
+            <span class="n">add_data__tributary_area_boundaries</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>
 
     <span class="c1"># plot beamcolumn elements</span>
     <span class="n">add_data__frames</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">)</span>

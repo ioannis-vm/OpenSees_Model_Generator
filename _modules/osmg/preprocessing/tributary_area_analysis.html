@@ -233,7 +233,7 @@
     <span class="c1"># maps an edge.uid to its corresponding tributary area</span>
     <span class="n">edge_area</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="c1"># maps an edge.uid to its corresponding tributary polygon</span>
-    <span class="n">edge_polygons</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">PolygonShape</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">edge_polygons</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">PolygonShape</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="c1"># maps a node.uid to a vertex</span>
     <span class="n">vertex_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="c1"># used to map zerolength element-induced coinciding nodes</span>
@@ -318,6 +318,16 @@
         <span class="c1"># for joints, we only consider the top-most line elements</span>
         <span class="c1"># and we treat them the same as rigid offsets.</span>
 
+        <span class="c1"># clear any previous results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_area</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_polygons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertex_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zn_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pz_node</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edges</span>
         <span class="n">vertices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertices</span>
         <span class="n">edge_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">edge_map</span>
@@ -326,15 +336,6 @@
         <span class="n">vertex_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">vertex_map</span>
         <span class="n">zn_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zn_map</span>
         <span class="n">pz_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pz_node</span>
-        <span class="c1"># clear any previous results</span>
-        <span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">vertices</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">edge_map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">edge_area</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">edge_polygons</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">vertex_map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">zn_map</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">pz_node</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">panel_zone</span> <span class="ow">in</span> <span class="n">panel_zones</span><span class="p">:</span>
             <span class="n">back_nd</span> <span class="o">=</span> <span class="n">panel_zone</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;middle_back&quot;</span><span class="p">]</span>
