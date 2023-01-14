@@ -1,6 +1,6 @@
 ![Tests](https://github.com/ioannis-vm/OpenSees_Model_Generator/actions/workflows/test_and_deploy.yaml/badge.svg)
 ![PyPI version](https://badge.fury.io/py/osmg.svg)
-
+![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.7536062.svg)
 # OpenSees Model Generator
 
 ![](img/img.png)
