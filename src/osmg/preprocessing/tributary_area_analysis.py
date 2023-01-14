@@ -104,6 +104,7 @@ class TributaryAreaAnaysis:
     ):
         """
         Performs tributary area analysis
+
         Arguments:
           load_factor: Factor by which to multiply the surface
             loads that count as a mass source, found in the load case.
@@ -121,6 +122,7 @@ class TributaryAreaAnaysis:
             behavior. This flag can be used to disable the checks for
             subsequent analyses to enhance performance if that a prior
             analysis has verified that the checks are satisfied.
+
         """
 
         try:

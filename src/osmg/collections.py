@@ -41,7 +41,7 @@ class Collection(dict[TK, TV]):
     Attributes:
         parent: Object to which the Collection belongs.
 
-    Examples:
+    Example:
         >>> # collections require parent objects to which they belong
         >>> parent = 52
         >>> my_collection = Collection(parent=parent)
@@ -169,7 +169,7 @@ class CollectionActive(Collection[TK, TV]):
       active: List of unique IDs that correspond to the active
         objects.
 
-    Examples:
+    Example:
         >>> from osmg.level import Level
         >>> my_collection = CollectionActive(parent=None)
         >>> my_collection.add(Level(
@@ -233,7 +233,7 @@ class NodeCollection(Collection[int, node.Node]):
     Attributes:
         parent: Object to which the Collection belongs.
 
-    Examples:
+    Example:
         >>> from osmg.ops.node import Node
         >>> from osmg.level import Level
         >>> level = Level(parent_model=None, uid=0, elevation=0.00)

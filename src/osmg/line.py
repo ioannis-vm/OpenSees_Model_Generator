@@ -152,7 +152,7 @@ class Line:
 
         Returns: True if the point lies on the line, False otherwise
 
-        Examples:
+        Example:
             >>> from osmg.line import Line
             >>> l = Line('my_line', np.array([0, 0]), np.array([1, 1]))
             >>> l.intersects_pt(np.array([0.5, 0.5]))

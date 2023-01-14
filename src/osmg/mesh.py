@@ -72,17 +72,17 @@ class Vertex:
             bool: `True` if the two vertices are equal, `False`
                   otherwise.
 
-        Examples:
-        >>> from osmg.mesh import Vertex
-        >>> v1 = Vertex((0, 0))
-        >>> v2 = Vertex((1, 1))
-        >>> v3 = Vertex((0, 0))
-        >>> v1 == v2
-        False
-        >>> v1 == v3
-        False
-        >>> v1 == v1
-        True
+        Example:
+            >>> from osmg.mesh import Vertex
+            >>> v1 = Vertex((0, 0))
+            >>> v2 = Vertex((1, 1))
+            >>> v3 = Vertex((0, 0))
+            >>> v1 == v2
+            False
+            >>> v1 == v3
+            False
+            >>> v1 == v1
+            True
 
         """
 
@@ -93,7 +93,7 @@ class Vertex:
         Returns a string representation of the vertex.
 
         Returns:
-            str: String representation of the vertex.
+            String representation of the vertex.
 
         """
 
@@ -102,10 +102,9 @@ class Vertex:
 
 class Edge:
     """
-    2D oriented Edge.
-    Connected to two vertices `v_i` and `v_j`.
-    Has two halfedges, `h_i` and `h_j`.
-    Each instance has an automatically generated unique id.
+    2D oriented Edge. Connected to two vertices `v_i` and `v_j`.  Has
+    two halfedges, `h_i` and `h_j`.  Each instance has an
+    automatically generated unique id.
 
     """
 
@@ -169,7 +168,7 @@ class Edge:
         If the given vertex is not connected to this edge, a ValueError
         is raised.
 
-        Examples:
+        Example:
             >>> from osmg.mesh import Vertex
             >>> v1 = Vertex((0, 0))
             >>> v2 = Vertex((1, 0))
@@ -209,7 +208,7 @@ class Edge:
             True if this edge overlaps or crosses the other edge,
             False otherwise.
 
-        Examples:
+        Example:
             >>> from osmg.mesh import Vertex, Edge
             >>> v1 = Vertex((0, 0))
             >>> v2 = Vertex((0, 1))
@@ -337,17 +336,14 @@ class Edge:
 
 class Halfedge:
     """
-    Halfedge object.
-    Every edge has two halfedges.
-    A halfedge has a direction, pointing from one
-    of the corresponding edge's vertices to the other.
-    The `vertex` attribute corresponds to the
-    edge's vertex that the halfedge originates from.
-    Halfedges have a `next` attribute that
-    points to the next halfedge, forming closed
-    loops, or sequences, which is the purpose of this module.
+    Halfedge object. Every edge has two halfedges.  A halfedge has a
+    direction, pointing from one of the corresponding edge's vertices
+    to the other.  The `vertex` attribute corresponds to the edge's
+    vertex that the halfedge originates from.  Halfedges have a `next`
+    attribute that points to the next halfedge, forming closed loops,
+    or sequences, which is the purpose of this module.
 
-    Examples:
+    Example:
         >>> from osmg.mesh import Vertex, Edge, Halfedge
         >>> v1 = Vertex((0, 0))
         >>> v2 = Vertex((2, 2))
@@ -409,7 +405,7 @@ class Halfedge:
         Calculates the angular direction of the halfedge
         using the arctan2 function (in radians).
 
-        Examples:
+        Example:
             >>> from osmg.mesh import Vertex, Edge, Halfedge
             >>> v1 = Vertex((0.0, 0.0))
             >>> v2 = Vertex((2.0, 2.0))
@@ -478,6 +474,7 @@ class Mesh:
 def polygon_area(coords: nparr) -> float:
     """
     Calculates the area of a polygon.
+
     Arguments:
         coords: A matrix whose columns represent
                 the coordinates and the rows
@@ -485,6 +482,7 @@ def polygon_area(coords: nparr) -> float:
                 The first point should not be repeated
                 at the end, as this is done
                 automatically.
+
     Returns:
         area: The area of the polygon.
 
@@ -508,6 +506,7 @@ def polygon_area(coords: nparr) -> float:
 def polygon_centroid(coords: nparr) -> nparr:
     """
     Calculates the centroid of a polygon.
+
     Arguments:
         coords: A matrix whose columns represent
                 the coordinates and the rows
@@ -515,6 +514,7 @@ def polygon_centroid(coords: nparr) -> nparr:
                 The first point should not be repeated
                 at the end, as this is done
                 automatically.
+
     Returns:
         centroid: The centroid of the polygon.
 
@@ -552,6 +552,7 @@ def polygon_centroid(coords: nparr) -> nparr:
 def polygon_inertia(coords):
     """
     Calculates the moments of inertia of a polygon.
+
     Arguments:
         coords: A matrix whose columns represent
                 the coordinates and the rows
@@ -559,6 +560,7 @@ def polygon_inertia(coords):
                 The first point should not be repeated
                 at the end, as this is done
                 automatically.
+
     Returns:
         dictionary, containing:
         'ixx': (float) - Moment of inertia around
@@ -711,7 +713,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     Returns:
         halfedges: List of Halfedge objects
 
-    Examples:
+    Example:
         >>> from osmg.mesh import Vertex, Edge, Halfedge
         >>> # define some vertices
         >>> v1 = Vertex((0.0, 0.0))
@@ -796,16 +798,16 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
 
 def obtain_closed_loops(halfedges):
     """
-    Given a list of halfedges,
-    this function uses their `next` attribute to
-    group them into sequences of closed loops
-    (ordered lists of halfedges of which the
-    `next` halfedge of the last list element
-    points to the first halfedge in the list, and
-    the `next` halfedge of any list element
-    points to the next halfedge in the list.
+    Given a list of halfedges, this function uses their `next`
+    attribute to group them into sequences of closed loops (ordered
+    lists of halfedges of which the `next` halfedge of the last list
+    element points to the first halfedge in the list, and the `next`
+    halfedge of any list element points to the next halfedge in the
+    list.
+
     Arguments:
         halfedges: list of halfedges
+
     Returns:
         loops with the aforementioned property.
 
@@ -833,12 +835,13 @@ def obtain_closed_loops(halfedges):
 
 def orient_loops(loops):
     """
-    Separates loops to internal (counterclockwise)
-    and external (clockwise). Also gathers trivial
-    loops, i.e. halfedge sequences that define polygons
-    that have no area (e.g. h1 -> h2 -> h1).
+    Separates loops to internal (counterclockwise) and external
+    (clockwise). Also gathers trivial loops, i.e. halfedge sequences
+    that define polygons that have no area (e.g. h1 -> h2 -> h1).
+
     Arguments:
         loops (list[list[Halfedge]]) (see `obtain_closed_loops`)
+
     Returns:
         external_loops (list[list[Halfedge]])
         internal_loops (list[list[Halfedge]])
@@ -871,12 +874,14 @@ def orient_loops(loops):
 def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     """
     Used to define the fibers of fiber sections.
+
     Arguments:
         halfedges: Sequence of halfedges that defines the shape of a
                   section.
         n_x: Number of spatial partitions in the x direction
         n_y: Number of spatial partitions in the y direction
         plot: Plots the resulting polygons for debugging
+
     Returns:
         pieces: shapely_Polygon objects that represent single fibers.
 
@@ -932,10 +937,12 @@ def subdivide_hss(
         -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.
+
     Arguments:
       sec_h: Section height
       sec_b: Section width
       sec_t: Section thickness
+
     Returns:
         pieces: shapely_Polygon objects that represent single fibers.
 
@@ -1068,8 +1075,7 @@ def plot_edges(edges):
 
 def sanity_checks(external, trivial):
     """
-    Perform some checks to make sure
-    assumptions are not violated.
+    Perform some checks to make sure assumptions are not violated.
 
     """
 

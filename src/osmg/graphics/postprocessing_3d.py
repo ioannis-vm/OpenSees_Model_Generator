@@ -53,17 +53,16 @@ def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
     use its shape functions to obtain intermediate points.
 
     Arguments:
-        element: A line element
-        u_i: 3 displacements at end i, global system
-        r_i: 3 rotations at end i, global system
-        u_j, r_j: similar to u_i, r_i.
-        num_points: Number of interpolation points
+      element: A line element
+      u_i: 3 displacements at end i, global system
+      r_i: 3 rotations at end i, global system
+      u_j, r_j: similar to u_i, r_i.
+      num_points: Number of interpolation points
 
     Returns:
-        d_global: Displacements (global system)
-        r_local: Rotations (local system)
-          (the rotations are needed for plotting the
-          deformed shape with extruded frame elements)
+      Displacements (global system) and rotations (local system). The
+        rotations are needed for plotting the deformed shape with
+        extruded frame elements.
 
     """
 
@@ -686,6 +685,7 @@ def show_deformed_shape(
 
     """
     Visualize the model in its deformed state
+
     Arguments:
       analysis: an analysis object
       case_name: the name of the load_case to be visualized
@@ -925,7 +925,8 @@ def show_basic_forces(
     subset_model=None,
 ):
     """
-    Visualize the model and plot the frame element basic forces
+    Visualize the model and plot the frame element basic forces.
+
     Arguments:
       analysis: an analysis object
       case_name: the name of the load_case to be visualized
@@ -944,13 +945,12 @@ def show_basic_forces(
         hover box data for moments (for unit conversions)
       global_axes: whether to show global axes
       camera: custom positioning of the camera
-      subset_model: use this model instead of the one
-        contained in the analysis object.
-        It needs to be a subset of the original model. This can be
-          used to only show the results for some part of a large
-          model.
+      subset_model: use this model instead of the one contained in the
+        analysis object. It needs to be a subset of the original
+        model. This can be used to only show the results for some part
+        of a large model.
+
     """
-    # TODO: what is going on with the scaling factors?...
 
     if subset_model:
         mdl = subset_model
@@ -1437,6 +1437,7 @@ def show_basic_forces_combo(
     """
     Visualize the model and plot the enveloped frame element basic forces
     for a load combination.
+
     Arguments:
       combo: a load combination object
       step: the analysis step to be visualized
@@ -1454,11 +1455,10 @@ def show_basic_forces_combo(
         hover box data for moments (for unit conversions)
       global_axes: whether to show global axes
       camera: custom positioning of the camera
-      subset_model: use this model instead of the one
-        contained in the analysis object.
-        It needs to be a subset of the original model. This can be
-          used to only show the results for some part of a large
-          model.
+      subset_model: use this model instead of the one contained in the
+        analysis object. It needs to be a subset of the original
+        model. This can be used to only show the results for some part
+        of a large model.
 
     """
 

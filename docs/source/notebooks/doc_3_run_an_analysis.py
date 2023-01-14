@@ -209,9 +209,7 @@ help(show_deformed_shape)
 
 
 # %%
-show_deformed_shape(static_anl, testcase.name, 0, 0.00, True)
-# I'm not sure why it's not showing here in the docs, it should work
-# on your machine!
+show_deformed_shape(static_anl, testcase.name, 0, 0.00, False)
 
 # %%
 help(show_basic_forces)
@@ -267,23 +265,23 @@ help(nlth_anl.run)
 
 
 # %%
-# nlth_anl.run(
-#     0.01,
-#     'groundmotions/1xa.txt',
-#     'groundmotions/1ya.txt',
-#     None,
-#     0.005,
-#     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
-#     print_progress=True
-# )
+nlth_anl.run(
+    0.01,
+    'groundmotions/1xa.txt',
+    'groundmotions/1ya.txt',
+    None,
+    0.005,
+    damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
+    print_progress=True
+)
 
 
 # %%
-# parent_node_lvl2 = testcase.parent_nodes[2]
+parent_node_lvl2 = testcase.parent_nodes[2]
 
 
 # %%
-# nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)
+nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)
 
 
 # %% [markdown]

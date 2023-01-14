@@ -3,17 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+Welcome to the documentation for `osmg`
+=======================================
+
 .. toctree::
-   :hidden:
+   :maxdepth: 1
+   :caption: Contents:
 
    Home page <self>
    Introductory Examples <notebooks>
    API reference <_autosummary/osmg>
 
 
-Welcome to the documentation for `osmg`
-=======================================
-
+Introduction
+------------
+   
 :literal:`OpenSees_Model_Generator` (`osmg`) is a Python package
 designed to facilitate the definition and analysis of 3D models using
 `OpenSees`_. Its main goal is to simplify the process of creating
@@ -66,7 +70,7 @@ Installing `osmg`
 It is recommended to use a virtual environment to manage the
 dependencies of this module. Anaconda or Miniconda are some valid
 options. Installation instructions can be found
-:ref:`here <conda_install>`.
+`here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_.
 
 `osmg` is available on `PyPI`_, but it is recommended to install it in
 development mode instead.
@@ -198,7 +202,6 @@ productivity. In `Gnu Emacs`_, this functionality is provided by
   
 .. _OpenSees: https://opensees.berkeley.edu/
 .. _dataclasses: https://docs.python.org/3/library/dataclasses.html
-.. _conda_install: https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 .. _scikit-geometry: https://github.com/scikit-geometry/scikit-geometry
 .. _PyPI: https://pypi.org/
 .. _pdb: https://docs.python.org/3/library/pdb.html

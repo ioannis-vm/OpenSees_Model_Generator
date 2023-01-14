@@ -1,5 +1,6 @@
 """
 Defines Analysis objects.
+
 """
 
 #
@@ -1216,6 +1217,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     ):
         """
         Run pushover analysis
+
         Arguments:
           direction: can be any of 'x', 'y', 'z'
           target_displacements: a list of target displacements.  each
@@ -1584,6 +1586,7 @@ class THAnalysis(GravityPlusAnalysis):
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the time-history analysis
+
         Arguments:
             filename_x, y, z: Paths where the fixed-step ground acceleration
                               records are stored (single-column).
@@ -1597,8 +1600,8 @@ class THAnalysis(GravityPlusAnalysis):
                      {'type': 'stiffness', 'ratio': r, 'period': t1}
                      {'type': 'modal', 'num_modes': n, 'ratio': r}
                      {'type': 'modal+stiffness', 'num_modes': n,
-                              'ratio_modal': r, 'period': t1,
-                              'ratio_stiffness': r}
+                     'ratio_modal': r, 'period': t1,
+                     'ratio_stiffness': r}
             print_progress: Controls whether the current time is printed out
 
         """

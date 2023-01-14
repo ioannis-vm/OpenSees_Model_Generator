@@ -38,7 +38,7 @@ def methods(obj: object) -> list[str]:
     Returns the names of all methods of an object,
     excluding the dunder methods.
 
-    Examples:
+    Example:
         >>> class TestClass:
         ...     def method_1(self):
         ...         pass
@@ -90,7 +90,7 @@ def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
 
-    Examples:
+    Example:
         >>> dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
         >>> previous_element(dct, 2)  # Returns 'a'
         'a'

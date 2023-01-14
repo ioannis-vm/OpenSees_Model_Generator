@@ -30,7 +30,6 @@
    .. rubric:: {{ _('Classes') }}
 
    .. autosummary::
-      :toctree:
       :template: custom-class-template.rst
    {% for item in classes %}
       {{ item }}
@@ -43,7 +42,6 @@
    .. rubric:: {{ _('Exceptions') }}
 
    .. autosummary::
-      :toctree:
    {% for item in exceptions %}
       {{ item }}
    {%- endfor %}

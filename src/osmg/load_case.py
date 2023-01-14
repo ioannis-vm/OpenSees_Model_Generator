@@ -49,7 +49,7 @@ class PointLoadMass:
         """
         Adds some quantity to the existing quantity.
 
-        Examples:
+        Example:
             >>> from osmg.load_case import PointLoadMass
             >>> load = np.array([1., 2., 3., 4., 5., 6.])
             >>> point_load = PointLoadMass()

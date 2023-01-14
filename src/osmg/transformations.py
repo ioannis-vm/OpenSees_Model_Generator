@@ -58,14 +58,14 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
         3x3 transformation matrix representing the rotation.
 
     Example:
-    >>> # this is how to run that function:
-    >>> res = rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)
-    >>> # this is the expected result:
-    >>> expected_res = np.array(
-    ...     [[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],
-    ...      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
-    ...      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
-    >>> assert np.allclose(res, expected_res)
+        >>> # this is how to run that function:
+        >>> res = rotation_matrix_3d(np.array([1, 0, 0]), np.pi/2)
+        >>> # this is the expected result:
+        >>> expected_res = np.array(
+        ...     [[ 1.00000000e+00,  0.00000000e+00, -0.00000000e+00],
+        ...      [-0.00000000e+00,  2.22044605e-16, -1.00000000e+00],
+        ...      [ 0.00000000e+00,  1.00000000e+00,  2.22044605e-16]])
+        >>> assert np.allclose(res, expected_res)
 
     """
 
@@ -142,27 +142,30 @@ def local_axes_from_points_and_angle(
     Arguments:
         point_i: Start point
         point_j: End point
-        ang : Parameter that controls the rotation of the
-            section around the x-axis. Counterclockwise rotation is
-            posotive. 0.00 corresponds to:
-              vertical elements whose local z axis coincides with
-                                the local x axis
-              horizontal elements whose local z axis is horizontal.
+        ang: Parameter that controls the rotation of the section
+          around the x-axis. Counterclockwise rotation is
+          posotive. 0.00 corresponds to vertical elements whose local
+          z axis coincides with the local x axis, and horizontal
+          elements whose local z axis is horizontal.
+
     Returns:
         Local coordinate system
         vectors. The first element is the local x axis, the second
         element is the local y axis, and the third element is the
         local z axis.
+
     Raises:
         ValueError: If the start point and end point define a vertical element
             that is defined upside down (i.e., with the start point at a lower
             height than the end point).
+
     Note:
         For vertical elements, the local x axis will be the vector connecting
         the start and end points, and the local z axis will be perpendicular
         to the local x axis and lying on the plane defined by the global xy
         plane and the local x axis. For horizontal elements, the local z axis
         will be parallel to the global z axis.
+
     Example:
         >>> point_i = np.array([0, 0, 0])
         >>> point_j = np.array([1, 0, 0])

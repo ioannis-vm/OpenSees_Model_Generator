@@ -179,6 +179,7 @@ class Model:
     def add_level(self, uid: int, elevation: float) -> None:
         """
         Adds a level to the model.
+
         Arguments:
             uid: Unique ID for the level.
             elevation: Elevation of the level.

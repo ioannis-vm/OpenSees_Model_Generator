@@ -26,9 +26,8 @@ if TYPE_CHECKING:
 @dataclass
 class Level:
     """
-    Level Object
-    Levels are part of a model and they contain primary nodes and
-      component assemblies.
+    Level Object. Levels are part of a model and they contain primary
+      nodes and component assemblies.
 
     Attributes:
         parent_model (Model)
@@ -37,7 +36,7 @@ class Level:
         nodes (NodeCollection)
         components (Collection)
 
-    Examples:
+    Example:
         >>> from osmg.model import Model
         >>> model = Model(name='example_model')
         >>> level = Level(parent_model=model, uid=1, elevation=0.0)

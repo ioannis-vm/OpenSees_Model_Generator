@@ -36,6 +36,7 @@ nparr = npt.NDArray[np.float64]
 def add_data__nodes(data_dict, mdl, load_case):
     """
     Adds a trace containing nodes
+
     Arguments:
       data_dict:
         list of dictionaries containing figure data
@@ -150,6 +151,7 @@ def add_data__parent_nodes(
         load_case: LoadCase) -> None:
     """
     Adds a trace containing parent nodes
+
     Arguments:
       data_dict:
         list of dictionaries containing figure data
@@ -216,6 +218,7 @@ def add_data__internal_nodes(
         mdl: Model, load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing internal nodes
+
     Arguments:
       data_dict:
         list of dictionaries containing figure data
@@ -324,13 +327,16 @@ def add_data__release_nodes(
         list_of_nodes: list[node_module.Node]) -> None:
     """
     Adds a trace containing release nodes
+
     Arguments:
       data_dict:
         list of dictionaries containing figure data
       list_of_nodes: List of nodes where a release is present.
       mdl: the model to be visualized
       load_case: the load_case to be visualized
+
     """
+
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
     z_list = [node.coords[2] for node in list_of_nodes]
@@ -361,12 +367,15 @@ def add_data__frames(
         load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
+
     Arguments:
       data_dict:
         list of dictionaries containing figure data
       mdl: the model to be visualized
       load_case: the load_case to be visualized
+
     """
+
     line_elems: list[
         Union[element.ElasticBeamColumn,
               element.DispBeamColumn]] = []
@@ -478,6 +487,7 @@ def add_data__bars(
         load_case: Optional[LoadCase] = None) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -573,6 +583,7 @@ def add_data__bars(
 def add_data__twonodelinks(data_dict, mdl):
     """
     Adds a trace containing twonodelink elements
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -627,6 +638,7 @@ def add_data__twonodelinks(data_dict, mdl):
 def add_data__frame_offsets(data_dict, mdl):
     """
     Adds a trace containing frame element rigid offset lines
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -678,6 +690,7 @@ def add_data__frame_offsets(data_dict, mdl):
 def add_data__frame_axes(data_dict, mdl, ref_len):
     """
     Adds a trace containing frame element local axis lines
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -739,6 +752,7 @@ def add_data__frame_axes(data_dict, mdl, ref_len):
 def add_data__zerolength_axes(data_dict, mdl, ref_len):
     """
     Adds a trace containing zerolength element local axis lines
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -788,6 +802,7 @@ def add_data__zerolength_axes(data_dict, mdl, ref_len):
 def add_data__global_axes(data_dict, ref_len):
     """
     Adds a trace containing global axes
+
     Arguments:
       data_dict: dictionary containing figure data
       ref_len: model reference length to scale the axes
@@ -836,6 +851,7 @@ def add_data__global_axes(data_dict, ref_len):
 def add_data__extruded_frames_mesh(data_dict, mdl):
     """
     Adds a trace containing frame element extrusion mesh
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -919,6 +935,7 @@ def add_data__extruded_frames_mesh(data_dict, mdl):
 def add_data__extruded_bars_mesh(data_dict, mdl):
     """
     Adds a trace containing frame element extrusion mesh
+
     Arguments:
       data_dict: dictionary containing figure data
       mdl: the model to be visualized
@@ -1014,6 +1031,7 @@ def show(
 ) -> None:
     """
     Visualize the model
+
     Arguments:
       mdl: the model to be visualized
       load_case: the load_case to be visualized
