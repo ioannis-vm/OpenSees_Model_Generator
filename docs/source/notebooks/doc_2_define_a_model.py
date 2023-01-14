@@ -152,13 +152,13 @@ show(mdl)
 Now that all the intended elements have been defined, we can apply pre-processing methods to the model.
 Some common methods are the following:
 
-- `rigid_diaphragms` assigns rigid diaphragm constraints to all levels that contain beams
+* `rigid_diaphragms` assigns rigid diaphragm constraints to all specified levels. Only primary nodes are affected (not internal nodes of component assemblies).
 
-- `tributary_area_analysis` distributes loads from the floors to the supporting elements
+* `tributary_area_analysis` distributes loads from the floors to the supporting elements.
 
-- `self_weight`, `self_mass` assign self-weight loads and lumped self-mass to all the elements.
+* `self_weight`, `self_mass` assign self-weight loads and lumped self-mass to all the elements / nodes.
 
-However, loads, mass, and diaphragm constraints are load_case-specific. We therefore need to define a load case first.
+Loads, mass, and diaphragm constraints are load_case-specific.
 """
 
 
