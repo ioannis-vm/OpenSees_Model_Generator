@@ -17,3 +17,5 @@ Links:
 ### Documentation
 
 Documentation is available [here](https://ioannis-vm.github.io/OpenSees_Model_Generator/).
+
+[View on Zenodo](https://zenodo.org/record/7536062).
