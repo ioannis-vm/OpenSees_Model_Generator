@@ -1,9 +1,6 @@
 name: Build and deploy documentation
 on:
   push:
-    paths:
-      - 'envs/osmg.yaml'
-      - '.github/workflows/build_docs.yaml'
     branches:
       - main
       - dev
