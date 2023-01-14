@@ -49,7 +49,7 @@ model creation and analysis.
    versions of this module may introduce breaking changes, which could
    affect code that relies on earlier versions. To minimize the risk
    of issues, it is recommended to keep up to date with the latest
-   version and test any changes before deployment.  If you encounter
+   version and adjust the syntax as instructed in the changelogs.  If you encounter
    any issues with the documentation or the code itself, please
    consider reporting them by opening an `issue
    <https://github.com/ioannis-vm/OpenSees_Model_Generator/issues>`_
