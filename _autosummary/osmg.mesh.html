@@ -42,8 +42,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="osmg.mesh.Edge" href="osmg.mesh.Edge.html" />
-    <link rel="prev" title="osmg.load_case.PointLoadMass" href="osmg.load_case.PointLoadMass.html" /> 
+    <link rel="next" title="osmg.model" href="osmg.model.html" />
+    <link rel="prev" title="osmg.load_case" href="osmg.load_case.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,7 +88,8 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
@@ -102,10 +103,6 @@
 <li class="toctree-l2"><a class="reference internal" href="osmg.line.html">osmg.line</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.load_case.html">osmg.load_case</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.mesh</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="osmg.mesh.Edge.html">osmg.mesh.Edge</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.mesh.Halfedge.html">osmg.mesh.Halfedge</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.mesh.Mesh.html">osmg.mesh.Mesh</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.mesh.Vertex.html">osmg.mesh.Vertex</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#osmg.mesh.Edge"><code class="docutils literal notranslate"><span class="pre">Edge</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.mesh.Edge.define_halfedge"><code class="docutils literal notranslate"><span class="pre">Edge.define_halfedge()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.mesh.Edge.other_vertex"><code class="docutils literal notranslate"><span class="pre">Edge.other_vertex()</span></code></a></li>
@@ -272,13 +269,13 @@
 <td><p>Plots the vertices/edges of a list of halfedges.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.mesh.polygon_area" title="osmg.mesh.polygon_area"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_area</span></code></a>(coords)</p></td>
-<td><p>Calculates the area of a polygon. :Parameters: <strong>coords</strong> -- A matrix whose columns represent              the coordinates and the rows              represent the points of the polygon. The first point should not be repeated              at the end, as this is done              automatically.</p></td>
+<td><p>Calculates the area of a polygon.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.mesh.polygon_centroid" title="osmg.mesh.polygon_centroid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_centroid</span></code></a>(coords)</p></td>
-<td><p>Calculates the centroid of a polygon. :Parameters: <strong>coords</strong> -- A matrix whose columns represent              the coordinates and the rows              represent the points of the polygon. The first point should not be repeated              at the end, as this is done              automatically.</p></td>
+<td><p>Calculates the centroid of a polygon.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.mesh.polygon_inertia" title="osmg.mesh.polygon_inertia"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polygon_inertia</span></code></a>(coords)</p></td>
-<td><p>Calculates the moments of inertia of a polygon. :Parameters: <strong>coords</strong> -- A matrix whose columns represent              the coordinates and the rows              represent the points of the polygon. The first point should not be repeated              at the end, as this is done              automatically.</p></td>
+<td><p>Calculates the moments of inertia of a polygon.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.mesh.print_halfedge_results" title="osmg.mesh.print_halfedge_results"><code class="xref py py-obj docutils literal notranslate"><span class="pre">print_halfedge_results</span></code></a>(halfedges)</p></td>
 <td><p>Prints the ids of the defined halfedges and their vertex, edge and next, for debugging.</p></td>
@@ -287,40 +284,39 @@
 <td><p>Perform some checks to make sure assumptions are not violated.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.mesh.subdivide_hss" title="osmg.mesh.subdivide_hss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_hss</span></code></a>(sec_h, sec_b, sec_t[, plot])</p></td>
-<td><p>Used to define the fibers of steel HSS fiber sections. :Parameters: * <strong>sec_h</strong> -- Section height              * <strong>sec_b</strong> -- Section width              * <strong>sec_t</strong> -- Section thickness.</p></td>
+<td><p>Used to define the fibers of steel HSS fiber sections.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.mesh.subdivide_polygon" title="osmg.mesh.subdivide_polygon"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subdivide_polygon</span></code></a>(outside, holes, n_x, n_y)</p></td>
-<td><p>Used to define the fibers of fiber sections. :Parameters: * <strong>halfedges</strong> -- Sequence of halfedges that defines the shape of a                section. * <strong>n_x</strong> -- Number of spatial partitions in the x direction              * <strong>n_y</strong> -- Number of spatial partitions in the y direction              * <strong>plot</strong> -- Plots the resulting polygons for debugging.</p></td>
+<td><p>Used to define the fibers of fiber sections.</p></td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="osmg.mesh.Edge.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Edge</span></code></a>(v_i, v_j)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.mesh.Edge" title="osmg.mesh.Edge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Edge</span></code></a>(v_i, v_j)</p></td>
 <td><p>2D oriented Edge.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="osmg.mesh.Halfedge.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Halfedge</span></code></a>(vertex, edge)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Halfedge</span></code></a>(vertex, edge)</p></td>
 <td><p>Halfedge object.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="osmg.mesh.Mesh.html#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a>(halfedges)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.mesh.Mesh" title="osmg.mesh.Mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code></a>(halfedges)</p></td>
 <td><p>A container that holds a list of unique halfedges.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vertex</span></code></a>(coords)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vertex</span></code></a>(coords)</p></td>
 <td><p>2D Vertex.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.mesh.Edge">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge" title="Permalink to this definition">¶</a></dt>
-<dd><p>2D oriented Edge.
-Connected to two vertices <cite>v_i</cite> and <cite>v_j</cite>.
-Has two halfedges, <cite>h_i</cite> and <cite>h_j</cite>.
-Each instance has an automatically generated unique id.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v_i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D oriented Edge. Connected to two vertices <cite>v_i</cite> and <cite>v_j</cite>.  Has
+two halfedges, <cite>h_i</cite> and <cite>h_j</cite>.  Each instance has an
+automatically generated unique id.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.mesh.Edge.define_halfedge">
-<span class="sig-name descname"><span class="pre">define_halfedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="osmg.mesh.Halfedge.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">Halfedge</span></a></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge.define_halfedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge.define_halfedge" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">define_halfedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">Halfedge</span></a></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge.define_halfedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge.define_halfedge" title="Permalink to this definition">¶</a></dt>
 <dd><p>For the current edge instance and given one of its vertices,
 we want the halfedge that points to the direction
 away from the given vertex.
@@ -333,7 +329,7 @@ We create it if it does not exist.</p>
 <dd><p>Returns the vertex of this edge that is not the given vertex.
 If the given vertex is not connected to this edge, a ValueError
 is raised.</p>
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -353,7 +349,7 @@ is raised.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.mesh.Edge.overlaps_or_crosses">
-<span class="sig-name descname"><span class="pre">overlaps_or_crosses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Edge.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">Edge</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge.overlaps_or_crosses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge.overlaps_or_crosses" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">overlaps_or_crosses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">Edge</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#Edge.overlaps_or_crosses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Edge.overlaps_or_crosses" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if this edge overlaps or crosses another edge.
 Edges are allowed to share one vertex (returns False), but not
 both (returns True).</p>
@@ -369,7 +365,7 @@ edge.</p>
 False otherwise.</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -401,17 +397,14 @@ False otherwise.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.mesh.Halfedge">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Halfedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Vertex.html#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.mesh.Edge.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">Edge</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Halfedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Halfedge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Halfedge object.
-Every edge has two halfedges.
-A halfedge has a direction, pointing from one
-of the corresponding edge’s vertices to the other.
-The <cite>vertex</cite> attribute corresponds to the
-edge’s vertex that the halfedge originates from.
-Halfedges have a <cite>next</cite> attribute that
-points to the next halfedge, forming closed
-loops, or sequences, which is the purpose of this module.</p>
-<p class="rubric">Examples</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Halfedge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Vertex" title="osmg.mesh.Vertex"><span class="pre">Vertex</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">Edge</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Halfedge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Halfedge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Halfedge object. Every edge has two halfedges.  A halfedge has a
+direction, pointing from one of the corresponding edge’s vertices
+to the other.  The <cite>vertex</cite> attribute corresponds to the edge’s
+vertex that the halfedge originates from.  Halfedges have a <cite>next</cite>
+attribute that points to the next halfedge, forming closed loops,
+or sequences, which is the purpose of this module.</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Halfedge</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -431,7 +424,7 @@ loops, or sequences, which is the purpose of this module.</p>
 <span class="sig-name descname"><span class="pre">direction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Halfedge.direction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Halfedge.direction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the angular direction of the halfedge
 using the arctan2 function (in radians).</p>
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Halfedge</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span>
@@ -450,7 +443,7 @@ using the arctan2 function (in radians).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.mesh.Mesh">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halfedges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.mesh.Halfedge.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">osmg.mesh.Halfedge</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halfedges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">osmg.mesh.Halfedge</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>A container that holds a list of unique halfedges.
 Vertices and edges can be retrieved from those.
 The mesh is assumed to be flat (2D).</p>
@@ -515,7 +508,7 @@ Each instance has an automatically generated unique id.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.define_halfedges">
-<span class="sig-name descname"><span class="pre">define_halfedges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.mesh.Edge.html#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">osmg.mesh.Edge</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.mesh.Halfedge.html#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">osmg.mesh.Halfedge</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#define_halfedges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.define_halfedges" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">define_halfedges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#osmg.mesh.Edge" title="osmg.mesh.Edge"><span class="pre">osmg.mesh.Edge</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#osmg.mesh.Halfedge" title="osmg.mesh.Halfedge"><span class="pre">osmg.mesh.Halfedge</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#define_halfedges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.define_halfedges" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a list of edges, defines all the halfedges and
 associates them with their <cite>next</cite>.</p>
 <div class="admonition note">
@@ -557,7 +550,7 @@ respect to the direction of h.</p>
 <dd class="field-odd"><p>halfedges</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Halfedge</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># define some vertices</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
@@ -588,18 +581,18 @@ respect to the direction of h.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.obtain_closed_loops">
 <span class="sig-name descname"><span class="pre">obtain_closed_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">halfedges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#obtain_closed_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.obtain_closed_loops" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a list of halfedges,
-this function uses their <cite>next</cite> attribute to
-group them into sequences of closed loops
-(ordered lists of halfedges of which the
-<cite>next</cite> halfedge of the last list element
-points to the first halfedge in the list, and
-the <cite>next</cite> halfedge of any list element
-points to the next halfedge in the list.
-:Parameters: <strong>halfedges</strong> – list of halfedges</p>
+<dd><p>Given a list of halfedges, this function uses their <cite>next</cite>
+attribute to group them into sequences of closed loops (ordered
+lists of halfedges of which the <cite>next</cite> halfedge of the last list
+element points to the first halfedge in the list, and the <cite>next</cite>
+halfedge of any list element points to the next halfedge in the
+list.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>loops with the aforementioned property.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>halfedges</strong> – list of halfedges</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>loops with the aforementioned property.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -607,14 +600,15 @@ points to the next halfedge in the list.
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.orient_loops">
 <span class="sig-name descname"><span class="pre">orient_loops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loops</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#orient_loops"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.orient_loops" title="Permalink to this definition">¶</a></dt>
-<dd><p>Separates loops to internal (counterclockwise)
-and external (clockwise). Also gathers trivial
-loops, i.e. halfedge sequences that define polygons
-that have no area (e.g. h1 -&gt; h2 -&gt; h1).
-:Parameters: <strong>loops</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[list[Halfedge]])</span> <span class="pre">(see</span> <span class="pre">`obtain_closed_loops`</span></code>)</p>
+<dd><p>Separates loops to internal (counterclockwise) and external
+(clockwise). Also gathers trivial loops, i.e. halfedge sequences
+that define polygons that have no area (e.g. h1 -&gt; h2 -&gt; h1).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>external_loops (list[list[Halfedge]])
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>loops</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[list[Halfedge]])</span> <span class="pre">(see</span> <span class="pre">`obtain_closed_loops`</span></code>)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>external_loops (list[list[Halfedge]])
 internal_loops (list[list[Halfedge]])
 trivial_loops (list[list[Halfedge]])</p>
 </dd>
@@ -636,21 +630,21 @@ trivial_loops (list[list[Halfedge]])</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.polygon_area">
 <span class="sig-name descname"><span class="pre">polygon_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#polygon_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.polygon_area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the area of a polygon.
-:Parameters: <strong>coords</strong> – A matrix whose columns represent</p>
-<blockquote>
-<div><p>the coordinates and the rows
+<dd><p>Calculates the area of a polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> – A matrix whose columns represent
+the coordinates and the rows
 represent the points of the polygon.
 The first point should not be repeated
 at the end, as this is done
 automatically.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The area of the polygon.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>area</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The area of the polygon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>area</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -664,21 +658,21 @@ automatically.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.polygon_centroid">
 <span class="sig-name descname"><span class="pre">polygon_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#polygon_centroid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.polygon_centroid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the centroid of a polygon.
-:Parameters: <strong>coords</strong> – A matrix whose columns represent</p>
-<blockquote>
-<div><p>the coordinates and the rows
+<dd><p>Calculates the centroid of a polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> – A matrix whose columns represent
+the coordinates and the rows
 represent the points of the polygon.
 The first point should not be repeated
 at the end, as this is done
 automatically.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The centroid of the polygon.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>centroid</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The centroid of the polygon.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>centroid</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -692,18 +686,18 @@ automatically.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.polygon_inertia">
 <span class="sig-name descname"><span class="pre">polygon_inertia</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#polygon_inertia"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.polygon_inertia" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the moments of inertia of a polygon.
-:Parameters: <strong>coords</strong> – A matrix whose columns represent</p>
-<blockquote>
-<div><p>the coordinates and the rows
+<dd><p>Calculates the moments of inertia of a polygon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> – A matrix whose columns represent
+the coordinates and the rows
 represent the points of the polygon.
 The first point should not be repeated
 at the end, as this is done
 automatically.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><dl class="simple">
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
 <dt>‘ixx’: (float) - Moment of inertia around</dt><dd><p>the x axis</p>
 </dd>
 <dt>’iyy’: (float) - Moment of inertia around</dt><dd><p>the y axis</p>
@@ -714,8 +708,8 @@ automatically.</p>
 ‘ir_mass’: (float) - Mass moment of inertia</p>
 </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dictionary, containing</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dictionary, containing</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -745,27 +739,26 @@ next, for debugging.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.sanity_checks">
 <span class="sig-name descname"><span class="pre">sanity_checks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">external</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trivial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#sanity_checks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.sanity_checks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform some checks to make sure
-assumptions are not violated.</p>
+<dd><p>Perform some checks to make sure assumptions are not violated.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.subdivide_hss">
 <span class="sig-name descname"><span class="pre">subdivide_hss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sec_h</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sec_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">shapely.geometry.polygon.Polygon</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/mesh.html#subdivide_hss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.subdivide_hss" title="Permalink to this definition">¶</a></dt>
-<dd><p>Used to define the fibers of steel HSS fiber sections.
-:Parameters: * <strong>sec_h</strong> – Section height</p>
-<blockquote>
-<div><ul class="simple">
+<dd><p>Used to define the fibers of steel HSS fiber sections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sec_h</strong> – Section height</p></li>
 <li><p><strong>sec_b</strong> – Section width</p></li>
 <li><p><strong>sec_t</strong> – Section thickness</p></li>
 </ul>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>shapely_Polygon objects that represent single fibers.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pieces</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shapely_Polygon objects that represent single fibers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pieces</p>
 </dd>
 </dl>
 </dd></dl>
@@ -773,24 +766,22 @@ assumptions are not violated.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.mesh.subdivide_polygon">
 <span class="sig-name descname"><span class="pre">subdivide_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outside</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#subdivide_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.subdivide_polygon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Used to define the fibers of fiber sections.
-:Parameters: * <strong>halfedges</strong> – Sequence of halfedges that defines the shape of a</p>
-<blockquote>
-<div><blockquote>
-<div><p>section.</p>
-</div></blockquote>
-<ul class="simple">
+<dd><p>Used to define the fibers of fiber sections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>halfedges</strong> – Sequence of halfedges that defines the shape of a
+section.</p></li>
 <li><p><strong>n_x</strong> – Number of spatial partitions in the x direction</p></li>
 <li><p><strong>n_y</strong> – Number of spatial partitions in the y direction</p></li>
 <li><p><strong>plot</strong> – Plots the resulting polygons for debugging</p></li>
 </ul>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>shapely_Polygon objects that represent single fibers.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pieces</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shapely_Polygon objects that represent single fibers.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pieces</p>
 </dd>
 </dl>
 </dd></dl>
@@ -803,8 +794,8 @@ assumptions are not violated.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="osmg.mesh.Edge.html" class="btn btn-neutral float-right" title="osmg.mesh.Edge" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="osmg.load_case.PointLoadMass.html" class="btn btn-neutral float-left" title="osmg.load_case.PointLoadMass" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="osmg.model.html" class="btn btn-neutral float-right" title="osmg.model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.load_case.html" class="btn btn-neutral float-left" title="osmg.load_case" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

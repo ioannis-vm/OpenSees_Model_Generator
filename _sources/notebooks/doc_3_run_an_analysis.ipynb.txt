@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "61bb6a3f",
+   "id": "ee7a310e",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -18,7 +18,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "4bf91a09",
+   "id": "719a3fdb",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -32,7 +32,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "da36b2af",
+   "id": "6f00ae06",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -140,7 +140,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3b1c8d13",
+   "id": "09bd1ef6",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -149,7 +149,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b935822b",
+   "id": "1e5095cf",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -160,7 +160,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "519de7ac",
+   "id": "b164c22f",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -172,7 +172,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3b3f7f75",
+   "id": "c551b2ef",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -185,7 +185,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "0d4acff7",
+   "id": "eb908fe8",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -196,7 +196,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "6c9907c7",
+   "id": "f5202879",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -208,7 +208,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "757fff1d",
+   "id": "40b07376",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -220,7 +220,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "bda7d5e8",
+   "id": "6fea1489",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -233,7 +233,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6d55ef4a",
+   "id": "9d78e65c",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -250,7 +250,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "9cb541ad",
+   "id": "0d0601cb",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -261,7 +261,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "04a1f197",
+   "id": "284543da",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -274,7 +274,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2be275ad",
+   "id": "d779d849",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -287,7 +287,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b40e74cc",
+   "id": "d014fdb9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -299,19 +299,17 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a2d1d2d4",
+   "id": "5777acc3",
    "metadata": {},
    "outputs": [],
    "source": [
-    "show_deformed_shape(static_anl, testcase.name, 0, 0.00, True)\n",
-    "# I'm not sure why it's not showing here in the docs, it should work\n",
-    "# on your machine!"
+    "show_deformed_shape(static_anl, testcase.name, 0, 0.00, False)"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3d61693b",
+   "id": "27d608b4",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -323,7 +321,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "10556aa2",
+   "id": "79eacfb8",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -334,7 +332,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "039da776",
+   "id": "baa52b62",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -345,7 +343,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "059160ab",
+   "id": "92740fb6",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -359,7 +357,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f66ec7f4",
+   "id": "5b8df55d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -372,7 +370,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6e3722ef",
+   "id": "f5954510",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -383,7 +381,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "68b064c9",
+   "id": "5dec76c0",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -395,7 +393,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "284a4a12",
+   "id": "cf4ae33e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -406,7 +404,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "3d427389",
+   "id": "dfa82f84",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -417,7 +415,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "693c2c30",
+   "id": "3f3a2f31",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -427,7 +425,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "34279648",
+   "id": "ceaa93c9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -439,50 +437,50 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "ddce417c",
+   "id": "e9afb389",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "# nlth_anl.run(\n",
-    "#     0.01,\n",
-    "#     'groundmotions/1xa.txt',\n",
-    "#     'groundmotions/1ya.txt',\n",
-    "#     None,\n",
-    "#     0.005,\n",
-    "#     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},\n",
-    "#     print_progress=True\n",
-    "# )"
+    "nlth_anl.run(\n",
+    "    0.01,\n",
+    "    'groundmotions/1xa.txt',\n",
+    "    'groundmotions/1ya.txt',\n",
+    "    None,\n",
+    "    0.005,\n",
+    "    damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},\n",
+    "    print_progress=True\n",
+    ")"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2dd1db2a",
+   "id": "47a7cdaf",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "# parent_node_lvl2 = testcase.parent_nodes[2]"
+    "parent_node_lvl2 = testcase.parent_nodes[2]"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "0b4174df",
+   "id": "8df10ed6",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "# nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)"
+    "nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)"
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "ce764a9c",
+   "id": "c1f732c3",
    "metadata": {
     "cell_marker": "\"\"\""
    },

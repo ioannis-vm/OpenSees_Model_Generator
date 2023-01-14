@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -191,7 +192,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="SectionGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.SectionGenerator.html#osmg.gen.section_gen.SectionGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="SectionGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.html#osmg.gen.section_gen.SectionGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">SectionGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used to populate the section repository of a model.</span>
@@ -203,7 +204,7 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span>
 
-<div class="viewcode-block" id="SectionGenerator.generate_generic_elastic"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.SectionGenerator.html#osmg.gen.section_gen.SectionGenerator.generate_generic_elastic">[docs]</a>    <span class="k">def</span> <span class="nf">generate_generic_elastic</span><span class="p">(</span>
+<div class="viewcode-block" id="SectionGenerator.generate_generic_elastic"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.html#osmg.gen.section_gen.SectionGenerator.generate_generic_elastic">[docs]</a>    <span class="k">def</span> <span class="nf">generate_generic_elastic</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">e_times_a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">e_times_i</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">g_times_j</span><span class="p">:</span> <span class="nb">float</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticSection</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -287,7 +288,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">elastic_sections</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sec</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sec</span></div>
 
-<div class="viewcode-block" id="SectionGenerator.load_aisc_from_database"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.SectionGenerator.html#osmg.gen.section_gen.SectionGenerator.load_aisc_from_database">[docs]</a>    <span class="k">def</span> <span class="nf">load_aisc_from_database</span><span class="p">(</span>
+<div class="viewcode-block" id="SectionGenerator.load_aisc_from_database"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.section_gen.html#osmg.gen.section_gen.SectionGenerator.load_aisc_from_database">[docs]</a>    <span class="k">def</span> <span class="nf">load_aisc_from_database</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sec_shape_designation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>

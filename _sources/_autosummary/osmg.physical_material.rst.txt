@@ -17,7 +17,6 @@ osmg.physical\_material
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
       :template: custom-class-template.rst
    
       PhysicalMaterial

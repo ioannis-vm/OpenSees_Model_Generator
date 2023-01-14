@@ -17,7 +17,6 @@ osmg.ops.uniaxial\_material
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
       :template: custom-class-template.rst
    
       Bilin

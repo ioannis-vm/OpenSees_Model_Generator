@@ -88,7 +88,8 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
@@ -226,20 +227,21 @@ method.</p>
 </table>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.postprocessing.basic_forces.basic_forces">
-<span class="sig-name descname"><span class="pre">basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.solver.Analysis.html#osmg.solver.Analysis" title="osmg.solver.Analysis"><span class="pre">Analysis</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.element.TrussBar.html#osmg.ops.element.TrussBar" title="osmg.ops.element.TrussBar"><span class="pre">TrussBar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.ElasticBeamColumn.html#osmg.ops.element.ElasticBeamColumn" title="osmg.ops.element.ElasticBeamColumn"><span class="pre">ElasticBeamColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.DispBeamColumn.html#osmg.ops.element.DispBeamColumn" title="osmg.ops.element.DispBeamColumn"><span class="pre">DispBeamColumn</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_tuple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></span><a class="reference internal" href="../_modules/osmg/postprocessing/basic_forces.html#basic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.postprocessing.basic_forces.basic_forces" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.solver.html#osmg.solver.Analysis" title="osmg.solver.Analysis"><span class="pre">Analysis</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.TrussBar" title="osmg.ops.element.TrussBar"><span class="pre">TrussBar</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.ElasticBeamColumn" title="osmg.ops.element.ElasticBeamColumn"><span class="pre">ElasticBeamColumn</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.DispBeamColumn" title="osmg.ops.element.DispBeamColumn"><span class="pre">DispBeamColumn</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_tuple</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)"><span class="pre">object</span></a></span></span><a class="reference internal" href="../_modules/osmg/postprocessing/basic_forces.html#basic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.postprocessing.basic_forces.basic_forces" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the basic forces of a specified element.</p>
-<p>Arguments:
-anl: Analysis object.
-case_name: Name of loadcase to look for results.
-step: Analysis step to look for results.
-elm: Element of which the basic forces are required.
-num_points: Number of points along the length of the element for</p>
-<blockquote>
-<div><p>which to report the basic forces (oftentimes called <cite>stations</cite>
-in analysis software.)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>as_tupe: Whether to return the results in the form of a pandas</dt><dd><p>DataFrame or a tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>anl</strong> – Analysis object.</p></li>
+<li><p><strong>case_name</strong> – Name of loadcase to look for results.</p></li>
+<li><p><strong>step</strong> – Analysis step to look for results.</p></li>
+<li><p><strong>elm</strong> – Element of which the basic forces are required.</p></li>
+<li><p><strong>num_points</strong> – Number of points along the length of the element for
+which to report the basic forces (oftentimes called <cite>stations</cite>
+in analysis software.)</p></li>
+<li><p><strong>as_tupe</strong> – Whether to return the results in the form of a pandas
+DataFrame or a tuple.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

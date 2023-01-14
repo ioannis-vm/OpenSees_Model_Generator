@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -182,7 +183,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="LoadCombination"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.LoadCombination.html#osmg.postprocessing.design.LoadCombination">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="LoadCombination"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">LoadCombination</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load combinations</span>
@@ -195,7 +196,7 @@
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="LoadCombination.envelope_basic_forces"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.LoadCombination.html#osmg.postprocessing.design.LoadCombination.envelope_basic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_basic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elm</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadCombination.envelope_basic_forces"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_basic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_basic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elm</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the envelope of the basic forces for the</span>
 <span class="sd">        given load combination</span>
@@ -224,7 +225,7 @@
 
         <span class="k">return</span> <span class="n">df_min</span><span class="p">,</span> <span class="n">df_max</span></div>
 
-<div class="viewcode-block" id="LoadCombination.envelope_node_displacement"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.LoadCombination.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadCombination.envelope_node_displacement"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the enveloped node displacement</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -250,7 +251,7 @@
 
         <span class="k">return</span> <span class="n">disp_min</span><span class="p">,</span> <span class="n">disp_max</span></div>
 
-<div class="viewcode-block" id="LoadCombination.envelope_node_displacement_diff"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.LoadCombination.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement_diff">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">node_j</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadCombination.envelope_node_displacement_diff"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement_diff">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">node_j</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the enveloped displacement difference between</span>
 <span class="sd">        two nodes</span>

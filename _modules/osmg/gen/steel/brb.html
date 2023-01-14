@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../_autosummary/osmg.html">API reference</a></li>
@@ -185,7 +186,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="BRBGenSettings"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.BRBGenSettings.html#osmg.gen.steel.brb.BRBGenSettings">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="BRBGenSettings"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.html#osmg.gen.steel.brb.BRBGenSettings">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">BRBGenSettings</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This object holds default values that are used by BRBGenerator</span>
@@ -216,7 +217,7 @@
     <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s1">&#39;Corotational&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="BRBGenerator"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.BRBGenerator.html#osmg.gen.steel.brb.BRBGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="BRBGenerator"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.html#osmg.gen.steel.brb.BRBGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">BRBGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Uses the lower-level `gen` classes to simplify the definition of</span>
@@ -237,7 +238,7 @@
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span>
     <span class="n">settings</span><span class="p">:</span> <span class="n">BRBGenSettings</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">BRBGenSettings</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BRBGenerator.add_brb"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.BRBGenerator.html#osmg.gen.steel.brb.BRBGenerator.add_brb">[docs]</a>    <span class="k">def</span> <span class="nf">add_brb</span><span class="p">(</span>
+<div class="viewcode-block" id="BRBGenerator.add_brb"><a class="viewcode-back" href="../../../../_autosummary/osmg.gen.steel.brb.html#osmg.gen.steel.brb.BRBGenerator.add_brb">[docs]</a>    <span class="k">def</span> <span class="nf">add_brb</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>

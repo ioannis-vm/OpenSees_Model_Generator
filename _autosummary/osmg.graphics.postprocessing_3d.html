@@ -88,7 +88,8 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
@@ -260,13 +261,13 @@
 <td><p>Calculates intermediate points based on end locations and deformations.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_basic_forces" title="osmg.graphics.postprocessing_3d.show_basic_forces"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_basic_forces</span></code></a>(analysis, case_name, step, ...)</p></td>
-<td><p>Visualize the model and plot the frame element basic forces :Parameters: * <strong>analysis</strong> -- an analysis object              * <strong>case_name</strong> -- the name of the load_case to be visualized              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling_global</strong> -- I don't even remember what this                does. It's kind of a mess right now. * <strong>scaling_n</strong>              * <strong>scaling_q</strong>              * <strong>scaling_m</strong>              * <strong>scaling_t</strong>              * <strong>num_points</strong> -- number of points to include in the basic force                curves              * <strong>force_conversion</strong> -- Conversion factor to be applied at the                hover box data for forces (for unit conversions)              * <strong>moment_conversion</strong> -- Conversion factor to be applied at the                hover box data for moments (for unit conversions)              * <strong>global_axes</strong> -- whether to show global axes              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- use this model instead of the one                contained in the analysis object. It needs to be a subset of the original model. This can be                  used to only show the results for some part of a large                  model.</p></td>
+<td><p>Visualize the model and plot the frame element basic forces.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_basic_forces_combo" title="osmg.graphics.postprocessing_3d.show_basic_forces_combo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_basic_forces_combo</span></code></a>(combo, ...[, ...])</p></td>
-<td><p>Visualize the model and plot the enveloped frame element basic forces for a load combination. :Parameters: * <strong>combo</strong> -- a load combination object              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling_global</strong> -- I don't even remember what this                does. It's kind of a mess right now. * <strong>scaling_n</strong>              * <strong>scaling_q</strong>              * <strong>scaling_m</strong>              * <strong>scaling_t</strong>              * <strong>num_points</strong> -- number of points to include in the basic force                curves              * <strong>force_conversion</strong> -- Conversion factor to be applied at the                hover box data for forces (for unit conversions)              * <strong>moment_conversion</strong> -- Conversion factor to be applied at the                hover box data for moments (for unit conversions)              * <strong>global_axes</strong> -- whether to show global axes              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- use this model instead of the one                contained in the analysis object. It needs to be a subset of the original model. This can be                  used to only show the results for some part of a large                  model.</p></td>
+<td><p>Visualize the model and plot the enveloped frame element basic forces for a load combination.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#osmg.graphics.postprocessing_3d.show_deformed_shape" title="osmg.graphics.postprocessing_3d.show_deformed_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_deformed_shape</span></code></a>(analysis, case_name, ...)</p></td>
-<td><p>Visualize the model in its deformed state :Parameters: * <strong>analysis</strong> -- an analysis object              * <strong>case_name</strong> -- the name of the load_case to be visualized              * <strong>step</strong> -- the analysis step to be visualized              * <strong>scaling</strong> -- scaling factor for the deformations. If 0.00 is                provided, the scaling factor is calculated automatically. * <strong>extrude</strong> -- wether to extrude frame elements              * <strong>camera</strong> -- custom positioning of the camera              * <strong>subset_model</strong> -- subset model used to only show certain                components              * <strong>animation</strong> -- show all frames up to the one identified with                <cite>step</cite>              * <strong>init_step</strong> -- starting step, in case of animation              * <strong>step_skip</strong> -- how many frames to skip to reduce the number of                frames in case an animation.</p></td>
+<td><p>Visualize the model in its deformed state</p></td>
 </tr>
 </tbody>
 </table>
@@ -310,7 +311,7 @@ in their deformed state.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ref_len</strong> – <a class="reference internal" href="osmg.model.Model.html#osmg.model.Model.reference_length" title="osmg.model.Model.reference_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">reference_length()</span></code></a> of the
+<li><p><strong>ref_len</strong> – <a class="reference internal" href="osmg.model.html#osmg.model.Model.reference_length" title="osmg.model.Model.reference_length"><code class="xref py py-func docutils literal notranslate"><span class="pre">reference_length()</span></code></a> of the
 model.</p></li>
 <li><p><strong>fmax</strong> – Largest value in the basic forces.</p></li>
 <li><p><strong>factor</strong> – Required scaling factor.</p></li>
@@ -343,16 +344,12 @@ use its shape functions to obtain intermediate points.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>Displacements (global system)
-r_local: Rotations (local system)</p>
-<blockquote>
-<div><p>(the rotations are needed for plotting the
-deformed shape with extruded frame elements)</p>
-</div></blockquote>
-</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>Displacements (global system) and rotations (local system). The</dt><dd><p>rotations are needed for plotting the deformed shape with
+extruded frame elements.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>d_global</p>
+</dl>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -367,10 +364,11 @@ deformations.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_basic_forces">
 <span class="sig-name descname"><span class="pre">show_basic_forces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_basic_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize the model and plot the frame element basic forces
-:Parameters: * <strong>analysis</strong> – an analysis object</p>
-<blockquote>
-<div><ul>
+<dd><p>Visualize the model and plot the frame element basic forces.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>analysis</strong> – an analysis object</p></li>
 <li><p><strong>case_name</strong> – the name of the load_case to be visualized</p></li>
 <li><p><strong>step</strong> – the analysis step to be visualized</p></li>
 <li><p><strong>scaling_global</strong> – I don’t even remember what this
@@ -387,26 +385,24 @@ hover box data for forces (for unit conversions)</p></li>
 hover box data for moments (for unit conversions)</p></li>
 <li><p><strong>global_axes</strong> – whether to show global axes</p></li>
 <li><p><strong>camera</strong> – custom positioning of the camera</p></li>
-<li><p><strong>subset_model</strong> – use this model instead of the one
-contained in the analysis object.
-It needs to be a subset of the original model. This can be</p>
-<blockquote>
-<div><p>used to only show the results for some part of a large
-model.</p>
-</div></blockquote>
-</li>
+<li><p><strong>subset_model</strong> – use this model instead of the one contained in the
+analysis object. It needs to be a subset of the original
+model. This can be used to only show the results for some part
+of a large model.</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_basic_forces_combo">
 <span class="sig-name descname"><span class="pre">show_basic_forces_combo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">combo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_global</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moment_conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_basic_forces_combo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_basic_forces_combo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visualize the model and plot the enveloped frame element basic forces
-for a load combination.
-:Parameters: * <strong>combo</strong> – a load combination object</p>
-<blockquote>
-<div><ul>
+for a load combination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>combo</strong> – a load combination object</p></li>
 <li><p><strong>step</strong> – the analysis step to be visualized</p></li>
 <li><p><strong>scaling_global</strong> – I don’t even remember what this
 does. It’s kind of a mess right now.</p></li>
@@ -422,25 +418,23 @@ hover box data for forces (for unit conversions)</p></li>
 hover box data for moments (for unit conversions)</p></li>
 <li><p><strong>global_axes</strong> – whether to show global axes</p></li>
 <li><p><strong>camera</strong> – custom positioning of the camera</p></li>
-<li><p><strong>subset_model</strong> – use this model instead of the one
-contained in the analysis object.
-It needs to be a subset of the original model. This can be</p>
-<blockquote>
-<div><p>used to only show the results for some part of a large
-model.</p>
-</div></blockquote>
-</li>
+<li><p><strong>subset_model</strong> – use this model instead of the one contained in the
+analysis object. It needs to be a subset of the original
+model. This can be used to only show the results for some part
+of a large model.</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.graphics.postprocessing_3d.show_deformed_shape">
 <span class="sig-name descname"><span class="pre">show_deformed_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/graphics/postprocessing_3d.html#show_deformed_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.graphics.postprocessing_3d.show_deformed_shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Visualize the model in its deformed state
-:Parameters: * <strong>analysis</strong> – an analysis object</p>
-<blockquote>
-<div><ul class="simple">
+<dd><p>Visualize the model in its deformed state</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>analysis</strong> – an analysis object</p></li>
 <li><p><strong>case_name</strong> – the name of the load_case to be visualized</p></li>
 <li><p><strong>step</strong> – the analysis step to be visualized</p></li>
 <li><p><strong>scaling</strong> – scaling factor for the deformations. If 0.00 is
@@ -455,7 +449,8 @@ components</p></li>
 <li><p><strong>step_skip</strong> – how many frames to skip to reduce the number of
 frames in case an animation.</p></li>
 </ul>
-</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

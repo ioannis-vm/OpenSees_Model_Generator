@@ -42,7 +42,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="osmg.collections.Collection" href="osmg.collections.Collection.html" />
+    <link rel="next" title="osmg.common" href="osmg.common.html" />
     <link rel="prev" title="osmg" href="osmg.html" /> 
 </head>
 
@@ -88,15 +88,12 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.collections</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="osmg.collections.Collection.html">osmg.collections.Collection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.collections.CollectionActive.html">osmg.collections.CollectionActive</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.collections.CollectionWithConnectivity.html">osmg.collections.CollectionWithConnectivity</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.collections.NodeCollection.html">osmg.collections.NodeCollection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#osmg.collections.Collection"><code class="docutils literal notranslate"><span class="pre">Collection</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.collections.Collection.parent"><code class="docutils literal notranslate"><span class="pre">Collection.parent</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.collections.Collection.add"><code class="docutils literal notranslate"><span class="pre">Collection.add()</span></code></a></li>
@@ -236,16 +233,16 @@
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="osmg.collections.Collection.html#osmg.collections.Collection" title="osmg.collections.Collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Collection</span></code></a>(parent)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.collections.Collection" title="osmg.collections.Collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Collection</span></code></a>(parent)</p></td>
 <td><p>Collection of objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="osmg.collections.CollectionActive.html#osmg.collections.CollectionActive" title="osmg.collections.CollectionActive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectionActive</span></code></a>(parent, active)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.collections.CollectionActive" title="osmg.collections.CollectionActive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectionActive</span></code></a>(parent, active)</p></td>
 <td><p>Collection with support for currently active objects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="osmg.collections.CollectionWithConnectivity.html#osmg.collections.CollectionWithConnectivity" title="osmg.collections.CollectionWithConnectivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectionWithConnectivity</span></code></a>(parent, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.collections.CollectionWithConnectivity" title="osmg.collections.CollectionWithConnectivity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CollectionWithConnectivity</span></code></a>(parent, ...)</p></td>
 <td><p>Collection of elements for which it is important to consider their connectivity.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="osmg.collections.NodeCollection.html#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeCollection</span></code></a>(parent, named_contents, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.collections.NodeCollection" title="osmg.collections.NodeCollection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NodeCollection</span></code></a>(parent, named_contents, ...)</p></td>
 <td><p>Node collection.</p></td>
 </tr>
 </tbody>
@@ -265,7 +262,7 @@
 </dl>
 </dd></dl>
 
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># collections require parent objects to which they belong</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parent</span> <span class="o">=</span> <span class="mi">52</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
@@ -368,7 +365,7 @@ objects.</p>
 </dl>
 </dd></dl>
 
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.level</span> <span class="kn">import</span> <span class="n">Level</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span> <span class="o">=</span> <span class="n">CollectionActive</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Level</span><span class="p">(</span>
@@ -466,7 +463,7 @@ it does.</p>
 </dl>
 </dd></dl>
 
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.ops.node</span> <span class="kn">import</span> <span class="n">Node</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.level</span> <span class="kn">import</span> <span class="n">Level</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">level</span> <span class="o">=</span> <span class="n">Level</span><span class="p">(</span><span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mf">0.00</span><span class="p">)</span>
@@ -503,7 +500,7 @@ it does.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="osmg.collections.Collection.html" class="btn btn-neutral float-right" title="osmg.collections.Collection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.common.html" class="btn btn-neutral float-right" title="osmg.common" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="osmg.html" class="btn btn-neutral float-left" title="osmg" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

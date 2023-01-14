@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -184,7 +185,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="MaterialGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.MaterialGenerator.html#osmg.gen.material_gen.MaterialGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="MaterialGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.html#osmg.gen.material_gen.MaterialGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">MaterialGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This object introduces element-specific materials to a model.</span>
@@ -192,7 +193,7 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span>
 
-<div class="viewcode-block" id="MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.MaterialGenerator.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_hss_rect_brace_maxstrainrange_mat</span><span class="p">(</span>
+<div class="viewcode-block" id="MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_rect_brace_maxstrainrange_mat">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_hss_rect_brace_maxstrainrange_mat</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">section</span><span class="p">:</span> <span class="n">FiberSection</span><span class="p">,</span>
         <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span><span class="p">,</span>
@@ -252,7 +253,7 @@
 
         <span class="k">return</span> <span class="n">maxstrainrange_mat</span></div>
 
-<div class="viewcode-block" id="MaterialGenerator.generate_steel_w_imk_material"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.MaterialGenerator.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_w_imk_material</span><span class="p">(</span>
+<div class="viewcode-block" id="MaterialGenerator.generate_steel_w_imk_material"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_w_imk_material</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">section</span><span class="p">,</span>
         <span class="n">physical_material</span><span class="p">,</span>

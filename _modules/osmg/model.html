@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
@@ -217,7 +218,7 @@
     <span class="n">other_level</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">component</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../_autosummary/osmg.model.Settings.html#osmg.model.Settings">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Settings">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Settings</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    General customization of a model.</span>
@@ -245,7 +246,7 @@
         <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Model object.</span>
@@ -309,7 +310,7 @@
         <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;physical_materials: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">physical_materials</span><span class="o">.</span><span class="n">__srepr__</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">res</span>
 
-<div class="viewcode-block" id="Model.component_connectivity"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.component_connectivity">[docs]</a>    <span class="k">def</span> <span class="nf">component_connectivity</span><span class="p">(</span>
+<div class="viewcode-block" id="Model.component_connectivity"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.component_connectivity">[docs]</a>    <span class="k">def</span> <span class="nf">component_connectivity</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">ComponentAssembly</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -333,9 +334,10 @@
             <span class="n">res</span><span class="p">[</span><span class="n">uids_tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">component</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="Model.add_level"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.add_level">[docs]</a>    <span class="k">def</span> <span class="nf">add_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elevation</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Model.add_level"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.add_level">[docs]</a>    <span class="k">def</span> <span class="nf">add_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">elevation</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a level to the model.</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            uid: Unique ID for the level.</span>
 <span class="sd">            elevation: Elevation of the level.</span>
@@ -352,7 +354,7 @@
         <span class="n">lvl</span> <span class="o">=</span> <span class="n">Level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="n">elevation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lvl</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_primary_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_primary_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_primary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.dict_of_primary_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_primary_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_primary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of all the primary nodes in the model.</span>
 <span class="sd">        The keys are the uids of the nodes.</span>
@@ -362,7 +364,7 @@
             <span class="n">dict_of_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lvl</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dict_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.list_of_primary_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_primary_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_primary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.list_of_primary_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_primary_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_primary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all the primary nodes in the model.</span>
 
@@ -374,7 +376,7 @@
                 <span class="n">list_of_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">list_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_internal_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_internal_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_internal_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.dict_of_internal_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_internal_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_internal_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of all the internal nodes in the model.</span>
 <span class="sd">        The keys are the uids of the nodes.</span>
@@ -387,7 +389,7 @@
                 <span class="n">dict_of_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">internal_nodes</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dict_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.list_of_internal_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_internal_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_internal_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.list_of_internal_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_internal_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_internal_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all the internal nodes in the model.</span>
 
@@ -400,7 +402,7 @@
                     <span class="n">list_of_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inode</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">list_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_all_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_all_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.dict_of_all_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_all_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of all the nodes in the model.</span>
 <span class="sd">        The keys are the uids of the nodes.</span>
@@ -412,7 +414,7 @@
         <span class="n">dict_of_nodes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_internal_nodes</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">dict_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.list_of_all_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_all_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.list_of_all_nodes"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_all_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_all_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all the nodes in the model.</span>
 
@@ -423,7 +425,7 @@
         <span class="n">list_of_nodes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_internal_nodes</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">list_of_nodes</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_components"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_components">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.dict_of_components"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_components">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of all the component assemblies in the</span>
 <span class="sd">        model.</span>
@@ -437,7 +439,7 @@
                 <span class="n">comps</span><span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">component</span>
         <span class="k">return</span> <span class="n">comps</span></div>
 
-<div class="viewcode-block" id="Model.list_of_components"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_components">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.list_of_components"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_components">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_components</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all the component assembiles in the</span>
 <span class="sd">        model.</span>
@@ -446,7 +448,7 @@
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_components</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_elements"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_elements">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
+<div class="viewcode-block" id="Model.dict_of_elements"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_elements">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a dictionary of all element objects in the model.</span>
 <span class="sd">        The keys are the uids of the objects.</span>
@@ -459,7 +461,7 @@
                 <span class="n">elems</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="n">elems</span></div>
 
-<div class="viewcode-block" id="Model.list_of_elements"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_elements">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
+<div class="viewcode-block" id="Model.list_of_elements"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_elements">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a list of all element objects in the model.</span>
 
@@ -467,7 +469,7 @@
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_elements</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Model.dict_of_specific_element"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.dict_of_specific_element">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_specific_element</span><span class="p">(</span>
+<div class="viewcode-block" id="Model.dict_of_specific_element"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.dict_of_specific_element">[docs]</a>    <span class="k">def</span> <span class="nf">dict_of_specific_element</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">element_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">])</span> \
             <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -484,7 +486,7 @@
                 <span class="n">res</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span> <span class="o">=</span> <span class="n">elm</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="Model.list_of_specific_element"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.list_of_specific_element">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_specific_element</span><span class="p">(</span>
+<div class="viewcode-block" id="Model.list_of_specific_element"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.list_of_specific_element">[docs]</a>    <span class="k">def</span> <span class="nf">list_of_specific_element</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">element_class</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">])</span> \
             <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -495,7 +497,7 @@
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_specific_element</span><span class="p">(</span><span class="n">element_class</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
 
-<div class="viewcode-block" id="Model.bounding_box"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nparr</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
+<div class="viewcode-block" id="Model.bounding_box"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">nparr</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the axis-aligned bouding box of the building</span>
 
@@ -512,7 +514,7 @@
         <span class="c1"># type hints gone mad  &gt;.&lt;   ...</span>
         <span class="k">return</span> <span class="n">p_min</span><span class="p">,</span> <span class="n">p_max</span>  <span class="c1"># type:ignore</span></div>
 
-<div class="viewcode-block" id="Model.reference_length"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.reference_length">[docs]</a>    <span class="k">def</span> <span class="nf">reference_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.reference_length"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.reference_length">[docs]</a>    <span class="k">def</span> <span class="nf">reference_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the largest dimension of the</span>
 <span class="sd">        bounding box of the building</span>
@@ -524,7 +526,7 @@
         <span class="n">ref_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">p_max</span> <span class="o">-</span> <span class="n">p_min</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ref_len</span></div>
 
-<div class="viewcode-block" id="Model.initialize_empty_copy"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.initialize_empty_copy">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_empty_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.initialize_empty_copy"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.initialize_empty_copy">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_empty_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a shallow empty copy of the model.</span>
 <span class="sd">        Used to create subset models.</span>
@@ -546,7 +548,7 @@
         <span class="n">res</span><span class="o">.</span><span class="n">uniaxial_materials</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uniaxial_materials</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="Model.transfer_by_polygon_selection"><a class="viewcode-back" href="../../_autosummary/osmg.model.Model.html#osmg.model.Model.transfer_by_polygon_selection">[docs]</a>    <span class="k">def</span> <span class="nf">transfer_by_polygon_selection</span><span class="p">(</span>
+<div class="viewcode-block" id="Model.transfer_by_polygon_selection"><a class="viewcode-back" href="../../_autosummary/osmg.model.html#osmg.model.Model.transfer_by_polygon_selection">[docs]</a>    <span class="k">def</span> <span class="nf">transfer_by_polygon_selection</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Uses :func:`~transfer_component` to transfer all components of which</span>

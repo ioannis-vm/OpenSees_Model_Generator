@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
@@ -183,7 +184,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Vertex.html#osmg.mesh.Vertex">[docs]</a><span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
+<div class="viewcode-block" id="Vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Vertex">[docs]</a><span class="k">class</span> <span class="nc">Vertex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    2D Vertex.</span>
 <span class="sd">    It knows all the edges connected to it.</span>
@@ -204,7 +205,7 @@
 
     <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Vertex.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Vertex.html#osmg.mesh.Vertex.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a new instance of the `Vertex` class.</span>
 
@@ -216,7 +217,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">coords</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Edge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -229,17 +230,17 @@
 <span class="sd">            bool: `True` if the two vertices are equal, `False`</span>
 <span class="sd">                  otherwise.</span>
 
-<span class="sd">        Examples:</span>
-<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex</span>
-<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
-<span class="sd">        &gt;&gt;&gt; v2 = Vertex((1, 1))</span>
-<span class="sd">        &gt;&gt;&gt; v3 = Vertex((0, 0))</span>
-<span class="sd">        &gt;&gt;&gt; v1 == v2</span>
-<span class="sd">        False</span>
-<span class="sd">        &gt;&gt;&gt; v1 == v3</span>
-<span class="sd">        False</span>
-<span class="sd">        &gt;&gt;&gt; v1 == v1</span>
-<span class="sd">        True</span>
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex</span>
+<span class="sd">            &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
+<span class="sd">            &gt;&gt;&gt; v2 = Vertex((1, 1))</span>
+<span class="sd">            &gt;&gt;&gt; v3 = Vertex((0, 0))</span>
+<span class="sd">            &gt;&gt;&gt; v1 == v2</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; v1 == v3</span>
+<span class="sd">            False</span>
+<span class="sd">            &gt;&gt;&gt; v1 == v1</span>
+<span class="sd">            True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -250,25 +251,24 @@
 <span class="sd">        Returns a string representation of the vertex.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            str: String representation of the vertex.</span>
+<span class="sd">            String representation of the vertex.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> @ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="si">}</span><span class="s2">) &quot;</span></div>
 
 
-<div class="viewcode-block" id="Edge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge">[docs]</a><span class="k">class</span> <span class="nc">Edge</span><span class="p">:</span>
+<div class="viewcode-block" id="Edge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Edge">[docs]</a><span class="k">class</span> <span class="nc">Edge</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    2D oriented Edge.</span>
-<span class="sd">    Connected to two vertices `v_i` and `v_j`.</span>
-<span class="sd">    Has two halfedges, `h_i` and `h_j`.</span>
-<span class="sd">    Each instance has an automatically generated unique id.</span>
+<span class="sd">    2D oriented Edge. Connected to two vertices `v_i` and `v_j`.  Has</span>
+<span class="sd">    two halfedges, `h_i` and `h_j`.  Each instance has an</span>
+<span class="sd">    automatically generated unique id.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Edge.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_i</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">v_j</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_i</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">v_j</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a new edge with the given vertices.</span>
 <span class="sd">        If the vertices don&#39;t already have an edge connecting them,</span>
@@ -284,7 +284,7 @@
         <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -295,7 +295,7 @@
 
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(E</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2"> @ V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">v_i</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">, V</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">v_j</span><span class="o">.</span><span class="n">uid</span><span class="si">}</span><span class="s2">) &quot;</span>
 
-<div class="viewcode-block" id="Edge.define_halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.define_halfedge">[docs]</a>    <span class="k">def</span> <span class="nf">define_halfedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Halfedge</span><span class="p">:</span>
+<div class="viewcode-block" id="Edge.define_halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Edge.define_halfedge">[docs]</a>    <span class="k">def</span> <span class="nf">define_halfedge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Halfedge</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        For the current edge instance and given one of its vertices,</span>
 <span class="sd">        we want the halfedge that points to the direction</span>
@@ -320,13 +320,13 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The edge is not connected to the given vertex.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">halfedge</span></div>
 
-<div class="viewcode-block" id="Edge.other_vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.other_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">other_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">):</span>
+<div class="viewcode-block" id="Edge.other_vertex"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Edge.other_vertex">[docs]</a>    <span class="k">def</span> <span class="nf">other_vertex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the vertex of this edge that is not the given vertex.</span>
 <span class="sd">        If the given vertex is not connected to this edge, a ValueError</span>
 <span class="sd">        is raised.</span>
 
-<span class="sd">        Examples:</span>
+<span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex</span>
 <span class="sd">            &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
 <span class="sd">            &gt;&gt;&gt; v2 = Vertex((1, 0))</span>
@@ -351,7 +351,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The edge is not connected to the given vertex&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">v_other</span></div>
 
-<div class="viewcode-block" id="Edge.overlaps_or_crosses"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Edge.html#osmg.mesh.Edge.overlaps_or_crosses">[docs]</a>    <span class="k">def</span> <span class="nf">overlaps_or_crosses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Edge</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="Edge.overlaps_or_crosses"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Edge.overlaps_or_crosses">[docs]</a>    <span class="k">def</span> <span class="nf">overlaps_or_crosses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Edge</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if this edge overlaps or crosses another edge.</span>
 <span class="sd">        Edges are allowed to share one vertex (returns False), but not</span>
@@ -366,7 +366,7 @@
 <span class="sd">            True if this edge overlaps or crosses the other edge,</span>
 <span class="sd">            False otherwise.</span>
 
-<span class="sd">        Examples:</span>
+<span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex, Edge</span>
 <span class="sd">            &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
 <span class="sd">            &gt;&gt;&gt; v2 = Vertex((0, 1))</span>
@@ -492,19 +492,16 @@
         <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
-<div class="viewcode-block" id="Halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge">[docs]</a><span class="k">class</span> <span class="nc">Halfedge</span><span class="p">:</span>
+<div class="viewcode-block" id="Halfedge"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Halfedge">[docs]</a><span class="k">class</span> <span class="nc">Halfedge</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Halfedge object.</span>
-<span class="sd">    Every edge has two halfedges.</span>
-<span class="sd">    A halfedge has a direction, pointing from one</span>
-<span class="sd">    of the corresponding edge&#39;s vertices to the other.</span>
-<span class="sd">    The `vertex` attribute corresponds to the</span>
-<span class="sd">    edge&#39;s vertex that the halfedge originates from.</span>
-<span class="sd">    Halfedges have a `next` attribute that</span>
-<span class="sd">    points to the next halfedge, forming closed</span>
-<span class="sd">    loops, or sequences, which is the purpose of this module.</span>
+<span class="sd">    Halfedge object. Every edge has two halfedges.  A halfedge has a</span>
+<span class="sd">    direction, pointing from one of the corresponding edge&#39;s vertices</span>
+<span class="sd">    to the other.  The `vertex` attribute corresponds to the edge&#39;s</span>
+<span class="sd">    vertex that the halfedge originates from.  Halfedges have a `next`</span>
+<span class="sd">    attribute that points to the next halfedge, forming closed loops,</span>
+<span class="sd">    or sequences, which is the purpose of this module.</span>
 
-<span class="sd">    Examples:</span>
+<span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
 <span class="sd">        &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
 <span class="sd">        &gt;&gt;&gt; v2 = Vertex((2, 2))</span>
@@ -522,7 +519,7 @@
 
     <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Halfedge.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">edge</span><span class="p">:</span> <span class="n">Edge</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertex</span><span class="p">:</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">edge</span><span class="p">:</span> <span class="n">Edge</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the halfedge object.</span>
 
@@ -535,7 +532,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">vertex</span> <span class="o">=</span> <span class="n">vertex</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edge</span> <span class="o">=</span> <span class="n">edge</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">uid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ids</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -561,12 +558,12 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uid</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">uid</span>
 
-<div class="viewcode-block" id="Halfedge.direction"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Halfedge.html#osmg.mesh.Halfedge.direction">[docs]</a>    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Halfedge.direction"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Halfedge.direction">[docs]</a>    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the angular direction of the halfedge</span>
 <span class="sd">        using the arctan2 function (in radians).</span>
 
-<span class="sd">        Examples:</span>
+<span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
 <span class="sd">            &gt;&gt;&gt; v1 = Vertex((0.0, 0.0))</span>
 <span class="sd">            &gt;&gt;&gt; v2 = Vertex((2.0, 2.0))</span>
@@ -588,7 +585,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">drct</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">drct</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div></div>
 
 
-<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">:</span>
+<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A container that holds a list of unique halfedges.</span>
 <span class="sd">    Vertices and edges can be retrieved from those.</span>
@@ -596,14 +593,14 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Mesh.__init__"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfedges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span> <span class="o">=</span> <span class="n">halfedges</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">halfedges</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Halfedge</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span> <span class="o">=</span> <span class="n">halfedges</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">)</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Mesh object containing </span><span class="si">{</span><span class="n">num</span><span class="si">}</span><span class="s2"> halfedges.&quot;</span>
 
-<div class="viewcode-block" id="Mesh.geometric_properties"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.geometric_properties">[docs]</a>    <span class="k">def</span> <span class="nf">geometric_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.geometric_properties"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Mesh.geometric_properties">[docs]</a>    <span class="k">def</span> <span class="nf">geometric_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the geometric properties of the shape defined by</span>
 <span class="sd">        the mesh</span>
@@ -613,7 +610,7 @@
         <span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">halfedges</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">geometric_properties</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Mesh.bounding_box"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.Mesh.html#osmg.mesh.Mesh.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.bounding_box"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.Mesh.bounding_box">[docs]</a>    <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a bounding box of the mesh</span>
 
@@ -635,6 +632,7 @@
 <div class="viewcode-block" id="polygon_area"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_area">[docs]</a><span class="k">def</span> <span class="nf">polygon_area</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the area of a polygon.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        coords: A matrix whose columns represent</span>
 <span class="sd">                the coordinates and the rows</span>
@@ -642,6 +640,7 @@
 <span class="sd">                The first point should not be repeated</span>
 <span class="sd">                at the end, as this is done</span>
 <span class="sd">                automatically.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        area: The area of the polygon.</span>
 
@@ -665,6 +664,7 @@
 <div class="viewcode-block" id="polygon_centroid"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_centroid">[docs]</a><span class="k">def</span> <span class="nf">polygon_centroid</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the centroid of a polygon.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        coords: A matrix whose columns represent</span>
 <span class="sd">                the coordinates and the rows</span>
@@ -672,6 +672,7 @@
 <span class="sd">                The first point should not be repeated</span>
 <span class="sd">                at the end, as this is done</span>
 <span class="sd">                automatically.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        centroid: The centroid of the polygon.</span>
 
@@ -709,6 +710,7 @@
 <div class="viewcode-block" id="polygon_inertia"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.polygon_inertia">[docs]</a><span class="k">def</span> <span class="nf">polygon_inertia</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the moments of inertia of a polygon.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        coords: A matrix whose columns represent</span>
 <span class="sd">                the coordinates and the rows</span>
@@ -716,6 +718,7 @@
 <span class="sd">                The first point should not be repeated</span>
 <span class="sd">                at the end, as this is done</span>
 <span class="sd">                automatically.</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        dictionary, containing:</span>
 <span class="sd">        &#39;ixx&#39;: (float) - Moment of inertia around</span>
@@ -868,7 +871,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        halfedges: List of Halfedge objects</span>
 
-<span class="sd">    Examples:</span>
+<span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
 <span class="sd">        &gt;&gt;&gt; # define some vertices</span>
 <span class="sd">        &gt;&gt;&gt; v1 = Vertex((0.0, 0.0))</span>
@@ -953,16 +956,16 @@
 
 <div class="viewcode-block" id="obtain_closed_loops"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.obtain_closed_loops">[docs]</a><span class="k">def</span> <span class="nf">obtain_closed_loops</span><span class="p">(</span><span class="n">halfedges</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Given a list of halfedges,</span>
-<span class="sd">    this function uses their `next` attribute to</span>
-<span class="sd">    group them into sequences of closed loops</span>
-<span class="sd">    (ordered lists of halfedges of which the</span>
-<span class="sd">    `next` halfedge of the last list element</span>
-<span class="sd">    points to the first halfedge in the list, and</span>
-<span class="sd">    the `next` halfedge of any list element</span>
-<span class="sd">    points to the next halfedge in the list.</span>
+<span class="sd">    Given a list of halfedges, this function uses their `next`</span>
+<span class="sd">    attribute to group them into sequences of closed loops (ordered</span>
+<span class="sd">    lists of halfedges of which the `next` halfedge of the last list</span>
+<span class="sd">    element points to the first halfedge in the list, and the `next`</span>
+<span class="sd">    halfedge of any list element points to the next halfedge in the</span>
+<span class="sd">    list.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        halfedges: list of halfedges</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        loops with the aforementioned property.</span>
 
@@ -990,12 +993,13 @@
 
 <div class="viewcode-block" id="orient_loops"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.orient_loops">[docs]</a><span class="k">def</span> <span class="nf">orient_loops</span><span class="p">(</span><span class="n">loops</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Separates loops to internal (counterclockwise)</span>
-<span class="sd">    and external (clockwise). Also gathers trivial</span>
-<span class="sd">    loops, i.e. halfedge sequences that define polygons</span>
-<span class="sd">    that have no area (e.g. h1 -&gt; h2 -&gt; h1).</span>
+<span class="sd">    Separates loops to internal (counterclockwise) and external</span>
+<span class="sd">    (clockwise). Also gathers trivial loops, i.e. halfedge sequences</span>
+<span class="sd">    that define polygons that have no area (e.g. h1 -&gt; h2 -&gt; h1).</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        loops (list[list[Halfedge]]) (see `obtain_closed_loops`)</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        external_loops (list[list[Halfedge]])</span>
 <span class="sd">        internal_loops (list[list[Halfedge]])</span>
@@ -1028,12 +1032,14 @@
 <div class="viewcode-block" id="subdivide_polygon"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_polygon">[docs]</a><span class="k">def</span> <span class="nf">subdivide_polygon</span><span class="p">(</span><span class="n">outside</span><span class="p">,</span> <span class="n">holes</span><span class="p">,</span> <span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used to define the fibers of fiber sections.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        halfedges: Sequence of halfedges that defines the shape of a</span>
 <span class="sd">                  section.</span>
 <span class="sd">        n_x: Number of spatial partitions in the x direction</span>
 <span class="sd">        n_y: Number of spatial partitions in the y direction</span>
 <span class="sd">        plot: Plots the resulting polygons for debugging</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        pieces: shapely_Polygon objects that represent single fibers.</span>
 
@@ -1089,10 +1095,12 @@
         <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used to define the fibers of steel HSS fiber sections.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">      sec_h: Section height</span>
 <span class="sd">      sec_b: Section width</span>
 <span class="sd">      sec_t: Section thickness</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        pieces: shapely_Polygon objects that represent single fibers.</span>
 
@@ -1225,8 +1233,7 @@
 
 <div class="viewcode-block" id="sanity_checks"><a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.sanity_checks">[docs]</a><span class="k">def</span> <span class="nf">sanity_checks</span><span class="p">(</span><span class="n">external</span><span class="p">,</span> <span class="n">trivial</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Perform some checks to make sure</span>
-<span class="sd">    assumptions are not violated.</span>
+<span class="sd">    Perform some checks to make sure assumptions are not violated.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 

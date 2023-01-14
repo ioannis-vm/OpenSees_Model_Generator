@@ -25,7 +25,6 @@ osmg.gen.component\_gen
    .. rubric:: Classes
 
    .. autosummary::
-      :toctree:
       :template: custom-class-template.rst
    
       BeamColumnGenerator

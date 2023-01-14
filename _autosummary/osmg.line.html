@@ -42,8 +42,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="osmg.line.Line" href="osmg.line.Line.html" />
-    <link rel="prev" title="osmg.level.Level" href="osmg.level.Level.html" /> 
+    <link rel="next" title="osmg.load_case" href="osmg.load_case.html" />
+    <link rel="prev" title="osmg.level" href="osmg.level.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,7 +88,8 @@
               
             
             
-              <ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
@@ -100,7 +101,6 @@
 <li class="toctree-l2"><a class="reference internal" href="osmg.graphics.html">osmg.graphics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.level.html">osmg.level</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">osmg.line</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="osmg.line.Line.html">osmg.line.Line</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#osmg.line.Line"><code class="docutils literal notranslate"><span class="pre">Line</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.line.Line.tag"><code class="docutils literal notranslate"><span class="pre">Line.tag</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.line.Line.start"><code class="docutils literal notranslate"><span class="pre">Line.start</span></code></a></li>
@@ -219,11 +219,11 @@
 </style>
 <section id="module-osmg.line">
 <span id="osmg-line"></span><h1>osmg.line<a class="headerlink" href="#module-osmg.line" title="Permalink to this heading">¶</a></h1>
-<p>Defines <a class="reference internal" href="osmg.line.Line.html#osmg.line.Line" title="osmg.line.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a> objects.</p>
+<p>Defines <a class="reference internal" href="#osmg.line.Line" title="osmg.line.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a> objects.</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="osmg.line.Line.html#osmg.line.Line" title="osmg.line.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a>(tag, start, end)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.line.Line" title="osmg.line.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a>(tag, start, end)</p></td>
 <td><p>Finite-length line segment object.</p></td>
 </tr>
 </tbody>
@@ -282,7 +282,7 @@ the line.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.line.Line.intersect">
-<span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.line.Line.html#osmg.line.Line" title="osmg.line.Line"><span class="pre">Line</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/line.html#Line.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.line.Line.intersect" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.line.Line" title="osmg.line.Line"><span class="pre">Line</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/line.html#Line.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.line.Line.intersect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the intersection point of this line with another
 line. Returns None if the lines don’t intersect.  Note: ‘line’
 is actually a finite-length line segment.</p>
@@ -311,7 +311,7 @@ is actually a finite-length line segment.</p>
 </dd>
 </dl>
 <p>Returns: True if the point lies on the line, False otherwise</p>
-<p class="rubric">Examples</p>
+<p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.line</span> <span class="kn">import</span> <span class="n">Line</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="s1">&#39;my_line&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">l</span><span class="o">.</span><span class="n">intersects_pt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]))</span>
@@ -406,8 +406,8 @@ projected point, otherwise it returns None.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="osmg.line.Line.html" class="btn btn-neutral float-right" title="osmg.line.Line" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="osmg.level.Level.html" class="btn btn-neutral float-left" title="osmg.level.Level" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="osmg.load_case.html" class="btn btn-neutral float-right" title="osmg.load_case" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.level.html" class="btn btn-neutral float-left" title="osmg.level" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

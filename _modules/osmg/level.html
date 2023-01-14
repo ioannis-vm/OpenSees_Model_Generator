@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
@@ -180,12 +181,11 @@
     <span class="kn">from</span> <span class="nn">.component_assembly</span> <span class="kn">import</span> <span class="n">ComponentAssembly</span>
 
 
-<div class="viewcode-block" id="Level"><a class="viewcode-back" href="../../_autosummary/osmg.level.Level.html#osmg.level.Level">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="Level"><a class="viewcode-back" href="../../_autosummary/osmg.level.html#osmg.level.Level">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Level</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Level Object</span>
-<span class="sd">    Levels are part of a model and they contain primary nodes and</span>
-<span class="sd">      component assemblies.</span>
+<span class="sd">    Level Object. Levels are part of a model and they contain primary</span>
+<span class="sd">      nodes and component assemblies.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        parent_model (Model)</span>
@@ -194,7 +194,7 @@
 <span class="sd">        nodes (NodeCollection)</span>
 <span class="sd">        components (Collection)</span>
 
-<span class="sd">    Examples:</span>
+<span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from osmg.model import Model</span>
 <span class="sd">        &gt;&gt;&gt; model = Model(name=&#39;example_model&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; level = Level(parent_model=model, uid=1, elevation=0.0)</span>

@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -179,7 +180,7 @@
     <span class="kn">from</span> <span class="nn">.model</span> <span class="kn">import</span> <span class="n">Model</span>
 
 
-<div class="viewcode-block" id="NodeGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.NodeGenerator.html#osmg.gen.node_gen.NodeGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="NodeGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.html#osmg.gen.node_gen.NodeGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">NodeGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NodeGenerator objects introduce node objects to a model.</span>
@@ -191,7 +192,7 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span>
 
-<div class="viewcode-block" id="NodeGenerator.add_node_lvl"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.NodeGenerator.html#osmg.gen.node_gen.NodeGenerator.add_node_lvl">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_lvl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+<div class="viewcode-block" id="NodeGenerator.add_node_lvl"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.html#osmg.gen.node_gen.NodeGenerator.add_node_lvl">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_lvl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a node at the specified coordinates and level.</span>
 
@@ -226,7 +227,7 @@
         <span class="n">level</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">node</span></div>
 
-<div class="viewcode-block" id="NodeGenerator.add_node_lvl_xyz"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.NodeGenerator.html#osmg.gen.node_gen.NodeGenerator.add_node_lvl_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_lvl_xyz</span><span class="p">(</span>
+<div class="viewcode-block" id="NodeGenerator.add_node_lvl_xyz"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.html#osmg.gen.node_gen.NodeGenerator.add_node_lvl_xyz">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_lvl_xyz</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -265,7 +266,7 @@
         <span class="n">level</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">node</span></div>
 
-<div class="viewcode-block" id="NodeGenerator.add_node_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.NodeGenerator.html#osmg.gen.node_gen.NodeGenerator.add_node_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_active</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">):</span>
+<div class="viewcode-block" id="NodeGenerator.add_node_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.node_gen.html#osmg.gen.node_gen.NodeGenerator.add_node_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_node_active</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a node[/s] at the specified coordinates to all active levels.</span>
 

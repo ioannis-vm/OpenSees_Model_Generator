@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -210,17 +211,16 @@
 <span class="sd">    use its shape functions to obtain intermediate points.</span>
 
 <span class="sd">    Arguments:</span>
-<span class="sd">        element: A line element</span>
-<span class="sd">        u_i: 3 displacements at end i, global system</span>
-<span class="sd">        r_i: 3 rotations at end i, global system</span>
-<span class="sd">        u_j, r_j: similar to u_i, r_i.</span>
-<span class="sd">        num_points: Number of interpolation points</span>
+<span class="sd">      element: A line element</span>
+<span class="sd">      u_i: 3 displacements at end i, global system</span>
+<span class="sd">      r_i: 3 rotations at end i, global system</span>
+<span class="sd">      u_j, r_j: similar to u_i, r_i.</span>
+<span class="sd">      num_points: Number of interpolation points</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        d_global: Displacements (global system)</span>
-<span class="sd">        r_local: Rotations (local system)</span>
-<span class="sd">          (the rotations are needed for plotting the</span>
-<span class="sd">          deformed shape with extruded frame elements)</span>
+<span class="sd">      Displacements (global system) and rotations (local system). The</span>
+<span class="sd">        rotations are needed for plotting the deformed shape with</span>
+<span class="sd">        extruded frame elements.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -843,6 +843,7 @@
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model in its deformed state</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">      analysis: an analysis object</span>
 <span class="sd">      case_name: the name of the load_case to be visualized</span>
@@ -1082,7 +1083,8 @@
     <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Visualize the model and plot the frame element basic forces</span>
+<span class="sd">    Visualize the model and plot the frame element basic forces.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">      analysis: an analysis object</span>
 <span class="sd">      case_name: the name of the load_case to be visualized</span>
@@ -1101,13 +1103,12 @@
 <span class="sd">        hover box data for moments (for unit conversions)</span>
 <span class="sd">      global_axes: whether to show global axes</span>
 <span class="sd">      camera: custom positioning of the camera</span>
-<span class="sd">      subset_model: use this model instead of the one</span>
-<span class="sd">        contained in the analysis object.</span>
-<span class="sd">        It needs to be a subset of the original model. This can be</span>
-<span class="sd">          used to only show the results for some part of a large</span>
-<span class="sd">          model.</span>
+<span class="sd">      subset_model: use this model instead of the one contained in the</span>
+<span class="sd">        analysis object. It needs to be a subset of the original</span>
+<span class="sd">        model. This can be used to only show the results for some part</span>
+<span class="sd">        of a large model.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># TODO: what is going on with the scaling factors?...</span>
 
     <span class="k">if</span> <span class="n">subset_model</span><span class="p">:</span>
         <span class="n">mdl</span> <span class="o">=</span> <span class="n">subset_model</span>
@@ -1594,6 +1595,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model and plot the enveloped frame element basic forces</span>
 <span class="sd">    for a load combination.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">      combo: a load combination object</span>
 <span class="sd">      step: the analysis step to be visualized</span>
@@ -1611,11 +1613,10 @@
 <span class="sd">        hover box data for moments (for unit conversions)</span>
 <span class="sd">      global_axes: whether to show global axes</span>
 <span class="sd">      camera: custom positioning of the camera</span>
-<span class="sd">      subset_model: use this model instead of the one</span>
-<span class="sd">        contained in the analysis object.</span>
-<span class="sd">        It needs to be a subset of the original model. This can be</span>
-<span class="sd">          used to only show the results for some part of a large</span>
-<span class="sd">          model.</span>
+<span class="sd">      subset_model: use this model instead of the one contained in the</span>
+<span class="sd">        analysis object. It needs to be a subset of the original</span>
+<span class="sd">        model. This can be used to only show the results for some part</span>
+<span class="sd">        of a large model.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 

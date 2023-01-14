@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
@@ -191,7 +192,7 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="PointLoadMass"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.PointLoadMass.html#osmg.load_case.PointLoadMass">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="PointLoadMass"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.PointLoadMass">[docs]</a><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">PointLoadMass</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Point load/mass object. Global coordinate system.</span>
@@ -202,11 +203,11 @@
 
     <span class="n">val</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span>
 
-<div class="viewcode-block" id="PointLoadMass.add"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.PointLoadMass.html#osmg.load_case.PointLoadMass.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="PointLoadMass.add"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.PointLoadMass.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">load</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds some quantity to the existing quantity.</span>
 
-<span class="sd">        Examples:</span>
+<span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; from osmg.load_case import PointLoadMass</span>
 <span class="sd">            &gt;&gt;&gt; load = np.array([1., 2., 3., 4., 5., 6.])</span>
 <span class="sd">            &gt;&gt;&gt; point_load = PointLoadMass()</span>
@@ -229,7 +230,7 @@
         <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="LineElementUDL"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="LineElementUDL"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LineElementUDL">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">LineElementUDL</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Line element uniformly distributed load object.</span>
@@ -249,7 +250,7 @@
         <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  val: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">res</span>
 
-<div class="viewcode-block" id="LineElementUDL.add_glob"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL.add_glob">[docs]</a>    <span class="k">def</span> <span class="nf">add_glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udl</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="LineElementUDL.add_glob"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LineElementUDL.add_glob">[docs]</a>    <span class="k">def</span> <span class="nf">add_glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udl</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a uniformly distributed load to the existing udl The load</span>
 <span class="sd">        is defined with respect to the global coordinate system of the</span>
@@ -298,7 +299,7 @@
             <span class="n">udl_local</span> <span class="o">=</span> <span class="n">transf_mat</span> <span class="o">@</span> <span class="n">udl</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">+=</span> <span class="n">udl_local</span></div>
 
-<div class="viewcode-block" id="LineElementUDL.to_global"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LineElementUDL.html#osmg.load_case.LineElementUDL.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+<div class="viewcode-block" id="LineElementUDL.to_global"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LineElementUDL.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the quantity expressed in the global coordinate</span>
 <span class="sd">        system.</span>
@@ -313,7 +314,7 @@
         <span class="k">return</span> <span class="n">transf_mat</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">udl</span></div></div>
 
 
-<div class="viewcode-block" id="LoadCase"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="LoadCase"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LoadCase">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">LoadCase</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load Case object.</span>
@@ -359,7 +360,7 @@
                 <span class="bp">self</span><span class="p">,</span> <span class="n">lvl</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="LoadCase.rigid_diaphragms"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase.rigid_diaphragms">[docs]</a>    <span class="k">def</span> <span class="nf">rigid_diaphragms</span><span class="p">(</span>
+<div class="viewcode-block" id="LoadCase.rigid_diaphragms"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LoadCase.rigid_diaphragms">[docs]</a>    <span class="k">def</span> <span class="nf">rigid_diaphragms</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">level_uids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
             <span class="n">gather_mass</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -373,7 +374,7 @@
             <span class="n">rda</span> <span class="o">=</span> <span class="n">RDAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lvl</span><span class="p">)</span>
             <span class="n">rda</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">gather_mass</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LoadCase.number_of_free_dofs"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.LoadCase.html#osmg.load_case.LoadCase.number_of_free_dofs">[docs]</a>    <span class="k">def</span> <span class="nf">number_of_free_dofs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadCase.number_of_free_dofs"><a class="viewcode-back" href="../../_autosummary/osmg.load_case.html#osmg.load_case.LoadCase.number_of_free_dofs">[docs]</a>    <span class="k">def</span> <span class="nf">number_of_free_dofs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the number of free DOFS of the model, considering</span>
 <span class="sd">        all (potentially) defined constraints, restraints and parent</span>

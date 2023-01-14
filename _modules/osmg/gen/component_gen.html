@@ -85,7 +85,8 @@
               
             
             
-              <ul>
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home page</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
@@ -378,7 +379,7 @@
     <span class="k">return</span> <span class="n">result_node</span></div>
 
 
-<div class="viewcode-block" id="TrussBarGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.TrussBarGenerator.html#osmg.gen.component_gen.TrussBarGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="TrussBarGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.TrussBarGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">TrussBarGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Introduces bar elements to a model.</span>
@@ -388,7 +389,7 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TrussBarGenerator.add"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.TrussBarGenerator.html#osmg.gen.component_gen.TrussBarGenerator.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
+<div class="viewcode-block" id="TrussBarGenerator.add"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.TrussBarGenerator.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -562,7 +563,7 @@
         <span class="k">return</span> <span class="n">component</span></div></div>
 
 
-<div class="viewcode-block" id="BeamColumnGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="BeamColumnGenerator"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">BeamColumnGenerator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Introduces beamcolumn elements to a model.</span>
@@ -571,7 +572,7 @@
 
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-<div class="viewcode-block" id="BeamColumnGenerator.define_beamcolumn"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.define_beamcolumn">[docs]</a>    <span class="k">def</span> <span class="nf">define_beamcolumn</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.define_beamcolumn"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.define_beamcolumn">[docs]</a>    <span class="k">def</span> <span class="nf">define_beamcolumn</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">assembly</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span>
             <span class="n">node_i</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
@@ -637,7 +638,7 @@
             <span class="n">res</span> <span class="o">=</span> <span class="n">elm_disp</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.define_zerolength"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.define_zerolength">[docs]</a>    <span class="k">def</span> <span class="nf">define_zerolength</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.define_zerolength"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.define_zerolength">[docs]</a>    <span class="k">def</span> <span class="nf">define_zerolength</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">assembly</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span>
         <span class="n">node_i</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
@@ -664,7 +665,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">elm</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.define_two_node_link"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.define_two_node_link">[docs]</a>    <span class="k">def</span> <span class="nf">define_two_node_link</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.define_two_node_link"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.define_two_node_link">[docs]</a>    <span class="k">def</span> <span class="nf">define_two_node_link</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">assembly</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span>
         <span class="n">node_i</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
@@ -691,7 +692,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">elm</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.add_beamcolumn_elements_in_series"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.add_beamcolumn_elements_in_series">[docs]</a>    <span class="k">def</span> <span class="nf">add_beamcolumn_elements_in_series</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.add_beamcolumn_elements_in_series"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_beamcolumn_elements_in_series">[docs]</a>    <span class="k">def</span> <span class="nf">add_beamcolumn_elements_in_series</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">component</span><span class="p">,</span>
         <span class="n">node_i</span><span class="p">,</span>
@@ -777,7 +778,7 @@
                 <span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.generate_plain_component_assembly"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.generate_plain_component_assembly">[docs]</a>    <span class="k">def</span> <span class="nf">generate_plain_component_assembly</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.generate_plain_component_assembly"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.generate_plain_component_assembly">[docs]</a>    <span class="k">def</span> <span class="nf">generate_plain_component_assembly</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">component_purpose</span><span class="p">,</span>
         <span class="n">lvl</span><span class="p">,</span>
@@ -831,7 +832,7 @@
 
         <span class="k">return</span> <span class="n">component</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.generate_hinged_component_assembly"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.generate_hinged_component_assembly">[docs]</a>    <span class="k">def</span> <span class="nf">generate_hinged_component_assembly</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.generate_hinged_component_assembly"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.generate_hinged_component_assembly">[docs]</a>    <span class="k">def</span> <span class="nf">generate_hinged_component_assembly</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">component_purpose</span><span class="p">,</span>
         <span class="n">lvl</span><span class="p">,</span>
@@ -1028,7 +1029,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">component</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.add_vertical_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.add_vertical_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertical_active</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.add_vertical_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_vertical_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_vertical_active</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">y_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1106,7 +1107,7 @@
             <span class="n">defined_component_assemblies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">mthd</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">defined_component_assemblies</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.add_horizontal_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.add_horizontal_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_horizontal_active</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.add_horizontal_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_horizontal_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_horizontal_active</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1210,7 +1211,7 @@
             <span class="n">defined_component_assemblies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">mthd</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">defined_component_assemblies</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.add_diagonal_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.add_diagonal_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_diagonal_active</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.add_diagonal_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_diagonal_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_diagonal_active</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -1303,7 +1304,7 @@
             <span class="n">defined_component_assemblies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">mthd</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">defined_component_assemblies</span></div>
 
-<div class="viewcode-block" id="BeamColumnGenerator.add_pz_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.BeamColumnGenerator.html#osmg.gen.component_gen.BeamColumnGenerator.add_pz_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_pz_active</span><span class="p">(</span>
+<div class="viewcode-block" id="BeamColumnGenerator.add_pz_active"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_pz_active">[docs]</a>    <span class="k">def</span> <span class="nf">add_pz_active</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">x_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">y_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
