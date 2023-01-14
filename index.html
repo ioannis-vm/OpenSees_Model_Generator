@@ -225,7 +225,10 @@ environments. Additionally, it should be kept in mind that future
 versions of this module may introduce breaking changes, which could
 affect code that relies on earlier versions. To minimize the risk
 of issues, it is recommended to keep up to date with the latest
-version and test any changes before deployment.</p>
+version and test any changes before deployment.  If you encounter
+any issues with the documentation or the code itself, please
+consider reporting them by opening an <a class="reference external" href="https://github.com/ioannis-vm/OpenSees_Model_Generator/issues">issue</a>
+on Github. Note that the documentation is a work in progress.</p>
 </div>
 </section>
 <section id="the-osmg-workflow">
@@ -284,8 +287,10 @@ python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </sp
 <section id="the-examples-can-help">
 <h3>The examples can help<a class="headerlink" href="#the-examples-can-help" title="Permalink to this heading">¶</a></h3>
 <p><cite>osmg</cite> is composed of several interconnected modules, which may make
-it difficult to understand at first. A helpful resource for gaining a
-better understanding is the set of quick examples provided in the next
+it difficult to understand at first, but this modularity offers
+enhanced development flexibility that will allow the project to scale
+more easily over time. A helpful resource for gaining a better
+understanding is the set of quick examples provided in the next
 section. They are by no means comprehensive, but by running these
 examples and following the execution of the code, the main logic
 behind the package will become clearer.</p>
@@ -343,22 +348,23 @@ effectively creating a conditional breakpoint.</p>
 executed. Once the debugger is running, the following commands are
 available:</p>
 <ul class="simple">
-<li><p>n (next): Execute the current line and move to the next one</p></li>
-<li><p>s (step): Step into a function call</p></li>
-<li><p>c (continue): Continue execution until a breakpoint is reached</p></li>
-<li><p>l (list): List the source code of the current file</p></li>
-<li><p>b (break): Set a breakpoint at a specific line</p></li>
+<li><p>n (next): Execute the current line and move to the next one.</p></li>
+<li><p>s (step): Step into a function call.</p></li>
+<li><p>c (continue): Continue execution until a breakpoint is reached.</p></li>
+<li><p>l (list): List the source code of the current file.</p></li>
+<li><p>b (break): Set a breakpoint at a specific line.</p></li>
 </ul>
 </section>
 <section id="a-good-ide-can-make-a-big-difference">
 <h3>A good IDE can make a big difference<a class="headerlink" href="#a-good-ide-can-make-a-big-difference" title="Permalink to this heading">¶</a></h3>
 <p>An incredibly useful feature of many IDEs is called “jump to
-definition”. This feature allows you to quickly navigate to the
-location in the code where a specific function or variable is
-defined. If you are not currently utilizing this feature, it is highly
-recommended that you look into it, as it can greatly increase your
-productivity. In <a class="reference external" href="https://www.gnu.org/software/emacs/">Gnu Emacs</a>, this functionality is provided by
-<a class="reference external" href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html">xref</a>.</p>
+definition”. This feature allows for quick navigation to the location
+in the code where a specific function or variable is defined (even if
+it is in another file). Typically there is also the option to jump to
+the previous location. If you are not currently utilizing these
+features, it is highly recommended that you look into it, as it can
+greatly increase your productivity. In <a class="reference external" href="https://www.gnu.org/software/emacs/">Gnu Emacs</a>, this
+functionality is provided by <a class="reference external" href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html">xref</a>.</p>
 </section>
 </section>
 </section>
