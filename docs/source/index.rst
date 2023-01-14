@@ -49,7 +49,11 @@ model creation and analysis.
    versions of this module may introduce breaking changes, which could
    affect code that relies on earlier versions. To minimize the risk
    of issues, it is recommended to keep up to date with the latest
-   version and test any changes before deployment.
+   version and test any changes before deployment.  If you encounter
+   any issues with the documentation or the code itself, please
+   consider reporting them by opening an `issue
+   <https://github.com/ioannis-vm/OpenSees_Model_Generator/issues>`_
+   on Github. Note that the documentation is a work in progress.
 
 The `osmg` Workflow
 -------------------
@@ -115,8 +119,10 @@ The examples can help
 *********************
 
 `osmg` is composed of several interconnected modules, which may make
-it difficult to understand at first. A helpful resource for gaining a
-better understanding is the set of quick examples provided in the next
+it difficult to understand at first, but this modularity offers
+enhanced development flexibility that will allow the project to scale
+more easily over time. A helpful resource for gaining a better
+understanding is the set of quick examples provided in the next
 section. They are by no means comprehensive, but by running these
 examples and following the execution of the code, the main logic
 behind the package will become clearer.
@@ -182,23 +188,24 @@ This will start the debugger at the point where the script is
 executed. Once the debugger is running, the following commands are
 available:
 
-- n (next): Execute the current line and move to the next one
-- s (step): Step into a function call
-- c (continue): Continue execution until a breakpoint is reached
-- l (list): List the source code of the current file
-- b (break): Set a breakpoint at a specific line
+* n (next): Execute the current line and move to the next one.
+* s (step): Step into a function call.
+* c (continue): Continue execution until a breakpoint is reached.
+* l (list): List the source code of the current file.
+* b (break): Set a breakpoint at a specific line.
 
 
 A good IDE can make a big difference
 ************************************
 
 An incredibly useful feature of many IDEs is called "jump to
-definition". This feature allows you to quickly navigate to the
-location in the code where a specific function or variable is
-defined. If you are not currently utilizing this feature, it is highly
-recommended that you look into it, as it can greatly increase your
-productivity. In `Gnu Emacs`_, this functionality is provided by
-`xref`_.
+definition". This feature allows for quick navigation to the location
+in the code where a specific function or variable is defined (even if
+it is in another file). Typically there is also the option to jump to
+the previous location. If you are not currently utilizing these
+features, it is highly recommended that you look into it, as it can
+greatly increase your productivity. In `Gnu Emacs`_, this
+functionality is provided by `xref`_.
   
 .. _OpenSees: https://opensees.berkeley.edu/
 .. _dataclasses: https://docs.python.org/3/library/dataclasses.html
