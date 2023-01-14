@@ -81,7 +81,7 @@ Installing from PyPI
 .. code-block:: bash
 
    # create a conda environment
-   conda create --name your_env_name_here python=3.11
+   conda create --name your_env_name_here python=3.9
    # activate the environment
    conda activate your_env_name_here
    # install scikit-geometry
