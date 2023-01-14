@@ -137,3 +137,5 @@ notes
 /.links/
 /conda/
 *_autosummary/*
+/docs/source/_autosummary/
+/docs/source/notebooks/*.ipynb

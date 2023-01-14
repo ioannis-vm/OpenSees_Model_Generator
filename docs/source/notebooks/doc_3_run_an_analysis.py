@@ -255,12 +255,6 @@ show_deformed_shape(modal_analysis, modalcase.name, 3, 0.00, extrude=False, anim
 
 # %% [markdown]
 """
-More analysis methods are available, including static pushover and transient time-history. See `solver.py` and the tests.
-
-"""
-
-# %% [markdown]
-"""
 ### Time-history analysis
 
 """
@@ -273,23 +267,23 @@ help(nlth_anl.run)
 
 
 # %%
-nlth_anl.run(
-    0.01,
-    'groundmotions/1xa.txt',
-    'groundmotions/1ya.txt',
-    None,
-    0.005,
-    damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
-    print_progress=True
-)
+# nlth_anl.run(
+#     0.01,
+#     'groundmotions/1xa.txt',
+#     'groundmotions/1ya.txt',
+#     None,
+#     0.005,
+#     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
+#     print_progress=True
+# )
 
 
 # %%
-parent_node_lvl2 = testcase.parent_nodes[2]
+# parent_node_lvl2 = testcase.parent_nodes[2]
 
 
 # %%
-nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)
+# nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)
 
 
 # %% [markdown]
