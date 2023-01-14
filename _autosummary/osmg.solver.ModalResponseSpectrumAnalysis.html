@@ -42,7 +42,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="osmg.solver.NLTHAnalysis" href="osmg.solver.NLTHAnalysis.html" />
+    <link rel="next" title="osmg.solver.PushoverAnalysis" href="osmg.solver.PushoverAnalysis.html" />
     <link rel="prev" title="osmg.solver.ModalAnalysis" href="osmg.solver.ModalAnalysis.html" /> 
 </head>
 
@@ -90,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -110,25 +110,25 @@
 <li class="toctree-l2 current"><a class="reference internal" href="osmg.solver.html">osmg.solver</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.Analysis.html">osmg.solver.Analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.AnalysisSettings.html">osmg.solver.AnalysisSettings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.solver.GravityPlusAnalysis.html">osmg.solver.GravityPlusAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.ModalAnalysis.html">osmg.solver.ModalAnalysis</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">osmg.solver.ModalResponseSpectrumAnalysis</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#osmg.solver.ModalResponseSpectrumAnalysis"><code class="docutils literal notranslate"><span class="pre">ModalResponseSpectrumAnalysis</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.solver.NLTHAnalysis.html">osmg.solver.NLTHAnalysis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.solver.NonlinearAnalysis.html">osmg.solver.NonlinearAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.PushoverAnalysis.html">osmg.solver.PushoverAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.Results.html">osmg.solver.Results</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.StaticAnalysis.html">osmg.solver.StaticAnalysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.solver.THAnalysis.html">osmg.solver.THAnalysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.Analysis"><code class="docutils literal notranslate"><span class="pre">Analysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.AnalysisSettings"><code class="docutils literal notranslate"><span class="pre">AnalysisSettings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.GravityPlusAnalysis"><code class="docutils literal notranslate"><span class="pre">GravityPlusAnalysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.ModalAnalysis"><code class="docutils literal notranslate"><span class="pre">ModalAnalysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.ModalResponseSpectrumAnalysis"><code class="docutils literal notranslate"><span class="pre">ModalResponseSpectrumAnalysis</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.NLTHAnalysis"><code class="docutils literal notranslate"><span class="pre">NLTHAnalysis</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.NonlinearAnalysis"><code class="docutils literal notranslate"><span class="pre">NonlinearAnalysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.PushoverAnalysis"><code class="docutils literal notranslate"><span class="pre">PushoverAnalysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.Results"><code class="docutils literal notranslate"><span class="pre">Results</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.StaticAnalysis"><code class="docutils literal notranslate"><span class="pre">StaticAnalysis</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.THAnalysis"><code class="docutils literal notranslate"><span class="pre">THAnalysis</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.define_lateral_load_pattern"><code class="docutils literal notranslate"><span class="pre">define_lateral_load_pattern()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="osmg.solver.html#osmg.solver.plot_ground_motion"><code class="docutils literal notranslate"><span class="pre">plot_ground_motion()</span></code></a></li>
 </ul>
@@ -328,7 +328,7 @@ nodes.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="osmg.solver.NLTHAnalysis.html" class="btn btn-neutral float-right" title="osmg.solver.NLTHAnalysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="osmg.solver.PushoverAnalysis.html" class="btn btn-neutral float-right" title="osmg.solver.PushoverAnalysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="osmg.solver.ModalAnalysis.html" class="btn btn-neutral float-left" title="osmg.solver.ModalAnalysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

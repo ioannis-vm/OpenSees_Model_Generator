@@ -29,13 +29,13 @@ osmg.solver
    
       Analysis
       AnalysisSettings
+      GravityPlusAnalysis
       ModalAnalysis
       ModalResponseSpectrumAnalysis
-      NLTHAnalysis
-      NonlinearAnalysis
       PushoverAnalysis
       Results
       StaticAnalysis
+      THAnalysis
    
    
 

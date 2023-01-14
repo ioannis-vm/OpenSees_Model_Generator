@@ -42,7 +42,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="notebooks.html" /> 
+    <link rel="next" title="Examples" href="notebooks.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,7 +89,7 @@
             
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_autosummary/osmg.html">API reference</a></li>
 </ul>
 
@@ -184,15 +184,173 @@
 </div>
 <section id="welcome-to-the-documentation-for-osmg">
 <h1>Welcome to the documentation for <cite>osmg</cite><a class="headerlink" href="#welcome-to-the-documentation-for-osmg" title="Permalink to this heading">¶</a></h1>
-<p><cite>osmg</cite> is a Python package that provides useful functions and classes
-for the definition and analysis of 3D OpenSees models. <cite>osmg</cite> attempts
-to simplify the process of creating large models of complex
-geometry. It only supports a subset of the functionality of OpenSees,
-but can be easily extended to add more functionality when needed.</p>
-<p>To get started with <cite>osmg</cite>, you can install it via pip:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>osmg
+<p><code class="docutils literal notranslate"><span class="pre">OpenSees_Model_Generator</span></code> (<cite>osmg</cite>) is a Python package
+designed to facilitate the definition and analysis of 3D models using
+<a class="reference external" href="https://opensees.berkeley.edu/">OpenSees</a>. Its main goal is to simplify the process of creating
+large models of complex geometry, by providing a set of useful
+functions and classes.  It is worth noting that osmg currently
+supports only a subset of the capabilities of OpenSees, but it can be
+easily extended to add more functionality as needed. This makes it a
+great tool for users who are already familiar with OpenSees and are
+looking for a more streamlined model creation process. OpenSees is
+incredibly powerful, and the goal of <cite>osmg</cite> is to encourage greater
+adoption by technical users, by providing commonly used functionality
+as boilerplate code, thus reducing the time and effort involved in
+model creation and analysis.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module is intended for advanced users who are capable of
+understanding the source code and have the ability to modify and
+extend it to meet their specific needs. A strong understanding of
+<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a> and previous experience using <a class="reference external" href="https://opensees.berkeley.edu/">OpenSees</a> is
+required for proper use of this module. Those who are not familiar
+with these concepts and tools will benefit from learning more about
+them before using this module.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please note that <cite>osmg</cite> is currently in beta and may contain
+bugs. While every effort has been made to ensure its stability, it
+is advised to use caution when using it in production
+environments. Additionally, it should be kept in mind that future
+versions of this module may introduce breaking changes, which could
+affect code that relies on earlier versions. To minimize the risk
+of issues, it is recommended to keep up to date with the latest
+version and test any changes before deployment.</p>
+</div>
+<section id="the-osmg-workflow">
+<h2>The <cite>osmg</cite> Workflow<a class="headerlink" href="#the-osmg-workflow" title="Permalink to this heading">¶</a></h2>
+<p>The general workflow enabled by the module is the following:</p>
+<ol class="arabic simple">
+<li><p>Instantiate model objects and define their components.</p></li>
+<li><p>Perform preprocessing operations.</p></li>
+<li><p>Define load case and analysis objects.</p></li>
+<li><p>Run the analyses.</p></li>
+<li><p>Post-process the analysis results.</p></li>
+</ol>
+<p>Actual interaction with OpenSees only happens at step #4.</p>
+</section>
+<section id="installing-osmg">
+<h2>Installing <cite>osmg</cite><a class="headerlink" href="#installing-osmg" title="Permalink to this heading">¶</a></h2>
+<p>It is recommended to use a virtual environment to manage the
+dependencies of this module. Anaconda or Miniconda are some valid
+options. Installation instructions can be found
+<span class="xref std std-ref">here</span>.</p>
+<p><cite>osmg</cite> is available on <a class="reference external" href="https://pypi.org/">PyPI</a>, but it is recommended to install it in
+development mode instead.</p>
+<section id="installing-from-pypi">
+<h3>Installing from PyPI<a class="headerlink" href="#installing-from-pypi" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># create a conda environment</span>
+conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>your_env_name_here<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.11
+<span class="c1"># activate the environment</span>
+conda<span class="w"> </span>activate<span class="w"> </span>your_env_name_here
+<span class="c1"># install scikit-geometry</span>
+conda<span class="w"> </span>install<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>scikit-geometry
+<span class="c1"># install osmg from PyPI in that environment</span>
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>osmg
 </pre></div>
 </div>
+<p>It is recommended to install <a class="reference external" href="https://github.com/scikit-geometry/scikit-geometry">scikit-geometry</a> before installing
+<cite>osmg</cite>. This dependency is used to perform tributary area analyses for
+load distribution calculations, but it is optional.</p>
+</section>
+<section id="installing-in-development-mode">
+<h3>Installing in development mode<a class="headerlink" href="#installing-in-development-mode" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>parent_directory_where_you_would_like_to_have_osmg
+<span class="nb">cd</span><span class="w"> </span>parent_directory_where_you_would_like_to_have_osmg
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ioannis-vm/OpenSees_Model_Generator
+<span class="nb">cd</span><span class="w"> </span>OpenSees_Model_Generator
+conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>your_env_name_here<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+conda<span class="w"> </span>activate<span class="w"> </span>your_env_name_here
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements_dev.txt
+conda<span class="w"> </span>install<span class="w"> </span>scikit-geometry<span class="w"> </span>-c<span class="w"> </span>conda-forge
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+</section>
+<section id="becoming-familiar-with-osmg">
+<h2>Becoming familiar with <cite>osmg</cite><a class="headerlink" href="#becoming-familiar-with-osmg" title="Permalink to this heading">¶</a></h2>
+<section id="the-examples-can-help">
+<h3>The examples can help<a class="headerlink" href="#the-examples-can-help" title="Permalink to this heading">¶</a></h3>
+<p><cite>osmg</cite> is composed of several interconnected modules, which may make
+it difficult to understand at first. A helpful resource for gaining a
+better understanding is the set of quick examples provided in the next
+section. They are by no means comprehensive, but by running these
+examples and following the execution of the code, the main logic
+behind the package will become clearer.</p>
+</section>
+<section id="api-reference-and-pydoc">
+<h3>API reference and pydoc<a class="headerlink" href="#api-reference-and-pydoc" title="Permalink to this heading">¶</a></h3>
+<p>The package’s API reference provides in-depth information about the
+package’s functions and classes. It is automatically generated from
+the docstrings in the code. This information can also be accessed
+offline by using the pydoc command in the terminal, which allows
+viewing the documentation for any specific module or package that is
+installed. pydoc can be used from the command line as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydoc<span class="w"> </span>&lt;module_name&gt;
+
+<span class="c1"># some examples:</span>
+pydoc<span class="w"> </span>osmg
+pydoc<span class="w"> </span>osmg.model
+pydoc<span class="w"> </span>osmg.model.Model
+pydoc<span class="w"> </span>osmg.model.Model.add_level<span class="w">  </span><span class="c1"># and so on</span>
+pydoc<span class="w"> </span>numpy.array
+pydoc<span class="w"> </span>matplotlib.pyplot.plot
+</pre></div>
+</div>
+<p>pydoc can also be used to start an HTTP server that allows viewing the
+documentation in a web browser, using the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydoc<span class="w"> </span>-p<span class="w"> </span>&lt;some_port_number&gt;
+
+<span class="c1"># e.g.</span>
+pydoc<span class="w"> </span>-p<span class="w"> </span><span class="m">9090</span>
+</pre></div>
+</div>
+<p>Note that this does not require network access.</p>
+</section>
+<section id="use-pdb-it-s-fantastic">
+<h3>Use <cite>pdb</cite>, it’s fantastic<a class="headerlink" href="#use-pdb-it-s-fantastic" title="Permalink to this heading">¶</a></h3>
+<p>Another helpful tool for understanding the package’s code is the
+<a class="reference external" href="https://docs.python.org/3/library/pdb.html">pdb</a> library. This library allows running the code in debugging
+mode, which enables stepping through the code line by line and viewing
+the current state of the execution. This can be extremely useful for
+understanding how the functions and classes of this (or any other)
+package interact with one another. Many well-known integrated
+development environments (IDEs) utilize the <cite>pdb</cite> library natively. A
+breakpoint can also be forced anywhere by simply adding the following
+lines at the intended location:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pdb</span>
+<span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pro tip: These two lines can be added under an if block,
+effectively creating a conditional breakpoint.</p>
+</div>
+<p>This will start the debugger at the point where the script is
+executed. Once the debugger is running, the following commands are
+available:</p>
+<ul class="simple">
+<li><p>n (next): Execute the current line and move to the next one</p></li>
+<li><p>s (step): Step into a function call</p></li>
+<li><p>c (continue): Continue execution until a breakpoint is reached</p></li>
+<li><p>l (list): List the source code of the current file</p></li>
+<li><p>b (break): Set a breakpoint at a specific line</p></li>
+</ul>
+</section>
+<section id="a-good-ide-can-make-a-big-difference">
+<h3>A good IDE can make a big difference<a class="headerlink" href="#a-good-ide-can-make-a-big-difference" title="Permalink to this heading">¶</a></h3>
+<p>An incredibly useful feature of many IDEs is called “jump to
+definition”. This feature allows you to quickly navigate to the
+location in the code where a specific function or variable is
+defined. If you are not currently utilizing this feature, it is highly
+recommended that you look into it, as it can greatly increase your
+productivity. In <a class="reference external" href="https://www.gnu.org/software/emacs/">Gnu Emacs</a>, this functionality is provided by
+<a class="reference external" href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html">xref</a>.</p>
+</section>
+</section>
 </section>
 
 
@@ -201,7 +359,7 @@ but can be easily extended to add more functionality when needed.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="notebooks.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="notebooks.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

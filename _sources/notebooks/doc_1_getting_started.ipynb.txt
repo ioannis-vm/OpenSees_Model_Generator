@@ -1,0 +1,89 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "45c5f656",
+   "metadata": {
+    "cell_marker": "\"\"\""
+   },
+   "source": [
+    "\n",
+    "### Development mode\n",
+    "\n",
+    "Alternatively, if you plan to make changes to the code, installing osmg in development mode is recommended.\n",
+    "This is how it is done.\n",
+    "```\n",
+    "$ mkdir parent_directory_where_you_would_like_to_have_osmg\n",
+    "$ cd parent_directory_where_you_would_like_to_have_osmg\n",
+    "$ git clone https://github.com/ioannis-vm/OpenSees_Model_Generator\n",
+    "$ cd OpenSees_Model_Generator\n",
+    "$ conda create --name your_env_name_here python=3.9\n",
+    "$ conda activate your_env_name_here\n",
+    "$ python -m pip install -r requirements_dev.txt\n",
+    "$ conda install scikit-geometry -c conda-forge\n",
+    "$ python -m pip install -e .\n",
+    "```\n",
+    "\n",
+    "### Units\n",
+    "At the moment, the following unit options are available:\n",
+    "\n",
+    "Imperial (default)\n",
+    "\n",
+    "| Quantity | Unit |\n",
+    "| --- | --- |\n",
+    "| Length | in |\n",
+    "| Force  | lb |\n",
+    "| Weight | lb/(in/s2) |\n",
+    "\n",
+    "Metric\n",
+    "\n",
+    "| Quantity | Unit |\n",
+    "| --- | --- |\n",
+    "| Length | m |\n",
+    "| Force  | kN |\n",
+    "| Weight | kg |\n",
+    "\n",
+    "Well, metric might not work as expected for a while. Making sure it does is on my TODO list. Check your results.\n",
+    "\n",
+    "### IDE or Jupyter Notebooks?\n",
+    "I prefer using Emacs as my IDE and working directly with `.py` files. Jupyter notebooks can be used instead, as in these example files.\n",
+    "\n",
+    "The benefit of using an IDE and `.py` files is the added ability to set up an argument parser and coordinate analyses from the command line. `.py` files also work much better with version control. The benefit of jupyter notebooks is a somewhat more interactive experience, integrated plots, and markdown integration, but the lack of convenient version-control and Emacs key bindings is a deal-breaker for me.\n",
+    "\n",
+    "An excellent IDE that I used in the past is [Spyder](https://www.spyder-ide.org/).\n",
+    "\n",
+    "## Tips\n",
+    "How to make sense of all this code?\n",
+    "\n",
+    "\n",
+    "To figure out the required syntax, these example files and the documentation of the module will be helpful.\n",
+    "For a deep-dive into the execution steps, other than reading the source files and the docstrings, an effective way is to run the examples using [the python debugger](https://docs.python.org/3/library/pdb.html). Just add\n",
+    "```\n",
+    "import pdb\n",
+    "pdb.set_trace()\n",
+    "```\n",
+    "at any line where you would like to stop the execution, and then follow the execution step by step. This is another instance where an IDE can be more effective than jupyter notebooks. There is also pydoc for offline documentation. On the terminal, try:\n",
+    "\n",
+    "```\n",
+    "pydoc osmg\n",
+    "pydoc osmg.model.Model\n",
+    "pydoc numpy.array\n",
+    "```\n",
+    "\n",
+    "Taking notes in the process might also help."
+   ]
+  }
+ ],
+ "metadata": {
+  "jupytext": {
+   "cell_markers": "\"\"\""
+  },
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -87,7 +87,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
 </ul>
 
@@ -1117,10 +1117,14 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">gammas</span><span class="p">,</span> <span class="n">mstars</span><span class="p">,</span> <span class="n">mn_tot</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="NonlinearAnalysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">NonlinearAnalysis</span><span class="p">(</span><span class="n">Analysis</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">GravityPlusAnalysis</span><span class="p">(</span><span class="n">Analysis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Nonlinear analysis parent class.</span>
+<span class="sd">    When performing nonlinear static or dynamic analysis, it is common</span>
+<span class="sd">    to first apply gravitly loads on the model and then proceed with</span>
+<span class="sd">    some other analysis, like static pushover or transient dynamic</span>
+<span class="sd">    analysis. This parent class is used to define analysis objects</span>
+<span class="sd">    that follow this practice.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1145,7 +1149,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Gravity analysis failed. Unable to continue...&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Analysis Failed&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_node_displacement"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_node_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_node_displacement"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_node_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the displacement of a node for all analysis steps</span>
 
@@ -1163,7 +1167,7 @@
         <span class="n">dframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="k">return</span> <span class="n">dframe</span></div>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_node_acceleration"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_node_acceleration">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_node_acceleration"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_node_acceleration">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the acceleration of a node for all analysis steps</span>
 
@@ -1179,7 +1183,7 @@
         <span class="n">dframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="k">return</span> <span class="n">dframe</span></div>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_node_velocity"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_node_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_node_velocity"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_node_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the velocity of a node for all analysis steps</span>
 
@@ -1195,7 +1199,7 @@
         <span class="n">dframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="k">return</span> <span class="n">dframe</span></div>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_node_abs_acceleration"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_node_abs_acceleration">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_abs_acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_node_abs_acceleration"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_node_abs_acceleration">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_abs_acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the absolute acceleration of a node for all analysis</span>
 <span class="sd">        steps</span>
@@ -1204,7 +1208,7 @@
 
         <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">n_steps_success</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
         <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_accelerations</span><span class="p">[</span><span class="n">uid</span><span class="p">])</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NLTHAnalysis</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">THAnalysis</span><span class="p">)</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
             <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_accelerations</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
@@ -1232,7 +1236,7 @@
         <span class="n">dframe</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="k">return</span> <span class="n">dframe</span></div>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_node_abs_velocity"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_node_abs_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_abs_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_node_abs_velocity"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_node_abs_velocity">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_node_abs_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the absolute velocity of a node for all analysis steps</span>
 
@@ -1240,7 +1244,7 @@
 
         <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">n_steps_success</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
         <span class="n">num</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_velocities</span><span class="p">[</span><span class="n">uid</span><span class="p">])</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NLTHAnalysis</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">THAnalysis</span><span class="p">)</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">a_g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
             <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_velocities</span><span class="p">[</span><span class="n">uid</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
@@ -1272,7 +1276,7 @@
         <span class="n">dfrmae</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;step&quot;</span>
         <span class="k">return</span> <span class="n">dfrmae</span></div>
 
-<div class="viewcode-block" id="NonlinearAnalysis.retrieve_release_force_defo"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NonlinearAnalysis.html#osmg.solver.NonlinearAnalysis.retrieve_release_force_defo">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_release_force_defo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+<div class="viewcode-block" id="GravityPlusAnalysis.retrieve_release_force_defo"><a class="viewcode-back" href="../../_autosummary/osmg.solver.GravityPlusAnalysis.html#osmg.solver.GravityPlusAnalysis.retrieve_release_force_defo">[docs]</a>    <span class="k">def</span> <span class="nf">retrieve_release_force_defo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the force-deformation of a zerolength element for all</span>
 <span class="sd">        analysis steps</span>
@@ -1291,7 +1295,7 @@
 
 
 <div class="viewcode-block" id="PushoverAnalysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.PushoverAnalysis.html#osmg.solver.PushoverAnalysis">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">PushoverAnalysis</span><span class="p">(</span><span class="n">NonlinearAnalysis</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PushoverAnalysis</span><span class="p">(</span><span class="n">GravityPlusAnalysis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pushover analysis</span>
 
@@ -1711,10 +1715,10 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="NLTHAnalysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NLTHAnalysis.html#osmg.solver.NLTHAnalysis">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">NLTHAnalysis</span><span class="p">(</span><span class="n">NonlinearAnalysis</span><span class="p">):</span>
+<div class="viewcode-block" id="THAnalysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.THAnalysis.html#osmg.solver.THAnalysis">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">THAnalysis</span><span class="p">(</span><span class="n">GravityPlusAnalysis</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Dynamic nonlinear time-history analysis</span>
+<span class="sd">    Dynamic time-history analysis</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1723,12 +1727,12 @@
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="NLTHAnalysis.run"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NLTHAnalysis.html#osmg.solver.NLTHAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+<div class="viewcode-block" id="THAnalysis.run"><a class="viewcode-back" href="../../_autosummary/osmg.solver.THAnalysis.html#osmg.solver.THAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">analysis_time_increment</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">filename_x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filename_y</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filename_z</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">filename_x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">filename_y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">filename_z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">file_time_incr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">finish_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
         <span class="n">skip_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1736,7 +1740,7 @@
         <span class="n">print_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Run the nonlinear time-history analysis</span>
+<span class="sd">        Run the time-history analysis</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            filename_x, y, z: Paths where the fixed-step ground acceleration</span>
 <span class="sd">                              records are stored (single-column).</span>
@@ -2045,7 +2049,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_write_results_to_disk</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">metadata</span></div>
 
-<div class="viewcode-block" id="NLTHAnalysis.plot_node_displacement_history"><a class="viewcode-back" href="../../_autosummary/osmg.solver.NLTHAnalysis.html#osmg.solver.NLTHAnalysis.plot_node_displacement_history">[docs]</a>    <span class="k">def</span> <span class="nf">plot_node_displacement_history</span><span class="p">(</span>
+<div class="viewcode-block" id="THAnalysis.plot_node_displacement_history"><a class="viewcode-back" href="../../_autosummary/osmg.solver.THAnalysis.html#osmg.solver.THAnalysis.plot_node_displacement_history">[docs]</a>    <span class="k">def</span> <span class="nf">plot_node_displacement_history</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">direction</span><span class="p">,</span> <span class="n">plotly</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>

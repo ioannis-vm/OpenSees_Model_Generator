@@ -90,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home page</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="osmg.collections.html">osmg.collections</a></li>
 <li class="toctree-l2"><a class="reference internal" href="osmg.common.html">osmg.common</a></li>
@@ -431,17 +431,19 @@ loops, or sequences, which is the purpose of this module.</p>
 <span class="sig-name descname"><span class="pre">direction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Halfedge.direction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Halfedge.direction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the angular direction of the halfedge
 using the arctan2 function (in radians).</p>
-<p>Examples:
-&gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge
-&gt;&gt;&gt; v1 = Vertex((0.0, 0.0))
-&gt;&gt;&gt; v2 = Vertex((2.0, 2.0))
-&gt;&gt;&gt; edge = Edge(v1, v2)
-&gt;&gt;&gt; halfedge1 = Halfedge(v1, edge)
-&gt;&gt;&gt; halfedge2 = Halfedge(v2, edge)
-&gt;&gt;&gt; halfedge1.direction()
-0.7853981633974483
-&gt;&gt;&gt; halfedge2.direction()
--2.356194490192345</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Halfedge</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span>
+<span class="go">0.7853981633974483</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span>
+<span class="go">-2.356194490192345</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
