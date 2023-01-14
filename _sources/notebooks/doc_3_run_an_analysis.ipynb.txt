@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "0121dede",
+   "id": "514c0a17",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -18,7 +18,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "78a12e47",
+   "id": "6032e62e",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -26,13 +26,13 @@
    "source": [
     "## Analysis examples\n",
     "\n",
-    "First, we need to define a model."
+    "First we define a model."
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b803cccd",
+   "id": "f64d9104",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -140,7 +140,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a5cb42c2",
+   "id": "631e662d",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -149,7 +149,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "82973299",
+   "id": "a78e5861",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -160,7 +160,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f70ef037",
+   "id": "e3ce143a",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -172,7 +172,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "e96d34fe",
+   "id": "af38b26a",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -185,7 +185,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6cf997b9",
+   "id": "3d4ca443",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -196,7 +196,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "25c89538",
+   "id": "77dd0df0",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -208,7 +208,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b93bf678",
+   "id": "a80c0912",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -220,7 +220,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b6c9f5fc",
+   "id": "5769327b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -233,7 +233,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "dc83099c",
+   "id": "f4f95c23",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -250,7 +250,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "066e6ed5",
+   "id": "d83aff39",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -261,7 +261,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "2f430744",
+   "id": "b9404749",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -274,7 +274,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c671eb76",
+   "id": "9d095610",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -287,7 +287,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d4f1963b",
+   "id": "71a70c09",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -299,7 +299,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "4a11dd5d",
+   "id": "9a1269c4",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -309,7 +309,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "bcf27e0b",
+   "id": "5d769d2f",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -321,7 +321,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "fed21735",
+   "id": "87bb3282",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -332,7 +332,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "a03d6bf9",
+   "id": "3ba0038d",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -343,7 +343,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "9f19a401",
+   "id": "7a775cca",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -357,7 +357,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "4f9a1b88",
+   "id": "24140a03",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -370,7 +370,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "70b47662",
+   "id": "362a1112",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -381,7 +381,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "a95c56f3",
+   "id": "0c7397d2",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -393,7 +393,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f42b1d02",
+   "id": "51df404d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -404,7 +404,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "6d30207a",
+   "id": "50f9ea53",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -415,7 +415,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "dbaf50f7",
+   "id": "a7a5e512",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -425,7 +425,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5b966ff0",
+   "id": "e51013a4",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -437,7 +437,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5a8299c4",
+   "id": "08713c05",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -457,7 +457,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "cbac53e0",
+   "id": "970b82bd",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -469,7 +469,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8286871b",
+   "id": "7c9563ad",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -480,16 +480,16 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b3b10e5c",
+   "id": "79a7e1c0",
    "metadata": {
     "cell_marker": "\"\"\""
    },
    "source": [
     "### Other types of structural analysis and ideas for future development\n",
     "\n",
-    "- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the design procedures.\n",
+    "- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the capabilities of `osmg` for structural design.\n",
     "\n",
-    "- Planned future support includes modal response history analysis."
+    "- Future plans include adding support for modal response history analysis which can reduce computation time for linear models."
    ]
   }
  ],
