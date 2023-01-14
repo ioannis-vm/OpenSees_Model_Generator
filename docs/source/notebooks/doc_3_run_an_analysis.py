@@ -28,7 +28,7 @@ Alternatively, a generic `Analysis` object can be defined (from the parent class
 """
 ## Analysis examples
 
-First, we need to define a model.
+First we define a model.
 
 """
 
@@ -288,8 +288,8 @@ nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plot
 """
 ### Other types of structural analysis and ideas for future development
 
-- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the design procedures.
+- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the capabilities of `osmg` for structural design.
 
-- Planned future support includes modal response history analysis.
+- Future plans include adding support for modal response history analysis which can reduce computation time for linear models.
 
 """

@@ -17,21 +17,26 @@
 """
 # Defining a Model
 
-This section demonstrates the definition of models.
+This section demonstrates the model definition process.
 
 ## Model Definition Overview
 
 The overall procedure for defining the elements of a model can be broken down into the following steps:
+
 - Set active levels
+
 - Define components
-- Apply pre-processing methods
+
+- Execute pre-processing methods
 
 The model can be visualized at any step in the process to confirm its validity.
 
-**To see all the available arguments of each of the following methods, please look at their source code and read the docstrings**.
+**To see all the available arguments of each of the following methods, please read the API reference or their docstrings**.
 
-Alternatively, use the `help()` function.
+Alternatively, use the `help()` function inside a python shell.
 e.g. `help(mdl.add_level)`
+
+You can also use `pydoc <osmg.name_of_module>` in a terminal window.
 """
 
 # %%
@@ -136,6 +141,12 @@ for node in mdl.levels[0].nodes.values():
 # %%
 show(mdl)
 
+
+# %% [markdown]
+"""
+# Preprocessing
+"""
+
 # %% [markdown]
 """
 Now that all the intended elements have been defined, we can apply pre-processing methods to the model.
@@ -148,11 +159,6 @@ Some common methods are the following:
 - `self_weight`, `self_mass` assign self-weight loads and lumped self-mass to all the elements.
 
 However, loads, mass, and diaphragm constraints are load_case-specific. We therefore need to define a load case first.
-"""
-
-# %% [markdown]
-"""
-# Preprocessing
 """
 
 
