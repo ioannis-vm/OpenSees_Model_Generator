@@ -19,15 +19,6 @@
 
 This section demonstrates the definition of models.
 
-As noted in `1_Getting_Started`, the general workflow enabled by the module is the following:
-1. Instantiate model objects and define their components
-2. Perform pre-processing operations
-3. Define load_case and analysis objects
-4. Run the analyses
-5. Post-process the analysis results
-
-This jupyter notebook demonstrates steps #1 and #2.
-
 ## Model Definition Overview
 
 The overall procedure for defining the elements of a model can be broken down into the following steps:
