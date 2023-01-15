@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "563f2a0a",
+   "id": "2a194d03",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -13,7 +13,8 @@
     "\n",
     "## Model Definition Overview\n",
     "\n",
-    "The overall procedure for defining the elements of a model can be broken down into the following steps:\n",
+    "The overall procedure for defining the elements of a model can be\n",
+    "broken down into the following steps:\n",
     "\n",
     "- Set active levels\n",
     "\n",
@@ -23,7 +24,8 @@
     "\n",
     "The model can be visualized at any step in the process to confirm its validity.\n",
     "\n",
-    "**To see all the available arguments of each of the following methods, please read the API reference or their docstrings**.\n",
+    "**To see all the available arguments of each of the following methods,\n",
+    "please read the API reference or their docstrings**.\n",
     "\n",
     "Alternatively, use the `help()` function inside a python shell.\n",
     "e.g. `help(mdl.add_level)`\n",
@@ -34,7 +36,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5669400d",
+   "id": "99c771dd",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -54,7 +56,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "80da5388",
+   "id": "978a18cc",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -67,7 +69,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "7eb57117",
+   "id": "eb76ac38",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -79,7 +81,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "006ab0ba",
+   "id": "b590ba0a",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -93,20 +95,21 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "acec7a70",
+   "id": "d373f25f",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
     "defaults.load_default_steel(mdl)\n",
-    "steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')"
+    "steel_phys_mat = mdl.physical_materials.retrieve_by_attr(\n",
+    "    'name', 'default steel')"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a77034a3",
+   "id": "0157190e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -125,7 +128,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "fa288f8a",
+   "id": "5a0c145a",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -138,7 +141,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "13d383c7",
+   "id": "d6887f71",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -153,7 +156,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "ea4e47ae",
+   "id": "1379ad9b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -176,7 +179,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "656bafc6",
+   "id": "136b943d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -203,7 +206,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "339a9f6f",
+   "id": "cc9d5502",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -215,7 +218,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "418a9478",
+   "id": "995dcd8b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -229,7 +232,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "29f8f1ff",
+   "id": "c2f377c8",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -240,7 +243,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "57db1b84",
+   "id": "394edf0d",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -250,20 +253,26 @@
   },
   {
    "cell_type": "markdown",
-   "id": "d853827c",
+   "id": "366c7c8b",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
    },
    "source": [
-    "Now that all the intended elements have been defined, we can apply pre-processing methods to the model.\n",
+    "Now that all the intended elements have been defined, we can apply\n",
+    "pre-processing methods to the model.\n",
+    "\n",
     "Some common methods are the following:\n",
     "\n",
-    "* `rigid_diaphragms` assigns rigid diaphragm constraints to all specified levels. Only primary nodes are affected (not internal nodes of component assemblies).\n",
+    "* `rigid_diaphragms` assigns rigid diaphragm constraints to all\n",
+    "  specified levels. Only primary nodes are affected (not internal\n",
+    "  nodes of component assemblies).\n",
     "\n",
-    "* `tributary_area_analysis` distributes loads from the floors to the supporting elements.\n",
+    "* `tributary_area_analysis` distributes loads from the floors to the\n",
+    "  supporting elements.\n",
     "\n",
-    "* `self_weight`, `self_mass` assign self-weight loads and lumped self-mass to all the elements / nodes.\n",
+    "* `self_weight`, `self_mass` assign self-weight loads and lumped\n",
+    "  self-mass to all the elements / nodes.\n",
     "\n",
     "Loads, mass, and diaphragm constraints are load_case-specific."
    ]
@@ -271,7 +280,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f31e31b3",
+   "id": "2431a1cb",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -287,7 +296,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "58fc85e2",
+   "id": "52a3b8c7",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -299,7 +308,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "48d2ffa9",
+   "id": "a7d545d8",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -312,7 +321,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "650eb501",
+   "id": "0e9bfbb9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -324,7 +333,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c06bab07",
+   "id": "10e2a6c0",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -341,10 +350,8 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d4370552",
-   "metadata": {
-    "lines_to_next_cell": 2
-   },
+   "id": "8bf9704a",
+   "metadata": {},
    "outputs": [],
    "source": [
     "# visualize the model\n",

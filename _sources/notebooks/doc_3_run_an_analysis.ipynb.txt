@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "69e175b7",
+   "id": "d2ce4a45",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -11,14 +11,21 @@
     "\n",
     "The `solver` module is used to interact with OpenSees.\n",
     "\n",
-    "The most convenient approach is using a child of the `Analysis` class from those already defined in the `solver` module for the specific analysis that is needed. This will run the analysis and store the requested results of each analysis step.\n",
+    "The most convenient approach is using a child of the `Analysis` class\n",
+    "from those already defined in the `solver` module for the specific\n",
+    "analysis that is needed. This will run the analysis and store the\n",
+    "requested results of each analysis step.\n",
     "\n",
-    "Alternatively, a generic `Analysis` object can be defined (from the parent class), and its generic methods for model definition can be used together with OpenSees commands issued directly in the analysis script. If such an analysis is repeated a lot, a new `Analysis` child class can be defined in the `solver` module."
+    "Alternatively, a generic `Analysis` object can be defined (from the\n",
+    "parent class), and its generic methods for model definition can be\n",
+    "used together with OpenSees commands issued directly in the analysis\n",
+    "script. If such an analysis is repeated a lot, a new `Analysis` child\n",
+    "class can be defined in the `solver` module."
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "10b7f3b7",
+   "id": "e48babba",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -32,7 +39,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b2079c62",
+   "id": "eefd79a8",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -57,7 +64,8 @@
     "defaults.load_default_steel(mdl)\n",
     "defaults.load_default_fix_release(mdl)\n",
     "defaults.load_util_rigid_elastic(mdl)\n",
-    "steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')\n",
+    "steel_phys_mat = mdl.physical_materials.retrieve_by_attr(\n",
+    "    'name', 'default steel')\n",
     "secg = SectionGenerator(mdl)\n",
     "secg.load_aisc_from_database(\n",
     "    'W',\n",
@@ -140,7 +148,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f5d58d3b",
+   "id": "d389c6eb",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -149,7 +157,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "09bb2b78",
+   "id": "0379adae",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -160,7 +168,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3ca202d8",
+   "id": "2b6211d5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -172,7 +180,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2aeda107",
+   "id": "7ff78b12",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -185,7 +193,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "61dc9fda",
+   "id": "1b1a0842",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -196,19 +204,21 @@
   },
   {
    "cell_type": "markdown",
-   "id": "cb9ec7e9",
+   "id": "7675b2a9",
    "metadata": {
     "cell_marker": "\"\"\""
    },
    "source": [
     "#### Retrieving results\n",
     "\n",
-    "Analysis results are stored in dictionaries. The keys are the unique identifiers of the elements that the results correspond to, and the values contain the results."
+    "Analysis results are stored in dictionaries. The keys are the unique\n",
+    "identifiers of the elements that the results correspond to, and the\n",
+    "values contain the results."
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "249bb030",
+   "id": "b3512cae",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -220,7 +230,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a537cea8",
+   "id": "857d170e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -233,7 +243,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "7678c0a0",
+   "id": "101d823a",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -250,31 +260,35 @@
   },
   {
    "cell_type": "markdown",
-   "id": "9ccdeeb9",
+   "id": "cc159449",
    "metadata": {
     "cell_marker": "\"\"\""
    },
    "source": [
     "\n",
-    "Note: Multiple load cases and analysis objects can be defined using the same model. The results will be stored independently in the various analysis objects."
+    "Note: Multiple load cases and analysis objects can be defined using\n",
+    "the same model. The results will be stored independently in the\n",
+    "various analysis objects."
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "9f5b2549",
+   "id": "016e6175",
    "metadata": {
     "cell_marker": "\"\"\""
    },
    "source": [
     "#### Visualizing results\n",
     "\n",
-    "The following visualization methods work for all analysis methods. However, some require specifying the analysis step to visualize. Static analyses only have a single step, so we specify 0."
+    "The following visualization methods work for all analysis\n",
+    "methods. However, some require specifying the analysis step to\n",
+    "visualize. Static analyses only have a single step, so we specify 0."
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d23f277b",
+   "id": "88005655",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -287,7 +301,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "ca3d6acf",
+   "id": "79d7454e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -299,7 +313,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "fb5d482a",
+   "id": "a14097dd",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -309,7 +323,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1bdd8964",
+   "id": "8d2b3a20",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -321,18 +335,21 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "9e832cd1",
+   "id": "637e84dc",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "show_basic_forces(static_anl, testcase.name, 0, 1.00, 1.00, 1.00, 1.00, 1.00, 10, 1.00, 1.00, False)"
+    "show_basic_forces(\n",
+    "    static_anl, testcase.name, 0,\n",
+    "    1.00, 1.00, 1.00, 1.00, 1.00,\n",
+    "    10, 1.00, 1.00, False)"
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "1e680efc",
+   "id": "eca7b3c3",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -343,7 +360,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1f85f5a4",
+   "id": "fcfe3a6c",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -357,20 +374,21 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "12f05ff1",
+   "id": "d1bbdde6",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "modal_analysis = solver.ModalAnalysis(mdl, {modalcase.name: modalcase}, num_modes=4)\n",
+    "modal_analysis = solver.ModalAnalysis(\n",
+    "    mdl, {modalcase.name: modalcase}, num_modes=4)\n",
     "modal_analysis.run()"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6bffd3d4",
+   "id": "48170af6",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -381,7 +399,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1043f787",
+   "id": "7bfb618f",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -393,18 +411,20 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1c7f38a4",
+   "id": "216d465e",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "show_deformed_shape(modal_analysis, modalcase.name, 3, 0.00, extrude=False, animation=False)"
+    "show_deformed_shape(\n",
+    "    modal_analysis, modalcase.name, 3, 0.00,\n",
+    "    extrude=False, animation=False)"
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "7c5c1d44",
+   "id": "adfcdebc",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -415,7 +435,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "208b62f7",
+   "id": "d5111055",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -425,7 +445,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a608684d",
+   "id": "35287d1d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -437,7 +457,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c66cc72a",
+   "id": "7d050014",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -457,7 +477,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8431f760",
+   "id": "4cf2c76b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -469,27 +489,35 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8739b465",
+   "id": "c976104b",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
-    "nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)"
+    "nlth_anl.plot_node_displacement_history(\n",
+    "    testcase.name, parent_node_lvl2, 0, plotly=True)"
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "357b687f",
+   "id": "b04121e3",
    "metadata": {
     "cell_marker": "\"\"\""
    },
    "source": [
     "### Other types of structural analysis and ideas for future development\n",
     "\n",
-    "- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the capabilities of `osmg` for structural design.\n",
+    "- Currently it is unclear what the intent of each model is (i.e. a\n",
+    "  linear model used for design or an advanced model used for\n",
+    "  performance evaluation purposes). There is already support for\n",
+    "  design-related analyses, such as modal response spectrum analysis,\n",
+    "  and definition of load combinations, which can support a design\n",
+    "  workflow. Examples will be added in the future, and there are plans\n",
+    "  to further enhance the capabilities of `osmg` for structural design.\n",
     "\n",
-    "- Future plans include adding support for modal response history analysis which can reduce computation time for linear models."
+    "- Future plans include adding support for modal response history\n",
+    "  analysis which can reduce computation time for linear models."
    ]
   }
  ],
