@@ -126,6 +126,29 @@ class AnalysisSettings:
 
 
 @dataclass(repr=False)
+class Warnings:
+    """
+    Analysis warnings. Helps avoid issuing repeated warnings.
+    """
+
+    parent_analysis: Analysis
+    issued_warnings: list[str] = field(default_factory=list)
+
+    def issue(self, message: str) -> None:
+        """
+        Shows unique warning messages.
+
+        Arguments:
+          message: Warning message.
+
+        """
+
+        if message not in self.issued_warnings:
+            self.parent_analysis.log(f'WARNING: {message}')
+            self.issued_warnings.append(message)
+
+
+@dataclass(repr=False)
 class Analysis:
     """
     Parent analysis class.
