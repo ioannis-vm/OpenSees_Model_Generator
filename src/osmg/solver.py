@@ -139,6 +139,7 @@ class Analysis:
       settings: analysis settings
       results: analysis results
       logger: Logger object
+      warning: Warnings object
 
     """
 
@@ -150,6 +151,11 @@ class Analysis:
     )
     results: dict[str, Results] = field(default_factory=dict)
     logger: Optional[object] = field(default=None)
+    warning: Warnings = field(init=False)
+
+    def __post_init__(self):
+        # instantiate a Warnings object
+        self.warning = Warnings(self)
 
     def log(self, msg: str) -> None:
         """
@@ -770,8 +776,8 @@ class ModalAnalysis(Analysis):
                     # this will cause issues with plotting if loads
                     # have been applied.
                     if np.linalg.norm(udl) > common.EPSILON:
-                        raise ValueError("Loads applied at modal load case.")
-                    # (could alternatively just ignore them?..)
+                        self.warning.issue("Loads were present in a modal load case. Ignoring them.")
+                        udl = np.zeros(3)
 
                 # global -> local transformation matrix
                 transf_global2local = transformations.transformation_matrix(
