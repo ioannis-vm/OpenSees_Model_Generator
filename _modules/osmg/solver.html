@@ -158,6 +158,29 @@
     <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s1">&#39;UmfPack&#39;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Warnings"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.Warnings">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Warnings</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analysis warnings. Helps avoid issuing repeated warnings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">parent_analysis</span><span class="p">:</span> <span class="n">Analysis</span>
+    <span class="n">issued_warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Warnings.issue"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.Warnings.issue">[docs]</a>    <span class="k">def</span> <span class="nf">issue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shows unique warning messages.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">          message: Warning message.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">issued_warnings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent_analysis</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;WARNING: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">issued_warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
+
+
 <div class="viewcode-block" id="Analysis"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.Analysis">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Analysis</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -172,6 +195,7 @@
 <span class="sd">      settings: analysis settings</span>
 <span class="sd">      results: analysis results</span>
 <span class="sd">      logger: Logger object</span>
+<span class="sd">      warning: Warnings object</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -183,6 +207,11 @@
     <span class="p">)</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Results</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">logger</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">warning</span><span class="p">:</span> <span class="n">Warnings</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># instantiate a Warnings object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">warning</span> <span class="o">=</span> <span class="n">Warnings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Analysis.log"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.Analysis.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -803,8 +832,8 @@
                     <span class="c1"># this will cause issues with plotting if loads</span>
                     <span class="c1"># have been applied.</span>
                     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">udl</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Loads applied at modal load case.&quot;</span><span class="p">)</span>
-                    <span class="c1"># (could alternatively just ignore them?..)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="o">.</span><span class="n">issue</span><span class="p">(</span><span class="s2">&quot;Loads were present in a modal load case. Ignoring them.&quot;</span><span class="p">)</span>
+                        <span class="n">udl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
                 <span class="c1"># global -&gt; local transformation matrix</span>
                 <span class="n">transf_global2local</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">(</span>
@@ -2121,6 +2150,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tips.html">Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
 </ul>

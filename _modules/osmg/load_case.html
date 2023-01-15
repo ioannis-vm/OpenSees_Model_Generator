@@ -71,6 +71,7 @@
 <span class="k">class</span> <span class="nc">PointLoadMass</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Point load/mass object. Global coordinate system.</span>
+
 <span class="sd">    Attributes:</span>
 <span class="sd">        val: Value for each DOF.</span>
 
@@ -198,6 +199,21 @@
 <span class="sd">    Analysis objects can use multiple load cases.</span>
 <span class="sd">    Load combination objects utilize load cases as well.</span>
 
+<span class="sd">    Attributes:</span>
+<span class="sd">      name: A string representing the name of the load case.</span>
+<span class="sd">      parent_model: A Model object representing the parent model of</span>
+<span class="sd">        the load case.</span>
+<span class="sd">      node_loads: A collection of PointLoadMass objects, indexed by</span>
+<span class="sd">        the node id.</span>
+<span class="sd">      node_mass: A collection of PointLoadMass objects, indexed by the</span>
+<span class="sd">        node id.</span>
+<span class="sd">      line_element_udl: A collection of LineElementUDL objects,</span>
+<span class="sd">        indexed by the element id.</span>
+<span class="sd">      tributary_area_analysis: A collection of TributaryAreaAnaysis</span>
+<span class="sd">        objects, indexed by the level id.</span>
+<span class="sd">      parent_nodes: A dictionary of Node objects, indexed by the node</span>
+<span class="sd">        id.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -316,6 +332,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tips.html">Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/osmg.html">API reference</a></li>
 </ul>

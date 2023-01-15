@@ -49,6 +49,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 <span class="kn">import</span> <span class="nn">plotly.graph_objects</span> <span class="k">as</span> <span class="nn">go</span>  <span class="c1"># type: ignore</span>
@@ -58,6 +59,8 @@
 <span class="kn">from</span> <span class="nn">.preprocessing_3d</span> <span class="kn">import</span> <span class="n">add_data__global_axes</span>
 <span class="kn">from</span> <span class="nn">..postprocessing.basic_forces</span> <span class="kn">import</span> <span class="n">basic_forces</span>
 <span class="kn">from</span> <span class="nn">..ops</span> <span class="kn">import</span> <span class="n">element</span>
+<span class="kn">from</span> <span class="nn">..model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">..solver</span> <span class="kn">import</span> <span class="n">Analysis</span>
 
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
@@ -704,17 +707,18 @@
 
 
 <div class="viewcode-block" id="show_deformed_shape"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_deformed_shape">[docs]</a><span class="k">def</span> <span class="nf">show_deformed_shape</span><span class="p">(</span>
-    <span class="n">analysis</span><span class="p">,</span>
-    <span class="n">case_name</span><span class="p">,</span>
-    <span class="n">step</span><span class="p">,</span>
-    <span class="n">scaling</span><span class="p">,</span>
-    <span class="n">extrude</span><span class="p">,</span>
-    <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">animation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">init_step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">step_skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<span class="p">):</span>
+        <span class="n">analysis</span><span class="p">:</span> <span class="n">Analysis</span><span class="p">,</span>
+        <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">scaling</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">subset_model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">animation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">init_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">step_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">to_html_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model in its deformed state</span>
@@ -734,6 +738,8 @@
 <span class="sd">      init_step: starting step, in case of animation</span>
 <span class="sd">      step_skip: how many frames to skip to reduce the number of</span>
 <span class="sd">        frames in case an animation.</span>
+<span class="sd">      to_html_file: If a path is specified, the figure is written in</span>
+<span class="sd">        an html file instead of being shown.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -754,10 +760,7 @@
     <span class="n">frame_data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># gather lists of associated objects</span>
-    <span class="n">list_of_line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">list_of_line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
         <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
     <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
@@ -934,7 +937,10 @@
 
     <span class="c1"># show the plot (if it&#39;s not a test)</span>
     <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">to_html_file</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">to_html_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="c1"># return plot-related metadata</span>
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;scaling&quot;</span><span class="p">:</span> <span class="n">scaling</span><span class="p">}</span>
@@ -956,6 +962,7 @@
     <span class="n">global_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model and plot the frame element basic forces.</span>
@@ -982,6 +989,8 @@
 <span class="sd">        analysis object. It needs to be a subset of the original</span>
 <span class="sd">        model. This can be used to only show the results for some part</span>
 <span class="sd">        of a large model.</span>
+<span class="sd">      to_html_file: If a path is specified, the figure is written in</span>
+<span class="sd">        an html file instead of being shown.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1442,7 +1451,10 @@
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">to_html_file</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">to_html_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;scaling_n&quot;</span><span class="p">:</span> <span class="n">scaling_n</span><span class="p">,</span>
@@ -1466,6 +1478,7 @@
     <span class="n">global_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model and plot the enveloped frame element basic forces</span>
@@ -1492,6 +1505,8 @@
 <span class="sd">        analysis object. It needs to be a subset of the original</span>
 <span class="sd">        model. This can be used to only show the results for some part</span>
 <span class="sd">        of a large model.</span>
+<span class="sd">      to_html_file: If a path is specified, the figure is written in</span>
+<span class="sd">        an html file instead of being shown.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1947,7 +1962,10 @@
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
-        <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">to_html_file</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">to_html_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
     <span class="n">metadata</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;scaling_n&quot;</span><span class="p">:</span> <span class="n">scaling_n</span><span class="p">,</span>
@@ -1977,6 +1995,7 @@
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tips.html">Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/osmg.html">API reference</a></li>
 </ul>

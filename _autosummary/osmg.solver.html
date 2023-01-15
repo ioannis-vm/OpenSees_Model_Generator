@@ -77,6 +77,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#osmg.solver.THAnalysis" title="osmg.solver.THAnalysis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">THAnalysis</span></code></a>(mdl, load_cases, ...)</p></td>
 <td><p>Dynamic time-history analysis</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.solver.Warnings" title="osmg.solver.Warnings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Warnings</span></code></a>(parent_analysis, issued_warnings)</p></td>
+<td><p>Analysis warnings.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py class">
@@ -147,6 +150,17 @@ when it is requested for them to be pickled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.11)">object</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.Analysis.warning">
+<span class="sig-name descname"><span class="pre">warning</span></span><a class="headerlink" href="#osmg.solver.Analysis.warning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Warnings object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#osmg.solver.Warnings" title="osmg.solver.Warnings">osmg.solver.Warnings</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -483,6 +497,23 @@ run for the entire duration of the files.</p></li>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="osmg.solver.Warnings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Warnings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_analysis:</span> <span class="pre">~osmg.solver.Analysis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issued_warnings:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#Warnings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analysis warnings. Helps avoid issuing repeated warnings.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="osmg.solver.Warnings.issue">
+<span class="sig-name descname"><span class="pre">issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/solver.html#Warnings.issue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.Warnings.issue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows unique warning messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> – Warning message.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.solver.define_lateral_load_pattern">
 <span class="sig-name descname"><span class="pre">define_lateral_load_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_time_incr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#define_lateral_load_pattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.define_lateral_load_pattern" title="Permalink to this definition">¶</a></dt>
@@ -518,6 +549,7 @@ previously parsed files with a constant dt</p>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a></li>
 </ul>

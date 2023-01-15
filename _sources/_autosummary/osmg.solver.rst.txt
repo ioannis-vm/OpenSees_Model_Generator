@@ -35,6 +35,7 @@ osmg.solver
       Results
       StaticAnalysis
       THAnalysis
+      Warnings
    
    
 

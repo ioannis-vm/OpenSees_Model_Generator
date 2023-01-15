@@ -92,6 +92,89 @@ Load cases contain information related to the specified loads,
 mass, parent nodes and rigid diaphragm constraints, etc.
 Analysis objects can use multiple load cases.
 Load combination objects utilize load cases as well.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string representing the name of the load case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.parent_model">
+<span class="sig-name descname"><span class="pre">parent_model</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.parent_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Model object representing the parent model of
+the load case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.model.html#osmg.model.Model" title="osmg.model.Model">Model</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.node_loads">
+<span class="sig-name descname"><span class="pre">node_loads</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.node_loads" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of PointLoadMass objects, indexed by
+the node id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="#osmg.load_case.PointLoadMass" title="osmg.load_case.PointLoadMass">PointLoadMass</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.node_mass">
+<span class="sig-name descname"><span class="pre">node_mass</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.node_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of PointLoadMass objects, indexed by the
+node id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="#osmg.load_case.PointLoadMass" title="osmg.load_case.PointLoadMass">PointLoadMass</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.line_element_udl">
+<span class="sig-name descname"><span class="pre">line_element_udl</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.line_element_udl" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of LineElementUDL objects,
+indexed by the element id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="#osmg.load_case.LineElementUDL" title="osmg.load_case.LineElementUDL">LineElementUDL</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.tributary_area_analysis">
+<span class="sig-name descname"><span class="pre">tributary_area_analysis</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.tributary_area_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of TributaryAreaAnaysis
+objects, indexed by the level id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.preprocessing.tributary_area_analysis.html#osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis" title="osmg.preprocessing.tributary_area_analysis.TributaryAreaAnaysis">TributaryAreaAnaysis</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.LoadCase.parent_nodes">
+<span class="sig-name descname"><span class="pre">parent_nodes</span></span><a class="headerlink" href="#osmg.load_case.LoadCase.parent_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of Node objects, indexed by the node
+id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.ops.node.html#osmg.ops.node.Node" title="osmg.ops.node.Node">Node</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.load_case.LoadCase.number_of_free_dofs">
 <span class="sig-name descname"><span class="pre">number_of_free_dofs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/load_case.html#LoadCase.number_of_free_dofs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.LoadCase.number_of_free_dofs" title="Permalink to this definition">¶</a></dt>
@@ -112,16 +195,18 @@ diaphragm constraints.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.load_case.PointLoadMass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PointLoadMass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val:</span> <span class="pre">~numpy.ndarray[~typing.Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~numpy.dtype[~numpy.float64]]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/load_case.html#PointLoadMass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.PointLoadMass" title="Permalink to this definition">¶</a></dt>
-<dd><p>Point load/mass object. Global coordinate system.
-.. attribute:: val</p>
-<blockquote>
-<div><p>Value for each DOF.</p>
+<dd><p>Point load/mass object. Global coordinate system.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.load_case.PointLoadMass.val">
+<span class="sig-name descname"><span class="pre">val</span></span><a class="headerlink" href="#osmg.load_case.PointLoadMass.val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value for each DOF.</p>
 <dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>numpy.ndarray[Any, numpy.dtype[numpy.float64]]</p>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)">numpy.ndarray</a>[Any, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)">numpy.dtype</a>[numpy.float64]]</p>
 </dd>
 </dl>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.load_case.PointLoadMass.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.24)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/load_case.html#PointLoadMass.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.load_case.PointLoadMass.add" title="Permalink to this definition">¶</a></dt>
@@ -164,6 +249,7 @@ diaphragm constraints.</p>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tips.html">Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../notebooks.html">Introductory Examples</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="osmg.html">API reference</a></li>
 </ul>
