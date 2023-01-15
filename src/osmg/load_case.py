@@ -38,6 +38,7 @@ nparr = npt.NDArray[np.float64]
 class PointLoadMass:
     """
     Point load/mass object. Global coordinate system.
+
     Attributes:
         val: Value for each DOF.
 
@@ -164,6 +165,21 @@ class LoadCase:
     mass, parent nodes and rigid diaphragm constraints, etc.
     Analysis objects can use multiple load cases.
     Load combination objects utilize load cases as well.
+
+    Attributes:
+      name: A string representing the name of the load case.
+      parent_model: A Model object representing the parent model of
+        the load case.
+      node_loads: A collection of PointLoadMass objects, indexed by
+        the node id.
+      node_mass: A collection of PointLoadMass objects, indexed by the
+        node id.
+      line_element_udl: A collection of LineElementUDL objects,
+        indexed by the element id.
+      tributary_area_analysis: A collection of TributaryAreaAnaysis
+        objects, indexed by the level id.
+      parent_nodes: A dictionary of Node objects, indexed by the node
+        id.
 
     """
 
