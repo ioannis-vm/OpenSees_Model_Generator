@@ -19,9 +19,16 @@
 
 The `solver` module is used to interact with OpenSees.
 
-The most convenient approach is using a child of the `Analysis` class from those already defined in the `solver` module for the specific analysis that is needed. This will run the analysis and store the requested results of each analysis step.
+The most convenient approach is using a child of the `Analysis` class
+from those already defined in the `solver` module for the specific
+analysis that is needed. This will run the analysis and store the
+requested results of each analysis step.
 
-Alternatively, a generic `Analysis` object can be defined (from the parent class), and its generic methods for model definition can be used together with OpenSees commands issued directly in the analysis script. If such an analysis is repeated a lot, a new `Analysis` child class can be defined in the `solver` module.
+Alternatively, a generic `Analysis` object can be defined (from the
+parent class), and its generic methods for model definition can be
+used together with OpenSees commands issued directly in the analysis
+script. If such an analysis is repeated a lot, a new `Analysis` child
+class can be defined in the `solver` module.
 """
 
 # %% [markdown]
@@ -53,7 +60,8 @@ for i in range(3):
 defaults.load_default_steel(mdl)
 defaults.load_default_fix_release(mdl)
 defaults.load_util_rigid_elastic(mdl)
-steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')
+steel_phys_mat = mdl.physical_materials.retrieve_by_attr(
+    'name', 'default steel')
 secg = SectionGenerator(mdl)
 secg.load_aisc_from_database(
     'W',
@@ -158,7 +166,9 @@ static_anl.run()
 """
 #### Retrieving results
 
-Analysis results are stored in dictionaries. The keys are the unique identifiers of the elements that the results correspond to, and the values contain the results.
+Analysis results are stored in dictionaries. The keys are the unique
+identifiers of the elements that the results correspond to, and the
+values contain the results.
 
 """
 
@@ -187,7 +197,9 @@ static_anl.results[testcase.name].node_displacements[
 # %% [markdown]
 """
 
-Note: Multiple load cases and analysis objects can be defined using the same model. The results will be stored independently in the various analysis objects.
+Note: Multiple load cases and analysis objects can be defined using
+the same model. The results will be stored independently in the
+various analysis objects.
 
 """
 
@@ -195,7 +207,9 @@ Note: Multiple load cases and analysis objects can be defined using the same mod
 """
 #### Visualizing results
 
-The following visualization methods work for all analysis methods. However, some require specifying the analysis step to visualize. Static analyses only have a single step, so we specify 0.
+The following visualization methods work for all analysis
+methods. However, some require specifying the analysis step to
+visualize. Static analyses only have a single step, so we specify 0.
 
 """
 
@@ -216,7 +230,10 @@ help(show_basic_forces)
 
 
 # %%
-show_basic_forces(static_anl, testcase.name, 0, 1.00, 1.00, 1.00, 1.00, 1.00, 10, 1.00, 1.00, False)
+show_basic_forces(
+    static_anl, testcase.name, 0,
+    1.00, 1.00, 1.00, 1.00, 1.00,
+    10, 1.00, 1.00, False)
 
 
 # %% [markdown]
@@ -232,7 +249,8 @@ modalcase.rigid_diaphragms([1, 2])
 
 
 # %%
-modal_analysis = solver.ModalAnalysis(mdl, {modalcase.name: modalcase}, num_modes=4)
+modal_analysis = solver.ModalAnalysis(
+    mdl, {modalcase.name: modalcase}, num_modes=4)
 modal_analysis.run()
 
 
@@ -248,7 +266,9 @@ for modal analyses, step corresponds to mode
 
 
 # %%
-show_deformed_shape(modal_analysis, modalcase.name, 3, 0.00, extrude=False, animation=False)
+show_deformed_shape(
+    modal_analysis, modalcase.name, 3, 0.00,
+    extrude=False, animation=False)
 
 
 # %% [markdown]
@@ -281,15 +301,23 @@ parent_node_lvl2 = testcase.parent_nodes[2]
 
 
 # %%
-nlth_anl.plot_node_displacement_history(testcase.name, parent_node_lvl2, 0, plotly=True)
+nlth_anl.plot_node_displacement_history(
+    testcase.name, parent_node_lvl2, 0, plotly=True)
 
 
 # %% [markdown]
 """
 ### Other types of structural analysis and ideas for future development
 
-- Currently it is unclear what the intent of each model is (i.e. a linear model used for design or an advanced model used for performance evaluation purposes). There is already support for design-related analyses, such as modal response spectrum analysis, and definition of load combinations, which can support a design workflow. Examples will be added in the future, and there are plans to further enhance the capabilities of `osmg` for structural design.
+- Currently it is unclear what the intent of each model is (i.e. a
+  linear model used for design or an advanced model used for
+  performance evaluation purposes). There is already support for
+  design-related analyses, such as modal response spectrum analysis,
+  and definition of load combinations, which can support a design
+  workflow. Examples will be added in the future, and there are plans
+  to further enhance the capabilities of `osmg` for structural design.
 
-- Future plans include adding support for modal response history analysis which can reduce computation time for linear models.
+- Future plans include adding support for modal response history
+  analysis which can reduce computation time for linear models.
 
 """

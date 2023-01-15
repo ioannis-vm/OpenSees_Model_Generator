@@ -21,7 +21,8 @@ This section demonstrates the model definition process.
 
 ## Model Definition Overview
 
-The overall procedure for defining the elements of a model can be broken down into the following steps:
+The overall procedure for defining the elements of a model can be
+broken down into the following steps:
 
 - Set active levels
 
@@ -31,7 +32,8 @@ The overall procedure for defining the elements of a model can be broken down in
 
 The model can be visualized at any step in the process to confirm its validity.
 
-**To see all the available arguments of each of the following methods, please read the API reference or their docstrings**.
+**To see all the available arguments of each of the following methods,
+please read the API reference or their docstrings**.
 
 Alternatively, use the `help()` function inside a python shell.
 e.g. `help(mdl.add_level)`
@@ -68,7 +70,8 @@ for i in range(3):
 
 # %%
 defaults.load_default_steel(mdl)
-steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')
+steel_phys_mat = mdl.physical_materials.retrieve_by_attr(
+    'name', 'default steel')
 
 
 # %%
@@ -149,14 +152,20 @@ show(mdl)
 
 # %% [markdown]
 """
-Now that all the intended elements have been defined, we can apply pre-processing methods to the model.
+Now that all the intended elements have been defined, we can apply
+pre-processing methods to the model.
+
 Some common methods are the following:
 
-* `rigid_diaphragms` assigns rigid diaphragm constraints to all specified levels. Only primary nodes are affected (not internal nodes of component assemblies).
+* `rigid_diaphragms` assigns rigid diaphragm constraints to all
+  specified levels. Only primary nodes are affected (not internal
+  nodes of component assemblies).
 
-* `tributary_area_analysis` distributes loads from the floors to the supporting elements.
+* `tributary_area_analysis` distributes loads from the floors to the
+  supporting elements.
 
-* `self_weight`, `self_mass` assign self-weight loads and lumped self-mass to all the elements / nodes.
+* `self_weight`, `self_mass` assign self-weight loads and lumped
+  self-mass to all the elements / nodes.
 
 Loads, mass, and diaphragm constraints are load_case-specific.
 """
@@ -195,4 +204,3 @@ for key in [1, 2]:
 # %%
 # visualize the model
 show(mdl, testcase, extrude=True)
-
