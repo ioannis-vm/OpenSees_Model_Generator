@@ -645,6 +645,11 @@ class BeamColumnGenerator:
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
 
+        uids = [node.uid for node in (node_i, node_j)]
+        uids.sort()
+        uids_tuple = (*uids,)
+        assert uids_tuple not in self.model.component_connectivity()
+
         # instantiate a component assembly
         component = ComponentAssembly(
             uid=self.model.uid_generator.new("component"),
@@ -701,6 +706,11 @@ class BeamColumnGenerator:
         beamcolumn elements (in order to be able to specify rigid offsets).
 
         """
+
+        uids = [node.uid for node in (node_i, node_j)]
+        uids.sort()
+        uids_tuple = (*uids,)
+        assert uids_tuple not in self.model.component_connectivity()
 
         # instantiate a component assembly
         component = ComponentAssembly(
