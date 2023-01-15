@@ -16,6 +16,7 @@ Defines utility functions used for data visualization.
 import sys
 from typing import Optional
 from typing import Union
+from typing import Any
 import numpy as np
 import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
@@ -25,6 +26,8 @@ from . import graphics_common_3d
 from .preprocessing_3d import add_data__global_axes
 from ..postprocessing.basic_forces import basic_forces
 from ..ops import element
+from ..model import Model
+from ..solver import Analysis
 
 nparr = npt.NDArray[np.float64]
 
@@ -671,17 +674,18 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
 
 
 def show_deformed_shape(
-    analysis,
-    case_name,
-    step,
-    scaling,
-    extrude,
-    camera=None,
-    subset_model=None,
-    animation=False,
-    init_step=0,
-    step_skip=0,
-):
+        analysis: Analysis,
+        case_name: str,
+        step: int,
+        scaling: float,
+        extrude: bool,
+        camera: Optional[dict[str, object]] = None,
+        subset_model: Model = None,
+        animation: bool = False,
+        init_step: int = 0,
+        step_skip: int = 0,
+        to_html_file: Optional[str] = None
+) -> dict[str, Any]:
 
     """
     Visualize the model in its deformed state
@@ -701,6 +705,8 @@ def show_deformed_shape(
       init_step: starting step, in case of animation
       step_skip: how many frames to skip to reduce the number of
         frames in case an animation.
+      to_html_file: If a path is specified, the figure is written in
+        an html file instead of being shown.
 
     """
 
@@ -721,10 +727,7 @@ def show_deformed_shape(
     frame_data_dict: list[list[dict[str, object]]] = []
 
     # gather lists of associated objects
-    list_of_line_elems: list[
-        Union[element.TrussBar,
-              element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
+    list_of_line_elems: list[element.Element] = []
     list_of_line_elems.extend(
         mdl.list_of_specific_element(element.TrussBar))
     list_of_line_elems.extend(
@@ -901,7 +904,10 @@ def show_deformed_shape(
 
     # show the plot (if it's not a test)
     if "pytest" not in sys.modules:
-        fig.show()
+        if to_html_file:
+            fig.write_html(to_html_file)
+        else:
+            fig.show()
 
     # return plot-related metadata
     metadata = {"scaling": scaling}
@@ -923,6 +929,7 @@ def show_basic_forces(
     global_axes=False,
     camera=None,
     subset_model=None,
+    to_html_file=None
 ):
     """
     Visualize the model and plot the frame element basic forces.
@@ -949,6 +956,8 @@ def show_basic_forces(
         analysis object. It needs to be a subset of the original
         model. This can be used to only show the results for some part
         of a large model.
+      to_html_file: If a path is specified, the figure is written in
+        an html file instead of being shown.
 
     """
 
@@ -1409,7 +1418,10 @@ def show_basic_forces(
     )
 
     if "pytest" not in sys.modules:
-        fig.show()
+        if to_html_file:
+            fig.write_html(to_html_file)
+        else:
+            fig.show()
 
     metadata = {
         "scaling_n": scaling_n,
@@ -1433,6 +1445,7 @@ def show_basic_forces_combo(
     global_axes=False,
     camera=None,
     subset_model=None,
+    to_html_file=None
 ):
     """
     Visualize the model and plot the enveloped frame element basic forces
@@ -1459,6 +1472,8 @@ def show_basic_forces_combo(
         analysis object. It needs to be a subset of the original
         model. This can be used to only show the results for some part
         of a large model.
+      to_html_file: If a path is specified, the figure is written in
+        an html file instead of being shown.
 
     """
 
@@ -1914,7 +1929,10 @@ def show_basic_forces_combo(
     )
 
     if "pytest" not in sys.modules:
-        fig.show()
+        if to_html_file:
+            fig.write_html(to_html_file)
+        else:
+            fig.show()
 
     metadata = {
         "scaling_n": scaling_n,

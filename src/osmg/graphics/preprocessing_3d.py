@@ -1147,7 +1147,8 @@ def show(
         zerolength_axes: bool = False,
         diaphragm_lines: bool = True,
         tributary_area_boundaries: bool = True,
-        camera: Optional[dict[str, object]] = None) -> None:
+        camera: Optional[dict[str, object]] = None,
+        to_html_file: Optional[str] = None) -> None:
     """
     Visualize the model
 
@@ -1167,6 +1168,8 @@ def show(
       zerolength_axes: whether to show the local axes of
         zerolength elements
       camera: custom positioning of the camera
+      to_html_file: If a path is specified, the figure is written in
+        an html file instead of being shown.
 
     """
 
@@ -1217,4 +1220,7 @@ def show(
     fig = go.Figure(fig_datastructure)
 
     if "pytest" not in sys.modules:
-        fig.show()
+        if to_html_file:
+            fig.write_html(to_html_file)
+        else:
+            fig.show()
