@@ -1080,8 +1080,8 @@ class BeamColumnGenerator:
             placement: str = 'centroid',
             angle: float = 0.00,
             camber_2: float = 0.00, camber_3: float = 0.00,
-            split_existing_i: bool = None,
-            split_existing_j: bool = None,
+            split_existing_i: Optional[ComponentAssembly] = None,
+            split_existing_j: Optional[ComponentAssembly] = None,
             method: str = 'generate_plain_component_assembly',
             additional_args: dict[str, object] = {}
     ) -> dict[int, ComponentAssembly]:
