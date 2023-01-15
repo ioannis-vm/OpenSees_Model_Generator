@@ -15,6 +15,7 @@ author = 'John Vouvakis Manousakis'
 release = [line.split('=')[1]
            for line in open('../../setup.cfg')
            if 'version' in line][0].strip()
+copyright = '2023, Ioannis Vouvakis Manousakis'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
