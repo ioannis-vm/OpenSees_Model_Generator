@@ -1,7 +1,7 @@
+# OpenSees Model Generator
 ![Tests](https://github.com/ioannis-vm/OpenSees_Model_Generator/actions/workflows/test_and_deploy.yaml/badge.svg)
 ![PyPI version](https://badge.fury.io/py/osmg.svg)
 ![Zenodo](https://zenodo.org/badge/DOI/10.5281/zenodo.7536062.svg)
-# OpenSees Model Generator
 
 ![](img/img.png)
 
@@ -10,8 +10,6 @@ This Python package aims to help users define, analyze, and post-process 3D mode
 ### Documentation
 
 You can access the documentation of this package [here](https://ioannis-vm.github.io/OpenSees_Model_Generator/).
-
-[View on Zenodo](https://zenodo.org/record/7536062).
 
 ### External resources
 
