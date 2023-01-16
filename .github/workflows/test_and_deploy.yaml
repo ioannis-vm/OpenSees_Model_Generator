@@ -56,7 +56,7 @@ jobs:
             name: dist
             path: dist
       - name: Deploy
-        if: ${{ steps.version_step_pypi.outputs.latest_version != steps.version_step_pypi.outputs.setupcfg_version }}
+        if: ${{ steps.version_step_pypi.outputs.latest_version != steps.version_step_setupcfg.outputs.setupcfg_version }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: ${{ secrets.PYPI_USERNAME }}
