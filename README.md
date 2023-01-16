@@ -5,17 +5,18 @@
 
 ![](img/img.png)
 
-This Python package aims to help users define, analyze, and post-process 3D models using OpenSees, which is an open-source finite-element analysis (FEA) program [\[1\]](https://opensees.berkeley.edu/) [\[2\]](https://opensees.berkeley.edu/wiki/index.php/Main_Page) [\[3\]](https://en.wikipedia.org/wiki/OpenSees). `osmg` is utilizing the Python interpreter of OpenSees [\[4\]](https://github.com/zhuminjie/OpenSeesPy) [\[5\]](https://openseespydoc.readthedocs.io/en/latest/). Anyone is free and welcome to use, fork, extend and redistribute the code.
-
-Links:  
-[\[1\]](https://opensees.berkeley.edu/) Open System for Earthquake Engineering Simulation - Home Page.  
-[\[2\]](https://opensees.berkeley.edu/wiki/index.php/Main_Page) OpenSeesWiki.  
-[\[3\]](https://en.wikipedia.org/wiki/OpenSees) Wikimedia Foundation. (2022, January 26). OpenSees. Wikipedia.  
-[\[4\]](https://github.com/zhuminjie/OpenSeesPy) OpenSeesPy GitHub repository.  
-[\[5\]](https://openseespydoc.readthedocs.io/en/latest/) OpenSeesPy documentation.  
+This Python package aims to help users define, analyze, and post-process 3D models using OpenSees. `osmg` is utilizing the Python interpreter of OpenSees. Anyone is free and welcome to use, fork, extend and redistribute the code.
 
 ### Documentation
 
-Documentation is available [here](https://ioannis-vm.github.io/OpenSees_Model_Generator/).
+You can access the documentation of this package [here](https://ioannis-vm.github.io/OpenSees_Model_Generator/).
 
 [View on Zenodo](https://zenodo.org/record/7536062).
+
+### External resources
+
+- Visit the OpenSees [homepage](https://opensees.berkeley.edu/) to learn more about the program.
+- Explore the [OpenSeesWiki](https://opensees.berkeley.edu/wiki/index.php/Main_Page) for additional resources and documentation
+- Find the source code for OpenSeesPy on its [Github repository](https://github.com/zhuminjie/OpenSeesPy).
+- Access the OpenSeesPy documentation [here](https://openseespydoc.readthedocs.io/en/latest/)
+
