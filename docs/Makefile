@@ -19,7 +19,7 @@ source/notebooks/%.ipynb: source/notebooks/%.py
 	@jupytext --to notebook $<
 
 # html target
-html: Makefile source/notebooks/*.ipynb
+html: Makefile source/notebooks/doc_2_define_a_model.ipynb source/notebooks/doc_3_run_an_analysis.ipynb
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # clear target, in case clean-build is required
