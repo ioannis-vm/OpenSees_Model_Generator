@@ -795,7 +795,7 @@ def show_deformed_shape(
 
     if animation:
         step_of_frame = []
-        for j in range(first_step, step, step_skip + 1):
+        for j in range(first_step, step+1, step_skip + 1):
             step_of_frame.append(j)
         for _, j in enumerate(step_of_frame):
             frame_data_dict.append([])

@@ -1740,6 +1740,7 @@ class THAnalysis(GravityPlusAnalysis):
 
         ops.numberer(NUMBERER)
         ops.constraints(*CONSTRAINTS)
+        self.log(f"Setting system solver to {self.settings.solver}")
         ops.system(self.settings.solver)
 
         if damping_type == "rayleigh":
@@ -1820,8 +1821,13 @@ class THAnalysis(GravityPlusAnalysis):
         total_step_count = 0
         analysis_failed = False
 
-        scale = [1.0, 0.1, 0.01, 0.001]
-        tols = [1.0e-6, 1.0e-6, 1.0e-2, 1.0e4]
+        scale = [
+            1.0, 0.1, 0.01,
+            0.001, 0.0001, 0.00001,
+            0.000001, 0.0000001, 0.00000001]
+        tols = [1.0e-8, 1.0e-8, 1.0e-7,
+                1.0e-6, 1.0e-6, 1.0e-6,
+                1.0e-6, 1.0e-6, 1.0e-6]
 
         # progress bar
         if print_progress:
@@ -1845,7 +1851,6 @@ class THAnalysis(GravityPlusAnalysis):
                 )
                 total_step_count += 1
 
-                # analysis speed stats
                 if check != 0:
                     # analysis failed
                     if num_subdiv == len(scale) - 1:
@@ -1864,7 +1869,7 @@ class THAnalysis(GravityPlusAnalysis):
                     # otherwise, we can still reduce step size
                     num_subdiv += 1
                     # how many times to run with reduced step size
-                    num_times = 100
+                    num_times = 50
                 else:
                     # analysis was successful
                     prev_time = curr_time
@@ -1890,6 +1895,7 @@ class THAnalysis(GravityPlusAnalysis):
 
                     if num_times != 0:
                         num_times -= 1
+
                     if total_step_count % skip_steps == 0:
                         n_steps_success += 1
                         self._read_opensees_results(
@@ -1903,7 +1909,7 @@ class THAnalysis(GravityPlusAnalysis):
                     if num_subdiv != 0:
                         if num_times == 0:
                             num_subdiv -= 1
-                            num_times = 100
+                            num_times = 50
 
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
