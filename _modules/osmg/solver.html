@@ -1773,6 +1773,7 @@
 
         <span class="n">ops</span><span class="o">.</span><span class="n">numberer</span><span class="p">(</span><span class="n">NUMBERER</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">constraints</span><span class="p">(</span><span class="o">*</span><span class="n">CONSTRAINTS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Setting system solver to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">damping_type</span> <span class="o">==</span> <span class="s2">&quot;rayleigh&quot;</span><span class="p">:</span>
@@ -1853,8 +1854,13 @@
         <span class="n">total_step_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">analysis_failed</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]</span>
-        <span class="n">tols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-2</span><span class="p">,</span> <span class="mf">1.0e4</span><span class="p">]</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span>
+            <span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">,</span>
+            <span class="mf">0.000001</span><span class="p">,</span> <span class="mf">0.0000001</span><span class="p">,</span> <span class="mf">0.00000001</span><span class="p">]</span>
+        <span class="n">tols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e-8</span><span class="p">,</span> <span class="mf">1.0e-8</span><span class="p">,</span> <span class="mf">1.0e-7</span><span class="p">,</span>
+                <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span>
+                <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">]</span>
 
         <span class="c1"># progress bar</span>
         <span class="k">if</span> <span class="n">print_progress</span><span class="p">:</span>
@@ -1878,7 +1884,6 @@
                 <span class="p">)</span>
                 <span class="n">total_step_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                <span class="c1"># analysis speed stats</span>
                 <span class="k">if</span> <span class="n">check</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># analysis failed</span>
                     <span class="k">if</span> <span class="n">num_subdiv</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -1897,7 +1902,7 @@
                     <span class="c1"># otherwise, we can still reduce step size</span>
                     <span class="n">num_subdiv</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="c1"># how many times to run with reduced step size</span>
-                    <span class="n">num_times</span> <span class="o">=</span> <span class="mi">100</span>
+                    <span class="n">num_times</span> <span class="o">=</span> <span class="mi">50</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># analysis was successful</span>
                     <span class="n">prev_time</span> <span class="o">=</span> <span class="n">curr_time</span>
@@ -1923,6 +1928,7 @@
 
                     <span class="k">if</span> <span class="n">num_times</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">num_times</span> <span class="o">-=</span> <span class="mi">1</span>
+
                     <span class="k">if</span> <span class="n">total_step_count</span> <span class="o">%</span> <span class="n">skip_steps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">n_steps_success</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_read_opensees_results</span><span class="p">(</span>
@@ -1936,7 +1942,7 @@
                     <span class="k">if</span> <span class="n">num_subdiv</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">num_times</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="n">num_subdiv</span> <span class="o">-=</span> <span class="mi">1</span>
-                            <span class="n">num_times</span> <span class="o">=</span> <span class="mi">100</span>
+                            <span class="n">num_times</span> <span class="o">=</span> <span class="mi">50</span>
 
         <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Analysis interrupted&quot;</span><span class="p">)</span>
