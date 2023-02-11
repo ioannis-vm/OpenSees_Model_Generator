@@ -47,14 +47,18 @@
 <span class="c1"># https://github.com/ioannis-vm/OpenSees_Model_Generator</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">numpy.typing</span> <span class="k">as</span> <span class="nn">npt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">..solver</span> <span class="kn">import</span> <span class="n">Analysis</span>
 <span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">TrussBar</span>
 <span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">ElasticBeamColumn</span>
 <span class="kn">from</span> <span class="nn">..ops.element</span> <span class="kn">import</span> <span class="n">DispBeamColumn</span>
 <span class="kn">from</span> <span class="nn">..solver</span> <span class="kn">import</span> <span class="n">ModalResponseSpectrumAnalysis</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">..solver</span> <span class="kn">import</span> <span class="n">Analysis</span>
+
 
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 

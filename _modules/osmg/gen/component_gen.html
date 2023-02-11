@@ -220,19 +220,20 @@
                     <span class="p">),</span> <span class="s2">&quot;There should only be one element here.&quot;</span>
                     <span class="n">elm</span> <span class="o">=</span> <span class="n">elms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="c1"># obtain offset from section (local system)</span>
-                    <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">:</span>
-                        <span class="n">d_z</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">[</span><span class="n">snap</span><span class="p">]</span>
-                        <span class="n">sec_offset_local</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">d_y</span><span class="p">,</span> <span class="n">d_z</span><span class="p">])</span>
-                        <span class="c1"># retrieve local coordinate system</span>
-                        <span class="n">x_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
-                        <span class="n">y_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
-                        <span class="n">z_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
-                        <span class="n">t_glob_to_loc</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span>
-                            <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span>
-                        <span class="p">)</span>
-                        <span class="n">t_loc_to_glob</span> <span class="o">=</span> <span class="n">t_glob_to_loc</span><span class="o">.</span><span class="n">T</span>
-                        <span class="n">sec_offset_global</span> <span class="o">=</span> <span class="n">t_loc_to_glob</span> <span class="o">@</span> <span class="n">sec_offset_local</span>
-                        <span class="n">e_o</span> <span class="o">+=</span> <span class="n">sec_offset_global</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="s1">&#39;section&#39;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">:</span>
+                            <span class="n">d_z</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">[</span><span class="n">snap</span><span class="p">]</span>
+                            <span class="n">sec_offset_local</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">d_y</span><span class="p">,</span> <span class="n">d_z</span><span class="p">])</span>
+                            <span class="c1"># retrieve local coordinate system</span>
+                            <span class="n">x_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
+                            <span class="n">y_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
+                            <span class="n">z_axis</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
+                            <span class="n">t_glob_to_loc</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span>
+                                <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span>
+                            <span class="p">)</span>
+                            <span class="n">t_loc_to_glob</span> <span class="o">=</span> <span class="n">t_glob_to_loc</span><span class="o">.</span><span class="n">T</span>
+                            <span class="n">sec_offset_global</span> <span class="o">=</span> <span class="n">t_loc_to_glob</span> <span class="o">@</span> <span class="n">sec_offset_local</span>
+                            <span class="n">e_o</span> <span class="o">+=</span> <span class="n">sec_offset_global</span>
     <span class="k">return</span> <span class="n">node</span><span class="p">,</span> <span class="n">e_o</span></div>
 
 
