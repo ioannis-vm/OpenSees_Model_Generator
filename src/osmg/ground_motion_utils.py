@@ -10,14 +10,13 @@ import numpy.typing as npt
 nparr = npt.NDArray[np.float64]
 
 
-def import_PEER(rel_path, filename):
+def import_PEER(filename):
     """
     Import a ground motion record from a specified PEER ground
     motion record file.
     Output is a two column matrix of time - acceleration pairs.
     Acceleration is in [g] units.
     """
-    filename = rel_path + '/' + filename
 
     # Get all data except for the last line, where it may have fewer
     # columns and cause an error
