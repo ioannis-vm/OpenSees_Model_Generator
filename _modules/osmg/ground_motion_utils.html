@@ -43,14 +43,13 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="import_PEER"><a class="viewcode-back" href="../../_autosummary/osmg.ground_motion_utils.html#osmg.ground_motion_utils.import_PEER">[docs]</a><span class="k">def</span> <span class="nf">import_PEER</span><span class="p">(</span><span class="n">rel_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="import_PEER"><a class="viewcode-back" href="../../_autosummary/osmg.ground_motion_utils.html#osmg.ground_motion_utils.import_PEER">[docs]</a><span class="k">def</span> <span class="nf">import_PEER</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Import a ground motion record from a specified PEER ground</span>
 <span class="sd">    motion record file.</span>
 <span class="sd">    Output is a two column matrix of time - acceleration pairs.</span>
 <span class="sd">    Acceleration is in [g] units.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">filename</span> <span class="o">=</span> <span class="n">rel_path</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span>
 
     <span class="c1"># Get all data except for the last line, where it may have fewer</span>
     <span class="c1"># columns and cause an error</span>
