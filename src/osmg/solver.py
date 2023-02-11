@@ -111,7 +111,21 @@ class Results:
 class AnalysisSettings:
     """
     Analysis settings object.
-    Controls what will be stored and how.
+
+    Attributes:
+      log_file: If specified, the log messages are written to this
+        file.
+      silent: If True, no messages are printed to the console.
+      store_forces: If True, store the element forces.
+      store_reactions: If True, store the reaction forces.
+      store_fiber: If True, store fiber section results.
+      store_release_force_defo: If True, store the release forces and
+        deformations.
+      specific_nodes: List of node numbers to store. If empty, all
+        nodes are stored.
+      pickle_results: If True, the results are stored using pickle.
+      solver: The solver to use. The default is 'UmfPack'.
+
     """
 
     log_file: Optional[str] = field(default=None)
@@ -1602,16 +1616,17 @@ class THAnalysis(GravityPlusAnalysis):
     )
 
     def run(
-        self,
-        analysis_time_increment: float,
-        filename_x: Optional[str],
-        filename_y: Optional[str],
-        filename_z: Optional[str],
-        file_time_incr: float,
-        finish_time: float = 0.00,
-        skip_steps: int = 1,
-        damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
-        print_progress: bool = True,
+            self,
+            analysis_time_increment: float,
+            filename_x: Optional[str],
+            filename_y: Optional[str],
+            filename_z: Optional[str],
+            file_time_incr: float,
+            finish_time: float = 0.00,
+            skip_steps: int = 1,
+            damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
+            print_progress: bool = True,
+            drift_check: float = 0.00,
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the time-history analysis
@@ -1632,6 +1647,10 @@ class THAnalysis(GravityPlusAnalysis):
                      'ratio_modal': r, 'period': t1,
                      'ratio_stiffness': r}
             print_progress: Controls whether the current time is printed out
+            drift_check: If a value other than 0.00 is specified, the
+              analysis stops if the drift ratio in each orthogonal
+              direction exceeds the specified value. Levels that have
+              no parent nodes are excempt from this check.
 
         """
 
@@ -1646,7 +1665,8 @@ class THAnalysis(GravityPlusAnalysis):
         # will be fixed in the future.
         case_name = list(self.load_cases.keys())[0]
         self.log(f'Case Name: {case_name}')
-        nodes.extend(self.load_cases[case_name].parent_nodes.values())
+        pnodes = self.load_cases[case_name].parent_nodes
+        nodes.extend(pnodes.values())
         elastic_elems = [
             elm
             for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
@@ -1822,12 +1842,12 @@ class THAnalysis(GravityPlusAnalysis):
         analysis_failed = False
 
         scale = [
-            1.0, 0.1, 0.01,
-            0.001, 0.0001, 0.00001,
-            0.000001, 0.0000001, 0.00000001]
-        tols = [1.0e-8, 1.0e-8, 1.0e-7,
-                1.0e-6, 1.0e-6, 1.0e-6,
-                1.0e-6, 1.0e-6, 1.0e-6]
+            1.0, 1.0e-1, 1.0e-2,
+            1.0e-3, 1.0e-4, 1.0e-5,
+            1.0e-6, 1.0e-7, 1.0e-8,
+            1.0e-9, 1.0e-10, 1.0e-11,
+        ]
+        tols = [1.0e-6]*12
 
         # progress bar
         if print_progress:
@@ -1844,6 +1864,9 @@ class THAnalysis(GravityPlusAnalysis):
         try:
 
             while curr_time + common.EPSILON < target_timestamp:
+
+                if analysis_failed:
+                    break
 
                 ops.test("EnergyIncr", tols[num_subdiv], 50, 0)
                 check = ops.analyze(
@@ -1911,6 +1934,46 @@ class THAnalysis(GravityPlusAnalysis):
                             num_subdiv -= 1
                             num_times = 50
 
+                    if drift_check > 0.00 and pnodes:
+                        peak_drift = 0.00
+                        for lvl_idx, pnode in pnodes.items():
+                            if lvl_idx == 1:
+                                pnode = pnodes[lvl_idx]
+                                drift = np.max(np.abs(
+                                    np.array(
+                                        self.results[case_name]
+                                        .node_displacements[
+                                            pnode.uid][
+                                                n_steps_success][0:2])
+                                    /pnode.coords[2]))
+                            else:
+                                drift = np.max(np.abs(
+                                    (
+                                        np.array(
+                                            self.results[case_name]
+                                            .node_displacements[
+                                                pnodes[lvl_idx].uid][
+                                                    n_steps_success][0:2])
+                                        - np.array(
+                                            self.results[case_name]
+                                            .node_displacements[
+                                                pnodes[lvl_idx-1].uid][
+                                                    n_steps_success][0:2]))
+                                    /(pnodes[lvl_idx].coords[2]
+                                      - pnodes[lvl_idx-1].coords[2])))
+                                if drift > peak_drift:
+                                    peak_drift = drift
+                            if peak_drift > drift_check:
+                                # terminate analysis
+                                if self.logger:
+                                    self.logger.warning(
+                                        "Analysis failed at time"
+                                        f" {curr_time:.5f}"
+                                        " due to excessive drift."
+                                    )
+                                analysis_failed = True
+                                break
+
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
             if self.logger:
@@ -1928,6 +1991,7 @@ class THAnalysis(GravityPlusAnalysis):
         self.results[case_name].n_steps_success = len(self.time_vector)
         if self.settings.pickle_results:
             self._write_results_to_disk()
+
         return metadata
 
     def plot_node_displacement_history(

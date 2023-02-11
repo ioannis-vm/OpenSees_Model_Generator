@@ -14,14 +14,18 @@ method.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from ..solver import Analysis
 from ..ops.element import TrussBar
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..solver import ModalResponseSpectrumAnalysis
+
+if TYPE_CHECKING:
+    from ..solver import Analysis
+
 
 nparr = npt.NDArray[np.float64]
 

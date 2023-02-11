@@ -187,19 +187,20 @@ def beam_placement_lookup(
                     ), "There should only be one element here."
                     elm = elms[0]
                     # obtain offset from section (local system)
-                    if elm.section.snap_points:
-                        d_z, d_y = elm.section.snap_points[snap]
-                        sec_offset_local = -np.array([0.00, d_y, d_z])
-                        # retrieve local coordinate system
-                        x_axis = elm.geomtransf.x_axis
-                        y_axis = elm.geomtransf.y_axis
-                        z_axis = elm.geomtransf.z_axis
-                        t_glob_to_loc = transformation_matrix(
-                            x_axis, y_axis, z_axis
-                        )
-                        t_loc_to_glob = t_glob_to_loc.T
-                        sec_offset_global = t_loc_to_glob @ sec_offset_local
-                        e_o += sec_offset_global
+                    if hasattr(elm, 'section'):
+                        if elm.section.snap_points:
+                            d_z, d_y = elm.section.snap_points[snap]
+                            sec_offset_local = -np.array([0.00, d_y, d_z])
+                            # retrieve local coordinate system
+                            x_axis = elm.geomtransf.x_axis
+                            y_axis = elm.geomtransf.y_axis
+                            z_axis = elm.geomtransf.z_axis
+                            t_glob_to_loc = transformation_matrix(
+                                x_axis, y_axis, z_axis
+                            )
+                            t_loc_to_glob = t_glob_to_loc.T
+                            sec_offset_global = t_loc_to_glob @ sec_offset_local
+                            e_o += sec_offset_global
     return node, e_o
 
 

@@ -13,10 +13,12 @@ Defines utility functions used for data visualization.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 import sys
 from typing import Optional
 from typing import Union
 from typing import Any
+from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
@@ -27,7 +29,10 @@ from .preprocessing_3d import add_data__global_axes
 from ..postprocessing.basic_forces import basic_forces
 from ..ops import element
 from ..model import Model
-from ..solver import Analysis
+
+if TYPE_CHECKING:
+    from ..solver import Analysis
+
 
 nparr = npt.NDArray[np.float64]
 
