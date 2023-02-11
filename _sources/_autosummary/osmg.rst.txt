@@ -35,6 +35,7 @@
    osmg.defaults
    osmg.gen
    osmg.graphics
+   osmg.ground_motion_utils
    osmg.level
    osmg.line
    osmg.load_case

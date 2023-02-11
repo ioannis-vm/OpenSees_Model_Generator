@@ -1,0 +1,32 @@
+osmg.ground\_motion\_utils
+==========================
+
+.. automodule:: osmg.ground_motion_utils
+   :members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      code_spectrum
+      import_PEER
+      response_spectrum
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
