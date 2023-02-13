@@ -14,7 +14,7 @@ You can access the documentation of this package [here](https://ioannis-vm.githu
 ### External resources
 
 - Visit the OpenSees [homepage](https://opensees.berkeley.edu/) to learn more about the program.
-- Explore the [OpenSeesWiki](https://opensees.berkeley.edu/wiki/index.php/Main_Page) for additional resources and documentation
+- Explore the [OpenSeesWiki](https://opensees.berkeley.edu/wiki/index.php/Main_Page) for additional resources and documentation.
 - Find the source code for OpenSeesPy on its [Github repository](https://github.com/zhuminjie/OpenSeesPy).
-- Access the OpenSeesPy documentation [here](https://openseespydoc.readthedocs.io/en/latest/)
+- Access the OpenSeesPy documentation [here](https://openseespydoc.readthedocs.io/en/latest/).
 
