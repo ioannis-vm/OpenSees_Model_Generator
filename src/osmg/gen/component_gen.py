@@ -199,7 +199,8 @@ def beam_placement_lookup(
                                 x_axis, y_axis, z_axis
                             )
                             t_loc_to_glob = t_glob_to_loc.T
-                            sec_offset_global = t_loc_to_glob @ sec_offset_local
+                            sec_offset_global = (
+                                t_loc_to_glob @ sec_offset_local)
                             e_o += sec_offset_global
     return node, e_o
 
