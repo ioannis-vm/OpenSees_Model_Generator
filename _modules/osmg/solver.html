@@ -1861,8 +1861,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;modal+stiffness damping defined&quot;</span><span class="p">)</span>
 
         <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s1">&#39;Newmark&#39;</span><span class="p">,</span> <span class="mf">0.50</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
-        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s1">&#39;TRBDF2&#39;</span><span class="p">)</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">,</span> <span class="s1">&#39;initial&#39;</span><span class="p">,</span> <span class="s1">&#39;initial&#39;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Transient&quot;</span><span class="p">)</span>
 
         <span class="n">define_lateral_load_pattern</span><span class="p">(</span>
@@ -1880,7 +1880,7 @@
             <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mf">1.0e-7</span><span class="p">,</span> <span class="mf">1.0e-8</span><span class="p">,</span>
             <span class="mf">1.0e-9</span><span class="p">,</span> <span class="mf">1.0e-10</span><span class="p">,</span> <span class="mf">1.0e-11</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">tols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e-6</span><span class="p">]</span><span class="o">*</span><span class="mi">12</span>
+        <span class="n">tols</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0e-8</span><span class="p">]</span><span class="o">*</span><span class="mi">12</span>
 
         <span class="c1"># progress bar</span>
         <span class="k">if</span> <span class="n">print_progress</span><span class="p">:</span>
@@ -1901,7 +1901,8 @@
                 <span class="k">if</span> <span class="n">analysis_failed</span><span class="p">:</span>
                     <span class="k">break</span>
 
-                <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="n">tols</span><span class="p">[</span><span class="n">num_subdiv</span><span class="p">],</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span>
+                    <span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="n">tols</span><span class="p">[</span><span class="n">num_subdiv</span><span class="p">],</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
                 <span class="n">check</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span>
                     <span class="mi">1</span><span class="p">,</span> <span class="n">analysis_time_increment</span> <span class="o">*</span> <span class="n">scale</span><span class="p">[</span><span class="n">num_subdiv</span><span class="p">]</span>
                 <span class="p">)</span>
@@ -1933,7 +1934,7 @@
 
                     <span class="c1"># progress bar</span>
                     <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">curr_time</span> <span class="o">-</span> <span class="n">prev_time</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+                        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">curr_time</span> <span class="o">-</span> <span class="n">prev_time</span><span class="p">)</span>
                     <span class="c1"># log entry for analysis status</span>
                     <span class="k">if</span> <span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">the_time</span> <span class="o">&gt;</span> <span class="mf">5.00</span><span class="o">*</span><span class="mf">60.00</span><span class="p">:</span>  <span class="c1"># 5 min</span>
                         <span class="n">the_time</span> <span class="o">=</span> <span class="n">perf_counter</span><span class="p">()</span>
@@ -1966,12 +1967,10 @@
                         <span class="k">if</span> <span class="n">num_times</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="n">num_subdiv</span> <span class="o">-=</span> <span class="mi">1</span>
                             <span class="n">num_times</span> <span class="o">=</span> <span class="mi">50</span>
-
                     <span class="k">if</span> <span class="n">drift_check</span> <span class="o">&gt;</span> <span class="mf">0.00</span> <span class="ow">and</span> <span class="n">pnodes</span><span class="p">:</span>
                         <span class="n">peak_drift</span> <span class="o">=</span> <span class="mf">0.00</span>
                         <span class="k">for</span> <span class="n">lvl_idx</span><span class="p">,</span> <span class="n">pnode</span> <span class="ow">in</span> <span class="n">pnodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                             <span class="k">if</span> <span class="n">lvl_idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                                <span class="n">pnode</span> <span class="o">=</span> <span class="n">pnodes</span><span class="p">[</span><span class="n">lvl_idx</span><span class="p">]</span>
                                 <span class="n">drift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
                                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
                                         <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span>
@@ -1994,18 +1993,18 @@
                                                     <span class="n">n_steps_success</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]))</span>
                                     <span class="o">/</span><span class="p">(</span><span class="n">pnodes</span><span class="p">[</span><span class="n">lvl_idx</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
                                       <span class="o">-</span> <span class="n">pnodes</span><span class="p">[</span><span class="n">lvl_idx</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
-                                <span class="k">if</span> <span class="n">drift</span> <span class="o">&gt;</span> <span class="n">peak_drift</span><span class="p">:</span>
-                                    <span class="n">peak_drift</span> <span class="o">=</span> <span class="n">drift</span>
-                            <span class="k">if</span> <span class="n">peak_drift</span> <span class="o">&gt;</span> <span class="n">drift_check</span><span class="p">:</span>
-                                <span class="c1"># terminate analysis</span>
-                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                                        <span class="s2">&quot;Analysis failed at time&quot;</span>
-                                        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">curr_time</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span>
-                                        <span class="s2">&quot; due to excessive drift.&quot;</span>
-                                    <span class="p">)</span>
-                                <span class="n">analysis_failed</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="k">break</span>
+                            <span class="k">if</span> <span class="n">drift</span> <span class="o">&gt;</span> <span class="n">peak_drift</span><span class="p">:</span>
+                                <span class="n">peak_drift</span> <span class="o">=</span> <span class="n">drift</span>
+                        <span class="k">if</span> <span class="n">peak_drift</span> <span class="o">&gt;</span> <span class="n">drift_check</span><span class="p">:</span>
+                            <span class="c1"># terminate analysis</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                                    <span class="s2">&quot;Analysis failed at time&quot;</span>
+                                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">curr_time</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span>
+                                    <span class="s2">&quot; due to excessive drift.&quot;</span>
+                                <span class="p">)</span>
+                            <span class="n">analysis_failed</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
 
         <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="s2">&quot;Analysis interrupted&quot;</span><span class="p">)</span>
