@@ -1828,8 +1828,8 @@ class THAnalysis(GravityPlusAnalysis):
             self.log("modal+stiffness damping defined")
 
         ops.test("EnergyIncr", 1.0e-6, 50, 0)
-        ops.integrator('Newmark', 0.50, 0.25)
-        ops.algorithm("KrylovNewton")
+        ops.integrator('TRBDF2')
+        ops.algorithm("KrylovNewton", 'initial', 'initial')
         ops.analysis("Transient")
 
         define_lateral_load_pattern(
@@ -1847,7 +1847,7 @@ class THAnalysis(GravityPlusAnalysis):
             1.0e-6, 1.0e-7, 1.0e-8,
             1.0e-9, 1.0e-10, 1.0e-11,
         ]
-        tols = [1.0e-6]*12
+        tols = [1.0e-8]*12
 
         # progress bar
         if print_progress:
@@ -1868,7 +1868,8 @@ class THAnalysis(GravityPlusAnalysis):
                 if analysis_failed:
                     break
 
-                ops.test("EnergyIncr", tols[num_subdiv], 50, 0)
+                ops.test(
+                    "EnergyIncr", tols[num_subdiv], 200, 3, 2)
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv]
                 )
@@ -1900,7 +1901,7 @@ class THAnalysis(GravityPlusAnalysis):
 
                     # progress bar
                     if pbar is not None:
-                        pbar.update(np.around(curr_time - prev_time, decimals=5))
+                        pbar.update(curr_time - prev_time)
                     # log entry for analysis status
                     if perf_counter() - the_time > 5.00*60.00:  # 5 min
                         the_time = perf_counter()
@@ -1933,12 +1934,10 @@ class THAnalysis(GravityPlusAnalysis):
                         if num_times == 0:
                             num_subdiv -= 1
                             num_times = 50
-
                     if drift_check > 0.00 and pnodes:
                         peak_drift = 0.00
                         for lvl_idx, pnode in pnodes.items():
                             if lvl_idx == 1:
-                                pnode = pnodes[lvl_idx]
                                 drift = np.max(np.abs(
                                     np.array(
                                         self.results[case_name]
@@ -1961,18 +1960,18 @@ class THAnalysis(GravityPlusAnalysis):
                                                     n_steps_success][0:2]))
                                     /(pnodes[lvl_idx].coords[2]
                                       - pnodes[lvl_idx-1].coords[2])))
-                                if drift > peak_drift:
-                                    peak_drift = drift
-                            if peak_drift > drift_check:
-                                # terminate analysis
-                                if self.logger:
-                                    self.logger.warning(
-                                        "Analysis failed at time"
-                                        f" {curr_time:.5f}"
-                                        " due to excessive drift."
-                                    )
-                                analysis_failed = True
-                                break
+                            if drift > peak_drift:
+                                peak_drift = drift
+                        if peak_drift > drift_check:
+                            # terminate analysis
+                            if self.logger:
+                                self.logger.warning(
+                                    "Analysis failed at time"
+                                    f" {curr_time:.5f}"
+                                    " due to excessive drift."
+                                )
+                            analysis_failed = True
+                            break
 
         except KeyboardInterrupt:
             self.print("Analysis interrupted")
