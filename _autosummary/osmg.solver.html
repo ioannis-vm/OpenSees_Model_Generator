@@ -193,7 +193,7 @@ when it is requested for them to be pickled.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.solver.AnalysisSettings">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_forces:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_reactions:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_fiber:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_release_force_defo:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_nodes:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_results:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'UmfPack'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#AnalysisSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.AnalysisSettings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_file:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">silent:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_forces:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_reactions:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_fiber:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_release_force_defo:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specific_nodes:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_results:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'UmfPack'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">restrict_dof:</span> <span class="pre">list[bool]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/solver.html#AnalysisSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.solver.AnalysisSettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analysis settings object.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.solver.AnalysisSettings.log_file">
@@ -293,6 +293,21 @@ nodes are stored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="osmg.solver.AnalysisSettings.restrict_dof">
+<span class="sig-name descname"><span class="pre">restrict_dof</span></span><a class="headerlink" href="#osmg.solver.AnalysisSettings.restrict_dof" title="Permalink to this definition">¶</a></dt>
+<dd><p>An optional list of booleans. If it is provided,
+the corresponding global DOF will be restricted. If all items
+are False no DOFs are restricted, but a very flexible spring
+support will be added to all primary nodes, which can help
+ease convergence issues in cases of rigid body motion modes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a>] | None</p>
 </dd>
 </dl>
 </dd></dl>

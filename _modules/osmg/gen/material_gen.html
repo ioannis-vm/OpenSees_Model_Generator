@@ -138,6 +138,7 @@
         <span class="n">rbs_factor</span><span class="p">,</span>
         <span class="n">consider_composite</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
+        <span class="n">moment_modifier</span><span class="o">=</span><span class="mf">1.00</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Lignos, D. G., &amp; Krawinkler, H. (2011). Deterioration modeling of</span>
@@ -291,8 +292,8 @@
         <span class="n">d_minus</span> <span class="o">=</span> <span class="mf">1.00</span>
         <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="mf">1.0001</span>
         <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="mf">1.0001</span>
-        <span class="n">m_plus</span> <span class="o">=</span> <span class="n">sec_m</span>
-        <span class="n">m_minus</span> <span class="o">=</span> <span class="o">-</span><span class="n">sec_m</span>
+        <span class="n">m_plus</span> <span class="o">=</span> <span class="n">sec_m</span> <span class="o">*</span> <span class="n">moment_modifier</span>
+        <span class="n">m_minus</span> <span class="o">=</span> <span class="o">-</span><span class="n">sec_m</span> <span class="o">*</span> <span class="n">moment_modifier</span>
         <span class="k">if</span> <span class="n">consider_composite</span><span class="p">:</span>
             <span class="c1"># Elkady, A., &amp; Lignos, D. G. (2014). Modeling of the</span>
             <span class="c1"># composite action in fully restrained beam‐to‐column</span>
@@ -313,7 +314,7 @@
             <span class="n">m_minus</span> <span class="o">*=</span> <span class="mf">1.25</span>
             <span class="n">residual_plus</span> <span class="o">=</span> <span class="mf">0.30</span>
             <span class="n">residual_minus</span> <span class="o">=</span> <span class="mf">0.20</span>
-        <span class="n">stiffness</span> <span class="o">=</span> <span class="mf">6.00</span> <span class="o">*</span> <span class="n">mat_e</span> <span class="o">*</span> <span class="n">sec_i</span> <span class="o">/</span> <span class="n">elm_h</span> <span class="o">*</span> <span class="mf">1e4</span>
+        <span class="n">stiffness</span> <span class="o">=</span> <span class="mf">6.00</span> <span class="o">*</span> <span class="n">section</span><span class="o">.</span><span class="n">e_mod</span> <span class="o">*</span> <span class="n">sec_i</span> <span class="o">/</span> <span class="n">elm_h</span>
         <span class="n">beta_plus</span> <span class="o">=</span> <span class="p">(</span><span class="n">mcmy_plus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_plus</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_p_plus</span><span class="p">)</span> <span class="o">/</span> <span class="n">stiffness</span>
         <span class="n">beta_minus</span> <span class="o">=</span> <span class="p">(</span>
             <span class="o">-</span><span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_minus</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_p_minus</span><span class="p">)</span> <span class="o">/</span> <span class="n">stiffness</span>
