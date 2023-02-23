@@ -127,8 +127,6 @@ class MaterialGenerator:
             self.model.settings.imperial_units
         ), "Error: Only imperial units supported."
         assert section.properties
-        # Young's modulus
-        mat_e = section.e_mod / 1.0e3
         # Yield stress
         mat_fy = physical_material.f_y / 1.0e3
         # Moment of inertia - strong axis - original section

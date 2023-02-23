@@ -211,6 +211,7 @@ def gravity_shear_tab(
     moment_modifier = kwargs.get('moment_modifier', 1.00)
 
     # Yield stress
+    assert isinstance(moment_modifier, float)
     mat_fy = physical_material.f_y / 1.0e3 * moment_modifier
     # Plastic modulus (unreduced)
     sec_zx = section.properties["Zx"]
