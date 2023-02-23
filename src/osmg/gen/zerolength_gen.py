@@ -154,6 +154,8 @@ def imk_56(
 
     """
 
+    moment_modifier = kwargs.get('moment_modifier', 1.00)
+
     mat_generator = MaterialGenerator(model)
     mat_strong = mat_generator.generate_steel_w_imk_material(
         section,
@@ -164,6 +166,7 @@ def imk_56(
         rbs_factor,
         consider_composite,
         direction="strong",
+        moment_modifier=moment_modifier
     )
     mat_weak = mat_generator.generate_steel_w_imk_material(
         section,
@@ -174,6 +177,7 @@ def imk_56(
         rbs_factor,
         consider_composite,
         direction="weak",
+        moment_modifier=moment_modifier
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
@@ -204,12 +208,14 @@ def gravity_shear_tab(
     ), "Error: Only imperial units supported."
     assert section.properties
 
+    moment_modifier = kwargs.get('moment_modifier', 1.00)
+
     # Yield stress
-    mat_fy = physical_material.f_y / 1.0e3
+    mat_fy = physical_material.f_y / 1.0e3 * moment_modifier
     # Plastic modulus (unreduced)
     sec_zx = section.properties["Zx"]
     # Plastic moment of the section
-    sec_mp = sec_zx * mat_fy * 1.0e3
+    sec_mp = sec_zx * mat_fy * 1.0e3 * moment_modifier
     if not consider_composite:
         m_max_pos = 0.121 * sec_mp
         m_max_neg = 0.121 * sec_mp

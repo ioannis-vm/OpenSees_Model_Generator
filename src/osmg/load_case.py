@@ -18,6 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 from typing import Union
+from typing import Optional
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -194,6 +195,7 @@ class LoadCase:
         int, TributaryAreaAnaysis
     ] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
+    equaldof: Optional[int] = field(default=None)
 
     def __post_init__(self):
         self.node_loads = collections.Collection(self)

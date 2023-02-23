@@ -125,6 +125,11 @@ class AnalysisSettings:
         nodes are stored.
       pickle_results: If True, the results are stored using pickle.
       solver: The solver to use. The default is 'UmfPack'.
+      restrict_dof: An optional list of booleans. If it is provided,
+        the corresponding global DOF will be restricted. If all items
+        are False no DOFs are restricted, but a very flexible spring
+        support will be added to all primary nodes, which can help
+        ease convergence issues in cases of rigid body motion modes.
 
     """
 
@@ -137,6 +142,7 @@ class AnalysisSettings:
     specific_nodes: list[int] = field(default_factory=list)
     pickle_results: bool = field(default=False)
     solver: str = field(default='UmfPack')
+    restrict_dof: Optional[list[bool]] = field(default=None)
 
 
 @dataclass(repr=False)
@@ -456,11 +462,63 @@ class Analysis:
         # node constraints #
         # ~~~~~~~~~~~~~~~~ #
 
-        for uid in parent_nodes:
-            lvl = self.mdl.levels[parent_node_to_lvl[uid]]
-            nodes = lvl.nodes.values()
-            good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-            ops.rigidDiaphragm(3, uid, *[nd.uid for nd in good_nodes])
+        if self.load_cases[case_name].equaldof is None:
+            for uid in parent_nodes:
+                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+                nodes = lvl.nodes.values()
+                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
+                ops.rigidDiaphragm(3, uid, *[nd.uid for nd in good_nodes])
+        else:
+            dof = self.load_cases[case_name].equaldof
+            for uid in parent_nodes:
+                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+                nodes = lvl.nodes.values()
+                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
+                for node in good_nodes:
+                    if node.uid == uid:
+                        continue
+                    ops.equalDOF(uid, node.uid, dof)
+
+        # ~~~~~~~~~~~~~~~~~ #
+        # node spring field #
+        # ~~~~~~~~~~~~~~~~~ #
+        # This is an attempt to resolve convergence issues during
+        # rigid body motion.
+        # It can also be used to restrict motion to particular DOFs
+
+        if self.settings.restrict_dof is not None:
+
+            restrict_dof_list = self.settings.restrict_dof
+            uidgen = self.mdl.uid_generator
+            fix_mat_uid = uidgen.new('uniaxial material')
+            release_mat_uid = uidgen.new('uniaxial material')
+            # define a very stiff spring
+            ops.uniaxialMaterial('Elastic', fix_mat_uid, common.STIFF)
+            # define a very soft spring
+            ops.uniaxialMaterial('Elastic', release_mat_uid, common.TINY)
+            material_list = [
+                fix_mat_uid
+                if item == True
+                else release_mat_uid
+                for item in restrict_dof_list]
+            for node in self.mdl.list_of_primary_nodes():
+                # define a conjugate node that is fixed.
+                node_uid = uidgen.new('node')
+                elm_uid = uidgen.new('element')
+                ops.node(node_uid, *node.coords)
+                ops.fix(node_uid, 1, 1, 1, 1, 1, 1)
+                # connect the nodes to the fixed node using the soft
+                # spring.
+                args = ['twoNodeLink', elm_uid, node.uid, node_uid,
+                    '-mat',
+                    *[material_list],
+                    '-dir', 1, 2, 3, 4, 5, 6]
+                ops.element(
+                    'twoNodeLink', elm_uid, node.uid, node_uid,
+                    '-mat',
+                    *material_list,
+                    '-dir', 1, 2, 3, 4, 5, 6
+                )
 
         # # ~~~~~~~~~~~~~~~ #
         # # 1-dof appendage #
@@ -1966,7 +2024,7 @@ class THAnalysis(GravityPlusAnalysis):
                             # terminate analysis
                             if self.logger:
                                 self.logger.warning(
-                                    "Analysis failed at time"
+                                    "Analysis stopped at time"
                                     f" {curr_time:.5f}"
                                     " due to excessive drift."
                                 )

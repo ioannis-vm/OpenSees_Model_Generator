@@ -105,6 +105,7 @@ class MaterialGenerator:
         rbs_factor,
         consider_composite,
         direction="strong",
+        moment_modifier=1.00
     ):
         """
         Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
@@ -258,8 +259,8 @@ class MaterialGenerator:
         d_minus = 1.00
         mcmy_plus = 1.0001
         mcmy_minus = 1.0001
-        m_plus = sec_m
-        m_minus = -sec_m
+        m_plus = sec_m * moment_modifier
+        m_minus = -sec_m * moment_modifier
         if consider_composite:
             # Elkady, A., & Lignos, D. G. (2014). Modeling of the
             # composite action in fully restrained beam‐to‐column
@@ -280,7 +281,7 @@ class MaterialGenerator:
             m_minus *= 1.25
             residual_plus = 0.30
             residual_minus = 0.20
-        stiffness = 6.00 * mat_e * sec_i / elm_h * 1e4
+        stiffness = 6.00 * section.e_mod * sec_i / elm_h
         beta_plus = (mcmy_plus - 1.0) * m_plus / (theta_p_plus) / stiffness
         beta_minus = (
             -(mcmy_minus - 1.0) * m_minus / (theta_p_minus) / stiffness
