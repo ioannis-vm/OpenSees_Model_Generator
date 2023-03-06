@@ -212,7 +212,7 @@ def gravity_shear_tab(
 
     # Yield stress
     assert isinstance(moment_modifier, float)
-    mat_fy = physical_material.f_y / 1.0e3 * moment_modifier
+    mat_fy = physical_material.f_y / 1.0e3
     # Plastic modulus (unreduced)
     sec_zx = section.properties["Zx"]
     # Plastic moment of the section
