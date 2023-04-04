@@ -818,7 +818,7 @@
             <span class="n">ops</span><span class="o">.</span><span class="n">numberer</span><span class="p">(</span><span class="n">NUMBERER</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">constraints</span><span class="p">(</span><span class="o">*</span><span class="n">CONSTRAINTS</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="mf">1.0e-8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-            <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;Newton&quot;</span><span class="p">)</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;LoadControl&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Static&quot;</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -1116,8 +1116,8 @@
         <span class="n">ops</span><span class="o">.</span><span class="n">numberer</span><span class="p">(</span><span class="n">NUMBERER</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;G: Setting constraints to </span><span class="si">{</span><span class="p">[</span><span class="o">*</span><span class="n">CONSTRAINTS</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">constraints</span><span class="p">(</span><span class="o">*</span><span class="n">CONSTRAINTS</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Setting algorithm to RaphsonNewton&quot;</span><span class="p">)</span>
-        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;RaphsonNewton&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Setting algorithm to KrylovNewton&quot;</span><span class="p">)</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;LoadControl&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Setting analysis to Static&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Static&quot;</span><span class="p">)</span>
@@ -1473,8 +1473,8 @@
                             <span class="n">steps</span><span class="p">[</span><span class="n">num_subdiv</span><span class="p">],</span>
                             <span class="mi">0</span><span class="p">,</span>
                         <span class="p">)</span>
-                        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;RaphsonNewton&quot;</span><span class="p">)</span>
-                        <span class="c1"># ops.integrator(&quot;ArcLength&quot;, 1.00e1, 1.00e-7)</span>
+                        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
+                        <span class="c1"># ops.integrator(&quot;ArcLength&quot;, 0.1, 1.00e-7)</span>
                         <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span>
                             <span class="s2">&quot;DisplacementControl&quot;</span><span class="p">,</span>
                             <span class="nb">int</span><span class="p">(</span><span class="n">control_node</span><span class="o">.</span><span class="n">uid</span><span class="p">),</span>
@@ -1920,7 +1920,8 @@
 
         <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s1">&#39;TRBDF2&#39;</span><span class="p">)</span>
-        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">,</span> <span class="s1">&#39;initial&#39;</span><span class="p">,</span> <span class="s1">&#39;initial&#39;</span><span class="p">)</span>
+        <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
+        <span class="c1"># ops.algorithm(&quot;KrylovNewton&quot;, &#39;initial&#39;, &#39;initial&#39;)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Transient&quot;</span><span class="p">)</span>
 
         <span class="n">define_lateral_load_pattern</span><span class="p">(</span>

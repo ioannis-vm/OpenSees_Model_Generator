@@ -137,8 +137,10 @@
         <span class="n">loverh</span><span class="p">,</span>
         <span class="n">rbs_factor</span><span class="p">,</span>
         <span class="n">consider_composite</span><span class="p">,</span>
+        <span class="n">axial_load_ratio</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
-        <span class="n">moment_modifier</span><span class="o">=</span><span class="mf">1.00</span>
+        <span class="n">moment_modifier</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span>
+        <span class="n">n_parameter</span><span class="o">=</span><span class="mf">0.00</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Lignos, D. G., &amp; Krawinkler, H. (2011). Deterioration modeling of</span>
@@ -154,6 +156,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># gather necessary data and check interpolation range</span>
         <span class="k">assert</span> <span class="n">section</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;Error: Only W sections can be used.&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">ElasticSection</span><span class="p">)</span>
         <span class="k">assert</span> <span class="p">(</span>
@@ -187,7 +190,11 @@
         <span class="n">elm_l</span> <span class="o">=</span> <span class="n">loverh</span> <span class="o">*</span> <span class="n">elm_h</span>
         <span class="n">elm_lb</span> <span class="o">=</span> <span class="n">lboverl</span> <span class="o">*</span> <span class="n">elm_l</span>
         <span class="n">lbry</span> <span class="o">=</span> <span class="n">elm_lb</span> <span class="o">/</span> <span class="n">sec_ry</span>
+
+        <span class="c1"># consider cases</span>
+
         <span class="k">if</span> <span class="n">rbs_factor</span><span class="p">:</span>
+
             <span class="c1"># RBS case</span>
             <span class="k">assert</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;strong&quot;</span>
             <span class="k">assert</span> <span class="n">rbs_factor</span> <span class="o">&lt;=</span> <span class="mf">1.00</span><span class="p">,</span> <span class="s2">&quot;rbs_factor must be &lt;= 1.00&quot;</span>
@@ -255,30 +262,89 @@
             <span class="n">rbs_c</span> <span class="o">=</span> <span class="n">sec_bf</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">rbs_factor</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
             <span class="n">z_rbs</span> <span class="o">=</span> <span class="n">sec_z</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">rbs_c</span> <span class="o">*</span> <span class="n">sec_tf</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">-</span> <span class="n">sec_tf</span><span class="p">)</span>
             <span class="n">sec_m</span> <span class="o">=</span> <span class="mf">1.06</span> <span class="o">*</span> <span class="n">z_rbs</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">*</span> <span class="mf">1.0e3</span>
+            <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="mf">1.10</span>
+            <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="mf">1.10</span>
+
         <span class="k">else</span><span class="p">:</span>
+
             <span class="c1"># Other-than-RBS case</span>
-            <span class="n">theta_p</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="mf">0.0865</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.365</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.14</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">elm_l</span> <span class="o">/</span> <span class="n">sec_d</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.34</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mf">25.4</span> <span class="o">*</span> <span class="n">sec_d</span> <span class="o">/</span> <span class="mf">533.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.721</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.23</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">theta_pc</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="mf">5.63</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.565</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.800</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mf">25.4</span> <span class="o">*</span> <span class="n">sec_d</span> <span class="o">/</span> <span class="mf">533.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.28</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.43</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">lamda</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="mf">495.0</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.34</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.595</span><span class="p">)</span>
-                <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.36</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">sec_m</span> <span class="o">=</span> <span class="mf">1.17</span> <span class="o">*</span> <span class="n">sec_z</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">*</span> <span class="mf">1.0e3</span>
+            <span class="k">if</span> <span class="n">axial_load_ratio</span><span class="p">:</span>
+                <span class="c1"># column case</span>
+                <span class="n">theta_p</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">294.00</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.70</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">lbry</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.70</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.60</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">theta_pc</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">90.00</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.80</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">lbry</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.80</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">2.50</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">theta_p</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">theta_p</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">)</span>
+                <span class="n">theta_pc</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">theta_pc</span><span class="p">,</span> <span class="mf">0.30</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">axial_load_ratio</span> <span class="o">&lt;=</span> <span class="mf">0.35</span><span class="p">:</span>
+                    <span class="n">lamda</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">25500.00</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.14</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">lbry</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.53</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">4.29</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lamda</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">268000.00</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.30</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">lbry</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.30</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.19</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">axial_load_ratio</span> <span class="o">&lt;=</span> <span class="mf">0.20</span><span class="p">:</span>
+                    <span class="n">sec_m</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">1.15</span><span class="o">/</span><span class="mf">1.10</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_z</span> <span class="o">*</span> <span class="n">mat_fy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0e3</span>
+                        <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span> <span class="o">/</span> <span class="mf">2.00</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sec_m</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">1.15</span><span class="o">/</span><span class="mf">1.10</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_z</span> <span class="o">*</span> <span class="n">mat_fy</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0e3</span>
+                        <span class="o">*</span> <span class="mf">9.0</span><span class="o">/</span><span class="mf">8.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">))</span>
+                <span class="n">mcmy</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">12.5</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.20</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">lbry</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.40</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">1.00</span> <span class="o">-</span> <span class="n">axial_load_ratio</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.40</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">mcmy</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">mcmy</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
+                <span class="n">mcmy</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mcmy</span><span class="p">,</span> <span class="mf">1.30</span><span class="p">)</span>
+                <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="n">mcmy</span>
+                <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="n">mcmy</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># non-RBS beam case</span>
+                <span class="n">theta_p</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">0.0865</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.365</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.14</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">elm_l</span> <span class="o">/</span> <span class="n">sec_d</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.34</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">25.4</span> <span class="o">*</span> <span class="n">sec_d</span> <span class="o">/</span> <span class="mf">533.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.721</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.23</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">theta_pc</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">5.63</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.565</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.800</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">25.4</span> <span class="o">*</span> <span class="n">sec_d</span> <span class="o">/</span> <span class="mf">533.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.28</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.43</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">lamda</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mf">495.0</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_tw</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.34</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="n">sec_bf</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">sec_tf</span><span class="p">))</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.595</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span><span class="mf">6.895</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">/</span> <span class="mf">355.0</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.36</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">sec_m</span> <span class="o">=</span> <span class="mf">1.17</span> <span class="o">*</span> <span class="n">sec_z</span> <span class="o">*</span> <span class="n">mat_fy</span> <span class="o">*</span> <span class="mf">1.0e3</span>
+                <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="mf">1.10</span>
+                <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="mf">1.10</span>
+
         <span class="n">theta_u</span> <span class="o">=</span> <span class="mf">0.20</span>
         <span class="n">residual_plus</span> <span class="o">=</span> <span class="mf">0.40</span>
         <span class="n">residual_minus</span> <span class="o">=</span> <span class="mf">0.40</span>
@@ -288,43 +354,60 @@
         <span class="n">theta_pc_minus</span> <span class="o">=</span> <span class="n">theta_pc</span>
         <span class="n">d_plus</span> <span class="o">=</span> <span class="mf">1.00</span>
         <span class="n">d_minus</span> <span class="o">=</span> <span class="mf">1.00</span>
-        <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="mf">1.0001</span>
-        <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="mf">1.0001</span>
-        <span class="n">m_plus</span> <span class="o">=</span> <span class="n">sec_m</span> <span class="o">*</span> <span class="n">moment_modifier</span>
-        <span class="n">m_minus</span> <span class="o">=</span> <span class="o">-</span><span class="n">sec_m</span> <span class="o">*</span> <span class="n">moment_modifier</span>
+        <span class="n">m_plus</span> <span class="o">=</span> <span class="n">sec_m</span>
+        <span class="n">m_minus</span> <span class="o">=</span> <span class="o">-</span><span class="n">sec_m</span>
+
         <span class="k">if</span> <span class="n">consider_composite</span><span class="p">:</span>
+
             <span class="c1"># Elkady, A., &amp; Lignos, D. G. (2014). Modeling of the</span>
             <span class="c1"># composite action in fully restrained beam‐to‐column</span>
             <span class="c1"># connections: implications in the seismic design and</span>
             <span class="c1"># collapse capacity of steel special moment</span>
             <span class="c1"># frames. Earthquake Engineering &amp; Structural Dynamics,</span>
             <span class="c1"># 43(13), 1935-1954.  Table II</span>
-            <span class="k">assert</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;strong&quot;</span>
+
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">axial_load_ratio</span> <span class="o">==</span> <span class="mf">0.00</span><span class="p">,</span>
+                <span class="s2">&quot;Can&#39;t consider composite action for columns&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;strong&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;Composite action affects the &quot;</span>
+                <span class="s2">&quot;behavior in strong-axis bending&quot;</span><span class="p">)</span>
+
             <span class="n">theta_p_plus</span> <span class="o">*=</span> <span class="mf">1.80</span>
             <span class="n">theta_p_minus</span> <span class="o">*=</span> <span class="mf">0.95</span>
             <span class="n">theta_pc_plus</span> <span class="o">*=</span> <span class="mf">1.35</span>
             <span class="n">theta_pc_minus</span> <span class="o">*=</span> <span class="mf">0.95</span>
-            <span class="n">d_plus</span> <span class="o">*=</span> <span class="mf">1.15</span>
-            <span class="n">d_minus</span> <span class="o">*=</span> <span class="mf">1.00</span>
-            <span class="n">mcmy_plus</span> <span class="o">*=</span> <span class="mf">1.30</span>
-            <span class="n">mcmy_minus</span> <span class="o">*=</span> <span class="mf">1.05</span>
+            <span class="n">d_plus</span> <span class="o">=</span> <span class="mf">1.15</span>
+            <span class="n">d_minus</span> <span class="o">=</span> <span class="mf">1.00</span>
+            <span class="n">mcmy_plus</span> <span class="o">=</span> <span class="mf">1.30</span>
+            <span class="n">mcmy_minus</span> <span class="o">=</span> <span class="mf">1.05</span>
             <span class="n">m_plus</span> <span class="o">*=</span> <span class="mf">1.35</span>
             <span class="n">m_minus</span> <span class="o">*=</span> <span class="mf">1.25</span>
             <span class="n">residual_plus</span> <span class="o">=</span> <span class="mf">0.30</span>
             <span class="n">residual_minus</span> <span class="o">=</span> <span class="mf">0.20</span>
-        <span class="n">stiffness</span> <span class="o">=</span> <span class="mf">6.00</span> <span class="o">*</span> <span class="n">section</span><span class="o">.</span><span class="n">e_mod</span> <span class="o">*</span> <span class="n">sec_i</span> <span class="o">/</span> <span class="n">elm_h</span>
-        <span class="n">beta_plus</span> <span class="o">=</span> <span class="p">(</span><span class="n">mcmy_plus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_plus</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_p_plus</span><span class="p">)</span> <span class="o">/</span> <span class="n">stiffness</span>
+
+        <span class="c1"># adjust parameters to account for the presence of the elastic element</span>
+        <span class="n">stiffness_init</span> <span class="o">=</span> <span class="mf">6.00</span> <span class="o">*</span> <span class="n">section</span><span class="o">.</span><span class="n">e_mod</span> <span class="o">*</span> <span class="n">sec_i</span> <span class="o">/</span> <span class="n">elm_h</span>
+        <span class="n">stiffness</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_parameter</span><span class="o">+</span><span class="mf">1.00</span><span class="p">)</span> <span class="o">*</span> <span class="n">stiffness_init</span>
+        <span class="n">theta_y</span> <span class="o">=</span> <span class="n">sec_m</span> <span class="o">/</span> <span class="n">stiffness_init</span>
+        <span class="n">theta_p_plus</span> <span class="o">-=</span> <span class="p">(</span><span class="n">mcmy_plus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_m</span> <span class="o">/</span> <span class="n">stiffness</span><span class="p">)</span>
+        <span class="n">theta_p_minus</span> <span class="o">-=</span> <span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_m</span> <span class="o">/</span> <span class="n">stiffness</span><span class="p">)</span>
+        <span class="n">theta_pc_plus</span> <span class="o">+=</span> <span class="n">theta_y</span> <span class="o">+</span> <span class="p">(</span><span class="n">mcmy_plus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_m</span> <span class="o">/</span> <span class="n">stiffness</span><span class="p">)</span>
+        <span class="n">theta_pc_plus</span> <span class="o">+=</span> <span class="n">theta_y</span> <span class="o">+</span> <span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sec_m</span> <span class="o">/</span> <span class="n">stiffness</span><span class="p">)</span>
+        <span class="n">beta_plus</span> <span class="o">=</span> <span class="p">(</span><span class="n">mcmy_plus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_plus</span> <span class="o">/</span> <span class="n">theta_p_plus</span> <span class="o">/</span> <span class="n">stiffness</span>
         <span class="n">beta_minus</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="o">-</span><span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_minus</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_p_minus</span><span class="p">)</span> <span class="o">/</span> <span class="n">stiffness</span>
+            <span class="o">-</span><span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_minus</span> <span class="o">/</span> <span class="n">theta_p_minus</span> <span class="o">/</span> <span class="n">stiffness</span>
         <span class="p">)</span>
+
         <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">Bilin</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
             <span class="s2">&quot;auto_IMK&quot;</span><span class="p">,</span>
-            <span class="n">stiffness</span><span class="p">,</span>
+            <span class="n">stiffness</span> <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">,</span>
             <span class="n">beta_plus</span><span class="p">,</span>
             <span class="n">beta_minus</span><span class="p">,</span>
-            <span class="n">m_plus</span><span class="p">,</span>
-            <span class="n">m_minus</span><span class="p">,</span>
+            <span class="n">m_plus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
+            <span class="n">m_minus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
             <span class="n">lamda</span><span class="p">,</span>
             <span class="n">lamda</span><span class="p">,</span>
             <span class="n">lamda</span><span class="p">,</span>

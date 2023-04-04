@@ -23,7 +23,9 @@ osmg.ops.uniaxial\_material
       Elastic
       Fatigue
       Hysteretic
+      IMKBilin
       MaxStrainRange
+      MinMax
       Pinching4
       Steel02
       Steel4

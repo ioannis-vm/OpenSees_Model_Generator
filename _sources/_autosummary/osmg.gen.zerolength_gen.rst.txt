@@ -23,6 +23,7 @@ osmg.gen.zerolength\_gen
       release_6
       steel_brace_gusset
       steel_w_col_pz
+      steel_w_col_pz_updated
    
    
 

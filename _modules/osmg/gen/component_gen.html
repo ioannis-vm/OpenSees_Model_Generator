@@ -77,8 +77,7 @@
 <span class="kn">from</span> <span class="nn">..transformations</span> <span class="kn">import</span> <span class="n">local_axes_from_points_and_angle</span>
 <span class="kn">from</span> <span class="nn">..transformations</span> <span class="kn">import</span> <span class="n">transformation_matrix</span>
 <span class="kn">from</span> <span class="nn">..defaults</span> <span class="kn">import</span> <span class="n">load_util_rigid_elastic</span>
-<span class="kn">from</span> <span class="nn">..gen.zerolength_gen</span> <span class="kn">import</span> <span class="n">steel_w_col_pz</span>
-<span class="kn">from</span> <span class="nn">..gen.zerolength_gen</span> <span class="kn">import</span> <span class="n">fix_all</span>
+<span class="kn">from</span> <span class="nn">..gen</span> <span class="kn">import</span> <span class="n">zerolength_gen</span>
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">common</span>
 
 
@@ -379,7 +378,7 @@
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">internal_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">int_node_x</span><span class="p">)</span>
                 <span class="n">n_x</span> <span class="o">=</span> <span class="n">int_node_x</span>
-                <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span> <span class="o">=</span> <span class="n">fix_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+                <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span> <span class="o">=</span> <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
                 <span class="c1"># flip the nodes if the element is about to be defined</span>
                 <span class="c1"># upside down</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
@@ -513,6 +512,9 @@
                 <span class="n">integration</span><span class="o">=</span><span class="n">beam_integration</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">elm_disp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Invalid element type: </span><span class="si">{element_type.__name__}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
 <div class="viewcode-block" id="BeamColumnGenerator.define_zerolength"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.define_zerolength">[docs]</a>    <span class="k">def</span> <span class="nf">define_zerolength</span><span class="p">(</span>
@@ -813,7 +815,7 @@
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">element_type_i</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;TwoNodeLink&quot;</span><span class="p">:</span>
                 <span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_two_node_link</span><span class="p">(</span>
-                    <span class="n">component</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">nh_i_out</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
+                    <span class="n">component</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">nh_i_out</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -879,7 +881,7 @@
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">element_type_j</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;TwoNodeLink&quot;</span><span class="p">:</span>
                 <span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_two_node_link</span><span class="p">(</span>
-                    <span class="n">component</span><span class="p">,</span> <span class="n">nh_j_out</span><span class="p">,</span> <span class="n">node_j</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
+                    <span class="n">component</span><span class="p">,</span> <span class="n">nh_j_out</span><span class="p">,</span> <span class="n">node_j</span><span class="p">,</span> <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1200,9 +1202,8 @@
             <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">column_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
             <span class="n">beam_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">pz_doubler_plate_thickness</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">pz_hardening</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">only_elastic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">zerolength_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">zerolength_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ComponentAssembly</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a component assembly representing a steel W-section</span>
@@ -1478,22 +1479,26 @@
             <span class="n">elm_interior</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">elm_interior</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span> <span class="o">=</span> <span class="kc">True</span>
 
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">zerolength_gen</span><span class="p">,</span> <span class="n">zerolength_method</span><span class="p">),</span> \
+                <span class="sa">f</span><span class="s2">&quot;Method not available: </span><span class="si">{</span><span class="n">zerolength_method</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">mthd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">zerolength_gen</span><span class="p">,</span> <span class="n">zerolength_method</span><span class="p">)</span>
+
             <span class="c1"># define zerolength elements</span>
+            <span class="n">zerolength_gen_args</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
+                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
+                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span>
+                 <span class="p">}</span>
+            <span class="n">zerolength_gen_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">zerolength_args</span><span class="p">)</span>
             <span class="n">zerolen_top_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
                 <span class="n">top_h_f</span><span class="p">,</span>
                 <span class="n">top_v_f</span><span class="p">,</span>
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
-                <span class="n">steel_w_col_pz</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
-                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_doubler_plate_thickness&quot;</span><span class="p">:</span> <span class="n">pz_doubler_plate_thickness</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_hardening&quot;</span><span class="p">:</span> <span class="n">pz_hardening</span><span class="p">,</span>
-                    <span class="s2">&quot;only_elastic&quot;</span><span class="p">:</span> <span class="n">only_elastic</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="n">mthd</span><span class="p">,</span>
+                <span class="n">zerolength_gen_args</span>
             <span class="p">)</span>
             <span class="n">zerolen_top_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1501,15 +1506,8 @@
                 <span class="n">top_v_b</span><span class="p">,</span>
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
-                <span class="n">steel_w_col_pz</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
-                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_doubler_plate_thickness&quot;</span><span class="p">:</span> <span class="n">pz_doubler_plate_thickness</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_hardening&quot;</span><span class="p">:</span> <span class="n">pz_hardening</span><span class="p">,</span>
-                    <span class="s2">&quot;only_elastic&quot;</span><span class="p">:</span> <span class="n">only_elastic</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="n">mthd</span><span class="p">,</span>
+                <span class="n">zerolength_gen_args</span>
             <span class="p">)</span>
             <span class="n">zerolen_bottom_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1517,15 +1515,8 @@
                 <span class="n">bottom_v_f</span><span class="p">,</span>
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
-                <span class="n">steel_w_col_pz</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
-                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_doubler_plate_thickness&quot;</span><span class="p">:</span> <span class="n">pz_doubler_plate_thickness</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_hardening&quot;</span><span class="p">:</span> <span class="n">pz_hardening</span><span class="p">,</span>
-                    <span class="s2">&quot;only_elastic&quot;</span><span class="p">:</span> <span class="n">only_elastic</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="n">mthd</span><span class="p">,</span>
+                <span class="n">zerolength_gen_args</span>
             <span class="p">)</span>
             <span class="n">zerolen_bottom_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1533,15 +1524,8 @@
                 <span class="n">bottom_v_b</span><span class="p">,</span>
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
-                <span class="n">steel_w_col_pz</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
-                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_doubler_plate_thickness&quot;</span><span class="p">:</span> <span class="n">pz_doubler_plate_thickness</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_hardening&quot;</span><span class="p">:</span> <span class="n">pz_hardening</span><span class="p">,</span>
-                    <span class="s2">&quot;only_elastic&quot;</span><span class="p">:</span> <span class="n">only_elastic</span><span class="p">,</span>
-                <span class="p">},</span>
+                <span class="n">mthd</span><span class="p">,</span>
+                <span class="n">zerolength_gen_args</span>
             <span class="p">)</span>
 
             <span class="c1"># fill component assembly</span>
