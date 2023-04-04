@@ -383,7 +383,7 @@
         <span class="n">pz_doubler_plate_thickness</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">pz_hardening</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">only_elastic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">moment_modifier</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
+        <span class="n">moment_modifier</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span>  <span class="nb">dict</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">])</span> \
         <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">UniaxialMaterial</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -412,9 +412,12 @@
     <span class="n">gamma_1</span> <span class="o">=</span> <span class="n">v_y</span> <span class="o">/</span> <span class="n">k_e</span>
     <span class="n">gamma_2</span> <span class="o">=</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">gamma_1</span>
     <span class="n">gamma_3</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="n">gamma_1</span>
-    <span class="n">m1y</span> <span class="o">=</span> <span class="n">gamma_1</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">pz_length</span> <span class="o">*</span> <span class="n">moment_modifier</span>
-    <span class="n">m2y</span> <span class="o">=</span> <span class="n">m1y</span> <span class="o">+</span> <span class="n">k_p</span> <span class="o">*</span> <span class="n">pz_length</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma_2</span> <span class="o">-</span> <span class="n">gamma_1</span><span class="p">)</span> <span class="o">*</span> <span class="n">moment_modifier</span>
-    <span class="n">m3y</span> <span class="o">=</span> <span class="n">m2y</span> <span class="o">+</span> <span class="p">(</span><span class="n">hardening</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">pz_length</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma_3</span> <span class="o">-</span> <span class="n">gamma_2</span><span class="p">)</span> <span class="o">*</span> <span class="n">moment_modifier</span>
+    <span class="n">m1y</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma_1</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">pz_length</span>
+           <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">)</span>
+    <span class="n">m2y</span> <span class="o">=</span> <span class="p">(</span><span class="n">m1y</span> <span class="o">+</span> <span class="n">k_p</span> <span class="o">*</span> <span class="n">pz_length</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma_2</span> <span class="o">-</span> <span class="n">gamma_1</span><span class="p">)</span>
+           <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">)</span>
+    <span class="n">m3y</span> <span class="o">=</span> <span class="p">(</span><span class="n">m2y</span> <span class="o">+</span> <span class="p">(</span><span class="n">hardening</span> <span class="o">*</span> <span class="n">k_e</span> <span class="o">*</span> <span class="n">pz_length</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma_3</span> <span class="o">-</span> <span class="n">gamma_2</span><span class="p">)</span>
+           <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">)</span>
 
     <span class="c1"># account for the fact that our panel zones have four nonlinear</span>
     <span class="c1"># springs</span>
@@ -462,9 +465,9 @@
     <span class="n">consider_composite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">only_elastic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">moment_modifier</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
+    <span class="n">moment_modifier</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.00</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span>  <span class="nb">dict</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">])</span> \
-    <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">UniaxialMaterial</span><span class="p">]]:</span>
+        <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">UniaxialMaterial</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). &quot;Proposed</span>
 <span class="sd">    Panel Zone Model for Seismic Design of Steel Moment-Resisting</span>
@@ -503,23 +506,25 @@
 
     <span class="c1"># Stiffness Calculation</span>
     <span class="n">Ks</span> <span class="o">=</span> <span class="n">tpz</span> <span class="o">*</span> <span class="p">(</span><span class="n">d_Col</span> <span class="o">-</span> <span class="n">tf_Col</span><span class="p">)</span> <span class="o">*</span> <span class="n">g_mod</span>
-    <span class="n">Kb</span> <span class="o">=</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="n">e_mod</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ix_Col</span> <span class="o">+</span> <span class="n">tdp</span> <span class="o">*</span> <span class="p">((</span><span class="n">d_Col</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf_Col</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.00</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">d_Beam</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">d_Beam</span>  <span class="c1"># strange..</span>
+    <span class="n">Kb</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.0</span> <span class="o">*</span> <span class="n">e_mod</span> <span class="o">*</span> <span class="p">(</span><span class="n">Ix_Col</span> <span class="o">+</span> <span class="n">tdp</span> <span class="o">*</span>
+          <span class="p">((</span><span class="n">d_Col</span> <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">tf_Col</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.00</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">d_Beam</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">d_Beam</span><span class="p">)</span>
     <span class="n">Ke</span> <span class="o">=</span> <span class="n">Ks</span> <span class="o">*</span> <span class="n">Kb</span> <span class="o">/</span> <span class="p">(</span><span class="n">Ks</span> <span class="o">+</span> <span class="n">Kb</span><span class="p">)</span>
 
     <span class="c1"># flange stiffness: shear contribution</span>
     <span class="n">Ksf</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">bf_Col</span> <span class="o">*</span> <span class="n">tf_Col</span><span class="p">)</span> <span class="o">*</span> <span class="n">g_mod</span>
     <span class="c1"># flange stiffness: bending contribution</span>
-    <span class="n">Kbf</span> <span class="o">=</span>  <span class="mf">2.0</span> <span class="o">*</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="n">e_mod</span> <span class="o">*</span> <span class="n">bf_Col</span> <span class="o">*</span> <span class="p">(</span><span class="n">tf_Col</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">d_Beam</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">d_Beam</span>
+    <span class="n">Kbf</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="mf">12.0</span> <span class="o">*</span> <span class="n">e_mod</span> <span class="o">*</span> <span class="n">bf_Col</span>
+           <span class="o">*</span> <span class="p">(</span><span class="n">tf_Col</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">12.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">d_Beam</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">d_Beam</span><span class="p">)</span>
     <span class="c1"># flange stiffness: total contribution</span>
     <span class="n">Kef</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ksf</span> <span class="o">*</span> <span class="n">Kbf</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">Ksf</span> <span class="o">+</span> <span class="n">Kbf</span><span class="p">)</span>
 
-    <span class="n">ay</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.58</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span>  <span class="o">+</span> <span class="mf">0.88</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span><span class="p">)</span>
+    <span class="n">ay</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.58</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span> <span class="o">+</span> <span class="mf">0.88</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span><span class="p">)</span>
 
     <span class="n">aw_eff_4gamma</span> <span class="o">=</span> <span class="mf">1.10</span>
     <span class="n">aw_eff_6gamma</span> <span class="o">=</span> <span class="mf">1.15</span>
 
-    <span class="n">af_eff_4gamma</span> <span class="o">=</span> <span class="mf">0.93</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span>  <span class="o">+</span> <span class="mf">0.015</span>
-    <span class="n">af_eff_6gamma</span> <span class="o">=</span> <span class="mf">1.05</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span>  <span class="o">+</span> <span class="mf">0.020</span>
+    <span class="n">af_eff_4gamma</span> <span class="o">=</span> <span class="mf">0.93</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span> <span class="o">+</span> <span class="mf">0.015</span>
+    <span class="n">af_eff_6gamma</span> <span class="o">=</span> <span class="mf">1.05</span> <span class="o">*</span> <span class="n">Kef</span> <span class="o">/</span> <span class="n">Ke</span> <span class="o">+</span> <span class="mf">0.020</span>
     <span class="c1"># reduction factor accounting for axial load</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
 
@@ -582,46 +587,46 @@
     <span class="n">gammaU_N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">consider_composite</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">M1_N</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M2_N</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M3_N</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M1_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M2_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M3_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
-            <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">((</span><span class="n">M1_N</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M2_N</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M3_N</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M1_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M2_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M3_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
+                <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">location</span> <span class="o">==</span> <span class="s1">&#39;interior&#39;</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">M1_P</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M2_P</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M3_P</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M1_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M2_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M3_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
-            <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">((</span><span class="n">M1_P</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M2_P</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M3_P</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M1_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M2_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M3_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
+                <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">location</span> <span class="o">==</span> <span class="s1">&#39;exterior_first&#39;</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">M1_N</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M2_N</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M3_N</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M1_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M2_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M3_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
-            <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">((</span><span class="n">M1_N</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M2_N</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M3_N</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M1_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M2_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M3_P</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
+                <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">location</span> <span class="o">==</span> <span class="s1">&#39;exterior_last&#39;</span><span class="p">:</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">M1_P</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M2_P</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">M3_P</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M1_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M2_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
-            <span class="p">(</span><span class="o">-</span><span class="n">M3_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
-            <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">((</span><span class="n">M1_P</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M2_P</span><span class="p">,</span> <span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">M3_P</span><span class="p">,</span> <span class="n">gamma3</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M1_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma1</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M2_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma2</span><span class="p">),</span>
+                <span class="p">(</span><span class="o">-</span><span class="n">M3_N</span><span class="p">,</span> <span class="o">-</span><span class="n">gamma3</span><span class="p">),</span>
+                <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid Location: </span><span class="si">{</span><span class="n">location</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">only_elastic</span><span class="p">:</span>
-        <span class="n">m1y</span><span class="p">,</span> <span class="n">gamma_1</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">m1y</span><span class="p">,</span> <span class="n">gamma_1</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
         <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span> <span class="o">=</span> <span class="n">Elastic</span><span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
             <span class="s2">&quot;auto_steel_W_PZ&quot;</span><span class="p">,</span>
-            <span class="n">m1y</span><span class="o">/</span><span class="n">gamma_1</span>
+            <span class="n">m1y</span><span class="o">/</span><span class="n">gamma_1</span>  <span class="c1"># type: ignore</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mat</span> <span class="o">=</span> <span class="n">Hysteretic</span><span class="p">(</span>

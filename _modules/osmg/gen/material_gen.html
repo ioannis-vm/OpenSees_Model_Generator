@@ -366,13 +366,11 @@
             <span class="c1"># frames. Earthquake Engineering &amp; Structural Dynamics,</span>
             <span class="c1"># 43(13), 1935-1954.  Table II</span>
 
-            <span class="k">assert</span> <span class="p">(</span>
-                <span class="n">axial_load_ratio</span> <span class="o">==</span> <span class="mf">0.00</span><span class="p">,</span>
-                <span class="s2">&quot;Can&#39;t consider composite action for columns&quot;</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="p">(</span>
-                <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;strong&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;Composite action affects the &quot;</span>
-                <span class="s2">&quot;behavior in strong-axis bending&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">axial_load_ratio</span> <span class="o">==</span> <span class="mf">0.00</span><span class="p">,</span> \
+                <span class="s2">&quot;Can&#39;t consider composite action for columns&quot;</span>
+            <span class="k">assert</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;strong&quot;</span><span class="p">,</span> \
+                <span class="s2">&quot;Composite action affects the &quot;</span> \
+                <span class="s2">&quot;behavior in strong-axis bending&quot;</span>
 
             <span class="n">theta_p_plus</span> <span class="o">*=</span> <span class="mf">1.80</span>
             <span class="n">theta_p_minus</span> <span class="o">*=</span> <span class="mf">0.95</span>

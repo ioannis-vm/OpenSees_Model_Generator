@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "48be5e51",
+   "id": "665a9fbb",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -25,7 +25,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "0815df8c",
+   "id": "cde3f8e0",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -39,7 +39,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f5841c79",
+   "id": "2639393f",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -88,8 +88,15 @@
     "        0.00,\n",
     "        24.00,\n",
     "        24.00,\n",
-    "        0.00,\n",
-    "        0.02)\n",
+    "        \"steel_w_col_pz_updated\",\n",
+    "        {'pz_doubler_plate_thickness': 0.00,\n",
+    "         'axial_load_ratio': 0.00,\n",
+    "         'slab_depth': 0.00,\n",
+    "         'consider_composite': False,\n",
+    "         'location': 'interior',\n",
+    "         'only_elastic': False,\n",
+    "         'moment_modifier': 1.00,\n",
+    "        })\n",
     "    mcg.add_vertical_active(\n",
     "        x_coord=pt[0], y_coord=pt[1],\n",
     "        offset_i=np.zeros(3), offset_j=np.zeros(3),\n",
@@ -148,7 +155,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "0bec243b",
+   "id": "7bcf527a",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -157,7 +164,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "9e9d457c",
+   "id": "9642418b",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -168,7 +175,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "daf164ce",
+   "id": "b5272884",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -180,7 +187,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "fd1f82e0",
+   "id": "d9dbdc1c",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -193,7 +200,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "3a462b00",
+   "id": "394f99db",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -204,7 +211,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "d86dc43c",
+   "id": "8d55e11d",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -218,7 +225,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "fc28a54d",
+   "id": "e8dd3ce3",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -230,7 +237,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "53707117",
+   "id": "707cf2f7",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -243,7 +250,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "428d8aa7",
+   "id": "1c3da297",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -260,7 +267,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "36de33ab",
+   "id": "ea0f942e",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -273,7 +280,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "44371237",
+   "id": "7dda418c",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -288,7 +295,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5395f885",
+   "id": "f2827455",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -301,7 +308,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c6e75d9b",
+   "id": "700f6aae",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -313,7 +320,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "640944c4",
+   "id": "f5c3883b",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -323,7 +330,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "dbfbd209",
+   "id": "35284d5e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -335,7 +342,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "7cac0288",
+   "id": "0b152c36",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -349,7 +356,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "f9d3a1db",
+   "id": "aa8a1426",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -360,7 +367,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d58edb08",
+   "id": "0631b113",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -374,7 +381,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "4b84dc12",
+   "id": "87e71ff9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -388,7 +395,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d18ad2e2",
+   "id": "0a5c1824",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -399,7 +406,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1dea5711",
+   "id": "7901916c",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -411,7 +418,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "60831778",
+   "id": "b454bc20",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -424,7 +431,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "23238e61",
+   "id": "2137c63d",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -435,7 +442,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8ba912ad",
+   "id": "c028af06",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -445,7 +452,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "adae9995",
+   "id": "6b9806a9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -457,7 +464,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "ba88a172",
+   "id": "0ae79c82",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -477,7 +484,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "43783a90",
+   "id": "4b763494",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -489,7 +496,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8e1f0700",
+   "id": "fcf6a0ed",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -501,7 +508,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "843c15b4",
+   "id": "718f39e9",
    "metadata": {
     "cell_marker": "\"\"\""
    },
