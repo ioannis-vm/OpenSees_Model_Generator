@@ -333,13 +333,11 @@ class MaterialGenerator:
             # frames. Earthquake Engineering & Structural Dynamics,
             # 43(13), 1935-1954.  Table II
 
-            assert (
-                axial_load_ratio == 0.00,
-                "Can't consider composite action for columns")
-            assert (
-                direction == "strong",
-                "Composite action affects the "
-                "behavior in strong-axis bending")
+            assert axial_load_ratio == 0.00, \
+                "Can't consider composite action for columns"
+            assert direction == "strong", \
+                "Composite action affects the " \
+                "behavior in strong-axis bending"
 
             theta_p_plus *= 1.80
             theta_p_minus *= 0.95

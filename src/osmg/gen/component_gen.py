@@ -782,7 +782,9 @@ class BeamColumnGenerator:
                 )
             elif element_type_i.__name__ == "TwoNodeLink":
                 elm = self.define_two_node_link(
-                    component, node_i, nh_i_out, x_axis, y_axis, zerolength_gen.fix_all, {}
+                    component, node_i, nh_i_out,
+                    x_axis, y_axis,
+                    zerolength_gen.fix_all, {}
                 )
                 component.elements.add(elm)
             else:
@@ -848,7 +850,9 @@ class BeamColumnGenerator:
                 )
             elif element_type_j.__name__ == "TwoNodeLink":
                 elm = self.define_two_node_link(
-                    component, nh_j_out, node_j, x_axis, y_axis, zerolength_gen.fix_all, {}
+                    component, nh_j_out, node_j,
+                    x_axis, y_axis,
+                    zerolength_gen.fix_all, {}
                 )
                 component.elements.add(elm)
             else:

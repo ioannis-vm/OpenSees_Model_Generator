@@ -350,7 +350,7 @@ def steel_w_col_pz(
         pz_doubler_plate_thickness: float,
         pz_hardening: float,
         only_elastic: bool = False,
-        moment_modifier: bool = 1.00,
+        moment_modifier: float = 1.00,
         **kwargs:  dict[object, object]) \
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -379,9 +379,12 @@ def steel_w_col_pz(
     gamma_1 = v_y / k_e
     gamma_2 = 4.0 * gamma_1
     gamma_3 = 100.0 * gamma_1
-    m1y = gamma_1 * k_e * pz_length * moment_modifier
-    m2y = m1y + k_p * pz_length * (gamma_2 - gamma_1) * moment_modifier
-    m3y = m2y + (hardening * k_e * pz_length) * (gamma_3 - gamma_2) * moment_modifier
+    m1y = (gamma_1 * k_e * pz_length
+           * moment_modifier)
+    m2y = (m1y + k_p * pz_length * (gamma_2 - gamma_1)
+           * moment_modifier)
+    m3y = (m2y + (hardening * k_e * pz_length) * (gamma_3 - gamma_2)
+           * moment_modifier)
 
     # account for the fact that our panel zones have four nonlinear
     # springs
@@ -429,9 +432,9 @@ def steel_w_col_pz_updated(
     consider_composite: bool,
     location: str,
     only_elastic: bool = False,
-    moment_modifier: bool = 1.00,
+    moment_modifier: float = 1.00,
     **kwargs:  dict[object, object]) \
-    -> tuple[list[int], list[UniaxialMaterial]]:
+        -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
     Panel Zone Model for Seismic Design of Steel Moment-Resisting
@@ -470,23 +473,25 @@ def steel_w_col_pz_updated(
 
     # Stiffness Calculation
     Ks = tpz * (d_Col - tf_Col) * g_mod
-    Kb = 12.0 * e_mod * (Ix_Col + tdp * ((d_Col - 2.0 * tf_Col)**3) / 12.00) / (d_Beam**3) * d_Beam  # strange..
+    Kb = (12.0 * e_mod * (Ix_Col + tdp *
+          ((d_Col - 2.0 * tf_Col)**3) / 12.00) / (d_Beam**3) * d_Beam)
     Ke = Ks * Kb / (Ks + Kb)
 
     # flange stiffness: shear contribution
     Ksf = 2.0 * (bf_Col * tf_Col) * g_mod
     # flange stiffness: bending contribution
-    Kbf =  2.0 * 12.0 * e_mod * bf_Col * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam
+    Kbf = (2.0 * 12.0 * e_mod * bf_Col
+           * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam)
     # flange stiffness: total contribution
     Kef = (Ksf * Kbf) / (Ksf + Kbf)
 
-    ay = (0.58 * Kef / Ke  + 0.88) / (1.0 - Kef / Ke)
+    ay = (0.58 * Kef / Ke + 0.88) / (1.0 - Kef / Ke)
 
     aw_eff_4gamma = 1.10
     aw_eff_6gamma = 1.15
 
-    af_eff_4gamma = 0.93 * Kef / Ke  + 0.015
-    af_eff_6gamma = 1.05 * Kef / Ke  + 0.020
+    af_eff_4gamma = 0.93 * Kef / Ke + 0.015
+    af_eff_6gamma = 1.05 * Kef / Ke + 0.020
     # reduction factor accounting for axial load
     r = np.sqrt(1.0 - (n**2))
 
@@ -549,46 +554,46 @@ def steel_w_col_pz_updated(
     gammaU_N = -0.3
 
     if not consider_composite:
-        args = [(M1_N, gamma1),
-            (M2_N, gamma2),
-            (M3_N, gamma3),
-            (-M1_N, -gamma1),
-            (-M2_N, -gamma2),
-            (-M3_N, -gamma3),
-            0.25, 0.75, 0.0, 0.0, 0.0]
+        args = ((M1_N, gamma1),
+                (M2_N, gamma2),
+                (M3_N, gamma3),
+                (-M1_N, -gamma1),
+                (-M2_N, -gamma2),
+                (-M3_N, -gamma3),
+                0.25, 0.75, 0.0, 0.0, 0.0)
     elif location == 'interior':
-        args = [(M1_P, gamma1),
-            (M2_P, gamma2),
-            (M3_P, gamma3),
-            (-M1_P, -gamma1),
-            (-M2_P, -gamma2),
-            (-M3_P, -gamma3),
-            0.25, 0.75, 0.0, 0.0, 0.0]
+        args = ((M1_P, gamma1),
+                (M2_P, gamma2),
+                (M3_P, gamma3),
+                (-M1_P, -gamma1),
+                (-M2_P, -gamma2),
+                (-M3_P, -gamma3),
+                0.25, 0.75, 0.0, 0.0, 0.0)
     elif location == 'exterior_first':
-        args = [(M1_N, gamma1),
-            (M2_N, gamma2),
-            (M3_N, gamma3),
-            (-M1_P, -gamma1),
-            (-M2_P, -gamma2),
-            (-M3_P, -gamma3),
-            0.25, 0.75, 0.0, 0.0, 0.0]
+        args = ((M1_N, gamma1),
+                (M2_N, gamma2),
+                (M3_N, gamma3),
+                (-M1_P, -gamma1),
+                (-M2_P, -gamma2),
+                (-M3_P, -gamma3),
+                0.25, 0.75, 0.0, 0.0, 0.0)
     elif location == 'exterior_last':
-        args = [(M1_P, gamma1),
-            (M2_P, gamma2),
-            (M3_P, gamma3),
-            (-M1_N, -gamma1),
-            (-M2_N, -gamma2),
-            (-M3_N, -gamma3),
-            0.25, 0.75, 0.0, 0.0, 0.0]
+        args = ((M1_P, gamma1),
+                (M2_P, gamma2),
+                (M3_P, gamma3),
+                (-M1_N, -gamma1),
+                (-M2_N, -gamma2),
+                (-M3_N, -gamma3),
+                0.25, 0.75, 0.0, 0.0, 0.0)
     else:
         raise ValueError(f'Invalid Location: {location}')
 
     if only_elastic:
-        m1y, gamma_1 = args[0]
+        m1y, gamma_1 = args[0]  # type: ignore
         mat: UniaxialMaterial = Elastic(
             model.uid_generator.new("uniaxial material"),
             "auto_steel_W_PZ",
-            m1y/gamma_1
+            m1y/gamma_1  # type: ignore
         )
     else:
         mat = Hysteretic(

@@ -84,8 +84,15 @@ for pt in [p1, p2, p3, p4]:
         0.00,
         24.00,
         24.00,
-        0.00,
-        0.02)
+        "steel_w_col_pz_updated",
+        {'pz_doubler_plate_thickness': 0.00,
+         'axial_load_ratio': 0.00,
+         'slab_depth': 0.00,
+         'consider_composite': False,
+         'location': 'interior',
+         'only_elastic': False,
+         'moment_modifier': 1.00,
+        })
     mcg.add_vertical_active(
         x_coord=pt[0], y_coord=pt[1],
         offset_i=np.zeros(3), offset_j=np.zeros(3),

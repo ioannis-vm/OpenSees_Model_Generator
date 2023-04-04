@@ -203,7 +203,8 @@ class TributaryAreaAnaysis:
 
             line_elements = [
                 elm for elm in comp.elements.values()
-                if isinstance(elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink))]
+                if isinstance(
+                    elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink))]
 
             zerolength_elements = [
                 elm for elm in comp.elements.values()
