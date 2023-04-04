@@ -44,8 +44,7 @@ from ..preprocessing.split_component import split_component
 from ..transformations import local_axes_from_points_and_angle
 from ..transformations import transformation_matrix
 from ..defaults import load_util_rigid_elastic
-from ..gen.zerolength_gen import steel_w_col_pz
-from ..gen.zerolength_gen import fix_all
+from ..gen import zerolength_gen
 from .. import common
 
 
@@ -346,7 +345,7 @@ class TrussBarGenerator:
                 )
                 component.internal_nodes.add(int_node_x)
                 n_x = int_node_x
-                dirs, mats = fix_all(self.model)
+                dirs, mats = zerolength_gen.fix_all(self.model)
                 # flip the nodes if the element is about to be defined
                 # upside down
                 if np.allclose(
@@ -480,6 +479,9 @@ class BeamColumnGenerator:
                 integration=beam_integration,
             )
             res = elm_disp
+        else:
+            raise ValueError(
+                'Invalid element type: {element_type.__name__}')
         return res
 
     def define_zerolength(
@@ -780,7 +782,7 @@ class BeamColumnGenerator:
                 )
             elif element_type_i.__name__ == "TwoNodeLink":
                 elm = self.define_two_node_link(
-                    component, node_i, nh_i_out, x_axis, y_axis, fix_all, {}
+                    component, node_i, nh_i_out, x_axis, y_axis, zerolength_gen.fix_all, {}
                 )
                 component.elements.add(elm)
             else:
@@ -846,7 +848,7 @@ class BeamColumnGenerator:
                 )
             elif element_type_j.__name__ == "TwoNodeLink":
                 elm = self.define_two_node_link(
-                    component, nh_j_out, node_j, x_axis, y_axis, fix_all, {}
+                    component, nh_j_out, node_j, x_axis, y_axis, zerolength_gen.fix_all, {}
                 )
                 component.elements.add(elm)
             else:
@@ -1167,9 +1169,8 @@ class BeamColumnGenerator:
             angle: float,
             column_depth: float,
             beam_depth: float,
-            pz_doubler_plate_thickness: float,
-            pz_hardening: float,
-            only_elastic: bool = False
+            zerolength_method: str,
+            zerolength_args: dict[str, object],
     ) -> dict[int, ComponentAssembly]:
         """
         Adds a component assembly representing a steel W-section
@@ -1445,22 +1446,26 @@ class BeamColumnGenerator:
             elm_interior.visibility.skip_opensees_definition = True
             elm_interior.visibility.hidden_at_line_plots = True
 
+            assert hasattr(
+                zerolength_gen, zerolength_method), \
+                f"Method not available: {zerolength_method}"
+            mthd = getattr(zerolength_gen, zerolength_method)
+
             # define zerolength elements
+            zerolength_gen_args = {
+                    "section": section,
+                    "physical_material": physical_material,
+                    "pz_length": beam_depth
+                 }
+            zerolength_gen_args.update(zerolength_args)
             zerolen_top_f = self.define_zerolength(
                 component,
                 top_h_f,
                 top_v_f,
                 x_axis,
                 y_axis,
-                steel_w_col_pz,
-                {
-                    "section": section,
-                    "physical_material": physical_material,
-                    "pz_length": beam_depth,
-                    "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
-                    "pz_hardening": pz_hardening,
-                    "only_elastic": only_elastic,
-                },
+                mthd,
+                zerolength_gen_args
             )
             zerolen_top_b = self.define_zerolength(
                 component,
@@ -1468,15 +1473,8 @@ class BeamColumnGenerator:
                 top_v_b,
                 x_axis,
                 y_axis,
-                steel_w_col_pz,
-                {
-                    "section": section,
-                    "physical_material": physical_material,
-                    "pz_length": beam_depth,
-                    "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
-                    "pz_hardening": pz_hardening,
-                    "only_elastic": only_elastic,
-                },
+                mthd,
+                zerolength_gen_args
             )
             zerolen_bottom_f = self.define_zerolength(
                 component,
@@ -1484,15 +1482,8 @@ class BeamColumnGenerator:
                 bottom_v_f,
                 x_axis,
                 y_axis,
-                steel_w_col_pz,
-                {
-                    "section": section,
-                    "physical_material": physical_material,
-                    "pz_length": beam_depth,
-                    "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
-                    "pz_hardening": pz_hardening,
-                    "only_elastic": only_elastic,
-                },
+                mthd,
+                zerolength_gen_args
             )
             zerolen_bottom_b = self.define_zerolength(
                 component,
@@ -1500,15 +1491,8 @@ class BeamColumnGenerator:
                 bottom_v_b,
                 x_axis,
                 y_axis,
-                steel_w_col_pz,
-                {
-                    "section": section,
-                    "physical_material": physical_material,
-                    "pz_length": beam_depth,
-                    "pz_doubler_plate_thickness": pz_doubler_plate_thickness,
-                    "pz_hardening": pz_hardening,
-                    "only_elastic": only_elastic,
-                },
+                mthd,
+                zerolength_gen_args
             )
 
             # fill component assembly

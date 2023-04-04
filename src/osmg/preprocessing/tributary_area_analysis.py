@@ -29,6 +29,7 @@ from ..ops.node import Node
 from .. import common
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
+from ..ops.element import TwoNodeLink
 from ..ops.element import ZeroLength
 
 if TYPE_CHECKING:
@@ -202,7 +203,7 @@ class TributaryAreaAnaysis:
 
             line_elements = [
                 elm for elm in comp.elements.values()
-                if isinstance(elm, (ElasticBeamColumn, DispBeamColumn))]
+                if isinstance(elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink))]
 
             zerolength_elements = [
                 elm for elm in comp.elements.values()
@@ -212,11 +213,17 @@ class TributaryAreaAnaysis:
 
             for elm in line_elements:
                 n_i = elm.nodes[0]
-                eo_i = elm.geomtransf.offset_i[0:2]
+                if hasattr(elm, 'geomtransf'):
+                    eo_i = elm.geomtransf.offset_i[0:2]
+                else:
+                    eo_i = np.zeros(2)
                 if n_i.uid in zn_map:
                     n_i = comp.internal_nodes[zn_map[n_i.uid]]
                 n_j = elm.nodes[1]
-                eo_j = elm.geomtransf.offset_j[0:2]
+                if hasattr(elm, 'geomtransf'):
+                    eo_j = elm.geomtransf.offset_j[0:2]
+                else:
+                    eo_j = np.zeros(2)
                 if n_j.uid in zn_map:
                     n_j = comp.internal_nodes[zn_map[n_j.uid]]
                 if n_i.uid in pz_node:
@@ -449,7 +456,7 @@ class TributaryAreaAnaysis:
         # fig.show()
 
         # apply loads and mass
-        # todo (future): account for the shape of the loaded area as well
+        # todo (future): account for the shape of the loaded area
         mdl = self.parent_level.parent_model
         if mdl.settings.imperial_units:
             g_const = common.G_CONST_IMPERIAL
@@ -504,5 +511,9 @@ class TributaryAreaAnaysis:
                             np.array([half_mass] * 3 + [0.00] * 3)
                         )
 
+                elif isinstance(loaded_elm, TwoNodeLink):
+                    # todo: (future) add this load to the connecting
+                    # nodes.
+                    pass
                 else:
                     raise TypeError("This should never happen!")

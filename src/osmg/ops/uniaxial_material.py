@@ -298,6 +298,70 @@ class Bilin(UniaxialMaterial):
 
 
 @dataclass
+class IMKBilin(UniaxialMaterial):
+    """
+    OpenSees IMKBilin Material
+    https://portwooddigital.com/2019/12/08/an-update-of-the-imk-models/
+
+    """
+
+    K0: float
+    theta_p_Plus: float
+    theta_pc_Plus: float
+    theta_u_Plus: float
+    My_Plus: float
+    as_Plus: float
+    Res_Pos: float
+    theta_p_Neg: float
+    theta_pc_Neg: float
+    theta_u_Neg: float
+    My_Neg: float
+    as_Neg: float
+    Res_Neg: float
+    Lamda_S: float
+    Lamda_C: float
+    Lamda_K: float
+    c_S: float
+    c_C: float
+    c_K: float
+    D_Plus: float
+    D_Neg: float
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+
+        """
+
+        return [
+            "Bilin",
+            self.uid,
+            self.K0,
+            self.theta_p_Plus,
+            self.theta_pc_Plus,
+            self.theta_u_Plus,
+            self.My_Plus,
+            self.as_Plus,
+            self.Res_Pos,
+            self.theta_p_Neg,
+            self.theta_pc_Neg,
+            self.theta_u_Neg,
+            self.My_Neg,
+            self.as_Neg,
+            self.Res_Neg,
+            self.Lamda_S,
+            self.Lamda_C,
+            self.Lamda_K,
+            self.c_S,
+            self.c_C,
+            self.c_K,
+            self.D_Plus,
+            self.D_Neg
+        ]
+
+
+@dataclass
 class Pinching4(UniaxialMaterial):
     """
     OpenSees Pinching4 Material
@@ -519,5 +583,37 @@ class MaxStrainRange(UniaxialMaterial):
             args.extend(["-nodeTags", *self.node_tags])
         if self.elements_to_remove:
             args.extend(["-eleTag", *self.elements_to_remove])
+
+        return args
+
+
+@dataclass
+class MinMax(UniaxialMaterial):
+    """
+    OpenSees MinMax Material
+    https://openseespydoc.readthedocs.io/en/latest/src/MinMax.html
+
+    """
+
+    predecessor: UniaxialMaterial
+    min_strain: float
+    max_strain: float
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+
+        """
+
+        args = [
+            "MinMax",
+            self.uid,
+            self.predecessor.uid,
+            '-min',
+            self.min_strain,
+            '-max',
+            self.max_strain
+        ]
 
         return args

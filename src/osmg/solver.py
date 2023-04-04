@@ -785,7 +785,7 @@ class StaticAnalysis(Analysis):
             ops.numberer(NUMBERER)
             ops.constraints(*CONSTRAINTS)
             ops.test("EnergyIncr", 1.0e-8, 20, 3)
-            ops.algorithm("Newton")
+            ops.algorithm("KrylovNewton")
             ops.integrator("LoadControl", 1.0)
             ops.analysis("Static")
             ops.analyze(1)
@@ -1083,8 +1083,8 @@ class GravityPlusAnalysis(Analysis):
         ops.numberer(NUMBERER)
         self.log(f"G: Setting constraints to {[*CONSTRAINTS]}")
         ops.constraints(*CONSTRAINTS)
-        self.log("G: Setting algorithm to RaphsonNewton")
-        ops.algorithm("RaphsonNewton")
+        self.log("G: Setting algorithm to KrylovNewton")
+        ops.algorithm("KrylovNewton")
         ops.integrator("LoadControl", 1)
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
@@ -1440,8 +1440,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             steps[num_subdiv],
                             0,
                         )
-                        ops.algorithm("RaphsonNewton")
-                        # ops.integrator("ArcLength", 1.00e1, 1.00e-7)
+                        ops.algorithm("KrylovNewton")
+                        # ops.integrator("ArcLength", 0.1, 1.00e-7)
                         ops.integrator(
                             "DisplacementControl",
                             int(control_node.uid),
@@ -1887,7 +1887,8 @@ class THAnalysis(GravityPlusAnalysis):
 
         ops.test("EnergyIncr", 1.0e-6, 50, 0)
         ops.integrator('TRBDF2')
-        ops.algorithm("KrylovNewton", 'initial', 'initial')
+        ops.algorithm("KrylovNewton")
+        # ops.algorithm("KrylovNewton", 'initial', 'initial')
         ops.analysis("Transient")
 
         define_lateral_load_pattern(

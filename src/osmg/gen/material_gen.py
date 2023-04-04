@@ -104,8 +104,10 @@ class MaterialGenerator:
         loverh,
         rbs_factor,
         consider_composite,
+        axial_load_ratio,
         direction="strong",
-        moment_modifier=1.00
+        moment_modifier=1.00,
+        n_parameter=0.00
     ):
         """
         Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
@@ -121,6 +123,7 @@ class MaterialGenerator:
 
         """
 
+        # gather necessary data and check interpolation range
         assert section.name[0] == "W", "Error: Only W sections can be used."
         assert isinstance(section, ElasticSection)
         assert (
@@ -154,7 +157,11 @@ class MaterialGenerator:
         elm_l = loverh * elm_h
         elm_lb = lboverl * elm_l
         lbry = elm_lb / sec_ry
+
+        # consider cases
+
         if rbs_factor:
+
             # RBS case
             assert direction == "strong"
             assert rbs_factor <= 1.00, "rbs_factor must be <= 1.00"
@@ -222,30 +229,89 @@ class MaterialGenerator:
             rbs_c = sec_bf * (1.0 - rbs_factor) / 2.0
             z_rbs = sec_z - 2.0 * rbs_c * sec_tf * (sec_d - sec_tf)
             sec_m = 1.06 * z_rbs * mat_fy * 1.0e3
+            mcmy_plus = 1.10
+            mcmy_minus = 1.10
+
         else:
+
             # Other-than-RBS case
-            theta_p = (
-                0.0865
-                * (sec_d / sec_tw) ** (-0.365)
-                * (sec_bf / (2.0 * sec_tf)) ** (-0.14)
-                * (elm_l / sec_d) ** 0.34
-                * (25.4 * sec_d / 533.0) ** (-0.721)
-                * (6.895 * mat_fy / 355.0) ** (-0.23)
-            )
-            theta_pc = (
-                5.63
-                * (sec_d / sec_tw) ** (-0.565)
-                * (sec_bf / (2.0 * sec_tf)) ** (-0.800)
-                * (25.4 * sec_d / 533.0) ** (-0.28)
-                * (6.895 * mat_fy / 355.0) ** (-0.43)
-            )
-            lamda = (
-                495.0
-                * (sec_d / sec_tw) ** (-1.34)
-                * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
-                * (6.895 * mat_fy / 355.0) ** (-0.36)
-            )
-            sec_m = 1.17 * sec_z * mat_fy * 1.0e3
+            if axial_load_ratio:
+                # column case
+                theta_p = (
+                    294.00
+                    * (sec_d / sec_tw) ** (-1.70)
+                    * lbry ** (-0.70)
+                    * (1.00 - axial_load_ratio) ** (1.60)
+                )
+                theta_pc = (
+                    90.00
+                    * (sec_d / sec_tw) ** (-0.80)
+                    * lbry ** (-0.80)
+                    * (1.00 - axial_load_ratio) ** (2.50)
+                )
+                theta_p = min(theta_p, 0.20)
+                theta_pc = min(theta_pc, 0.30)
+                if axial_load_ratio <= 0.35:
+                    lamda = (
+                        25500.00
+                        * (sec_d / sec_tw) ** (-2.14)
+                        * lbry ** (-0.53)
+                        * (1.00 - axial_load_ratio) ** (4.29)
+                    )
+                else:
+                    lamda = (
+                        268000.00
+                        * (sec_d / sec_tw) ** (-2.30)
+                        * lbry ** (-1.30)
+                        * (1.00 - axial_load_ratio) ** (1.19)
+                    )
+                if axial_load_ratio <= 0.20:
+                    sec_m = (
+                        1.15/1.10 * (sec_z * mat_fy) * 1.0e3
+                        * (1.00 - axial_load_ratio / 2.00))
+                else:
+                    sec_m = (
+                        1.15/1.10 * (sec_z * mat_fy) * 1.0e3
+                        * 9.0/8.0 * (1.00 - axial_load_ratio))
+                mcmy = (
+                    12.5
+                    * (sec_d / sec_tw) ** (-0.20)
+                    * lbry ** (-0.40)
+                    * (1.00 - axial_load_ratio) ** (0.40)
+                    )
+                mcmy = min(mcmy, 1.00)
+                mcmy = max(mcmy, 1.30)
+                mcmy_plus = mcmy
+                mcmy_minus = mcmy
+
+            else:
+
+                # non-RBS beam case
+                theta_p = (
+                    0.0865
+                    * (sec_d / sec_tw) ** (-0.365)
+                    * (sec_bf / (2.0 * sec_tf)) ** (-0.14)
+                    * (elm_l / sec_d) ** 0.34
+                    * (25.4 * sec_d / 533.0) ** (-0.721)
+                    * (6.895 * mat_fy / 355.0) ** (-0.23)
+                )
+                theta_pc = (
+                    5.63
+                    * (sec_d / sec_tw) ** (-0.565)
+                    * (sec_bf / (2.0 * sec_tf)) ** (-0.800)
+                    * (25.4 * sec_d / 533.0) ** (-0.28)
+                    * (6.895 * mat_fy / 355.0) ** (-0.43)
+                )
+                lamda = (
+                    495.0
+                    * (sec_d / sec_tw) ** (-1.34)
+                    * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
+                    * (6.895 * mat_fy / 355.0) ** (-0.36)
+                )
+                sec_m = 1.17 * sec_z * mat_fy * 1.0e3
+                mcmy_plus = 1.10
+                mcmy_minus = 1.10
+
         theta_u = 0.20
         residual_plus = 0.40
         residual_minus = 0.40
@@ -255,43 +321,60 @@ class MaterialGenerator:
         theta_pc_minus = theta_pc
         d_plus = 1.00
         d_minus = 1.00
-        mcmy_plus = 1.0001
-        mcmy_minus = 1.0001
-        m_plus = sec_m * moment_modifier
-        m_minus = -sec_m * moment_modifier
+        m_plus = sec_m
+        m_minus = -sec_m
+
         if consider_composite:
+
             # Elkady, A., & Lignos, D. G. (2014). Modeling of the
             # composite action in fully restrained beam‐to‐column
             # connections: implications in the seismic design and
             # collapse capacity of steel special moment
             # frames. Earthquake Engineering & Structural Dynamics,
             # 43(13), 1935-1954.  Table II
-            assert direction == "strong"
+
+            assert (
+                axial_load_ratio == 0.00,
+                "Can't consider composite action for columns")
+            assert (
+                direction == "strong",
+                "Composite action affects the "
+                "behavior in strong-axis bending")
+
             theta_p_plus *= 1.80
             theta_p_minus *= 0.95
             theta_pc_plus *= 1.35
             theta_pc_minus *= 0.95
-            d_plus *= 1.15
-            d_minus *= 1.00
-            mcmy_plus *= 1.30
-            mcmy_minus *= 1.05
+            d_plus = 1.15
+            d_minus = 1.00
+            mcmy_plus = 1.30
+            mcmy_minus = 1.05
             m_plus *= 1.35
             m_minus *= 1.25
             residual_plus = 0.30
             residual_minus = 0.20
-        stiffness = 6.00 * section.e_mod * sec_i / elm_h
-        beta_plus = (mcmy_plus - 1.0) * m_plus / (theta_p_plus) / stiffness
+
+        # adjust parameters to account for the presence of the elastic element
+        stiffness_init = 6.00 * section.e_mod * sec_i / elm_h
+        stiffness = (n_parameter+1.00) * stiffness_init
+        theta_y = sec_m / stiffness_init
+        theta_p_plus -= (mcmy_plus - 1.0) * (sec_m / stiffness)
+        theta_p_minus -= (mcmy_minus - 1.0) * (sec_m / stiffness)
+        theta_pc_plus += theta_y + (mcmy_plus - 1.0) * (sec_m / stiffness)
+        theta_pc_plus += theta_y + (mcmy_minus - 1.0) * (sec_m / stiffness)
+        beta_plus = (mcmy_plus - 1.0) * m_plus / theta_p_plus / stiffness
         beta_minus = (
-            -(mcmy_minus - 1.0) * m_minus / (theta_p_minus) / stiffness
+            -(mcmy_minus - 1.0) * m_minus / theta_p_minus / stiffness
         )
+
         bilin_mat = Bilin(
             self.model.uid_generator.new("uniaxial material"),
             "auto_IMK",
-            stiffness,
+            stiffness * moment_modifier,
             beta_plus,
             beta_minus,
-            m_plus,
-            m_minus,
+            m_plus*moment_modifier,
+            m_minus*moment_modifier,
             lamda,
             lamda,
             lamda,
