@@ -21,7 +21,7 @@ from ..physical_material import PhysicalMaterial
 from ..model import Model
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import MaxStrainRange
-from ..ops.uniaxial_material import Bilin
+from ..ops.uniaxial_material import IMKBilin
 from ..ops.section import ElasticSection
 
 nparr = npt.NDArray[np.float64]
@@ -365,32 +365,61 @@ class MaterialGenerator:
             -(mcmy_minus - 1.0) * m_minus / theta_p_minus / stiffness
         )
 
-        bilin_mat = Bilin(
+        # # old model
+        # from ..ops.uniaxial_material import Bilin
+        # bilin_mat = Bilin(
+        #     self.model.uid_generator.new("uniaxial material"),
+        #     "auto_IMK",
+        #     stiffness * moment_modifier,
+        #     beta_plus,
+        #     beta_minus,
+        #     m_plus*moment_modifier,
+        #     m_minus*moment_modifier,
+        #     lamda,
+        #     lamda,
+        #     lamda,
+        #     lamda,
+        #     1.00,
+        #     1.00,
+        #     1.00,
+        #     1.00,
+        #     theta_p_plus,
+        #     theta_p_minus,
+        #     theta_pc_plus,
+        #     theta_pc_minus,
+        #     residual_plus,
+        #     residual_minus,
+        #     theta_u,
+        #     theta_u,
+        #     d_plus,
+        #     d_minus,
+        #     0.00,
+        # )
+
+        # new model
+        bilin_mat = IMKBilin(
             self.model.uid_generator.new("uniaxial material"),
             "auto_IMK",
             stiffness * moment_modifier,
-            beta_plus,
-            beta_minus,
-            m_plus*moment_modifier,
-            m_minus*moment_modifier,
-            lamda,
-            lamda,
-            lamda,
-            lamda,
-            1.00,
-            1.00,
-            1.00,
-            1.00,
             theta_p_plus,
-            theta_p_minus,
             theta_pc_plus,
-            theta_pc_minus,
+            theta_u,
+            m_plus*moment_modifier,
+            (1.0 + beta_plus),
             residual_plus,
+            theta_p_minus,
+            theta_pc_minus,
+            theta_u,
+            -m_minus*moment_modifier,
+            (1.0 + beta_minus),
             residual_minus,
-            theta_u,
-            theta_u,
+            lamda,
+            lamda,
+            lamda,
+            1.00,
+            1.00,
+            1.00,
             d_plus,
-            d_minus,
-            0.00,
+            d_minus
         )
         return bilin_mat
