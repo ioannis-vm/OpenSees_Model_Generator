@@ -115,10 +115,13 @@ def code_spectrum(T_vals: nparr, Ss: float, S1: float,
     num_vals = len(T_vals)
     code_sa = np.full(num_vals, 0.00)
     T_short = S1 / Ss
+    T_zero = 0.20 * T_short
     code_sa[T_vals <= T_short] = Ss
     code_sa[T_vals >= Tl] = S1 * Tl / T_vals[T_vals >= Tl]**2
     sel = np.logical_and(T_vals > T_short, T_vals < Tl)
     code_sa[sel] = S1 / T_vals[sel]
+    code_sa[T_vals < T_zero] = (
+        Ss * (0.40 + 0.60 * T_vals[T_vals < T_zero] / T_zero))
     return np.column_stack((T_vals, code_sa))
 
 
