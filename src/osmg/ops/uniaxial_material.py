@@ -335,7 +335,7 @@ class IMKBilin(UniaxialMaterial):
         """
 
         return [
-            "Bilin",
+            "IMKBilin",
             self.uid,
             self.K0,
             self.theta_p_Plus,
