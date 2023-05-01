@@ -148,10 +148,13 @@
     <span class="n">num_vals</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">T_vals</span><span class="p">)</span>
     <span class="n">code_sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">num_vals</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
     <span class="n">T_short</span> <span class="o">=</span> <span class="n">S1</span> <span class="o">/</span> <span class="n">Ss</span>
+    <span class="n">T_zero</span> <span class="o">=</span> <span class="mf">0.20</span> <span class="o">*</span> <span class="n">T_short</span>
     <span class="n">code_sa</span><span class="p">[</span><span class="n">T_vals</span> <span class="o">&lt;=</span> <span class="n">T_short</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ss</span>
     <span class="n">code_sa</span><span class="p">[</span><span class="n">T_vals</span> <span class="o">&gt;=</span> <span class="n">Tl</span><span class="p">]</span> <span class="o">=</span> <span class="n">S1</span> <span class="o">*</span> <span class="n">Tl</span> <span class="o">/</span> <span class="n">T_vals</span><span class="p">[</span><span class="n">T_vals</span> <span class="o">&gt;=</span> <span class="n">Tl</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
     <span class="n">sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">T_vals</span> <span class="o">&gt;</span> <span class="n">T_short</span><span class="p">,</span> <span class="n">T_vals</span> <span class="o">&lt;</span> <span class="n">Tl</span><span class="p">)</span>
     <span class="n">code_sa</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">=</span> <span class="n">S1</span> <span class="o">/</span> <span class="n">T_vals</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+    <span class="n">code_sa</span><span class="p">[</span><span class="n">T_vals</span> <span class="o">&lt;</span> <span class="n">T_zero</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Ss</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.40</span> <span class="o">+</span> <span class="mf">0.60</span> <span class="o">*</span> <span class="n">T_vals</span><span class="p">[</span><span class="n">T_vals</span> <span class="o">&lt;</span> <span class="n">T_zero</span><span class="p">]</span> <span class="o">/</span> <span class="n">T_zero</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">T_vals</span><span class="p">,</span> <span class="n">code_sa</span><span class="p">))</span></div>
 
 
@@ -218,7 +221,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

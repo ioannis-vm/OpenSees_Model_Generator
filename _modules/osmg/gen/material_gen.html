@@ -54,7 +54,7 @@
 <span class="kn">from</span> <span class="nn">..model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Steel02</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">MaxStrainRange</span>
-<span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Bilin</span>
+<span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">IMKBilin</span>
 <span class="kn">from</span> <span class="nn">..ops.section</span> <span class="kn">import</span> <span class="n">ElasticSection</span>
 
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
@@ -398,33 +398,62 @@
             <span class="o">-</span><span class="p">(</span><span class="n">mcmy_minus</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">m_minus</span> <span class="o">/</span> <span class="n">theta_p_minus</span> <span class="o">/</span> <span class="n">stiffness</span>
         <span class="p">)</span>
 
-        <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">Bilin</span><span class="p">(</span>
+        <span class="c1"># # old model</span>
+        <span class="c1"># from ..ops.uniaxial_material import Bilin</span>
+        <span class="c1"># bilin_mat = Bilin(</span>
+        <span class="c1">#     self.model.uid_generator.new(&quot;uniaxial material&quot;),</span>
+        <span class="c1">#     &quot;auto_IMK&quot;,</span>
+        <span class="c1">#     stiffness * moment_modifier,</span>
+        <span class="c1">#     beta_plus,</span>
+        <span class="c1">#     beta_minus,</span>
+        <span class="c1">#     m_plus*moment_modifier,</span>
+        <span class="c1">#     m_minus*moment_modifier,</span>
+        <span class="c1">#     lamda,</span>
+        <span class="c1">#     lamda,</span>
+        <span class="c1">#     lamda,</span>
+        <span class="c1">#     lamda,</span>
+        <span class="c1">#     1.00,</span>
+        <span class="c1">#     1.00,</span>
+        <span class="c1">#     1.00,</span>
+        <span class="c1">#     1.00,</span>
+        <span class="c1">#     theta_p_plus,</span>
+        <span class="c1">#     theta_p_minus,</span>
+        <span class="c1">#     theta_pc_plus,</span>
+        <span class="c1">#     theta_pc_minus,</span>
+        <span class="c1">#     residual_plus,</span>
+        <span class="c1">#     residual_minus,</span>
+        <span class="c1">#     theta_u,</span>
+        <span class="c1">#     theta_u,</span>
+        <span class="c1">#     d_plus,</span>
+        <span class="c1">#     d_minus,</span>
+        <span class="c1">#     0.00,</span>
+        <span class="c1"># )</span>
+
+        <span class="c1"># new model</span>
+        <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">IMKBilin</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
             <span class="s2">&quot;auto_IMK&quot;</span><span class="p">,</span>
             <span class="n">stiffness</span> <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="n">beta_plus</span><span class="p">,</span>
-            <span class="n">beta_minus</span><span class="p">,</span>
-            <span class="n">m_plus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="n">m_minus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
             <span class="n">theta_p_plus</span><span class="p">,</span>
-            <span class="n">theta_p_minus</span><span class="p">,</span>
             <span class="n">theta_pc_plus</span><span class="p">,</span>
-            <span class="n">theta_pc_minus</span><span class="p">,</span>
+            <span class="n">theta_u</span><span class="p">,</span>
+            <span class="n">m_plus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
+            <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_plus</span><span class="p">),</span>
             <span class="n">residual_plus</span><span class="p">,</span>
+            <span class="n">theta_p_minus</span><span class="p">,</span>
+            <span class="n">theta_pc_minus</span><span class="p">,</span>
+            <span class="n">theta_u</span><span class="p">,</span>
+            <span class="o">-</span><span class="n">m_minus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
+            <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_minus</span><span class="p">),</span>
             <span class="n">residual_minus</span><span class="p">,</span>
-            <span class="n">theta_u</span><span class="p">,</span>
-            <span class="n">theta_u</span><span class="p">,</span>
+            <span class="n">lamda</span><span class="p">,</span>
+            <span class="n">lamda</span><span class="p">,</span>
+            <span class="n">lamda</span><span class="p">,</span>
+            <span class="mf">1.00</span><span class="p">,</span>
+            <span class="mf">1.00</span><span class="p">,</span>
+            <span class="mf">1.00</span><span class="p">,</span>
             <span class="n">d_plus</span><span class="p">,</span>
-            <span class="n">d_minus</span><span class="p">,</span>
-            <span class="mf">0.00</span><span class="p">,</span>
+            <span class="n">d_minus</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">bilin_mat</span></div></div>
 </pre></div>
@@ -488,7 +517,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

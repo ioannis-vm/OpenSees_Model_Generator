@@ -75,11 +75,11 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">parent</span>
 <span class="go">52</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># now `my_collection` knows that it belongs to the object `52`.</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collection.add method</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.ops.node</span> <span class="kn">import</span> <span class="n">Node</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">my_collection</span><span class="p">)</span>
@@ -104,11 +104,11 @@
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w">    </span><span class="o">...</span>
 <span class="gr">KeyError</span>: <span class="n">&#39;uid 0 already exists&#39;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collections.retrieve_by_attr method:</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.ops.section</span> <span class="kn">import</span> <span class="n">Section</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sec_collection</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sec_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Section</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sec_1&#39;</span><span class="p">,</span> <span class="n">uid</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
@@ -116,11 +116,11 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sec_collection</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;sec_1&#39;</span><span class="p">)</span>
 <span class="go">Section(name=&#39;sec_1&#39;, uid=0)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># we &#39;ll use this later:</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Collections.__srepr__ method:</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sec_collection</span><span class="o">.</span><span class="n">__srepr__</span><span class="p">()</span>
 <span class="go">&#39;[Collection of 2 items]&#39;</span>
 </pre></div>
@@ -182,11 +182,11 @@ objects.</p>
 <span class="gp">... </span>    <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">uid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">elevation</span><span class="o">=</span><span class="mf">1.00</span><span class="p">))</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># CollectionActive.set_active method:</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># set them both as active</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">set_active</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">active</span>
@@ -273,18 +273,18 @@ it does.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.ops.node</span> <span class="kn">import</span> <span class="n">Node</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.level</span> <span class="kn">import</span> <span class="n">Level</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">level</span> <span class="o">=</span> <span class="n">Level</span><span class="p">(</span><span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mf">0.00</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span> <span class="o">=</span> <span class="n">NodeCollection</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n_1</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">uid</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">[</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n_2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">uid</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="p">[</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">n_1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">my_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">n_2</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># NodeCollection.search_xy method:</span>
-<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">retrieved_node</span> <span class="o">=</span> <span class="n">my_collection</span><span class="o">.</span><span class="n">search_xy</span><span class="p">(</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span><span class="p">(</span><span class="n">retrieved_node</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">n_2</span><span class="p">)</span>  <span class="c1"># should be the same object</span>
 <span class="go">True</span>
@@ -362,7 +362,7 @@ it does.</p>
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

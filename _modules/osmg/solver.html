@@ -580,7 +580,7 @@
         <span class="c1">#     &#39;-dir&#39;, 1, 2, 3, 4, 5, 6</span>
         <span class="c1"># )</span>
 
-    <span class="k">def</span> <span class="nf">_define_loads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_define_loads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">1.00</span><span class="p">):</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">timeSeries</span><span class="p">(</span><span class="s2">&quot;Linear&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">pattern</span><span class="p">(</span><span class="s2">&quot;Plain&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">elms_with_udl</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span>
@@ -604,14 +604,14 @@
                     <span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span>
                     <span class="s2">&quot;-type&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;-beamUniform&quot;</span><span class="p">,</span>
-                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">factor</span><span class="p">,</span>
+                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">factor</span><span class="p">,</span>
+                    <span class="n">udl_total</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">factor</span><span class="p">,</span>
                 <span class="p">)</span>
 
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_all_nodes</span><span class="p">():</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                <span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">load_cases</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load_cases</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_loads</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span><span class="o">.</span><span class="n">val</span><span class="o">*</span><span class="n">factor</span><span class="p">)</span>
             <span class="p">)</span>
 
     <span class="c1">####################################################</span>
@@ -1106,7 +1106,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_run_gravity_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_run_gravity_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Setting test to (&#39;EnergyIncr&#39;, 1.0e-6, 100, 3)&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="mf">1.0e-6</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="n">system</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">solver</span>
@@ -1122,7 +1122,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Setting analysis to Static&quot;</span><span class="p">)</span>
         <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Static&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;G: Analyzing now.&quot;</span><span class="p">)</span>
-        <span class="n">check</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">num_steps</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">check</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Gravity analysis failed. Unable to continue...&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Analysis Failed&quot;</span><span class="p">)</span>
@@ -1346,6 +1346,7 @@
         <span class="n">target_displacements</span><span class="p">,</span>
         <span class="n">control_node</span><span class="p">,</span>
         <span class="n">displ_incr</span><span class="p">,</span>
+        <span class="n">integrator</span><span class="o">=</span><span class="s1">&#39;DisplacementControl&#39;</span><span class="p">,</span>
         <span class="n">modeshape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">loaded_node</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -1360,7 +1361,8 @@
 <span class="sd">            necessary.</span>
 <span class="sd">          control_node: analysis control node (of which the direction</span>
 <span class="sd">            is queried)</span>
-<span class="sd">          displ_incr: initial displacement increment.</span>
+<span class="sd">          displ_incr: initial displacement increment or arc length.</span>
+<span class="sd">          integrator: Any of &#39;DisplacementControl&#39; or &#39;ArcLength&#39;</span>
 <span class="sd">          mode shape: array containing a mode shape that is used to</span>
 <span class="sd">            distribute the applied incremental loads. If no mode shape</span>
 <span class="sd">            is specified, the distribution is uniform.</span>
@@ -1410,9 +1412,9 @@
 
 
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Defining loads&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_define_loads</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_define_loads</span><span class="p">(</span><span class="n">case_name</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Running gravity analysis&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_run_gravity_analysis</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_run_gravity_analysis</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
 
             <span class="n">curr_displ</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeDisp</span><span class="p">(</span><span class="n">control_node</span><span class="o">.</span><span class="n">uid</span><span class="p">,</span> <span class="n">control_dof</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">n_steps_success</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1474,13 +1476,18 @@
                             <span class="mi">0</span><span class="p">,</span>
                         <span class="p">)</span>
                         <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
-                        <span class="c1"># ops.integrator(&quot;ArcLength&quot;, 0.1, 1.00e-7)</span>
-                        <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span>
-                            <span class="s2">&quot;DisplacementControl&quot;</span><span class="p">,</span>
-                            <span class="nb">int</span><span class="p">(</span><span class="n">control_node</span><span class="o">.</span><span class="n">uid</span><span class="p">),</span>
-                            <span class="n">control_dof</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                            <span class="n">incr</span><span class="p">,</span>
-                        <span class="p">)</span>
+                        <span class="k">if</span> <span class="n">integrator</span> <span class="o">==</span> <span class="s1">&#39;DisplacementControl&#39;</span><span class="p">:</span>
+                            <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span>
+                                <span class="s2">&quot;DisplacementControl&quot;</span><span class="p">,</span>
+                                <span class="nb">int</span><span class="p">(</span><span class="n">control_node</span><span class="o">.</span><span class="n">uid</span><span class="p">),</span>
+                                <span class="n">control_dof</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                <span class="n">incr</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="k">elif</span> <span class="n">integrator</span> <span class="o">==</span> <span class="s1">&#39;ArcLength&#39;</span><span class="p">:</span>
+                            <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;ArcLength&quot;</span><span class="p">,</span> <span class="n">incr</span><span class="p">,</span> <span class="mf">1e-7</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s1">&#39;Invalid integrator: </span><span class="si">{</span><span class="n">integrator</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                         <span class="n">ops</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
                         <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Static&quot;</span><span class="p">)</span>
                         <span class="n">flag</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -1826,10 +1833,10 @@
 
         <span class="c1"># gravity analysis</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Defining loads&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_define_loads</span><span class="p">(</span><span class="n">case_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_define_loads</span><span class="p">(</span><span class="n">case_name</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting gravity analysis (G)&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_run_gravity_analysis</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_run_gravity_analysis</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Gravity analysis finished successfully&quot;</span><span class="p">)</span>
         <span class="n">n_steps_success</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_opensees_results</span><span class="p">(</span>
@@ -1839,7 +1846,6 @@
             <span class="n">line_elems</span><span class="p">,</span>
             <span class="n">zerolength_elems</span><span class="p">,</span>
         <span class="p">)</span>
-
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Starting transient analysis&quot;</span><span class="p">)</span>
@@ -1894,7 +1900,7 @@
             <span class="c1"># ops.systemSize()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Eigenvalue analysis finished&quot;</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">damping_ratio</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
-            <span class="n">ops</span><span class="o">.</span><span class="n">modalDamping</span><span class="p">(</span><span class="n">damping_ratio</span><span class="p">)</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">modalDampingQ</span><span class="p">(</span><span class="n">damping_ratio</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">damping_ratio</span><span class="o">*</span><span class="mf">100.00</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% &quot;</span> <span class="s2">&quot;modal damping defined&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">damping_type</span> <span class="o">==</span> <span class="s2">&quot;modal+stiffness&quot;</span><span class="p">:</span>
@@ -1907,7 +1913,7 @@
             <span class="n">ops</span><span class="o">.</span><span class="n">eigen</span><span class="p">(</span><span class="n">num_modes</span><span class="p">)</span>
             <span class="c1"># ops.systemSize()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Eigenvalue analysis finished&quot;</span><span class="p">)</span>
-            <span class="n">ops</span><span class="o">.</span><span class="n">modalDamping</span><span class="p">(</span><span class="n">damping</span><span class="p">[</span><span class="s2">&quot;ratio_modal&quot;</span><span class="p">])</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">modalDampingQ</span><span class="p">(</span><span class="n">damping</span><span class="p">[</span><span class="s2">&quot;ratio_modal&quot;</span><span class="p">])</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">damping</span><span class="p">[</span><span class="s2">&quot;ratio_stiffness&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">damping</span><span class="p">[</span><span class="s2">&quot;period&quot;</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">rayleigh</span><span class="p">(</span>
@@ -2318,7 +2324,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
