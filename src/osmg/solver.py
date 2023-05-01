@@ -547,7 +547,7 @@ class Analysis:
         #     '-dir', 1, 2, 3, 4, 5, 6
         # )
 
-    def _define_loads(self, case_name):
+    def _define_loads(self, case_name, factor=1.00):
         ops.timeSeries("Linear", 1)
         ops.pattern("Plain", 1, 1)
         elms_with_udl: list[Union[
@@ -571,14 +571,14 @@ class Analysis:
                     elm.uid,
                     "-type",
                     "-beamUniform",
-                    udl_total[1],
-                    udl_total[2],
-                    udl_total[0],
+                    udl_total[1]*factor,
+                    udl_total[2]*factor,
+                    udl_total[0]*factor,
                 )
 
         for node in self.mdl.list_of_all_nodes():
             ops.load(
-                node.uid, *self.load_cases[case_name].node_loads[node.uid].val
+                node.uid, *(self.load_cases[case_name].node_loads[node.uid].val*factor)
             )
 
     ####################################################
@@ -1073,7 +1073,7 @@ class GravityPlusAnalysis(Analysis):
 
     """
 
-    def _run_gravity_analysis(self):
+    def _run_gravity_analysis(self, num_steps=1):
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
         ops.test("EnergyIncr", 1.0e-6, 100, 3)
         system = self.settings.solver
@@ -1089,7 +1089,7 @@ class GravityPlusAnalysis(Analysis):
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
         self.log("G: Analyzing now.")
-        check = ops.analyze(1)
+        check = ops.analyze(num_steps)
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")
             raise ValueError("Analysis Failed")
@@ -1313,6 +1313,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         target_displacements,
         control_node,
         displ_incr,
+        integrator='DisplacementControl',
         modeshape=None,
         loaded_node=None,
     ):
@@ -1327,7 +1328,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
             necessary.
           control_node: analysis control node (of which the direction
             is queried)
-          displ_incr: initial displacement increment.
+          displ_incr: initial displacement increment or arc length.
+          integrator: Any of 'DisplacementControl' or 'ArcLength'
           mode shape: array containing a mode shape that is used to
             distribute the applied incremental loads. If no mode shape
             is specified, the distribution is uniform.
@@ -1377,9 +1379,9 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
 
             self.log("Defining loads")
-            self._define_loads(case_name)
+            self._define_loads(case_name, 0.01)
             self.log("Running gravity analysis")
-            self._run_gravity_analysis()
+            self._run_gravity_analysis(100)
 
             curr_displ = ops.nodeDisp(control_node.uid, control_dof + 1)
             n_steps_success = 0
@@ -1441,13 +1443,18 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             0,
                         )
                         ops.algorithm("KrylovNewton")
-                        # ops.integrator("ArcLength", 0.1, 1.00e-7)
-                        ops.integrator(
-                            "DisplacementControl",
-                            int(control_node.uid),
-                            control_dof + 1,
-                            incr,
-                        )
+                        if integrator == 'DisplacementControl':
+                            ops.integrator(
+                                "DisplacementControl",
+                                int(control_node.uid),
+                                control_dof + 1,
+                                incr,
+                            )
+                        elif integrator == 'ArcLength':
+                            ops.integrator("ArcLength", incr, 1e-7)
+                        else:
+                            raise ValueError(
+                                f'Invalid integrator: {integrator}')
                         ops.system(self.settings.solver)
                         ops.analysis("Static")
                         flag = ops.analyze(1)
@@ -1793,10 +1800,10 @@ class THAnalysis(GravityPlusAnalysis):
 
         # gravity analysis
         self.log("Defining loads")
-        self._define_loads(case_name)
+        self._define_loads(case_name, factor=0.01)
 
         self.log("Starting gravity analysis (G)")
-        self._run_gravity_analysis()
+        self._run_gravity_analysis(num_steps=100)
         self.log("Gravity analysis finished successfully")
         n_steps_success = 0
         self._read_opensees_results(
@@ -1806,7 +1813,6 @@ class THAnalysis(GravityPlusAnalysis):
             line_elems,
             zerolength_elems,
         )
-
 
         self.log("")
         self.log("Starting transient analysis")
@@ -1861,7 +1867,7 @@ class THAnalysis(GravityPlusAnalysis):
             # ops.systemSize()
             self.log("Eigenvalue analysis finished")
             assert isinstance(damping_ratio, float)
-            ops.modalDamping(damping_ratio)
+            ops.modalDampingQ(damping_ratio)
             self.log(f"{damping_ratio*100.00:.2f}% " "modal damping defined")
 
         if damping_type == "modal+stiffness":
@@ -1874,7 +1880,7 @@ class THAnalysis(GravityPlusAnalysis):
             ops.eigen(num_modes)
             # ops.systemSize()
             self.log("Eigenvalue analysis finished")
-            ops.modalDamping(damping["ratio_modal"])
+            ops.modalDampingQ(damping["ratio_modal"])
             assert isinstance(damping["ratio_stiffness"], float)
             assert isinstance(damping["period"], float)
             ops.rayleigh(
