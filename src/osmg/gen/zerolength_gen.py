@@ -230,6 +230,7 @@ def gravity_shear_tab(
     sec_zx = section.properties["Zx"]
     # Plastic moment of the section
     sec_mp = sec_zx * mat_fy * 1.0e3 * moment_modifier
+
     if not consider_composite:
         m_max_pos = 0.121 * sec_mp
         m_max_neg = 0.121 * sec_mp
@@ -263,31 +264,31 @@ def gravity_shear_tab(
     else:
         m_max_pos = 0.35 * sec_mp
         m_max_neg = 0.64 * 0.35 * sec_mp
-        m1_p = +0.521 * m_max_pos
-        m1_n = -0.521 * m_max_neg
-        m2_p = +0.967 * m_max_pos
-        m2_n = -0.967 * m_max_neg
-        m3_p = +1.000 * m_max_pos
-        m3_n = -1.000 * m_max_pos
-        m4_p = +0.901 * m_max_pos
-        m4_n = -0.901 * m_max_neg
-        th_1_p = 0.0045
-        th_1_n = -0.0045
-        th_2_p = 0.0465
-        th_2_n = -0.0465
-        th_3_p = 0.0750
-        th_3_n = -0.0750
-        th_4_p = 0.1000
-        th_4_n = -0.1000
-        rdispp = 0.57
-        rdispn = 0.57
-        rforcep = 0.40
-        rforcen = 0.40
-        uforcep = 0.05
+        m1_p = +0.250 * m_max_pos
+        m1_n = -0.250 * m_max_neg
+        m2_p = +1.000 * m_max_pos
+        m2_n = -1.000 * m_max_neg
+        m3_p = +1.001 * m_max_pos
+        m3_n = -1.001 * m_max_pos
+        m4_p = +0.530 * m_max_pos
+        m4_n = -0.540 * m_max_neg
+        th_1_p = 0.0042
+        th_1_n = -0.0042
+        th_2_p = 0.0200
+        th_2_n = -0.0110
+        th_3_p = 0.0390
+        th_3_n = -0.0300
+        th_4_p = 0.0400
+        th_4_n = -0.0550
+        rdispp = 0.40
+        rdispn = 0.50
+        rforcep = 0.13
+        rforcen = 0.53
+        uforcep = 0.01
         uforcen = 0.05
-        gklim = 0.2
-        gdlim = 0.1
-        gflim = 0.0
+        gklim = 0.30
+        gdlim = 0.05
+        gflim = 0.05
         g_e = 10
         dmgtype = "energy"
 
