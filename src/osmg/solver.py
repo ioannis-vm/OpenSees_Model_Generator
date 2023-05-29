@@ -786,9 +786,10 @@ class StaticAnalysis(Analysis):
             ops.constraints(*CONSTRAINTS)
             ops.test("EnergyIncr", 1.0e-8, 20, 3)
             ops.algorithm("KrylovNewton")
-            ops.integrator("LoadControl", 1.0)
+            ops.integrator("LoadControl", 0.01)
             ops.analysis("Static")
-            ops.analyze(1)
+            for _ in range(100):
+                ops.analyze(1)
             self._read_opensees_results(
                 case_name,
                 step,
@@ -1221,6 +1222,21 @@ class GravityPlusAnalysis(Analysis):
         dfrmae.index.name = "step"
         return dfrmae
 
+    def retrieve_base_shear(self, case_name):
+        """
+        Returns the base shear response history
+
+        """
+        base_shear_lst = []
+        for step in range(
+            self.results[case_name].n_steps_success
+        ):  # type:ignore
+            base_shear_lst.append(
+                self.global_reactions(case_name, step)[0:3]
+            )
+        base_shear: nparr = np.array(base_shear_lst)
+        return base_shear
+
     def retrieve_release_force_defo(self, uid, case_name):
         """
         Returns the force-deformation of a zerolength element for all
@@ -1577,7 +1593,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         )
 
 def define_lateral_load_pattern(
-    filename_x, filename_y, filename_z, file_time_incr
+    ag_x, ag_y, ag_z, file_time_incr
 ):
     """
     Defines the load pattern for a time-history analysis from
@@ -1586,7 +1602,7 @@ def define_lateral_load_pattern(
     """
 
     error = True
-    if filename_x:
+    if ag_x is not None:
         error = False
         # define X-direction TH
         ops.timeSeries(
@@ -1594,15 +1610,15 @@ def define_lateral_load_pattern(
             2,
             "-dt",
             file_time_incr,
-            "-filePath",
-            filename_x,
+            "-values",
+            *ag_x,
             "-factor",
             common.G_CONST_IMPERIAL,
         )
         # pattern, direction, time series tag
         ops.pattern("UniformExcitation", 2, 1, "-accel", 2)
 
-    if filename_y:
+    if ag_y is not None:
         error = False
         # define Y-direction TH
         ops.timeSeries(
@@ -1610,15 +1626,15 @@ def define_lateral_load_pattern(
             3,
             "-dt",
             file_time_incr,
-            "-filePath",
-            filename_y,
+            "-values",
+            *ag_y,
             "-factor",
             common.G_CONST_IMPERIAL,
         )
         # pattern, direction, time series tag
         ops.pattern("UniformExcitation", 3, 2, "-accel", 3)
 
-    if filename_z:
+    if ag_z is not None:
         error = False
         # define Z-direction TH
         ops.timeSeries(
@@ -1626,8 +1642,8 @@ def define_lateral_load_pattern(
             4,
             "-dt",
             file_time_incr,
-            "-filePath",
-            filename_z,
+            "-values",
+            *ag_z,
             "-factor",
             common.G_CONST_IMPERIAL,
         )
@@ -1683,10 +1699,10 @@ class THAnalysis(GravityPlusAnalysis):
     def run(
             self,
             analysis_time_increment: float,
-            filename_x: Optional[str],
-            filename_y: Optional[str],
-            filename_z: Optional[str],
-            file_time_incr: float,
+            ag_vec_x: Optional[nparr],
+            ag_vec_y: Optional[nparr],
+            ag_vec_z: Optional[nparr],
+            ag_vec_time_incr: float,
             finish_time: float = 0.00,
             skip_steps: int = 1,
             damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
@@ -1697,9 +1713,9 @@ class THAnalysis(GravityPlusAnalysis):
         Run the time-history analysis
 
         Arguments:
-            filename_x, y, z: Paths where the fixed-step ground acceleration
-                              records are stored (single-column).
-            file_time_incr:   The corresponding time increment
+            ag_vec_x, y, z: 1-D numpy arrays containing the fixed-step
+                            ground acceleration records.
+            ag_vec_time_incr:   The corresponding time increment
             finish_time: Specify a target time (s) to stop the analysis
                          the default value of 0.00 means that it will
                          run for the entire duration of the files.
@@ -1754,38 +1770,31 @@ class THAnalysis(GravityPlusAnalysis):
         self.log(f'Damping Type: {damping_type}')
 
         nss = []
-        if filename_x:
-            gm_vals_x = np.genfromtxt(filename_x)
-            nss.append(len(gm_vals_x))
-        if filename_y:
-            gm_vals_y = np.genfromtxt(filename_y)
-            nss.append(len(gm_vals_y))
-        if filename_z:
-            gm_vals_z = np.genfromtxt(filename_z)
-            nss.append(len(gm_vals_z))
-
-        self.log(f"filename_x: {filename_x}")
-        self.log(f"filename_y: {filename_y}")
-        self.log(f"filename_z: {filename_z}")
+        if ag_vec_x is not None:
+            nss.append(len(ag_vec_x))
+        if ag_vec_y is not None:
+            nss.append(len(ag_vec_y))
+        if ag_vec_z is not None:
+            nss.append(len(ag_vec_z))
 
         num_gm_points = np.min(np.array(nss))
-        duration = num_gm_points * file_time_incr
+        duration = num_gm_points * ag_vec_time_incr
 
         self.log(f'Ground Motion Duration: {duration:.2f} s')
 
         t_vec = np.linspace(
-            0.00, file_time_incr * num_gm_points, num_gm_points
+            0.00, ag_vec_time_incr * num_gm_points, num_gm_points
         )
-        if filename_x:
-            self.a_g[0] = np.column_stack((t_vec, gm_vals_x))  # type: ignore
+        if ag_vec_x is not None:
+            self.a_g[0] = np.column_stack((t_vec, ag_vec_x))  # type: ignore
         else:
             self.a_g[0] = np.column_stack((t_vec, np.zeros(len(t_vec))))
-        if filename_y:
-            self.a_g[1] = np.column_stack((t_vec, gm_vals_y))  # type: ignore
+        if ag_vec_y is not None:
+            self.a_g[1] = np.column_stack((t_vec, ag_vec_y))  # type: ignore
         else:
             self.a_g[1] = np.column_stack((t_vec, np.zeros(len(t_vec))))
-        if filename_z:
-            self.a_g[2] = np.column_stack((t_vec, gm_vals_z))  # type: ignore
+        if ag_vec_z is not None:
+            self.a_g[2] = np.column_stack((t_vec, ag_vec_z))  # type: ignore
         else:
             self.a_g[2] = np.column_stack((t_vec, np.zeros(len(t_vec))))
 
@@ -1898,7 +1907,7 @@ class THAnalysis(GravityPlusAnalysis):
         ops.analysis("Transient")
 
         define_lateral_load_pattern(
-            filename_x, filename_y, filename_z, file_time_incr
+            ag_vec_x, ag_vec_y, ag_vec_z, ag_vec_time_incr
         )
 
         num_subdiv = 0
@@ -1907,12 +1916,9 @@ class THAnalysis(GravityPlusAnalysis):
         analysis_failed = False
 
         scale = [
-            1.0, 1.0e-1, 1.0e-2,
-            1.0e-3, 1.0e-4, 1.0e-5,
-            1.0e-6, 1.0e-7, 1.0e-8,
-            1.0e-9, 1.0e-10, 1.0e-11,
+            1.0, 1.0e-1, 1.0e-2, 1.0e-3
         ]
-        tols = [1.0e-8]*12
+        tols = [1.0e-8]*4
 
         # progress bar
         if print_progress:

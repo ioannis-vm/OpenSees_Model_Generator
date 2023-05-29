@@ -292,11 +292,12 @@ help(nlth_anl.run)
 
 
 # %%
+ag_x = np.genfromtxt('groundmotions/1xa.txt')
+ag_y = np.genfromtxt('groundmotions/1ya.txt')
+
 nlth_anl.run(
     0.01,
-    'groundmotions/1xa.txt',
-    'groundmotions/1ya.txt',
-    None,
+    ag_x, ag_y, None,
     0.005,
     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
     print_progress=True
