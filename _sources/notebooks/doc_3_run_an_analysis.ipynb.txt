@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "3ac6bbc1",
+   "id": "d27de3cf",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -25,7 +25,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "8419cb97",
+   "id": "c0b474ae",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -39,7 +39,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d4882c3f",
+   "id": "50ecfafa",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -155,7 +155,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d7a2d62f",
+   "id": "e71afc49",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -164,7 +164,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "c39191af",
+   "id": "9e67bae0",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -175,7 +175,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "003efbab",
+   "id": "633cbfb2",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -187,7 +187,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c12d0cce",
+   "id": "1891a743",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -200,7 +200,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "e79d298d",
+   "id": "1d74d0c4",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -211,7 +211,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1b034104",
+   "id": "6c3095fe",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -225,7 +225,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "fc00edb3",
+   "id": "4d07344f",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -237,7 +237,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "34319d04",
+   "id": "f86eaf2b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -250,7 +250,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "efeaec06",
+   "id": "95e8fc54",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -267,7 +267,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "35843b39",
+   "id": "3efb8800",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -280,7 +280,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "ab2b6804",
+   "id": "a19a73d9",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -295,7 +295,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "e89e5b9f",
+   "id": "0a672253",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -308,7 +308,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b3f1554e",
+   "id": "915b5da3",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -320,7 +320,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a0f2b2ba",
+   "id": "48c0b0b0",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -330,7 +330,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "760b908b",
+   "id": "ecbea94c",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -342,7 +342,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "790461ce",
+   "id": "a89d8140",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -356,7 +356,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "a26b6867",
+   "id": "e103f07a",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -367,7 +367,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6ac612de",
+   "id": "6ac92566",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -381,7 +381,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2a11a664",
+   "id": "5a95b24d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -395,7 +395,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c5efebd6",
+   "id": "2dc58210",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -406,7 +406,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "deade3cc",
+   "id": "ba624367",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -418,7 +418,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "963caaff",
+   "id": "9367a221",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -431,7 +431,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b094a12b",
+   "id": "03ad6176",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -442,7 +442,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6ed309dd",
+   "id": "7e733cc4",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -452,7 +452,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "429c8568",
+   "id": "f321101b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -464,17 +464,18 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b0108a68",
+   "id": "b44e25a6",
    "metadata": {
     "lines_to_next_cell": 2
    },
    "outputs": [],
    "source": [
+    "ag_x = np.genfromtxt('groundmotions/1xa.txt')\n",
+    "ag_y = np.genfromtxt('groundmotions/1ya.txt')\n",
+    "\n",
     "nlth_anl.run(\n",
     "    0.01,\n",
-    "    'groundmotions/1xa.txt',\n",
-    "    'groundmotions/1ya.txt',\n",
-    "    None,\n",
+    "    ag_x, ag_y, None,\n",
     "    0.005,\n",
     "    damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},\n",
     "    print_progress=True\n",
@@ -484,7 +485,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c9275a44",
+   "id": "92961564",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -496,7 +497,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1a934538",
+   "id": "e41402b5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -508,7 +509,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "28cd4ced",
+   "id": "8824c541",
    "metadata": {
     "cell_marker": "\"\"\""
    },
