@@ -2084,7 +2084,7 @@
                                 <span class="p">)</span>
                             <span class="n">analysis_failed</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="k">break</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_limit</span><span class="o">*</span><span class="mf">3600.00</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">time_limit</span> <span class="ow">and</span> <span class="p">(</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">time_limit</span><span class="o">*</span><span class="mf">3600.00</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
                                 <span class="s2">&quot;Analysis interrupted due to time limit.&quot;</span><span class="p">)</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
