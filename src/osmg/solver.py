@@ -2051,7 +2051,7 @@ class THAnalysis(GravityPlusAnalysis):
                                 )
                             analysis_failed = True
                             break
-                        if (perf_counter() - start_time) > time_limit*3600.00:
+                        if time_limit and (perf_counter() - start_time) > time_limit*3600.00:
                             self.print(
                                 "Analysis interrupted due to time limit.")
                             if self.logger:
