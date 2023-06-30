@@ -1925,7 +1925,11 @@ class THAnalysis(GravityPlusAnalysis):
 
         # progress bar
         if print_progress:
-            pbar = tqdm(total=target_timestamp)
+            pbar = tqdm(
+                total=target_timestamp,
+                bar_format='{percentage:3.0f}%|{bar:25}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
+                )
+            pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f}'})
             pbar.update(curr_time)
         else:
             pbar = None
@@ -1975,6 +1979,7 @@ class THAnalysis(GravityPlusAnalysis):
 
                     # progress bar
                     if pbar is not None:
+                        pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f}'})
                         pbar.update(curr_time - prev_time)
                     # log entry for analysis status
                     if perf_counter() - the_time > 5.00*60.00:  # 5 min
