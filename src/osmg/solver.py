@@ -1708,6 +1708,7 @@ class THAnalysis(GravityPlusAnalysis):
             damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
             print_progress: bool = True,
             drift_check: float = 0.00,
+            time_limit: Optional[float] = None
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the time-history analysis
@@ -1732,6 +1733,8 @@ class THAnalysis(GravityPlusAnalysis):
               analysis stops if the drift ratio in each orthogonal
               direction exceeds the specified value. Levels that have
               no parent nodes are excempt from this check.
+            time_limit: Maximum analysis time allowed, in hours.
+              When reached, the anlysis is interrupted.
 
         """
 
@@ -2040,6 +2043,18 @@ class THAnalysis(GravityPlusAnalysis):
                                     "Analysis stopped at time"
                                     f" {curr_time:.5f}"
                                     " due to excessive drift."
+                                )
+                            analysis_failed = True
+                            break
+                        if (perf_counter() - start_time) > time_limit*3600.00:
+                            self.print(
+                                "Analysis interrupted due to time limit.")
+                            if self.logger:
+                                self.logger.warning(
+                                    "Analysis interrupted at time"
+                                    f" {curr_time:.5f}"
+                                    " because the time limit of"
+                                    f" {time_limit}h was reached."
                                 )
                             analysis_failed = True
                             break
