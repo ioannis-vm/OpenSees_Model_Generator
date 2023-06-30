@@ -1958,7 +1958,11 @@
 
         <span class="c1"># progress bar</span>
         <span class="k">if</span> <span class="n">print_progress</span><span class="p">:</span>
-            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">target_timestamp</span><span class="p">)</span>
+            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span>
+                <span class="n">total</span><span class="o">=</span><span class="n">target_timestamp</span><span class="p">,</span>
+                <span class="n">bar_format</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{percentage:3.0f}</span><span class="s1">%|</span><span class="si">{bar:25}</span><span class="s1">| [</span><span class="si">{elapsed}</span><span class="s1">&lt;</span><span class="si">{remaining}</span><span class="s1">, </span><span class="si">{rate_fmt}{postfix}</span><span class="s1">]&#39;</span>
+                <span class="p">)</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">({</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">curr_time</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">target_timestamp</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">})</span>
             <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">pbar</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2008,6 +2012,7 @@
 
                     <span class="c1"># progress bar</span>
                     <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">({</span><span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">curr_time</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">target_timestamp</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">})</span>
                         <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">curr_time</span> <span class="o">-</span> <span class="n">prev_time</span><span class="p">)</span>
                     <span class="c1"># log entry for analysis status</span>
                     <span class="k">if</span> <span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">the_time</span> <span class="o">&gt;</span> <span class="mf">5.00</span><span class="o">*</span><span class="mf">60.00</span><span class="p">:</span>  <span class="c1"># 5 min</span>
