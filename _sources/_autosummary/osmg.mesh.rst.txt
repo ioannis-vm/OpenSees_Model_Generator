@@ -26,7 +26,8 @@ osmg.mesh
       polygon_inertia
       print_halfedge_results
       sanity_checks
-      subdivide_hss
+      subdivide_hss_circ
+      subdivide_hss_rect
       subdivide_polygon
    
    

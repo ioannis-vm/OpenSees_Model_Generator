@@ -39,23 +39,40 @@
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.define_edges" title="osmg.gen.mesh_shapes.define_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">define_edges</span></code></a>(vertices)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.circ_mesh" title="osmg.gen.mesh_shapes.circ_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">circ_mesh</span></code></a>(dim_d)</p></td>
+<td><p>Defines a loop of counterclockwise halfedges that form the shape of the circular section with the specified parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.define_edges" title="osmg.gen.mesh_shapes.define_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">define_edges</span></code></a>(vertices)</p></td>
 <td><p>Defines edges from an ordered list of vertices.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generate" title="osmg.gen.mesh_shapes.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(edges)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generate" title="osmg.gen.mesh_shapes.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(edges)</p></td>
 <td><p>Generates halfedges from the given edges.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generic_snap_points" title="osmg.gen.mesh_shapes.generic_snap_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_snap_points</span></code></a>(mesh)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.generic_snap_points" title="osmg.gen.mesh_shapes.generic_snap_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generic_snap_points</span></code></a>(mesh)</p></td>
 <td><p>Generates generic snap poitns for a section object.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.rect_mesh" title="osmg.gen.mesh_shapes.rect_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rect_mesh</span></code></a>(dim_b, dim_h)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.rect_mesh" title="osmg.gen.mesh_shapes.rect_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rect_mesh</span></code></a>(dim_b, dim_h)</p></td>
 <td><p>Defines a loop of counterclockwise halfedges that form the shape of the rectangular section with the specified parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.w_mesh" title="osmg.gen.mesh_shapes.w_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">w_mesh</span></code></a>(sec_b, sec_h, sec_tw, sec_tf[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#osmg.gen.mesh_shapes.w_mesh" title="osmg.gen.mesh_shapes.w_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">w_mesh</span></code></a>(sec_b, sec_h, sec_tw, sec_tf[, ...])</p></td>
 <td><p>Defines a loop of counterclockwise halfedges that form the shape of the W section with the specified parameters.</p></td>
 </tr>
 </tbody>
 </table>
+<dl class="py function">
+<dt class="sig sig-object py" id="osmg.gen.mesh_shapes.circ_mesh">
+<span class="sig-name descname"><span class="pre">circ_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#circ_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.circ_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines a loop of counterclockwise halfedges
+that form the shape of the circular section with
+the specified parameters.
+The origin coincides with the centroid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>d</strong> – total diameter</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.gen.mesh_shapes.define_edges">
 <span class="sig-name descname"><span class="pre">define_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/gen/mesh_shapes.html#define_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.gen.mesh_shapes.define_edges" title="Permalink to this definition">¶</a></dt>

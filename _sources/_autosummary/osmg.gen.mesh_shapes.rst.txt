@@ -14,6 +14,7 @@ osmg.gen.mesh\_shapes
 
    .. autosummary::
    
+      circ_mesh
       define_edges
       generate
       generic_snap_points

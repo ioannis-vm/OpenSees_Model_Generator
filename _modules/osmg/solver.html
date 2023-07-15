@@ -784,7 +784,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="StaticAnalysis.run"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.StaticAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="StaticAnalysis.run"><a class="viewcode-back" href="../../_autosummary/osmg.solver.html#osmg.solver.StaticAnalysis.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_subdiv</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs the static analysis.</span>
 
@@ -819,9 +819,9 @@
             <span class="n">ops</span><span class="o">.</span><span class="n">constraints</span><span class="p">(</span><span class="o">*</span><span class="n">CONSTRAINTS</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="s2">&quot;EnergyIncr&quot;</span><span class="p">,</span> <span class="mf">1.0e-8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s2">&quot;KrylovNewton&quot;</span><span class="p">)</span>
-            <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;LoadControl&quot;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">integrator</span><span class="p">(</span><span class="s2">&quot;LoadControl&quot;</span><span class="p">,</span> <span class="mf">1.00</span><span class="o">/</span><span class="n">num_subdiv</span><span class="p">)</span>
             <span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s2">&quot;Static&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_subdiv</span><span class="p">):</span>
                 <span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_opensees_results</span><span class="p">(</span>
                 <span class="n">case_name</span><span class="p">,</span>

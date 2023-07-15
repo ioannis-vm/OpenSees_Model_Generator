@@ -261,6 +261,34 @@
     <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="circ_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.circ_mesh">[docs]</a><span class="k">def</span> <span class="nf">circ_mesh</span><span class="p">(</span><span class="n">dim_d</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines a loop of counterclockwise halfedges</span>
+<span class="sd">    that form the shape of the circular section with</span>
+<span class="sd">    the specified parameters.</span>
+<span class="sd">    The origin coincides with the centroid.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        d: total diameter</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">dim_d</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">num_vertices</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># Number of vertices on the circumference</span>
+
+    <span class="n">angle_increment</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">num_vertices</span>
+
+    <span class="n">vertices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_vertices</span><span class="p">):</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">angle_increment</span>
+        <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vertex</span><span class="p">((</span>
+            <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span>
+            <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span>
+        <span class="p">)))</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">define_edges</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="generic_snap_points"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.generic_snap_points">[docs]</a><span class="k">def</span> <span class="nf">generic_snap_points</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates generic snap poitns for a section object.</span>

@@ -53,6 +53,7 @@
 <span class="kn">from</span> <span class="nn">..physical_material</span> <span class="kn">import</span> <span class="n">PhysicalMaterial</span>
 <span class="kn">from</span> <span class="nn">..model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Steel02</span>
+<span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Fatigue</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">MaxStrainRange</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">IMKBilin</span>
 <span class="kn">from</span> <span class="nn">..ops.section</span> <span class="kn">import</span> <span class="n">ElasticSection</span>
@@ -127,6 +128,66 @@
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">maxstrainrange_mat</span></div>
+
+<div class="viewcode-block" id="MaterialGenerator.generate_steel_hss_circ_brace_fatigue_mat"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_hss_circ_brace_fatigue_mat">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_hss_circ_brace_fatigue_mat</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="n">FiberSection</span><span class="p">,</span>
+        <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span><span class="p">,</span>
+        <span class="n">brace_length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fatigue</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Karamanaci and Lignos (2014). Computational Approach for</span>
+<span class="sd">        Collapse Assessment of Concentrically Braced Frames in Seismic</span>
+<span class="sd">        Regions. Journal of Structural Engineering</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">param_b</span> <span class="o">=</span> <span class="mf">0.005</span>
+        <span class="n">param_r0</span> <span class="o">=</span> <span class="mf">24.00</span>
+        <span class="n">param_c_r1</span> <span class="o">=</span> <span class="mf">0.925</span>
+        <span class="n">param_c_r2</span> <span class="o">=</span> <span class="mf">0.25</span>
+
+        <span class="k">assert</span> <span class="n">section</span><span class="o">.</span><span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">sec_d</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;OD&quot;</span><span class="p">]</span>
+        <span class="n">sec_t</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;tdes&quot;</span><span class="p">]</span>
+        <span class="n">var_lc</span> <span class="o">=</span> <span class="n">brace_length</span>
+        <span class="n">sec_r</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;rx&quot;</span><span class="p">],</span> <span class="n">section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;ry&quot;</span><span class="p">])</span>
+        <span class="n">mat_e</span> <span class="o">=</span> <span class="n">physical_material</span><span class="o">.</span><span class="n">e_mod</span>
+        <span class="n">mat_g</span> <span class="o">=</span> <span class="n">physical_material</span><span class="o">.</span><span class="n">g_mod</span>
+        <span class="n">mat_fy</span> <span class="o">=</span> <span class="n">physical_material</span><span class="o">.</span><span class="n">f_y</span>
+        <span class="n">var_e0</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="mf">0.748</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">var_lc</span> <span class="o">/</span> <span class="n">sec_r</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.399</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">sec_d</span> <span class="o">/</span> <span class="n">sec_t</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.628</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">mat_e</span> <span class="o">/</span> <span class="n">mat_fy</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">0.201</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">var_m</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.300</span>
+
+        <span class="n">steel02_mat</span> <span class="o">=</span> <span class="n">Steel02</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;auto_steel02_brace_mat&quot;</span><span class="p">,</span>
+            <span class="n">mat_fy</span><span class="p">,</span>
+            <span class="n">mat_e</span><span class="p">,</span>
+            <span class="n">mat_g</span><span class="p">,</span>
+            <span class="n">param_b</span><span class="p">,</span>
+            <span class="n">param_r0</span><span class="p">,</span>
+            <span class="n">param_c_r1</span><span class="p">,</span>
+            <span class="n">param_c_r2</span><span class="p">,</span>
+            <span class="n">a1</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">a2</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="n">a3</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">a4</span><span class="o">=</span><span class="mf">1.0</span>
+        <span class="p">)</span>
+
+        <span class="n">fatigue_mat</span> <span class="o">=</span> <span class="n">Fatigue</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;auto_fatigue_brace_mat&quot;</span><span class="p">,</span>
+            <span class="n">steel02_mat</span><span class="p">,</span>
+            <span class="n">var_e0</span><span class="p">,</span>
+            <span class="n">var_m</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fatigue_mat</span></div>
 
 <div class="viewcode-block" id="MaterialGenerator.generate_steel_w_imk_material"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.material_gen.html#osmg.gen.material_gen.MaterialGenerator.generate_steel_w_imk_material">[docs]</a>    <span class="k">def</span> <span class="nf">generate_steel_w_imk_material</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

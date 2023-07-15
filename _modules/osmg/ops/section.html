@@ -209,19 +209,27 @@
         <span class="n">sec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="s2">&quot;HSS&quot;</span> <span class="ow">in</span> <span class="n">sec_name</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sec_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c1"># rectangular HSS section!</span>
-            <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_hss</span><span class="p">(</span>
+            <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_hss_rect</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;Ht&quot;</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;tdes&quot;</span><span class="p">],</span>
             <span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;HSS&#39;</span> <span class="ow">in</span> <span class="n">sec_name</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sec_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># circular HSS section!</span>
+            <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_hss_circ</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;OD&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s2">&quot;tdes&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
 
-        <span class="c1"># fallback: use the default rectangular mesh chopper</span>
-        <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_polygon</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">holes</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_x</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_y</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># fallback: use the default rectangular mesh chopper</span>
+            <span class="n">pieces</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">subdivide_polygon</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">outside_shape</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">holes</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_x</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parent_section</span><span class="o">.</span><span class="n">n_y</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">pieces</span></div>
 
 <div class="viewcode-block" id="SectionComponent.copy_alter_material"><a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.html#osmg.ops.section.SectionComponent.copy_alter_material">[docs]</a>    <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span>

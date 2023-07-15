@@ -369,6 +369,73 @@
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;Unsupported section type: </span><span class="si">{</span><span class="n">sec_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
                     <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">sec_shape_designation</span> <span class="o">==</span> <span class="s2">&quot;HSS_circ&quot;</span><span class="p">:</span>
+                <span class="c1"># TODO: eliminate some redundant code here by merging</span>
+                <span class="c1"># suare and round HSS</span>
+                <span class="k">assert</span> <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;Type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HSS&quot;</span>
+                <span class="c1"># must be circular: name will have 1.</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="n">sec_h</span> <span class="o">=</span> <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;OD&quot;</span><span class="p">]</span>
+                <span class="n">sec_t</span> <span class="o">=</span> <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;tdes&quot;</span><span class="p">]</span>
+                <span class="n">outside_shape</span> <span class="o">=</span> <span class="n">mesh_shapes</span><span class="o">.</span><span class="n">circ_mesh</span><span class="p">(</span><span class="n">sec_h</span><span class="p">)</span>
+                <span class="n">hole</span> <span class="o">=</span> <span class="n">mesh_shapes</span><span class="o">.</span><span class="n">circ_mesh</span><span class="p">(</span>
+                    <span class="n">sec_h</span> <span class="o">-</span> <span class="mf">2.00</span> <span class="o">*</span> <span class="n">sec_t</span>
+                <span class="p">)</span>
+                <span class="n">bbox</span> <span class="o">=</span> <span class="n">outside_shape</span><span class="o">.</span><span class="n">bounding_box</span><span class="p">()</span>
+                <span class="n">z_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">z_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">bbox</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="n">snap_points</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;centroid&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+                    <span class="s2">&quot;top_center&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">y_max</span><span class="p">]),</span>
+                    <span class="s2">&quot;top_left&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_min</span><span class="p">,</span> <span class="o">-</span><span class="n">y_max</span><span class="p">]),</span>
+                    <span class="s2">&quot;top_right&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_max</span><span class="p">,</span> <span class="o">-</span><span class="n">y_max</span><span class="p">]),</span>
+                    <span class="s2">&quot;center_left&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_min</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+                    <span class="s2">&quot;center_right&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_max</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span>
+                    <span class="s2">&quot;bottom_center&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">y_min</span><span class="p">]),</span>
+                    <span class="s2">&quot;bottom_left&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_min</span><span class="p">,</span> <span class="o">-</span><span class="n">y_min</span><span class="p">]),</span>
+                    <span class="s2">&quot;bottom_right&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z_max</span><span class="p">,</span> <span class="o">-</span><span class="n">y_min</span><span class="p">]),</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="n">sec_type</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;FiberSection&quot;</span><span class="p">:</span>
+                    <span class="n">main_part</span> <span class="o">=</span> <span class="n">SectionComponent</span><span class="p">(</span>
+                        <span class="n">outside_shape</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;hole&quot;</span><span class="p">:</span> <span class="n">hole</span><span class="p">},</span> <span class="n">ops_mat</span><span class="p">,</span> <span class="n">phs_mat</span>
+                    <span class="p">)</span>
+                    <span class="n">sec_fib</span> <span class="o">=</span> <span class="n">FiberSection</span><span class="p">(</span>
+                        <span class="n">label</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;section&quot;</span><span class="p">),</span>
+                        <span class="n">outside_shape</span><span class="p">,</span>
+                        <span class="p">{</span><span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="n">main_part</span><span class="p">},</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;J&quot;</span><span class="p">],</span>
+                        <span class="n">snap_points</span><span class="p">,</span>
+                        <span class="n">sec_data</span><span class="p">,</span>
+                        <span class="n">n_x</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">n_y</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">store_in_model</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fiber_sections</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sec_fib</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">return_section</span><span class="p">:</span>
+                        <span class="n">returned_sections</span><span class="p">[</span><span class="n">sec_fib</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sec_fib</span>
+                <span class="k">elif</span> <span class="n">sec_type</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;ElasticSection&quot;</span><span class="p">:</span>
+                    <span class="n">sec_el</span> <span class="o">=</span> <span class="n">ElasticSection</span><span class="p">(</span>
+                        <span class="n">label</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;section&quot;</span><span class="p">),</span>
+                        <span class="n">phs_mat</span><span class="o">.</span><span class="n">e_mod</span><span class="p">,</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">],</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;Iy&quot;</span><span class="p">],</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;Ix&quot;</span><span class="p">],</span>
+                        <span class="n">phs_mat</span><span class="o">.</span><span class="n">g_mod</span><span class="p">,</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;J&quot;</span><span class="p">],</span>
+                        <span class="n">sec_data</span><span class="p">[</span><span class="s2">&quot;W&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mf">12.00</span><span class="p">,</span>  <span class="c1"># lb/in</span>
+                        <span class="n">outside_shape</span><span class="p">,</span>
+                        <span class="n">snap_points</span><span class="p">,</span>
+                        <span class="n">properties</span><span class="o">=</span><span class="n">sec_data</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">store_in_model</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">elastic_sections</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sec_el</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">return_section</span><span class="p">:</span>
+                        <span class="n">returned_sections</span><span class="p">[</span><span class="n">sec_el</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">sec_el</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Unsupported section type: </span><span class="si">{</span><span class="n">sec_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Unsupported section designtation:&quot;</span>
