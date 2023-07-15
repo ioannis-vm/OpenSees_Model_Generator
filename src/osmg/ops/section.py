@@ -176,19 +176,27 @@ class SectionComponent:
         sec_name = self.parent_section.name
         if "HSS" in sec_name and len(sec_name.split("X")) == 3:
             # rectangular HSS section!
-            pieces = mesh.subdivide_hss(
+            pieces = mesh.subdivide_hss_rect(
                 self.parent_section.properties["Ht"],
                 self.parent_section.properties["B"],
                 self.parent_section.properties["tdes"],
             )
+        elif 'HSS' in sec_name and len(sec_name.split('X')) == 2:
+            # circular HSS section!
+            pieces = mesh.subdivide_hss_circ(
+                self.parent_section.properties["OD"],
+                self.parent_section.properties["tdes"],
+            )
 
-        # fallback: use the default rectangular mesh chopper
-        pieces = mesh.subdivide_polygon(
-            self.outside_shape,
-            self.holes,
-            self.parent_section.n_x,
-            self.parent_section.n_y,
-        )
+        else:
+            # fallback: use the default rectangular mesh chopper
+            pieces = mesh.subdivide_polygon(
+                self.outside_shape,
+                self.holes,
+                self.parent_section.n_x,
+                self.parent_section.n_y,
+            )
+
         return pieces
 
     def copy_alter_material(

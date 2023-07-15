@@ -20,6 +20,7 @@ from ..ops.section import FiberSection
 from ..physical_material import PhysicalMaterial
 from ..model import Model
 from ..ops.uniaxial_material import Steel02
+from ..ops.uniaxial_material import Fatigue
 from ..ops.uniaxial_material import MaxStrainRange
 from ..ops.uniaxial_material import IMKBilin
 from ..ops.section import ElasticSection
@@ -94,6 +95,66 @@ class MaterialGenerator:
         )
 
         return maxstrainrange_mat
+
+    def generate_steel_hss_circ_brace_fatigue_mat(
+        self,
+        section: FiberSection,
+        physical_material: PhysicalMaterial,
+        brace_length: float,
+    ) -> Fatigue:
+        """
+        Karamanaci and Lignos (2014). Computational Approach for
+        Collapse Assessment of Concentrically Braced Frames in Seismic
+        Regions. Journal of Structural Engineering
+
+        """
+
+        param_b = 0.005
+        param_r0 = 24.00
+        param_c_r1 = 0.925
+        param_c_r2 = 0.25
+
+        assert section.properties is not None
+        sec_d = section.properties["OD"]
+        sec_t = section.properties["tdes"]
+        var_lc = brace_length
+        sec_r = min(section.properties["rx"], section.properties["ry"])
+        mat_e = physical_material.e_mod
+        mat_g = physical_material.g_mod
+        mat_fy = physical_material.f_y
+        var_e0 = (
+            (0.748)
+            * (var_lc / sec_r) ** (-0.399)
+            * (sec_d / sec_t) ** (-0.628)
+            * (mat_e / mat_fy) ** (0.201)
+        )
+        var_m = -0.300
+
+        steel02_mat = Steel02(
+            self.model.uid_generator.new("uniaxial material"),
+            "auto_steel02_brace_mat",
+            mat_fy,
+            mat_e,
+            mat_g,
+            param_b,
+            param_r0,
+            param_c_r1,
+            param_c_r2,
+            a1=0.2,
+            a2=1.0,
+            a3=0.2,
+            a4=1.0
+        )
+
+        fatigue_mat = Fatigue(
+            self.model.uid_generator.new("uniaxial material"),
+            "auto_fatigue_brace_mat",
+            steel02_mat,
+            var_e0,
+            var_m
+        )
+
+        return fatigue_mat
 
     def generate_steel_w_imk_material(
         self,

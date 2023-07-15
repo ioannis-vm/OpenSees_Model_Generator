@@ -228,6 +228,34 @@ def rect_mesh(dim_b, dim_h):
     return generate(edges)
 
 
+def circ_mesh(dim_d):
+    """
+    Defines a loop of counterclockwise halfedges
+    that form the shape of the circular section with
+    the specified parameters.
+    The origin coincides with the centroid.
+
+    Arguments:
+        d: total diameter
+
+    """
+    radius = dim_d / 2.0
+    num_vertices = 32  # Number of vertices on the circumference
+
+    angle_increment = 2 * np.pi / num_vertices
+
+    vertices = []
+    for i in range(num_vertices):
+        angle = i * angle_increment
+        vertices.append(Vertex((
+            radius * np.cos(angle),
+            radius * np.sin(angle)
+        )))
+
+    edges = define_edges(vertices)
+    return generate(edges)
+
+
 def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     """
     Generates generic snap poitns for a section object.

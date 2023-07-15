@@ -336,6 +336,73 @@ class SectionGenerator:
                     raise ValueError(
                         f"Unsupported section type: {sec_type.__name__}"
                     )
+            elif sec_shape_designation == "HSS_circ":
+                # TODO: eliminate some redundant code here by merging
+                # suare and round HSS
+                assert sec_data["Type"] == "HSS"
+                # must be circular: name will have 1.
+                assert len(label.split("X")) == 2
+                sec_h = sec_data["OD"]
+                sec_t = sec_data["tdes"]
+                outside_shape = mesh_shapes.circ_mesh(sec_h)
+                hole = mesh_shapes.circ_mesh(
+                    sec_h - 2.00 * sec_t
+                )
+                bbox = outside_shape.bounding_box()
+                z_min, y_min, z_max, y_max = bbox.flatten()
+                snap_points = {
+                    "centroid": np.array([0.0, 0.0]),
+                    "top_center": np.array([0.0, -y_max]),
+                    "top_left": np.array([-z_min, -y_max]),
+                    "top_right": np.array([-z_max, -y_max]),
+                    "center_left": np.array([-z_min, 0.0]),
+                    "center_right": np.array([-z_max, 0.0]),
+                    "bottom_center": np.array([0.0, -y_min]),
+                    "bottom_left": np.array([-z_min, -y_min]),
+                    "bottom_right": np.array([-z_max, -y_min]),
+                }
+                if sec_type.__name__ == "FiberSection":
+                    main_part = SectionComponent(
+                        outside_shape, {"hole": hole}, ops_mat, phs_mat
+                    )
+                    sec_fib = FiberSection(
+                        label,
+                        self.model.uid_generator.new("section"),
+                        outside_shape,
+                        {"main": main_part},
+                        sec_data["J"],
+                        snap_points,
+                        sec_data,
+                        n_x=10,
+                        n_y=10,
+                    )
+                    if store_in_model:
+                        self.model.fiber_sections.add(sec_fib)
+                    if return_section:
+                        returned_sections[sec_fib.name] = sec_fib
+                elif sec_type.__name__ == "ElasticSection":
+                    sec_el = ElasticSection(
+                        label,
+                        self.model.uid_generator.new("section"),
+                        phs_mat.e_mod,
+                        sec_data["A"],
+                        sec_data["Iy"],
+                        sec_data["Ix"],
+                        phs_mat.g_mod,
+                        sec_data["J"],
+                        sec_data["W"] / 12.00,  # lb/in
+                        outside_shape,
+                        snap_points,
+                        properties=sec_data,
+                    )
+                    if store_in_model:
+                        self.model.elastic_sections.add(sec_el)
+                    if return_section:
+                        returned_sections[sec_el.name] = sec_el
+                else:
+                    raise ValueError(
+                        f"Unsupported section type: {sec_type.__name__}"
+                    )
             else:
                 raise ValueError(
                     "Unsupported section designtation:"

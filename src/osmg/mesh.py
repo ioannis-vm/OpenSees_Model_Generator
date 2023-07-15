@@ -20,6 +20,7 @@ from descartes.patch import PolygonPatch  # type: ignore
 import numpy as np
 import numpy.typing as npt
 import matplotlib.pyplot as plt  # type: ignore
+from matplotlib.patches import Polygon
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 from . import common
 
@@ -931,7 +932,7 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     return pieces
 
 
-def subdivide_hss(
+def subdivide_hss_rect(
         sec_h: float, sec_b: float,
         sec_t: float, plot: bool = False) \
         -> list[shapely_Polygon]:
@@ -1008,6 +1009,56 @@ def subdivide_hss(
         for subregion in pieces:
             ax_1.scatter(subregion.centroid.x, subregion.centroid.y)
         ax_1.margins(0.10)
+        plt.show()
+
+    return pieces
+
+
+def subdivide_hss_circ(
+        sec_d: float, sec_t: float,
+        plot: bool = False) \
+        -> list[shapely_Polygon]:
+    """
+    Used to define the fibers of steel HSS fiber sections.
+
+    Arguments:
+      sec_d: Section diameter
+      sec_t: Section thickness
+
+    Returns:
+        pieces: shapely_Polygon objects that represent single fibers.
+
+    """
+
+    num_subdiv_t = 3
+    num_subdiv_circ = 12
+
+    radius = sec_d/2.00
+
+    pieces = []
+
+    for i in range(num_subdiv_t):
+        for j in range(num_subdiv_circ):
+            rr_i = radius - i * sec_t/num_subdiv_t
+            rr_j = radius - (i+1.0) * sec_t/num_subdiv_t
+            ang_i = (2.00 * np.pi) / num_subdiv_circ * j
+            ang_j = (2.00 * np.pi) / num_subdiv_circ * (j+1.00)
+            pt1 = (rr_i * np.cos(ang_i), rr_i * np.sin(ang_i))
+            pt2 = (rr_i * np.cos(ang_j), rr_i * np.sin(ang_j))
+            pt3 = (rr_j * np.cos(ang_j), rr_j * np.sin(ang_j))
+            pt4 = (rr_j * np.cos(ang_i), rr_j * np.sin(ang_i))
+            pol = shapely_Polygon((pt1, pt2, pt3, pt4))
+            pieces.append(pol)
+
+    if plot:
+        fig, ax = plt.subplots()
+        ax.set_aspect('equal')
+        for piece in pieces:
+            patch = Polygon(piece.exterior.coords, alpha=0.5, zorder=2)
+            ax.add_patch(patch)
+        for piece in pieces:
+            ax.scatter(piece.centroid.x, piece.centroid.y)
+        ax.margins(0.10)
         plt.show()
 
     return pieces
