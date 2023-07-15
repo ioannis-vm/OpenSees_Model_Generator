@@ -751,7 +751,7 @@ class StaticAnalysis(Analysis):
 
     """
 
-    def run(self):
+    def run(self, num_subdiv=1):
         """
         Runs the static analysis.
 
@@ -786,9 +786,9 @@ class StaticAnalysis(Analysis):
             ops.constraints(*CONSTRAINTS)
             ops.test("EnergyIncr", 1.0e-8, 20, 3)
             ops.algorithm("KrylovNewton")
-            ops.integrator("LoadControl", 0.01)
+            ops.integrator("LoadControl", 1.00/num_subdiv)
             ops.analysis("Static")
-            for _ in range(100):
+            for _ in range(num_subdiv):
                 ops.analyze(1)
             self._read_opensees_results(
                 case_name,
