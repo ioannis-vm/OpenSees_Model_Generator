@@ -474,6 +474,7 @@ class TributaryAreaAnaysis:
                     cmult = load_factor
                 surf_load = load.value
                 load_val = surf_load * area
+
                 if isinstance(loaded_elm, Node):
                     lcase.node_loads[loaded_elm.uid].add(
                         np.array(

@@ -2158,12 +2158,9 @@ class THAnalysis(GravityPlusAnalysis):
 
         damping_code += '\n'
 
-
-
-
-        contents = (
-            pkgutil.get_data(__name__, 'th_analysis.tcl')
-            .decode())
+        data = pkgutil.get_data(__name__, 'th_analysis.tcl')
+        assert data is not None
+        contents = data.decode()
 
         contents = contents.replace('{%NUMBERER%}', str(NUMBERER))
         contents = contents.replace('{%CONSTRAINTS%}', ' '.join([str(x) for x in CONSTRAINTS]))
@@ -2180,9 +2177,9 @@ class THAnalysis(GravityPlusAnalysis):
         # contents = contents.replace('{%%}', )
         # contents = contents.replace('{%%}', )
 
-        contents = contents.splitlines()
+        contents_list = contents.splitlines()
 
-        script_append(tcl_script, contents)
+        script_append(tcl_script, contents_list)
     
     def run(
             self,
@@ -2377,6 +2374,7 @@ class THAnalysis(GravityPlusAnalysis):
             # stiffness-proportional contribution
             assert isinstance(damping["ratio_stiffness"], float)
             assert isinstance(damping["period"], float)
+            assert isinstance(damping["ratio_modal"], float)
             alpha_1 = damping["ratio_stiffness"] * damping["period"] / np.pi
             ops.rayleigh(
                 0.00,
