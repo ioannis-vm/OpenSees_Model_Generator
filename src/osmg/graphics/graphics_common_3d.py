@@ -17,24 +17,23 @@ import numpy as np
 
 # pio.renderers.default = 'browser'
 
-# # used for production plots
-# node_marker = {
-#     'fixed': ("square", 8),
-#     'pinned': ("circle-open", 2),
-#     'free': ("circle", 3),
-#     'parent': ("circle-open", 15),
-#     'internal': ("x", 2),
-#     '111011': ("circle-open", 3),
-# }
-
-# used for development plots
+# used for production plots
 node_marker = {
-    "fixed": ("square", 10),
-    "free": ("circle", 5),
-    "parent": ("circle-open", 20),
-    "internal": ("x", 3),
-    "release": ("circle-open", 15),
+    'fixed': ("square", 8),
+    'release': ("circle-open", 6),
+    'free': ("circle", 3),
+    'parent': ("circle-open", 15),
+    'internal': ("x", 2),
 }
+
+# # used for development plots
+# node_marker = {
+#     "fixed": ("square", 10),
+#     "free": ("circle", 5),
+#     "parent": ("circle-open", 20),
+#     "internal": ("x", 3),
+#     "release": ("circle-open", 15),
+# }
 
 
 def global_layout(mdl, camera=None):
