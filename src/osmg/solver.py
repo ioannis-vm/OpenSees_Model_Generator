@@ -26,11 +26,14 @@ from typing import Optional
 from typing import Any
 from typing import Union
 from dataclasses import dataclass, field
+import pkgutil
 import os
+import shutil
 import pickle
 import logging
 from time import perf_counter
 from tqdm import tqdm
+import dill
 import numpy as np
 import numpy.typing as npt
 from scipy import integrate
@@ -52,6 +55,11 @@ nparr = npt.NDArray[np.float64]
 
 CONSTRAINTS = ("Transformation",)
 NUMBERER = "RCM"
+
+
+def script_append(tcl_script, lines):
+    with open(tcl_script, 'a', encoding='utf-8') as f:
+        f.writelines([f'{line}\n' for line in lines])
 
 
 @dataclass(repr=False)
@@ -299,6 +307,308 @@ class Analysis:
         with open(f"{self.output_directory}/main_results.pcl", "rb") as file:
             self.results = pickle.load(file)
 
+    def write_tcl_model(self, case_name, tcl_script):
+        """
+        Generates a tcl script defining the model
+
+        """
+
+        # determine if a file already exists
+        if os.path.exists(tcl_script):
+            # remove it if it does
+            os.remove(tcl_script)
+
+
+        # initialize
+        script_append(tcl_script, [
+            'wipe',
+            'model basic -ndm 3 -ndf 6'
+        ])
+
+        # ~~~~~~~~~~~~~~~ #
+        # Node definition #
+        # ~~~~~~~~~~~~~~~ #
+
+        # keep track of defined nodes
+        defined_nodes = {}
+
+        primary_nodes = self.mdl.dict_of_primary_nodes()
+        internal_nodes = self.mdl.dict_of_internal_nodes()
+        parent_nodes = {}
+        parent_node_to_lvl = {}
+        for lvl_uid, node in self.load_cases[case_name].parent_nodes.items():
+            parent_nodes[node.uid] = node
+            parent_node_to_lvl[node.uid] = lvl_uid
+
+        all_nodes = {}
+        all_nodes.update(primary_nodes)
+        all_nodes.update(internal_nodes)
+        all_nodes.update(parent_nodes)
+        for uid, node in all_nodes.items():
+            if uid in defined_nodes:
+                raise KeyError(f"Node already defined: {uid}")
+            defined_nodes[uid] = node
+            script_append(
+                tcl_script,
+                [f'node {node.uid} '+' '.join(str(x) for x in node.coords)])
+
+        # restraints
+        for uid, node in primary_nodes.items():
+            script_append(
+                tcl_script,
+                [
+                    f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
+                ])
+            
+        for uid, node in internal_nodes.items():
+            # (this is super unusual, but who knows..)
+            script_append(tcl_script,
+                [
+                f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
+            ])
+        for node in parent_nodes.values():
+            script_append(tcl_script,
+                          [
+                f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
+            ])
+
+        # lumped nodal mass
+        for uid, node in all_nodes.items():
+            # retrieve osmg node mass
+            specified_mass = self.load_cases[case_name].node_mass[node.uid].val
+            # replace zeros with a small mass
+            # (to be able to capture all mode shapes)
+            specified_mass[specified_mass == 0] = common.EPSILON
+            # verify that all mass values are non-negative
+            assert np.size(specified_mass[specified_mass < 0.00]) == 0
+            # assign mass to the opensees node
+            script_append(tcl_script,
+                          [
+                f'mass {node.uid} '+' '.join(str(x) for x in specified_mass)
+            ])
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # Elastic BeamColumn element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        # keep track of defined elements
+        defined_elements = {}
+
+        elms = list(self.mdl.dict_of_specific_element(
+            element.ElasticBeamColumn).values())
+
+        # define line elements
+        for elm in elms:
+            if elm.visibility.skip_opensees_definition:
+                continue
+            script_append(tcl_script, [
+                f'geomTransf '+' '.join([str(x) for x in elm.geomtransf.ops_args()]),
+                f'element '+' '.join([str(x) for x in elm.ops_args()]),
+            ])
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # Fiber BeamColumn element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        # keep track of defined elements
+        defined_sections: dict[int, object] = {}
+        defined_materials: dict[int, object] = {}
+
+        elms = self.mdl.list_of_specific_element(element.DispBeamColumn)
+
+        def define_material(mat, defined_materials):
+            """
+            A cute recursive function that defines materials with
+            predecessors.
+
+            """
+
+            # if the actual material has not been defined yet,
+            if mat.uid not in defined_materials:
+                while (
+                    hasattr(mat, "predecessor")
+                    and mat.predecessor.uid not in defined_materials
+                ):
+                    # define predecessor
+                    define_material(mat.predecessor, defined_materials)
+                # and also define the actual material
+                script_append(tcl_script,[
+                    f'uniaxialMaterial '+' '.join([str(x) for x in mat.ops_args()])
+                ])
+                defined_materials[mat.uid] = mat
+
+        for elm in elms:
+            sec = elm.section
+            parts = sec.section_parts.values()
+            if sec.uid not in defined_sections:
+                script_append(tcl_script, [
+                    f'section '+' '.join([str(x) for x in sec.ops_args()])+' {'
+                ])
+                defined_sections[sec.uid] = sec
+                for part in parts:
+                    mat = part.ops_material
+                    define_material(mat, defined_materials)
+                    pieces = part.cut_into_tiny_little_pieces()
+                    for piece in pieces:
+                        area = piece.area
+                        z_loc = piece.centroid.x
+                        y_loc = piece.centroid.y
+                        script_append(tcl_script, [
+                            f'    fiber {y_loc} {z_loc} {area} {part.ops_material.uid}'
+                        ])
+                script_append(tcl_script, ['}'])
+        for elm in elms:
+            # note: OpenSees has a substantially different syntax for this
+            args = elm.ops_args()
+            elmtype, uid, node_i, node_j, transftag, integrtag = args
+            integr_type, integr_uid, integr_section, integr_np = elm.integration.ops_args()
+            script_append(tcl_script, [
+                f'geomTransf '+' '.join([str(x) for x in elm.geomtransf.ops_args()]),
+                f'element {elmtype} {uid} {node_i} {node_j} {integr_np} {integr_section} {transftag} -Integration {integr_type}'
+            ])
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # ZeroLength element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.ZeroLength)
+
+        # define zerolength elements
+        for elm in elms:
+            for mat in elm.mats:
+                define_material(mat, defined_materials)
+            script_append(tcl_script, [
+                f'element '+' '.join([str(x) for x in elm.ops_args()]),
+            ])
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # TwoNodeLink element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.TwoNodeLink)
+
+        # define twonodelink elements
+        for elm in elms:
+            for mat in elm.mats:
+                define_material(mat, defined_materials)
+            script_append(tcl_script, [
+                f'element '+' '.join([str(x) for x in elm.ops_args()]),
+            ])
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # TrussBar element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.TrussBar)
+
+        # define TrussBar elements
+        for elm in elms:
+            define_material(elm.mat, defined_materials)
+            script_append(tcl_script, [
+                f'element '+' '.join([str(x) for x in elm.ops_args()]),
+            ])
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~ #
+        # node constraints #
+        # ~~~~~~~~~~~~~~~~ #
+
+        if self.load_cases[case_name].equaldof is None:
+            for uid in parent_nodes:
+                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+                nodes = lvl.nodes.values()
+                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
+                script_append(tcl_script, [
+                    f'rigidDiaphragm 3 {uid} '+' '.join([str(x) for x in [nd.uid for nd in good_nodes]]),
+                ])
+        else:
+            dof = self.load_cases[case_name].equaldof
+            for uid in parent_nodes:
+                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+                nodes = lvl.nodes.values()
+                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
+                for node in good_nodes:
+                    if node.uid == uid:
+                        continue
+                    script_append(tcl_script, [
+                        f'equalDOF {uid} {node.uid} {dof}'
+                    ])
+
+        # ~~~~~~~~~~~~~~~~~ #
+        # node spring field #
+        # ~~~~~~~~~~~~~~~~~ #
+        # This is an attempt to resolve convergence issues during
+        # rigid body motion.
+        # It can also be used to restrict motion to particular DOFs
+
+        if self.settings.restrict_dof is not None:
+
+            restrict_dof_list = self.settings.restrict_dof
+            uidgen = self.mdl.uid_generator
+            fix_mat_uid = uidgen.new('uniaxial material')
+            release_mat_uid = uidgen.new('uniaxial material')
+            # define a very stiff spring
+            script_append(tcl_script ,[
+                f'uniaxialMaterial Elastic {fix_mat_uid} {common.STIFF}',
+            ])
+            # define a very soft spring
+            script_append(tcl_script, [
+                f'uniaxialMaterial Elastic {release_mat_uid} {common.TINY}',
+            ])
+            material_list = [
+                fix_mat_uid
+                if item == True
+                else release_mat_uid
+                for item in restrict_dof_list]
+            for node in self.mdl.list_of_primary_nodes():
+                # define a conjugate node that is fixed.
+                node_uid = uidgen.new('node')
+                elm_uid = uidgen.new('element')
+                script_append(tcl_script,
+                    [f'node {node_uid} '+' '.join(str(x) for x in node.coords)])
+                script_append(tcl_script,
+                              [
+                    f'fix {node_uid} 1 1 1 1 1 1'
+                ])
+                # connect the nodes to the fixed node using the soft
+                # spring.
+                args = ['twoNodeLink', elm_uid, node.uid, node_uid,
+                    '-mat',
+                    *[material_list],
+                    '-dir', 1, 2, 3, 4, 5, 6]
+                script_append(tcl_script,
+                              [
+                    f'element twoNodeLink {elm_uid} {node.uid} {node_uid} -mat '+' '.join(str(x) for x in material_list)+' -dir 1 2 3 4 5 6'
+                ])
+
+    def write_tcl_node_recorders(self, tcl_script, uids, dofs, types, base_path):
+        """
+        Adds node recorders to a tcl script.
+
+        Arguments:
+          tcl_script: path to the tcl script in which the recorder
+            commands will be appended
+          uids: uids of the nodes to include
+          dofs: list of dofs, 1-6.
+          types: list of types of recorders to include (disp, vel,
+            accel, ...)
+          base_path: base path. Filenames are controlled by the type
+            of recorder.
+
+        """
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
+        for tp in types:
+            path = f'{base_path}/{tp}_recorder.txt'
+            script_append(
+                tcl_script,
+                [
+                    f'recorder Node -file {path} -time -node '+' '.join(str(x) for x in uids)+' -dof '+' '.join(str(x) for x in dofs)+f' {tp}'
+                ]
+            )
+
     def _to_opensees_domain(self, case_name):
         """
         Defines the model in OpenSeesPy.
@@ -337,9 +647,11 @@ class Analysis:
         # restraints
         for uid, node in primary_nodes.items():
             ops.fix(node.uid, *node.restraint)
+            
         for uid, node in internal_nodes.items():
             # (this is super unusual, but who knows..)
             ops.fix(node.uid, *node.restraint)
+
         for node in parent_nodes.values():
             ops.fix(node.uid, *node.restraint)
 
@@ -520,34 +832,37 @@ class Analysis:
                     '-dir', 1, 2, 3, 4, 5, 6
                 )
 
-        # # ~~~~~~~~~~~~~~~ #
-        # # 1-dof appendage #
-        # # ~~~~~~~~~~~~~~~ #
+    def write_tcl_loads(self, case_name, tcl_script, factor=1.00):
 
-        # # we define a cantilever appendage in order to be able to
-        # # capture all N eigenvalues, since the fast sparse solvers can
-        # # only return up to N-1 eigenvalue-eigenvector pairs. The
-        # # appendage must correspond to the highest frequency mode, so
-        # # that it ends up being the only one that is omitted.
-        # n_i_uid = self.mdl.uid_generator.new('node')
-        # n_j_uid = self.mdl.uid_generator.new('node')
-        # link_uid = self.mdl.uid_generator.new('element')
-        # mat_uid = self.mdl.uid_generator.new('uniaxial material')
-        # ops.node(n_i_uid, 100000.00, 0.00, 0.00)
-        # ops.node(n_j_uid, 100000.00, 0.00, 0.00)
-        # ops.fix(n_i_uid, True, True, True, True, True, True)
-        # ops.mass(
-        #     n_j_uid,
-        #     common.EPSILON, common.EPSILON, common.EPSILON,
-        #     common.EPSILON, common.EPSILON, common.EPSILON)
-        # ops.uniaxialMaterial('Elastic', mat_uid, common.STIFF)
-        # ops.element(
-        #     'zeroLength', link_uid, n_i_uid, n_j_uid,
-        #     '-mat', mat_uid, mat_uid, mat_uid, mat_uid, mat_uid, mat_uid,
-        #     '-dir', 1, 2, 3, 4, 5, 6
-        # )
+        script_append(tcl_script, ['pattern Plain 1 Linear {'])
+        elms_with_udl: list[Union[
+            element.ElasticBeamColumn, element.DispBeamColumn
+        ]] = []
+        elms_with_udl.extend(
+            [elm for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
+             if isinstance(elm, element.ElasticBeamColumn)])
+        elms_with_udl.extend(
+            [elm for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
+             if isinstance(elm, element.DispBeamColumn)])
+        for elm in elms_with_udl:
+            if elm.visibility.skip_opensees_definition:
+                continue
+            udl_total = (
+                self.load_cases[case_name].line_element_udl[elm.uid].val
+            )
+            if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
+                script_append(tcl_script, [
+                    f'eleLoad -ele {elm.uid} -type -beamUniform {udl_total[1]*factor} {udl_total[2]*factor} {udl_total[0]*factor}'
+                ])
+
+        for node in self.mdl.list_of_all_nodes():
+            script_append(tcl_script, [
+                f'load {node.uid} '+' '.join(str(x) for x in self.load_cases[case_name].node_loads[node.uid].val*factor)
+            ])
+        script_append(tcl_script, ['}'])
 
     def _define_loads(self, case_name, factor=1.00):
+
         ops.timeSeries("Linear", 1)
         ops.pattern("Plain", 1, 1)
         elms_with_udl: list[Union[
@@ -580,6 +895,7 @@ class Analysis:
             ops.load(
                 node.uid, *(self.load_cases[case_name].node_loads[node.uid].val*factor)
             )
+
 
     ####################################################
     # Methods that read back information from OpenSees #
@@ -701,45 +1017,46 @@ class Analysis:
         """
 
         reactions = np.full(6, 0.00)
-        for lvl in self.mdl.levels.values():
-            for node in lvl.nodes.values():
-                if True in node.restraint:
-                    uid = node.uid
-                    x_coord = node.coords[0]
-                    y_coord = node.coords[1]
-                    z_coord = node.coords[2]
-                    local_reaction = np.array(
-                        self.results[case_name].node_reactions[
-                            uid
-                        ][step])
-                    # bug fix: It has been observed that sometimes
-                    # OpenSees reports reactions to unrestrained DOFs.
-                    # https://opensees.berkeley.edu/community/
-                    # viewtopic.php?f=12&t=70795
-                    # To overcome this, we replace the reported
-                    # reactions corresponding to unrestrained DOFs
-                    # with zero in the following line
-                    local_reaction[~np.array(node.restraint)] = 0.00
+        # for lvl in self.mdl.levels.values():
+        lvl = list(self.mdl.levels.values())[0] # temporary fix
+        for node in lvl.nodes.values():
+            if True in node.restraint:
+                uid = node.uid
+                x_coord = node.coords[0]
+                y_coord = node.coords[1]
+                z_coord = node.coords[2]
+                local_reaction = np.array(
+                    self.results[case_name].node_reactions[
+                        uid
+                    ][step])
+                # bug fix: It has been observed that sometimes
+                # OpenSees reports reactions to unrestrained DOFs.
+                # https://opensees.berkeley.edu/community/
+                # viewtopic.php?f=12&t=70795
+                # To overcome this, we replace the reported
+                # reactions corresponding to unrestrained DOFs
+                # with zero in the following line
+                local_reaction[~np.array(node.restraint)] = 0.00
 
-                    # transfer moments to the global coordinate system
-                    global_reaction: nparr = np.array(
-                        [
-                            local_reaction[0],
-                            local_reaction[1],
-                            local_reaction[2],
-                            local_reaction[3]
-                            + local_reaction[2] * y_coord
-                            - local_reaction[1] * z_coord,
-                            local_reaction[4]
-                            + local_reaction[0] * z_coord
-                            - local_reaction[2] * x_coord,
-                            local_reaction[5]
-                            + local_reaction[1] * x_coord
-                            - local_reaction[0] * y_coord,
-                        ]
-                    )
-                    # add to the global reactions
-                    reactions += global_reaction
+                # transfer moments to the global coordinate system
+                global_reaction: nparr = np.array(
+                    [
+                        local_reaction[0],
+                        local_reaction[1],
+                        local_reaction[2],
+                        local_reaction[3]
+                        + local_reaction[2] * y_coord
+                        - local_reaction[1] * z_coord,
+                        local_reaction[4]
+                        + local_reaction[0] * z_coord
+                        - local_reaction[2] * x_coord,
+                        local_reaction[5]
+                        + local_reaction[1] * x_coord
+                        - local_reaction[0] * y_coord,
+                    ]
+                )
+                # add to the global reactions
+                reactions += global_reaction
         return reactions
 
 
@@ -1038,18 +1355,23 @@ class ModalAnalysis(Analysis):
         """
 
         dof_dir = {"x": 0, "y": 1, "z": 2}
-        ntgs = ops.getNodeTags()
+        ntgs = list(self.mdl.dict_of_all_nodes().keys())
+        # if there is a rigid diaphragm, we also need to include the parent nodes
+        loadcase = self.load_cases[case_name]
+        if loadcase.parent_nodes:
+            pnodes = [x.uid for x in loadcase.parent_nodes.values()]
+            ntgs.extend(pnodes)
         gammas = np.zeros(self.num_modes)
         mstars = np.zeros(self.num_modes)
         mn_tot = 0.0
         for ntg in ntgs:
-            node_mass = self.load_cases[case_name].node_mass[ntg].val
+            node_mass = loadcase.node_mass[ntg].val
             mn_tot += node_mass[dof_dir[direction]]
         for mode in range(self.num_modes):
             l_n = 0.0
             m_n = 0.0
             for ntg in ntgs:
-                node_mass = self.load_cases[case_name].node_mass[ntg].val
+                node_mass = loadcase.node_mass[ntg].val
                 node_phi = ops.nodeEigenvector(ntg, mode + 1)
                 l_n += (
                     node_phi[dof_dir[direction]]
@@ -1073,6 +1395,31 @@ class GravityPlusAnalysis(Analysis):
     that follow this practice.
 
     """
+
+    def write_tcl_gravity_analysis(self, tcl_script, num_steps=1):
+
+        system = self.settings.solver
+        script_append(
+            tcl_script,
+            [
+             'test EnergyIncr 1.0e-6 100 3',
+             f'system {system}',
+             f'numberer {NUMBERER}',
+             'constraints '+' '.join([str(x) for x in CONSTRAINTS]),
+             'algorithm KrylovNewton',
+             'integrator LoadControl 1',
+             'analysis Static',
+             f'set check [analyze {num_steps}]'
+            ]
+        )
+        script_append(
+            tcl_script,
+            [
+                'if {$check != 0} {',
+                '    puts "Gravity analysis failed. Unable to continue..."',
+                '    error "Analysis Failed"',
+                '}'
+            ])
 
     def _run_gravity_analysis(self, num_steps=1):
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
@@ -1421,10 +1768,12 @@ class PushoverAnalysis(GravityPlusAnalysis):
             total_fail = False
             num_subdiv = 0
             num_times = 0
+            algorithm_idx = 0
 
-            scale = [1.0, 0.1, 0.01]
-            steps = [25, 50, 100]
-            norm = [1.0e-6, 1.0e-1, 1.0e-1]
+            scale = [1.0, 1.0e-1, 1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11]
+            steps = [500]*12
+            norm = [1.0e-15]*12
+            algorithms = [("KrylovNewton", ), ("KrylovNewton", 'initial')]
 
             try:
 
@@ -1458,7 +1807,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             steps[num_subdiv],
                             0,
                         )
-                        ops.algorithm("KrylovNewton")
+                        ops.algorithm(*algorithms[algorithm_idx])
                         if integrator == 'DisplacementControl':
                             ops.integrator(
                                 "DisplacementControl",
@@ -1488,9 +1837,13 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                 total_fail = True
                                 break
                             # can still reduce step size
-                            num_subdiv += 1
-                            # how many times to run with reduced step size
-                            num_times = 10
+                            if algorithm_idx != len(algorithms) - 1:
+                                algorithm_idx += 1
+                            else:
+                                algorithm_idx = 0
+                                num_subdiv += 1
+                                # how many times to run with reduced step size
+                                num_times = 50
                         else:
                             # analysis was successful
                             if num_times != 0:
@@ -1515,6 +1868,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                 f" | Current: {curr_displ:.4f}",
                                 end="\r",
                             )
+                            algorithm_idx = 0
                             if num_subdiv != 0:
                                 if num_times == 0:
                                     num_subdiv -= 1
@@ -1696,6 +2050,140 @@ class THAnalysis(GravityPlusAnalysis):
         default_factory=dict, repr=False
     )
 
+    def write_tcl_th_pattern(self, tcl_script, ag_x, ag_y, ag_z, gm_dt, base_path):
+
+        ag_dir = {'x': ag_x, 'y': ag_y, 'z': ag_z}
+        ag_tag = {'x': '2', 'y': '3', 'z': '4'}
+        ag_dof = {'x': '1', 'y': '2', 'z': '3'}
+
+        if not os.path.exists(base_path):
+            os.makedirs(base_path)
+
+        script_append(
+            tcl_script,
+            ['wipeAnalysis', 'loadConst -time 0.00']
+        )
+
+        for dr in ('x', 'y', 'z'):
+            ag = ag_dir[dr]
+            if ag is not None:
+                np.savetxt(f'{base_path}/ag_{dr}', ag)
+                script_append(
+                    tcl_script,
+                    [
+                        f'set AccelSeries_{dr} "Series -dt {gm_dt} -filePath {base_path}/ag_{dr}"',
+                        f'pattern UniformExcitation {ag_tag[dr]} {ag_dof[dr]} -accel $AccelSeries_{dr}'
+                    ]
+            )
+
+
+    def write_tcl_th_analysis(
+        self, tcl_script,
+        finish_time, damping, time_increment, output_dir,
+        drift_nodes, drift_heights,
+        skip_steps=1, collapse_drift=0.10):
+
+        damping_type = damping.get("type")
+
+        target_timestamp = finish_time
+
+        damping_code = ''
+
+        if damping_type == "rayleigh":
+            assert isinstance(damping["periods"], list)
+            assert isinstance(damping["periods"][0], float)
+            w_i = 2 * np.pi / damping["periods"][0]
+            zeta_i = damping["ratio"]
+            assert isinstance(damping["periods"][1], float)
+            w_j = 2 * np.pi / damping["periods"][1]
+            zeta_j = damping["ratio"]
+            a_mat: nparr = np.array([[1 / w_i, w_i], [1 / w_j, w_j]])
+            b_vec: nparr = np.array([zeta_i, zeta_j])
+            x_sol: nparr = np.linalg.solve(a_mat, 2 * b_vec)
+            damping_code += f'rayleigh {x_sol[0]} 0.0 0.0 {x_sol[1]}'
+
+        if damping_type == "stiffness":
+            assert isinstance(damping["ratio"], float)
+            assert isinstance(damping["period"], float)
+            damping_code += f'rayleigh 0.00 0.00 0.00 {damping["ratio"] * damping["period"] / np.pi}'
+
+        if damping_type == "modal":
+            num_modes = damping["num_modes"]
+            damping_ratio = damping["ratio"]
+            ops.eigen(num_modes)
+            assert isinstance(damping_ratio, float)
+            damping_code += f'modalDampingQ {damping_ratio}'
+
+        if damping_type == "modal+stiffness":
+
+            # stiffness-proportional contribution
+            assert isinstance(damping["ratio_stiffness"], float)
+            assert isinstance(damping["period"], float)
+            alpha_1 = damping["ratio_stiffness"] * damping["period"] / np.pi
+            damping_code += f'rayleigh 0.00 0.00 0.00 {alpha_1}'
+            damping_code += '\n'
+
+            num_modes = damping["num_modes"]
+            damping_ratio = damping["ratio_modal"]
+            damping_code += f'set ratio_modal {damping_ratio}'
+            damping_code += '\n'
+            damping_code += f'set num_modes {int(num_modes)}'
+            damping_code += '\n'
+            damping_code += f'set damping_ratio {damping_ratio}'
+            damping_code += '\n'
+            damping_code += 'set omega_squareds [eigen $num_modes]'
+            damping_code += '\n'
+            damping_code += f'set alpha_1 {alpha_1}'
+            damping_code += '\n'
+            damping_code += 'set values [list]'
+            damping_code += '\n'
+            damping_code += 'foreach omega_squared $omega_squareds {'
+            damping_code += '\n'
+            damping_code += '  set result [expr {$ratio_modal - $alpha_1 * $omega_squared / 2.00}]'
+            damping_code += '\n'
+            damping_code += '    if {$result < 0} {'
+            damping_code += '\n'
+            damping_code += '    lappend values 0.00'
+            damping_code += '\n'
+            damping_code += '    } else {'
+            damping_code += '\n'
+            damping_code += '      lappend values $result'
+            damping_code += '\n'
+            damping_code += '  }'
+            damping_code += '\n'
+            damping_code += '}'
+            damping_code += '\n'
+            damping_code += 'modalDampingQ {*}$values'
+            damping_code += '\n'
+
+        damping_code += '\n'
+
+
+
+
+        contents = (
+            pkgutil.get_data(__name__, 'th_analysis.tcl')
+            .decode())
+
+        contents = contents.replace('{%NUMBERER%}', str(NUMBERER))
+        contents = contents.replace('{%CONSTRAINTS%}', ' '.join([str(x) for x in CONSTRAINTS]))
+        contents = contents.replace('{%SYSTEM%}', self.settings.solver)
+        contents = contents.replace('{%DAMPING CODE%}', damping_code)
+        contents = contents.replace('{%time_increment%}', str(time_increment))
+        contents = contents.replace('{%output_dir%}', output_dir)
+        contents = contents.replace('{%skip_steps%}', str(skip_steps))
+        contents = contents.replace('{%target_timestamp%}', str(target_timestamp))
+        contents = contents.replace('{%collapse_drift%}', str(collapse_drift))
+        contents = contents.replace('{%drift_nodes%}', ' '.join([str(x) for x in drift_nodes]))
+        contents = contents.replace('{%drift_heights%}', ' '.join([str(x) for x in drift_heights]))
+        # contents = contents.replace('{%%}', )
+        # contents = contents.replace('{%%}', )
+        # contents = contents.replace('{%%}', )
+
+        contents = contents.splitlines()
+
+        script_append(tcl_script, contents)
+    
     def run(
             self,
             analysis_time_increment: float,
@@ -1739,13 +2227,13 @@ class THAnalysis(GravityPlusAnalysis):
         """
 
         self._init_results()
-        self.log("Running NLTH analysis")
+        self.log("Running TH analysis")
 
         self.log(f'Model Name: {self.mdl.name}')
 
         nodes = self.mdl.list_of_all_nodes()
         # note: only runs the first load case provided.
-        # nlth should not have load cases.
+        # th should not have load cases.
         # will be fixed in the future.
         case_name = list(self.load_cases.keys())[0]
         self.log(f'Case Name: {case_name}')
@@ -1885,25 +2373,30 @@ class THAnalysis(GravityPlusAnalysis):
         if damping_type == "modal+stiffness":
 
             self.log("Using modal+stiffness damping")
-            num_modes = damping["num_modes"]
-            # num_modes = num_modeshapes
-            damping_ratio = damping["ratio_modal"]
-            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
-            ops.eigen(num_modes)
-            # ops.systemSize()
-            self.log("Eigenvalue analysis finished")
-            ops.modalDampingQ(damping["ratio_modal"])
+
+            # stiffness-proportional contribution
             assert isinstance(damping["ratio_stiffness"], float)
             assert isinstance(damping["period"], float)
+            alpha_1 = damping["ratio_stiffness"] * damping["period"] / np.pi
             ops.rayleigh(
                 0.00,
                 0.0,
                 0.0,
-                damping["ratio_stiffness"] * damping["period"] / np.pi,
+                alpha_1,
             )
             self.log("modal+stiffness damping defined")
 
-        ops.test("EnergyIncr", 1.0e-6, 50, 0)
+            # modal damping
+            num_modes = damping["num_modes"]
+            damping_ratio = damping["ratio_modal"]
+            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
+            omega_squareds = np.array(ops.eigen(num_modes))
+            self.log("Eigenvalue analysis finished")
+            damping_vals = damping["ratio_modal"] - alpha_1*omega_squareds/2.00
+            damping_vals[damping_vals < 0.00] = 0.00
+            ops.modalDampingQ(*damping_vals)
+
+        ops.test("EnergyIncr", 1.0e-6, 100, 0)
         ops.integrator('TRBDF2')
         ops.algorithm("KrylovNewton")
         # ops.algorithm("KrylovNewton", 'initial', 'initial')
@@ -1917,11 +2410,15 @@ class THAnalysis(GravityPlusAnalysis):
         num_times = 0
         total_step_count = 0
         analysis_failed = False
+        algorithm_idx = 0
 
-        scale = [
-            1.0, 1.0e-1, 1.0e-2, 1.0e-3
-        ]
-        tols = [1.0e-8]*4
+        scale = (
+            1.0, 1.0e-1, 1.0e-2, 1.0e-3,
+            1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7,
+            1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11
+        )
+        tols = [1.0e-12]*12
+        algorithms = (('KrylovNewton', ), ('KrylovNewton', 'initial'))
 
         # progress bar
         if print_progress:
@@ -1948,6 +2445,7 @@ class THAnalysis(GravityPlusAnalysis):
 
                 ops.test(
                     "EnergyIncr", tols[num_subdiv], 200, 3, 2)
+                ops.algorithm(*algorithms[algorithm_idx])
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv]
                 )
@@ -1968,10 +2466,14 @@ class THAnalysis(GravityPlusAnalysis):
                         analysis_failed = True
                         break
 
-                    # otherwise, we can still reduce step size
-                    num_subdiv += 1
-                    # how many times to run with reduced step size
-                    num_times = 50
+                    # otherwise, we can still try
+                    if algorithm_idx != len(algorithms) - 1:
+                        algorithm_idx += 1
+                    else:
+                        algorithm_idx = 0
+                        num_subdiv += 1
+                        # how many times to run with reduced step size
+                        num_times = 50
                 else:
                     # analysis was successful
                     prev_time = curr_time
@@ -1986,9 +2488,9 @@ class THAnalysis(GravityPlusAnalysis):
                         the_time = perf_counter()
                         # total time running
                         running_time = the_time - start_time
-                        # nlth seconds ran is `curr_time`
+                        # th seconds ran is `curr_time`
                         remaining_time = target_timestamp - curr_time
-                        average_speed = curr_time / running_time  # nlth [s] / real [s]
+                        average_speed = curr_time / running_time  # th [s] / real [s]
                         # estimated remaining real time to finish [s]
                         est_remaining_dur = remaining_time / average_speed
                         self.log(f'Analysis status: {{curr: {curr_time:.2f}, '
@@ -2009,6 +2511,8 @@ class THAnalysis(GravityPlusAnalysis):
                             zerolength_elems,
                         )
                         self.time_vector.append(curr_time)
+
+                    algorithm_idx = 0
                     if num_subdiv != 0:
                         if num_times == 0:
                             num_subdiv -= 1
@@ -2062,6 +2566,7 @@ class THAnalysis(GravityPlusAnalysis):
                                     f" {time_limit}h was reached."
                                 )
                             analysis_failed = True
+                            # self.save_state()
                             break
 
         except KeyboardInterrupt:
@@ -2083,6 +2588,17 @@ class THAnalysis(GravityPlusAnalysis):
             self._write_results_to_disk()
 
         return metadata
+
+    # def save_state(self):
+    #     if self.settings.output_directory:
+    #         # remove earlier saved state if it exists
+    #         path = os.path.join(self.settings.output_directory, 'saved_state')
+    #         if os.path.isdir(path):
+    #             shutil.rmtree(path)
+    #         # create the directory to save the state
+    #         os.makedirs(path)
+    #         ops.database('File', '/tmp/')
+    #         ops.save(0)
 
     def plot_node_displacement_history(
         self, case_name, node, direction, plotly=False
