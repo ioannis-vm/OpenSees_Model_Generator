@@ -54,7 +54,7 @@ class BRBGenSettings:
     steel4_R_i: float = field(default=1.0)
     steel4_R_ic: float = field(default=1.0)
     steel4_l_yp: float = field(default=1.0)
-    fatigue_e_mod: float = field(default=0.02)
+    fatigue_e_mod: float = field(default=0.12)
     fatigue_var_m: float = field(default=-0.458)
     transf_type: str = field(default='Corotational')
 
