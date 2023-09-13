@@ -513,8 +513,27 @@ class TributaryAreaAnaysis:
                         )
 
                 elif isinstance(loaded_elm, TwoNodeLink):
-                    # todo: (future) add this load to the connecting
-                    # nodes.
-                    pass
+                    for node in loaded_elm.nodes:
+                        lcase.node_loads[node.uid].add(
+                            np.array(
+                                [0.00, 0.00,
+                                 -load_val * cmult / 2.00,
+                                 0.00, 0.00, 0.00]
+                            )
+                        )
+                        if not load.massless:
+                            lcase.node_mass[node.uid].add(
+                                np.array(
+                                    [
+                                        load_val / g_const / 2.00,
+                                        load_val / g_const / 2.00,
+                                        load_val / g_const / 2.00,
+                                        0.00,
+                                        0.00,
+                                        0.00,
+                                    ]
+                                )
+                            )
+
                 else:
                     raise TypeError("This should never happen!")
