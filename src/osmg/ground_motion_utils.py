@@ -46,7 +46,7 @@ def import_PEER(filename):
                 tmp = re.sub('\s* SEC', '', tmp)  # noqa: W605
                 tmp = tmp.replace('SEC', '')  # some files have no space
                 dt = float(tmp)
-            elif i > 29:
+            elif i > 3:
                 break
 
     # Assert correct number of points and units
