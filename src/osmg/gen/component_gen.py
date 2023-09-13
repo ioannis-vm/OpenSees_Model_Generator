@@ -1485,8 +1485,8 @@ class BeamColumnGenerator:
                 top_v_b,
                 x_axis,
                 y_axis,
-                mthd,
-                zerolength_gen_args
+                zerolength_gen.release_6,
+                {}
             )
             zerolen_bottom_f = self.define_zerolength(
                 component,
@@ -1494,8 +1494,8 @@ class BeamColumnGenerator:
                 bottom_v_f,
                 x_axis,
                 y_axis,
-                mthd,
-                zerolength_gen_args
+                zerolength_gen.release_6,
+                {}
             )
             zerolen_bottom_b = self.define_zerolength(
                 component,
@@ -1503,8 +1503,8 @@ class BeamColumnGenerator:
                 bottom_v_b,
                 x_axis,
                 y_axis,
-                mthd,
-                zerolength_gen_args
+                zerolength_gen.release_6,
+                {}
             )
 
             # fill component assembly

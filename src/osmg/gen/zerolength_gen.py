@@ -387,12 +387,6 @@ def steel_w_col_pz(
     m3y = (m2y + (hardening * k_e * pz_length) * (gamma_3 - gamma_2)
            * moment_modifier)
 
-    # account for the fact that our panel zones have four nonlinear
-    # springs
-    m1y /= 4.00
-    m2y /= 4.00
-    m3y /= 4.00
-
     if only_elastic:
         mat: UniaxialMaterial = Elastic(
             model.uid_generator.new("uniaxial material"),
@@ -542,14 +536,6 @@ def steel_w_col_pz_updated(
     M1_N *= moment_modifier
     M2_N *= moment_modifier
     M3_N *= moment_modifier
-
-    # we use four panel zone springs for each panel zone
-    M1_P *= 1.0/4.00
-    M2_P *= 1.0/4.00
-    M3_P *= 1.0/4.00
-    M1_N *= 1.0/4.00
-    M2_N *= 1.0/4.00
-    M3_N *= 1.0/4.00
 
     gammaU_P = 0.3
     gammaU_N = -0.3
