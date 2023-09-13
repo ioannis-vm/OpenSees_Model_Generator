@@ -987,6 +987,8 @@ class BeamColumnGenerator:
         camber_3: float = 0.00,
         split_existing_i: Optional[ComponentAssembly] = None,
         split_existing_j: Optional[ComponentAssembly] = None,
+        h_offset_i: float = 0.00,
+        h_offset_j: float = 0.00,
         method: str = "generate_plain_component_assembly",
         additional_args: dict[str, object] = {},
     ) -> dict[int, ComponentAssembly]:
@@ -1010,14 +1012,20 @@ class BeamColumnGenerator:
             p_i_init = np.array((xi_coord, yi_coord, lvl.elevation)) + offset_i
             p_j_init = np.array((xj_coord, yj_coord, lvl.elevation)) + offset_j
 
+            # retrieve local coordinate system
+            x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
+                p_i_init, p_j_init, angle
+            )  # type: ignore
+
+            p_i_init += h_offset_i * x_axis
+            p_j_init += - h_offset_j * x_axis
+            offset_i += h_offset_i * x_axis
+            offset_j += - h_offset_j * x_axis
+
             if section.snap_points and (placement != "centroid"):
                 # obtain offset from section (local system)
                 d_z, d_y = section.snap_points[placement]
                 sec_offset_local: nparr = np.array([0.00, d_y, d_z])
-                # retrieve local coordinate system
-                x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
-                    p_i_init, p_j_init, angle
-                )  # type: ignore
                 t_glob_to_loc = transformation_matrix(x_axis, y_axis, z_axis)
                 t_loc_to_glob = t_glob_to_loc.T
                 sec_offset_global = t_loc_to_glob @ sec_offset_local
