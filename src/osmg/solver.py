@@ -39,7 +39,10 @@ import numpy.typing as npt
 from scipy import integrate
 from scipy.interpolate import interp1d
 import pandas as pd
+
 import openseespy.opensees as ops
+# import opensees.openseespy as ops # Use Claudio's package instead
+
 import matplotlib.pyplot as plt
 from .load_case import LoadCase
 from .model import Model
@@ -2274,15 +2277,15 @@ class THAnalysis(GravityPlusAnalysis):
             0.00, ag_vec_time_incr * num_gm_points, num_gm_points
         )
         if ag_vec_x is not None:
-            self.a_g[0] = np.column_stack((t_vec, ag_vec_x))  # type: ignore
+            self.a_g[0] = np.column_stack((t_vec, ag_vec_x[:num_gm_points]))  # type: ignore
         else:
             self.a_g[0] = np.column_stack((t_vec, np.zeros(len(t_vec))))
         if ag_vec_y is not None:
-            self.a_g[1] = np.column_stack((t_vec, ag_vec_y))  # type: ignore
+            self.a_g[1] = np.column_stack((t_vec, ag_vec_y[:num_gm_points]))  # type: ignore
         else:
             self.a_g[1] = np.column_stack((t_vec, np.zeros(len(t_vec))))
         if ag_vec_z is not None:
-            self.a_g[2] = np.column_stack((t_vec, ag_vec_z))  # type: ignore
+            self.a_g[2] = np.column_stack((t_vec, ag_vec_z[:num_gm_points]))  # type: ignore
         else:
             self.a_g[2] = np.column_stack((t_vec, np.zeros(len(t_vec))))
 
@@ -2388,7 +2391,7 @@ class THAnalysis(GravityPlusAnalysis):
             num_modes = damping["num_modes"]
             damping_ratio = damping["ratio_modal"]
             self.log("Running eigenvalue analysis" f" with {num_modes} modes")
-            omega_squareds = np.array(ops.eigen(num_modes))
+            omega_squareds = np.array(ops.eigen(int(num_modes)))
             self.log("Eigenvalue analysis finished")
             damping_vals = damping["ratio_modal"] - alpha_1*omega_squareds/2.00
             damping_vals[damping_vals < 0.00] = 0.00
