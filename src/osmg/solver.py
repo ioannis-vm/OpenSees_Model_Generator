@@ -40,8 +40,8 @@ from scipy import integrate
 from scipy.interpolate import interp1d
 import pandas as pd
 
-import openseespy.opensees as ops
-# import opensees.openseespy as ops # Use Claudio's package instead
+# import openseespy.opensees as ops
+import opensees.openseespy as ops # Use Claudio's package instead
 
 import matplotlib.pyplot as plt
 from .load_case import LoadCase
