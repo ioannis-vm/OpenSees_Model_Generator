@@ -2300,10 +2300,10 @@ class THAnalysis(GravityPlusAnalysis):
 
         # gravity analysis
         self.log("Defining loads")
-        self._define_loads(case_name, factor=0.01)
+        self._define_loads(case_name, factor=0.1)
 
         self.log("Starting gravity analysis (G)")
-        self._run_gravity_analysis(num_steps=100)
+        self._run_gravity_analysis(num_steps=10)
         self.log("Gravity analysis finished successfully")
         n_steps_success = 0
         self._read_opensees_results(
