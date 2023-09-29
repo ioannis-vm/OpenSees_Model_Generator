@@ -13,6 +13,8 @@ from osmg import solver
 # set up argument parser #
 # ~~~~~~~~~~~~~~~~~~~~~~ #
 
+print('(osmg is preparing the model)')
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--archetype")
 
@@ -68,6 +70,7 @@ if not os.path.exists(output_folder):
 # modal analysis
 #
 
+print('(osmg is now running a modal analysis)')
 modal_analysis = solver.ModalAnalysis(
     mdl, {loadcase.name: loadcase}, num_modes=num_levels*3)
 modal_analysis.settings.store_forces = False
@@ -124,6 +127,7 @@ nlth.settings.store_release_force_defo = False
 nlth.settings.specific_nodes = specific_nodes
 
 # run the nlth analysis
+print('(osmg is now running the nlth analysis)')
 nlth.run(
     analysis_dt,
     ag_x,
