@@ -31,6 +31,7 @@ import os
 import shutil
 import pickle
 import logging
+import textwrap
 from time import perf_counter
 from tqdm import tqdm
 import dill
@@ -720,8 +721,7 @@ class Analysis:
             sec = elm.section
             parts = sec.section_parts.values()
             if sec.uid not in defined_sections:
-                ops.section(*sec.ops_args())
-                defined_sections[sec.uid] = sec
+                fibers = []
                 for part in parts:
                     mat = part.ops_material
                     define_material(mat, defined_materials)
@@ -730,7 +730,19 @@ class Analysis:
                         area = piece.area
                         z_loc = piece.centroid.x
                         y_loc = piece.centroid.y
-                        ops.fiber(y_loc, z_loc, area, part.ops_material.uid)
+#                       ops.fiber(y_loc, z_loc, area, part.ops_material.uid)
+                        fibers.append([y_loc, z_loc, area, part.ops_material.uid])
+
+                fiber_commands = ';\n     '.join("fiber "+" ".join(map(str,fiber)) for fiber in fibers)
+                cmd = textwrap.dedent(f"""
+                section {' '.join(map(str,sec.ops_args()))} {{
+                  {fiber_commands}
+                }}
+                """)
+                ops.eval(cmd)
+#               ops.section(*sec.ops_args())
+                defined_sections[sec.uid] = sec
+
             ops.beamIntegration(*elm.integration.ops_args())
             ops.geomTransf(*elm.geomtransf.ops_args())
             ops.element(*elm.ops_args())
