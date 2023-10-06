@@ -2413,9 +2413,9 @@ class THAnalysis(GravityPlusAnalysis):
         scale = (
             1.0, 1.0e-1, 1.0e-2, 1.0e-3,
             1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7,
-            1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11
+            1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11, 1e-12
         )
-        tols = [1.0e-12]*12
+        tols = [1.0e-12]*13
         algorithms = (('KrylovNewton', ), ('KrylovNewton', 'initial'))
 
         # progress bar
