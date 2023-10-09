@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.graphics.preprocessing_3d &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>osmg.graphics.preprocessing_3d &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -66,7 +65,9 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="add_data__nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">):</span>
+<div class="viewcode-block" id="add_data__nodes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__nodes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__nodes</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">load_case</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing nodes</span>
 
@@ -179,7 +180,10 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__parent_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__parent_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__parent_nodes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__parent_nodes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__parent_nodes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__parent_nodes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">load_case</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -246,7 +250,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__internal_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__internal_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__internal_nodes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__internal_nodes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__internal_nodes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__internal_nodes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -355,7 +362,10 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__release_nodes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__release_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_data__release_nodes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__release_nodes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__release_nodes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__release_nodes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">list_of_nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">node_module</span><span class="o">.</span><span class="n">Node</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -394,7 +404,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frames"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frames">[docs]</a><span class="k">def</span> <span class="nf">add_data__frames</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__frames">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frames">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__frames</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
         <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -514,7 +527,10 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__bars"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__bars">[docs]</a><span class="k">def</span> <span class="nf">add_data__bars</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__bars">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__bars">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__bars</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
         <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -613,7 +629,10 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__twonodelinks"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a><span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__twonodelinks">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -670,7 +689,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frame_offsets"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__frame_offsets">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -725,7 +747,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frame_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__frame_axes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
         <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -790,7 +815,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__zerolength_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__zerolength_axes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -845,7 +873,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__global_axes"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a><span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__global_axes">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -896,7 +927,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__diaphragm_lines"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__diaphragm_lines">[docs]</a><span class="k">def</span> <span class="nf">add_data__diaphragm_lines</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__diaphragm_lines">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__diaphragm_lines">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__diaphragm_lines</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -946,7 +980,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__tributary_area_boundaries"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__tributary_area_boundaries">[docs]</a><span class="k">def</span> <span class="nf">add_data__tributary_area_boundaries</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__tributary_area_boundaries">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__tributary_area_boundaries">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__tributary_area_boundaries</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
         <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -995,7 +1032,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__extruded_frames_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__extruded_frames_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
@@ -1080,7 +1120,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__extruded_bars_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__extruded_bars_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span>
         <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
@@ -1169,7 +1212,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="show"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.show">[docs]</a><span class="k">def</span> <span class="nf">show</span><span class="p">(</span>
+
+<div class="viewcode-block" id="show">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.show">[docs]</a>
+<span class="k">def</span> <span class="nf">show</span><span class="p">(</span>
         <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
         <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1257,6 +1303,7 @@
             <span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="n">to_html_file</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
 </pre></div>
 
           </div>
@@ -1318,7 +1365,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

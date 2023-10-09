@@ -1,0 +1,34 @@
+osmg.obj\_collections
+=====================
+
+.. automodule:: osmg.obj_collections
+   :members:
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :template: custom-class-template.rst
+   
+      Collection
+      CollectionActive
+      CollectionWithConnectivity
+      NodeCollection
+   
+   
+
+   
+   
+   
+
+
+

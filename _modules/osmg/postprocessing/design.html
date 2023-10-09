@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.postprocessing.design &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>osmg.postprocessing.design &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -58,7 +57,9 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="LoadCombination"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination">[docs]</a><span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="viewcode-block" id="LoadCombination">
+<a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">LoadCombination</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load combinations</span>
@@ -71,7 +72,9 @@
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="LoadCombination.envelope_basic_forces"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_basic_forces">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_basic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elm</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
+<div class="viewcode-block" id="LoadCombination.envelope_basic_forces">
+<a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_basic_forces">[docs]</a>
+    <span class="k">def</span> <span class="nf">envelope_basic_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elm</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the envelope of the basic forces for the</span>
 <span class="sd">        given load combination</span>
@@ -100,7 +103,10 @@
 
         <span class="k">return</span> <span class="n">df_min</span><span class="p">,</span> <span class="n">df_max</span></div>
 
-<div class="viewcode-block" id="LoadCombination.envelope_node_displacement"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LoadCombination.envelope_node_displacement">
+<a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement">[docs]</a>
+    <span class="k">def</span> <span class="nf">envelope_node_displacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the enveloped node displacement</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -126,7 +132,10 @@
 
         <span class="k">return</span> <span class="n">disp_min</span><span class="p">,</span> <span class="n">disp_max</span></div>
 
-<div class="viewcode-block" id="LoadCombination.envelope_node_displacement_diff"><a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement_diff">[docs]</a>    <span class="k">def</span> <span class="nf">envelope_node_displacement_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">node_j</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LoadCombination.envelope_node_displacement_diff">
+<a class="viewcode-back" href="../../../_autosummary/osmg.postprocessing.design.html#osmg.postprocessing.design.LoadCombination.envelope_node_displacement_diff">[docs]</a>
+    <span class="k">def</span> <span class="nf">envelope_node_displacement_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">node_j</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the enveloped displacement difference between</span>
 <span class="sd">        two nodes</span>
@@ -158,7 +167,9 @@
             <span class="n">disp_min</span><span class="p">[</span><span class="n">disp_min</span> <span class="o">&gt;</span> <span class="n">disp_tot</span><span class="p">]</span> <span class="o">=</span> <span class="n">disp_tot</span><span class="p">[</span><span class="n">disp_min</span> <span class="o">&gt;</span> <span class="n">disp_tot</span><span class="p">]</span>
             <span class="n">disp_max</span><span class="p">[</span><span class="n">disp_max</span> <span class="o">&lt;</span> <span class="n">disp_tot</span><span class="p">]</span> <span class="o">=</span> <span class="n">disp_tot</span><span class="p">[</span><span class="n">disp_max</span> <span class="o">&lt;</span> <span class="n">disp_tot</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">disp_min</span><span class="p">,</span> <span class="n">disp_max</span></div></div>
+        <span class="k">return</span> <span class="n">disp_min</span><span class="p">,</span> <span class="n">disp_max</span></div>
+</div>
+
 </pre></div>
 
           </div>
@@ -220,7 +231,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

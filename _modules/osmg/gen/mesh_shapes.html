@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.gen.mesh_shapes &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>osmg.gen.mesh_shapes &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -59,7 +58,9 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.generate">[docs]</a><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
+<div class="viewcode-block" id="generate">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.generate">[docs]</a>
+<span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates halfedges from the given edges.</span>
 
@@ -72,7 +73,10 @@
     <span class="k">return</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">internal</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="define_edges"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.define_edges">[docs]</a><span class="k">def</span> <span class="nf">define_edges</span><span class="p">(</span><span class="n">vertices</span><span class="p">):</span>
+
+<div class="viewcode-block" id="define_edges">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.define_edges">[docs]</a>
+<span class="k">def</span> <span class="nf">define_edges</span><span class="p">(</span><span class="n">vertices</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Defines edges from an ordered list of vertices.</span>
 
@@ -90,7 +94,10 @@
     <span class="k">return</span> <span class="n">edges</span></div>
 
 
-<div class="viewcode-block" id="w_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.w_mesh">[docs]</a><span class="k">def</span> <span class="nf">w_mesh</span><span class="p">(</span><span class="n">sec_b</span><span class="p">,</span> <span class="n">sec_h</span><span class="p">,</span> <span class="n">sec_tw</span><span class="p">,</span> <span class="n">sec_tf</span><span class="p">,</span> <span class="n">target_area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="w_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.w_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">w_mesh</span><span class="p">(</span><span class="n">sec_b</span><span class="p">,</span> <span class="n">sec_h</span><span class="p">,</span> <span class="n">sec_tw</span><span class="p">,</span> <span class="n">sec_tf</span><span class="p">,</span> <span class="n">target_area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Defines a loop of counterclockwise halfedges that form the shape</span>
 <span class="sd">    of the W section with the specified parameters.  The origin</span>
@@ -238,7 +245,10 @@
     <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="rect_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.rect_mesh">[docs]</a><span class="k">def</span> <span class="nf">rect_mesh</span><span class="p">(</span><span class="n">dim_b</span><span class="p">,</span> <span class="n">dim_h</span><span class="p">):</span>
+
+<div class="viewcode-block" id="rect_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.rect_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">rect_mesh</span><span class="p">(</span><span class="n">dim_b</span><span class="p">,</span> <span class="n">dim_h</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Defines a loop of counterclockwise halfedges</span>
 <span class="sd">    that form the shape of the rectangular section with</span>
@@ -261,7 +271,10 @@
     <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="circ_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.circ_mesh">[docs]</a><span class="k">def</span> <span class="nf">circ_mesh</span><span class="p">(</span><span class="n">dim_d</span><span class="p">):</span>
+
+<div class="viewcode-block" id="circ_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.circ_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">circ_mesh</span><span class="p">(</span><span class="n">dim_d</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Defines a loop of counterclockwise halfedges</span>
 <span class="sd">    that form the shape of the circular section with</span>
@@ -289,7 +302,10 @@
     <span class="k">return</span> <span class="n">generate</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="generic_snap_points"><a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.generic_snap_points">[docs]</a><span class="k">def</span> <span class="nf">generic_snap_points</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="generic_snap_points">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.mesh_shapes.html#osmg.gen.mesh_shapes.generic_snap_points">[docs]</a>
+<span class="k">def</span> <span class="nf">generic_snap_points</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates generic snap poitns for a section object.</span>
 
@@ -308,6 +324,7 @@
     <span class="n">snap_points</span><span class="p">[</span><span class="s2">&quot;bottom_left&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">])</span>
     <span class="n">snap_points</span><span class="p">[</span><span class="s2">&quot;bottom_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">z_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">snap_points</span></div>
+
 </pre></div>
 
           </div>
@@ -369,7 +386,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

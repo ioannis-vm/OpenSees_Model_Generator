@@ -1,21 +1,20 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>osmg.model &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <title>osmg.model &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <script src="../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="osmg.ops" href="osmg.ops.html" />
+    <link rel="next" title="osmg.obj_collections" href="osmg.obj_collections.html" />
     <link rel="prev" title="osmg.mesh" href="osmg.mesh.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -34,7 +33,7 @@
           <div class="body" role="main">
             
   <section id="module-osmg.model">
-<span id="osmg-model"></span><h1>osmg.model<a class="headerlink" href="#module-osmg.model" title="Permalink to this heading">¶</a></h1>
+<span id="osmg-model"></span><h1>osmg.model<a class="headerlink" href="#module-osmg.model" title="Link to this heading">¶</a></h1>
 <p>Defines Model objects.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
@@ -57,7 +56,7 @@
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.model.Model">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid_generator:</span> <span class="pre">~osmg.gen.uid_gen.UIDGenerator</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings:</span> <span class="pre">~osmg.model.Settings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uid_generator:</span> <span class="pre">~osmg.gen.uid_gen.UIDGenerator</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings:</span> <span class="pre">~osmg.model.Settings</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model" title="Link to this definition">¶</a></dt>
 <dd><p>Model object.
 A model object is a representation of a structural model in
 OpenSees. It is the primary object of osmg.
@@ -67,73 +66,73 @@ nodes, elements, and component assemblies that exist inside each level.
 Those objects are populated by generator objects. See <cite>osmg.gen</cite>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#osmg.model.Model.name" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#osmg.model.Model.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.levels">
-<span class="sig-name descname"><span class="pre">levels</span></span><a class="headerlink" href="#osmg.model.Model.levels" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">levels</span></span><a class="headerlink" href="#osmg.model.Model.levels" title="Link to this definition">¶</a></dt>
 <dd><p>Collection of levels in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.CollectionActive" title="osmg.collections.CollectionActive">collections.CollectionActive</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.level.html#osmg.level.Level" title="osmg.level.Level">Level</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.obj_collections.html#osmg.obj_collections.CollectionActive" title="osmg.obj_collections.CollectionActive">obj_collections.CollectionActive</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>, <a class="reference internal" href="osmg.level.html#osmg.level.Level" title="osmg.level.Level">Level</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.elastic_sections">
-<span class="sig-name descname"><span class="pre">elastic_sections</span></span><a class="headerlink" href="#osmg.model.Model.elastic_sections" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">elastic_sections</span></span><a class="headerlink" href="#osmg.model.Model.elastic_sections" title="Link to this definition">¶</a></dt>
 <dd><p>Collection of elastic sections in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.ops.section.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection">ElasticSection</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.obj_collections.html#osmg.obj_collections.Collection" title="osmg.obj_collections.Collection">obj_collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>, <a class="reference internal" href="osmg.ops.section.html#osmg.ops.section.ElasticSection" title="osmg.ops.section.ElasticSection">ElasticSection</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.fiber_sections">
-<span class="sig-name descname"><span class="pre">fiber_sections</span></span><a class="headerlink" href="#osmg.model.Model.fiber_sections" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fiber_sections</span></span><a class="headerlink" href="#osmg.model.Model.fiber_sections" title="Link to this definition">¶</a></dt>
 <dd><p>Collection of fiber sections in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.ops.section.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection">FiberSection</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.obj_collections.html#osmg.obj_collections.Collection" title="osmg.obj_collections.Collection">obj_collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>, <a class="reference internal" href="osmg.ops.section.html#osmg.ops.section.FiberSection" title="osmg.ops.section.FiberSection">FiberSection</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.uniaxial_materials">
-<span class="sig-name descname"><span class="pre">uniaxial_materials</span></span><a class="headerlink" href="#osmg.model.Model.uniaxial_materials" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">uniaxial_materials</span></span><a class="headerlink" href="#osmg.model.Model.uniaxial_materials" title="Link to this definition">¶</a></dt>
 <dd><p>Collection of uniaxial materials in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.ops.uniaxial_material.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial">UniaxialMaterial</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.obj_collections.html#osmg.obj_collections.Collection" title="osmg.obj_collections.Collection">obj_collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>, <a class="reference internal" href="osmg.ops.uniaxial_material.html#osmg.ops.uniaxial_material.UniaxialMaterial" title="osmg.ops.uniaxial_material.UniaxialMaterial">UniaxialMaterial</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.physical_materials">
-<span class="sig-name descname"><span class="pre">physical_materials</span></span><a class="headerlink" href="#osmg.model.Model.physical_materials" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">physical_materials</span></span><a class="headerlink" href="#osmg.model.Model.physical_materials" title="Link to this definition">¶</a></dt>
 <dd><p>Collection of physical materials in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="osmg.collections.html#osmg.collections.Collection" title="osmg.collections.Collection">collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference internal" href="osmg.physical_material.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial">PhysicalMaterial</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="osmg.obj_collections.html#osmg.obj_collections.Collection" title="osmg.obj_collections.Collection">obj_collections.Collection</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)">int</a>, <a class="reference internal" href="osmg.physical_material.html#osmg.physical_material.PhysicalMaterial" title="osmg.physical_material.PhysicalMaterial">PhysicalMaterial</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.uid_generator">
-<span class="sig-name descname"><span class="pre">uid_generator</span></span><a class="headerlink" href="#osmg.model.Model.uid_generator" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">uid_generator</span></span><a class="headerlink" href="#osmg.model.Model.uid_generator" title="Link to this definition">¶</a></dt>
 <dd><p>Object for generating unique IDs for objects in the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -144,7 +143,7 @@ Those objects are populated by generator objects. See <cite>osmg.gen</cite>.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="osmg.model.Model.settings">
-<span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#osmg.model.Model.settings" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#osmg.model.Model.settings" title="Link to this definition">¶</a></dt>
 <dd><p>Settings for the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -155,7 +154,7 @@ Those objects are populated by generator objects. See <cite>osmg.gen</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.add_level">
-<span class="sig-name descname"><span class="pre">add_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.add_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.add_level" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">add_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.add_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.add_level" title="Link to this definition">¶</a></dt>
 <dd><p>Adds a level to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -177,13 +176,13 @@ Those objects are populated by generator objects. See <cite>osmg.gen</cite>.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.bounding_box">
-<span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.25)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.25)"><span class="pre">numpy.dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.bounding_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.bounding_box" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.26)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.26)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.bounding_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.bounding_box" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the axis-aligned bouding box of the building</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.component_connectivity">
-<span class="sig-name descname"><span class="pre">component_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.component_assembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.component_connectivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.component_connectivity" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">component_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.component_assembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.component_connectivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.component_connectivity" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the connectivity of all component
 assemblies. Component assemblies are collections of
 lower-level components that are connected to primary
@@ -195,14 +194,14 @@ the associated components as values.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_all_nodes">
-<span class="sig-name descname"><span class="pre">dict_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_all_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_all_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_all_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_all_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all the nodes in the model.
 The keys are the uids of the nodes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_components">
-<span class="sig-name descname"><span class="pre">dict_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_components" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_components" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all the component assemblies in the
 model.
 The keys are the uids of the component assemblies.</p>
@@ -210,28 +209,28 @@ The keys are the uids of the component assemblies.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_elements">
-<span class="sig-name descname"><span class="pre">dict_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_elements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_elements" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all element objects in the model.
 The keys are the uids of the objects.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_internal_nodes">
-<span class="sig-name descname"><span class="pre">dict_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_internal_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_internal_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_internal_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_internal_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all the internal nodes in the model.
 The keys are the uids of the nodes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_primary_nodes">
-<span class="sig-name descname"><span class="pre">dict_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_primary_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_primary_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_primary_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_primary_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all the primary nodes in the model.
 The keys are the uids of the nodes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.dict_of_specific_element">
-<span class="sig-name descname"><span class="pre">dict_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_specific_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_specific_element" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dict_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.dict_of_specific_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.dict_of_specific_element" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of all element objects in the model of a
 particular element class.
 The keys are the uids of the objects.</p>
@@ -239,52 +238,52 @@ The keys are the uids of the objects.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.initialize_empty_copy">
-<span class="sig-name descname"><span class="pre">initialize_empty_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.initialize_empty_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.initialize_empty_copy" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">initialize_empty_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.initialize_empty_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.initialize_empty_copy" title="Link to this definition">¶</a></dt>
 <dd><p>Initializes a shallow empty copy of the model.
 Used to create subset models.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_all_nodes">
-<span class="sig-name descname"><span class="pre">list_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_all_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_all_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_all_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_all_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all the nodes in the model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_components">
-<span class="sig-name descname"><span class="pre">list_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_components" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_components"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_components" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all the component assembiles in the
 model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_elements">
-<span class="sig-name descname"><span class="pre">list_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_elements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_elements</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_elements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_elements" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all element objects in the model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_internal_nodes">
-<span class="sig-name descname"><span class="pre">list_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_internal_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_internal_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_internal_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_internal_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_internal_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all the internal nodes in the model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_primary_nodes">
-<span class="sig-name descname"><span class="pre">list_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_primary_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_primary_nodes" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_primary_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_primary_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_primary_nodes" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all the primary nodes in the model.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.list_of_specific_element">
-<span class="sig-name descname"><span class="pre">list_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_specific_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_specific_element" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">list_of_specific_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="osmg.ops.element.html#osmg.ops.element.Element" title="osmg.ops.element.Element"><span class="pre">element.Element</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.list_of_specific_element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.list_of_specific_element" title="Link to this definition">¶</a></dt>
 <dd><p>Returns a list of all element objects in the model of a
 particular element class.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.reference_length">
-<span class="sig-name descname"><span class="pre">reference_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.reference_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.reference_length" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">reference_length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Model.reference_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.reference_length" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the largest dimension of the
 bounding box of the building
 (used in graphics)</p>
@@ -292,7 +291,7 @@ bounding box of the building
 
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.model.Model.transfer_by_polygon_selection">
-<span class="sig-name descname"><span class="pre">transfer_by_polygon_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.25)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.transfer_by_polygon_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.transfer_by_polygon_selection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">transfer_by_polygon_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.12)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.26)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#Model.transfer_by_polygon_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Model.transfer_by_polygon_selection" title="Link to this definition">¶</a></dt>
 <dd><p>Uses <a class="reference internal" href="#osmg.model.transfer_component" title="osmg.model.transfer_component"><code class="xref py py-func docutils literal notranslate"><span class="pre">transfer_component()</span></code></a> to transfer all components of which
 the projection to the XY plane falls inside the specified
 polygon.</p>
@@ -302,7 +301,7 @@ polygon.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="osmg.model.Settings">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imperial_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Settings" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imperial_units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/model.html#Settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.Settings" title="Link to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>General customization of a model.</dt><dd><dl class="simple">
 <dt>imperial_units:</dt><dd><dl class="simple">
@@ -322,7 +321,7 @@ extended in the future if needed.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="osmg.model.transfer_component">
-<span class="sig-name descname"><span class="pre">transfer_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.component_assembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#transfer_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.transfer_component" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">transfer_component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#osmg.model.Model" title="osmg.model.Model"><span class="pre">Model</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">component</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="osmg.component_assembly.html#osmg.component_assembly.ComponentAssembly" title="osmg.component_assembly.ComponentAssembly"><span class="pre">ComponentAssembly</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/osmg/model.html#transfer_component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.model.transfer_component" title="Link to this definition">¶</a></dt>
 <dd><p>Transfers a single component assembly from one model to
 another, assuming the other model was generated with the
 <a class="reference internal" href="#osmg.model.Model.initialize_empty_copy" title="osmg.model.Model.initialize_empty_copy"><code class="xref py py-func docutils literal notranslate"><span class="pre">initialize_empty_copy()</span></code></a> method.</p>
@@ -361,7 +360,7 @@ another, assuming the other model was generated with the
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="osmg.html">osmg</a><ul>
       <li>Previous: <a href="osmg.mesh.html" title="previous chapter">osmg.mesh</a></li>
-      <li>Next: <a href="osmg.ops.html" title="next chapter">osmg.ops</a></li>
+      <li>Next: <a href="osmg.obj_collections.html" title="next chapter">osmg.obj_collections</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -392,7 +391,7 @@ another, assuming the other model was generated with the
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

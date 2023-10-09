@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "f8bdeb83",
+   "id": "780a7741",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -36,7 +36,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "2e8fec48",
+   "id": "10c29d24",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -56,7 +56,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "91e5c44a",
+   "id": "9fbb3bee",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -69,7 +69,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "33870910",
+   "id": "014f79fa",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -81,7 +81,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d0890ebc",
+   "id": "d97f2921",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -95,7 +95,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "91987e9b",
+   "id": "2775961f",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -109,7 +109,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "685e248e",
+   "id": "e2927df5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -128,7 +128,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "78b05177",
+   "id": "1720af2d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -141,7 +141,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8e61a40b",
+   "id": "894c05a3",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -156,7 +156,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "06550cf0",
+   "id": "10e371d2",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -179,7 +179,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f9d463b8",
+   "id": "4e5e76e1",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -206,7 +206,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "92ce7247",
+   "id": "d89774b1",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -218,7 +218,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d26f8e69",
+   "id": "53d9dbe9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -232,7 +232,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c0b90932",
+   "id": "5ad6c170",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -243,7 +243,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "b5f51d02",
+   "id": "05a78f0c",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -253,7 +253,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "dd230b53",
+   "id": "7370cfc6",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -268,9 +268,6 @@
     "  specified levels. Only primary nodes are affected (not internal\n",
     "  nodes of component assemblies).\n",
     "\n",
-    "* `tributary_area_analysis` distributes loads from the floors to the\n",
-    "  supporting elements.\n",
-    "\n",
     "* `self_weight`, `self_mass` assign self-weight loads and lumped\n",
     "  self-mass to all the elements / nodes.\n",
     "\n",
@@ -280,7 +277,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "69fa549f",
+   "id": "9c6881b5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -289,14 +286,13 @@
     "# imports\n",
     "from osmg.load_case import LoadCase\n",
     "from osmg.preprocessing.self_weight_mass import self_weight\n",
-    "from osmg.preprocessing.self_weight_mass import self_mass\n",
-    "from osmg.preprocessing.tributary_area_analysis import PolygonLoad"
+    "from osmg.preprocessing.self_weight_mass import self_mass"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d7ac0342",
+   "id": "c221b7fb",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -308,7 +304,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "53f6d9ea",
+   "id": "1cab7f98",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -321,7 +317,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5913d0fc",
+   "id": "ab0e7748",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -333,24 +329,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "757ded9f",
-   "metadata": {
-    "lines_to_next_cell": 2
-   },
-   "outputs": [],
-   "source": [
-    "for key in [1, 2]:\n",
-    "    testcase.tributary_area_analysis[key].polygon_loads.append(\n",
-    "        PolygonLoad('dead', 50.00, None, None, False))\n",
-    "    testcase.tributary_area_analysis[key].polygon_loads.append(\n",
-    "        PolygonLoad('live', 10.00, None, None, True))\n",
-    "    testcase.tributary_area_analysis[key].run()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "c8574a3d",
+   "id": "55d810f7",
    "metadata": {},
    "outputs": [],
    "source": [

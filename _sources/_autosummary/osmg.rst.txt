@@ -29,11 +29,11 @@
    :template: custom-module-template.rst
    :recursive:
 
-   osmg.collections
    osmg.common
    osmg.component_assembly
    osmg.defaults
    osmg.gen
+   osmg.get_latest_pypi_version
    osmg.graphics
    osmg.ground_motion_utils
    osmg.level
@@ -41,6 +41,7 @@
    osmg.load_case
    osmg.mesh
    osmg.model
+   osmg.obj_collections
    osmg.ops
    osmg.physical_material
    osmg.postprocessing

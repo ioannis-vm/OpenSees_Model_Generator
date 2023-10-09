@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.graphics.graphics_common_3d &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>osmg.graphics.graphics_common_3d &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -50,27 +49,28 @@
 
 <span class="c1"># pio.renderers.default = &#39;browser&#39;</span>
 
-<span class="c1"># # used for production plots</span>
-<span class="c1"># node_marker = {</span>
-<span class="c1">#     &#39;fixed&#39;: (&quot;square&quot;, 8),</span>
-<span class="c1">#     &#39;pinned&#39;: (&quot;circle-open&quot;, 2),</span>
-<span class="c1">#     &#39;free&#39;: (&quot;circle&quot;, 3),</span>
-<span class="c1">#     &#39;parent&#39;: (&quot;circle-open&quot;, 15),</span>
-<span class="c1">#     &#39;internal&#39;: (&quot;x&quot;, 2),</span>
-<span class="c1">#     &#39;111011&#39;: (&quot;circle-open&quot;, 3),</span>
-<span class="c1"># }</span>
-
-<span class="c1"># used for development plots</span>
+<span class="c1"># used for production plots</span>
 <span class="n">node_marker</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;fixed&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-    <span class="s2">&quot;free&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
-    <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-    <span class="s2">&quot;internal&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-    <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+    <span class="s1">&#39;fixed&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;square&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+    <span class="s1">&#39;release&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+    <span class="s1">&#39;free&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+    <span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;circle-open&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+    <span class="s1">&#39;internal&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
 <span class="p">}</span>
 
+<span class="c1"># # used for development plots</span>
+<span class="c1"># node_marker = {</span>
+<span class="c1">#     &quot;fixed&quot;: (&quot;square&quot;, 10),</span>
+<span class="c1">#     &quot;free&quot;: (&quot;circle&quot;, 5),</span>
+<span class="c1">#     &quot;parent&quot;: (&quot;circle-open&quot;, 20),</span>
+<span class="c1">#     &quot;internal&quot;: (&quot;x&quot;, 3),</span>
+<span class="c1">#     &quot;release&quot;: (&quot;circle-open&quot;, 15),</span>
+<span class="c1"># }</span>
 
-<div class="viewcode-block" id="global_layout"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.graphics_common_3d.html#osmg.graphics.graphics_common_3d.global_layout">[docs]</a><span class="k">def</span> <span class="nf">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="global_layout">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.graphics_common_3d.html#osmg.graphics.graphics_common_3d.global_layout">[docs]</a>
+<span class="k">def</span> <span class="nf">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Some general definitions that are often needed.</span>
 
@@ -112,6 +112,7 @@
             <span class="c1"># the camera &#39;moving&#39; across different animation frames</span>
         <span class="p">)</span>
     <span class="p">)</span></div>
+
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -177,7 +178,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

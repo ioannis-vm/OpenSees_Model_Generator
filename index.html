@@ -1,17 +1,16 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Welcome to the documentation for osmg &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Welcome to the documentation for osmg &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <script src="_static/documentation_options.js?v=92734c54"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -33,7 +32,7 @@
           <div class="body" role="main">
             
   <section id="welcome-to-the-documentation-for-osmg">
-<h1>Welcome to the documentation for <cite>osmg</cite><a class="headerlink" href="#welcome-to-the-documentation-for-osmg" title="Permalink to this heading">¶</a></h1>
+<h1>Welcome to the documentation for <cite>osmg</cite><a class="headerlink" href="#welcome-to-the-documentation-for-osmg" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
@@ -44,7 +43,7 @@
 </ul>
 </div>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">OpenSees_Model_Generator</span></code> (<cite>osmg</cite>) is a Python package
 designed to facilitate the definition and analysis of 3D models using
 <a class="reference external" href="https://opensees.berkeley.edu/">OpenSees</a>. Its main goal is to simplify the process of creating
@@ -84,7 +83,7 @@ on Github. Note that the documentation is a work in progress.</p>
 </div>
 </section>
 <section id="the-osmg-workflow">
-<h2>The <cite>osmg</cite> Workflow<a class="headerlink" href="#the-osmg-workflow" title="Permalink to this heading">¶</a></h2>
+<h2>The <cite>osmg</cite> Workflow<a class="headerlink" href="#the-osmg-workflow" title="Link to this heading">¶</a></h2>
 <p>The general workflow enabled by the module is the following:</p>
 <ol class="arabic simple">
 <li><p>Instantiate model objects and define their components.</p></li>
@@ -96,7 +95,7 @@ on Github. Note that the documentation is a work in progress.</p>
 <p>Actual interaction with OpenSees only happens at step #4.</p>
 </section>
 <section id="installing-osmg">
-<h2>Installing <cite>osmg</cite><a class="headerlink" href="#installing-osmg" title="Permalink to this heading">¶</a></h2>
+<h2>Installing <cite>osmg</cite><a class="headerlink" href="#installing-osmg" title="Link to this heading">¶</a></h2>
 <p>It is recommended to use a virtual environment to manage the
 dependencies of this module. Anaconda or Miniconda are some valid
 options. Installation instructions can be found
@@ -104,7 +103,7 @@ options. Installation instructions can be found
 <p><cite>osmg</cite> is available on <a class="reference external" href="https://pypi.org/">PyPI</a>, but it is recommended to install it in
 development mode instead.</p>
 <section id="installing-from-pypi">
-<h3>Installing from PyPI<a class="headerlink" href="#installing-from-pypi" title="Permalink to this heading">¶</a></h3>
+<h3>Installing from PyPI<a class="headerlink" href="#installing-from-pypi" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># create a conda environment</span>
 conda<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span>your_env_name_here<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
 <span class="c1"># activate the environment</span>
@@ -120,7 +119,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </sp
 load distribution calculations, but it is optional.</p>
 </section>
 <section id="installing-in-development-mode">
-<h3>Installing in development mode<a class="headerlink" href="#installing-in-development-mode" title="Permalink to this heading">¶</a></h3>
+<h3>Installing in development mode<a class="headerlink" href="#installing-in-development-mode" title="Link to this heading">¶</a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>parent_directory_where_you_would_like_to_have_osmg
 <span class="nb">cd</span><span class="w"> </span>parent_directory_where_you_would_like_to_have_osmg
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ioannis-vm/OpenSees_Model_Generator
@@ -195,7 +194,7 @@ python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </sp
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

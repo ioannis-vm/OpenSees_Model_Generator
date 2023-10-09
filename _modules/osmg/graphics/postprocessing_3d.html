@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.graphics.postprocessing_3d &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>osmg.graphics.postprocessing_3d &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -70,7 +69,9 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="force_scaling_factor"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.force_scaling_factor">[docs]</a><span class="k">def</span> <span class="nf">force_scaling_factor</span><span class="p">(</span><span class="n">ref_len</span><span class="p">,</span> <span class="n">fmax</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
+<div class="viewcode-block" id="force_scaling_factor">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.force_scaling_factor">[docs]</a>
+<span class="k">def</span> <span class="nf">force_scaling_factor</span><span class="p">(</span><span class="n">ref_len</span><span class="p">,</span> <span class="n">fmax</span><span class="p">,</span> <span class="n">factor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a scaling factor to basic forces.</span>
 
@@ -88,7 +89,10 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-<div class="viewcode-block" id="interp_3d_deformation"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.interp_3d_deformation">[docs]</a><span class="k">def</span> <span class="nf">interp_3d_deformation</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">u_i</span><span class="p">,</span> <span class="n">r_i</span><span class="p">,</span> <span class="n">u_j</span><span class="p">,</span> <span class="n">r_j</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
+
+<div class="viewcode-block" id="interp_3d_deformation">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.interp_3d_deformation">[docs]</a>
+<span class="k">def</span> <span class="nf">interp_3d_deformation</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">u_i</span><span class="p">,</span> <span class="n">r_i</span><span class="p">,</span> <span class="n">u_j</span><span class="p">,</span> <span class="n">r_j</span><span class="p">,</span> <span class="n">num_points</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given the deformations of the ends of a Bernoulli beam,</span>
 <span class="sd">    use its shape functions to obtain intermediate points.</span>
@@ -171,7 +175,9 @@
     <span class="c1"># bending rotation around the local z axis</span>
     <span class="n">r_z_local</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">nyz_derivative_mat</span>
-<div class="viewcode-block" id="interp_3d_points"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.interp_3d_points">[docs]</a>        <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_i_local</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r_i_local</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j_local</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r_j_local</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+<div class="viewcode-block" id="interp_3d_points">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.interp_3d_points">[docs]</a>
+        <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_i_local</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r_i_local</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j_local</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">r_j_local</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
         <span class="o">/</span> <span class="n">len_clr</span>
     <span class="p">)</span>
 
@@ -191,6 +197,7 @@
     <span class="n">d_global</span> <span class="o">=</span> <span class="p">(</span><span class="n">transf_local2global</span> <span class="o">@</span> <span class="n">d_local</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
     <span class="k">return</span> <span class="n">d_global</span><span class="p">,</span> <span class="n">r_local</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">interp_3d_points</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">d_global</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">scaling</span><span class="p">):</span>
@@ -219,7 +226,10 @@
     <span class="k">return</span> <span class="n">interpolation_points</span></div>
 
 
-<div class="viewcode-block" id="add_data__extruded_line_elms_deformed_mesh"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh">[docs]</a><span class="k">def</span> <span class="nf">add_data__extruded_line_elms_deformed_mesh</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__extruded_line_elms_deformed_mesh">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__extruded_line_elms_deformed_mesh">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__extruded_line_elms_deformed_mesh</span><span class="p">(</span>
     <span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_line_elems</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">scaling</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -400,7 +410,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__line_elms_deformed"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__line_elms_deformed">[docs]</a><span class="k">def</span> <span class="nf">add_data__line_elms_deformed</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__line_elms_deformed">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__line_elms_deformed">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__line_elms_deformed</span><span class="p">(</span>
     <span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_line_elems</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">scaling</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -486,7 +499,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__line_elm_offsets_deformed"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed">[docs]</a><span class="k">def</span> <span class="nf">add_data__line_elm_offsets_deformed</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__line_elm_offsets_deformed">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__line_elm_offsets_deformed">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__line_elm_offsets_deformed</span><span class="p">(</span>
     <span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_line_elems</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">scaling</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -561,7 +577,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__frames_undeformed"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__frames_undeformed">[docs]</a><span class="k">def</span> <span class="nf">add_data__frames_undeformed</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_line_elems</span><span class="p">):</span>
+
+<div class="viewcode-block" id="add_data__frames_undeformed">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__frames_undeformed">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__frames_undeformed</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_line_elems</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element centroidal axis lines</span>
 
@@ -596,7 +615,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_data__nodes_deformed"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__nodes_deformed">[docs]</a><span class="k">def</span> <span class="nf">add_data__nodes_deformed</span><span class="p">(</span>
+
+<div class="viewcode-block" id="add_data__nodes_deformed">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.add_data__nodes_deformed">[docs]</a>
+<span class="k">def</span> <span class="nf">add_data__nodes_deformed</span><span class="p">(</span>
     <span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="n">list_of_nodes</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">scaling</span><span class="p">,</span> <span class="n">function</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -663,7 +685,10 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_auto_scaling_deformation"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.get_auto_scaling_deformation">[docs]</a><span class="k">def</span> <span class="nf">get_auto_scaling_deformation</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_auto_scaling_deformation">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.get_auto_scaling_deformation">[docs]</a>
+<span class="k">def</span> <span class="nf">get_auto_scaling_deformation</span><span class="p">(</span><span class="n">analysis</span><span class="p">,</span> <span class="n">case_name</span><span class="p">,</span> <span class="n">mdl</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Automatically calculate a scaling value that makes the maximum</span>
 <span class="sd">    displacement appear approximately 10% of the largest dimention of</span>
@@ -711,7 +736,10 @@
     <span class="k">return</span> <span class="n">scaling</span></div>
 
 
-<div class="viewcode-block" id="show_deformed_shape"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_deformed_shape">[docs]</a><span class="k">def</span> <span class="nf">show_deformed_shape</span><span class="p">(</span>
+
+<div class="viewcode-block" id="show_deformed_shape">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_deformed_shape">[docs]</a>
+<span class="k">def</span> <span class="nf">show_deformed_shape</span><span class="p">(</span>
         <span class="n">analysis</span><span class="p">:</span> <span class="n">Analysis</span><span class="p">,</span>
         <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -952,7 +980,10 @@
     <span class="k">return</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="show_basic_forces"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_basic_forces">[docs]</a><span class="k">def</span> <span class="nf">show_basic_forces</span><span class="p">(</span>
+
+<div class="viewcode-block" id="show_basic_forces">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_basic_forces">[docs]</a>
+<span class="k">def</span> <span class="nf">show_basic_forces</span><span class="p">(</span>
     <span class="n">analysis</span><span class="p">,</span>
     <span class="n">case_name</span><span class="p">,</span>
     <span class="n">step</span><span class="p">,</span>
@@ -1470,7 +1501,10 @@
     <span class="k">return</span> <span class="n">metadata</span></div>
 
 
-<div class="viewcode-block" id="show_basic_forces_combo"><a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_basic_forces_combo">[docs]</a><span class="k">def</span> <span class="nf">show_basic_forces_combo</span><span class="p">(</span>
+
+<div class="viewcode-block" id="show_basic_forces_combo">
+<a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_basic_forces_combo">[docs]</a>
+<span class="k">def</span> <span class="nf">show_basic_forces_combo</span><span class="p">(</span>
     <span class="n">combo</span><span class="p">,</span>
     <span class="n">scaling_global</span><span class="p">,</span>
     <span class="n">scaling_n</span><span class="p">,</span>
@@ -1979,6 +2013,7 @@
         <span class="s2">&quot;scaling_t&quot;</span><span class="p">:</span> <span class="n">scaling_t</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="n">metadata</span></div>
+
 </pre></div>
 
           </div>
@@ -2040,7 +2075,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>

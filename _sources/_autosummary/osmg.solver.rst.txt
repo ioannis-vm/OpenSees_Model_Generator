@@ -16,6 +16,7 @@ osmg.solver
    
       define_lateral_load_pattern
       plot_ground_motion
+      script_append
    
    
 

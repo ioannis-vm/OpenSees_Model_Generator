@@ -1,0 +1,30 @@
+osmg.get\_latest\_pypi\_version
+===============================
+
+.. automodule:: osmg.get_latest_pypi_version
+   :members:
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_latest_version
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.line &#8212; osmg 0.1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
+    <title>osmg.line &#8212; osmg 0.1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script src="../../_static/documentation_options.js?v=92734c54"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -56,7 +55,9 @@
 <span class="n">nparr</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="Line">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Line</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finite-length line segment object.</span>
@@ -80,7 +81,9 @@
         <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  end: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">res</span>
 
-<div class="viewcode-block" id="Line.length"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Line.length">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.length">[docs]</a>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the length of the line.</span>
 
@@ -94,7 +97,10 @@
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Line.direction"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.direction">[docs]</a>    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Line.direction">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.direction">[docs]</a>
+    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a unit vector pointing from the start to the end of</span>
 <span class="sd">        the line.</span>
@@ -109,7 +115,10 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Line.intersect"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;Line&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Line.intersect">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.intersect">[docs]</a>
+    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;Line&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the intersection point of this line with another</span>
 <span class="sd">        line. Returns None if the lines don&#39;t intersect.  Note: &#39;line&#39;</span>
@@ -176,7 +185,10 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="Line.intersects_pt"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.intersects_pt">[docs]</a>    <span class="k">def</span> <span class="nf">intersects_pt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+<div class="viewcode-block" id="Line.intersects_pt">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.intersects_pt">[docs]</a>
+    <span class="k">def</span> <span class="nf">intersects_pt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether the given point pt lies on the line.</span>
 
@@ -212,7 +224,10 @@
             <span class="n">res</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="Line.point_distance"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.point_distance">[docs]</a>    <span class="k">def</span> <span class="nf">point_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="Line.point_distance">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.point_distance">[docs]</a>
+    <span class="k">def</span> <span class="nf">point_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculate the minimum distance between the line segment and a</span>
 <span class="sd">        point.  If the point falls on the line but is outside of the</span>
@@ -250,7 +265,10 @@
             <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-<div class="viewcode-block" id="Line.project"><a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">nparr</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="Line.project">
+<a class="viewcode-back" href="../../_autosummary/osmg.line.html#osmg.line.Line.project">[docs]</a>
+    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">nparr</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the projection of a point on the line.</span>
 <span class="sd">        If the projection falls on the line segment, it returns the</span>
@@ -277,7 +295,9 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersects_pt</span><span class="p">(</span><span class="n">proj_point</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">proj_point</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span></div></div>
+            <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
 </pre></div>
 
           </div>
@@ -339,7 +359,7 @@
       &copy;2023, Ioannis Vouvakis Manousakis.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
       
     </div>
