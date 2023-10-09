@@ -42,13 +42,13 @@ jobs:
           python -m pip install osmg --upgrade
           latest=$(pip show osmg | grep 'Version:' | awk '{print $2}')
           echo "Latest Version found on PyPi: $latest"
-          echo "::set-output name=latest_version::$latest"
+          echo "PYPI_VERSION=$latest" >> $GITHUB_ENV
       - name: Check the current version on setup.cfg
         id: version_step_setupcfg
         run: |
-            version=$(grep '^version' setup.cfg | awk -F= '{print $2}' | tr -d '[:space:]')
-            echo "Version found in setup.cfg: $version"
-            echo "::set-output name=setupcfg_version::$version"
+          version=$(grep '^version' setup.cfg | awk -F= '{print $2}' | tr -d '[:space:]')
+          echo "Version found in setup.cfg: $version"
+          echo "SETUPCFG_VERSION=$version" >> $GITHUB_ENV
       - name: Prepare package
         run: |
             python -m pip install --upgrade pip setuptools wheel twine
@@ -59,7 +59,7 @@ jobs:
             name: dist
             path: dist
       - name: Deploy
-        if: ${{ steps.version_step_pypi.outputs.latest_version != steps.version_step_setupcfg.outputs.setupcfg_version }}
+        if: ${{ env.PYPI_VERSION != env.SETUPCFG_VERSION }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: ${{ secrets.PYPI_USERNAME }}
