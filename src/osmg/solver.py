@@ -2401,9 +2401,11 @@ class THAnalysis(GravityPlusAnalysis):
 
             # modal damping
             num_modes = damping["num_modes"]
+            assert isinstance(num_modes, int)
             damping_ratio = damping["ratio_modal"]
+            assert isinstance(damping_ratio, float)
             self.log("Running eigenvalue analysis" f" with {num_modes} modes")
-            omega_squareds = np.array(ops.eigen(int(num_modes)))
+            omega_squareds = np.array(ops.eigen(num_modes))
             self.log("Eigenvalue analysis finished")
             damping_vals = damping["ratio_modal"] - alpha_1*omega_squareds/2.00
             damping_vals[damping_vals < 0.00] = 0.00
