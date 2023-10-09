@@ -122,15 +122,12 @@ class Model:
     elastic_sections: obj_collections.Collection[int, ElasticSection] = field(
         init=False
     )
-    fiber_sections: obj_collections.Collection[int, FiberSection] = field(
-        init=False
-    )
-    uniaxial_materials: obj_collections.Collection[int, UniaxialMaterial] = field(
-        init=False
-    )
-    physical_materials: obj_collections.Collection[int, PhysicalMaterial] = field(
-        init=False
-    )
+    fiber_sections: obj_collections.Collection[
+        int, FiberSection] = field(init=False)
+    uniaxial_materials: obj_collections.Collection[
+        int, UniaxialMaterial] = field(init=False)
+    physical_materials: obj_collections.Collection[
+        int, PhysicalMaterial] = field(init=False)
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 

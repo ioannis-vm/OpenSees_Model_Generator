@@ -186,8 +186,12 @@ class LoadCase:
 
     name: str
     parent_model: Model
-    node_loads: obj_collections.Collection[int, PointLoadMass] = field(init=False)
-    node_mass: obj_collections.Collection[int, PointLoadMass] = field(init=False)
+    node_loads: obj_collections.Collection[int, PointLoadMass] = field(
+        init=False
+    )
+    node_mass: obj_collections.Collection[int, PointLoadMass] = field(
+        init=False
+    )
     line_element_udl: obj_collections.Collection[int, LineElementUDL] = field(
         init=False
     )
