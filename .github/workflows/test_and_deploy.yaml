@@ -39,6 +39,7 @@ jobs:
       - name: Check the current version on PyPi
         id: version_step_pypi
         run: |
+          python -m pip install requests
           latest=$(python src/osmg/get_latest_pypi_version.py)
           echo "Latest Version found on PyPi: $latest"
           echo "PYPI_VERSION=$latest" >> $GITHUB_ENV
