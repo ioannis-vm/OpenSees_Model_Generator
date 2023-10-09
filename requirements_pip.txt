@@ -1,7 +1,0 @@
-pandas
-numpy
-scipy
-matplotlib
-plotly
-shapely
-tqdm
