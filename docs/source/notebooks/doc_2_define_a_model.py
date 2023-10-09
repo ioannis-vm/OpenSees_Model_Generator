@@ -161,9 +161,6 @@ Some common methods are the following:
   specified levels. Only primary nodes are affected (not internal
   nodes of component assemblies).
 
-* `tributary_area_analysis` distributes loads from the floors to the
-  supporting elements.
-
 * `self_weight`, `self_mass` assign self-weight loads and lumped
   self-mass to all the elements / nodes.
 
@@ -176,7 +173,6 @@ Loads, mass, and diaphragm constraints are load_case-specific.
 from osmg.load_case import LoadCase
 from osmg.preprocessing.self_weight_mass import self_weight
 from osmg.preprocessing.self_weight_mass import self_mass
-from osmg.preprocessing.tributary_area_analysis import PolygonLoad
 
 
 # %%
@@ -190,15 +186,6 @@ self_mass(mdl, testcase)
 
 # %%
 testcase.rigid_diaphragms([1, 2])
-
-
-# %%
-for key in [1, 2]:
-    testcase.tributary_area_analysis[key].polygon_loads.append(
-        PolygonLoad('dead', 50.00, None, None, False))
-    testcase.tributary_area_analysis[key].polygon_loads.append(
-        PolygonLoad('live', 10.00, None, None, True))
-    testcase.tributary_area_analysis[key].run()
 
 
 # %%
