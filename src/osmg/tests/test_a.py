@@ -140,7 +140,7 @@ def test_a():
 
     anl = PushoverAnalysis(mdl, {testcase.name: testcase})
 
-    anl.run("y", [+50.00], control_node, 0.1, loaded_node=control_node)
+    anl.run("y", [+1.00], control_node, 0.1, loaded_node=control_node)
 
     show_deformed_shape(
         anl,
@@ -157,7 +157,7 @@ def test_a():
     # zelm = zelms[0].uid
     # res_a = anl.retrieve_release_force_defo(zelm, testcase.name)
 
-    anl.run("y", [-50.00], control_node, 0.1, loaded_node=control_node)
+    anl.run("y", [-1.00], control_node, 0.1, loaded_node=control_node)
 
     # deformed_shape(anl, anl.n_steps_success, 0.00, True)
     # res_b = anl.retrieve_release_force_defo(zelm, testcase.name)
