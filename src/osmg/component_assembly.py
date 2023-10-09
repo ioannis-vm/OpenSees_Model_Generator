@@ -17,8 +17,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
-from . import collections
 from .ops import element
+from . import obj_collections
 
 
 nparr = npt.NDArray[np.float64]
@@ -50,19 +50,19 @@ class ComponentAssembly:
     """
 
     uid: int
-    parent_collection: collections.Collection[int, ComponentAssembly]
+    parent_collection: obj_collections.Collection[int, ComponentAssembly]
     component_purpose: str
-    external_nodes: collections.NodeCollection = field(init=False)
-    internal_nodes: collections.NodeCollection = field(init=False)
+    external_nodes: obj_collections.NodeCollection = field(init=False)
+    internal_nodes: obj_collections.NodeCollection = field(init=False)
     elements: (
-        collections.CollectionWithConnectivity[int, element.Element]
+        obj_collections.CollectionWithConnectivity[int, element.Element]
     ) = field(init=False)
 
     def __post_init__(self):
-        self.external_nodes = collections.NodeCollection(self)
-        self.internal_nodes = collections.NodeCollection(self)
+        self.external_nodes = obj_collections.NodeCollection(self)
+        self.internal_nodes = obj_collections.NodeCollection(self)
         self.elements = (
-            collections.CollectionWithConnectivity(self)
+            obj_collections.CollectionWithConnectivity(self)
         )
 
     def __srepr__(self):

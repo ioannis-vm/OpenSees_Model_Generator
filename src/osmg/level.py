@@ -15,8 +15,8 @@ Model Generator for OpenSees ~ level
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
-from .collections import Collection
-from .collections import NodeCollection
+from .obj_collections import Collection
+from .obj_collections import NodeCollection
 
 if TYPE_CHECKING:
     from .model import Model
@@ -47,9 +47,9 @@ class Level:
         >>> level.elevation
         0.0
         >>> type(level.nodes)
-        <class 'osmg.collections.NodeCollection'>
+        <class 'osmg.obj_collections.NodeCollection'>
         >>> type(level.components)
-        <class 'osmg.collections.Collection'>
+        <class 'osmg.obj_collections.Collection'>
     """
 
     parent_model: Model = field(repr=False)

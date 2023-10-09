@@ -12,9 +12,11 @@ Defines OpenSees Element interfrace objects.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Union
 from typing import Optional
+from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 from .uniaxial_material import UniaxialMaterial
@@ -23,7 +25,8 @@ from .section import ElasticSection
 from .section import FiberSection
 from ..mesh import Mesh
 from ..graphics.visibility import ElementVisibility
-from ..component_assembly import ComponentAssembly
+if TYPE_CHECKING:
+    from ..component_assembly import ComponentAssembly
 
 
 nparr = npt.NDArray[np.float64]

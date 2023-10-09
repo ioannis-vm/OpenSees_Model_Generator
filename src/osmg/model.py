@@ -25,7 +25,7 @@ from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 from shapely.geometry import Point  # type: ignore
 
 from .gen.uid_gen import UIDGenerator
-from . import collections
+from . import obj_collections
 from .level import Level
 
 if TYPE_CHECKING:
@@ -118,28 +118,28 @@ class Model:
     """
 
     name: str
-    levels: collections.CollectionActive[int, Level] = field(init=False)
-    elastic_sections: collections.Collection[int, ElasticSection] = field(
+    levels: obj_collections.CollectionActive[int, Level] = field(init=False)
+    elastic_sections: obj_collections.Collection[int, ElasticSection] = field(
         init=False
     )
-    fiber_sections: collections.Collection[int, FiberSection] = field(
+    fiber_sections: obj_collections.Collection[int, FiberSection] = field(
         init=False
     )
-    uniaxial_materials: collections.Collection[int, UniaxialMaterial] = field(
+    uniaxial_materials: obj_collections.Collection[int, UniaxialMaterial] = field(
         init=False
     )
-    physical_materials: collections.Collection[int, PhysicalMaterial] = field(
+    physical_materials: obj_collections.Collection[int, PhysicalMaterial] = field(
         init=False
     )
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
     def __post_init__(self):
-        self.levels = collections.CollectionActive(self)
-        self.elastic_sections = collections.Collection(self)
-        self.fiber_sections = collections.Collection(self)
-        self.uniaxial_materials = collections.Collection(self)
-        self.physical_materials = collections.Collection(self)
+        self.levels = obj_collections.CollectionActive(self)
+        self.elastic_sections = obj_collections.Collection(self)
+        self.fiber_sections = obj_collections.Collection(self)
+        self.uniaxial_materials = obj_collections.Collection(self)
+        self.physical_materials = obj_collections.Collection(self)
 
     def __repr__(self):
         res = ""

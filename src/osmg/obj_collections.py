@@ -42,7 +42,7 @@ class Collection(dict[TK, TV]):
         parent: Object to which the Collection belongs.
 
     Example:
-        >>> # collections require parent objects to which they belong
+        >>> # obj_collections require parent objects to which they belong
         >>> parent = 52
         >>> my_collection = Collection(parent=parent)
         >>> my_collection.parent
@@ -80,7 +80,7 @@ class Collection(dict[TK, TV]):
         >>>
         >>>
         >>>
-        >>> # Collections.retrieve_by_attr method:
+        >>> # obj_collections.retrieve_by_attr method:
         >>>
         >>> from osmg.ops.section import Section
         >>> sec_collection = Collection(parent=None)
@@ -92,7 +92,7 @@ class Collection(dict[TK, TV]):
         >>>
         >>>
         >>>
-        >>> # Collections.__srepr__ method:
+        >>> # obj_collections.__srepr__ method:
         >>>
         >>> sec_collection.__srepr__()
         '[Collection of 2 items]'

@@ -51,7 +51,7 @@ from .ops import element
 from . import common
 from .graphics import general_2d
 from . import transformations
-from .collections import Collection
+from .obj_collections import Collection
 from .gen.query import LoadCaseQuery
 from .ops import uniaxial_material
 
