@@ -61,11 +61,6 @@ CONSTRAINTS = ("Transformation",)
 NUMBERER = "RCM"
 
 
-def script_append(tcl_script, lines):
-    with open(tcl_script, 'a', encoding='utf-8') as f:
-        f.writelines([f'{line}\n' for line in lines])
-
-
 @dataclass(repr=False)
 class Results:
     """
@@ -311,308 +306,6 @@ class Analysis:
         with open(f"{self.output_directory}/main_results.pcl", "rb") as file:
             self.results = pickle.load(file)
 
-    def write_tcl_model(self, case_name, tcl_script):
-        """
-        Generates a tcl script defining the model
-
-        """
-
-        # determine if a file already exists
-        if os.path.exists(tcl_script):
-            # remove it if it does
-            os.remove(tcl_script)
-
-
-        # initialize
-        script_append(tcl_script, [
-            'wipe',
-            'model basic -ndm 3 -ndf 6'
-        ])
-
-        # ~~~~~~~~~~~~~~~ #
-        # Node definition #
-        # ~~~~~~~~~~~~~~~ #
-
-        # keep track of defined nodes
-        defined_nodes = {}
-
-        primary_nodes = self.mdl.dict_of_primary_nodes()
-        internal_nodes = self.mdl.dict_of_internal_nodes()
-        parent_nodes = {}
-        parent_node_to_lvl = {}
-        for lvl_uid, node in self.load_cases[case_name].parent_nodes.items():
-            parent_nodes[node.uid] = node
-            parent_node_to_lvl[node.uid] = lvl_uid
-
-        all_nodes = {}
-        all_nodes.update(primary_nodes)
-        all_nodes.update(internal_nodes)
-        all_nodes.update(parent_nodes)
-        for uid, node in all_nodes.items():
-            if uid in defined_nodes:
-                raise KeyError(f"Node already defined: {uid}")
-            defined_nodes[uid] = node
-            script_append(
-                tcl_script,
-                [f'node {node.uid} '+' '.join(str(x) for x in node.coords)])
-
-        # restraints
-        for uid, node in primary_nodes.items():
-            script_append(
-                tcl_script,
-                [
-                    f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
-                ])
-            
-        for uid, node in internal_nodes.items():
-            # (this is super unusual, but who knows..)
-            script_append(tcl_script,
-                [
-                f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
-            ])
-        for node in parent_nodes.values():
-            script_append(tcl_script,
-                          [
-                f'fix {node.uid} '+' '.join(str(int(x)) for x in node.restraint)
-            ])
-
-        # lumped nodal mass
-        for uid, node in all_nodes.items():
-            # retrieve osmg node mass
-            specified_mass = self.load_cases[case_name].node_mass[node.uid].val
-            # replace zeros with a small mass
-            # (to be able to capture all mode shapes)
-            specified_mass[specified_mass == 0] = common.EPSILON
-            # verify that all mass values are non-negative
-            assert np.size(specified_mass[specified_mass < 0.00]) == 0
-            # assign mass to the opensees node
-            script_append(tcl_script,
-                          [
-                f'mass {node.uid} '+' '.join(str(x) for x in specified_mass)
-            ])
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # Elastic BeamColumn element definition #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-        # keep track of defined elements
-        defined_elements = {}
-
-        elms = list(self.mdl.dict_of_specific_element(
-            element.ElasticBeamColumn).values())
-
-        # define line elements
-        for elm in elms:
-            if elm.visibility.skip_opensees_definition:
-                continue
-            script_append(tcl_script, [
-                f'geomTransf '+' '.join([str(x) for x in elm.geomtransf.ops_args()]),
-                f'element '+' '.join([str(x) for x in elm.ops_args()]),
-            ])
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # Fiber BeamColumn element definition #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-        # keep track of defined elements
-        defined_sections: dict[int, object] = {}
-        defined_materials: dict[int, object] = {}
-
-        elms = self.mdl.list_of_specific_element(element.DispBeamColumn)
-
-        def define_material(mat, defined_materials):
-            """
-            A cute recursive function that defines materials with
-            predecessors.
-
-            """
-
-            # if the actual material has not been defined yet,
-            if mat.uid not in defined_materials:
-                while (
-                    hasattr(mat, "predecessor")
-                    and mat.predecessor.uid not in defined_materials
-                ):
-                    # define predecessor
-                    define_material(mat.predecessor, defined_materials)
-                # and also define the actual material
-                script_append(tcl_script,[
-                    f'uniaxialMaterial '+' '.join([str(x) for x in mat.ops_args()])
-                ])
-                defined_materials[mat.uid] = mat
-
-        for elm in elms:
-            sec = elm.section
-            parts = sec.section_parts.values()
-            if sec.uid not in defined_sections:
-                script_append(tcl_script, [
-                    f'section '+' '.join([str(x) for x in sec.ops_args()])+' {'
-                ])
-                defined_sections[sec.uid] = sec
-                for part in parts:
-                    mat = part.ops_material
-                    define_material(mat, defined_materials)
-                    pieces = part.cut_into_tiny_little_pieces()
-                    for piece in pieces:
-                        area = piece.area
-                        z_loc = piece.centroid.x
-                        y_loc = piece.centroid.y
-                        script_append(tcl_script, [
-                            f'    fiber {y_loc} {z_loc} {area} {part.ops_material.uid}'
-                        ])
-                script_append(tcl_script, ['}'])
-        for elm in elms:
-            # note: OpenSees has a substantially different syntax for this
-            args = elm.ops_args()
-            elmtype, uid, node_i, node_j, transftag, integrtag = args
-            integr_type, integr_uid, integr_section, integr_np = elm.integration.ops_args()
-            script_append(tcl_script, [
-                f'geomTransf '+' '.join([str(x) for x in elm.geomtransf.ops_args()]),
-                f'element {elmtype} {uid} {node_i} {node_j} {integr_np} {integr_section} {transftag} -Integration {integr_type}'
-            ])
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # ZeroLength element definition #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-        elms = self.mdl.list_of_specific_element(element.ZeroLength)
-
-        # define zerolength elements
-        for elm in elms:
-            for mat in elm.mats:
-                define_material(mat, defined_materials)
-            script_append(tcl_script, [
-                f'element '+' '.join([str(x) for x in elm.ops_args()]),
-            ])
-            defined_elements[elm.uid] = elm
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # TwoNodeLink element definition #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-        elms = self.mdl.list_of_specific_element(element.TwoNodeLink)
-
-        # define twonodelink elements
-        for elm in elms:
-            for mat in elm.mats:
-                define_material(mat, defined_materials)
-            script_append(tcl_script, [
-                f'element '+' '.join([str(x) for x in elm.ops_args()]),
-            ])
-            defined_elements[elm.uid] = elm
-
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-        # TrussBar element definition #
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-
-        elms = self.mdl.list_of_specific_element(element.TrussBar)
-
-        # define TrussBar elements
-        for elm in elms:
-            define_material(elm.mat, defined_materials)
-            script_append(tcl_script, [
-                f'element '+' '.join([str(x) for x in elm.ops_args()]),
-            ])
-            defined_elements[elm.uid] = elm
-
-        # ~~~~~~~~~~~~~~~~ #
-        # node constraints #
-        # ~~~~~~~~~~~~~~~~ #
-
-        if self.load_cases[case_name].equaldof is None:
-            for uid in parent_nodes:
-                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
-                nodes = lvl.nodes.values()
-                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-                script_append(tcl_script, [
-                    f'rigidDiaphragm 3 {uid} '+' '.join([str(x) for x in [nd.uid for nd in good_nodes]]),
-                ])
-        else:
-            dof = self.load_cases[case_name].equaldof
-            for uid in parent_nodes:
-                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
-                nodes = lvl.nodes.values()
-                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-                for node in good_nodes:
-                    if node.uid == uid:
-                        continue
-                    script_append(tcl_script, [
-                        f'equalDOF {uid} {node.uid} {dof}'
-                    ])
-
-        # ~~~~~~~~~~~~~~~~~ #
-        # node spring field #
-        # ~~~~~~~~~~~~~~~~~ #
-        # This is an attempt to resolve convergence issues during
-        # rigid body motion.
-        # It can also be used to restrict motion to particular DOFs
-
-        if self.settings.restrict_dof is not None:
-
-            restrict_dof_list = self.settings.restrict_dof
-            uidgen = self.mdl.uid_generator
-            fix_mat_uid = uidgen.new('uniaxial material')
-            release_mat_uid = uidgen.new('uniaxial material')
-            # define a very stiff spring
-            script_append(tcl_script ,[
-                f'uniaxialMaterial Elastic {fix_mat_uid} {common.STIFF}',
-            ])
-            # define a very soft spring
-            script_append(tcl_script, [
-                f'uniaxialMaterial Elastic {release_mat_uid} {common.TINY}',
-            ])
-            material_list = [
-                fix_mat_uid
-                if item == True
-                else release_mat_uid
-                for item in restrict_dof_list]
-            for node in self.mdl.list_of_primary_nodes():
-                # define a conjugate node that is fixed.
-                node_uid = uidgen.new('node')
-                elm_uid = uidgen.new('element')
-                script_append(tcl_script,
-                    [f'node {node_uid} '+' '.join(str(x) for x in node.coords)])
-                script_append(tcl_script,
-                              [
-                    f'fix {node_uid} 1 1 1 1 1 1'
-                ])
-                # connect the nodes to the fixed node using the soft
-                # spring.
-                args = ['twoNodeLink', elm_uid, node.uid, node_uid,
-                    '-mat',
-                    *[material_list],
-                    '-dir', 1, 2, 3, 4, 5, 6]
-                script_append(tcl_script,
-                              [
-                    f'element twoNodeLink {elm_uid} {node.uid} {node_uid} -mat '+' '.join(str(x) for x in material_list)+' -dir 1 2 3 4 5 6'
-                ])
-
-    def write_tcl_node_recorders(self, tcl_script, uids, dofs, types, base_path):
-        """
-        Adds node recorders to a tcl script.
-
-        Arguments:
-          tcl_script: path to the tcl script in which the recorder
-            commands will be appended
-          uids: uids of the nodes to include
-          dofs: list of dofs, 1-6.
-          types: list of types of recorders to include (disp, vel,
-            accel, ...)
-          base_path: base path. Filenames are controlled by the type
-            of recorder.
-
-        """
-        if not os.path.exists(base_path):
-            os.makedirs(base_path)
-        for tp in types:
-            path = f'{base_path}/{tp}_recorder.txt'
-            script_append(
-                tcl_script,
-                [
-                    f'recorder Node -file {path} -time -node '+' '.join(str(x) for x in uids)+' -dof '+' '.join(str(x) for x in dofs)+f' {tp}'
-                ]
-            )
-
     def _to_opensees_domain(self, case_name):
         """
         Defines the model in OpenSeesPy.
@@ -846,35 +539,6 @@ class Analysis:
                     *material_list,
                     '-dir', 1, 2, 3, 4, 5, 6
                 )
-
-    def write_tcl_loads(self, case_name, tcl_script, factor=1.00):
-
-        script_append(tcl_script, ['pattern Plain 1 Linear {'])
-        elms_with_udl: list[Union[
-            element.ElasticBeamColumn, element.DispBeamColumn
-        ]] = []
-        elms_with_udl.extend(
-            [elm for elm in self.mdl.list_of_specific_element(element.ElasticBeamColumn)
-             if isinstance(elm, element.ElasticBeamColumn)])
-        elms_with_udl.extend(
-            [elm for elm in self.mdl.list_of_specific_element(element.DispBeamColumn)
-             if isinstance(elm, element.DispBeamColumn)])
-        for elm in elms_with_udl:
-            if elm.visibility.skip_opensees_definition:
-                continue
-            udl_total = (
-                self.load_cases[case_name].line_element_udl[elm.uid].val
-            )
-            if not np.isclose(np.sqrt(udl_total @ udl_total), 0.00):
-                script_append(tcl_script, [
-                    f'eleLoad -ele {elm.uid} -type -beamUniform {udl_total[1]*factor} {udl_total[2]*factor} {udl_total[0]*factor}'
-                ])
-
-        for node in self.mdl.list_of_all_nodes():
-            script_append(tcl_script, [
-                f'load {node.uid} '+' '.join(str(x) for x in self.load_cases[case_name].node_loads[node.uid].val*factor)
-            ])
-        script_append(tcl_script, ['}'])
 
     def _define_loads(self, case_name, factor=1.00):
 
@@ -1410,31 +1074,6 @@ class GravityPlusAnalysis(Analysis):
     that follow this practice.
 
     """
-
-    def write_tcl_gravity_analysis(self, tcl_script, num_steps=1):
-
-        system = self.settings.solver
-        script_append(
-            tcl_script,
-            [
-             'test EnergyIncr 1.0e-6 100 3',
-             f'system {system}',
-             f'numberer {NUMBERER}',
-             'constraints '+' '.join([str(x) for x in CONSTRAINTS]),
-             'algorithm KrylovNewton',
-             'integrator LoadControl 1',
-             'analysis Static',
-             f'set check [analyze {num_steps}]'
-            ]
-        )
-        script_append(
-            tcl_script,
-            [
-                'if {$check != 0} {',
-                '    puts "Gravity analysis failed. Unable to continue..."',
-                '    error "Analysis Failed"',
-                '}'
-            ])
 
     def _run_gravity_analysis(self, num_steps=1):
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
@@ -1980,7 +1619,7 @@ def define_lateral_load_pattern(
             "-dt",
             file_time_incr,
             "-values",
-            *ag_x,
+            '{' + ' '.join([str(val) for val in ag_x]) + '}',
             "-factor",
             common.G_CONST_IMPERIAL,
         )
@@ -1996,7 +1635,7 @@ def define_lateral_load_pattern(
             "-dt",
             file_time_incr,
             "-values",
-            *ag_y,
+            '{' + ' '.join([str(val) for val in ag_y]) + '}',
             "-factor",
             common.G_CONST_IMPERIAL,
         )
@@ -2012,7 +1651,7 @@ def define_lateral_load_pattern(
             "-dt",
             file_time_incr,
             "-values",
-            *ag_z,
+            '{' + ' '.join([str(val) for val in ag_z]) + '}',
             "-factor",
             common.G_CONST_IMPERIAL,
         )
@@ -2065,137 +1704,6 @@ class THAnalysis(GravityPlusAnalysis):
         default_factory=dict, repr=False
     )
 
-    def write_tcl_th_pattern(self, tcl_script, ag_x, ag_y, ag_z, gm_dt, base_path):
-
-        ag_dir = {'x': ag_x, 'y': ag_y, 'z': ag_z}
-        ag_tag = {'x': '2', 'y': '3', 'z': '4'}
-        ag_dof = {'x': '1', 'y': '2', 'z': '3'}
-
-        if not os.path.exists(base_path):
-            os.makedirs(base_path)
-
-        script_append(
-            tcl_script,
-            ['wipeAnalysis', 'loadConst -time 0.00']
-        )
-
-        for dr in ('x', 'y', 'z'):
-            ag = ag_dir[dr]
-            if ag is not None:
-                np.savetxt(f'{base_path}/ag_{dr}', ag)
-                script_append(
-                    tcl_script,
-                    [
-                        f'set AccelSeries_{dr} "Series -dt {gm_dt} -filePath {base_path}/ag_{dr}"',
-                        f'pattern UniformExcitation {ag_tag[dr]} {ag_dof[dr]} -accel $AccelSeries_{dr}'
-                    ]
-            )
-
-
-    def write_tcl_th_analysis(
-        self, tcl_script,
-        finish_time, damping, time_increment, output_dir,
-        drift_nodes, drift_heights,
-        skip_steps=1, collapse_drift=0.10):
-
-        damping_type = damping.get("type")
-
-        target_timestamp = finish_time
-
-        damping_code = ''
-
-        if damping_type == "rayleigh":
-            assert isinstance(damping["periods"], list)
-            assert isinstance(damping["periods"][0], float)
-            w_i = 2 * np.pi / damping["periods"][0]
-            zeta_i = damping["ratio"]
-            assert isinstance(damping["periods"][1], float)
-            w_j = 2 * np.pi / damping["periods"][1]
-            zeta_j = damping["ratio"]
-            a_mat: nparr = np.array([[1 / w_i, w_i], [1 / w_j, w_j]])
-            b_vec: nparr = np.array([zeta_i, zeta_j])
-            x_sol: nparr = np.linalg.solve(a_mat, 2 * b_vec)
-            damping_code += f'rayleigh {x_sol[0]} 0.0 0.0 {x_sol[1]}'
-
-        if damping_type == "stiffness":
-            assert isinstance(damping["ratio"], float)
-            assert isinstance(damping["period"], float)
-            damping_code += f'rayleigh 0.00 0.00 0.00 {damping["ratio"] * damping["period"] / np.pi}'
-
-        if damping_type == "modal":
-            num_modes = damping["num_modes"]
-            damping_ratio = damping["ratio"]
-            ops.eigen(num_modes)
-            assert isinstance(damping_ratio, float)
-            damping_code += f'modalDampingQ {damping_ratio}'
-
-        if damping_type == "modal+stiffness":
-
-            # stiffness-proportional contribution
-            assert isinstance(damping["ratio_stiffness"], float)
-            assert isinstance(damping["period"], float)
-            alpha_1 = damping["ratio_stiffness"] * damping["period"] / np.pi
-            damping_code += f'rayleigh 0.00 0.00 0.00 {alpha_1}'
-            damping_code += '\n'
-
-            num_modes = damping["num_modes"]
-            damping_ratio = damping["ratio_modal"]
-            damping_code += f'set ratio_modal {damping_ratio}'
-            damping_code += '\n'
-            damping_code += f'set num_modes {int(num_modes)}'
-            damping_code += '\n'
-            damping_code += f'set damping_ratio {damping_ratio}'
-            damping_code += '\n'
-            damping_code += 'set omega_squareds [eigen $num_modes]'
-            damping_code += '\n'
-            damping_code += f'set alpha_1 {alpha_1}'
-            damping_code += '\n'
-            damping_code += 'set values [list]'
-            damping_code += '\n'
-            damping_code += 'foreach omega_squared $omega_squareds {'
-            damping_code += '\n'
-            damping_code += '  set result [expr {$ratio_modal - $alpha_1 * $omega_squared / 2.00}]'
-            damping_code += '\n'
-            damping_code += '    if {$result < 0} {'
-            damping_code += '\n'
-            damping_code += '    lappend values 0.00'
-            damping_code += '\n'
-            damping_code += '    } else {'
-            damping_code += '\n'
-            damping_code += '      lappend values $result'
-            damping_code += '\n'
-            damping_code += '  }'
-            damping_code += '\n'
-            damping_code += '}'
-            damping_code += '\n'
-            damping_code += 'modalDampingQ {*}$values'
-            damping_code += '\n'
-
-        damping_code += '\n'
-
-        data = pkgutil.get_data(__name__, 'th_analysis.tcl')
-        assert data is not None
-        contents = data.decode()
-
-        contents = contents.replace('{%NUMBERER%}', str(NUMBERER))
-        contents = contents.replace('{%CONSTRAINTS%}', ' '.join([str(x) for x in CONSTRAINTS]))
-        contents = contents.replace('{%SYSTEM%}', self.settings.solver)
-        contents = contents.replace('{%DAMPING CODE%}', damping_code)
-        contents = contents.replace('{%time_increment%}', str(time_increment))
-        contents = contents.replace('{%output_dir%}', output_dir)
-        contents = contents.replace('{%skip_steps%}', str(skip_steps))
-        contents = contents.replace('{%target_timestamp%}', str(target_timestamp))
-        contents = contents.replace('{%collapse_drift%}', str(collapse_drift))
-        contents = contents.replace('{%drift_nodes%}', ' '.join([str(x) for x in drift_nodes]))
-        contents = contents.replace('{%drift_heights%}', ' '.join([str(x) for x in drift_heights]))
-        # contents = contents.replace('{%%}', )
-        # contents = contents.replace('{%%}', )
-        # contents = contents.replace('{%%}', )
-
-        contents_list = contents.splitlines()
-
-        script_append(tcl_script, contents_list)
-    
     def run(
             self,
             analysis_time_increment: float,
