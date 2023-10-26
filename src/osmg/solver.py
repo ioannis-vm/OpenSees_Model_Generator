@@ -2442,6 +2442,9 @@ class THAnalysis(GravityPlusAnalysis):
         start_time = perf_counter()
         the_time = start_time
 
+        self.log('Initiating time traversal')
+        self.log(f'Max time step: {analysis_time_increment}')
+
         try:
 
             while curr_time + common.EPSILON < target_timestamp:
