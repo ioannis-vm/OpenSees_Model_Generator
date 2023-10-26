@@ -26,6 +26,9 @@ from typing import Optional
 from typing import Any
 from typing import Union
 from dataclasses import dataclass, field
+import platform
+import socket
+import sys
 import pkgutil
 import os
 import shutil
@@ -288,6 +291,11 @@ class Analysis:
                     self.results[case_name].release_force_defo[uid] = {}
 
         self.log("Analysis started")
+        os_system = platform.system()
+        self.log(f'Platform: {os_system}')
+        if os_system == 'Linux':
+            self.log(f'Hostname: {socket.gethostname()}')
+        self.log(f'Python Version: {sys.version}')
 
     def _write_results_to_disk(self):
         """
