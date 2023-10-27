@@ -2423,7 +2423,7 @@ class THAnalysis(GravityPlusAnalysis):
             1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7,
             1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11
         )
-        tols = [1.0e-12]*12
+        tols = [1.0e-10]*len(scale)
         algorithms = (('KrylovNewton', ), ('KrylovNewton', 'initial'))
 
         # progress bar
@@ -2453,7 +2453,7 @@ class THAnalysis(GravityPlusAnalysis):
                     break
 
                 ops.test(
-                    "EnergyIncr", tols[num_subdiv], 200, 3, 2)
+                    "EnergyIncr", tols[num_subdiv], 25, 3, 2)
                 ops.algorithm(*algorithms[algorithm_idx])
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv]
@@ -2482,7 +2482,7 @@ class THAnalysis(GravityPlusAnalysis):
                         algorithm_idx = 0
                         num_subdiv += 1
                         # how many times to run with reduced step size
-                        num_times = 50
+                        num_times = 10
                 else:
                     # analysis was successful
                     prev_time = curr_time
