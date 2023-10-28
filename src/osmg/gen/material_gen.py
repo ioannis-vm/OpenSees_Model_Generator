@@ -19,6 +19,7 @@ import numpy.typing as npt
 from ..ops.section import FiberSection
 from ..physical_material import PhysicalMaterial
 from ..model import Model
+from ..ops.uniaxial_material import Elastic
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Fatigue
 from ..ops.uniaxial_material import MaxStrainRange
@@ -484,16 +485,10 @@ class MaterialGenerator:
         #     d_minus
         # )
 
-        bilin_mat = Steel02(
+        bilin_mat = Elastic(
             self.model.uid_generator.new("uniaxial material"),
             "auto_IMK",
-            Fy=m_plus * moment_modifier,
-            E0=stiffness * moment_modifier,
-            G=0.00,
-            b=0.01,
-            c_r0=15,
-            c_r1=0.925,
-            c_r2=0.15,
+            e_mod=stiffness * moment_modifier
         )
 
         return bilin_mat
