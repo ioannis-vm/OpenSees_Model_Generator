@@ -457,30 +457,43 @@ class MaterialGenerator:
         #     0.00,
         # )
 
-        # new model
-        bilin_mat = IMKBilin(
+        # # new model
+        # bilin_mat = IMKBilin(
+        #     self.model.uid_generator.new("uniaxial material"),
+        #     "auto_IMK",
+        #     stiffness * moment_modifier,
+        #     theta_p_plus,
+        #     theta_pc_plus,
+        #     theta_u,
+        #     m_plus*moment_modifier,
+        #     (1.0 + beta_plus),
+        #     residual_plus,
+        #     theta_p_minus,
+        #     theta_pc_minus,
+        #     theta_u,
+        #     -m_minus*moment_modifier,
+        #     (1.0 + beta_minus),
+        #     residual_minus,
+        #     lamda,
+        #     lamda,
+        #     lamda,
+        #     1.00,
+        #     1.00,
+        #     1.00,
+        #     d_plus,
+        #     d_minus
+        # )
+
+        bilin_mat = Steel02(
             self.model.uid_generator.new("uniaxial material"),
             "auto_IMK",
-            stiffness * moment_modifier,
-            theta_p_plus,
-            theta_pc_plus,
-            theta_u,
-            m_plus*moment_modifier,
-            (1.0 + beta_plus),
-            residual_plus,
-            theta_p_minus,
-            theta_pc_minus,
-            theta_u,
-            -m_minus*moment_modifier,
-            (1.0 + beta_minus),
-            residual_minus,
-            lamda,
-            lamda,
-            lamda,
-            1.00,
-            1.00,
-            1.00,
-            d_plus,
-            d_minus
+            Fy=m_plus * moment_modifier,
+            E0=stiffness * moment_modifier,
+            G=0.00,
+            b=0.01,
+            c_r0=15,
+            c_r1=0.925,
+            c_r2=0.15,
         )
+
         return bilin_mat
