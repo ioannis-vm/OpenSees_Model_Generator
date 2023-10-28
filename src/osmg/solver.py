@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 import platform
 import socket
 import sys
+from time import perf_counter
 import pkgutil
 import os
 import shutil
@@ -83,6 +84,9 @@ class Results:
       release_foce_defo: Force-deformation pairs of zerolength
         elements. The nested structure is similar to that of
         node_displacements.
+      clock: Timestamp of each instance of result storage.
+      subdivision_level: If applicable, the level of
+        timestep/displacement increment subdivision.
       periods: Optional, stores the periods for modal analyses.
       n_steps_success: Total number of steps of the analysis.
       metadata: Optional metadata that depend on the type of analysis.
@@ -104,6 +108,8 @@ class Results:
     release_force_defo: Collection[int, dict[int, list[float]]] = field(
         init=False
     )
+    clock: list = field(init=False)
+    subdivision_level: list = field(init=False)
     periods: Optional[nparr] = field(default=None)
     n_steps_success: int = field(default=0)
     metadata: Optional[dict[str, object]] = field(default=None)
@@ -270,6 +276,8 @@ class Analysis:
                     ]
                 )
             self.results[case_name] = Results()
+            self.results[case_name].clock = []
+            self.results[case_name].subdivision_level = []
             for uid in node_uids:
                 self.results[case_name].node_displacements[uid] = {}
                 self.results[case_name].node_velocities[uid] = {}
@@ -1000,6 +1008,7 @@ class Analysis:
         line_elements,
         zerolength_elements,
     ):
+        self.results[case_name].clock.append(perf_counter())
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
         self._read_node_accelerations(case_name, step, nodes)
@@ -2318,6 +2327,7 @@ class THAnalysis(GravityPlusAnalysis):
             line_elems,
             zerolength_elems,
         )
+        self.results[case_name].subdivision_level.append(0)
 
         self.log("")
         self.log("Starting transient analysis")
@@ -2519,6 +2529,7 @@ class THAnalysis(GravityPlusAnalysis):
                             line_elems,
                             zerolength_elems,
                         )
+                        self.results[case_name].subdivision_level.append(num_subdiv)
                         self.time_vector.append(curr_time)
 
                     algorithm_idx = 0
