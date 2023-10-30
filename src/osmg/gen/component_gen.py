@@ -426,6 +426,8 @@ class BeamColumnGenerator:
             section: ElasticSection | FiberSection,
             element_type: Type[Union[ElasticBeamColumn, DispBeamColumn]],
             angle: float = 0.00,
+            n_x: Optional[float] = None,
+            n_y: Optional[float] = None
     ) -> ElasticBeamColumn | DispBeamColumn:
         """
         Adds a beamcolumn element to the model, connecting the
@@ -453,10 +455,13 @@ class BeamColumnGenerator:
                 nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
+                n_x=n_x, n_y=n_y
             )
             res: Union[ElasticBeamColumn, DispBeamColumn] = elm_el
         elif element_type.__name__ == "DispBeamColumn":
             assert isinstance(section, FiberSection)
+            assert n_x is None
+            assert n_y is None
             # TODO: add elastic section support
             transf = GeomTransf(
                 transf_type,
@@ -552,11 +557,16 @@ class BeamColumnGenerator:
         angle,
         camber_2,
         camber_3,
+        n_x=None,
+        n_y=None
     ):
         """
         Adds beamcolumn elemens in series.
 
         """
+
+        if (n_x is not None) or (n_y is not None):
+            assert n_sub == 1
 
         if n_sub > 1:
             p_i = np.array(node_i.coords) + eo_i
@@ -606,6 +616,11 @@ class BeamColumnGenerator:
             else:
                 n_j = intnodes[i]
                 o_j = np.zeros(3)
+            if element_type.__name__ not in {
+                    'ElasticBeamColumn', 'DispBeamColumn'}:
+                raise TypeError(
+                    "Unsupported element type:" f" {element_type.__name__}"
+                )
             element = self.define_beamcolumn(
                 assembly=component,
                 node_i=n_i,
@@ -616,12 +631,8 @@ class BeamColumnGenerator:
                 section=section,
                 element_type=element_type,
                 angle=angle,
+                n_x=n_x, n_y=n_y
             )
-            if element_type.__name__ not in {
-                    'ElasticBeamColumn', 'DispBeamColumn'}:
-                raise TypeError(
-                    "Unsupported element type:" f" {element_type.__name__}"
-                )
             component.elements.add(element)
 
     def generate_plain_component_assembly(
@@ -639,6 +650,8 @@ class BeamColumnGenerator:
         angle,
         camber_2,
         camber_3,
+        n_x=None,
+        n_y=None
     ):
         """
         Generates a plain component assembly, with line elements in
@@ -679,6 +692,7 @@ class BeamColumnGenerator:
             angle,
             camber_2,
             camber_3,
+            n_x, n_y
         )
 
         return component
@@ -698,6 +712,7 @@ class BeamColumnGenerator:
         angle,
         camber_2,
         camber_3,
+        n_x, n_y,
         zerolength_gen_i,
         zerolength_gen_args_i,
         zerolength_gen_j,
@@ -846,7 +861,7 @@ class BeamColumnGenerator:
                     element_type_j,
                     angle,
                     0.00,
-                    0.00,
+                    0.00
                 )
             elif element_type_j.__name__ == "TwoNodeLink":
                 elm = self.define_two_node_link(
@@ -886,6 +901,7 @@ class BeamColumnGenerator:
             angle,
             camber_2,
             camber_3,
+            n_x, n_y
         )
         return component
 

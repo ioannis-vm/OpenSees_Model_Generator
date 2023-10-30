@@ -258,6 +258,8 @@ class ElasticBeamColumn(Element):
 
     section: ElasticSection
     geomtransf: GeomTransf
+    n_x: Optional[float] = field(default=None)
+    n_y: Optional[float] = field(default=None)
 
     def ops_args(self):
         """
@@ -265,6 +267,77 @@ class ElasticBeamColumn(Element):
         OpenSees
 
         """
+
+        if self.n_x is not None:
+            n_x = self.n_x
+            k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
+            k11_x = (1.0 + 2.0 * n_x) * k44_x / (1.0 + n_x)
+            k33_x = k11_x
+
+        if self.n_y is not None:
+            n_y = self.n_y
+            k44_y = 6.0 * (1.0 + n_y) / (2.0 + 3.0 * n_y)
+            k11_y = (1.0 + 2.0 * n_y) * k44_y / (1.0 + n_y)
+            k33_y = k11_y
+
+        if self.n_x is not None and self.n_y is None:
+            return [
+                "ModElasticBeam3d",
+                self.uid,
+                self.nodes[0].uid,
+                self.nodes[1].uid,
+                self.section.area,
+                self.section.e_mod,
+                self.section.g_mod,
+                self.section.j_mod,
+                self.section.i_y,
+                self.section.i_x,
+                4.00, 4.00, 2.00,
+                k11_x,
+                k33_x,
+                k44_x,
+                self.geomtransf.uid,
+            ]
+
+        if self.n_y is not None and self.n_x is None:
+            return [
+                "ModElasticBeam3d",
+                self.uid,
+                self.nodes[0].uid,
+                self.nodes[1].uid,
+                self.section.area,
+                self.section.e_mod,
+                self.section.g_mod,
+                self.section.j_mod,
+                self.section.i_y,
+                self.section.i_x,
+                k11_y,
+                k33_y,
+                k44_y,
+                4.00, 4.00, 2.00,
+                self.geomtransf.uid,
+            ]
+
+        if self.n_x is not None and self.n_y is not None:
+            return [
+                "ModElasticBeam3d",
+                self.uid,
+                self.nodes[0].uid,
+                self.nodes[1].uid,
+                self.section.area,
+                self.section.e_mod,
+                self.section.g_mod,
+                self.section.j_mod,
+                self.section.i_y,
+                self.section.i_x,
+                k11_y,
+                k33_y,
+                k44_y,
+                k11_x,
+                k33_x,
+                k44_x,
+                self.geomtransf.uid,
+            ]
 
         return [
             "elasticBeamColumn",
