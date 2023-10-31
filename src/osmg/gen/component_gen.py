@@ -1318,7 +1318,7 @@ class BeamColumnGenerator:
                 [top_node, top_h_f],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1336,7 +1336,7 @@ class BeamColumnGenerator:
                 [top_h_b, top_node],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1354,7 +1354,7 @@ class BeamColumnGenerator:
                 [bottom_mid, bottom_h_f],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1372,7 +1372,7 @@ class BeamColumnGenerator:
                 [bottom_h_b, bottom_mid],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1390,7 +1390,7 @@ class BeamColumnGenerator:
                 [top_v_f, mid_v_f],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1408,7 +1408,7 @@ class BeamColumnGenerator:
                 [top_v_b, mid_v_b],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1426,7 +1426,7 @@ class BeamColumnGenerator:
                 [mid_v_f, bottom_v_f],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1444,7 +1444,7 @@ class BeamColumnGenerator:
                 [mid_v_b, bottom_v_b],
                 rigid_sec,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
@@ -1462,7 +1462,7 @@ class BeamColumnGenerator:
                 [top_node, bottom_mid],
                 section,
                 GeomTransf(
-                    "Corotational",
+                    "Linear",
                     self.model.uid_generator.new("transformation"),
                     np.zeros(3),
                     np.zeros(3),
