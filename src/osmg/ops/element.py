@@ -53,6 +53,42 @@ class Element:
 
 
 @dataclass(repr=False)
+class RigidLink(Element):
+    """
+    OpenSees rigidLink element
+    https://openseespydoc.readthedocs.io/en/latest/src/rigidLink.html?highlight=rigidlink
+    """
+
+    elmtype: str
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+
+        """
+
+        assert self.elmtype in ('bar', 'beam')
+        assert len(self.nodes) == 2
+
+        return [
+            "rigidLink",
+            self.elmtype,
+            self.nodes[0].uid,
+            self.nodes[1].uid
+        ]
+
+    def __repr__(self):
+        res = ""
+        res += "rigidLink element object\n"
+        res += f"uid: {self.uid}"
+        res += f"elmtype: {self.elmtype}\n"
+        res += f"r_node_tag: {self.r_node_tag}\n"
+        res += f"c_node_tag: {self.c_node_tag}\n"
+        return res
+
+
+@dataclass(repr=False)
 class ZeroLength(Element):
     """
     OpenSees ZeroLength element

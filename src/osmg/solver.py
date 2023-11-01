@@ -1450,10 +1450,11 @@ class GravityPlusAnalysis(Analysis):
         ops.constraints(*CONSTRAINTS)
         self.log("G: Setting algorithm to KrylovNewton")
         ops.algorithm("KrylovNewton")
-        ops.integrator("LoadControl", 1)
+        ops.integrator("LoadControl", 1/num_steps)
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
         self.log("G: Analyzing now.")
+        breakpoint()
         check = ops.analyze(num_steps)
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")
