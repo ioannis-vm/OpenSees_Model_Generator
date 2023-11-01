@@ -774,6 +774,17 @@ class Analysis:
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # RigidLink element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.RigidLink)
+
+        # define twonodelink elements
+        for elm in elms:
+            ops.rigidLink(*elm.ops_args())
+            defined_elements[elm.uid] = elm
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
         # TrussBar element definition #
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
@@ -783,6 +794,19 @@ class Analysis:
         # define TrussBar elements
         for elm in elms:
             define_material(elm.mat, defined_materials)
+            ops.element(*elm.ops_args())
+            defined_elements[elm.uid] = elm
+
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+        # BeamColumnJoint element definition #
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+
+        elms = self.mdl.list_of_specific_element(element.BeamColumnJoint)
+
+        # define BeamColumnJoint elements
+        for elm in elms:
+            for mat in elm.mats:
+                define_material(mat, defined_materials)
             ops.element(*elm.ops_args())
             defined_elements[elm.uid] = elm
 
@@ -1440,7 +1464,7 @@ class GravityPlusAnalysis(Analysis):
 
     def _run_gravity_analysis(self, num_steps=1):
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
-        ops.test("EnergyIncr", 1.0e-6, 100, 3)
+        ops.test("EnergyIncr", 1.0e-6, 20, 3)
         system = self.settings.solver
         self.log(f"G: Setting system solver to {system}")
         ops.system(system)
@@ -1454,7 +1478,6 @@ class GravityPlusAnalysis(Analysis):
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
         self.log("G: Analyzing now.")
-        breakpoint()
         check = ops.analyze(num_steps)
         if check != 0:
             self.log("Gravity analysis failed. Unable to continue...")

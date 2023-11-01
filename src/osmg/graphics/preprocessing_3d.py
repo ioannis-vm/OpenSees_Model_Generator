@@ -481,6 +481,57 @@ def add_data__frames(
         )
 
 
+def add_data__rigid_links(
+        data_dict: list[dict[str, object]],
+        mdl: Model):
+    """
+    Adds a trace containing frame element centroidal axis lines
+
+    Arguments:
+      data_dict:
+        list of dictionaries containing figure data
+      mdl: the model to be visualized
+      load_case: the load_case to be visualized
+
+    """
+
+    line_elems: list[element.RigidLink] = []
+
+    elms_rlink = [
+        elm for elm in mdl.list_of_specific_element(element.RigidLink)
+        if isinstance(elm, element.RigidLink)
+    ]
+    line_elems.extend(elms_rlink)
+
+    if not line_elems:
+        return
+
+    x_list: list[Optional[float]] = []
+    y_list: list[Optional[float]] = []
+    z_list: list[Optional[float]] = []
+    customdata_list = []
+    for elm in line_elems:
+        p_i = np.array(elm.nodes[0].coords)
+        p_j = np.array(elm.nodes[1].coords)
+        x_list.extend((p_i[0], p_j[0], None))
+        y_list.extend((p_i[1], p_j[1], None))
+        z_list.extend((p_i[2], p_j[2], None))
+
+    data_dict.append(
+        {
+            "name": "Rigid link elements",
+            "type": "scatter3d",
+            "mode": "lines",
+            "x": x_list,
+            "y": y_list,
+            "z": z_list,
+            "text": None,
+            "customdata": None,
+            "line": {"width": 8, "color": graphics_common.FRAME_COLOR},
+        }
+    )
+
+
 def add_data__bars(
         data_dict: list[dict[str, object]],
         mdl: Model,
@@ -1211,6 +1262,7 @@ def show(
     if offsets:
         add_data__frame_offsets(data_dict, mdl)
     add_data__twonodelinks(data_dict, mdl)
+    add_data__rigid_links(data_dict, mdl)
     # plot the parent nodes
     if parent_nodes:
         if load_case:

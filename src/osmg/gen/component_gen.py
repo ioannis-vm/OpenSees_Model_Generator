@@ -33,6 +33,7 @@ from ..ops.node import Node
 from ..component_assembly import ComponentAssembly
 from ..ops.element import TrussBar
 from ..ops.element import RigidLink
+from ..ops.element import BeamColumnJoint
 from ..ops.element import ElasticBeamColumn
 from ..ops.element import DispBeamColumn
 from ..ops.element import ZeroLength
@@ -1189,6 +1190,485 @@ class BeamColumnGenerator:
             defined_component_assemblies[key] = mthd(**args)
         return defined_component_assemblies
 
+    # def add_pz_active(
+    #         self,
+    #         x_coord: float,
+    #         y_coord: float,
+    #         section: ElasticSection,
+    #         physical_material: PhysicalMaterial,
+    #         angle: float,
+    #         column_depth: float,
+    #         beam_depth: float,
+    #         zerolength_method: str,
+    #         zerolength_args: dict[str, object],
+    # ) -> dict[int, ComponentAssembly]:
+    #     """
+    #     Adds a component assembly representing a steel W-section
+    #     panel zone joint.
+
+    #     """
+
+    #     ndg = NodeGenerator(self.model)
+    #     query = ElmQuery(self.model)
+    #     lvls = self.model.levels
+    #     assert lvls.active, "No active levels."
+    #     defined_components: dict[int, ComponentAssembly] = {}
+    #     for key in lvls.active:
+
+    #         lvl = lvls[key]
+    #         if key - 1 not in lvls:
+    #             continue
+
+    #         top_node = query.search_node_lvl(x_coord, y_coord, key)
+    #         if not top_node:
+    #             top_node = ndg.add_node_lvl(x_coord, y_coord, key)
+
+    #         # instantiate a component assembly
+    #         component = ComponentAssembly(
+    #             uid=self.model.uid_generator.new("component"),
+    #             parent_collection=lvl.components,
+    #             component_purpose="steel_W_panel_zone",
+    #         )
+    #         # add it to the level
+    #         lvl.components.add(component)
+
+    #         p_i: nparr = np.array(top_node.coords)
+    #         p_j = np.array(top_node.coords) + np.array(
+    #             (0.00, 0.00, -beam_depth)
+    #         )
+    #         x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
+    #             p_i, p_j, angle
+    #         )  # type: ignore
+
+    #         # determine node locations
+    #         # top_h_f_loc = p_i + y_axis * column_depth / 2.00
+    #         # top_h_b_loc = p_i - y_axis * column_depth / 2.00
+    #         # top_v_f_loc = p_i + y_axis * column_depth / 2.00
+    #         # top_v_b_loc = p_i - y_axis * column_depth / 2.00
+    #         mid_v_f_loc = (
+    #             p_i + y_axis * column_depth / 2.00 + x_axis * beam_depth / 2.00
+    #         )
+    #         mid_v_b_loc = (
+    #             p_i - y_axis * column_depth / 2.00 + x_axis * beam_depth / 2.00
+    #         )
+    #         # bottom_h_f_loc = (
+    #         #     p_i + y_axis * column_depth / 2.00 + x_axis * beam_depth
+    #         # )
+    #         # bottom_h_b_loc = (
+    #         #     p_i - y_axis * column_depth / 2.00 + x_axis * beam_depth
+    #         # )
+    #         # bottom_v_f_loc = (
+    #         #     p_i + y_axis * column_depth / 2.00 + x_axis * beam_depth
+    #         # )
+    #         # bottom_v_b_loc = (
+    #         #     p_i - y_axis * column_depth / 2.00 + x_axis * beam_depth
+    #         # )
+
+    #         # # define nodes
+    #         # top_h_f = Node(
+    #         #     self.model.uid_generator.new("node"), [*top_h_f_loc]
+    #         # )
+    #         # top_h_b = Node(
+    #         #     self.model.uid_generator.new("node"), [*top_h_b_loc]
+    #         # )
+    #         # top_v_f = Node(
+    #         #     self.model.uid_generator.new("node"), [*top_v_f_loc]
+    #         # )
+    #         # top_v_f.visibility.connected_to_zerolength = True
+    #         # top_v_b = Node(
+    #         #     self.model.uid_generator.new("node"), [*top_v_b_loc]
+    #         # )
+    #         # top_v_b.visibility.connected_to_zerolength = True
+
+    #         mid_v_f = ndg.add_node_lvl_xyz(
+    #             mid_v_f_loc[0], mid_v_f_loc[1], mid_v_f_loc[2], lvl.uid
+    #         )
+    #         mid_v_b = ndg.add_node_lvl_xyz(
+    #             mid_v_b_loc[0], mid_v_b_loc[1], mid_v_b_loc[2], lvl.uid
+    #         )
+
+    #         # bottom_h_f = Node(
+    #         #     self.model.uid_generator.new("node"), [*bottom_h_f_loc]
+    #         # )
+    #         # bottom_h_b = Node(
+    #         #     self.model.uid_generator.new("node"), [*bottom_h_b_loc]
+    #         # )
+    #         # bottom_v_f = Node(
+    #         #     self.model.uid_generator.new("node"), [*bottom_v_f_loc]
+    #         # )
+    #         # bottom_v_f.visibility.connected_to_zerolength = True
+    #         # bottom_v_b = Node(
+    #         #     self.model.uid_generator.new("node"), [*bottom_v_b_loc]
+    #         # )
+    #         # bottom_v_b.visibility.connected_to_zerolength = True
+
+    #         bottom_mid = ndg.add_node_lvl_xyz(p_j[0], p_j[1], p_j[2], lvl.uid)
+
+    #         # # define rigid beamcolumn elements
+    #         # if not self.model.elastic_sections.retrieve_by_attr(
+    #         #     "name", "rigid_link_section"
+    #         # ):
+    #         #     load_util_rigid_elastic(self.model)
+    #         # rigid_sec = self.model.elastic_sections.retrieve_by_attr(
+    #         #     "name", "rigid_link_section"
+    #         # )
+    #         # assert rigid_sec
+
+    #         # factor_i = 1e9
+    #         # factor_a = 1e1
+    #         # factor_j = 1e9
+
+    #         # new_uid = self.model.uid_generator.new("section")
+    #         # rigid_sec = ElasticSection(
+    #         #     name="rigid_link_section",
+    #         #     uid=new_uid,
+    #         #     outside_shape=None,
+    #         #     snap_points=None,
+    #         #     e_mod=section.e_mod,
+    #         #     area=section.area*factor_a,
+    #         #     i_y=section.i_y*factor_i,
+    #         #     i_x=section.i_x*factor_i,
+    #         #     g_mod=section.g_mod,
+    #         #     j_mod=section.j_mod*factor_j,
+    #         #     sec_w=0.00,
+    #         #     )
+
+    #         # elm_top_h_f = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_node, top_h_f],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         y_axis,
+    #         #         -x_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_top_h_f.visibility.hidden_when_extruded = True
+    #         # elm_top_h_f.visibility.hidden_basic_forces = True
+
+    #         # elm_top_h_f = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_node, top_h_f],
+    #         #     'beam'
+    #         #     )
+
+    #         # elm_top_h_b = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_h_b, top_node],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         y_axis,
+    #         #         -x_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_top_h_b.visibility.hidden_when_extruded = True
+    #         # elm_top_h_b.visibility.hidden_basic_forces = True
+
+    #         # elm_top_h_b = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_node, top_h_b],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_bottom_h_f = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [bottom_mid, bottom_h_f],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         y_axis,
+    #         #         -x_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_bottom_h_f.visibility.hidden_when_extruded = True
+    #         # elm_bottom_h_f.visibility.hidden_basic_forces = True
+
+    #         # elm_bottom_h_f = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [bottom_mid, bottom_h_f],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_bottom_h_b = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [bottom_h_b, bottom_mid],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         y_axis,
+    #         #         -x_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_bottom_h_b.visibility.hidden_when_extruded = True
+    #         # elm_bottom_h_b.visibility.hidden_basic_forces = True
+
+    #         # elm_bottom_h_b = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [bottom_mid, bottom_h_b],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_top_v_f = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_v_f, mid_v_f],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         x_axis,
+    #         #         y_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_top_v_f.visibility.hidden_when_extruded = True
+    #         # elm_top_v_f.visibility.hidden_basic_forces = True
+
+    #         # elm_top_v_f = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_f, top_v_f],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_top_v_b = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [top_v_b, mid_v_b],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         x_axis,
+    #         #         y_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_top_v_b.visibility.hidden_when_extruded = True
+    #         # elm_top_v_b.visibility.hidden_basic_forces = True
+
+    #         # elm_top_v_b = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_b, top_v_b],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_bottom_v_f = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_f, bottom_v_f],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         x_axis,
+    #         #         y_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_bottom_v_f.visibility.hidden_when_extruded = True
+    #         # elm_bottom_v_f.visibility.hidden_basic_forces = True
+
+    #         # elm_bottom_v_f = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_f, bottom_v_f],
+    #         #     'beam',
+    #         #     )
+
+    #         # elm_bottom_v_b = ElasticBeamColumn(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_b, bottom_v_b],
+    #         #     rigid_sec,
+    #         #     GeomTransf(
+    #         #         "Corotational",
+    #         #         self.model.uid_generator.new("transformation"),
+    #         #         np.zeros(3),
+    #         #         np.zeros(3),
+    #         #         x_axis,
+    #         #         y_axis,
+    #         #         z_axis,
+    #         #     ),
+    #         # )
+    #         # elm_bottom_v_b.visibility.hidden_when_extruded = True
+    #         # elm_bottom_v_b.visibility.hidden_basic_forces = True
+
+    #         # elm_bottom_v_b = RigidLink(
+    #         #     component,
+    #         #     self.model.uid_generator.new("element"),
+    #         #     [mid_v_b, bottom_v_b],
+    #         #     'beam',
+    #         #     )
+
+    #         elm_interior = ElasticBeamColumn(
+    #             component,
+    #             self.model.uid_generator.new("element"),
+    #             [top_node, bottom_mid],
+    #             section,
+    #             GeomTransf(
+    #                 "Corotational",
+    #                 self.model.uid_generator.new("transformation"),
+    #                 np.zeros(3),
+    #                 np.zeros(3),
+    #                 x_axis,
+    #                 y_axis,
+    #                 z_axis,
+    #             ),
+    #         )
+    #         elm_interior.visibility.skip_opensees_definition = True
+    #         elm_interior.visibility.hidden_at_line_plots = True
+
+    #         assert hasattr(
+    #             zerolength_gen, zerolength_method), \
+    #             f"Method not available: {zerolength_method}"
+    #         mthd = getattr(zerolength_gen, zerolength_method)
+
+    #         # define zerolength elements
+    #         zerolength_gen_args = {
+    #                 "section": section,
+    #                 "physical_material": physical_material,
+    #                 "pz_length": beam_depth
+    #              }
+    #         zerolength_gen_args.update(zerolength_args)
+    #         zerolen_top_f = self.define_zerolength(
+    #             component,
+    #             top_node,
+    #             top_node,
+    #             x_axis,
+    #             y_axis,
+    #             mthd,
+    #             zerolength_gen_args
+    #         )
+    #         fix_mat = zerolen_top_f.mats[0]
+    #         pz_mat = zerolen_top_f.mats[-1]
+
+    #         elm_joint = BeamColumnJoint(
+    #             component,
+    #             self.model.uid_generator.new("element"),
+    #             [bottom_mid, mid_v_f, top_node, mid_v_b],
+    #             [fix_mat]*12+[pz_mat]
+    #         )
+
+    #         # zerolen_top_b = self.define_zerolength(
+    #         #     component,
+    #         #     top_h_b,
+    #         #     top_v_b,
+    #         #     x_axis,
+    #         #     y_axis,
+    #         #     zerolength_gen.release_6,
+    #         #     {}
+    #         # )
+    #         # zerolen_bottom_f = self.define_zerolength(
+    #         #     component,
+    #         #     bottom_h_f,
+    #         #     bottom_v_f,
+    #         #     x_axis,
+    #         #     y_axis,
+    #         #     zerolength_gen.release_6,
+    #         #     {}
+    #         # )
+    #         # zerolen_bottom_b = self.define_zerolength(
+    #         #     component,
+    #         #     bottom_h_b,
+    #         #     bottom_v_b,
+    #         #     x_axis,
+    #         #     y_axis,
+    #         #     zerolength_gen.release_6,
+    #         #     {}
+    #         # )
+
+    #         # fill component assembly
+    #         component.external_nodes.add(top_node)
+    #         component.external_nodes.named_contents["top_node"] = top_node
+    #         component.external_nodes.add(bottom_mid)
+    #         component.external_nodes.named_contents["bottom_node"] = bottom_mid
+    #         component.external_nodes.add(mid_v_f)
+    #         component.external_nodes.named_contents["middle_front"] = mid_v_f
+    #         component.external_nodes.add(mid_v_b)
+    #         component.external_nodes.named_contents["middle_back"] = mid_v_b
+
+    #         # component.internal_nodes.add(top_h_f)
+    #         # component.internal_nodes.add(top_h_b)
+    #         # component.internal_nodes.add(top_v_f)
+    #         # component.internal_nodes.add(top_v_b)
+    #         # component.internal_nodes.add(bottom_h_f)
+    #         # component.internal_nodes.add(bottom_h_b)
+    #         # component.internal_nodes.add(bottom_v_f)
+    #         # component.internal_nodes.add(bottom_v_b)
+
+    #         component.elements.add(elm_joint)
+
+    #         # component.elements.add(elm_top_h_f)
+    #         # (
+    #         #     component.elements.named_contents[
+    #         #         "elm_top_h_f"
+    #         #     ]
+    #         # ) = elm_top_h_f
+    #         # component.elements.add(elm_top_h_b)
+    #         # (
+    #         #     component.elements.named_contents[
+    #         #         "elm_top_h_b"
+    #         #     ]
+    #         # ) = elm_top_h_b
+    #         # component.elements.add(elm_bottom_h_f)
+    #         # component.elements.add(elm_bottom_h_b)
+    #         # component.elements.add(elm_top_v_f)
+    #         # component.elements.add(elm_top_v_b)
+    #         # component.elements.add(elm_bottom_v_f)
+    #         # component.elements.add(elm_bottom_v_b)
+    #         component.elements.add(elm_interior)
+    #         (
+    #             component.elements.named_contents[
+    #                 "elm_interior"
+    #             ]
+    #         ) = elm_interior
+
+    #         # component.elements.add(zerolen_top_f)
+    #         # (
+    #         #     component.elements.named_contents[
+    #         #         "nonlinear_spring"
+    #         #     ]
+    #         # ) = zerolen_top_f  # type: ignore
+    #         # component.elements.add(zerolen_top_b)
+    #         # component.elements.add(zerolen_bottom_f)
+    #         # component.elements.add(zerolen_bottom_b)
+    #         defined_components[key] = component
+
+    #     return defined_components
+
     def add_pz_active(
             self,
             x_coord: float,
@@ -1313,215 +1793,217 @@ class BeamColumnGenerator:
             # )
             # assert rigid_sec
 
-            # factor = 1e2
+            factor_i = 1e9
+            factor_a = 1e1
+            factor_j = 1e9
 
-            # new_uid = self.model.uid_generator.new("section")
-            # rigid_sec = ElasticSection(
-            #     name="rigid_link_section",
-            #     uid=new_uid,
-            #     outside_shape=None,
-            #     snap_points=None,
-            #     e_mod=section.e_mod,
-            #     area=section.area*factor,
-            #     i_y=section.i_y*factor,
-            #     i_x=section.i_x*factor,
-            #     g_mod=section.g_mod,
-            #     j_mod=section.j_mod*factor,
-            #     sec_w=0.00,
-            #     )
+            new_uid = self.model.uid_generator.new("section")
+            rigid_sec = ElasticSection(
+                name="rigid_link_section",
+                uid=new_uid,
+                outside_shape=None,
+                snap_points=None,
+                e_mod=section.e_mod,
+                area=section.area*factor_a,
+                i_y=section.i_y*factor_i,
+                i_x=section.i_x*factor_i,
+                g_mod=section.g_mod,
+                j_mod=section.j_mod*factor_j,
+                sec_w=0.00,
+                )
 
-            # elm_top_h_f = ElasticBeamColumn(
-            #     component,
-            #     self.model.uid_generator.new("element"),
-            #     [top_node, top_h_f],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         y_axis,
-            #         -x_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_top_h_f.visibility.hidden_when_extruded = True
-            # elm_top_h_f.visibility.hidden_basic_forces = True
-
-            elm_top_h_f = RigidLink(
+            elm_top_h_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
                 [top_node, top_h_f],
-                'beam'
-                )
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    y_axis,
+                    -x_axis,
+                    z_axis,
+                ),
+            )
+            elm_top_h_f.visibility.hidden_when_extruded = True
+            elm_top_h_f.visibility.hidden_basic_forces = True
 
-            # elm_top_h_b = ElasticBeamColumn(
+            # elm_top_h_f = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [top_h_b, top_node],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         y_axis,
-            #         -x_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_top_h_b.visibility.hidden_when_extruded = True
-            # elm_top_h_b.visibility.hidden_basic_forces = True
+            #     [top_node, top_h_f],
+            #     'beam'
+            #     )
 
-            elm_top_h_b = RigidLink(
+            elm_top_h_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
-                [top_node, top_h_b],
-                'beam',
-                )
+                [top_h_b, top_node],
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    y_axis,
+                    -x_axis,
+                    z_axis,
+                ),
+            )
+            elm_top_h_b.visibility.hidden_when_extruded = True
+            elm_top_h_b.visibility.hidden_basic_forces = True
 
-            # elm_bottom_h_f = ElasticBeamColumn(
+            # elm_top_h_b = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [bottom_mid, bottom_h_f],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         y_axis,
-            #         -x_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_bottom_h_f.visibility.hidden_when_extruded = True
-            # elm_bottom_h_f.visibility.hidden_basic_forces = True
+            #     [top_node, top_h_b],
+            #     'beam',
+            #     )
 
-            elm_bottom_h_f = RigidLink(
+            elm_bottom_h_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
                 [bottom_mid, bottom_h_f],
-                'beam',
-                )
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    y_axis,
+                    -x_axis,
+                    z_axis,
+                ),
+            )
+            elm_bottom_h_f.visibility.hidden_when_extruded = True
+            elm_bottom_h_f.visibility.hidden_basic_forces = True
 
-            # elm_bottom_h_b = ElasticBeamColumn(
+            # elm_bottom_h_f = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [bottom_h_b, bottom_mid],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         y_axis,
-            #         -x_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_bottom_h_b.visibility.hidden_when_extruded = True
-            # elm_bottom_h_b.visibility.hidden_basic_forces = True
+            #     [bottom_mid, bottom_h_f],
+            #     'beam',
+            #     )
 
-            elm_bottom_h_b = RigidLink(
+            elm_bottom_h_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
-                [bottom_mid, bottom_h_b],
-                'beam',
-                )
+                [bottom_h_b, bottom_mid],
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    y_axis,
+                    -x_axis,
+                    z_axis,
+                ),
+            )
+            elm_bottom_h_b.visibility.hidden_when_extruded = True
+            elm_bottom_h_b.visibility.hidden_basic_forces = True
 
-            # elm_top_v_f = ElasticBeamColumn(
+            # elm_bottom_h_b = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [top_v_f, mid_v_f],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         x_axis,
-            #         y_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_top_v_f.visibility.hidden_when_extruded = True
-            # elm_top_v_f.visibility.hidden_basic_forces = True
+            #     [bottom_mid, bottom_h_b],
+            #     'beam',
+            #     )
 
-            elm_top_v_f = RigidLink(
+            elm_top_v_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
-                [mid_v_f, top_v_f],
-                'beam',
-                )
+                [top_v_f, mid_v_f],
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    x_axis,
+                    y_axis,
+                    z_axis,
+                ),
+            )
+            elm_top_v_f.visibility.hidden_when_extruded = True
+            elm_top_v_f.visibility.hidden_basic_forces = True
 
-            # elm_top_v_b = ElasticBeamColumn(
+            # elm_top_v_f = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [top_v_b, mid_v_b],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         x_axis,
-            #         y_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_top_v_b.visibility.hidden_when_extruded = True
-            # elm_top_v_b.visibility.hidden_basic_forces = True
+            #     [mid_v_f, top_v_f],
+            #     'beam',
+            #     )
 
-            elm_top_v_b = RigidLink(
+            elm_top_v_b = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
-                [mid_v_b, top_v_b],
-                'beam',
-                )
+                [top_v_b, mid_v_b],
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    x_axis,
+                    y_axis,
+                    z_axis,
+                ),
+            )
+            elm_top_v_b.visibility.hidden_when_extruded = True
+            elm_top_v_b.visibility.hidden_basic_forces = True
 
-            # elm_bottom_v_f = ElasticBeamColumn(
+            # elm_top_v_b = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [mid_v_f, bottom_v_f],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         x_axis,
-            #         y_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_bottom_v_f.visibility.hidden_when_extruded = True
-            # elm_bottom_v_f.visibility.hidden_basic_forces = True
-
-            elm_bottom_v_f = RigidLink(
+            #     [mid_v_b, top_v_b],
+            #     'beam',
+            #     )
+   
+            elm_bottom_v_f = ElasticBeamColumn(
                 component,
                 self.model.uid_generator.new("element"),
                 [mid_v_f, bottom_v_f],
-                'beam',
-                )
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    x_axis,
+                    y_axis,
+                    z_axis,
+                ),
+            )
+            elm_bottom_v_f.visibility.hidden_when_extruded = True
+            elm_bottom_v_f.visibility.hidden_basic_forces = True
 
-            # elm_bottom_v_b = ElasticBeamColumn(
+            # elm_bottom_v_f = RigidLink(
             #     component,
             #     self.model.uid_generator.new("element"),
-            #     [mid_v_b, bottom_v_b],
-            #     rigid_sec,
-            #     GeomTransf(
-            #         "Corotational",
-            #         self.model.uid_generator.new("transformation"),
-            #         np.zeros(3),
-            #         np.zeros(3),
-            #         x_axis,
-            #         y_axis,
-            #         z_axis,
-            #     ),
-            # )
-            # elm_bottom_v_b.visibility.hidden_when_extruded = True
-            # elm_bottom_v_b.visibility.hidden_basic_forces = True
+            #     [mid_v_f, bottom_v_f],
+            #     'beam',
+            #     )
+
+            elm_bottom_v_b = ElasticBeamColumn(
+                component,
+                self.model.uid_generator.new("element"),
+                [mid_v_b, bottom_v_b],
+                rigid_sec,
+                GeomTransf(
+                    "Corotational",
+                    self.model.uid_generator.new("transformation"),
+                    np.zeros(3),
+                    np.zeros(3),
+                    x_axis,
+                    y_axis,
+                    z_axis,
+                ),
+            )
+            elm_bottom_v_b.visibility.hidden_when_extruded = True
+            elm_bottom_v_b.visibility.hidden_basic_forces = True
 
             elm_bottom_v_b = RigidLink(
                 component,
@@ -1562,13 +2044,23 @@ class BeamColumnGenerator:
             zerolength_gen_args.update(zerolength_args)
             zerolen_top_f = self.define_zerolength(
                 component,
-                top_h_f,
-                top_v_f,
+                top_node,
+                top_node,
                 x_axis,
                 y_axis,
                 mthd,
                 zerolength_gen_args
             )
+            # fix_mat = zerolen_top_f.mats[0]
+            # pz_mat = zerolen_top_f.mats[-1]
+
+            # elm_joint = BeamColumnJoint(
+            #     component,
+            #     self.model.uid_generator.new("element"),
+            #     [bottom_mid, mid_v_f, top_node, mid_v_b],
+            #     [fix_mat]*12+[pz_mat]
+            # )
+
             zerolen_top_b = self.define_zerolength(
                 component,
                 top_h_b,
@@ -1616,6 +2108,8 @@ class BeamColumnGenerator:
             component.internal_nodes.add(bottom_v_f)
             component.internal_nodes.add(bottom_v_b)
 
+            # component.elements.add(elm_joint)
+
             component.elements.add(elm_top_h_f)
             (
                 component.elements.named_contents[
@@ -1653,3 +2147,4 @@ class BeamColumnGenerator:
             defined_components[key] = component
 
         return defined_components
+    

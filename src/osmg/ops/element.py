@@ -72,7 +72,6 @@ class RigidLink(Element):
         assert len(self.nodes) == 2
 
         return [
-            "rigidLink",
             self.elmtype,
             self.nodes[0].uid,
             self.nodes[1].uid
@@ -86,6 +85,33 @@ class RigidLink(Element):
         res += f"r_node_tag: {self.r_node_tag}\n"
         res += f"c_node_tag: {self.c_node_tag}\n"
         return res
+
+
+@dataclass(repr=False)
+class BeamColumnJoint(Element):
+    """
+    OpenSees BeamColumnJoint element
+    https://openseespydoc.readthedocs.io/en/latest/src/beamColumnJoint.html
+
+    """
+
+    mats: list[UniaxialMaterial]
+
+    def __post_init__(self):
+        assert len(self.mats) == 13
+
+    def ops_args(self):
+        """
+        Returns the arguments required to define the object in
+        OpenSees
+
+        """
+        return [
+            'beamColumnJoint',
+            self.uid,
+            *[n.uid for n in self.nodes],
+            *[mat.uid for mat in self.mats]
+        ]
 
 
 @dataclass(repr=False)
