@@ -45,7 +45,8 @@ def fix_all(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 6
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 3
     return dirs, mats
 
 
@@ -60,7 +61,8 @@ def release_6(
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 5
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 2
     return dirs, mats
 
 
@@ -75,7 +77,8 @@ def release_5(
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 5
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 2
     return dirs, mats
 
 
@@ -90,7 +93,8 @@ def release_56(
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 4
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat]
     return dirs, mats
 
 
@@ -140,7 +144,8 @@ def imk_6(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 5 + [mat]
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_mat] * 2 + [mat]
     return dirs, mats
 
 
@@ -195,7 +200,8 @@ def imk_56(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 4 + [mat_weak, mat_strong]
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat, mat_weak, mat_strong]
     return dirs, mats
 
 
@@ -338,8 +344,9 @@ def gravity_shear_tab(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
     release_mat = mat_repo.retrieve_by_attr("name", "release")
-    mats = [fix_mat] * 4 + [release_mat] + [mat]
+    mats = [fix_mat] * 3 + [fix_rot_mat, release_mat, mat]
     return dirs, mats
 
 
@@ -412,7 +419,8 @@ def steel_w_col_pz(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 5 + [mat]
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
 
@@ -588,14 +596,16 @@ def steel_w_col_pz_updated(
             "auto_steel_W_pz_updated",
             *args
         )
-    minmaxmat = MinMax(
-        model.uid_generator.new("uniaxial material"),
-        "auto_steel_W_pz_updated_minmax",
-        mat, gammaU_N, gammaU_P)
+    # minmaxmat = MinMax(
+    #     model.uid_generator.new("uniaxial material"),
+    #     "auto_steel_W_pz_updated_minmax",
+    #     mat, gammaU_N, gammaU_P)
+    # print(mat.ops_args())
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 5 + [minmaxmat]
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
 
@@ -651,5 +661,6 @@ def steel_brace_gusset(
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    mats = [fix_mat] * 4 + [gusset_mat, fix_mat]
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat, gusset_mat, fix_mat]
     return dirs, mats

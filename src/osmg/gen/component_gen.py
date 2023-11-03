@@ -1302,15 +1302,24 @@ class BeamColumnGenerator:
 
             bottom_mid = ndg.add_node_lvl_xyz(p_j[0], p_j[1], p_j[2], lvl.uid)
 
-            # define rigid beamcolumn elements
-            if not self.model.elastic_sections.retrieve_by_attr(
-                "name", "rigid_link_section"
-            ):
-                load_util_rigid_elastic(self.model)
-            rigid_sec = self.model.elastic_sections.retrieve_by_attr(
-                "name", "rigid_link_section"
-            )
-            assert rigid_sec
+            factor_i = 1.00e1
+            factor_a = 1.00e1
+            factor_j = 1.00e1
+
+            new_uid = self.model.uid_generator.new("section")
+            rigid_sec = ElasticSection(
+                name="rigid_link_section",
+                uid=new_uid,
+                outside_shape=None,
+                snap_points=None,
+                e_mod=section.e_mod,
+                area=section.area*factor_a,
+                i_y=section.i_y*factor_i,
+                i_x=section.i_x*factor_i,
+                g_mod=section.g_mod,
+                j_mod=section.j_mod*factor_j,
+                sec_w=0.00,
+                )
 
             elm_top_h_f = ElasticBeamColumn(
                 component,

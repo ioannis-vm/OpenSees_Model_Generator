@@ -142,8 +142,14 @@ def load_default_fix_release(model: Model) -> None:
 
     uniaxial_mat = Elastic(
         uid=model.uid_generator.new("uniaxial material"),
-        name="fix",
+        name="fix_rot",
         e_mod=common.STIFF_ROT,
+    )
+    model.uniaxial_materials.add(uniaxial_mat)
+    uniaxial_mat = Elastic(
+        uid=model.uid_generator.new("uniaxial material"),
+        name="fix",
+        e_mod=common.STIFF,
     )
     model.uniaxial_materials.add(uniaxial_mat)
     uniaxial_mat = Elastic(

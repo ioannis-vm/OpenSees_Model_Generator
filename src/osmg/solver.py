@@ -87,6 +87,7 @@ class Results:
       clock: Timestamp of each instance of result storage.
       subdivision_level: If applicable, the level of
         timestep/displacement increment subdivision.
+      iters: Number of iterations to convergence.
       periods: Optional, stores the periods for modal analyses.
       n_steps_success: Total number of steps of the analysis.
       metadata: Optional metadata that depend on the type of analysis.
@@ -109,6 +110,7 @@ class Results:
         init=False
     )
     clock: list = field(init=False)
+    iters: list = field(init=False)
     subdivision_level: list = field(init=False)
     periods: Optional[nparr] = field(default=None)
     n_steps_success: int = field(default=0)
@@ -277,6 +279,7 @@ class Analysis:
                 )
             self.results[case_name] = Results()
             self.results[case_name].clock = []
+            self.results[case_name].iters = []
             self.results[case_name].subdivision_level = []
             for uid in node_uids:
                 self.results[case_name].node_displacements[uid] = {}
@@ -1009,6 +1012,7 @@ class Analysis:
         zerolength_elements,
     ):
         self.results[case_name].clock.append(perf_counter())
+        self.results[case_name].iters.append(ops.testIter())
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
         self._read_node_accelerations(case_name, step, nodes)
@@ -1450,7 +1454,7 @@ class GravityPlusAnalysis(Analysis):
         ops.constraints(*CONSTRAINTS)
         self.log("G: Setting algorithm to KrylovNewton")
         ops.algorithm("KrylovNewton")
-        ops.integrator("LoadControl", 1)
+        ops.integrator("LoadControl", 1.00/num_steps)
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
         self.log("G: Analyzing now.")
@@ -2429,10 +2433,16 @@ class THAnalysis(GravityPlusAnalysis):
         algorithm_idx = 0
 
         scale = (
-            1.0, 1.0e-1, 1.0e-2
+            1.0, 1.0e-1, 1.0e-2, 1.0e-3,
+            1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7,
+            1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11
         )
-        tols = [1.0e-6]*len(scale)
-        algorithms = (('KrylovNewton', ), ('KrylovNewton', 'initial'))
+        tols = [1.0e-8]*len(scale)
+        algorithms = (
+            ("KrylovNewton",),
+            ("KrylovNewton", "initial", "initial"),
+            ("NewtonLineSearch",),
+        )
 
         # progress bar
         if print_progress:
@@ -2461,7 +2471,7 @@ class THAnalysis(GravityPlusAnalysis):
                     break
 
                 ops.test(
-                    "EnergyIncr", tols[num_subdiv], 20, 3, 2)
+                    "EnergyIncr", tols[num_subdiv], 200, 3, 2)
                 ops.algorithm(*algorithms[algorithm_idx])
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv]
@@ -2490,15 +2500,16 @@ class THAnalysis(GravityPlusAnalysis):
                         algorithm_idx = 0
                         num_subdiv += 1
                         # how many times to run with reduced step size
-                        num_times = 10
+                        num_times = 50
                 else:
                     # analysis was successful
                     prev_time = curr_time
                     curr_time = float(ops.getTime())
+                    testiter = ops.testIter()
 
                     # progress bar
                     if pbar is not None:
-                        pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f}'})
+                        pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f} [{testiter}]'})
                         pbar.update(curr_time - prev_time)
                     # log entry for analysis status
                     if perf_counter() - the_time > 5.00*60.00:  # 5 min
