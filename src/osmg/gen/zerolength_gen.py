@@ -126,6 +126,7 @@ def imk_6(
 
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
+    only_elastic = kwargs.get('only_elastic', False)
 
     mat_generator = MaterialGenerator(model)
     mat = mat_generator.generate_steel_w_imk_material(
@@ -139,13 +140,14 @@ def imk_6(
         axial_load_ratio,
         direction="strong",
         moment_modifier=moment_modifier,
-        n_parameter=n_parameter
+        n_parameter=n_parameter,
+        only_elastic=only_elastic
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
     fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
-    mats = [fix_mat] * 3 + [fix_mat] * 2 + [mat]
+    mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
 
@@ -170,6 +172,7 @@ def imk_56(
 
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
+    only_elastic = kwargs.get('only_elastic', False)
 
     mat_generator = MaterialGenerator(model)
     mat_strong = mat_generator.generate_steel_w_imk_material(
@@ -183,7 +186,8 @@ def imk_56(
         axial_load_ratio,
         direction="strong",
         moment_modifier=moment_modifier,
-        n_parameter=n_parameter
+        n_parameter=n_parameter,
+        only_elastic=only_elastic
     )
     mat_weak = mat_generator.generate_steel_w_imk_material(
         section,
@@ -195,13 +199,60 @@ def imk_56(
         consider_composite,
         axial_load_ratio,
         direction="weak",
-        moment_modifier=moment_modifier
+        moment_modifier=moment_modifier,
+        only_elastic=only_elastic
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr("name", "fix")
     fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
     mats = [fix_mat] * 3 + [fix_rot_mat, mat_weak, mat_strong]
+    return dirs, mats
+
+
+def imk_6_release_5(
+        model: Model,
+        element_length: float,
+        lboverl: float,
+        loverh: float,
+        rbs_factor: Optional[float],
+        consider_composite: bool,
+        axial_load_ratio: float,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        **kwargs:  dict[object, object]) \
+        -> tuple[list[int], list[UniaxialMaterial]]:
+    """
+    release in the weak axis bending direction,
+    :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
+    direction
+
+    """
+
+    moment_modifier = kwargs.get('moment_modifier', 1.00)
+    n_parameter = kwargs.get('n_parameter', 0.00)
+    only_elastic = kwargs.get('only_elastic', False)
+
+    mat_generator = MaterialGenerator(model)
+    mat_strong = mat_generator.generate_steel_w_imk_material(
+        section,
+        physical_material,
+        element_length,
+        lboverl,
+        loverh,
+        rbs_factor,
+        consider_composite,
+        axial_load_ratio,
+        direction="strong",
+        moment_modifier=moment_modifier,
+        n_parameter=n_parameter,
+        only_elastic=only_elastic
+    )
+    dirs = [1, 2, 3, 4, 6]
+    mat_repo = model.uniaxial_materials
+    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
+    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    mats = [fix_mat] * 3 + [fix_rot_mat, mat_strong]
     return dirs, mats
 
 

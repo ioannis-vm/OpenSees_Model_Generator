@@ -19,6 +19,7 @@ import numpy.typing as npt
 from ..ops.section import FiberSection
 from ..physical_material import PhysicalMaterial
 from ..model import Model
+from ..ops.uniaxial_material import Elastic
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Fatigue
 from ..ops.uniaxial_material import MaxStrainRange
@@ -168,7 +169,8 @@ class MaterialGenerator:
         axial_load_ratio,
         direction="strong",
         moment_modifier=1.00,
-        n_parameter=0.00
+        n_parameter=0.00,
+        only_elastic=False
     ):
         """
         Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
@@ -458,29 +460,36 @@ class MaterialGenerator:
         # )
 
         # new model
-        bilin_mat = IMKBilin(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_IMK",
-            stiffness * moment_modifier,
-            theta_p_plus,
-            theta_pc_plus,
-            theta_u,
-            m_plus*moment_modifier,
-            (1.0 + beta_plus),
-            residual_plus,
-            theta_p_minus,
-            theta_pc_minus,
-            theta_u,
-            -m_minus*moment_modifier,
-            (1.0 + beta_minus),
-            residual_minus,
-            lamda,
-            lamda,
-            lamda,
-            1.00,
-            1.00,
-            1.00,
-            d_plus,
-            d_minus
-        )
+        if only_elastic:
+            bilin_mat = Elastic(
+                self.model.uid_generator.new("uniaxial material"),
+                "auto_IMK",
+                stiffness * moment_modifier
+            )
+        else:
+            bilin_mat = IMKBilin(
+                self.model.uid_generator.new("uniaxial material"),
+                "auto_IMK",
+                stiffness * moment_modifier,
+                theta_p_plus,
+                theta_pc_plus,
+                theta_u,
+                m_plus*moment_modifier,
+                (1.0 + beta_plus),
+                residual_plus,
+                theta_p_minus,
+                theta_pc_minus,
+                theta_u,
+                -m_minus*moment_modifier,
+                (1.0 + beta_minus),
+                residual_minus,
+                lamda,
+                lamda,
+                lamda,
+                1.00,
+                1.00,
+                1.00,
+                d_plus,
+                d_minus
+            )
         return bilin_mat

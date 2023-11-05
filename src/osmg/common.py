@@ -28,7 +28,7 @@ G_CONST_IMPERIAL = 386.22  # in/s**2
 G_CONST_SI = 9.81  # m/s**2
 
 # quantities to use for extreme stiffnesses
-STIFF_ROT = 1.0e10
+STIFF_ROT = 1.0e15
 STIFF = 1.0e10
 TINY = 1.0e-12
 
