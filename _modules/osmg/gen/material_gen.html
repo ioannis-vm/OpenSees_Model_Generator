@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.gen.material_gen &#8212; osmg 0.2.0 documentation</title>
+    <title>osmg.gen.material_gen &#8212; osmg 0.2.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
-    <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -51,6 +51,7 @@
 <span class="kn">from</span> <span class="nn">..ops.section</span> <span class="kn">import</span> <span class="n">FiberSection</span>
 <span class="kn">from</span> <span class="nn">..physical_material</span> <span class="kn">import</span> <span class="n">PhysicalMaterial</span>
 <span class="kn">from</span> <span class="nn">..model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Elastic</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Steel02</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Fatigue</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">MaxStrainRange</span>
@@ -210,7 +211,8 @@
         <span class="n">axial_load_ratio</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
         <span class="n">moment_modifier</span><span class="o">=</span><span class="mf">1.00</span><span class="p">,</span>
-        <span class="n">n_parameter</span><span class="o">=</span><span class="mf">0.00</span>
+        <span class="n">n_parameter</span><span class="o">=</span><span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">only_elastic</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Lignos, D. G., &amp; Krawinkler, H. (2011). Deterioration modeling of</span>
@@ -500,31 +502,38 @@
         <span class="c1"># )</span>
 
         <span class="c1"># new model</span>
-        <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">IMKBilin</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;auto_IMK&quot;</span><span class="p">,</span>
-            <span class="n">stiffness</span> <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="n">theta_p_plus</span><span class="p">,</span>
-            <span class="n">theta_pc_plus</span><span class="p">,</span>
-            <span class="n">theta_u</span><span class="p">,</span>
-            <span class="n">m_plus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_plus</span><span class="p">),</span>
-            <span class="n">residual_plus</span><span class="p">,</span>
-            <span class="n">theta_p_minus</span><span class="p">,</span>
-            <span class="n">theta_pc_minus</span><span class="p">,</span>
-            <span class="n">theta_u</span><span class="p">,</span>
-            <span class="o">-</span><span class="n">m_minus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
-            <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_minus</span><span class="p">),</span>
-            <span class="n">residual_minus</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="n">lamda</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="mf">1.00</span><span class="p">,</span>
-            <span class="n">d_plus</span><span class="p">,</span>
-            <span class="n">d_minus</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">only_elastic</span><span class="p">:</span>
+            <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">Elastic</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;auto_IMK&quot;</span><span class="p">,</span>
+                <span class="n">stiffness</span> <span class="o">*</span> <span class="n">moment_modifier</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bilin_mat</span> <span class="o">=</span> <span class="n">IMKBilin</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;auto_IMK&quot;</span><span class="p">,</span>
+                <span class="n">stiffness</span> <span class="o">*</span> <span class="n">moment_modifier</span><span class="p">,</span>
+                <span class="n">theta_p_plus</span><span class="p">,</span>
+                <span class="n">theta_pc_plus</span><span class="p">,</span>
+                <span class="n">theta_u</span><span class="p">,</span>
+                <span class="n">m_plus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
+                <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_plus</span><span class="p">),</span>
+                <span class="n">residual_plus</span><span class="p">,</span>
+                <span class="n">theta_p_minus</span><span class="p">,</span>
+                <span class="n">theta_pc_minus</span><span class="p">,</span>
+                <span class="n">theta_u</span><span class="p">,</span>
+                <span class="o">-</span><span class="n">m_minus</span><span class="o">*</span><span class="n">moment_modifier</span><span class="p">,</span>
+                <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">beta_minus</span><span class="p">),</span>
+                <span class="n">residual_minus</span><span class="p">,</span>
+                <span class="n">lamda</span><span class="p">,</span>
+                <span class="n">lamda</span><span class="p">,</span>
+                <span class="n">lamda</span><span class="p">,</span>
+                <span class="mf">1.00</span><span class="p">,</span>
+                <span class="mf">1.00</span><span class="p">,</span>
+                <span class="mf">1.00</span><span class="p">,</span>
+                <span class="n">d_plus</span><span class="p">,</span>
+                <span class="n">d_minus</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">bilin_mat</span></div>
 </div>
 

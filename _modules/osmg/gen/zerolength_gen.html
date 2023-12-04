@@ -4,10 +4,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>osmg.gen.zerolength_gen &#8212; osmg 0.2.0 documentation</title>
+    <title>osmg.gen.zerolength_gen &#8212; osmg 0.2.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
-    <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+    <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -79,7 +79,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">6</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -97,7 +98,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -115,7 +117,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -133,7 +136,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -168,6 +172,7 @@
 
     <span class="n">moment_modifier</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moment_modifier&#39;</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
     <span class="n">n_parameter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_parameter&#39;</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
+    <span class="n">only_elastic</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;only_elastic&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="n">mat_generator</span> <span class="o">=</span> <span class="n">MaterialGenerator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">mat_generator</span><span class="o">.</span><span class="n">generate_steel_w_imk_material</span><span class="p">(</span>
@@ -181,12 +186,14 @@
         <span class="n">axial_load_ratio</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
         <span class="n">moment_modifier</span><span class="o">=</span><span class="n">moment_modifier</span><span class="p">,</span>
-        <span class="n">n_parameter</span><span class="o">=</span><span class="n">n_parameter</span>
+        <span class="n">n_parameter</span><span class="o">=</span><span class="n">n_parameter</span><span class="p">,</span>
+        <span class="n">only_elastic</span><span class="o">=</span><span class="n">only_elastic</span>
     <span class="p">)</span>
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -214,6 +221,7 @@
 
     <span class="n">moment_modifier</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moment_modifier&#39;</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
     <span class="n">n_parameter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_parameter&#39;</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
+    <span class="n">only_elastic</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;only_elastic&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="n">mat_generator</span> <span class="o">=</span> <span class="n">MaterialGenerator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">mat_strong</span> <span class="o">=</span> <span class="n">mat_generator</span><span class="o">.</span><span class="n">generate_steel_w_imk_material</span><span class="p">(</span>
@@ -227,7 +235,8 @@
         <span class="n">axial_load_ratio</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
         <span class="n">moment_modifier</span><span class="o">=</span><span class="n">moment_modifier</span><span class="p">,</span>
-        <span class="n">n_parameter</span><span class="o">=</span><span class="n">n_parameter</span>
+        <span class="n">n_parameter</span><span class="o">=</span><span class="n">n_parameter</span><span class="p">,</span>
+        <span class="n">only_elastic</span><span class="o">=</span><span class="n">only_elastic</span>
     <span class="p">)</span>
     <span class="n">mat_weak</span> <span class="o">=</span> <span class="n">mat_generator</span><span class="o">.</span><span class="n">generate_steel_w_imk_material</span><span class="p">(</span>
         <span class="n">section</span><span class="p">,</span>
@@ -239,12 +248,63 @@
         <span class="n">consider_composite</span><span class="p">,</span>
         <span class="n">axial_load_ratio</span><span class="p">,</span>
         <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;weak&quot;</span><span class="p">,</span>
-        <span class="n">moment_modifier</span><span class="o">=</span><span class="n">moment_modifier</span>
+        <span class="n">moment_modifier</span><span class="o">=</span><span class="n">moment_modifier</span><span class="p">,</span>
+        <span class="n">only_elastic</span><span class="o">=</span><span class="n">only_elastic</span>
     <span class="p">)</span>
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat_weak</span><span class="p">,</span> <span class="n">mat_strong</span><span class="p">]</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">,</span> <span class="n">mat_weak</span><span class="p">,</span> <span class="n">mat_strong</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
+
+
+
+<div class="viewcode-block" id="imk_6_release_5">
+<a class="viewcode-back" href="../../../_autosummary/osmg.gen.zerolength_gen.html#osmg.gen.zerolength_gen.imk_6_release_5">[docs]</a>
+<span class="k">def</span> <span class="nf">imk_6_release_5</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+        <span class="n">element_length</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">lboverl</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">loverh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">rbs_factor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">consider_composite</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">axial_load_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span><span class="p">,</span>
+        <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span>  <span class="nb">dict</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">])</span> \
+        <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">UniaxialMaterial</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    release in the weak axis bending direction,</span>
+<span class="sd">    :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending</span>
+<span class="sd">    direction</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">moment_modifier</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;moment_modifier&#39;</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
+    <span class="n">n_parameter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;n_parameter&#39;</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">)</span>
+    <span class="n">only_elastic</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;only_elastic&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">mat_generator</span> <span class="o">=</span> <span class="n">MaterialGenerator</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">mat_strong</span> <span class="o">=</span> <span class="n">mat_generator</span><span class="o">.</span><span class="n">generate_steel_w_imk_material</span><span class="p">(</span>
+        <span class="n">section</span><span class="p">,</span>
+        <span class="n">physical_material</span><span class="p">,</span>
+        <span class="n">element_length</span><span class="p">,</span>
+        <span class="n">lboverl</span><span class="p">,</span>
+        <span class="n">loverh</span><span class="p">,</span>
+        <span class="n">rbs_factor</span><span class="p">,</span>
+        <span class="n">consider_composite</span><span class="p">,</span>
+        <span class="n">axial_load_ratio</span><span class="p">,</span>
+        <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span>
+        <span class="n">moment_modifier</span><span class="o">=</span><span class="n">moment_modifier</span><span class="p">,</span>
+        <span class="n">n_parameter</span><span class="o">=</span><span class="n">n_parameter</span><span class="p">,</span>
+        <span class="n">only_elastic</span><span class="o">=</span><span class="n">only_elastic</span>
+    <span class="p">)</span>
+    <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+    <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
+    <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">,</span> <span class="n">mat_strong</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -390,8 +450,9 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
     <span class="n">release_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="n">release_mat</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">,</span> <span class="n">release_mat</span><span class="p">,</span> <span class="n">mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -467,7 +528,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -646,14 +708,16 @@
             <span class="s2">&quot;auto_steel_W_pz_updated&quot;</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span>
         <span class="p">)</span>
-    <span class="n">minmaxmat</span> <span class="o">=</span> <span class="n">MinMax</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;uniaxial material&quot;</span><span class="p">),</span>
-        <span class="s2">&quot;auto_steel_W_pz_updated_minmax&quot;</span><span class="p">,</span>
-        <span class="n">mat</span><span class="p">,</span> <span class="n">gammaU_N</span><span class="p">,</span> <span class="n">gammaU_P</span><span class="p">)</span>
+    <span class="c1"># minmaxmat = MinMax(</span>
+    <span class="c1">#     model.uid_generator.new(&quot;uniaxial material&quot;),</span>
+    <span class="c1">#     &quot;auto_steel_W_pz_updated_minmax&quot;,</span>
+    <span class="c1">#     mat, gammaU_N, gammaU_P)</span>
+    <span class="c1"># print(mat.ops_args())</span>
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="p">[</span><span class="n">minmaxmat</span><span class="p">]</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="n">mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 
@@ -671,7 +735,7 @@
         <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">UniaxialMaterial</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved</span>
-<span class="sd">    analysis model for special concentrically braced frames, Journal</span>
+<span class="sd">    analytical model for special concentrically braced frames, Journal</span>
 <span class="sd">    of Constructional Steel Research, Vol. 73, pp 80-94.</span>
 
 <span class="sd">    Arguments:</span>
@@ -712,7 +776,8 @@
     <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
     <span class="n">mat_repo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">uniaxial_materials</span>
     <span class="n">fix_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix&quot;</span><span class="p">)</span>
-    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="n">gusset_mat</span><span class="p">,</span> <span class="n">fix_mat</span><span class="p">]</span>
+    <span class="n">fix_rot_mat</span> <span class="o">=</span> <span class="n">mat_repo</span><span class="o">.</span><span class="n">retrieve_by_attr</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;fix_rot&quot;</span><span class="p">)</span>
+    <span class="n">mats</span> <span class="o">=</span> <span class="p">[</span><span class="n">fix_mat</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="n">fix_rot_mat</span><span class="p">,</span> <span class="n">gusset_mat</span><span class="p">,</span> <span class="n">fix_mat</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span></div>
 
 </pre></div>

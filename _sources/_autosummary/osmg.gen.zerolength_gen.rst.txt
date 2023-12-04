@@ -18,6 +18,7 @@ osmg.gen.zerolength\_gen
       gravity_shear_tab
       imk_56
       imk_6
+      imk_6_release_5
       release_5
       release_56
       release_6
