@@ -26,7 +26,6 @@ from ..ops.uniaxial_material import Elastic
 from ..ops.uniaxial_material import Steel02
 from ..ops.uniaxial_material import Pinching4
 from ..ops.uniaxial_material import Hysteretic
-from ..ops.uniaxial_material import MinMax
 from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:
@@ -595,9 +594,6 @@ def steel_w_col_pz_updated(
     M1_N *= moment_modifier
     M2_N *= moment_modifier
     M3_N *= moment_modifier
-
-    gammaU_P = 0.3
-    gammaU_N = -0.3
 
     if not consider_composite:
         args = ((M1_N, gamma1),

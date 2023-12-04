@@ -122,6 +122,8 @@ for i, pair in enumerate([(p1, p2), (p2, p3), (p3, p4), (p4, p1)]):
         angle=0.00,
         method='generate_hinged_component_assembly',
         additional_args={
+            'n_x': None,
+            'n_y': None,
             'zerolength_gen_i': gravity_shear_tab,
             'zerolength_gen_args_i': {
                 'consider_composite': True,

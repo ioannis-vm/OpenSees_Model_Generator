@@ -18,7 +18,9 @@ def get_latest_version(package_name):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--package_name", default="osmg", help="Name of the package.")
+    parser.add_argument(
+        "--package_name", default="osmg",
+        help="Name of the package.")
     args = parser.parse_args()
 
     package = args.package_name

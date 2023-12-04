@@ -43,7 +43,6 @@ from ..ops.section import FiberSection
 from ..preprocessing.split_component import split_component
 from ..transformations import local_axes_from_points_and_angle
 from ..transformations import transformation_matrix
-from ..defaults import load_util_rigid_elastic
 from ..gen import zerolength_gen
 from .. import common
 
