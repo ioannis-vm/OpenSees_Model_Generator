@@ -2616,7 +2616,7 @@ class THAnalysis(GravityPlusAnalysis):
         if pbar is not None:
             pbar.close()
 
-        if dampen_out_residual:
+        if dampen_out_residual and not analysis_failed:
             self.log("Dampening out residual response")
             define_lateral_load_pattern(
                 [0.00, 0.00], [0.00, 0.00], [0.00, 0.00], 1.00, redefine=True
