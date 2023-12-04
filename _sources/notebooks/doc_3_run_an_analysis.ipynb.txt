@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "77854402",
+   "id": "f6405b57",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -25,7 +25,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "a1164ce3",
+   "id": "5a3222f8",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -39,7 +39,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a0a0f9d9",
+   "id": "6345fdd1",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -126,6 +126,8 @@
     "        angle=0.00,\n",
     "        method='generate_hinged_component_assembly',\n",
     "        additional_args={\n",
+    "            'n_x': None,\n",
+    "            'n_y': None,\n",
     "            'zerolength_gen_i': gravity_shear_tab,\n",
     "            'zerolength_gen_args_i': {\n",
     "                'consider_composite': True,\n",
@@ -155,7 +157,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "cab588e3",
+   "id": "c16eec6d",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -164,7 +166,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "44d89c17",
+   "id": "339b36b7",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -175,7 +177,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "dc04746c",
+   "id": "6d47eb06",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -187,7 +189,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1973511a",
+   "id": "d3999e73",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -200,7 +202,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "db19cd6c",
+   "id": "13cbc616",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -211,7 +213,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "90684391",
+   "id": "73a4b613",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -225,7 +227,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "743795a1",
+   "id": "031d46ea",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -237,7 +239,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "da5baa74",
+   "id": "911e4e64",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -250,7 +252,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "246c305b",
+   "id": "a77dbe3e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -267,7 +269,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "6e7feafc",
+   "id": "3d7750a2",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -280,7 +282,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "43c09ef8",
+   "id": "6ee654c5",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -295,7 +297,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "98fb2068",
+   "id": "a7b04767",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -308,7 +310,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "36d3a076",
+   "id": "38010a85",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -320,7 +322,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "853bc5a2",
+   "id": "e84ae01a",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -330,7 +332,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "ff08a23e",
+   "id": "69437231",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -342,7 +344,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "30e273b4",
+   "id": "0b71dde1",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -356,7 +358,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "bb3db9d4",
+   "id": "039f7f16",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -367,7 +369,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "a3053990",
+   "id": "492f959d",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -381,7 +383,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "120eda4e",
+   "id": "0d9e4c85",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -395,7 +397,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "34ea78eb",
+   "id": "8ed58bcd",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -406,7 +408,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "fb4f9c96",
+   "id": "dc9c3088",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -418,7 +420,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "5ddec1f2",
+   "id": "8fb93da9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -431,7 +433,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "f1f10362",
+   "id": "4258d542",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -442,7 +444,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "4e0b2743",
+   "id": "1b30d589",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -452,7 +454,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "de908896",
+   "id": "5f6b5fac",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -464,7 +466,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "467a57fb",
+   "id": "981916ef",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -485,7 +487,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "9c0c4150",
+   "id": "a12898e7",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -497,7 +499,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1822713d",
+   "id": "9a149e7e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -509,7 +511,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "9968243f",
+   "id": "256ac95f",
    "metadata": {
     "cell_marker": "\"\"\""
    },

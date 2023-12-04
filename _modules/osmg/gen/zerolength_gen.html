@@ -58,7 +58,6 @@
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Steel02</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Pinching4</span>
 <span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">Hysteretic</span>
-<span class="kn">from</span> <span class="nn">..ops.uniaxial_material</span> <span class="kn">import</span> <span class="n">MinMax</span>
 <span class="kn">from</span> <span class="nn">.material_gen</span> <span class="kn">import</span> <span class="n">MaterialGenerator</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -656,9 +655,6 @@
     <span class="n">M1_N</span> <span class="o">*=</span> <span class="n">moment_modifier</span>
     <span class="n">M2_N</span> <span class="o">*=</span> <span class="n">moment_modifier</span>
     <span class="n">M3_N</span> <span class="o">*=</span> <span class="n">moment_modifier</span>
-
-    <span class="n">gammaU_P</span> <span class="o">=</span> <span class="mf">0.3</span>
-    <span class="n">gammaU_N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.3</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">consider_composite</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">((</span><span class="n">M1_N</span><span class="p">,</span> <span class="n">gamma1</span><span class="p">),</span>
