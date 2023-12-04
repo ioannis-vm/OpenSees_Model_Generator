@@ -385,7 +385,7 @@ def add_data__line_elms_deformed(
     for elm in list_of_line_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
-        num_points = 8
+        num_points = 20
         u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
             step
         ][0:3]

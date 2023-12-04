@@ -29,7 +29,7 @@ G_CONST_SI = 9.81  # m/s**2
 
 # quantities to use for extreme stiffnesses
 STIFF_ROT = 1.0e15
-STIFF = 1.0e15  # note: too high a value causes convergence problems
+STIFF = 1.0e10
 TINY = 1.0e-12
 
 

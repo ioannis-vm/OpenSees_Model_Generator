@@ -26,6 +26,10 @@ from typing import Optional
 from typing import Any
 from typing import Union
 from dataclasses import dataclass, field
+import platform
+import socket
+import sys
+from time import perf_counter
 import pkgutil
 import os
 import shutil
@@ -79,6 +83,10 @@ class Results:
       release_foce_defo: Force-deformation pairs of zerolength
         elements. The nested structure is similar to that of
         node_displacements.
+      clock: Timestamp of each instance of result storage.
+      subdivision_level: If applicable, the level of
+        timestep/displacement increment subdivision.
+      iters: Number of iterations to convergence.
       periods: Optional, stores the periods for modal analyses.
       n_steps_success: Total number of steps of the analysis.
       metadata: Optional metadata that depend on the type of analysis.
@@ -100,6 +108,9 @@ class Results:
     release_force_defo: Collection[int, dict[int, list[float]]] = field(
         init=False
     )
+    clock: list = field(init=False)
+    iters: list = field(init=False)
+    subdivision_level: list = field(init=False)
     periods: Optional[nparr] = field(default=None)
     n_steps_success: int = field(default=0)
     metadata: Optional[dict[str, object]] = field(default=None)
@@ -266,6 +277,9 @@ class Analysis:
                     ]
                 )
             self.results[case_name] = Results()
+            self.results[case_name].clock = []
+            self.results[case_name].iters = []
+            self.results[case_name].subdivision_level = []
             for uid in node_uids:
                 self.results[case_name].node_displacements[uid] = {}
                 self.results[case_name].node_velocities[uid] = {}
@@ -287,6 +301,11 @@ class Analysis:
                     self.results[case_name].release_force_defo[uid] = {}
 
         self.log("Analysis started")
+        os_system = platform.system()
+        self.log(f'Platform: {os_system}')
+        if os_system == 'Linux':
+            self.log(f'Hostname: {socket.gethostname()}')
+        self.log(f'Python Version: {sys.version}')
 
     def _write_results_to_disk(self):
         """
@@ -671,6 +690,8 @@ class Analysis:
         line_elements,
         zerolength_elements,
     ):
+        self.results[case_name].clock.append(perf_counter())
+        self.results[case_name].iters.append(ops.testIter())
         self._read_node_displacements(case_name, step, nodes)
         self._read_node_velocities(case_name, step, nodes)
         self._read_node_accelerations(case_name, step, nodes)
@@ -1087,7 +1108,7 @@ class GravityPlusAnalysis(Analysis):
         ops.constraints(*CONSTRAINTS)
         self.log("G: Setting algorithm to KrylovNewton")
         ops.algorithm("KrylovNewton")
-        ops.integrator("LoadControl", 1)
+        ops.integrator("LoadControl", 1.00/num_steps)
         self.log("G: Setting analysis to Static")
         ops.analysis("Static")
         self.log("G: Analyzing now.")
@@ -1601,7 +1622,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         )
 
 def define_lateral_load_pattern(
-    ag_x, ag_y, ag_z, file_time_incr
+    ag_x, ag_y, ag_z, file_time_incr, redefine=False
 ):
     """
     Defines the load pattern for a time-history analysis from
@@ -1609,9 +1630,18 @@ def define_lateral_load_pattern(
 
     """
 
-    error = True
+    if redefine:
+        for tag in (2, 3, 4):
+            try:
+                ops.remove('loadPattern', tag)
+                ops.remove('timeSeries', tag)
+            except ops.OpenSeesError:
+                pass
+
+    if all((ag_x is None, ag_y is None, ag_z is None)):
+        raise ValueError("No input files specified.")
+
     if ag_x is not None:
-        error = False
         # define X-direction TH
         ops.timeSeries(
             "Path",
@@ -1627,7 +1657,6 @@ def define_lateral_load_pattern(
         ops.pattern("UniformExcitation", 2, 1, "-accel", 2)
 
     if ag_y is not None:
-        error = False
         # define Y-direction TH
         ops.timeSeries(
             "Path",
@@ -1643,7 +1672,6 @@ def define_lateral_load_pattern(
         ops.pattern("UniformExcitation", 3, 2, "-accel", 3)
 
     if ag_z is not None:
-        error = False
         # define Z-direction TH
         ops.timeSeries(
             "Path",
@@ -1657,9 +1685,6 @@ def define_lateral_load_pattern(
         )
         # pattern, direction, time series tag
         ops.pattern("UniformExcitation", 4, 3, "-accel", 4)
-
-    if error:
-        raise ValueError("No input files specified.")
 
 
 def plot_ground_motion(filename, file_time_incr, gmunit="g", plotly=False):
@@ -1716,7 +1741,8 @@ class THAnalysis(GravityPlusAnalysis):
             damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {"type": None},
             print_progress: bool = True,
             drift_check: float = 0.00,
-            time_limit: Optional[float] = None
+            time_limit: Optional[float] = None,
+            dampen_out_residual: bool = False
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the time-history analysis
@@ -1743,6 +1769,10 @@ class THAnalysis(GravityPlusAnalysis):
               no parent nodes are excempt from this check.
             time_limit: Maximum analysis time allowed, in hours.
               When reached, the anlysis is interrupted.
+            dampen_out_residual: When the analysis finishes, whether to
+              dampen out the motion to reveal the residual deformations.
+              Note that retrieving the absolute velocity and acceleration
+              will not output the correct values after dampening starts.
 
         """
 
@@ -1833,6 +1863,7 @@ class THAnalysis(GravityPlusAnalysis):
             line_elems,
             zerolength_elems,
         )
+        self.results[case_name].subdivision_level.append(0)
 
         self.log("")
         self.log("Starting transient analysis")
@@ -1940,8 +1971,12 @@ class THAnalysis(GravityPlusAnalysis):
             1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7,
             1.0e-8, 1.0e-9, 1.0e-10, 1.0e-11, 1e-12
         )
-        tols = [1.0e-12]*13
-        algorithms = (('KrylovNewton', ), ('KrylovNewton', 'initial'))
+        tols = [1.0e-8]*len(scale)
+        algorithms = (
+            ("KrylovNewton",),
+            ("KrylovNewton", "initial", "initial"),
+            ("NewtonLineSearch",),
+        )
 
         # progress bar
         if print_progress:
@@ -1958,6 +1993,9 @@ class THAnalysis(GravityPlusAnalysis):
         # of the analysis every 5 minutes.
         start_time = perf_counter()
         the_time = start_time
+
+        self.log('Initiating time traversal')
+        self.log(f'Max time step: {analysis_time_increment}')
 
         try:
 
@@ -2001,10 +2039,11 @@ class THAnalysis(GravityPlusAnalysis):
                     # analysis was successful
                     prev_time = curr_time
                     curr_time = float(ops.getTime())
+                    testiter = ops.testIter()
 
                     # progress bar
                     if pbar is not None:
-                        pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f}'})
+                        pbar.set_postfix({'time': f'{curr_time:.4f}/{target_timestamp:.2f} [{testiter}]'})
                         pbar.update(curr_time - prev_time)
                     # log entry for analysis status
                     if perf_counter() - the_time > 5.00*60.00:  # 5 min
@@ -2033,6 +2072,7 @@ class THAnalysis(GravityPlusAnalysis):
                             line_elems,
                             zerolength_elems,
                         )
+                        self.results[case_name].subdivision_level.append(num_subdiv)
                         self.time_vector.append(curr_time)
 
                     algorithm_idx = 0
@@ -2101,6 +2141,60 @@ class THAnalysis(GravityPlusAnalysis):
         if pbar is not None:
             pbar.close()
 
+        if dampen_out_residual and not analysis_failed:
+            self.log("Dampening out residual response")
+            define_lateral_load_pattern(
+                [0.00, 0.00], [0.00, 0.00], [0.00, 0.00], 1.00, redefine=True
+            )
+            ops.rayleigh(
+                0.00, 0.0, 0.0, 0.60 / np.pi
+            )
+            last_time = curr_time
+            curr_time = 0.00
+            ops.setTime(curr_time)
+            target_timestamp = 10.00
+
+            while curr_time + common.EPSILON < target_timestamp:
+
+                ops.test(
+                    "EnergyIncr", tols[0], 200, 3, 2)
+                ops.algorithm(*algorithms[0])
+                check = ops.analyze(
+                    1, analysis_time_increment
+                )
+
+                if check != 0:
+                    self.log(
+                        "Failed to dampen out residual motion, skipping...")
+                    break
+                else:
+                    curr_time = float(ops.getTime())
+                    n_steps_success += 1
+                    self._read_opensees_results(
+                        case_name,
+                        n_steps_success,
+                        nodes,
+                        line_elems,
+                        zerolength_elems,
+                    )
+                    self.results[case_name].subdivision_level.append(0)
+                    self.time_vector.append(curr_time + last_time)
+                    # determine if the struture has stopped moving
+                    vel = np.zeros(6)
+                    node_tags = ops.getNodeTags()
+                    num_nodes = len(node_tags)
+                    for ntag in node_tags:
+                        vel += [x/num_nodes for x in  ops.nodeVel(ntag)]
+                    vel_norm = np.sqrt(vel@vel)
+                    if vel_norm < 1e-12:
+                        if pbar is not None:
+                            print()
+                        break
+                    else:
+                        if pbar is not None:
+                            print(f'{vel_norm:5.3e} > 1e-12', end='\r')
+
+
         self.log("Analysis finished")
         metadata: dict[str, Union[int, str, float]] = {
             "successful steps": n_steps_success,
@@ -2120,8 +2214,12 @@ class THAnalysis(GravityPlusAnalysis):
     #             shutil.rmtree(path)
     #         # create the directory to save the state
     #         os.makedirs(path)
-    #         ops.database('File', '/tmp/')
+    #         ops.database('File', path)
     #         ops.save(0)
+    #         ops.wipe()
+    #         ops.database('File', path)
+    #         ops.restore(0)
+    #         breakpoint()
 
     def plot_node_displacement_history(
         self, case_name, node, direction, plotly=False
