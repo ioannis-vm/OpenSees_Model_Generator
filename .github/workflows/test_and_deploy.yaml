@@ -30,6 +30,9 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
     needs: test
     steps:
       - uses: actions/checkout@v3
@@ -62,6 +65,3 @@ jobs:
       - name: Deploy
         if: ${{ env.PYPI_VERSION != env.SETUPCFG_VERSION }}
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.PYPI_PASSWORD }}
