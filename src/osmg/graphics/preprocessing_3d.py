@@ -19,6 +19,7 @@ from typing import Union
 from typing import Any
 import sys
 import plotly.graph_objects as go  # type: ignore
+import plotly.io as pio
 import numpy as np
 import numpy.typing as npt
 from . import graphics_common, graphics_common_3d
@@ -1042,7 +1043,7 @@ def add_data__extruded_frames_mesh(
             "k": k_list,
             "hoverinfo": "skip",
             "color": graphics_common.BEAM_MESH_COLOR,
-            "opacity": 0.30,
+            "opacity": 0.70,
         }
     )
 
@@ -1148,7 +1149,8 @@ def show(
         diaphragm_lines: bool = True,
         tributary_area_boundaries: bool = True,
         camera: Optional[dict[str, object]] = None,
-        to_html_file: Optional[str] = None) -> None:
+        to_html_file: Optional[str] = None,
+        to_figure: Optional[str] = None) -> None:
     """
     Visualize the model
 
@@ -1170,7 +1172,8 @@ def show(
       camera: custom positioning of the camera
       to_html_file: If a path is specified, the figure is written in
         an html file instead of being shown.
-
+      to_figure: If a path is specified, the figure is
+        saved in the specified format.
     """
 
     layout = graphics_common_3d.global_layout(mdl, camera)
@@ -1222,5 +1225,7 @@ def show(
     if "pytest" not in sys.modules:
         if to_html_file:
             fig.write_html(to_html_file)
+        elif to_figure:
+            pio.write_image(fig, to_figure, width=2000, height=2000)
         else:
             fig.show()

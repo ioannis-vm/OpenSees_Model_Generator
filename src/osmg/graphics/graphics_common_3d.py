@@ -52,7 +52,7 @@ def global_layout(mdl, camera=None):
         camera = dict(
             up=dict(x=0, y=0, z=1),
             center=dict(x=0, y=0, z=0),
-            eye=dict(x=0.0, y=1.00, z=0.0),
+            eye=dict(x=0.7, y=1.00, z=0.30),
             projection={"type": view_type},
         )
     ref_len = np.linalg.norm(p_max - p_min)  # used in aspect ratio calcs
