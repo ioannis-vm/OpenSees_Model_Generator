@@ -671,7 +671,7 @@ def steel_brace_gusset(
         -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
-    analysis model for special concentrically braced frames, Journal
+    analytical model for special concentrically braced frames, Journal
     of Constructional Steel Research, Vol. 73, pp 80-94.
 
     Arguments:
