@@ -2306,13 +2306,13 @@
                     <span class="k">for</span> <span class="n">ntag</span> <span class="ow">in</span> <span class="n">node_tags</span><span class="p">:</span>
                         <span class="n">vel</span> <span class="o">+=</span> <span class="p">[</span><span class="n">x</span><span class="o">/</span><span class="n">num_nodes</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>  <span class="n">ops</span><span class="o">.</span><span class="n">nodeVel</span><span class="p">(</span><span class="n">ntag</span><span class="p">)]</span>
                     <span class="n">vel_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">vel</span><span class="nd">@vel</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">vel_norm</span> <span class="o">&lt;</span> <span class="mf">1e-12</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">vel_norm</span> <span class="o">&lt;</span> <span class="mf">1e-6</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">()</span>
                         <span class="k">break</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">vel_norm</span><span class="si">:</span><span class="s1">5.3e</span><span class="si">}</span><span class="s1"> &gt; 1e-12&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">vel_norm</span><span class="si">:</span><span class="s1">5.3e</span><span class="si">}</span><span class="s1"> &gt; 1.000e-06&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Analysis finished&quot;</span><span class="p">)</span>
