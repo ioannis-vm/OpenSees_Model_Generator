@@ -2186,13 +2186,13 @@ class THAnalysis(GravityPlusAnalysis):
                     for ntag in node_tags:
                         vel += [x/num_nodes for x in  ops.nodeVel(ntag)]
                     vel_norm = np.sqrt(vel@vel)
-                    if vel_norm < 1e-12:
+                    if vel_norm < 1e-6:
                         if pbar is not None:
                             print()
                         break
                     else:
                         if pbar is not None:
-                            print(f'{vel_norm:5.3e} > 1e-12', end='\r')
+                            print(f'{vel_norm:5.3e} > 1.000e-06', end='\r')
 
 
         self.log("Analysis finished")
