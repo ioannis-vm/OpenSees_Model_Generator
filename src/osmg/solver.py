@@ -441,6 +441,9 @@ class Analysis:
             sec = elm.section
             parts = sec.section_parts.values()
             if sec.uid not in defined_sections:
+                if ops.__name__ == 'openseespy.opensees':
+                    ops.section(*sec.ops_args())
+                    defined_sections[sec.uid] = sec
                 fibers = []
                 for part in parts:
                     mat = part.ops_material
@@ -459,9 +462,7 @@ class Analysis:
                                 [y_loc, z_loc, area, part.ops_material.uid]
                             )
 
-                if ops.__name__ == 'openseespy.opensees':
-                    ops.section(*sec.ops_args())
-                else:  # ops.__name__ == 'opensees.openseespy'
+                if ops.__name__ == 'opensees.openseespy':
                     fiber_commands = ';\n     '.join(
                         "fiber " + " ".join(map(str, fiber))
                         for fiber in fibers
@@ -474,8 +475,7 @@ class Analysis:
                     """
                     )
                     ops.eval(cmd)
-
-                defined_sections[sec.uid] = sec
+                    defined_sections[sec.uid] = sec
 
             ops.beamIntegration(*elm.integration.ops_args())
             ops.geomTransf(*elm.geomtransf.ops_args())
