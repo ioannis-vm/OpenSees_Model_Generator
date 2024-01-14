@@ -23,6 +23,7 @@ jobs:
           sudo apt-get install -y pandoc
           python -m pip install --upgrade pip
           python -m pip install -r requirements_dev.txt
+          python -m pip install openseespy
           python -m pip install -e .
       - name: Build docs
         run: cd docs && make html
