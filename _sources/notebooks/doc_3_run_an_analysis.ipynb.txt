@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "efbc3c5c",
+   "id": "79d45c40",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -25,7 +25,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "84271811",
+   "id": "d18da23b",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -39,7 +39,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8c1ae67c",
+   "id": "600788ab",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -157,7 +157,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "fb5a666a",
+   "id": "bf1a2d8e",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -166,7 +166,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "1a0a4d61",
+   "id": "ad060d60",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -177,7 +177,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "12ebccb3",
+   "id": "99b080ce",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -189,7 +189,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "b44ed410",
+   "id": "6bd5acf5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -202,7 +202,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "7c9d5f75",
+   "id": "613f82ef",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -213,7 +213,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "49cd962d",
+   "id": "28af82a7",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -227,7 +227,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "df390577",
+   "id": "e337a83a",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -239,7 +239,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "f6c49e5b",
+   "id": "3777c129",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -252,7 +252,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "1f69e1ac",
+   "id": "011eb9b0",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -269,7 +269,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "9362d718",
+   "id": "d2e55f8e",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -282,7 +282,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "7af7d3fe",
+   "id": "ee392553",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -297,7 +297,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "42d87c4e",
+   "id": "88cfc3d5",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -310,7 +310,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8046c469",
+   "id": "72815d6f",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -322,7 +322,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "e7a2e59d",
+   "id": "64b7f799",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -332,7 +332,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "0640db3f",
+   "id": "70802f00",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -344,7 +344,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "4cc4eb69",
+   "id": "065a450b",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -358,7 +358,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "112f59c0",
+   "id": "ad2a7984",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -369,7 +369,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "120341da",
+   "id": "16ac89a9",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -383,7 +383,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "db91d89f",
+   "id": "293f4526",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -397,7 +397,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "6395d063",
+   "id": "4a7f0b70",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -408,7 +408,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "250ef841",
+   "id": "820c8819",
    "metadata": {
     "cell_marker": "\"\"\"",
     "lines_to_next_cell": 2
@@ -420,7 +420,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "16fe51a2",
+   "id": "6844d745",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -433,7 +433,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "ac8f7404",
+   "id": "b18b080a",
    "metadata": {
     "cell_marker": "\"\"\""
    },
@@ -444,7 +444,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "c1eb794e",
+   "id": "f3157988",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -454,7 +454,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "d26de1c3",
+   "id": "e0c553df",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -466,7 +466,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "dcfb2014",
+   "id": "695985a2",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -480,14 +480,14 @@
     "    ag_x, ag_y, None,\n",
     "    0.005,\n",
     "    damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},\n",
-    "    print_progress=True\n",
+    "    print_progress=False\n",
     ")"
    ]
   },
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "8c91b19f",
+   "id": "75fd776e",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -499,7 +499,7 @@
   {
    "cell_type": "code",
    "execution_count": null,
-   "id": "35ceecb5",
+   "id": "b3d1ffae",
    "metadata": {
     "lines_to_next_cell": 2
    },
@@ -511,7 +511,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "6cdd1fe5",
+   "id": "2e6c33b6",
    "metadata": {
     "cell_marker": "\"\"\""
    },
