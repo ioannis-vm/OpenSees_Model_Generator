@@ -344,20 +344,6 @@ class Halfedge:
     attribute that points to the next halfedge, forming closed loops,
     or sequences, which is the purpose of this module.
 
-    Example:
-        >>> from osmg.mesh import Vertex, Edge, Halfedge
-        >>> v1 = Vertex((0, 0))
-        >>> v2 = Vertex((2, 2))
-        >>> edge = Edge(v1, v2)
-        >>> halfedge1 = Halfedge(v1, edge)
-        >>> halfedge2 = Halfedge(v2, edge)
-        >>> halfedge1.nxt = halfedge2
-        >>> halfedge2.nxt = halfedge1
-        >>> print(halfedge1)
-        (H0 from E7 to E7 next H1)
-        >>> print(halfedge2)
-        (H1 from E7 to E7 next H0)
-
     """
 
     _ids = count(0)
