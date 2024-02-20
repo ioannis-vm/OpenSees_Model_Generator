@@ -302,7 +302,7 @@ nlth_anl.run(
     ag_x, ag_y, None,
     0.005,
     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
-    print_progress=True
+    print_progress=False
 )
 
 
