@@ -199,21 +199,6 @@ to the other.  The <cite>vertex</cite> attribute corresponds to the edge’s
 vertex that the halfedge originates from.  Halfedges have a <cite>next</cite>
 attribute that points to the next halfedge, forming closed loops,
 or sequences, which is the purpose of this module.</p>
-<p class="rubric">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">osmg.mesh</span> <span class="kn">import</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">Edge</span><span class="p">,</span> <span class="n">Halfedge</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">v1</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">v2</span> <span class="o">=</span> <span class="n">Vertex</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="n">halfedge2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span><span class="o">.</span><span class="n">nxt</span> <span class="o">=</span> <span class="n">halfedge1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">halfedge1</span><span class="p">)</span>
-<span class="go">(H0 from E7 to E7 next H1)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">halfedge2</span><span class="p">)</span>
-<span class="go">(H1 from E7 to E7 next H0)</span>
-</pre></div>
-</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="osmg.mesh.Halfedge.direction">
 <span class="sig-name descname"><span class="pre">direction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/osmg/mesh.html#Halfedge.direction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#osmg.mesh.Halfedge.direction" title="Link to this definition">¶</a></dt>

@@ -394,20 +394,6 @@
 <span class="sd">    attribute that points to the next halfedge, forming closed loops,</span>
 <span class="sd">    or sequences, which is the purpose of this module.</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; from osmg.mesh import Vertex, Edge, Halfedge</span>
-<span class="sd">        &gt;&gt;&gt; v1 = Vertex((0, 0))</span>
-<span class="sd">        &gt;&gt;&gt; v2 = Vertex((2, 2))</span>
-<span class="sd">        &gt;&gt;&gt; edge = Edge(v1, v2)</span>
-<span class="sd">        &gt;&gt;&gt; halfedge1 = Halfedge(v1, edge)</span>
-<span class="sd">        &gt;&gt;&gt; halfedge2 = Halfedge(v2, edge)</span>
-<span class="sd">        &gt;&gt;&gt; halfedge1.nxt = halfedge2</span>
-<span class="sd">        &gt;&gt;&gt; halfedge2.nxt = halfedge1</span>
-<span class="sd">        &gt;&gt;&gt; print(halfedge1)</span>
-<span class="sd">        (H0 from E7 to E7 next H1)</span>
-<span class="sd">        &gt;&gt;&gt; print(halfedge2)</span>
-<span class="sd">        (H1 from E7 to E7 next H0)</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_ids</span> <span class="o">=</span> <span class="n">count</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
