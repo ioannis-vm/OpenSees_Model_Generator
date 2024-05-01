@@ -141,7 +141,8 @@ class Collection(dict[TK, TV]):
         if res is None:
             raise ValueError(
                 f'Item having the value "{val}" '
-                f'in the attribute "{attr}" not found in collection.')
+                f'in the attribute "{attr}" not found in collection.'
+            )
         return res
 
     def __srepr__(self):

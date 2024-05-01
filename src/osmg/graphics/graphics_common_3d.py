@@ -72,7 +72,7 @@ def global_layout(mdl, camera=None):
                 x=(p_max[0] - p_min[0]) / (ref_len / 4.0),
                 y=(p_max[1] - p_min[1]) / (ref_len / 4.0),
                 z=(p_max[2] - p_min[2]) / (ref_len / 4.0),
-            )
+            ),
             # note:
             # aspectmode='data': was causing issues with
             # the camera 'moving' across different animation frames

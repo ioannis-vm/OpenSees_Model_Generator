@@ -83,7 +83,8 @@ class LineElementUDL:
 
     parent_load_case: LoadCase
     parent_line_element: Union[
-        element.ElasticBeamColumn, element.DispBeamColumn]
+        element.ElasticBeamColumn, element.DispBeamColumn
+    ]
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
@@ -121,7 +122,8 @@ class LineElementUDL:
         # transformation.
         elm = self.parent_line_element
         assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        )
         if elm.geomtransf.transf_type == "Corotational":
             elm_len = elm.clear_length()
             force = udl * elm_len / 2.00
@@ -212,12 +214,11 @@ class LoadCase:
             self.node_mass[node.uid] = PointLoadMass()
         for elm in self.parent_model.list_of_elements():
             # only proceed for certain elements
-            if not isinstance(elm, (
-                    element.ElasticBeamColumn, element.DispBeamColumn)):
+            if not isinstance(
+                elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+            ):
                 continue
-            self.line_element_udl[elm.uid] = LineElementUDL(
-                self, elm
-            )
+            self.line_element_udl[elm.uid] = LineElementUDL(self, elm)
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():
             self.tributary_area_analysis[lvlkey] = TributaryAreaAnaysis(
@@ -225,8 +226,8 @@ class LoadCase:
             )
 
     def rigid_diaphragms(
-            self, level_uids: list[int],
-            gather_mass: bool = False) -> None:
+        self, level_uids: list[int], gather_mass: bool = False
+    ) -> None:
         """
         Processes the geometry of the given levels and applies rigid
         diaphragm constraints.

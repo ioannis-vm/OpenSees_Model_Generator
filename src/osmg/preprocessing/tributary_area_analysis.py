@@ -200,15 +200,19 @@ class TributaryAreaAnaysis:
             }
 
         for comp in horizontal_elements:
-
             line_elements = [
-                elm for elm in comp.elements.values()
+                elm
+                for elm in comp.elements.values()
                 if isinstance(
-                    elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink))]
+                    elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink)
+                )
+            ]
 
             zerolength_elements = [
-                elm for elm in comp.elements.values()
-                if isinstance(elm, ZeroLength)]
+                elm
+                for elm in comp.elements.values()
+                if isinstance(elm, ZeroLength)
+            ]
             for zelm in zerolength_elements:
                 zn_map[zelm.nodes[1].uid] = zelm.nodes[0].uid
 
@@ -316,7 +320,7 @@ class TributaryAreaAnaysis:
                 if index == len(all_edges_list):
                     # we are done.
                     continue
-                remaining_edges = all_edges_list[(index + 1)::]
+                remaining_edges = all_edges_list[(index + 1) : :]
                 for other_edge in remaining_edges:
                     # check if the two edges overlap or cross each other
                     if considered_edge.overlaps_or_crosses(other_edge):
@@ -517,9 +521,14 @@ class TributaryAreaAnaysis:
                     for node in loaded_elm.nodes:
                         lcase.node_loads[node.uid].add(
                             np.array(
-                                [0.00, 0.00,
-                                 -load_val * cmult / 2.00,
-                                 0.00, 0.00, 0.00]
+                                [
+                                    0.00,
+                                    0.00,
+                                    -load_val * cmult / 2.00,
+                                    0.00,
+                                    0.00,
+                                    0.00,
+                                ]
                             )
                         )
                         if not load.massless:

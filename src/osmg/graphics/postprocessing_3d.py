@@ -233,11 +233,15 @@ def add_data__extruded_line_elms_deformed_mesh(
         if isinstance(elm, element.TrussBar):
             offset_i = np.zeros(3)
             offset_j = np.zeros(3)
-            x_vec, y_vec, z_vec = (
-                transformations.local_axes_from_points_and_angle(
-                    np.array(elm.nodes[0].coords),
-                    np.array(elm.nodes[1].coords),
-                    0.00))
+            (
+                x_vec,
+                y_vec,
+                z_vec,
+            ) = transformations.local_axes_from_points_and_angle(
+                np.array(elm.nodes[0].coords),
+                np.array(elm.nodes[1].coords),
+                0.00,
+            )
             outside_shape = elm.outside_shape
         else:
             offset_i = elm.geomtransf.offset_i
@@ -249,18 +253,21 @@ def add_data__extruded_line_elms_deformed_mesh(
         u_i_o = transformations.offset_transformation(offset_i, u_i, r_i)
         u_j_o = transformations.offset_transformation(offset_j, u_j, r_j)
         if isinstance(elm, element.TrussBar):
-            d_global = np.column_stack((
-                np.linspace(u_i[0], u_j[0], num_points),
-                np.linspace(u_i[1], u_j[1], num_points),
-                np.linspace(u_i[2], u_j[2], num_points),
-            ))
+            d_global = np.column_stack(
+                (
+                    np.linspace(u_i[0], u_j[0], num_points),
+                    np.linspace(u_i[1], u_j[1], num_points),
+                    np.linspace(u_i[2], u_j[2], num_points),
+                )
+            )
             r_local = np.zeros((num_points, 3))
             interpolation_points = interp_3d_points(
                 elm, d_global, num_points, scaling
             )
         else:
             d_global, r_local = interp_3d_deformation(
-                elm, u_i_o, r_i, u_j_o, r_j, num_points)
+                elm, u_i_o, r_i, u_j_o, r_j, num_points
+            )
             interpolation_points = interp_3d_points(
                 elm, d_global, num_points, scaling
             )
@@ -326,20 +333,15 @@ def add_data__extruded_line_elms_deformed_mesh(
                 loc1 = loc_j_global + defo_ja_global
                 loc2 = loc_j_global + defo_jb_global
                 loc3 = loc_i_global + defo_ib_global
-                x_list.extend((
-                    loc0[0], loc1[0], loc2[0], loc3[0]))
-                y_list.extend((
-                    loc0[1], loc1[1], loc2[1], loc3[1]))
-                z_list.extend((
-                    loc0[2], loc1[2], loc2[2], loc3[2]))
-                i_list.extend((
-                    index + 0, index + 0))
-                j_list.extend((
-                    index + 1, index + 2))
-                k_list.extend((
-                    index + 2, index + 3))
+                x_list.extend((loc0[0], loc1[0], loc2[0], loc3[0]))
+                y_list.extend((loc0[1], loc1[1], loc2[1], loc3[1]))
+                z_list.extend((loc0[2], loc1[2], loc2[2], loc3[2]))
+                i_list.extend((index + 0, index + 0))
+                j_list.extend((index + 1, index + 2))
+                k_list.extend((index + 2, index + 3))
                 intensity.append(
-                    float(np.sqrt(d_global[i, :] @ d_global[i, :])))
+                    float(np.sqrt(d_global[i, :] @ d_global[i, :]))
+                )
                 intensity.append(
                     float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
@@ -347,7 +349,8 @@ def add_data__extruded_line_elms_deformed_mesh(
                     float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
                 intensity.append(
-                    float(np.sqrt(d_global[i, :] @ d_global[i, :])))
+                    float(np.sqrt(d_global[i, :] @ d_global[i, :]))
+                )
                 index += 4
     data_dict.append(
         {
@@ -409,11 +412,13 @@ def add_data__line_elms_deformed(
             )
         else:
             # for a truss member, just connect the two ends
-            d_global = np.column_stack((
-                np.linspace(u_i[0], u_j[0], num_points),
-                np.linspace(u_i[1], u_j[1], num_points),
-                np.linspace(u_i[2], u_j[2], num_points),
-            ))
+            d_global = np.column_stack(
+                (
+                    np.linspace(u_i[0], u_j[0], num_points),
+                    np.linspace(u_i[1], u_j[1], num_points),
+                    np.linspace(u_i[2], u_j[2], num_points),
+                )
+            )
         interpolation_points = interp_3d_points(
             elm, d_global, num_points, scaling
         )
@@ -539,7 +544,6 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
     z_list: list[Optional[float]] = []
 
     for elm in list_of_line_elems:
-
         if isinstance(elm, element.TrussBar):
             p_i = np.array(elm.nodes[0].coords)
             p_j = np.array(elm.nodes[1].coords)
@@ -612,14 +616,16 @@ def add_data__nodes_deformed(
             "y": location_data[:, 1] + displacement_data[:, 1] * scaling,
             "z": location_data[:, 2] + displacement_data[:, 2] * scaling,
             "customdata": displacement_data,
-            "hovertemplate": "ux: %{customdata[0]:.6g}<br>"
-            + "uy: %{customdata[1]:.6g}<br>"
-            + "uz: %{customdata[2]:.6g}<br>"
-            + "combined: %{customdata[6]:.6g}<br>"
-            + "rx: %{customdata[3]:.6g} (rad)<br>"
-            + "ry: %{customdata[4]:.6g} (rad)<br>"
-            + "rz: %{customdata[5]:.6g} (rad)<br>"
-            + "<extra>Node %{customdata[7]:d}</extra>",
+            "hovertemplate": (
+                "ux: %{customdata[0]:.6g}<br>"
+                + "uy: %{customdata[1]:.6g}<br>"
+                + "uz: %{customdata[2]:.6g}<br>"
+                + "combined: %{customdata[6]:.6g}<br>"
+                + "rx: %{customdata[3]:.6g} (rad)<br>"
+                + "ry: %{customdata[4]:.6g} (rad)<br>"
+                + "rz: %{customdata[5]:.6g} (rad)<br>"
+                + "<extra>Node %{customdata[7]:d}</extra>"
+            ),
             "marker": {
                 "symbol": marker,
                 "color": color,
@@ -641,13 +647,9 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
-    elms: list[
-        Union[element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
-    elms.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    elms.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+    elms: list[Union[element.ElasticBeamColumn, element.DispBeamColumn]] = []
+    elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(mdl.list_of_specific_element(element.DispBeamColumn))
 
     for elm in elms:
         u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
@@ -679,19 +681,18 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
 
 
 def show_deformed_shape(
-        analysis: Analysis,
-        case_name: str,
-        step: int,
-        scaling: float,
-        extrude: bool,
-        camera: Optional[dict[str, object]] = None,
-        subset_model: Model = None,
-        animation: bool = False,
-        init_step: int = 0,
-        step_skip: int = 0,
-        to_html_file: Optional[str] = None
+    analysis: Analysis,
+    case_name: str,
+    step: int,
+    scaling: float,
+    extrude: bool,
+    camera: Optional[dict[str, object]] = None,
+    subset_model: Model = None,
+    animation: bool = False,
+    init_step: int = 0,
+    step_skip: int = 0,
+    to_html_file: Optional[str] = None,
 ) -> dict[str, Any]:
-
     """
     Visualize the model in its deformed state
 
@@ -733,12 +734,13 @@ def show_deformed_shape(
 
     # gather lists of associated objects
     list_of_line_elems: list[element.Element] = []
+    list_of_line_elems.extend(mdl.list_of_specific_element(element.TrussBar))
     list_of_line_elems.extend(
-        mdl.list_of_specific_element(element.TrussBar))
+        mdl.list_of_specific_element(element.ElasticBeamColumn)
+    )
     list_of_line_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    list_of_line_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        mdl.list_of_specific_element(element.DispBeamColumn)
+    )
     list_of_primary_nodes = mdl.list_of_primary_nodes()
     list_of_internal_nodes = mdl.list_of_internal_nodes()
     # list_of_parent_nodes = mdl.list_of_parent_nodes()
@@ -800,7 +802,7 @@ def show_deformed_shape(
 
     if animation:
         step_of_frame = []
-        for j in range(first_step, step+1, step_skip + 1):
+        for j in range(first_step, step + 1, step_skip + 1):
             step_of_frame.append(j)
         for _, j in enumerate(step_of_frame):
             frame_data_dict.append([])
@@ -934,7 +936,7 @@ def show_basic_forces(
     global_axes=False,
     camera=None,
     subset_model=None,
-    to_html_file=None
+    to_html_file=None,
 ):
     """
     Visualize the model and plot the frame element basic forces.
@@ -972,20 +974,16 @@ def show_basic_forces(
         mdl = analysis.mdl
 
     elms: list[
-        Union[element.TrussBar,
-              element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
-    elms.extend(
-        mdl.list_of_specific_element(element.TrussBar))
-    elms.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    elms.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        Union[
+            element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn
+        ]
+    ] = []
+    elms.extend(mdl.list_of_specific_element(element.TrussBar))
+    elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(mdl.list_of_specific_element(element.DispBeamColumn))
 
     list_of_line_elements = [
-        elm
-        for elm in elms
-        if not elm.visibility.skip_opensees_definition
+        elm for elm in elms if not elm.visibility.skip_opensees_definition
     ]
 
     layout = graphics_common_3d.global_layout(mdl, camera)
@@ -1053,7 +1051,6 @@ def show_basic_forces(
     my_vecs = {}
 
     for elm in list_of_line_elements:
-
         if elm.visibility.hidden_basic_forces:
             continue
 
@@ -1115,7 +1112,6 @@ def show_basic_forces(
         scaling_m = 1.00
 
     for elm in list_of_line_elements:
-
         if elm.visibility.hidden_basic_forces:
             continue
 
@@ -1127,7 +1123,8 @@ def show_basic_forces(
         my_vec = my_vecs[elm.uid]
         mz_vec = mz_vecs[elm.uid]
         if isinstance(
-                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        ):
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
@@ -1138,15 +1135,18 @@ def show_basic_forces(
             p_i = np.array(elm.nodes[0].coords)
             p_j = np.array(elm.nodes[1].coords)
             i_pos = np.array(elm.nodes[0].coords)
-            x_vec, y_vec, z_vec = (
-                transformations.local_axes_from_points_and_angle(
-                    p_i, p_j, 0.00))
+            (
+                x_vec,
+                y_vec,
+                z_vec,
+            ) = transformations.local_axes_from_points_and_angle(
+                p_i, p_j, 0.00
+            )
 
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):
-
             p_start = i_pos + t_vec[i] * x_vec
             p_end = i_pos + t_vec[i + 1] * x_vec
 
@@ -1261,7 +1261,7 @@ def show_basic_forces(
             "z": z1_a,
             "visible": False,
             "customdata": customdata_a,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_a},
         }
     ]
@@ -1274,7 +1274,7 @@ def show_basic_forces(
             "z": z1_b,
             "visible": False,
             "customdata": customdata_b,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_b},
         }
     ]
@@ -1287,7 +1287,7 @@ def show_basic_forces(
             "z": z1_c,
             "visible": False,
             "customdata": customdata_c,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_c},
         }
     ]
@@ -1300,7 +1300,7 @@ def show_basic_forces(
             "z": z1_d,
             "visible": False,
             "customdata": customdata_d,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_d},
         }
     ]
@@ -1313,7 +1313,7 @@ def show_basic_forces(
             "z": z1_e,
             "visible": False,
             "customdata": customdata_e,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_e},
         }
     ]
@@ -1326,7 +1326,7 @@ def show_basic_forces(
             "z": z1_f,
             "visible": False,
             "customdata": customdata_f,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_f},
         }
     ]
@@ -1352,9 +1352,11 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [True]
-                                + [False] * 5
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [True]
+                                    + [False] * 5
+                                )
                             }
                         ],
                     ),
@@ -1363,10 +1365,12 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False]
-                                + [True]
-                                + [False] * 4
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False]
+                                    + [True]
+                                    + [False] * 4
+                                )
                             }
                         ],
                     ),
@@ -1375,10 +1379,12 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 2
-                                + [True]
-                                + [False] * 3
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 2
+                                    + [True]
+                                    + [False] * 3
+                                )
                             }
                         ],
                     ),
@@ -1387,10 +1393,12 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 3
-                                + [True]
-                                + [False] * 2
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 3
+                                    + [True]
+                                    + [False] * 2
+                                )
                             }
                         ],
                     ),
@@ -1399,10 +1407,12 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 4
-                                + [True]
-                                + [False]
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 4
+                                    + [True]
+                                    + [False]
+                                )
                             }
                         ],
                     ),
@@ -1411,9 +1421,11 @@ def show_basic_forces(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 5
-                                + [True]
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 5
+                                    + [True]
+                                )
                             }
                         ],
                     ),
@@ -1450,7 +1462,7 @@ def show_basic_forces_combo(
     global_axes=False,
     camera=None,
     subset_model=None,
-    to_html_file=None
+    to_html_file=None,
 ):
     """
     Visualize the model and plot the enveloped frame element basic forces
@@ -1489,19 +1501,15 @@ def show_basic_forces_combo(
     else:
         mdl = combo.mdl
     elms: list[
-        Union[element.TrussBar,
-              element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
-    elms.extend(
-        mdl.list_of_specific_element(element.TrussBar))
-    elms.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    elms.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        Union[
+            element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn
+        ]
+    ] = []
+    elms.extend(mdl.list_of_specific_element(element.TrussBar))
+    elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    elms.extend(mdl.list_of_specific_element(element.DispBeamColumn))
     list_of_line_elements = [
-        elm
-        for elm in elms
-        if not elm.visibility.skip_opensees_definition
+        elm for elm in elms if not elm.visibility.skip_opensees_definition
     ]
 
     layout = graphics_common_3d.global_layout(mdl, camera)
@@ -1563,7 +1571,6 @@ def show_basic_forces_combo(
     my_vecs_max = {}
 
     for elm in list_of_line_elements:
-
         if elm.visibility.hidden_basic_forces:
             continue
 
@@ -1651,7 +1658,6 @@ def show_basic_forces_combo(
         scaling_m = 1.00
 
     for elm in list_of_line_elements:
-
         if elm.visibility.hidden_basic_forces:
             continue
 
@@ -1671,7 +1677,8 @@ def show_basic_forces_combo(
         mz_vec_max = mz_vecs_max[elm.uid]
 
         if isinstance(
-                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        ):
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
@@ -1682,15 +1689,18 @@ def show_basic_forces_combo(
             p_i = np.array(elm.nodes[0].coords)
             p_j = np.array(elm.nodes[1].coords)
             i_pos = np.array(elm.nodes[0].coords)
-            x_vec, y_vec, z_vec = (
-                transformations.local_axes_from_points_and_angle(
-                    p_i, p_j, 0.00))
+            (
+                x_vec,
+                y_vec,
+                z_vec,
+            ) = transformations.local_axes_from_points_and_angle(
+                p_i, p_j, 0.00
+            )
 
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
 
         for i in range(num_points - 1):
-
             p_start = i_pos + t_vec[i] * x_vec
             p_end = i_pos + t_vec[i + 1] * x_vec
 
@@ -1822,7 +1832,7 @@ def show_basic_forces_combo(
             "z": z1_a,
             "visible": False,
             "customdata": customdata_a,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_a},
         }
     ]
@@ -1835,7 +1845,7 @@ def show_basic_forces_combo(
             "z": z1_b,
             "visible": False,
             "customdata": customdata_b,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_b},
         }
     ]
@@ -1848,7 +1858,7 @@ def show_basic_forces_combo(
             "z": z1_c,
             "visible": False,
             "customdata": customdata_c,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_c},
         }
     ]
@@ -1861,7 +1871,7 @@ def show_basic_forces_combo(
             "z": z1_d,
             "visible": False,
             "customdata": customdata_d,
-            "hovertemplate": " %{customdata:.0f}<br>" "<extra></extra>",
+            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
             "line": {"width": 3, "color": colors1_d},
         }
     ]
@@ -1887,9 +1897,11 @@ def show_basic_forces_combo(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [True]
-                                + [False] * 3
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [True]
+                                    + [False] * 3
+                                )
                             }
                         ],
                     ),
@@ -1898,10 +1910,12 @@ def show_basic_forces_combo(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False]
-                                + [True]
-                                + [False] * 2
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False]
+                                    + [True]
+                                    + [False] * 2
+                                )
                             }
                         ],
                     ),
@@ -1910,10 +1924,12 @@ def show_basic_forces_combo(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 2
-                                + [True]
-                                + [False]
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 2
+                                    + [True]
+                                    + [False]
+                                )
                             }
                         ],
                     ),
@@ -1922,9 +1938,11 @@ def show_basic_forces_combo(
                         method="update",
                         args=[
                             {
-                                "visible": [True] * len(data_dict)
-                                + [False] * 3
-                                + [True]
+                                "visible": (
+                                    [True] * len(data_dict)
+                                    + [False] * 3
+                                    + [True]
+                                )
                             }
                         ],
                     ),

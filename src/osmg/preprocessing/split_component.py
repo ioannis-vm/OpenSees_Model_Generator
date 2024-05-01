@@ -31,8 +31,8 @@ nparr = npt.NDArray[np.float64]
 
 
 def split_component(
-        component: ComponentAssembly, point: nparr) \
-        -> tuple[Node, nparr]:
+    component: ComponentAssembly, point: nparr
+) -> tuple[Node, nparr]:
     """
     Splits a beam-functioning component assembly to accomodate for a
     node required to connect another component assembly.
@@ -49,8 +49,12 @@ def split_component(
 
     elms = []
     elms.extend(
-        [elm for elm in component.elements.values()
-         if isinstance(elm, (ElasticBeamColumn, DispBeamColumn))])
+        [
+            elm
+            for elm in component.elements.values()
+            if isinstance(elm, (ElasticBeamColumn, DispBeamColumn))
+        ]
+    )
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -132,8 +136,7 @@ def split_component(
         assert isinstance(closest_elm.integration, Lobatto)
         beam_integration = Lobatto(
             uid=(
-                component.parent_collection
-                .parent.parent_model.uid_generator.new(
+                component.parent_collection.parent.parent_model.uid_generator.new(
                     "beam integration"
                 )
             ),
@@ -144,8 +147,7 @@ def split_component(
         elm_i = DispBeamColumn(  # type: ignore
             component,
             (
-                component.parent_collection.parent
-                .parent_model.uid_generator.new(
+                component.parent_collection.parent.parent_model.uid_generator.new(
                     "element"
                 )
             ),
@@ -163,8 +165,7 @@ def split_component(
     transf_j = GeomTransf(
         prev_gtransf.transf_type,
         (
-            component.parent_collection
-            .parent.parent_model.uid_generator.new(
+            component.parent_collection.parent.parent_model.uid_generator.new(
                 "transformation"
             )
         ),
@@ -179,8 +180,7 @@ def split_component(
         elm_j = ElasticBeamColumn(
             component,
             (
-                component.parent_collection
-                .parent.parent_model.uid_generator.new(
+                component.parent_collection.parent.parent_model.uid_generator.new(
                     "element"
                 )
             ),
@@ -193,8 +193,7 @@ def split_component(
         assert isinstance(closest_elm.integration, Lobatto)
         beam_integration = Lobatto(
             uid=(
-                component.parent_collection
-                .parent.parent_model.uid_generator.new(
+                component.parent_collection.parent.parent_model.uid_generator.new(
                     "beam integration"
                 )
             ),
@@ -205,8 +204,7 @@ def split_component(
         elm_j = DispBeamColumn(  # type: ignore
             component,
             (
-                component.parent_collection
-                .parent.parent_model.uid_generator.new(
+                component.parent_collection.parent.parent_model.uid_generator.new(
                     "element"
                 )
             ),

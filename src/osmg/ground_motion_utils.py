@@ -37,14 +37,10 @@ def import_PEER(filename):
             elif i == 3:
                 # Number of points
                 npts = int(
-                    re.sub(
-                        r'NPTS=\s+', '', line.split(sep=', ')[0]
-                    )
+                    re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0])
                 )  # noqa: W605
                 # Time step
-                tmp = re.sub(
-                    r'DT=\s+', '', line.split(sep=', ')[1]
-                )
+                tmp = re.sub(r'DT=\s+', '', line.split(sep=', ')[1])
                 tmp = re.sub(r'\s* SEC', '', tmp)
                 tmp = tmp.replace('SEC', '')  # some files have no space
                 d_t = float(tmp)

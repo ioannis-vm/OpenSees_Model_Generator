@@ -84,18 +84,19 @@ def add_data__nodes(data_dict, mdl, load_case):
                 "z": z_list,
                 "customdata": customdata,
                 "text": restraints,
-                "hovertemplate": "Coordinates: "
-                "(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                + "Restraint: %{text}<br>"
-                + "Mass: (%{customdata[1]:.3g}, "
-                + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
-                + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
-                + "%{customdata[6]:.3g})<br>"
-                + "Load: (%{customdata[7]:.3g}, "
-                + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
-                + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
-                + "%{customdata[12]:.3g})"
-                + "<extra>Node: %{customdata[0]:d}</extra>",
+                "hovertemplate": (
+                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
+                    + "Restraint: %{text}<br>"
+                    + "Mass: (%{customdata[1]:.3g}, "
+                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
+                    + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
+                    + "%{customdata[6]:.3g})<br>"
+                    + "Load: (%{customdata[7]:.3g}, "
+                    + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
+                    + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
+                    + "%{customdata[12]:.3g})"
+                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                ),
                 "marker": {
                     "symbol": [
                         graphics_common_3d.node_marker[sym][0]
@@ -124,10 +125,11 @@ def add_data__nodes(data_dict, mdl, load_case):
                 "z": z_list,
                 "customdata": customdata,
                 "text": restraints,
-                "hovertemplate": "Coordinates: "
-                "(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                + "Restraint: %{text}<br>"
-                + "<extra>Node: %{customdata[0]:d}</extra>",
+                "hovertemplate": (
+                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
+                    + "Restraint: %{text}<br>"
+                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                ),
                 "marker": {
                     "symbol": [
                         graphics_common_3d.node_marker[sym][0]
@@ -148,8 +150,8 @@ def add_data__nodes(data_dict, mdl, load_case):
 
 
 def add_data__parent_nodes(
-        data_dict: list[dict[str, object]],
-        load_case: LoadCase) -> None:
+    data_dict: list[dict[str, object]], load_case: LoadCase
+) -> None:
     """
     Adds a trace containing parent nodes
 
@@ -186,25 +188,25 @@ def add_data__parent_nodes(
             "z": z_list,
             "customdata": customdata,
             "text": restraints,
-            "hovertemplate": "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-            + "Restraint: %{text}<br>"
-            + "Mass: (%{customdata[1]:.3g}, "
-            + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
-            + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
-            + "%{customdata[6]:.3g})<br>"
-            + "Load: (%{customdata[7]:.3g}, "
-            + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
-            + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
-            + "%{customdata[12]:.3g})"
-            + "<extra>Parent Node: %{customdata[0]:d}</extra>",
+            "hovertemplate": (
+                "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
+                + "Restraint: %{text}<br>"
+                + "Mass: (%{customdata[1]:.3g}, "
+                + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
+                + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
+                + "%{customdata[6]:.3g})<br>"
+                + "Load: (%{customdata[7]:.3g}, "
+                + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
+                + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
+                + "%{customdata[12]:.3g})"
+                + "<extra>Parent Node: %{customdata[0]:d}</extra>"
+            ),
             "marker": {
-                "symbol": [
-                    graphics_common_3d.node_marker[
-                        "parent"][0]]*len(list_of_nodes),
+                "symbol": [graphics_common_3d.node_marker["parent"][0]]
+                * len(list_of_nodes),
                 "color": graphics_common.NODE_PRIMARY_COLOR,
-                "size": [
-                    graphics_common_3d.node_marker[
-                        "parent"][1]]*len(list_of_nodes),
+                "size": [graphics_common_3d.node_marker["parent"][1]]
+                * len(list_of_nodes),
                 "line": {
                     "color": graphics_common.NODE_PRIMARY_COLOR,
                     "width": 4,
@@ -215,8 +217,10 @@ def add_data__parent_nodes(
 
 
 def add_data__internal_nodes(
-        data_dict: list[dict[str, object]],
-        mdl: Model, load_case: Optional[LoadCase] = None) -> None:
+    data_dict: list[dict[str, object]],
+    mdl: Model,
+    load_case: Optional[LoadCase] = None,
+) -> None:
     """
     Adds a trace containing internal nodes
 
@@ -264,14 +268,15 @@ def add_data__internal_nodes(
                 "z": z_list,
                 "customdata": customdata,
                 "text": restraints,
-                "hovertemplate": "Coordinates: "
-                "(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                + "Restraint: %{text}<br>"
-                + "Mass: (%{customdata[1]:.3g}, "
-                + "%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>"
-                + "Load: (%{customdata[4]:.3g}, "
-                + "%{customdata[5]:.3g}, %{customdata[6]:.3g})"
-                + "<extra>Node: %{customdata[0]:d}</extra>",
+                "hovertemplate": (
+                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
+                    + "Restraint: %{text}<br>"
+                    + "Mass: (%{customdata[1]:.3g}, "
+                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>"
+                    + "Load: (%{customdata[4]:.3g}, "
+                    + "%{customdata[5]:.3g}, %{customdata[6]:.3g})"
+                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                ),
                 "marker": {
                     "symbol": [
                         graphics_common_3d.node_marker[sym][0]
@@ -300,10 +305,11 @@ def add_data__internal_nodes(
                 "z": z_list,
                 "customdata": customdata,
                 "text": restraints,
-                "hovertemplate": "Coordinates: "
-                "(%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                + "Restraint: %{text}<br>"
-                + "<extra>Node: %{customdata[0]:d}</extra>",
+                "hovertemplate": (
+                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
+                    + "Restraint: %{text}<br>"
+                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                ),
                 "marker": {
                     "symbol": [
                         graphics_common_3d.node_marker[sym][0]
@@ -324,8 +330,8 @@ def add_data__internal_nodes(
 
 
 def add_data__release_nodes(
-        data_dict: list[dict[str, object]],
-        list_of_nodes: list[node_module.Node]) -> None:
+    data_dict: list[dict[str, object]], list_of_nodes: list[node_module.Node]
+) -> None:
     """
     Adds a trace containing release nodes
 
@@ -363,9 +369,10 @@ def add_data__release_nodes(
 
 
 def add_data__frames(
-        data_dict: list[dict[str, object]],
-        mdl: Model,
-        load_case: Optional[LoadCase] = None) -> None:
+    data_dict: list[dict[str, object]],
+    mdl: Model,
+    load_case: Optional[LoadCase] = None,
+) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
 
@@ -378,18 +385,21 @@ def add_data__frames(
     """
 
     line_elems: list[
-        Union[element.ElasticBeamColumn,
-              element.DispBeamColumn]] = []
+        Union[element.ElasticBeamColumn, element.DispBeamColumn]
+    ] = []
 
     # >>>
     # it feels ridiculous to do this, but it's the only way I am
     # getting rid of type checking warnings.
     elms_elastic = [
-        elm for elm in mdl.list_of_specific_element(element.ElasticBeamColumn)
-        if isinstance(elm, element.ElasticBeamColumn)]
+        elm
+        for elm in mdl.list_of_specific_element(element.ElasticBeamColumn)
+        if isinstance(elm, element.ElasticBeamColumn)
+    ]
     line_elems.extend(elms_elastic)
     elms_disp = [
-        elm for elm in mdl.list_of_specific_element(element.DispBeamColumn)
+        elm
+        for elm in mdl.list_of_specific_element(element.DispBeamColumn)
         if isinstance(elm, element.DispBeamColumn)
     ]
     line_elems.extend(elms_disp)
@@ -452,12 +462,14 @@ def add_data__frames(
                 "z": z_list,
                 "text": section_names,
                 "customdata": customdata,
-                "hovertemplate": "Section: %{text}<br>"
-                + "UDL (local): (%{customdata[1]:.3g}, "
-                + "%{customdata[2]:.3g}, %{customdata[3]:.3g})"
-                + "<extra>Element: %{customdata[0]:d}<br>"
-                + "Node @ this end: %{customdata[4]:d}<br>"
-                "Parent: %{customdata[5]}</extra>",
+                "hovertemplate": (
+                    "Section: %{text}<br>"
+                    + "UDL (local): (%{customdata[1]:.3g}, "
+                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g})"
+                    + "<extra>Element: %{customdata[0]:d}<br>"
+                    + "Node @ this end: %{customdata[4]:d}<br>"
+                    "Parent: %{customdata[5]}</extra>"
+                ),
                 "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
             }
         )
@@ -473,19 +485,22 @@ def add_data__frames(
                 "z": z_list,
                 "text": section_names,
                 "customdata": customdata,
-                "hovertemplate": "Section: %{text}<br>"
-                + "<extra>Element: %{customdata[0]:d}<br>"
-                + "Node @ this end: %{customdata[1]:d}<br>"
-                "Parent: %{customdata[2]}</extra>",
+                "hovertemplate": (
+                    "Section: %{text}<br>"
+                    + "<extra>Element: %{customdata[0]:d}<br>"
+                    + "Node @ this end: %{customdata[1]:d}<br>"
+                    "Parent: %{customdata[2]}</extra>"
+                ),
                 "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
             }
         )
 
 
 def add_data__bars(
-        data_dict: list[dict[str, object]],
-        mdl: Model,
-        load_case: Optional[LoadCase] = None) -> None:
+    data_dict: list[dict[str, object]],
+    mdl: Model,
+    load_case: Optional[LoadCase] = None,
+) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
 
@@ -496,8 +511,11 @@ def add_data__bars(
 
     """
 
-    line_elems = [elm for elm in mdl.list_of_specific_element(element.TrussBar)
-                  if isinstance(elm, element.TrussBar)]
+    line_elems = [
+        elm
+        for elm in mdl.list_of_specific_element(element.TrussBar)
+        if isinstance(elm, element.TrussBar)
+    ]
     if not line_elems:
         return
     x_list: list[Optional[float]] = []
@@ -553,10 +571,12 @@ def add_data__bars(
                 "z": z_list,
                 "text": section_areas,
                 "customdata": customdata,
-                "hovertemplate": "Section area: %{text}<br>"
-                + "<extra>Element: %{customdata[0]:d}<br>"
-                + "Node @ this end: %{customdata[1]:d}<br>"
-                "Parent: %{customdata[2]}</extra>",
+                "hovertemplate": (
+                    "Section area: %{text}<br>"
+                    + "<extra>Element: %{customdata[0]:d}<br>"
+                    + "Node @ this end: %{customdata[1]:d}<br>"
+                    "Parent: %{customdata[2]}</extra>"
+                ),
                 "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
             }
         )
@@ -572,18 +592,20 @@ def add_data__bars(
                 "z": z_list,
                 "text": section_areas,
                 "customdata": customdata,
-                "hovertemplate": "Section area: %{text}<br>"
-                + "<extra>Element: %{customdata[0]:d}<br>"
-                + "Node @ this end: %{customdata[1]:d}<br>"
-                "Parent: %{customdata[2]}</extra>",
+                "hovertemplate": (
+                    "Section area: %{text}<br>"
+                    + "<extra>Element: %{customdata[0]:d}<br>"
+                    + "Node @ this end: %{customdata[1]:d}<br>"
+                    "Parent: %{customdata[2]}</extra>"
+                ),
                 "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
             }
         )
 
 
 def add_data__twonodelinks(
-        data_dict: list[dict[str, object]],
-        mdl: Model) -> None:
+    data_dict: list[dict[str, object]], mdl: Model
+) -> None:
     """
     Adds a trace containing twonodelink elements
 
@@ -596,7 +618,8 @@ def add_data__twonodelinks(
     link_elems = [
         elm
         for elm in mdl.list_of_elements()
-        if isinstance(elm, element.TwoNodeLink)]
+        if isinstance(elm, element.TwoNodeLink)
+    ]
 
     if not link_elems:
         return
@@ -629,18 +652,20 @@ def add_data__twonodelinks(
             "z": z_list,
             # "text": section_names,
             "customdata": customdata,
-            "hovertemplate": "Section: %{text}<br>"
-            + "<extra>Element: %{customdata[0]:d}<br>"
-            + "Node @ this end: %{customdata[1]:d}<br>"
-            "Parent: %{customdata[2]}</extra>",
+            "hovertemplate": (
+                "Section: %{text}<br>"
+                + "<extra>Element: %{customdata[0]:d}<br>"
+                + "Node @ this end: %{customdata[1]:d}<br>"
+                "Parent: %{customdata[2]}</extra>"
+            ),
             "line": {"width": 5, "color": graphics_common.LINK_COLOR},
         }
     )
 
 
 def add_data__frame_offsets(
-        data_dict: list[dict[str, object]],
-        mdl: Model) -> None:
+    data_dict: list[dict[str, object]], mdl: Model
+) -> None:
     """
     Adds a trace containing frame element rigid offset lines
 
@@ -650,12 +675,13 @@ def add_data__frame_offsets(
 
     """
 
-    beamcolumn_elems: list[
-        element.Element] = []
+    beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
+        mdl.list_of_specific_element(element.ElasticBeamColumn)
+    )
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        mdl.list_of_specific_element(element.DispBeamColumn)
+    )
 
     if not beamcolumn_elems:
         return
@@ -666,7 +692,8 @@ def add_data__frame_offsets(
 
     for elm in beamcolumn_elems:
         assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        )
         p_i: nparr = np.array(elm.nodes[0].coords)
         p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j: nparr = np.array(elm.nodes[1].coords)
@@ -694,9 +721,8 @@ def add_data__frame_offsets(
 
 
 def add_data__frame_axes(
-        data_dict: list[dict[str, object]],
-        mdl: Model,
-        ref_len: float) -> None:
+    data_dict: list[dict[str, object]], mdl: Model, ref_len: float
+) -> None:
     """
     Adds a trace containing frame element local axis lines
 
@@ -708,12 +734,13 @@ def add_data__frame_axes(
     """
 
     beamcolumn_elems: list[element.Element] = []
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.TrussBar))
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.TrussBar))
+        mdl.list_of_specific_element(element.ElasticBeamColumn)
+    )
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        mdl.list_of_specific_element(element.DispBeamColumn)
+    )
     if not beamcolumn_elems:
         return
     scaling = ref_len * 0.025
@@ -723,7 +750,8 @@ def add_data__frame_axes(
     colors: list[Optional[str]] = []
     for elm in beamcolumn_elems:
         assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        )
         if elm.visibility.hidden_at_line_plots:
             continue
         x_vec = elm.geomtransf.x_axis
@@ -759,8 +787,8 @@ def add_data__frame_axes(
 
 
 def add_data__zerolength_axes(
-        data_dict: list[dict[str, object]],
-        mdl: Model, ref_len: float) -> None:
+    data_dict: list[dict[str, object]], mdl: Model, ref_len: float
+) -> None:
     """
     Adds a trace containing zerolength element local axis lines
 
@@ -773,7 +801,8 @@ def add_data__zerolength_axes(
 
     zerolength_elements: list[element.Element] = []
     zerolength_elements.extend(
-        mdl.list_of_specific_element(element.ZeroLength))
+        mdl.list_of_specific_element(element.ZeroLength)
+    )
     if not zerolength_elements:
         return
     scaling = ref_len * 0.025
@@ -814,8 +843,8 @@ def add_data__zerolength_axes(
 
 
 def add_data__global_axes(
-        data_dict: list[dict[str, object]],
-        ref_len: float) -> None:
+    data_dict: list[dict[str, object]], ref_len: float
+) -> None:
     """
     Adds a trace containing global axes
 
@@ -865,8 +894,8 @@ def add_data__global_axes(
 
 
 def add_data__diaphragm_lines(
-        data_dict: list[dict[str, object]],
-        loadcase: LoadCase) -> None:
+    data_dict: list[dict[str, object]], loadcase: LoadCase
+) -> None:
     """
     Adds a trace containing lines indicating rigid diaphragm
     constraints.
@@ -891,7 +920,6 @@ def add_data__diaphragm_lines(
     # for each level that has a parent node, draw the lines
     mdl = loadcase.parent_model
     for lvl_uid, pnode in pnodes.items():
-
         level = mdl.levels[lvl_uid]
         level_primary_nodes = level.nodes.values()
         for node in level_primary_nodes:
@@ -915,8 +943,8 @@ def add_data__diaphragm_lines(
 
 
 def add_data__tributary_area_boundaries(
-        data_dict: list[dict[str, object]],
-        loadcase: LoadCase) -> None:
+    data_dict: list[dict[str, object]], loadcase: LoadCase
+) -> None:
     """
     Adds a trace containing lines indicating tributary area boundaries
     that are used for load distribution.
@@ -934,7 +962,6 @@ def add_data__tributary_area_boundaries(
     z_list: list[Optional[float]] = []
 
     for analysis in trib_area_analysis_collection.values():
-
         level = analysis.parent_level
         data = analysis.data
         edge_polygons = data.edge_polygons
@@ -947,7 +974,7 @@ def add_data__tributary_area_boundaries(
                 y_vals.append(y_vals[0])
                 x_list.extend((*x_vals, None))
                 y_list.extend((*y_vals, None))
-                z_list.extend((*[level.elevation]*len(x_vals), None))
+                z_list.extend((*[level.elevation] * len(x_vals), None))
 
     data_dict.append(
         {
@@ -964,7 +991,8 @@ def add_data__tributary_area_boundaries(
 
 
 def add_data__extruded_frames_mesh(
-        data_dict: list[dict[str, object]], mdl: Model) -> None:
+    data_dict: list[dict[str, object]], mdl: Model
+) -> None:
     """
     Adds a trace containing frame element extrusion mesh
 
@@ -976,9 +1004,11 @@ def add_data__extruded_frames_mesh(
 
     beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn))
+        mdl.list_of_specific_element(element.ElasticBeamColumn)
+    )
     beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn))
+        mdl.list_of_specific_element(element.DispBeamColumn)
+    )
     if not beamcolumn_elems:
         return
     x_list: list[Optional[float]] = []
@@ -990,7 +1020,8 @@ def add_data__extruded_frames_mesh(
     index = 0
     for elm in beamcolumn_elems:
         assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn))
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        )
         if elm.visibility.hidden_when_extruded:
             continue
         side_a = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -1006,31 +1037,29 @@ def add_data__extruded_frames_mesh(
             loc0 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec
-                + side_a)
+                + side_a
+            )
             loc1 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec
-                + side_b)
+                + side_b
+            )
             loc2 = (
                 halfedge.nxt.vertex.coords[0] * z_vec
                 + halfedge.nxt.vertex.coords[1] * y_vec
-                + side_b)
+                + side_b
+            )
             loc3 = (
                 halfedge.nxt.vertex.coords[0] * z_vec
                 + halfedge.nxt.vertex.coords[1] * y_vec
-                + side_a)
-            x_list.extend((
-                loc0[0], loc1[0], loc2[0], loc3[0]))
-            y_list.extend((
-                loc0[1], loc1[1], loc2[1], loc3[1]))
-            z_list.extend((
-                loc0[2], loc1[2], loc2[2], loc3[2]))
-            i_list.extend((
-                index + 0, index + 0))
-            j_list.extend((
-                index + 1, index + 2))
-            k_list.extend((
-                index + 2, index + 3))
+                + side_a
+            )
+            x_list.extend((loc0[0], loc1[0], loc2[0], loc3[0]))
+            y_list.extend((loc0[1], loc1[1], loc2[1], loc3[1]))
+            z_list.extend((loc0[2], loc1[2], loc2[2], loc3[2]))
+            i_list.extend((index + 0, index + 0))
+            j_list.extend((index + 1, index + 2))
+            k_list.extend((index + 2, index + 3))
             index += 4
     data_dict.append(
         {
@@ -1049,7 +1078,8 @@ def add_data__extruded_frames_mesh(
 
 
 def add_data__extruded_bars_mesh(
-        data_dict: list[dict[str, object]], mdl: Model) -> None:
+    data_dict: list[dict[str, object]], mdl: Model
+) -> None:
     """
     Adds a trace containing frame element extrusion mesh
 
@@ -1070,7 +1100,6 @@ def add_data__extruded_bars_mesh(
     k_list: list[Optional[int]] = []
     index = 0
     for elm in line_elems:
-
         assert isinstance(elm, element.TrussBar)
         if elm.visibility.hidden_when_extruded:
             continue
@@ -1095,31 +1124,29 @@ def add_data__extruded_bars_mesh(
             loc0 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec
-                + side_a)
+                + side_a
+            )
             loc1 = (
                 halfedge.vertex.coords[0] * z_vec
                 + halfedge.vertex.coords[1] * y_vec
-                + side_b)
+                + side_b
+            )
             loc2 = (
                 halfedge.nxt.vertex.coords[0] * z_vec
                 + halfedge.nxt.vertex.coords[1] * y_vec
-                + side_b)
+                + side_b
+            )
             loc3 = (
                 halfedge.nxt.vertex.coords[0] * z_vec
                 + halfedge.nxt.vertex.coords[1] * y_vec
-                + side_a)
-            x_list.extend((
-                loc0[0], loc1[0], loc2[0], loc3[0]))
-            y_list.extend((
-                loc0[1], loc1[1], loc2[1], loc3[1]))
-            z_list.extend((
-                loc0[2], loc1[2], loc2[2], loc3[2]))
-            i_list.extend((
-                index + 0, index + 0))
-            j_list.extend((
-                index + 1, index + 2))
-            k_list.extend((
-                index + 2, index + 3))
+                + side_a
+            )
+            x_list.extend((loc0[0], loc1[0], loc2[0], loc3[0]))
+            y_list.extend((loc0[1], loc1[1], loc2[1], loc3[1]))
+            z_list.extend((loc0[2], loc1[2], loc2[2], loc3[2]))
+            i_list.extend((index + 0, index + 0))
+            j_list.extend((index + 1, index + 2))
+            k_list.extend((index + 2, index + 3))
             index += 4
     data_dict.append(
         {
@@ -1138,19 +1165,20 @@ def add_data__extruded_bars_mesh(
 
 
 def show(
-        mdl: Model,
-        load_case: Optional[LoadCase] = None,
-        extrude: bool = False,
-        offsets: bool = True,
-        global_axes: bool = True,
-        parent_nodes: bool = True,
-        frame_axes: bool = False,
-        zerolength_axes: bool = False,
-        diaphragm_lines: bool = True,
-        tributary_area_boundaries: bool = True,
-        camera: Optional[dict[str, object]] = None,
-        to_html_file: Optional[str] = None,
-        to_figure: Optional[str] = None) -> None:
+    mdl: Model,
+    load_case: Optional[LoadCase] = None,
+    extrude: bool = False,
+    offsets: bool = True,
+    global_axes: bool = True,
+    parent_nodes: bool = True,
+    frame_axes: bool = False,
+    zerolength_axes: bool = False,
+    diaphragm_lines: bool = True,
+    tributary_area_boundaries: bool = True,
+    camera: Optional[dict[str, object]] = None,
+    to_html_file: Optional[str] = None,
+    to_figure: Optional[str] = None,
+) -> None:
     """
     Visualize the model
 

@@ -450,10 +450,7 @@ class Analysis:
                         area = piece.area
                         z_loc = piece.centroid.x
                         y_loc = piece.centroid.y
-                        ops.fiber(
-                            y_loc, z_loc, area, part.ops_material.uid
-                        )
-
+                        ops.fiber(y_loc, z_loc, area, part.ops_material.uid)
 
             ops.beamIntegration(*elm.integration.ops_args())
             ops.geomTransf(*elm.geomtransf.ops_args())
@@ -932,7 +929,8 @@ class ModalAnalysis(Analysis):
                     # have been applied.
                     if np.linalg.norm(udl) > common.EPSILON:
                         self.warning.issue(
-                            "Loads were present in a modal load case. Ignoring them."
+                            "Loads were present in a modal load case. Ignoring"
+                            " them."
                         )
                         udl = np.zeros(3)
 
@@ -1982,13 +1980,13 @@ class THAnalysis(GravityPlusAnalysis):
             num_modes = damping["num_modes"]
             # num_modes = num_modeshapes
             damping_ratio = damping["ratio"]
-            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
+            self.log(f"Running eigenvalue analysis with {num_modes} modes")
             ops.eigen(num_modes)
             # ops.systemSize()
             self.log("Eigenvalue analysis finished")
             assert isinstance(damping_ratio, float)
             ops.modalDampingQ(damping_ratio)
-            self.log(f"{damping_ratio*100.00:.2f}% " "modal damping defined")
+            self.log(f"{damping_ratio*100.00:.2f}% modal damping defined")
 
         if damping_type == "modal+stiffness":
             self.log("Using modal+stiffness damping")
@@ -2011,7 +2009,7 @@ class THAnalysis(GravityPlusAnalysis):
             assert isinstance(num_modes, int)
             damping_ratio = damping["ratio_modal"]
             assert isinstance(damping_ratio, float)
-            self.log("Running eigenvalue analysis" f" with {num_modes} modes")
+            self.log(f"Running eigenvalue analysis with {num_modes} modes")
             omega_squareds = np.array(ops.eigen(num_modes))
             self.log("Eigenvalue analysis finished")
             damping_vals = (
@@ -2051,7 +2049,6 @@ class THAnalysis(GravityPlusAnalysis):
             1.0e-11,
             1e-12,
         )
-        tols = [1.0e-8] * len(scale)
         algorithms = (
             ("KrylovNewton",),
             ("KrylovNewton", "initial", "initial"),
@@ -2127,7 +2124,9 @@ class THAnalysis(GravityPlusAnalysis):
                     if pbar is not None:
                         pbar.set_postfix(
                             {
-                                'time': f'{curr_time:.4f}/{target_timestamp:.2f} [{testiter}]'
+                                'time': (
+                                    f'{curr_time:.4f}/{target_timestamp:.2f} [{testiter}]'
+                                )
                             }
                         )
                         pbar.update(curr_time - prev_time)

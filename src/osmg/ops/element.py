@@ -25,6 +25,7 @@ from .section import ElasticSection
 from .section import FiberSection
 from ..mesh import Mesh
 from ..graphics.visibility import ElementVisibility
+
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
 
@@ -173,10 +174,7 @@ class TrussBar(Element):
 
         """
 
-        elm_name = {
-            'Linear': 'Truss',
-            'Corotational': 'corotTruss'
-        }
+        elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
 
         return [
             elm_name[self.transf_type],
@@ -190,7 +188,7 @@ class TrussBar(Element):
             '-cMass',
             self.cflag,
             '-doRayleigh',
-            self.rflag
+            self.rflag,
         ]
 
     def clear_length(self):
@@ -205,10 +203,7 @@ class TrussBar(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
-        elm_name = {
-            'Linear': 'Truss',
-            'Corotational': 'corotTruss'
-        }
+        elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
         res = ""
         res += f"{elm_name[self.transf_type]} element object\n"
         res += f"uid: {self.uid}\n"
@@ -297,7 +292,9 @@ class ElasticBeamColumn(Element):
                 self.section.j_mod,
                 self.section.i_y,
                 self.section.i_x,
-                4.00, 4.00, 2.00,
+                4.00,
+                4.00,
+                2.00,
                 k11_x,
                 k33_x,
                 k44_x,
@@ -319,7 +316,9 @@ class ElasticBeamColumn(Element):
                 k11_y,
                 k33_y,
                 k44_y,
-                4.00, 4.00, 2.00,
+                4.00,
+                4.00,
+                2.00,
                 self.geomtransf.uid,
             ]
 

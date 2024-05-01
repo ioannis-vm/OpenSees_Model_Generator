@@ -37,6 +37,7 @@ class BRBGenSettings:
     fewer arguments.
 
     """
+
     steel4_b_k: float = field(default=0.003)
     steel4_b_kc: float = field(default=0.023)
     steel4_R_0: float = field(default=25.00)
@@ -81,22 +82,22 @@ class BRBGenerator:
     settings: BRBGenSettings = field(default_factory=BRBGenSettings)
 
     def add_brb(
-            self,
-            xi_coord: float,
-            yi_coord: float,
-            lvl_key_i: int,
-            offset_i: nparr,
-            snap_i: str,
-            xj_coord: float,
-            yj_coord: float,
-            lvl_key_j: int,
-            offset_j: nparr,
-            snap_j: str,
-            area: float,
-            f_y: float,
-            e_0: float,
-            casing_size: float,
-            unit_weight: float
+        self,
+        xi_coord: float,
+        yi_coord: float,
+        lvl_key_i: int,
+        offset_i: nparr,
+        snap_i: str,
+        xj_coord: float,
+        yj_coord: float,
+        lvl_key_j: int,
+        offset_j: nparr,
+        snap_j: str,
+        area: float,
+        f_y: float,
+        e_0: float,
+        casing_size: float,
+        unit_weight: float,
     ) -> None:
         """
         Adds a BRB element to the model.
@@ -139,8 +140,7 @@ class BRBGenerator:
 
         trg = TrussBarGenerator(self.model)
 
-        uid = self.model.uid_generator.new(
-            "uniaxial material")
+        uid = self.model.uid_generator.new("uniaxial material")
         mat = Steel4(
             uid=uid,
             name=f'auto_BRB_{uid}',
@@ -164,20 +164,22 @@ class BRBGenerator:
             R_ic=self.settings.steel4_R_ic,
             l_yp=self.settings.steel4_l_yp,
         )
-        uid = self.model.uid_generator.new(
-            "uniaxial material")
+        uid = self.model.uid_generator.new("uniaxial material")
         mat_fatigue = Fatigue(
             uid=uid,
             name=f'auto_BRB_fatigue_{uid}',
             predecessor=mat,
             e_mod=self.settings.fatigue_e_mod,
-            var_m=self.settings.fatigue_var_m)
+            var_m=self.settings.fatigue_var_m,
+        )
         trg.add(
-            xi_coord, yi_coord,
+            xi_coord,
+            yi_coord,
             lvl_key_i,
             offset_i,
             snap_i,
-            xj_coord, yj_coord,
+            xj_coord,
+            yj_coord,
             lvl_key_j,
             offset_j,
             snap_j,
@@ -185,5 +187,5 @@ class BRBGenerator:
             area=area,
             mat=mat_fatigue,
             outside_shape=rect_mesh(casing_size, casing_size),
-            weight_per_length=unit_weight*casing_size**2
+            weight_per_length=unit_weight * casing_size**2,
         )

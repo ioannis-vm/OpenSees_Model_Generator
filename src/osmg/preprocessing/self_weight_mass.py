@@ -25,9 +25,9 @@ def self_weight(mdl, lcase, factor=1.00):
     """
 
     for elm in mdl.list_of_elements():
-
         if isinstance(
-                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        ):
             weight_per_length = elm.section.weight_per_length()
             # apply weight as UDL
             if elm.visibility.skip_opensees_definition:
@@ -69,9 +69,9 @@ def self_mass(mdl, lcase):
         g_const = common.G_CONST_SI
 
     for elm in mdl.list_of_elements():
-
         if isinstance(
-                elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
+            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
+        ):
             weight_per_length = elm.section.weight_per_length()
         elif isinstance(elm, element.TrussBar):
             weight_per_length = elm.weight_per_length

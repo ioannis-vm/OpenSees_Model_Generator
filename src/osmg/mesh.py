@@ -253,7 +253,6 @@ class Edge:
         determinant = np.linalg.det(mat_a)
 
         if np.isclose(determinant, 0.00):
-
             # there are infinite solutions
             # or there are no solutions
             # i.e., the edges are parallel.
@@ -919,9 +918,8 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
 
 
 def subdivide_hss_rect(
-        sec_h: float, sec_b: float,
-        sec_t: float, plot: bool = False) \
-        -> list[shapely_Polygon]:
+    sec_h: float, sec_b: float, sec_t: float, plot: bool = False
+) -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.
 
@@ -1001,9 +999,8 @@ def subdivide_hss_rect(
 
 
 def subdivide_hss_circ(
-        sec_d: float, sec_t: float,
-        plot: bool = False) \
-        -> list[shapely_Polygon]:
+    sec_d: float, sec_t: float, plot: bool = False
+) -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.
 
@@ -1019,16 +1016,16 @@ def subdivide_hss_circ(
     num_subdiv_t = 3
     num_subdiv_circ = 12
 
-    radius = sec_d/2.00
+    radius = sec_d / 2.00
 
     pieces = []
 
     for i in range(num_subdiv_t):
         for j in range(num_subdiv_circ):
-            rr_i = radius - i * sec_t/num_subdiv_t
-            rr_j = radius - (i+1.0) * sec_t/num_subdiv_t
+            rr_i = radius - i * sec_t / num_subdiv_t
+            rr_j = radius - (i + 1.0) * sec_t / num_subdiv_t
             ang_i = (2.00 * np.pi) / num_subdiv_circ * j
-            ang_j = (2.00 * np.pi) / num_subdiv_circ * (j+1.00)
+            ang_j = (2.00 * np.pi) / num_subdiv_circ * (j + 1.00)
             pt1 = (rr_i * np.cos(ang_i), rr_i * np.sin(ang_i))
             pt2 = (rr_i * np.cos(ang_j), rr_i * np.sin(ang_j))
             pt3 = (rr_j * np.cos(ang_j), rr_j * np.sin(ang_j))

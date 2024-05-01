@@ -20,6 +20,7 @@ from dataclasses import field
 
 # pylint: disable=invalid-name
 
+
 @dataclass
 class UniaxialMaterial:
     """
@@ -195,12 +196,7 @@ class Steel4(UniaxialMaterial):
         #
 
         # these are required and will always be there
-        args = [
-            "Steel4",
-            self.uid,
-            self.Fy,
-            self.E0
-        ]
+        args = ["Steel4", self.uid, self.Fy, self.E0]
 
         # optional arguments:
         if asym:
@@ -210,11 +206,11 @@ class Steel4(UniaxialMaterial):
             if asym:
                 args.extend([self.b_kc, self.R_0c, self.r_1c, self.r_2c])
         if iso:
-            args.extend(['-iso', self.b_i, self.rho_i,
-                         self.b_l, self.R_i, self.l_yp])
+            args.extend(
+                ['-iso', self.b_i, self.rho_i, self.b_l, self.R_i, self.l_yp]
+            )
             if asym:
-                args.extend([self.b_ic, self.rho_ic,
-                             self.b_lc, self.R_ic])
+                args.extend([self.b_ic, self.rho_ic, self.b_lc, self.R_ic])
         if ultimate:
             args.extend(['-ult', self.f_u, self.R_u])
             if asym:
@@ -357,7 +353,7 @@ class IMKBilin(UniaxialMaterial):
             self.c_C,
             self.c_K,
             self.D_Plus,
-            self.D_Neg
+            self.D_Neg,
         ]
 
 
@@ -613,7 +609,7 @@ class MinMax(UniaxialMaterial):
             '-min',
             self.min_strain,
             '-max',
-            self.max_strain
+            self.max_strain,
         ]
 
         return args

@@ -144,7 +144,7 @@ class MaterialGenerator:
             a1=0.2,
             a2=1.0,
             a3=0.2,
-            a4=1.0
+            a4=1.0,
         )
 
         fatigue_mat = Fatigue(
@@ -152,7 +152,7 @@ class MaterialGenerator:
             "auto_fatigue_brace_mat",
             steel02_mat,
             var_e0,
-            var_m
+            var_m,
         )
 
         return fatigue_mat
@@ -170,7 +170,7 @@ class MaterialGenerator:
         direction="strong",
         moment_modifier=1.00,
         n_parameter=0.00,
-        only_elastic=False
+        only_elastic=False,
     ):
         """
         Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
@@ -224,7 +224,6 @@ class MaterialGenerator:
         # consider cases
 
         if rbs_factor:
-
             # RBS case
             assert direction == "strong"
             assert rbs_factor <= 1.00, "rbs_factor must be <= 1.00"
@@ -249,15 +248,13 @@ class MaterialGenerator:
                 print(section.name, "\n")
             if not 2.5 < elm_l / sec_d < 7.0:
                 print(
-                    f"Warning: L/d={elm_l/sec_d:.2f}"
-                    "  outside regression range"
+                    f"Warning: L/d={elm_l/sec_d:.2f}  outside regression range"
                 )
                 print("2.5 < elm_l/sec_d < 7.0")
                 print(section.name, "\n")
             if not 4.00 < sec_d < 36.00:
                 print(
-                    f"Warning: Section d={sec_d:.2f} "
-                    "outside regression range"
+                    f"Warning: Section d={sec_d:.2f} outside regression range"
                 )
                 print("4.00 < sec_d < 36.00")
                 print(section.name, "\n")
@@ -296,7 +293,6 @@ class MaterialGenerator:
             mcmy_minus = 1.10
 
         else:
-
             # Other-than-RBS case
             if axial_load_ratio:
                 # column case
@@ -330,25 +326,34 @@ class MaterialGenerator:
                     )
                 if axial_load_ratio <= 0.20:
                     sec_m = (
-                        1.15/1.10 * (sec_z * mat_fy) * 1.0e3
-                        * (1.00 - axial_load_ratio / 2.00))
+                        1.15
+                        / 1.10
+                        * (sec_z * mat_fy)
+                        * 1.0e3
+                        * (1.00 - axial_load_ratio / 2.00)
+                    )
                 else:
                     sec_m = (
-                        1.15/1.10 * (sec_z * mat_fy) * 1.0e3
-                        * 9.0/8.0 * (1.00 - axial_load_ratio))
+                        1.15
+                        / 1.10
+                        * (sec_z * mat_fy)
+                        * 1.0e3
+                        * 9.0
+                        / 8.0
+                        * (1.00 - axial_load_ratio)
+                    )
                 mcmy = (
                     12.5
                     * (sec_d / sec_tw) ** (-0.20)
                     * lbry ** (-0.40)
                     * (1.00 - axial_load_ratio) ** (0.40)
-                    )
+                )
                 mcmy = min(mcmy, 1.00)
                 mcmy = max(mcmy, 1.30)
                 mcmy_plus = mcmy
                 mcmy_minus = mcmy
 
             else:
-
                 # non-RBS beam case
                 theta_p = (
                     0.0865
@@ -388,7 +393,6 @@ class MaterialGenerator:
         m_minus = -sec_m
 
         if consider_composite:
-
             # Elkady, A., & Lignos, D. G. (2014). Modeling of the
             # composite action in fully restrained beam‐to‐column
             # connections: implications in the seismic design and
@@ -396,11 +400,12 @@ class MaterialGenerator:
             # frames. Earthquake Engineering & Structural Dynamics,
             # 43(13), 1935-1954.  Table II
 
-            assert axial_load_ratio == 0.00, \
-                "Can't consider composite action for columns"
-            assert direction == "strong", \
-                "Composite action affects the " \
-                "behavior in strong-axis bending"
+            assert (
+                axial_load_ratio == 0.00
+            ), "Can't consider composite action for columns"
+            assert (
+                direction == "strong"
+            ), "Composite action affects the behavior in strong-axis bending"
 
             theta_p_plus *= 1.80
             theta_p_minus *= 0.95
@@ -417,16 +422,14 @@ class MaterialGenerator:
 
         # adjust parameters to account for the presence of the elastic element
         stiffness_init = 6.00 * section.e_mod * sec_i / elm_h
-        stiffness = (n_parameter+1.00) * stiffness_init
+        stiffness = (n_parameter + 1.00) * stiffness_init
         theta_y = sec_m / stiffness_init
         theta_p_plus -= (mcmy_plus - 1.0) * (sec_m / stiffness)
         theta_p_minus -= (mcmy_minus - 1.0) * (sec_m / stiffness)
         theta_pc_plus += theta_y + (mcmy_plus - 1.0) * (sec_m / stiffness)
         theta_pc_plus += theta_y + (mcmy_minus - 1.0) * (sec_m / stiffness)
         beta_plus = (mcmy_plus - 1.0) * m_plus / theta_p_plus / stiffness
-        beta_minus = (
-            -(mcmy_minus - 1.0) * m_minus / theta_p_minus / stiffness
-        )
+        beta_minus = -(mcmy_minus - 1.0) * m_minus / theta_p_minus / stiffness
 
         # # old model
         # from ..ops.uniaxial_material import Bilin
@@ -464,7 +467,7 @@ class MaterialGenerator:
             elastic_mat = Elastic(
                 self.model.uid_generator.new("uniaxial material"),
                 "auto_IMK",
-                stiffness * moment_modifier
+                stiffness * moment_modifier,
             )
             return elastic_mat
         bilin_mat = IMKBilin(
@@ -474,13 +477,13 @@ class MaterialGenerator:
             theta_p_plus,
             theta_pc_plus,
             theta_u,
-            m_plus*moment_modifier,
+            m_plus * moment_modifier,
             (1.0 + beta_plus),
             residual_plus,
             theta_p_minus,
             theta_pc_minus,
             theta_u,
-            -m_minus*moment_modifier,
+            -m_minus * moment_modifier,
             (1.0 + beta_minus),
             residual_minus,
             lamda,
@@ -490,6 +493,6 @@ class MaterialGenerator:
             1.00,
             1.00,
             d_plus,
-            d_minus
+            d_minus,
         )
         return bilin_mat

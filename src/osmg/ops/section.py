@@ -199,8 +199,7 @@ class SectionComponent:
 
         return pieces
 
-    def copy_alter_material(
-            self, mat: UniaxialMaterial) -> SectionComponent:
+    def copy_alter_material(self, mat: UniaxialMaterial) -> SectionComponent:
         """
         Make a shallow copy of a section component and replace the old
         material with the given one.
@@ -288,8 +287,8 @@ class FiberSection(Section):
         return res * mult
 
     def copy_alter_material(
-            self, mat: UniaxialMaterial,
-            new_uid: int) -> FiberSection:
+        self, mat: UniaxialMaterial, new_uid: int
+    ) -> FiberSection:
         """
         Returns a shallow copy of the section object in which all
         opensees_material objects have been replaced with the given

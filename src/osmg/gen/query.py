@@ -173,8 +173,8 @@ class ElmQuery:
         return retrieved_component
 
     def retrieve_component(
-            self, x_loc: float, y_loc: float, lvl: int) \
-            -> Optional[ComponentAssembly]:
+        self, x_loc: float, y_loc: float, lvl: int
+    ) -> Optional[ComponentAssembly]:
         """
         Retrieves a component assembly of a level if any of its
         line elements passes trhough the specified point.
@@ -192,10 +192,13 @@ class ElmQuery:
         for component in level.components.values():
             if len(component.external_nodes) != 2:
                 continue
-            line_elems: list[Union[
-                element.TrussBar,
-                element.ElasticBeamColumn,
-                element.DispBeamColumn]] = []
+            line_elems: list[
+                Union[
+                    element.TrussBar,
+                    element.ElasticBeamColumn,
+                    element.DispBeamColumn,
+                ]
+            ] = []
             for elm in component.elements.values():
                 if isinstance(elm, element.TrussBar):
                     line_elems.append(elm)
@@ -209,10 +212,12 @@ class ElmQuery:
                     p_i = np.array(elm.nodes[0].coords)
                     p_j = np.array(elm.nodes[1].coords)
                 else:
-                    p_i = np.array(
-                        elm.nodes[0].coords) + elm.geomtransf.offset_i
-                    p_j = np.array(
-                        elm.nodes[1].coords) + elm.geomtransf.offset_j
+                    p_i = (
+                        np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+                    )
+                    p_j = (
+                        np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+                    )
                 if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
                     if (
                         np.linalg.norm(np.array((x_loc, y_loc)) - p_i[0:2])

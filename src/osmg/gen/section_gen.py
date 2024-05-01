@@ -345,9 +345,7 @@ class SectionGenerator:
                 sec_h = sec_data["OD"]
                 sec_t = sec_data["tdes"]
                 outside_shape = mesh_shapes.circ_mesh(sec_h)
-                hole = mesh_shapes.circ_mesh(
-                    sec_h - 2.00 * sec_t
-                )
+                hole = mesh_shapes.circ_mesh(sec_h - 2.00 * sec_t)
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
                 snap_points = {

@@ -66,10 +66,7 @@ def load_default_elastic(model: Model, sec_name: str) -> None:
     sgen = SectionGenerator(model)
     # generate a default elastic section and add it to the model
     sgen.generate_generic_elastic(
-        name=sec_name,
-        e_times_a=1.00,
-        e_times_i=1.00,
-        g_times_j=1.00
+        name=sec_name, e_times_a=1.00, e_times_i=1.00, g_times_j=1.00
     )
 
 

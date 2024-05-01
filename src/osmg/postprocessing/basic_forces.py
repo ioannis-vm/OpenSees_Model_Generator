@@ -62,8 +62,9 @@ def basic_forces(
     else:
         forces = anl.results[case_name].element_forces[elm.uid][step]
         if isinstance(elm, (ElasticBeamColumn, DispBeamColumn)):
-            w_x, w_y, w_z = anl.load_cases[
-                case_name].line_element_udl[elm.uid].val
+            w_x, w_y, w_z = (
+                anl.load_cases[case_name].line_element_udl[elm.uid].val
+            )
         else:
             w_x, w_y, w_z = (0.00, 0.00, 0.00)
 

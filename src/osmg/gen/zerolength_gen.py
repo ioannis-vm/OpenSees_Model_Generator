@@ -34,8 +34,8 @@ if TYPE_CHECKING:
 
 
 def fix_all(
-        model: Model, **kwargs: dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model, **kwargs: dict[object, object]
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Fixed in all directions.
 
@@ -50,8 +50,8 @@ def fix_all(
 
 
 def release_6(
-        model: Model, **kwargs: dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model, **kwargs: dict[object, object]
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees strong axis bending.
 
@@ -66,8 +66,8 @@ def release_6(
 
 
 def release_5(
-        model: Model, **kwargs: dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model, **kwargs: dict[object, object]
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees weak axis bending.
 
@@ -82,8 +82,8 @@ def release_5(
 
 
 def release_56(
-        model: Model, **kwargs: dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model, **kwargs: dict[object, object]
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees both strong and weak axis bending.
 
@@ -98,17 +98,17 @@ def release_56(
 
 
 def imk_6(
-        model: Model,
-        element_length: float,
-        lboverl: float,
-        loverh: float,
-        rbs_factor: Optional[float],
-        consider_composite: bool,
-        axial_load_ratio: float,
-        section: ElasticSection,
-        physical_material: PhysicalMaterial,
-        **kwargs: dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    element_length: float,
+    lboverl: float,
+    loverh: float,
+    rbs_factor: Optional[float],
+    consider_composite: bool,
+    axial_load_ratio: float,
+    section: ElasticSection,
+    physical_material: PhysicalMaterial,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
     steel components in support of collapse prediction of steel moment
@@ -140,7 +140,7 @@ def imk_6(
         direction="strong",
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
-        only_elastic=only_elastic
+        only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
@@ -151,17 +151,17 @@ def imk_6(
 
 
 def imk_56(
-        model: Model,
-        element_length: float,
-        lboverl: float,
-        loverh: float,
-        rbs_factor: Optional[float],
-        consider_composite: bool,
-        axial_load_ratio: float,
-        section: ElasticSection,
-        physical_material: PhysicalMaterial,
-        **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    element_length: float,
+    lboverl: float,
+    loverh: float,
+    rbs_factor: Optional[float],
+    consider_composite: bool,
+    axial_load_ratio: float,
+    section: ElasticSection,
+    physical_material: PhysicalMaterial,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     release in the weak axis bending direction,
     :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
@@ -186,7 +186,7 @@ def imk_56(
         direction="strong",
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
-        only_elastic=only_elastic
+        only_elastic=only_elastic,
     )
     mat_weak = mat_generator.generate_steel_w_imk_material(
         section,
@@ -199,7 +199,7 @@ def imk_56(
         axial_load_ratio,
         direction="weak",
         moment_modifier=moment_modifier,
-        only_elastic=only_elastic
+        only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
@@ -210,17 +210,17 @@ def imk_56(
 
 
 def imk_6_release_5(
-        model: Model,
-        element_length: float,
-        lboverl: float,
-        loverh: float,
-        rbs_factor: Optional[float],
-        consider_composite: bool,
-        axial_load_ratio: float,
-        section: ElasticSection,
-        physical_material: PhysicalMaterial,
-        **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    element_length: float,
+    lboverl: float,
+    loverh: float,
+    rbs_factor: Optional[float],
+    consider_composite: bool,
+    axial_load_ratio: float,
+    section: ElasticSection,
+    physical_material: PhysicalMaterial,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     release in the weak axis bending direction,
     :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
@@ -245,7 +245,7 @@ def imk_6_release_5(
         direction="strong",
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
-        only_elastic=only_elastic
+        only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
@@ -256,12 +256,12 @@ def imk_6_release_5(
 
 
 def gravity_shear_tab(
-        model: Model,
-        consider_composite: bool,
-        section: ElasticSection,
-        physical_material: PhysicalMaterial,
-        **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    consider_composite: bool,
+    section: ElasticSection,
+    physical_material: PhysicalMaterial,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
     the overstrength and collapse capacity of steel frame buildings
@@ -401,16 +401,16 @@ def gravity_shear_tab(
 
 
 def steel_w_col_pz(
-        model: Model,
-        section: ElasticSection,
-        physical_material: PhysicalMaterial,
-        pz_length: float,
-        pz_doubler_plate_thickness: float,
-        pz_hardening: float,
-        only_elastic: bool = False,
-        moment_modifier: float = 1.00,
-        **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    section: ElasticSection,
+    physical_material: PhysicalMaterial,
+    pz_length: float,
+    pz_doubler_plate_thickness: float,
+    pz_hardening: float,
+    only_elastic: bool = False,
+    moment_modifier: float = 1.00,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
     performance evaluation of steel moment resisting frame
@@ -437,18 +437,18 @@ def steel_w_col_pz(
     gamma_1 = v_y / k_e
     gamma_2 = 4.0 * gamma_1
     gamma_3 = 100.0 * gamma_1
-    m1y = (gamma_1 * k_e * pz_length
-           * moment_modifier)
-    m2y = (m1y + k_p * pz_length * (gamma_2 - gamma_1)
-           * moment_modifier)
-    m3y = (m2y + (hardening * k_e * pz_length) * (gamma_3 - gamma_2)
-           * moment_modifier)
+    m1y = gamma_1 * k_e * pz_length * moment_modifier
+    m2y = m1y + k_p * pz_length * (gamma_2 - gamma_1) * moment_modifier
+    m3y = (
+        m2y
+        + (hardening * k_e * pz_length) * (gamma_3 - gamma_2) * moment_modifier
+    )
 
     if only_elastic:
         mat: UniaxialMaterial = Elastic(
             model.uid_generator.new("uniaxial material"),
             "auto_steel_W_PZ",
-            m1y/gamma_1
+            m1y / gamma_1,
         )
     else:
         mat = Hysteretic(
@@ -486,8 +486,8 @@ def steel_w_col_pz_updated(
     location: str,
     only_elastic: bool = False,
     moment_modifier: float = 1.00,
-    **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
     Panel Zone Model for Seismic Design of Steel Moment-Resisting
@@ -526,15 +526,28 @@ def steel_w_col_pz_updated(
 
     # Stiffness Calculation
     Ks = tpz * (d_Col - tf_Col) * g_mod
-    Kb = (12.0 * e_mod * (Ix_Col + tdp *
-          ((d_Col - 2.0 * tf_Col)**3) / 12.00) / (d_Beam**3) * d_Beam)
+    Kb = (
+        12.0
+        * e_mod
+        * (Ix_Col + tdp * ((d_Col - 2.0 * tf_Col) ** 3) / 12.00)
+        / (d_Beam**3)
+        * d_Beam
+    )
     Ke = Ks * Kb / (Ks + Kb)
 
     # flange stiffness: shear contribution
     Ksf = 2.0 * (bf_Col * tf_Col) * g_mod
     # flange stiffness: bending contribution
-    Kbf = (2.0 * 12.0 * e_mod * bf_Col
-           * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam)
+    Kbf = (
+        2.0
+        * 12.0
+        * e_mod
+        * bf_Col
+        * (tf_Col**3)
+        / 12.0
+        / (d_Beam**3)
+        * d_Beam
+    )
     # flange stiffness: total contribution
     Kef = (Ksf * Kbf) / (Ksf + Kbf)
 
@@ -551,16 +564,26 @@ def steel_w_col_pz_updated(
     Vy = r * 0.577 * f_y * ay * (d_Col - tf_Col) * tpz
     # Plastic Shear Force at 4 gammaY
     Vp_4gamma = (
-        r * 0.577 * f_y * (
-            aw_eff_4gamma * (d_Col - tf_Col)
-            * tpz + af_eff_4gamma * (bf_Col - tw_Col) * 2*tf_Col))
+        r
+        * 0.577
+        * f_y
+        * (
+            aw_eff_4gamma * (d_Col - tf_Col) * tpz
+            + af_eff_4gamma * (bf_Col - tw_Col) * 2 * tf_Col
+        )
+    )
     # Plastic Shear Force at 6 gammaY
     Vp_6gamma = (
-        r * 0.577 * f_y * (
-            aw_eff_6gamma * (d_Col - tf_Col)
-            * tpz + af_eff_6gamma * (bf_Col - tw_Col) * 2*tf_Col))
+        r
+        * 0.577
+        * f_y
+        * (
+            aw_eff_6gamma * (d_Col - tf_Col) * tpz
+            + af_eff_6gamma * (bf_Col - tw_Col) * 2 * tf_Col
+        )
+    )
 
-    gamma_y = Vy/Ke
+    gamma_y = Vy / Ke
     gamma4_y = 4.0 * gamma_y
 
     My_P = Vy * d_BeamP
@@ -596,37 +619,61 @@ def steel_w_col_pz_updated(
     M3_N *= moment_modifier
 
     if not consider_composite:
-        args = ((M1_N, gamma1),
-                (M2_N, gamma2),
-                (M3_N, gamma3),
-                (-M1_N, -gamma1),
-                (-M2_N, -gamma2),
-                (-M3_N, -gamma3),
-                0.25, 0.75, 0.0, 0.0, 0.0)
+        args = (
+            (M1_N, gamma1),
+            (M2_N, gamma2),
+            (M3_N, gamma3),
+            (-M1_N, -gamma1),
+            (-M2_N, -gamma2),
+            (-M3_N, -gamma3),
+            0.25,
+            0.75,
+            0.0,
+            0.0,
+            0.0,
+        )
     elif location == 'interior':
-        args = ((M1_P, gamma1),
-                (M2_P, gamma2),
-                (M3_P, gamma3),
-                (-M1_P, -gamma1),
-                (-M2_P, -gamma2),
-                (-M3_P, -gamma3),
-                0.25, 0.75, 0.0, 0.0, 0.0)
+        args = (
+            (M1_P, gamma1),
+            (M2_P, gamma2),
+            (M3_P, gamma3),
+            (-M1_P, -gamma1),
+            (-M2_P, -gamma2),
+            (-M3_P, -gamma3),
+            0.25,
+            0.75,
+            0.0,
+            0.0,
+            0.0,
+        )
     elif location == 'exterior_first':
-        args = ((M1_N, gamma1),
-                (M2_N, gamma2),
-                (M3_N, gamma3),
-                (-M1_P, -gamma1),
-                (-M2_P, -gamma2),
-                (-M3_P, -gamma3),
-                0.25, 0.75, 0.0, 0.0, 0.0)
+        args = (
+            (M1_N, gamma1),
+            (M2_N, gamma2),
+            (M3_N, gamma3),
+            (-M1_P, -gamma1),
+            (-M2_P, -gamma2),
+            (-M3_P, -gamma3),
+            0.25,
+            0.75,
+            0.0,
+            0.0,
+            0.0,
+        )
     elif location == 'exterior_last':
-        args = ((M1_P, gamma1),
-                (M2_P, gamma2),
-                (M3_P, gamma3),
-                (-M1_N, -gamma1),
-                (-M2_N, -gamma2),
-                (-M3_N, -gamma3),
-                0.25, 0.75, 0.0, 0.0, 0.0)
+        args = (
+            (M1_P, gamma1),
+            (M2_P, gamma2),
+            (M3_P, gamma3),
+            (-M1_N, -gamma1),
+            (-M2_N, -gamma2),
+            (-M3_N, -gamma3),
+            0.25,
+            0.75,
+            0.0,
+            0.0,
+            0.0,
+        )
     else:
         raise ValueError(f'Invalid Location: {location}')
 
@@ -635,13 +682,13 @@ def steel_w_col_pz_updated(
         mat: UniaxialMaterial = Elastic(
             model.uid_generator.new("uniaxial material"),
             "auto_steel_W_PZ",
-            m1y/gamma_1  # type: ignore
+            m1y / gamma_1,  # type: ignore
         )
     else:
         mat = Hysteretic(
             model.uid_generator.new("uniaxial material"),
             "auto_steel_W_pz_updated",
-            *args
+            *args,
         )
     # minmaxmat = MinMax(
     #     model.uid_generator.new("uniaxial material"),
@@ -657,14 +704,14 @@ def steel_w_col_pz_updated(
 
 
 def steel_brace_gusset(
-        model: Model,
-        physical_mat: PhysicalMaterial,
-        d_brace: float,
-        l_c: float,
-        t_p: float,
-        l_b: float,
-        **kwargs:  dict[object, object]) \
-        -> tuple[list[int], list[UniaxialMaterial]]:
+    model: Model,
+    physical_mat: PhysicalMaterial,
+    d_brace: float,
+    l_c: float,
+    t_p: float,
+    l_b: float,
+    **kwargs: dict[object, object],
+) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
     analytical model for special concentrically braced frames, Journal

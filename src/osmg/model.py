@@ -40,9 +40,7 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def transfer_component(
-        other: Model,
-        component: ComponentAssembly) -> None:
+def transfer_component(other: Model, component: ComponentAssembly) -> None:
     """
     Transfers a single component assembly from one model to
     another, assuming the other model was generated with the
@@ -122,12 +120,15 @@ class Model:
     elastic_sections: obj_collections.Collection[int, ElasticSection] = field(
         init=False
     )
-    fiber_sections: obj_collections.Collection[
-        int, FiberSection] = field(init=False)
+    fiber_sections: obj_collections.Collection[int, FiberSection] = field(
+        init=False
+    )
     uniaxial_materials: obj_collections.Collection[
-        int, UniaxialMaterial] = field(init=False)
+        int, UniaxialMaterial
+    ] = field(init=False)
     physical_materials: obj_collections.Collection[
-        int, PhysicalMaterial] = field(init=False)
+        int, PhysicalMaterial
+    ] = field(init=False)
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
@@ -309,8 +310,8 @@ class Model:
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
-            self, element_class: Type[element.Element]) \
-            -> dict[int, element.Element]:
+        self, element_class: Type[element.Element]
+    ) -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model of a
         particular element class.
@@ -326,8 +327,8 @@ class Model:
         return res
 
     def list_of_specific_element(
-            self, element_class: Type[element.Element]) \
-            -> list[element.Element]:
+        self, element_class: Type[element.Element]
+    ) -> list[element.Element]:
         """
         Returns a list of all element objects in the model of a
         particular element class.
@@ -388,7 +389,8 @@ class Model:
         return res
 
     def transfer_by_polygon_selection(
-            self, other: Model, coords: nparr) -> None:
+        self, other: Model, coords: nparr
+    ) -> None:
         """
         Uses :func:`~transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified

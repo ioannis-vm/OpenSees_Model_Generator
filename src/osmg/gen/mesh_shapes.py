@@ -247,10 +247,9 @@ def circ_mesh(dim_d):
     vertices = []
     for i in range(num_vertices):
         angle = i * angle_increment
-        vertices.append(Vertex((
-            radius * np.cos(angle),
-            radius * np.sin(angle)
-        )))
+        vertices.append(
+            Vertex((radius * np.cos(angle), radius * np.sin(angle)))
+        )
 
     edges = define_edges(vertices)
     return generate(edges)
