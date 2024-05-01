@@ -366,14 +366,14 @@ class Analysis:
 
         # restraints
         for uid, node in primary_nodes.items():
-            ops.fix(node.uid, *node.restraint)
+            ops.fix(node.uid, *[int(x) for x in node.restraint])
 
         for uid, node in internal_nodes.items():
             # (this is super unusual, but who knows..)
-            ops.fix(node.uid, *node.restraint)
+            ops.fix(node.uid, *[int(x) for x in node.restraint])
 
         for node in parent_nodes.values():
-            ops.fix(node.uid, *node.restraint)
+            ops.fix(node.uid, *[int(x) for x in node.restraint])
 
         # lumped nodal mass
         for uid, node in all_nodes.items():
@@ -1737,9 +1737,9 @@ def define_lateral_load_pattern(
                     "-dt",
                     file_time_incr,
                     "-values",
-                    '{' + ' '.join([str(val) for val in ag_dir]) + '}',
-                    "-factor",
-                    common.G_CONST_IMPERIAL,
+                    ' '.join(
+                        [str(val * common.G_CONST_IMPERIAL) for val in ag_dir]
+                    ),
                 )
             # pattern, direction, time series tag
             ops.pattern("UniformExcitation", i, j, "-accel", i)
