@@ -60,9 +60,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">():</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">weight_per_length</span><span class="p">()</span>
             <span class="c1"># apply weight as UDL</span>
             <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span><span class="p">:</span>
@@ -107,9 +107,9 @@
         <span class="n">g_const</span> <span class="o">=</span> <span class="n">common</span><span class="o">.</span><span class="n">G_CONST_SI</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">():</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">weight_per_length</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
             <span class="n">weight_per_length</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">weight_per_length</span>

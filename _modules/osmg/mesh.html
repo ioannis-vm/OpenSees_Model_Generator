@@ -299,7 +299,6 @@
         <span class="n">determinant</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">mat_a</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">determinant</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">):</span>
-
             <span class="c1"># there are infinite solutions</span>
             <span class="c1"># or there are no solutions</span>
             <span class="c1"># i.e., the edges are parallel.</span>
@@ -1011,9 +1010,8 @@
 <div class="viewcode-block" id="subdivide_hss_rect">
 <a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_hss_rect">[docs]</a>
 <span class="k">def</span> <span class="nf">subdivide_hss_rect</span><span class="p">(</span>
-        <span class="n">sec_h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">sec_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
+    <span class="n">sec_h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used to define the fibers of steel HSS fiber sections.</span>
 
@@ -1096,9 +1094,8 @@
 <div class="viewcode-block" id="subdivide_hss_circ">
 <a class="viewcode-back" href="../../_autosummary/osmg.mesh.html#osmg.mesh.subdivide_hss_circ">[docs]</a>
 <span class="k">def</span> <span class="nf">subdivide_hss_circ</span><span class="p">(</span>
-        <span class="n">sec_d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
+    <span class="n">sec_d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sec_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">shapely_Polygon</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Used to define the fibers of steel HSS fiber sections.</span>
 
@@ -1114,16 +1111,16 @@
     <span class="n">num_subdiv_t</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="n">num_subdiv_circ</span> <span class="o">=</span> <span class="mi">12</span>
 
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">sec_d</span><span class="o">/</span><span class="mf">2.00</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">sec_d</span> <span class="o">/</span> <span class="mf">2.00</span>
 
     <span class="n">pieces</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_subdiv_t</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_subdiv_circ</span><span class="p">):</span>
-            <span class="n">rr_i</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">sec_t</span><span class="o">/</span><span class="n">num_subdiv_t</span>
-            <span class="n">rr_j</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">sec_t</span><span class="o">/</span><span class="n">num_subdiv_t</span>
+            <span class="n">rr_i</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="n">i</span> <span class="o">*</span> <span class="n">sec_t</span> <span class="o">/</span> <span class="n">num_subdiv_t</span>
+            <span class="n">rr_j</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">sec_t</span> <span class="o">/</span> <span class="n">num_subdiv_t</span>
             <span class="n">ang_i</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_subdiv_circ</span> <span class="o">*</span> <span class="n">j</span>
-            <span class="n">ang_j</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_subdiv_circ</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mf">1.00</span><span class="p">)</span>
+            <span class="n">ang_j</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.00</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_subdiv_circ</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mf">1.00</span><span class="p">)</span>
             <span class="n">pt1</span> <span class="o">=</span> <span class="p">(</span><span class="n">rr_i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang_i</span><span class="p">),</span> <span class="n">rr_i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang_i</span><span class="p">))</span>
             <span class="n">pt2</span> <span class="o">=</span> <span class="p">(</span><span class="n">rr_i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang_j</span><span class="p">),</span> <span class="n">rr_i</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang_j</span><span class="p">))</span>
             <span class="n">pt3</span> <span class="o">=</span> <span class="p">(</span><span class="n">rr_j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ang_j</span><span class="p">),</span> <span class="n">rr_j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ang_j</span><span class="p">))</span>

@@ -281,7 +281,9 @@
                 <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
-                    <span class="mf">0.00</span><span class="p">))</span>
+                    <span class="mf">0.00</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">outside_shape</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">offset_i</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
@@ -293,18 +295,21 @@
         <span class="n">u_i_o</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">offset_transformation</span><span class="p">(</span><span class="n">offset_i</span><span class="p">,</span> <span class="n">u_i</span><span class="p">,</span> <span class="n">r_i</span><span class="p">)</span>
         <span class="n">u_j_o</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">offset_transformation</span><span class="p">(</span><span class="n">offset_j</span><span class="p">,</span> <span class="n">u_j</span><span class="p">,</span> <span class="n">r_j</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
-            <span class="n">d_global</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-            <span class="p">))</span>
+            <span class="n">d_global</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">r_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_points</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
             <span class="n">interpolation_points</span> <span class="o">=</span> <span class="n">interp_3d_points</span><span class="p">(</span>
                 <span class="n">elm</span><span class="p">,</span> <span class="n">d_global</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">scaling</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">d_global</span><span class="p">,</span> <span class="n">r_local</span> <span class="o">=</span> <span class="n">interp_3d_deformation</span><span class="p">(</span>
-                <span class="n">elm</span><span class="p">,</span> <span class="n">u_i_o</span><span class="p">,</span> <span class="n">r_i</span><span class="p">,</span> <span class="n">u_j_o</span><span class="p">,</span> <span class="n">r_j</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+                <span class="n">elm</span><span class="p">,</span> <span class="n">u_i_o</span><span class="p">,</span> <span class="n">r_i</span><span class="p">,</span> <span class="n">u_j_o</span><span class="p">,</span> <span class="n">r_j</span><span class="p">,</span> <span class="n">num_points</span>
+            <span class="p">)</span>
             <span class="n">interpolation_points</span> <span class="o">=</span> <span class="n">interp_3d_points</span><span class="p">(</span>
                 <span class="n">elm</span><span class="p">,</span> <span class="n">d_global</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">scaling</span>
             <span class="p">)</span>
@@ -370,20 +375,15 @@
                 <span class="n">loc1</span> <span class="o">=</span> <span class="n">loc_j_global</span> <span class="o">+</span> <span class="n">defo_ja_global</span>
                 <span class="n">loc2</span> <span class="o">=</span> <span class="n">loc_j_global</span> <span class="o">+</span> <span class="n">defo_jb_global</span>
                 <span class="n">loc3</span> <span class="o">=</span> <span class="n">loc_i_global</span> <span class="o">+</span> <span class="n">defo_ib_global</span>
-                <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-                <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-                <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
-                <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-                <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                    <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
                 <span class="n">intensity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])))</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+                <span class="p">)</span>
                 <span class="n">intensity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]))</span>
                 <span class="p">)</span>
@@ -391,7 +391,8 @@
                     <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]))</span>
                 <span class="p">)</span>
                 <span class="n">intensity</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])))</span>
+                    <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">@</span> <span class="n">d_global</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]))</span>
+                <span class="p">)</span>
                 <span class="n">index</span> <span class="o">+=</span> <span class="mi">4</span>
     <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
@@ -456,11 +457,13 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># for a truss member, just connect the two ends</span>
-            <span class="n">d_global</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
-            <span class="p">))</span>
+            <span class="n">d_global</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">u_i</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">u_j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">num_points</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="n">interpolation_points</span> <span class="o">=</span> <span class="n">interp_3d_points</span><span class="p">(</span>
             <span class="n">elm</span><span class="p">,</span> <span class="n">d_global</span><span class="p">,</span> <span class="n">num_points</span><span class="p">,</span> <span class="n">scaling</span>
         <span class="p">)</span>
@@ -592,7 +595,6 @@
     <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">list_of_line_elems</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
             <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
@@ -668,14 +670,16 @@
             <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">location_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">displacement_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span>
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">location_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">displacement_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">scaling</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">displacement_data</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;ux: %</span><span class="si">{customdata[0]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;uy: %</span><span class="si">{customdata[1]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;uz: %</span><span class="si">{customdata[2]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;combined: %</span><span class="si">{customdata[6]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;rx: %</span><span class="si">{customdata[3]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;ry: %</span><span class="si">{customdata[4]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;rz: %</span><span class="si">{customdata[5]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node %</span><span class="si">{customdata[7]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="s2">&quot;ux: %</span><span class="si">{customdata[0]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;uy: %</span><span class="si">{customdata[1]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;uz: %</span><span class="si">{customdata[2]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;combined: %</span><span class="si">{customdata[6]:.6g}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;rx: %</span><span class="si">{customdata[3]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;ry: %</span><span class="si">{customdata[4]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;rz: %</span><span class="si">{customdata[5]:.6g}</span><span class="s2"> (rad)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node %</span><span class="si">{customdata[7]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+            <span class="p">),</span>
             <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                 <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="n">marker</span><span class="p">,</span>
                 <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">color</span><span class="p">,</span>
@@ -700,13 +704,9 @@
     <span class="n">ref_len</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">reference_length</span><span class="p">()</span>
     <span class="c1"># maximum displacement</span>
     <span class="n">max_d</span> <span class="o">=</span> <span class="mf">0.00</span>
-    <span class="n">elms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+    <span class="n">elms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">elms</span><span class="p">:</span>
         <span class="n">u_i</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">case_name</span><span class="p">]</span><span class="o">.</span><span class="n">node_displacements</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">uid</span><span class="p">][</span>
@@ -741,19 +741,18 @@
 <div class="viewcode-block" id="show_deformed_shape">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.postprocessing_3d.html#osmg.graphics.postprocessing_3d.show_deformed_shape">[docs]</a>
 <span class="k">def</span> <span class="nf">show_deformed_shape</span><span class="p">(</span>
-        <span class="n">analysis</span><span class="p">:</span> <span class="n">Analysis</span><span class="p">,</span>
-        <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">scaling</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-        <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">subset_model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">animation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">init_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">step_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">to_html_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">analysis</span><span class="p">:</span> <span class="n">Analysis</span><span class="p">,</span>
+    <span class="n">case_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">scaling</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">subset_model</span><span class="p">:</span> <span class="n">Model</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">animation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">init_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">step_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">to_html_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model in its deformed state</span>
 
@@ -795,12 +794,13 @@
 
     <span class="c1"># gather lists of associated objects</span>
     <span class="n">list_of_line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
     <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
-    <span class="n">list_of_line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">list_of_primary_nodes</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_primary_nodes</span><span class="p">()</span>
     <span class="n">list_of_internal_nodes</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_internal_nodes</span><span class="p">()</span>
     <span class="c1"># list_of_parent_nodes = mdl.list_of_parent_nodes()</span>
@@ -862,7 +862,7 @@
 
     <span class="k">if</span> <span class="n">animation</span><span class="p">:</span>
         <span class="n">step_of_frame</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_step</span><span class="p">,</span> <span class="n">step</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">step_skip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_step</span><span class="p">,</span> <span class="n">step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step_skip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">step_of_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">step_of_frame</span><span class="p">):</span>
             <span class="n">frame_data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
@@ -999,7 +999,7 @@
     <span class="n">global_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model and plot the frame element basic forces.</span>
@@ -1037,20 +1037,16 @@
         <span class="n">mdl</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">mdl</span>
 
     <span class="n">elms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">Union</span><span class="p">[</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span>
+        <span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
 
     <span class="n">list_of_line_elements</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">elm</span>
-        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">elms</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span>
+        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">elms</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span>
     <span class="p">]</span>
 
     <span class="n">layout</span> <span class="o">=</span> <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
@@ -1118,7 +1114,6 @@
     <span class="n">my_vecs</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">list_of_line_elements</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_basic_forces</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -1180,7 +1175,6 @@
         <span class="n">scaling_m</span> <span class="o">=</span> <span class="mf">1.00</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">list_of_line_elements</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_basic_forces</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -1192,7 +1186,8 @@
         <span class="n">my_vec</span> <span class="o">=</span> <span class="n">my_vecs</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
         <span class="n">mz_vec</span> <span class="o">=</span> <span class="n">mz_vecs</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">x_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
             <span class="n">y_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
             <span class="n">z_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
@@ -1205,13 +1200,14 @@
             <span class="n">i_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">))</span>
+                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="n">len_clr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_i</span> <span class="o">-</span> <span class="n">p_j</span><span class="p">)</span>
         <span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">len_clr</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">num_points</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-
             <span class="n">p_start</span> <span class="o">=</span> <span class="n">i_pos</span> <span class="o">+</span> <span class="n">t_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_vec</span>
             <span class="n">p_end</span> <span class="o">=</span> <span class="n">i_pos</span> <span class="o">+</span> <span class="n">t_vec</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_vec</span>
 
@@ -1326,7 +1322,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_a</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_a</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_a</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1339,7 +1335,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_b</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_b</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_b</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1352,7 +1348,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_c</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_c</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_c</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1365,7 +1361,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_d</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_d</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_d</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1378,7 +1374,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_e</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_e</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_e</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1391,7 +1387,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_f</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_f</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_f</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1417,9 +1413,11 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1428,10 +1426,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1440,10 +1440,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1452,10 +1454,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1464,10 +1468,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1476,9 +1482,11 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1518,7 +1526,7 @@
     <span class="n">global_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">subset_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">to_html_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model and plot the enveloped frame element basic forces</span>
@@ -1557,19 +1565,15 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">mdl</span> <span class="o">=</span> <span class="n">combo</span><span class="o">.</span><span class="n">mdl</span>
     <span class="n">elms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
-    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">Union</span><span class="p">[</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span>
+        <span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+    <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
     <span class="n">list_of_line_elements</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">elm</span>
-        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">elms</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span>
+        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">elms</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">skip_opensees_definition</span>
     <span class="p">]</span>
 
     <span class="n">layout</span> <span class="o">=</span> <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">global_layout</span><span class="p">(</span><span class="n">mdl</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
@@ -1631,7 +1635,6 @@
     <span class="n">my_vecs_max</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">list_of_line_elements</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_basic_forces</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -1719,7 +1722,6 @@
         <span class="n">scaling_m</span> <span class="o">=</span> <span class="mf">1.00</span>
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">list_of_line_elements</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_basic_forces</span><span class="p">:</span>
             <span class="k">continue</span>
 
@@ -1739,7 +1741,8 @@
         <span class="n">mz_vec_max</span> <span class="o">=</span> <span class="n">mz_vecs_max</span><span class="p">[</span><span class="n">elm</span><span class="o">.</span><span class="n">uid</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)):</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">):</span>
             <span class="n">x_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
             <span class="n">y_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">y_axis</span>
             <span class="n">z_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">z_axis</span>
@@ -1752,13 +1755,14 @@
             <span class="n">i_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">))</span>
+                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="n">len_clr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_i</span> <span class="o">-</span> <span class="n">p_j</span><span class="p">)</span>
         <span class="n">t_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">len_clr</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">num_points</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-
             <span class="n">p_start</span> <span class="o">=</span> <span class="n">i_pos</span> <span class="o">+</span> <span class="n">t_vec</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_vec</span>
             <span class="n">p_end</span> <span class="o">=</span> <span class="n">i_pos</span> <span class="o">+</span> <span class="n">t_vec</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">x_vec</span>
 
@@ -1890,7 +1894,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_a</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_a</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_a</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1903,7 +1907,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_b</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_b</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_b</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1916,7 +1920,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_c</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_c</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_c</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1929,7 +1933,7 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z1_d</span><span class="p">,</span>
             <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata_d</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&quot;</span> <span class="s2">&quot;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot; %</span><span class="si">{customdata:.0f}</span><span class="s2">&lt;br&gt;&lt;extra&gt;&lt;/extra&gt;&quot;</span><span class="p">,</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">colors1_d</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">]</span>
@@ -1955,9 +1959,11 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1966,10 +1972,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1978,10 +1986,12 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>
@@ -1990,9 +2000,11 @@
                         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;update&quot;</span><span class="p">,</span>
                         <span class="n">args</span><span class="o">=</span><span class="p">[</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-                                <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                <span class="s2">&quot;visible&quot;</span><span class="p">:</span> <span class="p">(</span>
+                                    <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                                <span class="p">)</span>
                             <span class="p">}</span>
                         <span class="p">],</span>
                     <span class="p">),</span>

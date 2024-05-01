@@ -248,8 +248,7 @@
 
 <div class="viewcode-block" id="SectionComponent.copy_alter_material">
 <a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.html#osmg.ops.section.SectionComponent.copy_alter_material">[docs]</a>
-    <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SectionComponent</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SectionComponent</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a shallow copy of a section component and replace the old</span>
 <span class="sd">        material with the given one.</span>
@@ -349,8 +348,8 @@
 <div class="viewcode-block" id="FiberSection.copy_alter_material">
 <a class="viewcode-back" href="../../../_autosummary/osmg.ops.section.html#osmg.ops.section.FiberSection.copy_alter_material">[docs]</a>
     <span class="k">def</span> <span class="nf">copy_alter_material</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">,</span>
-            <span class="n">new_uid</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FiberSection</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">,</span> <span class="n">new_uid</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FiberSection</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a shallow copy of the section object in which all</span>
 <span class="sd">        opensees_material objects have been replaced with the given</span>

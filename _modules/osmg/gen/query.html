@@ -222,8 +222,8 @@
 <div class="viewcode-block" id="ElmQuery.retrieve_component">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.query.html#osmg.gen.query.ElmQuery.retrieve_component">[docs]</a>
     <span class="k">def</span> <span class="nf">retrieve_component</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> \
-            <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lvl</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieves a component assembly of a level if any of its</span>
 <span class="sd">        line elements passes trhough the specified point.</span>
@@ -241,10 +241,13 @@
         <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">level</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">external_nodes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">continue</span>
-            <span class="n">line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span>
-                <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span>
-                <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-                <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
+                <span class="n">Union</span><span class="p">[</span>
+                    <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">,</span>
+                    <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
+                    <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
                     <span class="n">line_elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span>
@@ -258,10 +261,12 @@
                     <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
                     <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                        <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
-                    <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-                        <span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span>
+                    <span class="n">p_i</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
+                    <span class="p">)</span>
+                    <span class="n">p_j</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_j</span>
+                    <span class="p">)</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_j</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">x_loc</span><span class="p">,</span> <span class="n">y_loc</span><span class="p">))</span> <span class="o">-</span> <span class="n">p_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>

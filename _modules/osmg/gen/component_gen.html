@@ -91,8 +91,12 @@
 <div class="viewcode-block" id="retrieve_snap_pt_global_offset">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.retrieve_snap_pt_global_offset">[docs]</a>
 <span class="k">def</span> <span class="nf">retrieve_snap_pt_global_offset</span><span class="p">(</span>
-        <span class="n">placement</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span> <span class="o">|</span> <span class="n">FiberSection</span><span class="p">,</span>
-        <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span> <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
+    <span class="n">placement</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span> <span class="o">|</span> <span class="n">FiberSection</span><span class="p">,</span>
+    <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+    <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+    <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">nparr</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the necessary offset to connect an element at a specified</span>
 <span class="sd">    snap point of the section.</span>
@@ -188,9 +192,7 @@
                     <span class="s2">&quot;bottom_left&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;bottom_right&quot;</span><span class="p">,</span>
                 <span class="p">]:</span>
-                    <span class="n">elm</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span>
-                        <span class="s2">&quot;elm_interior&quot;</span>
-                    <span class="p">]</span>
+                    <span class="n">elm</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;elm_interior&quot;</span><span class="p">]</span>
                     <span class="n">d_z</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">[</span><span class="n">snap</span><span class="p">]</span>
                     <span class="n">sec_offset_local</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">d_y</span><span class="p">,</span> <span class="n">d_z</span><span class="p">])</span>
                     <span class="c1"># retrieve local coordinate system</span>
@@ -236,7 +238,8 @@
                             <span class="p">)</span>
                             <span class="n">t_loc_to_glob</span> <span class="o">=</span> <span class="n">t_glob_to_loc</span><span class="o">.</span><span class="n">T</span>
                             <span class="n">sec_offset_global</span> <span class="o">=</span> <span class="p">(</span>
-                                <span class="n">t_loc_to_glob</span> <span class="o">@</span> <span class="n">sec_offset_local</span><span class="p">)</span>
+                                <span class="n">t_loc_to_glob</span> <span class="o">@</span> <span class="n">sec_offset_local</span>
+                            <span class="p">)</span>
                             <span class="n">e_o</span> <span class="o">+=</span> <span class="n">sec_offset_global</span>
     <span class="k">return</span> <span class="n">node</span><span class="p">,</span> <span class="n">e_o</span></div>
 
@@ -278,25 +281,25 @@
 <div class="viewcode-block" id="TrussBarGenerator.add">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.TrussBarGenerator.add">[docs]</a>
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">lvl_key_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">snap_i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">xj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">yj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">lvl_key_j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">snap_j</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">area</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">,</span>
-            <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span>
-            <span class="n">weight_per_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
-            <span class="n">split_existing_i</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">split_existing_j</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">component_purpose</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Truss Element&#39;</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">lvl_key_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">snap_i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">xj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">yj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">lvl_key_j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">snap_j</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">area</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">mat</span><span class="p">:</span> <span class="n">UniaxialMaterial</span><span class="p">,</span>
+        <span class="n">outside_shape</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span>
+        <span class="n">weight_per_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">split_existing_i</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">split_existing_j</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">component_purpose</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;Truss Element&#39;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentAssembly</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a truss bar element.</span>
@@ -348,12 +351,10 @@
         <span class="c1"># offset, to move the ends of the brace back where we want</span>
         <span class="c1"># them to be. The effect of this is that the rigid offsets</span>
         <span class="c1"># (twonodelinks) will connect to that other node.</span>
-        <span class="n">i_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">xi_coord</span><span class="p">,</span> <span class="n">yi_coord</span><span class="p">))</span>
-                  <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_i</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">i_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">xi_coord</span><span class="p">,</span> <span class="n">yi_coord</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_i</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">i_diff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
             <span class="n">eo_i</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">i_diff</span>
-        <span class="n">j_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">xj_coord</span><span class="p">,</span> <span class="n">yj_coord</span><span class="p">))</span>
-                  <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_j</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">j_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">xj_coord</span><span class="p">,</span> <span class="n">yj_coord</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_j</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">j_diff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
             <span class="n">eo_j</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">j_diff</span>
 
@@ -369,9 +370,7 @@
         <span class="n">component</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_i</span><span class="p">)</span>
         <span class="n">component</span><span class="o">.</span><span class="n">external_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node_j</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">prepare_connection</span><span class="p">(</span>
-                <span class="n">node_x</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">eo_x</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> \
-                <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">prepare_connection</span><span class="p">(</span><span class="n">node_x</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span> <span class="n">eo_x</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Node</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            For each end of the bar element, creates a rigid link if</span>
 <span class="sd">            an offset exists, and returns the node to which the bar</span>
@@ -386,21 +385,25 @@
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">eo_x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">common</span><span class="o">.</span><span class="n">EPSILON</span><span class="p">:</span>
                 <span class="n">int_node_x</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;node&#39;</span><span class="p">),</span>
-                    <span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">eo_x</span><span class="p">)]</span>
+                    <span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">eo_x</span><span class="p">)],</span>
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">internal_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">int_node_x</span><span class="p">)</span>
                 <span class="n">n_x</span> <span class="o">=</span> <span class="n">int_node_x</span>
                 <span class="n">dirs</span><span class="p">,</span> <span class="n">mats</span> <span class="o">=</span> <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
                 <span class="c1"># flip the nodes if the element is about to be defined</span>
                 <span class="c1"># upside down</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]),</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">int_node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]),</span>
-                <span class="p">)</span> <span class="ow">and</span> <span class="n">int_node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                    <span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">int_node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">):</span>
                     <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">int_node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
-                        <span class="mf">0.00</span><span class="p">)</span>
+                        <span class="mf">0.00</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">elm_link</span> <span class="o">=</span> <span class="n">TwoNodeLink</span><span class="p">(</span>
                         <span class="n">component</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;element&quot;</span><span class="p">),</span>
@@ -414,7 +417,8 @@
                     <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
                         <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">int_node_x</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
-                        <span class="mf">0.00</span><span class="p">)</span>
+                        <span class="mf">0.00</span><span class="p">,</span>
+                    <span class="p">)</span>
                     <span class="n">elm_link</span> <span class="o">=</span> <span class="n">TwoNodeLink</span><span class="p">(</span>
                         <span class="n">component</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;element&quot;</span><span class="p">),</span>
@@ -442,7 +446,7 @@
             <span class="n">area</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
             <span class="n">mat</span><span class="o">=</span><span class="n">mat</span><span class="p">,</span>
             <span class="n">outside_shape</span><span class="o">=</span><span class="n">outside_shape</span><span class="p">,</span>
-            <span class="n">weight_per_length</span><span class="o">=</span><span class="n">weight_per_length</span>
+            <span class="n">weight_per_length</span><span class="o">=</span><span class="n">weight_per_length</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># add it to the component assembly</span>
@@ -467,18 +471,18 @@
 <div class="viewcode-block" id="BeamColumnGenerator.define_beamcolumn">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.define_beamcolumn">[docs]</a>
     <span class="k">def</span> <span class="nf">define_beamcolumn</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">assembly</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span>
-            <span class="n">node_i</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
-            <span class="n">node_j</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
-            <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span> <span class="o">|</span> <span class="n">FiberSection</span><span class="p">,</span>
-            <span class="n">element_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">]],</span>
-            <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
-            <span class="n">n_x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">n_y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">assembly</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span>
+        <span class="n">node_i</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
+        <span class="n">node_j</span><span class="p">:</span> <span class="n">Node</span><span class="p">,</span>
+        <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span> <span class="o">|</span> <span class="n">FiberSection</span><span class="p">,</span>
+        <span class="n">element_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">]],</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">n_x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ElasticBeamColumn</span> <span class="o">|</span> <span class="n">DispBeamColumn</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a beamcolumn element to the model, connecting the</span>
@@ -506,7 +510,8 @@
                 <span class="n">nodes</span><span class="o">=</span><span class="p">[</span><span class="n">node_i</span><span class="p">,</span> <span class="n">node_j</span><span class="p">],</span>
                 <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
                 <span class="n">geomtransf</span><span class="o">=</span><span class="n">transf</span><span class="p">,</span>
-                <span class="n">n_x</span><span class="o">=</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="o">=</span><span class="n">n_y</span>
+                <span class="n">n_x</span><span class="o">=</span><span class="n">n_x</span><span class="p">,</span>
+                <span class="n">n_y</span><span class="o">=</span><span class="n">n_y</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">res</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">elm_el</span>
         <span class="k">elif</span> <span class="n">element_type</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;DispBeamColumn&quot;</span><span class="p">:</span>
@@ -536,8 +541,7 @@
             <span class="p">)</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">elm_disp</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Invalid element type: </span><span class="si">{element_type.__name__}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid element type: </span><span class="si">{element_type.__name__}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
 
@@ -618,7 +622,7 @@
         <span class="n">camber_2</span><span class="p">,</span>
         <span class="n">camber_3</span><span class="p">,</span>
         <span class="n">n_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_y</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">n_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds beamcolumn elemens in series.</span>
@@ -677,9 +681,11 @@
                 <span class="n">n_j</span> <span class="o">=</span> <span class="n">intnodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="n">o_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">element_type</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span>
-                    <span class="s1">&#39;ElasticBeamColumn&#39;</span><span class="p">,</span> <span class="s1">&#39;DispBeamColumn&#39;</span><span class="p">}:</span>
+                <span class="s1">&#39;ElasticBeamColumn&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;DispBeamColumn&#39;</span><span class="p">,</span>
+            <span class="p">}:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;Unsupported element type:&quot;</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">element_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported element type: </span><span class="si">{</span><span class="n">element_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
             <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_beamcolumn</span><span class="p">(</span>
                 <span class="n">assembly</span><span class="o">=</span><span class="n">component</span><span class="p">,</span>
@@ -691,7 +697,8 @@
                 <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span>
                 <span class="n">element_type</span><span class="o">=</span><span class="n">element_type</span><span class="p">,</span>
                 <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
-                <span class="n">n_x</span><span class="o">=</span><span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="o">=</span><span class="n">n_y</span>
+                <span class="n">n_x</span><span class="o">=</span><span class="n">n_x</span><span class="p">,</span>
+                <span class="n">n_y</span><span class="o">=</span><span class="n">n_y</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">element</span><span class="p">)</span></div>
 
@@ -714,7 +721,7 @@
         <span class="n">camber_2</span><span class="p">,</span>
         <span class="n">camber_3</span><span class="p">,</span>
         <span class="n">n_x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_y</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">n_y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generates a plain component assembly, with line elements in</span>
@@ -755,7 +762,8 @@
             <span class="n">angle</span><span class="p">,</span>
             <span class="n">camber_2</span><span class="p">,</span>
             <span class="n">camber_3</span><span class="p">,</span>
-            <span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span>
+            <span class="n">n_x</span><span class="p">,</span>
+            <span class="n">n_y</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">component</span></div>
@@ -778,7 +786,8 @@
         <span class="n">angle</span><span class="p">,</span>
         <span class="n">camber_2</span><span class="p">,</span>
         <span class="n">camber_3</span><span class="p">,</span>
-        <span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span><span class="p">,</span>
+        <span class="n">n_x</span><span class="p">,</span>
+        <span class="n">n_y</span><span class="p">,</span>
         <span class="n">zerolength_gen_i</span><span class="p">,</span>
         <span class="n">zerolength_gen_args_i</span><span class="p">,</span>
         <span class="n">zerolength_gen_j</span><span class="p">,</span>
@@ -820,7 +829,6 @@
         <span class="c1"># we can have hinges at both ends, or just one of the two ends.</span>
         <span class="c1"># ...or even no hinges!</span>
         <span class="k">if</span> <span class="n">zerolength_gen_i</span><span class="p">:</span>
-
             <span class="n">hinge_location_i</span> <span class="o">=</span> <span class="n">p_i</span> <span class="o">+</span> <span class="n">x_axis</span> <span class="o">*</span> <span class="n">zerolength_gen_args_i</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span>
             <span class="n">nh_i_out</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;node&quot;</span><span class="p">),</span> <span class="p">[</span><span class="o">*</span><span class="n">hinge_location_i</span><span class="p">]</span>
@@ -863,9 +871,13 @@
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">element_type_i</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;TwoNodeLink&quot;</span><span class="p">:</span>
                 <span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_two_node_link</span><span class="p">(</span>
-                    <span class="n">component</span><span class="p">,</span> <span class="n">node_i</span><span class="p">,</span> <span class="n">nh_i_out</span><span class="p">,</span>
-                    <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span>
-                    <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
+                    <span class="n">component</span><span class="p">,</span>
+                    <span class="n">node_i</span><span class="p">,</span>
+                    <span class="n">nh_i_out</span><span class="p">,</span>
+                    <span class="n">x_axis</span><span class="p">,</span>
+                    <span class="n">y_axis</span><span class="p">,</span>
+                    <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span>
+                    <span class="p">{},</span>
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -886,7 +898,6 @@
             <span class="n">conn_node_i</span> <span class="o">=</span> <span class="n">node_i</span>
             <span class="n">conn_eo_i</span> <span class="o">=</span> <span class="n">eo_i</span>
         <span class="k">if</span> <span class="n">zerolength_gen_j</span><span class="p">:</span>
-
             <span class="n">hinge_location_j</span> <span class="o">=</span> <span class="n">p_i</span> <span class="o">+</span> <span class="n">x_axis</span> <span class="o">*</span> <span class="p">(</span>
                 <span class="n">clear_length</span> <span class="o">-</span> <span class="n">zerolength_gen_args_j</span><span class="p">[</span><span class="s2">&quot;distance&quot;</span><span class="p">]</span>
             <span class="p">)</span>
@@ -927,13 +938,17 @@
                     <span class="n">element_type_j</span><span class="p">,</span>
                     <span class="n">angle</span><span class="p">,</span>
                     <span class="mf">0.00</span><span class="p">,</span>
-                    <span class="mf">0.00</span>
+                    <span class="mf">0.00</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">element_type_j</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;TwoNodeLink&quot;</span><span class="p">:</span>
                 <span class="n">elm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_two_node_link</span><span class="p">(</span>
-                    <span class="n">component</span><span class="p">,</span> <span class="n">nh_j_out</span><span class="p">,</span> <span class="n">node_j</span><span class="p">,</span>
-                    <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span>
-                    <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span> <span class="p">{}</span>
+                    <span class="n">component</span><span class="p">,</span>
+                    <span class="n">nh_j_out</span><span class="p">,</span>
+                    <span class="n">node_j</span><span class="p">,</span>
+                    <span class="n">x_axis</span><span class="p">,</span>
+                    <span class="n">y_axis</span><span class="p">,</span>
+                    <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">fix_all</span><span class="p">,</span>
+                    <span class="p">{},</span>
                 <span class="p">)</span>
                 <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -967,7 +982,8 @@
             <span class="n">angle</span><span class="p">,</span>
             <span class="n">camber_2</span><span class="p">,</span>
             <span class="n">camber_3</span><span class="p">,</span>
-            <span class="n">n_x</span><span class="p">,</span> <span class="n">n_y</span>
+            <span class="n">n_x</span><span class="p">,</span>
+            <span class="n">n_y</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">component</span></div>
 
@@ -1106,9 +1122,9 @@
             <span class="p">)</span>  <span class="c1"># type: ignore</span>
 
             <span class="n">p_i_init</span> <span class="o">+=</span> <span class="n">h_offset_i</span> <span class="o">*</span> <span class="n">x_axis</span>
-            <span class="n">p_j_init</span> <span class="o">+=</span> <span class="o">-</span> <span class="n">h_offset_j</span> <span class="o">*</span> <span class="n">x_axis</span>
+            <span class="n">p_j_init</span> <span class="o">+=</span> <span class="o">-</span><span class="n">h_offset_j</span> <span class="o">*</span> <span class="n">x_axis</span>
             <span class="n">offset_i</span> <span class="o">+=</span> <span class="n">h_offset_i</span> <span class="o">*</span> <span class="n">x_axis</span>
-            <span class="n">offset_j</span> <span class="o">+=</span> <span class="o">-</span> <span class="n">h_offset_j</span> <span class="o">*</span> <span class="n">x_axis</span>
+            <span class="n">offset_j</span> <span class="o">+=</span> <span class="o">-</span><span class="n">h_offset_j</span> <span class="o">*</span> <span class="n">x_axis</span>
 
             <span class="k">if</span> <span class="n">section</span><span class="o">.</span><span class="n">snap_points</span> <span class="ow">and</span> <span class="p">(</span><span class="n">placement</span> <span class="o">!=</span> <span class="s2">&quot;centroid&quot;</span><span class="p">):</span>
                 <span class="c1"># obtain offset from section (local system)</span>
@@ -1171,26 +1187,27 @@
 <div class="viewcode-block" id="BeamColumnGenerator.add_diagonal_active">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_diagonal_active">[docs]</a>
     <span class="k">def</span> <span class="nf">add_diagonal_active</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">xj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">yj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
-            <span class="n">snap_i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">snap_j</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">n_sub</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span><span class="p">,</span>
-            <span class="n">element_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">]],</span>
-            <span class="n">placement</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;centroid&#39;</span><span class="p">,</span>
-            <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
-            <span class="n">camber_2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span> <span class="n">camber_3</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
-            <span class="n">split_existing_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">split_existing_j</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;generate_plain_component_assembly&#39;</span><span class="p">,</span>
-            <span class="n">additional_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">xi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">yi_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">xj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">yj_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">offset_i</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">offset_j</span><span class="p">:</span> <span class="n">nparr</span><span class="p">,</span>
+        <span class="n">snap_i</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">snap_j</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">transf_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">n_sub</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span><span class="p">,</span>
+        <span class="n">element_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">]],</span>
+        <span class="n">placement</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;centroid&#39;</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">camber_2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">camber_3</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span>
+        <span class="n">split_existing_i</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">split_existing_j</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;generate_plain_component_assembly&#39;</span><span class="p">,</span>
+        <span class="n">additional_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ComponentAssembly</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a diagonal beamcolumn element to all active levels.</span>
@@ -1204,7 +1221,7 @@
         <span class="n">defined_component_assemblies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">lvls</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
             <span class="n">lvl</span> <span class="o">=</span> <span class="n">lvls</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">lvl_prev</span> <span class="o">=</span> <span class="n">lvls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">lvl_prev</span> <span class="o">=</span> <span class="n">lvls</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">lvl_prev</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -1217,28 +1234,39 @@
                 <span class="n">d_z</span><span class="p">,</span> <span class="n">d_y</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">snap_points</span><span class="p">[</span><span class="n">placement</span><span class="p">]</span>
                 <span class="n">sec_offset_local</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.00</span><span class="p">,</span> <span class="n">d_y</span><span class="p">,</span> <span class="n">d_z</span><span class="p">])</span>
                 <span class="c1"># retrieve local coordinate system</span>
-                <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span> <span class="o">=</span> \
-                    <span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                        <span class="n">p_i_init</span><span class="p">,</span> <span class="n">p_j_init</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-                <span class="n">t_glob_to_loc</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span>
-                    <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span><span class="p">)</span>
+                <span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span> <span class="o">=</span> <span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
+                    <span class="n">p_i_init</span><span class="p">,</span> <span class="n">p_j_init</span><span class="p">,</span> <span class="n">angle</span>
+                <span class="p">)</span>  <span class="c1"># type: ignore</span>
+                <span class="n">t_glob_to_loc</span> <span class="o">=</span> <span class="n">transformation_matrix</span><span class="p">(</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span><span class="p">)</span>
                 <span class="n">t_loc_to_glob</span> <span class="o">=</span> <span class="n">t_glob_to_loc</span><span class="o">.</span><span class="n">T</span>
                 <span class="n">sec_offset_global</span> <span class="o">=</span> <span class="n">t_loc_to_glob</span> <span class="o">@</span> <span class="n">sec_offset_local</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">sec_offset_global</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
 
             <span class="n">node_i</span><span class="p">,</span> <span class="n">eo_i</span> <span class="o">=</span> <span class="n">beam_placement_lookup</span><span class="p">(</span>
-                <span class="n">xi_coord</span><span class="p">,</span> <span class="n">yi_coord</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">ndg</span><span class="p">,</span>
-                <span class="n">lvls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">offset_i</span><span class="p">,</span>
+                <span class="n">xi_coord</span><span class="p">,</span>
+                <span class="n">yi_coord</span><span class="p">,</span>
+                <span class="n">query</span><span class="p">,</span>
+                <span class="n">ndg</span><span class="p">,</span>
+                <span class="n">lvls</span><span class="p">,</span>
+                <span class="n">key</span><span class="p">,</span>
+                <span class="n">offset_i</span><span class="p">,</span>
                 <span class="n">sec_offset_global</span><span class="p">,</span>
                 <span class="n">split_existing_i</span><span class="p">,</span>
-                <span class="n">snap_i</span><span class="p">)</span>
+                <span class="n">snap_i</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">node_j</span><span class="p">,</span> <span class="n">eo_j</span> <span class="o">=</span> <span class="n">beam_placement_lookup</span><span class="p">(</span>
-                <span class="n">xj_coord</span><span class="p">,</span> <span class="n">yj_coord</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">ndg</span><span class="p">,</span>
-                <span class="n">lvls</span><span class="p">,</span> <span class="n">key</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">offset_j</span><span class="p">,</span>
+                <span class="n">xj_coord</span><span class="p">,</span>
+                <span class="n">yj_coord</span><span class="p">,</span>
+                <span class="n">query</span><span class="p">,</span>
+                <span class="n">ndg</span><span class="p">,</span>
+                <span class="n">lvls</span><span class="p">,</span>
+                <span class="n">key</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">offset_j</span><span class="p">,</span>
                 <span class="n">sec_offset_global</span><span class="p">,</span>
                 <span class="n">split_existing_j</span><span class="p">,</span>
-                <span class="n">snap_j</span><span class="p">)</span>
+                <span class="n">snap_j</span><span class="p">,</span>
+            <span class="p">)</span>
 
             <span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s1">&#39;component_purpose&#39;</span><span class="p">:</span> <span class="s1">&#39;diagonal_component&#39;</span><span class="p">,</span>
@@ -1253,12 +1281,11 @@
                 <span class="s1">&#39;transf_type&#39;</span><span class="p">:</span> <span class="n">transf_type</span><span class="p">,</span>
                 <span class="s1">&#39;angle&#39;</span><span class="p">:</span> <span class="n">angle</span><span class="p">,</span>
                 <span class="s1">&#39;camber_2&#39;</span><span class="p">:</span> <span class="n">camber_2</span><span class="p">,</span>
-                <span class="s1">&#39;camber_3&#39;</span><span class="p">:</span> <span class="n">camber_3</span>
+                <span class="s1">&#39;camber_3&#39;</span><span class="p">:</span> <span class="n">camber_3</span><span class="p">,</span>
             <span class="p">}</span>
 
             <span class="n">args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">additional_args</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> \
-                <span class="sa">f</span><span class="s1">&#39;Method not available: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;Method not available: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">mthd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
             <span class="n">defined_component_assemblies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">mthd</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">defined_component_assemblies</span></div>
@@ -1267,16 +1294,16 @@
 <div class="viewcode-block" id="BeamColumnGenerator.add_pz_active">
 <a class="viewcode-back" href="../../../_autosummary/osmg.gen.component_gen.html#osmg.gen.component_gen.BeamColumnGenerator.add_pz_active">[docs]</a>
     <span class="k">def</span> <span class="nf">add_pz_active</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">x_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">y_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span><span class="p">,</span>
-            <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span><span class="p">,</span>
-            <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">column_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">beam_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">zerolength_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">zerolength_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">y_coord</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="n">ElasticSection</span><span class="p">,</span>
+        <span class="n">physical_material</span><span class="p">:</span> <span class="n">PhysicalMaterial</span><span class="p">,</span>
+        <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">column_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">beam_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">zerolength_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">zerolength_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ComponentAssembly</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds a component assembly representing a steel W-section</span>
@@ -1290,7 +1317,6 @@
         <span class="k">assert</span> <span class="n">lvls</span><span class="o">.</span><span class="n">active</span><span class="p">,</span> <span class="s2">&quot;No active levels.&quot;</span>
         <span class="n">defined_components</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ComponentAssembly</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">lvls</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
-
             <span class="n">lvl</span> <span class="o">=</span> <span class="n">lvls</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lvls</span><span class="p">:</span>
                 <span class="k">continue</span>
@@ -1391,13 +1417,13 @@
                 <span class="n">outside_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">snap_points</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">e_mod</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">e_mod</span><span class="p">,</span>
-                <span class="n">area</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">area</span><span class="o">*</span><span class="n">factor_a</span><span class="p">,</span>
-                <span class="n">i_y</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">i_y</span><span class="o">*</span><span class="n">factor_i</span><span class="p">,</span>
-                <span class="n">i_x</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">i_x</span><span class="o">*</span><span class="n">factor_i</span><span class="p">,</span>
+                <span class="n">area</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">area</span> <span class="o">*</span> <span class="n">factor_a</span><span class="p">,</span>
+                <span class="n">i_y</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">i_y</span> <span class="o">*</span> <span class="n">factor_i</span><span class="p">,</span>
+                <span class="n">i_x</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">i_x</span> <span class="o">*</span> <span class="n">factor_i</span><span class="p">,</span>
                 <span class="n">g_mod</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">g_mod</span><span class="p">,</span>
-                <span class="n">j_mod</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">j_mod</span><span class="o">*</span><span class="n">factor_j</span><span class="p">,</span>
+                <span class="n">j_mod</span><span class="o">=</span><span class="n">section</span><span class="o">.</span><span class="n">j_mod</span> <span class="o">*</span> <span class="n">factor_j</span><span class="p">,</span>
                 <span class="n">sec_w</span><span class="o">=</span><span class="mf">0.00</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="n">elm_top_h_f</span> <span class="o">=</span> <span class="n">ElasticBeamColumn</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1562,16 +1588,16 @@
             <span class="n">elm_interior</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span>
-                <span class="n">zerolength_gen</span><span class="p">,</span> <span class="n">zerolength_method</span><span class="p">),</span> \
-                <span class="sa">f</span><span class="s2">&quot;Method not available: </span><span class="si">{</span><span class="n">zerolength_method</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">zerolength_gen</span><span class="p">,</span> <span class="n">zerolength_method</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Method not available: </span><span class="si">{</span><span class="n">zerolength_method</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">mthd</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">zerolength_gen</span><span class="p">,</span> <span class="n">zerolength_method</span><span class="p">)</span>
 
             <span class="c1"># define zerolength elements</span>
             <span class="n">zerolength_gen_args</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
-                    <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
-                    <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span>
-                 <span class="p">}</span>
+                <span class="s2">&quot;section&quot;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
+                <span class="s2">&quot;physical_material&quot;</span><span class="p">:</span> <span class="n">physical_material</span><span class="p">,</span>
+                <span class="s2">&quot;pz_length&quot;</span><span class="p">:</span> <span class="n">beam_depth</span><span class="p">,</span>
+            <span class="p">}</span>
             <span class="n">zerolength_gen_args</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">zerolength_args</span><span class="p">)</span>
             <span class="n">zerolen_top_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1580,7 +1606,7 @@
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
                 <span class="n">mthd</span><span class="p">,</span>
-                <span class="n">zerolength_gen_args</span>
+                <span class="n">zerolength_gen_args</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">zerolen_top_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1589,7 +1615,7 @@
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
                 <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">release_6</span><span class="p">,</span>
-                <span class="p">{}</span>
+                <span class="p">{},</span>
             <span class="p">)</span>
             <span class="n">zerolen_bottom_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1598,7 +1624,7 @@
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
                 <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">release_6</span><span class="p">,</span>
-                <span class="p">{}</span>
+                <span class="p">{},</span>
             <span class="p">)</span>
             <span class="n">zerolen_bottom_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">define_zerolength</span><span class="p">(</span>
                 <span class="n">component</span><span class="p">,</span>
@@ -1607,7 +1633,7 @@
                 <span class="n">x_axis</span><span class="p">,</span>
                 <span class="n">y_axis</span><span class="p">,</span>
                 <span class="n">zerolength_gen</span><span class="o">.</span><span class="n">release_6</span><span class="p">,</span>
-                <span class="p">{}</span>
+                <span class="p">{},</span>
             <span class="p">)</span>
 
             <span class="c1"># fill component assembly</span>
@@ -1630,17 +1656,9 @@
             <span class="n">component</span><span class="o">.</span><span class="n">internal_nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">bottom_v_b</span><span class="p">)</span>
 
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_top_h_f</span><span class="p">)</span>
-            <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span>
-                    <span class="s2">&quot;elm_top_h_f&quot;</span>
-                <span class="p">]</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">elm_top_h_f</span>
+            <span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;elm_top_h_f&quot;</span><span class="p">])</span> <span class="o">=</span> <span class="n">elm_top_h_f</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_top_h_b</span><span class="p">)</span>
-            <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span>
-                    <span class="s2">&quot;elm_top_h_b&quot;</span>
-                <span class="p">]</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">elm_top_h_b</span>
+            <span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;elm_top_h_b&quot;</span><span class="p">])</span> <span class="o">=</span> <span class="n">elm_top_h_b</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_bottom_h_f</span><span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_bottom_h_b</span><span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_top_v_f</span><span class="p">)</span>
@@ -1648,17 +1666,11 @@
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_bottom_v_f</span><span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_bottom_v_b</span><span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elm_interior</span><span class="p">)</span>
-            <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span>
-                    <span class="s2">&quot;elm_interior&quot;</span>
-                <span class="p">]</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">elm_interior</span>
+            <span class="p">(</span><span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;elm_interior&quot;</span><span class="p">])</span> <span class="o">=</span> <span class="n">elm_interior</span>
 
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">zerolen_top_f</span><span class="p">)</span>
             <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span>
-                    <span class="s2">&quot;nonlinear_spring&quot;</span>
-                <span class="p">]</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">named_contents</span><span class="p">[</span><span class="s2">&quot;nonlinear_spring&quot;</span><span class="p">]</span>
             <span class="p">)</span> <span class="o">=</span> <span class="n">zerolen_top_f</span>  <span class="c1"># type: ignore</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">zerolen_top_b</span><span class="p">)</span>
             <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">zerolen_bottom_f</span><span class="p">)</span>

@@ -66,8 +66,8 @@
 <div class="viewcode-block" id="split_component">
 <a class="viewcode-back" href="../../../_autosummary/osmg.preprocessing.split_component.html#osmg.preprocessing.split_component.split_component">[docs]</a>
 <span class="k">def</span> <span class="nf">split_component</span><span class="p">(</span>
-        <span class="n">component</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span><span class="p">)</span> \
-        <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
+    <span class="n">component</span><span class="p">:</span> <span class="n">ComponentAssembly</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">nparr</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Node</span><span class="p">,</span> <span class="n">nparr</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits a beam-functioning component assembly to accomodate for a</span>
 <span class="sd">    node required to connect another component assembly.</span>
@@ -84,8 +84,12 @@
 
     <span class="n">elms</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">elms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">))])</span>
+        <span class="p">[</span>
+            <span class="n">elm</span>
+            <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
     <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elms</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">elm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elms</span><span class="p">):</span>
         <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
@@ -167,8 +171,7 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">closest_elm</span><span class="o">.</span><span class="n">integration</span><span class="p">,</span> <span class="n">Lobatto</span><span class="p">)</span>
         <span class="n">beam_integration</span> <span class="o">=</span> <span class="n">Lobatto</span><span class="p">(</span>
             <span class="n">uid</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span>
-                <span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                     <span class="s2">&quot;beam integration&quot;</span>
                 <span class="p">)</span>
             <span class="p">),</span>
@@ -179,8 +182,7 @@
         <span class="n">elm_i</span> <span class="o">=</span> <span class="n">DispBeamColumn</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
             <span class="n">component</span><span class="p">,</span>
             <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span>
-                <span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                     <span class="s2">&quot;element&quot;</span>
                 <span class="p">)</span>
             <span class="p">),</span>
@@ -198,8 +200,7 @@
     <span class="n">transf_j</span> <span class="o">=</span> <span class="n">GeomTransf</span><span class="p">(</span>
         <span class="n">prev_gtransf</span><span class="o">.</span><span class="n">transf_type</span><span class="p">,</span>
         <span class="p">(</span>
-            <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span>
-            <span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+            <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                 <span class="s2">&quot;transformation&quot;</span>
             <span class="p">)</span>
         <span class="p">),</span>
@@ -214,8 +215,7 @@
         <span class="n">elm_j</span> <span class="o">=</span> <span class="n">ElasticBeamColumn</span><span class="p">(</span>
             <span class="n">component</span><span class="p">,</span>
             <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span>
-                <span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                     <span class="s2">&quot;element&quot;</span>
                 <span class="p">)</span>
             <span class="p">),</span>
@@ -228,8 +228,7 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">closest_elm</span><span class="o">.</span><span class="n">integration</span><span class="p">,</span> <span class="n">Lobatto</span><span class="p">)</span>
         <span class="n">beam_integration</span> <span class="o">=</span> <span class="n">Lobatto</span><span class="p">(</span>
             <span class="n">uid</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span>
-                <span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                     <span class="s2">&quot;beam integration&quot;</span>
                 <span class="p">)</span>
             <span class="p">),</span>
@@ -240,8 +239,7 @@
         <span class="n">elm_j</span> <span class="o">=</span> <span class="n">DispBeamColumn</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
             <span class="n">component</span><span class="p">,</span>
             <span class="p">(</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span>
-                <span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                <span class="n">component</span><span class="o">.</span><span class="n">parent_collection</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent_model</span><span class="o">.</span><span class="n">uid_generator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
                     <span class="s2">&quot;element&quot;</span>
                 <span class="p">)</span>
             <span class="p">),</span>

@@ -119,18 +119,19 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
-                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -159,10 +160,11 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
-                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -186,8 +188,8 @@
 <div class="viewcode-block" id="add_data__parent_nodes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__parent_nodes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__parent_nodes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">load_case</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">load_case</span><span class="p">:</span> <span class="n">LoadCase</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing parent nodes</span>
 
@@ -224,25 +226,27 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
             <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Parent Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[7]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[8]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[9]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[10]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[11]:.3g}</span><span class="s2">, &quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[12]:.3g}</span><span class="s2">)&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Parent Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+            <span class="p">),</span>
             <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span>
-                        <span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_nodes</span><span class="p">),</span>
+                <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="n">list_of_nodes</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
-                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span>
-                        <span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_nodes</span><span class="p">),</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="n">list_of_nodes</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">NODE_PRIMARY_COLOR</span><span class="p">,</span>
                     <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
@@ -256,8 +260,10 @@
 <div class="viewcode-block" id="add_data__internal_nodes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__internal_nodes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__internal_nodes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing internal nodes</span>
 
@@ -305,14 +311,15 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
-                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Mass: (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Load: (%</span><span class="si">{customdata[4]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[5]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[6]:.3g}</span><span class="s2">)&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -341,10 +348,11 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">restraints</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Coordinates: &quot;</span>
-                <span class="s2">&quot;(%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Coordinates: (%</span><span class="si">{x:.2f}</span><span class="s2">, %</span><span class="si">{y:.2f}</span><span class="s2">, %</span><span class="si">{z:.2f}</span><span class="s2">)&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Restraint: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Node: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="p">{</span>
                     <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="n">graphics_common_3d</span><span class="o">.</span><span class="n">node_marker</span><span class="p">[</span><span class="n">sym</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -368,8 +376,8 @@
 <div class="viewcode-block" id="add_data__release_nodes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__release_nodes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__release_nodes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">list_of_nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">node_module</span><span class="o">.</span><span class="n">Node</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">list_of_nodes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">node_module</span><span class="o">.</span><span class="n">Node</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing release nodes</span>
 
@@ -410,9 +418,10 @@
 <div class="viewcode-block" id="add_data__frames">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frames">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__frames</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element centroidal axis lines</span>
 
@@ -425,18 +434,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">line_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span>
-              <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># &gt;&gt;&gt;</span>
     <span class="c1"># it feels ridiculous to do this, but it&#39;s the only way I am</span>
     <span class="c1"># getting rid of type checking warnings.</span>
     <span class="n">elms_elastic</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)]</span>
+        <span class="n">elm</span>
+        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+    <span class="p">]</span>
     <span class="n">line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">elms_elastic</span><span class="p">)</span>
     <span class="n">elms_disp</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="n">elm</span>
+        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="n">line_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">elms_disp</span><span class="p">)</span>
@@ -499,12 +511,14 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_names</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;UDL (local): (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[4]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[5]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;UDL (local): (%</span><span class="si">{customdata[1]:.3g}</span><span class="s2">, &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;%</span><span class="si">{customdata[2]:.3g}</span><span class="s2">, %</span><span class="si">{customdata[3]:.3g}</span><span class="s2">)&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[4]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="s2">&quot;Parent: %</span><span class="si">{customdata[5]}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">)</span>
@@ -520,10 +534,12 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_names</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">)</span></div>
@@ -533,9 +549,10 @@
 <div class="viewcode-block" id="add_data__bars">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__bars">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__bars</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
+    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element centroidal axis lines</span>
 
@@ -546,8 +563,11 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">line_elems</span> <span class="o">=</span> <span class="p">[</span><span class="n">elm</span> <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
-                  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)]</span>
+    <span class="n">line_elems</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">elm</span>
+        <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
+    <span class="p">]</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">line_elems</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -603,10 +623,12 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_areas</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">)</span>
@@ -622,10 +644,12 @@
                 <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
                 <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">section_areas</span><span class="p">,</span>
                 <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
-                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="s2">&quot;Section area: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                    <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+                <span class="p">),</span>
                 <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">FRAME_COLOR</span><span class="p">},</span>
             <span class="p">}</span>
         <span class="p">)</span></div>
@@ -635,8 +659,8 @@
 <div class="viewcode-block" id="add_data__twonodelinks">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__twonodelinks">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__twonodelinks</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing twonodelink elements</span>
 
@@ -649,7 +673,8 @@
     <span class="n">link_elems</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">elm</span>
         <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_elements</span><span class="p">()</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TwoNodeLink</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TwoNodeLink</span><span class="p">)</span>
+    <span class="p">]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">link_elems</span><span class="p">:</span>
         <span class="k">return</span>
@@ -682,10 +707,12 @@
             <span class="s2">&quot;z&quot;</span><span class="p">:</span> <span class="n">z_list</span><span class="p">,</span>
             <span class="c1"># &quot;text&quot;: section_names,</span>
             <span class="s2">&quot;customdata&quot;</span><span class="p">:</span> <span class="n">customdata</span><span class="p">,</span>
-            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
-            <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hovertemplate&quot;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="s2">&quot;Section: %</span><span class="si">{text}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;&lt;extra&gt;Element: %</span><span class="si">{customdata[0]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Node @ this end: %</span><span class="si">{customdata[1]:d}</span><span class="s2">&lt;br&gt;&quot;</span>
+                <span class="s2">&quot;Parent: %</span><span class="si">{customdata[2]}</span><span class="s2">&lt;/extra&gt;&quot;</span>
+            <span class="p">),</span>
             <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">graphics_common</span><span class="o">.</span><span class="n">LINK_COLOR</span><span class="p">},</span>
         <span class="p">}</span>
     <span class="p">)</span></div>
@@ -695,8 +722,8 @@
 <div class="viewcode-block" id="add_data__frame_offsets">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_offsets">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__frame_offsets</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element rigid offset lines</span>
 
@@ -706,12 +733,13 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span>
-        <span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">return</span>
@@ -722,7 +750,8 @@
 
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">p_i</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">p_io</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
         <span class="n">p_j</span><span class="p">:</span> <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
@@ -753,9 +782,8 @@
 <div class="viewcode-block" id="add_data__frame_axes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__frame_axes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__frame_axes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-        <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element local axis lines</span>
 
@@ -767,12 +795,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
-    <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span> <span class="o">*</span> <span class="mf">0.025</span>
@@ -782,7 +811,8 @@
     <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_at_line_plots</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">x_vec</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">x_axis</span>
@@ -821,8 +851,8 @@
 <div class="viewcode-block" id="add_data__zerolength_axes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__zerolength_axes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__zerolength_axes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing zerolength element local axis lines</span>
 
@@ -835,7 +865,8 @@
 
     <span class="n">zerolength_elements</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">zerolength_elements</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ZeroLength</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ZeroLength</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">zerolength_elements</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">scaling</span> <span class="o">=</span> <span class="n">ref_len</span> <span class="o">*</span> <span class="mf">0.025</span>
@@ -879,8 +910,8 @@
 <div class="viewcode-block" id="add_data__global_axes">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__global_axes">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__global_axes</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">ref_len</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing global axes</span>
 
@@ -933,8 +964,8 @@
 <div class="viewcode-block" id="add_data__diaphragm_lines">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__diaphragm_lines">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__diaphragm_lines</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing lines indicating rigid diaphragm</span>
 <span class="sd">    constraints.</span>
@@ -959,7 +990,6 @@
     <span class="c1"># for each level that has a parent node, draw the lines</span>
     <span class="n">mdl</span> <span class="o">=</span> <span class="n">loadcase</span><span class="o">.</span><span class="n">parent_model</span>
     <span class="k">for</span> <span class="n">lvl_uid</span><span class="p">,</span> <span class="n">pnode</span> <span class="ow">in</span> <span class="n">pnodes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
         <span class="n">level</span> <span class="o">=</span> <span class="n">mdl</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="n">lvl_uid</span><span class="p">]</span>
         <span class="n">level_primary_nodes</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">level_primary_nodes</span><span class="p">:</span>
@@ -986,8 +1016,8 @@
 <div class="viewcode-block" id="add_data__tributary_area_boundaries">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__tributary_area_boundaries">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__tributary_area_boundaries</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span>
-        <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">loadcase</span><span class="p">:</span> <span class="n">LoadCase</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing lines indicating tributary area boundaries</span>
 <span class="sd">    that are used for load distribution.</span>
@@ -1005,7 +1035,6 @@
     <span class="n">z_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="n">trib_area_analysis_collection</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-
         <span class="n">level</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">parent_level</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">analysis</span><span class="o">.</span><span class="n">data</span>
         <span class="n">edge_polygons</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">edge_polygons</span>
@@ -1018,7 +1047,7 @@
                 <span class="n">y_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="n">x_vals</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
                 <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="n">y_vals</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">x_vals</span><span class="p">),</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="n">level</span><span class="o">.</span><span class="n">elevation</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_vals</span><span class="p">),</span> <span class="kc">None</span><span class="p">))</span>
 
     <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
@@ -1038,7 +1067,8 @@
 <div class="viewcode-block" id="add_data__extruded_frames_mesh">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_frames_mesh">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__extruded_frames_mesh</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
 
@@ -1050,9 +1080,11 @@
 
     <span class="n">beamcolumn_elems</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">element</span><span class="o">.</span><span class="n">Element</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">beamcolumn_elems</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+        <span class="n">mdl</span><span class="o">.</span><span class="n">list_of_specific_element</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">x_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1064,7 +1096,8 @@
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">beamcolumn_elems</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">))</span>
+            <span class="n">elm</span><span class="p">,</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">ElasticBeamColumn</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">DispBeamColumn</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">side_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">+</span> <span class="n">elm</span><span class="o">.</span><span class="n">geomtransf</span><span class="o">.</span><span class="n">offset_i</span>
@@ -1080,31 +1113,29 @@
             <span class="n">loc0</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_a</span>
+            <span class="p">)</span>
             <span class="n">loc1</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_b</span>
+            <span class="p">)</span>
             <span class="n">loc2</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_b</span>
+            <span class="p">)</span>
             <span class="n">loc3</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
-            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="o">+</span> <span class="n">side_a</span>
+            <span class="p">)</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
             <span class="n">index</span> <span class="o">+=</span> <span class="mi">4</span>
     <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
@@ -1126,7 +1157,8 @@
 <div class="viewcode-block" id="add_data__extruded_bars_mesh">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.add_data__extruded_bars_mesh">[docs]</a>
 <span class="k">def</span> <span class="nf">add_data__extruded_bars_mesh</span><span class="p">(</span>
-        <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data_dict</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]],</span> <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds a trace containing frame element extrusion mesh</span>
 
@@ -1147,7 +1179,6 @@
     <span class="n">k_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">elm</span> <span class="ow">in</span> <span class="n">line_elems</span><span class="p">:</span>
-
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">elm</span><span class="o">.</span><span class="n">visibility</span><span class="o">.</span><span class="n">hidden_when_extruded</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -1172,31 +1203,29 @@
             <span class="n">loc0</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_a</span>
+            <span class="p">)</span>
             <span class="n">loc1</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_b</span>
+            <span class="p">)</span>
             <span class="n">loc2</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_b</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">side_b</span>
+            <span class="p">)</span>
             <span class="n">loc3</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">z_vec</span>
                 <span class="o">+</span> <span class="n">halfedge</span><span class="o">.</span><span class="n">nxt</span><span class="o">.</span><span class="n">vertex</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_vec</span>
-                <span class="o">+</span> <span class="n">side_a</span><span class="p">)</span>
-            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
-            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
-            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span>
-                <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="o">+</span> <span class="n">side_a</span>
+            <span class="p">)</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">y_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">z_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">loc0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc1</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc2</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">loc3</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">i_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">j_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">k_list</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="n">index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">))</span>
             <span class="n">index</span> <span class="o">+=</span> <span class="mi">4</span>
     <span class="n">data_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
         <span class="p">{</span>
@@ -1218,19 +1247,20 @@
 <div class="viewcode-block" id="show">
 <a class="viewcode-back" href="../../../_autosummary/osmg.graphics.preprocessing_3d.html#osmg.graphics.preprocessing_3d.show">[docs]</a>
 <span class="k">def</span> <span class="nf">show</span><span class="p">(</span>
-        <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-        <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">offsets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">global_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">frame_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">zerolength_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">diaphragm_lines</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">tributary_area_boundaries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">to_html_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">to_figure</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">mdl</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">load_case</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">LoadCase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">extrude</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">offsets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">global_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">parent_nodes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">frame_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">zerolength_axes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">diaphragm_lines</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">tributary_area_boundaries</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">camera</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_html_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_figure</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Visualize the model</span>
 
