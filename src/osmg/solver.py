@@ -442,7 +442,6 @@ class Analysis:
             if sec.uid not in defined_sections:
                 ops.section(*sec.ops_args())
                 defined_sections[sec.uid] = sec
-                fibers = []
                 for part in parts:
                     mat = part.ops_material
                     define_material(mat, defined_materials)
@@ -1806,6 +1805,7 @@ class THAnalysis(GravityPlusAnalysis):
         drift_check: float = 0.00,
         time_limit: Optional[float] = None,
         dampen_out_residual: bool = False,
+        test_tolerance: float = 1e-12,
     ) -> dict[str, Union[int, str, float]]:
         """
         Run the time-history analysis
@@ -2020,7 +2020,7 @@ class THAnalysis(GravityPlusAnalysis):
             damping_vals[damping_vals < 0.00] = 0.00
             ops.modalDampingQ(*damping_vals)
 
-        ops.test("EnergyIncr", 1.0e-6, 100, 0)
+        ops.test("EnergyIncr", test_tolerance, 100, 0)
         ops.integrator('TRBDF2')
         ops.algorithm("KrylovNewton")
         # ops.algorithm("KrylovNewton", 'initial', 'initial')
@@ -2087,7 +2087,7 @@ class THAnalysis(GravityPlusAnalysis):
                 if analysis_failed:
                     break
 
-                ops.test("EnergyIncr", tols[num_subdiv], 200, 3, 2)
+                ops.test("EnergyIncr", test_tolerance, 200, 3, 2)
                 ops.algorithm(*algorithms[algorithm_idx])
                 check = ops.analyze(
                     1, analysis_time_increment * scale[num_subdiv]
@@ -2275,7 +2275,7 @@ class THAnalysis(GravityPlusAnalysis):
             target_timestamp = 10.00
 
             while curr_time + common.EPSILON < target_timestamp:
-                ops.test("EnergyIncr", tols[0], 200, 3, 2)
+                ops.test("EnergyIncr", test_tolerance, 200, 3, 2)
                 ops.algorithm(*algorithms[0])
                 check = ops.analyze(1, analysis_time_increment)
 
