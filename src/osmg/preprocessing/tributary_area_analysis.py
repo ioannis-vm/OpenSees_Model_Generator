@@ -320,7 +320,7 @@ class TributaryAreaAnaysis:
                 if index == len(all_edges_list):
                     # we are done.
                     continue
-                remaining_edges = all_edges_list[(index + 1) : :]
+                remaining_edges = all_edges_list[(index + 1)::]
                 for other_edge in remaining_edges:
                     # check if the two edges overlap or cross each other
                     if considered_edge.overlaps_or_crosses(other_edge):
