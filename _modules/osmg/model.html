@@ -164,12 +164,12 @@
     <span class="n">fiber_sections</span><span class="p">:</span> <span class="n">obj_collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">FiberSection</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">init</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span>
-    <span class="n">uniaxial_materials</span><span class="p">:</span> <span class="n">obj_collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">UniaxialMaterial</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="p">)</span>
-    <span class="n">physical_materials</span><span class="p">:</span> <span class="n">obj_collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">PhysicalMaterial</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">uniaxial_materials</span><span class="p">:</span> <span class="n">obj_collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span>
+        <span class="nb">int</span><span class="p">,</span> <span class="n">UniaxialMaterial</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">physical_materials</span><span class="p">:</span> <span class="n">obj_collections</span><span class="o">.</span><span class="n">Collection</span><span class="p">[</span>
+        <span class="nb">int</span><span class="p">,</span> <span class="n">PhysicalMaterial</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">uid_generator</span><span class="p">:</span> <span class="n">UIDGenerator</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">UIDGenerator</span><span class="p">)</span>
     <span class="n">settings</span><span class="p">:</span> <span class="n">Settings</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Settings</span><span class="p">)</span>
 

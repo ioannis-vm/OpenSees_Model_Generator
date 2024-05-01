@@ -277,12 +277,14 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elm</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">TrussBar</span><span class="p">):</span>
             <span class="n">offset_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
             <span class="n">offset_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-            <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
-                    <span class="mf">0.00</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="p">(</span>
+                <span class="n">x_vec</span><span class="p">,</span>
+                <span class="n">y_vec</span><span class="p">,</span>
+                <span class="n">z_vec</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span>
+                <span class="mf">0.00</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">outside_shape</span> <span class="o">=</span> <span class="n">elm</span><span class="o">.</span><span class="n">outside_shape</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1198,10 +1200,12 @@
             <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">i_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-            <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
-                <span class="p">)</span>
+            <span class="p">(</span>
+                <span class="n">x_vec</span><span class="p">,</span>
+                <span class="n">y_vec</span><span class="p">,</span>
+                <span class="n">z_vec</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
+                <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
             <span class="p">)</span>
 
         <span class="n">len_clr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_i</span> <span class="o">-</span> <span class="n">p_j</span><span class="p">)</span>
@@ -1753,10 +1757,12 @@
             <span class="n">p_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">p_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">i_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">elm</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-            <span class="n">x_vec</span><span class="p">,</span> <span class="n">y_vec</span><span class="p">,</span> <span class="n">z_vec</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
-                    <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
-                <span class="p">)</span>
+            <span class="p">(</span>
+                <span class="n">x_vec</span><span class="p">,</span>
+                <span class="n">y_vec</span><span class="p">,</span>
+                <span class="n">z_vec</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">transformations</span><span class="o">.</span><span class="n">local_axes_from_points_and_angle</span><span class="p">(</span>
+                <span class="n">p_i</span><span class="p">,</span> <span class="n">p_j</span><span class="p">,</span> <span class="mf">0.00</span>
             <span class="p">)</span>
 
         <span class="n">len_clr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p_i</span> <span class="o">-</span> <span class="n">p_j</span><span class="p">)</span>
