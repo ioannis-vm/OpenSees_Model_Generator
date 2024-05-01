@@ -363,7 +363,7 @@
                 <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_edges_list</span><span class="p">):</span>
                     <span class="c1"># we are done.</span>
                     <span class="k">continue</span>
-                <span class="n">remaining_edges</span> <span class="o">=</span> <span class="n">all_edges_list</span><span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="p">:]</span>
+                <span class="n">remaining_edges</span> <span class="o">=</span> <span class="n">all_edges_list</span><span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)::]</span>
                 <span class="k">for</span> <span class="n">other_edge</span> <span class="ow">in</span> <span class="n">remaining_edges</span><span class="p">:</span>
                     <span class="c1"># check if the two edges overlap or cross each other</span>
                     <span class="k">if</span> <span class="n">considered_edge</span><span class="o">.</span><span class="n">overlaps_or_crosses</span><span class="p">(</span><span class="n">other_edge</span><span class="p">):</span>
