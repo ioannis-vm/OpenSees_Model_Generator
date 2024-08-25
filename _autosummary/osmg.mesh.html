@@ -211,10 +211,10 @@ using the arctan2 function (in radians).</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">edge</span> <span class="o">=</span> <span class="n">Edge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span> <span class="o">=</span> <span class="n">Halfedge</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span>
-<span class="go">0.7853981633974483</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span>
-<span class="go">-2.356194490192345</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge1</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span> <span class="o">==</span> <span class="mf">0.7853981633974483</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">halfedge2</span><span class="o">.</span><span class="n">direction</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mf">2.356194490192345</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -495,16 +495,16 @@ automatically.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">polygon_inertia</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ixx&#39;</span><span class="p">]</span>
-<span class="go">-2.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;iyy&#39;</span><span class="p">]</span>
-<span class="go">-6.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ixy&#39;</span><span class="p">]</span>
-<span class="go">0.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ir&#39;</span><span class="p">]</span>
-<span class="go">-8.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ir_mass&#39;</span><span class="p">]</span>
-<span class="go">1.3333333333333333</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ixx&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mf">2.0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;iyy&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mf">6.0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ixy&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.00</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ir&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mf">8.0</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;ir_mass&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.33333333333333333333</span>
+<span class="go">True</span>
 </pre></div>
 </div>
 </dd></dl>

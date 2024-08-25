@@ -450,10 +450,10 @@
 <span class="sd">            &gt;&gt;&gt; edge = Edge(v1, v2)</span>
 <span class="sd">            &gt;&gt;&gt; halfedge1 = Halfedge(v1, edge)</span>
 <span class="sd">            &gt;&gt;&gt; halfedge2 = Halfedge(v2, edge)</span>
-<span class="sd">            &gt;&gt;&gt; halfedge1.direction()</span>
-<span class="sd">            0.7853981633974483</span>
-<span class="sd">            &gt;&gt;&gt; halfedge2.direction()</span>
-<span class="sd">            -2.356194490192345</span>
+<span class="sd">            &gt;&gt;&gt; halfedge1.direction() == 0.7853981633974483</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; halfedge2.direction() == -2.356194490192345</span>
+<span class="sd">            True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -631,16 +631,16 @@
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; coords = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])</span>
 <span class="sd">        &gt;&gt;&gt; res = polygon_inertia(coords)</span>
-<span class="sd">        &gt;&gt;&gt; res[&#39;ixx&#39;]</span>
-<span class="sd">        -2.0</span>
-<span class="sd">        &gt;&gt;&gt; res[&#39;iyy&#39;]</span>
-<span class="sd">        -6.0</span>
-<span class="sd">        &gt;&gt;&gt; res[&#39;ixy&#39;]</span>
-<span class="sd">        0.0</span>
-<span class="sd">        &gt;&gt;&gt; res[&#39;ir&#39;]</span>
-<span class="sd">        -8.0</span>
-<span class="sd">        &gt;&gt;&gt; res[&#39;ir_mass&#39;]</span>
-<span class="sd">        1.3333333333333333</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ixx&#39;] == -2.0</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;iyy&#39;] == -6.0</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ixy&#39;] == 0.00</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ir&#39;] == -8.0</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; res[&#39;ir_mass&#39;] == 1.33333333333333333333</span>
+<span class="sd">        True</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
