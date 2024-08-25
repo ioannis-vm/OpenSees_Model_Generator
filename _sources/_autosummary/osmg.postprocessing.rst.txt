@@ -29,7 +29,7 @@ osmg.postprocessing
    :template: custom-module-template.rst
    :recursive:
 
-   osmg.postprocessing.basic_forces
-   osmg.postprocessing.design
-   osmg.postprocessing.steel_design_checks
+   basic_forces
+   design
+   steel_design_checks
 

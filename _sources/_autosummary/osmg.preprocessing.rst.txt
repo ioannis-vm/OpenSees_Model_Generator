@@ -29,8 +29,8 @@ osmg.preprocessing
    :template: custom-module-template.rst
    :recursive:
 
-   osmg.preprocessing.rigid_diaphragm
-   osmg.preprocessing.self_weight_mass
-   osmg.preprocessing.split_component
-   osmg.preprocessing.tributary_area_analysis
+   rigid_diaphragm
+   self_weight_mass
+   split_component
+   tributary_area_analysis
 

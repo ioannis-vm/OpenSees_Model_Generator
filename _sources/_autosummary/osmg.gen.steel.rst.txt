@@ -29,5 +29,5 @@ osmg.gen.steel
    :template: custom-module-template.rst
    :recursive:
 
-   osmg.gen.steel.brb
+   brb
 

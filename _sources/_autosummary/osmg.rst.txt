@@ -29,23 +29,23 @@
    :template: custom-module-template.rst
    :recursive:
 
-   osmg.common
-   osmg.component_assembly
-   osmg.defaults
-   osmg.gen
-   osmg.get_latest_pypi_version
-   osmg.graphics
-   osmg.ground_motion_utils
-   osmg.level
-   osmg.line
-   osmg.load_case
-   osmg.mesh
-   osmg.model
-   osmg.obj_collections
-   osmg.ops
-   osmg.physical_material
-   osmg.postprocessing
-   osmg.preprocessing
-   osmg.solver
-   osmg.transformations
+   common
+   component_assembly
+   defaults
+   gen
+   get_latest_pypi_version
+   graphics
+   ground_motion_utils
+   level
+   line
+   load_case
+   mesh
+   model
+   obj_collections
+   ops
+   physical_material
+   postprocessing
+   preprocessing
+   solver
+   transformations
 
