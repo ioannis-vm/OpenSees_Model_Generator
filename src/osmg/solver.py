@@ -1482,7 +1482,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
             self._to_opensees_domain(case_name)
 
             self.log("Defining loads")
-            self._define_loads(case_name, 0.01)
+            self._define_loads(case_name)
             self.log("Running gravity analysis")
             self._run_gravity_analysis(100)
 
@@ -1525,7 +1525,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                 1.0e-11,
             ]
             steps = [500] * 12
-            norm = [1.0e-15] * 12
+            norm = [1.0e-8] * 12
             algorithms = [("KrylovNewton",), ("KrylovNewton", 'initial')]
 
             try:
@@ -1917,7 +1917,7 @@ class THAnalysis(GravityPlusAnalysis):
 
         # gravity analysis
         self.log("Defining loads")
-        self._define_loads(case_name, factor=0.1)
+        self._define_loads(case_name)
 
         self.log("Starting gravity analysis (G)")
         self._run_gravity_analysis(num_steps=10)
