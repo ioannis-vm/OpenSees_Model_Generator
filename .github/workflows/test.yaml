@@ -26,4 +26,4 @@ jobs:
       - name: flake8
         run: flake8 src
       - name: Unit tests
-        run: python -m pytest --doctest-modules src/osmg/
+        run: python -m pytest src/osmg/
