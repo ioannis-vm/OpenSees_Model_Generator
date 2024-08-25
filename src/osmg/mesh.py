@@ -398,10 +398,10 @@ class Halfedge:
             >>> edge = Edge(v1, v2)
             >>> halfedge1 = Halfedge(v1, edge)
             >>> halfedge2 = Halfedge(v2, edge)
-            >>> halfedge1.direction()
-            0.7853981633974483
-            >>> halfedge2.direction()
-            -2.356194490192345
+            >>> halfedge1.direction() == 0.7853981633974483
+            True
+            >>> halfedge2.direction() == -2.356194490192345
+            True
 
         """
 
@@ -560,16 +560,16 @@ def polygon_inertia(coords):
     Example:
         >>> coords = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])
         >>> res = polygon_inertia(coords)
-        >>> res['ixx']
-        -2.0
-        >>> res['iyy']
-        -6.0
-        >>> res['ixy']
-        0.0
-        >>> res['ir']
-        -8.0
-        >>> res['ir_mass']
-        1.3333333333333333
+        >>> res['ixx'] == -2.0
+        True
+        >>> res['iyy'] == -6.0
+        True
+        >>> res['ixy'] == 0.00
+        True
+        >>> res['ir'] == -8.0
+        True
+        >>> res['ir_mass'] == 1.33333333333333333333
+        True
 
     """
 

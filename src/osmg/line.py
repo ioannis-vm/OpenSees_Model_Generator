@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 import numpy as np
 import numpy.typing as npt
-from . import common
+from osmg import common
 
 # pylint: disable=no-else-return
 
@@ -54,8 +54,8 @@ class Line:
         Example:
             >>> from osmg.line import Line
             >>> l1 = Line('l1', np.array([0, 0]), np.array([2, 2]))
-            >>> l1.length()
-            2.8284271247461903
+            >>> l1.length() == 2.8284271247461903
+            True
 
         """
 
