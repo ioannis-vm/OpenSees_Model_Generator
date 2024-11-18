@@ -1184,7 +1184,7 @@ class GravityPlusAnalysis(Analysis):
                     fill_value=0.00,
                 )
                 res[:, j] += a_g(self.time_vector) * common.G_CONST_IMPERIAL
-                # TODO: update to support SI
+                # TODO(JVM): update to support SI
         dframe = pd.DataFrame(
             res,
             columns=[
@@ -1630,7 +1630,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         Plots the pushover curve
 
         """
-        # TODO: units
+        # TODO(JVM): units
         displacement, base_shear = self.table_pushover_curve(
             case_name, direction, node
         )

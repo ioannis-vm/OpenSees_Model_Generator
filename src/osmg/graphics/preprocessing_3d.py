@@ -45,9 +45,9 @@ def add_data__nodes(data_dict, mdl, load_case):
       load_case: the load_case to be visualized
 
     """
-    # TODO: this was written very sloppily, because I was in a rush.
+    # TODO(JVM): this was written very sloppily, because I was in a rush.
     # I need to improve this code, avoid code repetition
-    # TODO: merge this method with the other methods that plot nodes.
+    # TODO(JVM): merge this method with the other methods that plot nodes.
     list_of_nodes = mdl.list_of_primary_nodes()
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]

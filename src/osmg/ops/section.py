@@ -279,7 +279,7 @@ class FiberSection(Section):
                 )
                 area -= polygon_area(hole_coords)
             density = part.physical_material.density
-            # TODO: units
+            # TODO(JVM): units
             res += area * density * common.G_CONST_IMPERIAL
         return res * mult
 

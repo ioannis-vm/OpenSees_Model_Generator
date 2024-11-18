@@ -336,7 +336,7 @@ class SectionGenerator:
                     msg = f'Unsupported section type: {sec_type.__name__}'
                     raise ValueError(msg)
             elif sec_shape_designation == 'HSS_circ':
-                # TODO: eliminate some redundant code here by merging
+                # TODO(JVM): eliminate some redundant code here by merging
                 # suare and round HSS
                 assert sec_data['Type'] == 'HSS'
                 # must be circular: name will have 1.

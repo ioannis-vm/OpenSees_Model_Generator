@@ -449,7 +449,7 @@ class BeamColumnGenerator:
             assert isinstance(section, FiberSection)
             assert n_x is None
             assert n_y is None
-            # TODO: add elastic section support
+            # TODO(JVM): add elastic section support
             transf = GeomTransf(
                 transf_type,
                 self.model.uid_generator.new('transformation'),

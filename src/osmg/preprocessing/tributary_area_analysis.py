@@ -330,7 +330,7 @@ class TributaryAreaAnaysis:
         for internal_loop in internal:  # noqa: PLR1702
             poly = sg.Polygon([h.vertex.coords for h in internal_loop])
             skel = sg.skeleton.create_interior_straight_skeleton(poly)
-            # TODO: what we need to get rid of this is to end up with a list
+            # TODO(JVM): what we need to get rid of this is to end up with a list
             # of halfedges defining the subloops.
 
             # something like:

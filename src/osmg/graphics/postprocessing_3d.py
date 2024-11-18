@@ -1462,7 +1462,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
         an html file instead of being shown.
 
     """
-    # TODO: merge code repetitions with the previous function
+    # TODO(JVM): merge code repetitions with the previous function
 
     if subset_model:
         mdl = subset_model
