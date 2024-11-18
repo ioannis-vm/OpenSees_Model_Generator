@@ -192,7 +192,7 @@ class ElmQuery:
         """
         level = self.model.levels[lvl]
         for component in level.components.values():
-            if len(component.external_nodes) != 2:
+            if len(component.external_nodes) != 2:  # noqa: PLR2004
                 continue
             line_elems: list[
                 Union[

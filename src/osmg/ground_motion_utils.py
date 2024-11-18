@@ -30,11 +30,13 @@ def import_PEER(filename):  # noqa: N802
 
     # Read metadata
     with open(filename, encoding='utf-8') as file:
+        line_containing_units = 2
+        line_containing_number_of_points = 3
         for i, line in enumerate(file):
-            if i == 2:
+            if i == line_containing_units:
                 # Units
                 units = (line.split(sep=' ')[-1]).strip()
-            elif i == 3:
+            elif i == line_containing_number_of_points:
                 # Number of points
                 npts = int(re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0]))
                 # Time step
@@ -42,7 +44,7 @@ def import_PEER(filename):  # noqa: N802
                 tmp = re.sub(r'\s* SEC', '', tmp)
                 tmp = tmp.replace('SEC', '')  # some files have no space
                 d_t = float(tmp)
-            elif i > 3:
+            elif i > line_containing_number_of_points:
                 break
 
     # Assert correct number of points and units

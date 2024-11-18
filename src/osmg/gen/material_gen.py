@@ -229,33 +229,33 @@ class MaterialGenerator:
             assert direction == 'strong'
             assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
             # checks ~ acceptable range
-            if not 20.00 < sec_d / sec_tw < 55.00:
+            if not 20.00 < sec_d / sec_tw < 55.00:  # noqa: PLR2004
                 print(
                     f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
                     ' outside regression range'
                 )
                 print('20.00 < sec_d/sec_tw < 55.00')
                 print(section.name, '\n')
-            if not 20.00 < lbry < 80.00:
+            if not 20.00 < lbry < 80.00:  # noqa: PLR2004
                 print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
                 print('20.00 < lbry < 80.00')
                 print(section.name, '\n')
-            if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:
+            if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:  # noqa: PLR2004
                 print(
                     f'Warning: bf/(2 tf)={sec_bf / (2. * sec_tf):.2f}'
                     ' outside regression range'
                 )
                 print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
                 print(section.name, '\n')
-            if not 2.5 < elm_l / sec_d < 7.0:
+            if not 2.5 < elm_l / sec_d < 7.0:  # noqa: PLR2004
                 print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')
                 print('2.5 < elm_l/sec_d < 7.0')
                 print(section.name, '\n')
-            if not 4.00 < sec_d < 36.00:
+            if not 4.00 < sec_d < 36.00:  # noqa: PLR2004
                 print(f'Warning: Section d={sec_d:.2f} outside regression range')
                 print('4.00 < sec_d < 36.00')
                 print(section.name, '\n')
-            if not 35.00 < mat_fy < 65.00:
+            if not 35.00 < mat_fy < 65.00:  # noqa: PLR2004
                 print(f'Warning: Fy={mat_fy:.2f} outside regression range')
                 print('35.00 < mat_fy < 65.00')
                 print(section.name, '\n')
@@ -306,7 +306,7 @@ class MaterialGenerator:
             )
             theta_p = min(theta_p, 0.20)
             theta_pc = min(theta_pc, 0.30)
-            if axial_load_ratio <= 0.35:
+            if axial_load_ratio <= 0.35:  # noqa: PLR2004
                 lamda = (
                     25500.00
                     * (sec_d / sec_tw) ** (-2.14)
@@ -320,7 +320,7 @@ class MaterialGenerator:
                     * lbry ** (-1.30)
                     * (1.00 - axial_load_ratio) ** (1.19)
                 )
-            if axial_load_ratio <= 0.20:
+            if axial_load_ratio <= 0.20:  # noqa: PLR2004
                 sec_m = (
                     1.15
                     / 1.10

@@ -170,7 +170,7 @@ class Line:
         """
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
-        if np.abs(norm2) < 1.0e-4:
+        if np.abs(norm2) < common.EPSILON:
             raise ValueError
         r_b = point - self.start
         cross = np.linalg.norm(np.cross(r_a, r_b))

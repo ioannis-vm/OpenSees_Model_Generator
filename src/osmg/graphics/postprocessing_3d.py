@@ -28,6 +28,7 @@ from ..ops import element
 from ..postprocessing.basic_forces import basic_forces
 from . import graphics_common, graphics_common_3d
 from .preprocessing_3d import add_data__global_axes
+from osmg.common import TINY, ALPHA
 
 if TYPE_CHECKING:
     from ..solver import Analysis
@@ -647,7 +648,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
         d_global, _ = interp_3d_deformation(elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
-    if max_d > 1.00e-14:
+    if max_d > TINY:
         scaling = ref_len / max_d * 0.1
     else:
         # no infinite scaling, thank you
@@ -1056,7 +1057,7 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
     factor = 0.05
     nx_max = np.max(np.abs(np.column_stack(list(nx_vecs.values()))))
     scaling_n = force_scaling_factor(ref_len, nx_max, factor)
-    if scaling_n > 1.0e8:
+    if scaling_n > ALPHA:
         scaling_t = 1.00
     qy_max = np.max(np.abs(np.column_stack(list(qy_vecs.values()))))
     qz_max = np.max(np.abs(np.column_stack(list(qz_vecs.values()))))
@@ -1070,7 +1071,7 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
         scaling_q = scaling_qy
     else:
         scaling_q = 0.00
-    if scaling_q > 1.0e8:
+    if scaling_q > ALPHA:
         scaling_q = 1.00
     my_max = np.max(np.abs(np.column_stack(list(my_vecs.values()))))
     mz_max = np.max(np.abs(np.column_stack(list(mz_vecs.values()))))
@@ -1084,7 +1085,7 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
         scaling_m = scaling_my
     else:
         scaling_m = 0.00
-    if scaling_m > 1.0e8:
+    if scaling_m > ALPHA:
         scaling_m = 1.00
 
     for elm in list_of_line_elements:
@@ -1565,7 +1566,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
         )
     )
     scaling_n = force_scaling_factor(ref_len, nx_max, factor)
-    if scaling_n > 1.0e8:
+    if scaling_n > ALPHA:
         scaling_t = 1.00
     qy_max = np.max(
         np.abs(
@@ -1587,7 +1588,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
         scaling_q = scaling_qy
     else:
         scaling_q = 0.00
-    if scaling_q > 1.0e8:
+    if scaling_q > ALPHA:
         scaling_q = 1.00
     my_max = np.max(
         np.abs(
@@ -1609,7 +1610,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
         scaling_m = scaling_my
     else:
         scaling_m = 0.00
-    if scaling_m > 1.0e8:
+    if scaling_m > ALPHA:
         scaling_m = 1.00
 
     for elm in list_of_line_elements:

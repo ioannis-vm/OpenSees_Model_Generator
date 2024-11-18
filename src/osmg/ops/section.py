@@ -172,14 +172,16 @@ class SectionComponent:
         # certain way
         assert self.parent_section
         sec_name = self.parent_section.name
-        if 'HSS' in sec_name and len(sec_name.split('X')) == 3:
+        rectangular_sections = 3
+        circular_sections = 2
+        if 'HSS' in sec_name and len(sec_name.split('X')) == rectangular_sections:
             # rectangular HSS section!
             pieces = mesh.subdivide_hss_rect(
                 self.parent_section.properties['Ht'],
                 self.parent_section.properties['B'],
                 self.parent_section.properties['tdes'],
             )
-        elif 'HSS' in sec_name and len(sec_name.split('X')) == 2:
+        elif 'HSS' in sec_name and len(sec_name.split('X')) == circular_sections:
             # circular HSS section!
             pieces = mesh.subdivide_hss_circ(
                 self.parent_section.properties['OD'],

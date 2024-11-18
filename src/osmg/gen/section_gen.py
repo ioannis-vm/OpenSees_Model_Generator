@@ -273,7 +273,7 @@ class SectionGenerator:
             elif sec_shape_designation == 'HSS_rect':
                 assert sec_data['Type'] == 'HSS'
                 # must be rectangle: name will have 2 X's.
-                assert len(label.split('X')) == 3
+                assert len(label.split('X')) == 3  # noqa: PLR2004
                 sec_ht = sec_data['Ht']
                 sec_b = sec_data['B']
                 sec_t = sec_data['tdes']
@@ -340,7 +340,7 @@ class SectionGenerator:
                 # suare and round HSS
                 assert sec_data['Type'] == 'HSS'
                 # must be circular: name will have 1.
-                assert len(label.split('X')) == 2
+                assert len(label.split('X')) == 2  # noqa: PLR2004
                 sec_h = sec_data['OD']
                 sec_t = sec_data['tdes']
                 outside_shape = mesh_shapes.circ_mesh(sec_h)

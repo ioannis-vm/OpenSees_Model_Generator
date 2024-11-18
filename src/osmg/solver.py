@@ -1470,7 +1470,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
                         )
                         ops.algorithm(*algorithms[algorithm_idx])
                         current_load = ops.getLoadFactor(2)
-                        while current_load > 1e-4:
+                        load_threshold = 1e-4
+                        while current_load > load_threshold:
                             increment = -current_load / 10.00
                             ops.integrator('LoadControl', increment)
                             flag = ops.analyze(1)
@@ -2219,7 +2220,8 @@ class THAnalysis(GravityPlusAnalysis):
                 for ntag in node_tags:
                     vel += [x / num_nodes for x in ops.nodeVel(ntag)]
                 vel_norm = np.sqrt(vel @ vel)
-                if vel_norm < 1e-6:
+                velocity_threshold = 1e-6
+                if vel_norm < velocity_threshold:
                     if pbar is not None:
                         print()
                     break

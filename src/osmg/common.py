@@ -20,7 +20,7 @@ from typing import Any, Optional, OrderedDict
 # very big, very small numbers used for
 # comparing floats and hashing
 EPSILON = 1.00e-6
-ALPHA = 10000000.00
+ALPHA = 1.00e8
 
 # gravitational acceleration
 G_CONST_IMPERIAL = 386.22  # in/s**2
