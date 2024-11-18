@@ -1,7 +1,4 @@
-"""
-Defines utility functions used for data visualization.
-
-"""
+"""Defines utility functions used for data visualization."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -548,10 +545,7 @@ def add_data__line_elm_offsets_deformed(
 def add_data__frames_undeformed(
     data_dict: dict[str, object], list_of_line_elems: list[element.Element]
 ) -> None:
-    """
-    Adds a trace containing frame element centroidal axis lines
-
-    """
+    """Adds a trace containing frame element centroidal axis lines"""
     x_list: list[float | None] = []
     y_list: list[float | None] = []
     z_list: list[float | None] = []
@@ -589,10 +583,7 @@ def add_data__nodes_deformed(
     scaling: float,
     function: str,
 ) -> None:
-    """
-    Adds a trace containing nodes in their deformed locations.
-
-    """
+    """Adds a trace containing nodes in their deformed locations."""
     ids_list = [int(node.uid) for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)

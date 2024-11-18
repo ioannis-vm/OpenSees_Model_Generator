@@ -1,7 +1,4 @@
-"""
-Defines the :func:`~split_component` method.
-
-"""
+"""Defines the :func:`~split_component` method."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

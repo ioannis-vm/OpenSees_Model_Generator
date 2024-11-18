@@ -1,7 +1,4 @@
-"""
-Defines Analysis objects.
-
-"""
+"""Defines Analysis objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -159,9 +156,7 @@ class AnalysisSettings:
 
 @dataclass(repr=False)
 class Warnings:
-    """
-    Analysis warnings. Helps avoid issuing repeated warnings.
-    """
+    """Analysis warnings. Helps avoid issuing repeated warnings."""
 
     parent_analysis: Analysis
     issued_warnings: list[str] = field(default_factory=list)
@@ -214,10 +209,7 @@ class Analysis:
         self.warning = Warnings(self)
 
     def log(self, msg: str) -> None:
-        """
-        Adds a message to the log file.
-
-        """
+        """Adds a message to the log file."""
         if self.logger:
             # logger might not have been initialized yet
             self.logger.info(msg)
@@ -287,27 +279,18 @@ class Analysis:
         self.log(f'Python Version: {sys.version}')
 
     def _write_results_to_disk(self) -> None:
-        """
-        Serializes the results to a JSON file using json-tricks.
-
-        """
+        """Serializes the results to a JSON file using json-tricks."""
         with Path(f'{self.output_directory}/main_results.json').open('w') as file:
             json_data = dumps(self.results, indent=4)
             file.write(json_data)
 
     def read_results_from_disk(self) -> None:
-        """
-        Reads back results from a JSON file using json-tricks.
-
-        """
+        """Reads back results from a JSON file using json-tricks."""
         with Path(f'{self.output_directory}/main_results.json').open('r') as file:
             self.results = loads(file.read())
 
     def _to_opensees_domain(self, case_name: str) -> None:  # noqa: C901
-        """
-        Defines the model in OpenSeesPy.
-
-        """
+        """Defines the model in OpenSeesPy."""
         # initialize
         ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
@@ -703,10 +686,7 @@ class Analysis:
     ##################################
 
     def global_reactions(self, case_name: str, step: int) -> nparr:
-        """
-        Calculates and returns the global reaction forces.
-
-        """
+        """Calculates and returns the global reaction forces."""
         reactions = np.full(6, 0.00)
         # for lvl in self.mdl.levels.values():
         lvl = next(iter(self.mdl.levels.values()))  # temporary fix
@@ -759,10 +739,7 @@ class StaticAnalysis(Analysis):
     """
 
     def run(self, num_subdiv: int = 1) -> None:
-        """
-        Runs the static analysis.
-
-        """
+        """Runs the static analysis."""
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -811,10 +788,7 @@ class StaticAnalysis(Analysis):
 
 @dataclass
 class ModalAnalysis(Analysis):
-    """
-    Runs a modal analysis.
-
-    """
+    """Runs a modal analysis."""
 
     num_modes: int = field(default=1, repr=False)
 
@@ -1010,10 +984,7 @@ class ModalAnalysis(Analysis):
                 ) = forces_vector_local
 
     def run(self) -> None:
-        """
-        Runs the modal analysis.
-
-        """
+        """Runs the modal analysis."""
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -1077,10 +1048,7 @@ class ModalAnalysis(Analysis):
     def modal_participation_factors(
         self, case_name: str, direction: str
     ) -> tuple[nparr, nparr, nparr]:
-        """
-        Calculates modal participation factors
-
-        """
+        """Calculates modal participation factors"""
         dof_dir = {'x': 0, 'y': 1, 'z': 2}
         ntgs = list(self.mdl.dict_of_all_nodes().keys())
         # if there is a rigid diaphragm, we also need to include the parent nodes
@@ -1143,10 +1111,7 @@ class GravityPlusAnalysis(Analysis):
             raise ValueError(msg)
 
     def retrieve_node_displacement(self, uid: int, case_name: str) -> pd.DataFrame:
-        """
-        Returns the displacement of a node for all analysis steps
-
-        """
+        """Returns the displacement of a node for all analysis steps"""
         if case_name not in self.results:
             msg = f'case_name {case_name} not found in results.'
             raise ValueError(msg)
@@ -1159,10 +1124,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_acceleration(self, uid: int, case_name: str) -> pd.DataFrame:
-        """
-        Returns the acceleration of a node for all analysis steps
-
-        """
+        """Returns the acceleration of a node for all analysis steps"""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
@@ -1172,10 +1134,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """
-        Returns the velocity of a node for all analysis steps
-
-        """
+        """Returns the velocity of a node for all analysis steps"""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
@@ -1223,10 +1182,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_abs_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """
-        Returns the absolute velocity of a node for all analysis steps
-
-        """
+        """Returns the absolute velocity of a node for all analysis steps"""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, THAnalysis)
@@ -1262,10 +1218,7 @@ class GravityPlusAnalysis(Analysis):
         return dfrmae
 
     def retrieve_base_shear(self, case_name: str) -> pd.DataFrame:
-        """
-        Returns the base shear response history
-
-        """
+        """Returns the base shear response history"""
         base_shear_lst = []
         for step in range(self.results[case_name].n_steps_success):  # type:ignore
             base_shear_lst.append(self.global_reactions(case_name, step)[0:3])  # noqa: PERF401
@@ -1289,10 +1242,7 @@ class GravityPlusAnalysis(Analysis):
 
 @dataclass
 class PushoverAnalysis(GravityPlusAnalysis):
-    """
-    Pushover analysis
-
-    """
+    """Pushover analysis"""
 
     def _apply_lateral_load(
         self,
@@ -1629,10 +1579,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def table_pushover_curve(
         self, case_name: str, direction: str, node: Node
     ) -> tuple[nparr, nparr]:
-        """
-        Returns the force deformation results
-
-        """
+        """Returns the force deformation results"""
         if direction == 'x':
             control_dof = 0
         elif direction == 'y':
@@ -1660,10 +1607,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def plot_pushover_curve(
         self, case_name: str, direction: str, node: Node
     ) -> None:
-        """
-        Plots the pushover curve
-
-        """
+        """Plots the pushover curve"""
         # TODO(JVM): units
         displacement, base_shear = self.table_pushover_curve(
             case_name, direction, node
@@ -1737,10 +1681,7 @@ def define_lateral_load_pattern(
 def plot_ground_motion(
     filename: str, file_time_incr: float, gmunit: str = 'g', *, plotly: bool = False
 ) -> None:
-    """
-    Plots a ground motion input file.
-
-    """
+    """Plots a ground motion input file."""
     y_vals = np.loadtxt(filename)
     n_points = len(y_vals)
     x_vals = np.arange(0.00, n_points * file_time_incr, file_time_incr)
@@ -1767,10 +1708,7 @@ def plot_ground_motion(
 
 @dataclass
 class THAnalysis(GravityPlusAnalysis):
-    """
-    Dynamic time-history analysis
-
-    """
+    """Dynamic time-history analysis"""
 
     time_vector: list[float] = field(default_factory=list, repr=False)
     a_g: dict[int, npt.NDArray[np.float64]] = field(default_factory=dict, repr=False)
@@ -2291,10 +2229,7 @@ class THAnalysis(GravityPlusAnalysis):
     def plot_node_displacement_history(
         self, case_name: str, node: Node, direction: str, *, plotly: bool = False
     ) -> None:
-        """
-        Plots the displacement history of the specified node.
-
-        """
+        """Plots the displacement history of the specified node."""
         time_vec = self.time_vector
         uid = node.uid
         results = []
@@ -2326,10 +2261,7 @@ class THAnalysis(GravityPlusAnalysis):
 
 @dataclass
 class ModalResponseSpectrumAnalysis:
-    """
-    Modal response spectrum analysis.
-
-    """
+    """Modal response spectrum analysis."""
 
     mdl: Model
     load_case: LoadCase
@@ -2342,10 +2274,7 @@ class ModalResponseSpectrumAnalysis:
     anl: Analysis | None = field(default=None)
 
     def run(self) -> None:
-        """
-        Run the modal response spectrum analysis.
-
-        """
+        """Run the modal response spectrum analysis."""
         spectrum_ifun = interp1d(self.periods, self.spectrum, kind='linear')
         anl = ModalAnalysis(
             self.mdl,
@@ -2379,10 +2308,7 @@ class ModalResponseSpectrumAnalysis:
         self.anl = anl
 
     def combined_node_disp(self, node_uid: int) -> nparr:
-        """
-        Returns the SRSS-combined node displacement of a node.
-
-        """
+        """Returns the SRSS-combined node displacement of a node."""
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -2432,10 +2358,7 @@ class ModalResponseSpectrumAnalysis:
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
     def combined_basic_forces(self, element_uid: int) -> nparr:
-        """
-        Returns the SRSS-combined basic forces of a line element.
-
-        """
+        """Returns the SRSS-combined basic forces of a line element."""
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):

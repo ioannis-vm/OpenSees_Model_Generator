@@ -1,6 +1,4 @@
-"""
-Defines :obj:`~osmg.ops.section.Section` objects.
-"""
+"""Defines :obj:`~osmg.ops.section.Section` objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -167,10 +165,7 @@ class SectionComponent:
         return res
 
     def cut_into_tiny_little_pieces(self) -> list[shapely_Polygon]:
-        """
-        Returns data used to define fibers in OpenSees.
-
-        """
+        """Returns data used to define fibers in OpenSees."""
         # if we have an AISC HSS section, we need to discretize in a
         # certain way
         assert self.parent_section

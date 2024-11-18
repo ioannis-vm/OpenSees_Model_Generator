@@ -1,7 +1,4 @@
-"""
-Objects that generate materials.
-
-"""
+"""Objects that generate materials."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -36,9 +33,7 @@ nparr = npt.NDArray[np.float64]
 
 @dataclass(repr=False)
 class MaterialGenerator:
-    """
-    This object introduces element-specific materials to a model.
-    """
+    """This object introduces element-specific materials to a model."""
 
     model: Model
 

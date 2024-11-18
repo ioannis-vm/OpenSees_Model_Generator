@@ -1,6 +1,4 @@
-"""
-Defines OpenSees Element interfrace objects.
-"""
+"""Defines OpenSees Element interfrace objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

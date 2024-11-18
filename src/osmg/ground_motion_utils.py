@@ -107,9 +107,7 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
 
 
 def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:  # noqa: N803
-    """
-    Generate a simplified ASCE code response spectrum.
-    """
+    """Generate a simplified ASCE code response spectrum."""
     num_vals = len(T_vals)
     code_sa = np.full(num_vals, 0.00)
     T_short = S1 / Ss  # noqa: N806

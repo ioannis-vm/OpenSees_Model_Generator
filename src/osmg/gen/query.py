@@ -242,10 +242,7 @@ class LoadCaseQuery:
     loadcase: LoadCase
 
     def level_masses(self) -> nparr:
-        """
-        Returns the total mass of each level.
-
-        """
+        """Returns the total mass of each level."""
         mdl = self.model
         num_lvls = len(mdl.levels)
         distr = np.zeros(num_lvls)

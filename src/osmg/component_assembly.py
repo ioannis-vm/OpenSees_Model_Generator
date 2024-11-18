@@ -95,10 +95,7 @@ class ComponentAssembly:
         return res
 
     def list_of_elements(self) -> list[obj_collections.CollectionWithConnectivity]:
-        """
-        Returns a list of all element objects in the model.
-
-        """
+        """Returns a list of all element objects in the model."""
         return list(self.dict_of_elements().values())
 
     def element_connectivity(

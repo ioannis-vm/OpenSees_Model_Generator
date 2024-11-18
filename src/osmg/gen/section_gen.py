@@ -1,7 +1,4 @@
-"""
-Objects that generate sections.
-
-"""
+"""Objects that generate sections."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

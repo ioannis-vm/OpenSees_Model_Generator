@@ -1,6 +1,4 @@
-"""
-Defines :obj:`~osmg.load_case.LoadCase` objects.
-"""
+"""Defines :obj:`~osmg.load_case.LoadCase` objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -77,10 +75,7 @@ class PointLoadMass:
 
 @dataclass(repr=False)
 class LineElementUDL:
-    """
-    Line element uniformly distributed load object.
-
-    """
+    """Line element uniformly distributed load object."""
 
     parent_load_case: LoadCase
     parent_line_element: element.ElasticBeamColumn | element.DispBeamColumn

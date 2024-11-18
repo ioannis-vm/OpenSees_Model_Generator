@@ -1,6 +1,4 @@
-"""
-Defines :obj:`~osmg.line.Line` objects.
-"""
+"""Defines :obj:`~osmg.line.Line` objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

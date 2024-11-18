@@ -1,7 +1,4 @@
-"""
-BRB element generator.
-
-"""
+"""BRB element generator."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

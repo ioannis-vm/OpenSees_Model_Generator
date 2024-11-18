@@ -1,7 +1,4 @@
-"""
-Objects that generate unique IDs
-
-"""
+"""Objects that generate unique IDs"""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -19,10 +16,7 @@ from itertools import count
 
 @dataclass
 class UIDGenerator:
-    """
-    Generates unique identifiers (uids) for various objects.
-
-    """
+    """Generates unique identifiers (uids) for various objects."""
 
     def new(self, thing: str) -> int:
         """

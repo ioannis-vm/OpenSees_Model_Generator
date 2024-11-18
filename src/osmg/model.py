@@ -1,7 +1,4 @@
-"""
-Defines Model objects.
-
-"""
+"""Defines Model objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -204,10 +201,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_primary_nodes(self) -> list[Node]:
-        """
-        Returns a list of all the primary nodes in the model.
-
-        """
+        """Returns a list of all the primary nodes in the model."""
         list_of_nodes = []
         for lvl in self.levels.values():
             for node in lvl.nodes.values():
@@ -227,10 +221,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_internal_nodes(self) -> list[Node]:
-        """
-        Returns a list of all the internal nodes in the model.
-
-        """
+        """Returns a list of all the internal nodes in the model."""
         list_of_nodes = []
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -250,10 +241,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_all_nodes(self) -> list[Node]:
-        """
-        Returns a list of all the nodes in the model.
-
-        """
+        """Returns a list of all the nodes in the model."""
         list_of_nodes = []
         list_of_nodes.extend(self.list_of_primary_nodes())
         list_of_nodes.extend(self.list_of_internal_nodes())
@@ -293,10 +281,7 @@ class Model:
         return elems
 
     def list_of_elements(self) -> list[element.Element]:
-        """
-        Returns a list of all element objects in the model.
-
-        """
+        """Returns a list of all element objects in the model."""
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
@@ -326,10 +311,7 @@ class Model:
         return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
-        """
-        Returns the axis-aligned bouding box of the building
-
-        """
+        """Returns the axis-aligned bouding box of the building"""
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():

@@ -1,6 +1,4 @@
-"""
-Defines objects used in mesing operations.
-"""
+"""Defines objects used in mesing operations."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -391,10 +389,7 @@ class Halfedge:
         return out
 
     def __lt__(self, other: type[self]):
-        """
-        Comparison function used for sorting. Compares the halfedge ids.
-
-        """
+        """Comparison function used for sorting. Compares the halfedge ids."""
         return self.uid < other.uid
 
     def direction(self) -> float:
@@ -449,10 +444,7 @@ class Mesh:
         return geometric_properties(coords)
 
     def bounding_box(self) -> nparr:
-        """
-        Returns a bounding box of the mesh
-
-        """
+        """Returns a bounding box of the mesh"""
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -624,10 +616,7 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
 
 
 def geometric_properties(coords: nparr) -> dict[str, float]:
-    """
-    Aggregates the results of the previous functions.
-
-    """
+    """Aggregates the results of the previous functions."""
     # repeat the first row at the end to close the shape
     coords = np.vstack((coords, coords[0, :]))
     area = polygon_area(coords)
@@ -646,10 +635,7 @@ def geometric_properties(coords: nparr) -> dict[str, float]:
 
 
 def ang_reduce(ang: float) -> float:
-    """
-    Brings and angle expressed in radians in the interval [0, 2pi)
-
-    """
+    """Brings and angle expressed in radians in the interval [0, 2pi)"""
     while ang < 0:
         ang += 2.0 * np.pi
     while ang >= 2.0 * np.pi:
@@ -1076,10 +1062,7 @@ def print_halfedge_results(halfedges: list[Halfedge]) -> None:
 
 
 def plot_loop(halfedge_loop: list[Halfedge]) -> None:
-    """
-    Plots the vertices/edges of a list of halfedges.
-
-    """
+    """Plots the vertices/edges of a list of halfedges."""
     num = len(halfedge_loop)
     coords = np.full((num + 1, 2), 0.00)
     for i, halfedge in enumerate(halfedge_loop):
@@ -1092,10 +1075,7 @@ def plot_loop(halfedge_loop: list[Halfedge]) -> None:
 
 
 def plot_edges(edges: list[Edge]) -> None:
-    """
-    Plots the given edges.
-
-    """
+    """Plots the given edges."""
     fig = plt.figure()
     for edge in edges:
         coords = np.full((2, 2), 0.00)
@@ -1106,10 +1086,7 @@ def plot_edges(edges: list[Edge]) -> None:
 
 
 def sanity_checks(external: list[Halfedge], trivial: list[Halfedge]) -> None:
-    """
-    Perform some checks to make sure assumptions are not violated.
-
-    """
+    """Perform some checks to make sure assumptions are not violated."""
     #   We expect no trivial loops
     if trivial:
         print('Warning: Found trivial loop')  # noqa: T201

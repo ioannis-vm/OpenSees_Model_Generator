@@ -1,7 +1,4 @@
-"""
-Objects that introduce nodes to a model.
-
-"""
+"""Objects that introduce nodes to a model."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

@@ -1,7 +1,4 @@
-"""
-Basic Test Suite.
-
-"""
+"""Basic Test Suite."""
 
 # import pytest
 import numpy as np

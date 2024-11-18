@@ -1,7 +1,4 @@
-"""
-Generates meshes for preconfigured sections.
-
-"""
+"""Generates meshes for preconfigured sections."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -31,10 +28,7 @@ nparr = npt.NDArray[np.float64]
 
 
 def generate(edges: list[Edge]) -> Mesh:
-    """
-    Generates halfedges from the given edges.
-
-    """
+    """Generates halfedges from the given edges."""
     halfedges = define_halfedges(edges)
     loops = obtain_closed_loops(halfedges)
     _, internal, trivial = orient_loops(loops)
@@ -43,10 +37,7 @@ def generate(edges: list[Edge]) -> Mesh:
 
 
 def define_edges(vertices: list[Vertex]) -> list[Edge]:
-    """
-    Defines edges from an ordered list of vertices.
-
-    """
+    """Defines edges from an ordered list of vertices."""
     n_v = len(vertices)
     edges = []
     for i in range(n_v - 1):
@@ -232,10 +223,7 @@ def circ_mesh(dim_d: float) -> Mesh:
 
 
 def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
-    """
-    Generates generic snap poitns for a section object.
-
-    """
+    """Generates generic snap poitns for a section object."""
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
     snap_points: dict[str, nparr] = {}

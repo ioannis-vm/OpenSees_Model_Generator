@@ -1,7 +1,4 @@
-"""
-Introduces some default objects to a model.
-
-"""
+"""Introduces some default objects to a model."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

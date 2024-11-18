@@ -1,6 +1,4 @@
-"""
-Library for consistent all-purpose 2D plots
-"""
+"""Library for consistent all-purpose 2D plots"""
 
 
 #
@@ -50,9 +48,7 @@ def line_plot_interactive(
     yunit: str | Nonen = None,
     yhoverformat: str = '.0f',
 ) -> None:
-    """
-    Gneric polty line plot
-    """
+    """Gneric polty line plot"""
     assert len(x_vals) == len(y_vals), "Dimensions don't match"
     assert mode in {
         'spline+markers',

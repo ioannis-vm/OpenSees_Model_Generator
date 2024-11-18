@@ -1,6 +1,4 @@
-"""
-Model Generator for OpenSees ~ level
-"""
+"""Model Generator for OpenSees ~ level"""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

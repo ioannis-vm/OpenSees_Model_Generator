@@ -1,6 +1,4 @@
-"""
-Defines the RDAnalyzer object.
-"""
+"""Defines the RDAnalyzer object."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

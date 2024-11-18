@@ -1,7 +1,4 @@
-"""
-Objects that generate ZeroLength elements.
-
-"""
+"""Objects that generate ZeroLength elements."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -40,10 +37,7 @@ def fix_all(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """
-    Fixed in all directions.
-
-    """
+    """Fixed in all directions."""
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -56,10 +50,7 @@ def release_6(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """
-    Frees strong axis bending.
-
-    """
+    """Frees strong axis bending."""
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -72,10 +63,7 @@ def release_5(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """
-    Frees weak axis bending.
-
-    """
+    """Frees weak axis bending."""
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -88,10 +76,7 @@ def release_56(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """
-    Frees both strong and weak axis bending.
-
-    """
+    """Frees both strong and weak axis bending."""
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')

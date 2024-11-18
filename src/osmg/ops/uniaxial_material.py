@@ -1,7 +1,4 @@
-"""
-Defines OpenSees uniaxialMaterial interfrace objects.
-
-"""
+"""Defines OpenSees uniaxialMaterial interfrace objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

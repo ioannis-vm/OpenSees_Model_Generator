@@ -1,6 +1,4 @@
-"""
-Defines :obj:`~osmg.ops.node.Node` objects.
-"""
+"""Defines :obj:`~osmg.ops.node.Node` objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

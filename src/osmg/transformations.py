@@ -1,7 +1,4 @@
-"""
-Coordinate transformation operations.
-
-"""
+"""Coordinate transformation operations."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

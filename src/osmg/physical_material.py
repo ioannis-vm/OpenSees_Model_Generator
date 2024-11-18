@@ -1,6 +1,4 @@
-"""
-Defines PhysicalMaterial objects.
-"""
+"""Defines PhysicalMaterial objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
