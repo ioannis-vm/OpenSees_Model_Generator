@@ -103,8 +103,7 @@ def response_spectrum(th, dt, zeta, n_Pts=200):  # noqa: N803
     # Include T = 0 s ~ PGA
     Ts = np.concatenate((np.array([0.00]), T))  # noqa: N806
     sas = np.concatenate((np.array([np.max(np.abs(th))]), sa))
-    rs = np.column_stack((Ts, sas))
-    return rs
+    return np.column_stack((Ts, sas))
 
 
 def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:  # noqa: N803

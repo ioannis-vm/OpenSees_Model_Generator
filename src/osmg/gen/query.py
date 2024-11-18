@@ -69,8 +69,7 @@ class ElmQuery:
         uids.sort()
         uids_tuple = (*uids,)
         conn_dict = self.model.component_connectivity()
-        val = conn_dict.get(uids_tuple)
-        return val
+        return conn_dict.get(uids_tuple)
 
     def search_node_lvl(
         self,

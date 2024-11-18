@@ -87,7 +87,7 @@ class MaterialGenerator:
             param_c_r2,
         )
 
-        maxstrainrange_mat = MaxStrainRange(
+        return MaxStrainRange(
             self.model.uid_generator.new('uniaxial material'),
             'auto_maxstrainrange_brace_mat',
             steel02_mat,
@@ -96,8 +96,6 @@ class MaterialGenerator:
             def_coeff=0.068,
             node_tags=(node_i_uid, node_j_uid),
         )
-
-        return maxstrainrange_mat
 
     def generate_steel_hss_circ_brace_fatigue_mat(
         self,
@@ -148,15 +146,13 @@ class MaterialGenerator:
             a4=1.0,
         )
 
-        fatigue_mat = Fatigue(
+        return Fatigue(
             self.model.uid_generator.new('uniaxial material'),
             'auto_fatigue_brace_mat',
             steel02_mat,
             var_e0,
             var_m,
         )
-
-        return fatigue_mat
 
     def generate_steel_w_imk_material(  # noqa: C901
         self,
@@ -460,13 +456,12 @@ class MaterialGenerator:
 
         # new model
         if only_elastic:
-            elastic_mat = Elastic(
+            return Elastic(
                 self.model.uid_generator.new('uniaxial material'),
                 'auto_IMK',
                 stiffness * moment_modifier,
             )
-            return elastic_mat
-        bilin_mat = IMKBilin(
+        return IMKBilin(
             self.model.uid_generator.new('uniaxial material'),
             'auto_IMK',
             stiffness * moment_modifier,
@@ -491,4 +486,3 @@ class MaterialGenerator:
             d_plus,
             d_minus,
         )
-        return bilin_mat

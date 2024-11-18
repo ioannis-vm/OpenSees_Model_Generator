@@ -141,9 +141,7 @@ class Line:
             result = None
         # Otherwise the point is valid
         point = ra_ori + ra_dir * uvvec[0]
-        result = np.array([point[0], point[1]])
-
-        return result
+        return np.array([point[0], point[1]])
 
     def intersects_pt(self, point: nparr) -> bool:
         """

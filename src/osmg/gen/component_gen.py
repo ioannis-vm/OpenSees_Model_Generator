@@ -494,7 +494,7 @@ class BeamColumnGenerator:
 
         """
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
-        elm = ZeroLength(
+        return ZeroLength(
             assembly,
             self.model.uid_generator.new('element'),
             [node_i, node_j],
@@ -503,7 +503,6 @@ class BeamColumnGenerator:
             x_axis,
             y_axis,
         )
-        return elm
 
     def define_two_node_link(
         self,
@@ -520,7 +519,7 @@ class BeamColumnGenerator:
 
         """
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
-        elm = TwoNodeLink(
+        return TwoNodeLink(
             assembly,
             self.model.uid_generator.new('element'),
             [node_i, node_j],
@@ -529,7 +528,6 @@ class BeamColumnGenerator:
             x_axis,
             y_axis,
         )
-        return elm
 
     def add_beamcolumn_elements_in_series(
         self,

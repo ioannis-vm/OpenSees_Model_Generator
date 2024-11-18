@@ -346,8 +346,7 @@ class Model:
 
         """
         p_min, p_max = self.bounding_box(padding=0.00)
-        ref_len = np.max(p_max - p_min)
-        return ref_len
+        return np.max(p_max - p_min)
 
     def initialize_empty_copy(self, name):
         """

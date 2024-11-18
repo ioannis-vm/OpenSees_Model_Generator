@@ -90,7 +90,7 @@ def basic_forces(
 
     if as_tuple:
         return (nx_vec, qy_vec, qz_vec, tx_vec, mz_vec, my_vec)
-    dframe = pd.DataFrame.from_dict(
+    return pd.DataFrame.from_dict(
         {
             'nx': nx_vec,
             'qy': qy_vec,
@@ -100,4 +100,3 @@ def basic_forces(
             'my': my_vec,
         }
     )
-    return dframe

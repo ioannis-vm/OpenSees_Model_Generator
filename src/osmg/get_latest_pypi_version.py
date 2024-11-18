@@ -15,8 +15,7 @@ def get_latest_version(package_name):
 
     response = requests.get(url, timeout=10)
     package_info = response.json()
-    latest_version = package_info['info']['version']
-    return latest_version
+    return package_info['info']['version']
 
 
 if __name__ == '__main__':

@@ -205,10 +205,9 @@ class SectionComponent:
         material with the given one.
 
         """
-        new_component = SectionComponent(
+        return SectionComponent(
             self.outside_shape, self.holes, mat, self.physical_material
         )
-        return new_component
 
 
 @dataclass(repr=False)
@@ -296,7 +295,7 @@ class FiberSection(Section):
         for key, val in self.section_parts.items():
             new_part = val.copy_alter_material(mat)
             new_section_parts[key] = new_part
-        other_sec = FiberSection(
+        return FiberSection(
             f'auto_{self.name}',
             new_uid,
             self.outside_shape,
@@ -307,4 +306,3 @@ class FiberSection(Section):
             self.n_x,
             self.n_y,
         )
-        return other_sec

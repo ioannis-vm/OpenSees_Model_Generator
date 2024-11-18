@@ -592,7 +592,7 @@ class MinMax(UniaxialMaterial):
         OpenSees
 
         """
-        args = [
+        return [
             'MinMax',
             self.uid,
             self.predecessor.uid,
@@ -601,5 +601,3 @@ class MinMax(UniaxialMaterial):
             '-max',
             self.max_strain,
         ]
-
-        return args

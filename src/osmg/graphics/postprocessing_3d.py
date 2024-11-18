@@ -178,9 +178,7 @@ def interp_3d_points(elm, d_global, num_points, scaling):
         )
     )
 
-    interpolation_points = element_point_samples + d_global * scaling
-
-    return interpolation_points
+    return element_point_samples + d_global * scaling
 
 
 def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
@@ -657,8 +655,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     # never scale things down
     # (usually when this is required, things have gone bad
     #  and we should be able to realize that immediately)
-    scaling = max(scaling, 1.00)
-    return scaling
+    return max(scaling, 1.00)
 
 
 def show_deformed_shape(  # noqa: C901
@@ -896,8 +893,7 @@ def show_deformed_shape(  # noqa: C901
             fig.show()
 
     # return plot-related metadata
-    metadata = {'scaling': scaling}
-    return metadata
+    return {'scaling': scaling}
 
 
 def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
@@ -1408,13 +1404,12 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
         else:
             fig.show()
 
-    metadata = {
+    return {
         'scaling_n': scaling_n,
         'scaling_q': scaling_q,
         'scaling_m': scaling_m,
         'scaling_t': scaling_t,
     }
-    return metadata
 
 
 def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
@@ -1880,10 +1875,9 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
         else:
             fig.show()
 
-    metadata = {
+    return {
         'scaling_n': scaling_n,
         'scaling_q': scaling_q,
         'scaling_m': scaling_m,
         'scaling_t': scaling_t,
     }
-    return metadata
