@@ -417,31 +417,31 @@ def add_data__frames(
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
         if load_case:
-            customdata_list.append(
+            customdata_list.extend(
                 (
-                    elm.uid,
-                    *load_case.line_element_udl[elm.uid].val,
-                    elm.nodes[0].uid,
-                    elm.parent_component.uid,
+                    (
+                        elm.uid,
+                        *load_case.line_element_udl[elm.uid].val,
+                        elm.nodes[0].uid,
+                        elm.parent_component.uid,
+                    ),
+                    (
+                        elm.uid,
+                        *load_case.line_element_udl[elm.uid].val,
+                        elm.nodes[1].uid,
+                        elm.parent_component.uid,
+                    ),
+                    (None,) * 6,
                 )
             )
-            customdata_list.append(
-                (
-                    elm.uid,
-                    *load_case.line_element_udl[elm.uid].val,
-                    elm.nodes[1].uid,
-                    elm.parent_component.uid,
-                )
-            )
-            customdata_list.append((None,) * 6)
         else:
-            customdata_list.append(
-                (elm.uid, elm.nodes[0].uid, elm.parent_component.uid)
+            customdata_list.extend(
+                (
+                    (elm.uid, elm.nodes[0].uid, elm.parent_component.uid),
+                    (elm.uid, elm.nodes[1].uid, elm.parent_component.uid),
+                    (None,) * 3,
+                )
             )
-            customdata_list.append(
-                (elm.uid, elm.nodes[1].uid, elm.parent_component.uid)
-            )
-            customdata_list.append((None,) * 3)
 
     if load_case:
         customdata: nparr = np.array(customdata_list, dtype='object')
@@ -527,29 +527,29 @@ def add_data__bars(
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
         if load_case:
-            customdata_list.append(
+            customdata_list.extend(
                 (
-                    elm.uid,
-                    elm.nodes[0].uid,
-                    elm.parent_component.uid,
+                    (
+                        elm.uid,
+                        elm.nodes[0].uid,
+                        elm.parent_component.uid,
+                    ),
+                    (
+                        elm.uid,
+                        elm.nodes[1].uid,
+                        elm.parent_component.uid,
+                    ),
+                    (None,) * 6,
                 )
             )
-            customdata_list.append(
-                (
-                    elm.uid,
-                    elm.nodes[1].uid,
-                    elm.parent_component.uid,
-                )
-            )
-            customdata_list.append((None,) * 6)
         else:
-            customdata_list.append(
-                (elm.uid, elm.nodes[0].uid, elm.parent_component.uid)
+            customdata_list.extend(
+                (
+                    (elm.uid, elm.nodes[0].uid, elm.parent_component.uid),
+                    (elm.uid, elm.nodes[1].uid, elm.parent_component.uid),
+                    (None,) * 3,
+                )
             )
-            customdata_list.append(
-                (elm.uid, elm.nodes[1].uid, elm.parent_component.uid)
-            )
-            customdata_list.append((None,) * 3)
 
     if load_case:
         customdata: nparr = np.array(customdata_list, dtype='object')
@@ -620,9 +620,13 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
-        customdata_list.append((elm.uid, elm.nodes[0].uid, elm.parent_component.uid))
-        customdata_list.append((elm.uid, elm.nodes[1].uid, elm.parent_component.uid))
-        customdata_list.append((None,) * 3)
+        customdata_list.extend(
+            (
+                (elm.uid, elm.nodes[0].uid, elm.parent_component.uid),
+                (elm.uid, elm.nodes[1].uid, elm.parent_component.uid),
+                (None,) * 3,
+            )
+        )
 
     customdata: nparr = np.array(customdata_list, dtype='object')
     data_dict.append(

@@ -333,14 +333,14 @@ def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
                 i_list.extend((index + 0, index + 0))
                 j_list.extend((index + 1, index + 2))
                 k_list.extend((index + 2, index + 3))
-                intensity.append(float(np.sqrt(d_global[i, :] @ d_global[i, :])))
-                intensity.append(
-                    float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
+                intensity.extend(
+                    (
+                        float(np.sqrt(d_global[i, :] @ d_global[i, :])),
+                        float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :])),
+                        float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :])),
+                        float(np.sqrt(d_global[i, :] @ d_global[i, :])),
+                    )
                 )
-                intensity.append(
-                    float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
-                )
-                intensity.append(float(np.sqrt(d_global[i, :] @ d_global[i, :])))
                 index += 4
     data_dict.append(
         {

@@ -711,8 +711,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         v_j = edge.v_j
         h_i = edge.define_halfedge(v_i)
         h_j = edge.define_halfedge(v_j)
-        all_halfedges.append(h_i)
-        all_halfedges.append(h_j)
+        all_halfedges.extend((h_i, h_j))
         v_i.halfedges.append(h_i)
         v_j.halfedges.append(h_j)
 
