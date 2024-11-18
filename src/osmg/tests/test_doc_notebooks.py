@@ -1,4 +1,6 @@
 """
+Test tutorial code.
+
 Test that the code that generates the tutorial notebooks runs without
 producing any errors.
 

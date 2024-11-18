@@ -30,6 +30,7 @@ nparr = npt.NDArray[np.float64]
 class Vertex:
     """
     2D Vertex.
+
     It knows all the edges connected to it.
     It knows all the halfedges leaving from it.
     Each instance has an automatically generated unique id.
@@ -122,7 +123,9 @@ class Vertex:
 
 class Edge:
     """
-    2D oriented Edge. Connected to two vertices `v_i` and `v_j`.  Has
+    2D oriented Edge.
+
+    Connected to two vertices `v_i` and `v_j`.  Has
     two halfedges, `h_i` and `h_j`.  Each instance has an
     automatically generated unique id.
 
@@ -133,6 +136,7 @@ class Edge:
     def __init__(self, v_i: Vertex, v_j: Vertex) -> None:
         """
         Initializes a new edge with the given vertices.
+
         If the vertices don't already have an edge connecting them,
         this edge is added to their list of edges.
 
@@ -149,7 +153,9 @@ class Edge:
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of this edge, in the form
+        Returns a string representation of this edge.
+
+        Returns a string representation of this edge in the form
         `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
 
         """
@@ -157,6 +163,8 @@ class Edge:
 
     def define_halfedge(self, vertex: Vertex) -> Halfedge:
         """
+        Define a halfedge.
+
         For the current edge instance and given one of its vertices,
         we want the halfedge that points to the direction
         away from the given vertex.
@@ -185,6 +193,7 @@ class Edge:
     def other_vertex(self, vertex: Vertex) -> Vertex:
         """
         Returns the vertex of this edge that is not the given vertex.
+
         If the given vertex is not connected to this edge, a ValueError
         is raised.
 
@@ -216,6 +225,7 @@ class Edge:
     def overlaps_or_crosses(self, other: Edge) -> bool:
         """
         Returns True if this edge overlaps or crosses another edge.
+
         Edges are allowed to share one vertex (returns False), but not
         both (returns True).
 
@@ -348,12 +358,14 @@ class Edge:
 
 class Halfedge:
     """
-    Halfedge object. Every edge has two halfedges.  A halfedge has a
-    direction, pointing from one of the corresponding edge's vertices
-    to the other.  The `vertex` attribute corresponds to the edge's
-    vertex that the halfedge originates from.  Halfedges have a `next`
-    attribute that points to the next halfedge, forming closed loops,
-    or sequences, which is the purpose of this module.
+    Halfedge object.
+
+    Every edge has two halfedges. A halfedge has a direction, pointing
+    from one of the corresponding edge's vertices to the other.  The
+    `vertex` attribute corresponds to the edge's vertex that the
+    halfedge originates from.  Halfedges have a `next` attribute that
+    points to the next halfedge, forming closed loops, or sequences,
+    which is the purpose of this module.
 
     """
 
@@ -375,6 +387,8 @@ class Halfedge:
 
     def __repr__(self) -> str:
         """
+        Returns a string representation of the halfedge.
+
         Returns a string representation of the halfedge, in the form
         `(H0 from E0 to E0 next H1)`
 
@@ -394,6 +408,8 @@ class Halfedge:
 
     def direction(self) -> float:
         """
+        Calculates the angular direction of the halfedge.
+
         Calculates the angular direction of the halfedge
         using the arctan2 function (in radians).
 
@@ -421,6 +437,7 @@ class Halfedge:
 class Mesh:
     """
     A container that holds a list of unique halfedges.
+
     Vertices and edges can be retrieved from those.
     The mesh is assumed to be flat (2D).
 
@@ -436,8 +453,7 @@ class Mesh:
 
     def geometric_properties(self) -> dict[str, float]:
         """
-        Calculates the geometric properties of the shape defined by
-        the mesh
+        Calculates the geometric properties of the mesh.
 
         """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
@@ -645,6 +661,8 @@ def ang_reduce(ang: float) -> float:
 
 def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     """
+    Defines all halfedges.
+
     Given a list of edges, defines all the halfedges and
     associates them with their `next`.
 
@@ -768,6 +786,8 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
 
 def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
     """
+    Obtain closed halfedge loops.
+
     Given a list of halfedges, this function uses their `next`
     attribute to group them into sequences of closed loops (ordered
     lists of halfedges of which the `next` halfedge of the last list
@@ -809,6 +829,8 @@ def orient_loops(
     list[list[Halfedge]],
 ]:
     """
+    Orient loops.
+
     Separates loops to internal (counterclockwise) and external
     (clockwise). Also gathers trivial loops, i.e. halfedge sequences
     that define polygons that have no area (e.g. h1 -> h2 -> h1).
@@ -1041,6 +1063,8 @@ def subdivide_hss_circ(
 
 def print_halfedge_results(halfedges: list[Halfedge]) -> None:
     """
+    Prints the ids.
+
     Prints the ids of the defined halfedges and their vertex, edge and
     next, for debugging.
 

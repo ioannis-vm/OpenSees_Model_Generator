@@ -61,6 +61,8 @@ def interp_3d_deformation(
     num_points: int,
 ) -> tuple[nparr, nparr]:
     """
+    Interpolate deformation in 3D.
+
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
 
@@ -169,6 +171,8 @@ def interp_3d_points(
     scaling: float,
 ) -> nparr:
     """
+    Interpolate intermediate points.
+
     Calculates intermediate points based on end locations and
     deformations.
 
@@ -199,6 +203,8 @@ def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
     scaling: float,
 ) -> None:
     """
+    Extruded mesh of linear members.
+
     Adds a trace containing frame element extrusion mesh
     in its deformed state.
 
@@ -382,6 +388,8 @@ def add_data__line_elms_deformed(
     scaling: float,
 ) -> None:
     """
+    Cnetroidal axis lines.
+
     Adds a trace containing frame element centroidal axis lines
     in their deformed state.
 
@@ -472,6 +480,8 @@ def add_data__line_elm_offsets_deformed(
     scaling: float,
 ) -> None:
     """
+    Element offests.
+
     Adds a trace containing frame element rigid offset lines
     in their deformed state.
 
@@ -646,6 +656,8 @@ def get_auto_scaling_deformation(
     analysis: Analysis, case_name: str, mdl: Model, step: int
 ) -> float:
     """
+    Get scaling factor.
+
     Automatically calculate a scaling value that makes the maximum
     displacement appear approximately 10% of the largest dimention of
     the building's bounding box.
@@ -1457,6 +1469,8 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     to_html_file: str | None = None,
 ) -> dict[str, float]:
     """
+    Show the basic forces for a combination.
+
     Visualize the model and plot the enveloped frame element basic forces
     for a load combination.
 

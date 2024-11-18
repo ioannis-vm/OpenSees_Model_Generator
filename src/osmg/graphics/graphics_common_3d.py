@@ -1,5 +1,6 @@
 """
-Common utility functions used for 3D data visualization
+Common utility functions used for 3D data visualization.
+
 https://plotly.com/python/reference/
 """
 #

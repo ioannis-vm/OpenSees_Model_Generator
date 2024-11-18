@@ -1,4 +1,6 @@
 """
+Self-weight, self-mass.
+
 Defines methods to assign self-weight and self-mass to a loadcase
 using a given model.
 """

@@ -35,6 +35,7 @@ nparr = npt.NDArray[np.float64]
 class Element:
     """
     OpenSees element
+
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
 
     Attributes:
@@ -60,6 +61,7 @@ class Element:
 class ZeroLength(Element):
     """
     OpenSees ZeroLength element
+
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
 
     """
@@ -70,11 +72,7 @@ class ZeroLength(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'zeroLength',
             self.uid,
@@ -107,6 +105,7 @@ class ZeroLength(Element):
 class TwoNodeLink(Element):
     """
     OpenSees TwoNodeLink element
+
     https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html
 
     """
@@ -117,11 +116,7 @@ class TwoNodeLink(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'twoNodeLink',
             self.uid,
@@ -150,6 +145,8 @@ class TwoNodeLink(Element):
 @dataclass(repr=False)
 class TrussBar(Element):
     """
+    Truss and Corotational Truss
+
     Implements both of the following:
     OpenSees Truss Element
     https://openseespydoc.readthedocs.io/en/latest/src/trussEle.html
@@ -168,11 +165,7 @@ class TrussBar(Element):
     rflag: int = field(default=0)
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
 
         return [
@@ -192,6 +185,8 @@ class TrussBar(Element):
 
     def clear_length(self) -> float:
         """
+        Clear length.
+
         Returns the clear length of the element (without the rigid
         offsets)
 
@@ -217,6 +212,7 @@ class TrussBar(Element):
 class GeomTransf:
     """
     OpenSees geomTransf object
+
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation
 
@@ -231,11 +227,7 @@ class GeomTransf:
     z_axis: nparr
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             self.transf_type,
             self.uid,
@@ -250,6 +242,7 @@ class GeomTransf:
 class ElasticBeamColumn(Element):
     """
     OpenSees Elastic Beam Column Element
+
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
 
     """
@@ -260,11 +253,7 @@ class ElasticBeamColumn(Element):
     n_y: float | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         if self.n_x is not None:
             n_x = self.n_x
             k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
@@ -356,6 +345,8 @@ class ElasticBeamColumn(Element):
 
     def clear_length(self) -> list[object]:
         """
+        Clear length.
+
         Returns the clear length of the element (without the rigid
         offsets)
 
@@ -386,6 +377,7 @@ class ElasticBeamColumn(Element):
 class BeamIntegration:
     """
     OpenSees beamIntegration parent class.
+
     https://openseespydoc.readthedocs.io/en/latest/src/beamIntegration.html?highlight=beamintegration
 
     """
@@ -398,6 +390,7 @@ class BeamIntegration:
 class Lobatto(BeamIntegration):
     """
     OpenSees Lobatto beam integration.
+
     https://openseespydoc.readthedocs.io/en/latest/src/Lobatto.html
 
     """
@@ -405,11 +398,7 @@ class Lobatto(BeamIntegration):
     n_p: int
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return ['Lobatto', self.uid, self.parent_section.uid, self.n_p]
 
 
@@ -417,6 +406,7 @@ class Lobatto(BeamIntegration):
 class DispBeamColumn(Element):
     """
     OpenSees dispBeamColumn element
+
     https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html
 
     """
@@ -426,11 +416,7 @@ class DispBeamColumn(Element):
     integration: BeamIntegration
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'dispBeamColumn',
             self.uid,
@@ -445,6 +431,8 @@ class DispBeamColumn(Element):
 
     def clear_length(self) -> list[object]:
         """
+        Clear length.
+
         Returns the clear length of the element (without the rigid
         offsets)
 

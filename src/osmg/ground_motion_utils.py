@@ -1,4 +1,6 @@
 """
+Utility functions.
+
 Utility functions for handling ground motion files and response
 spectra.
 """
@@ -13,6 +15,8 @@ nparr = npt.NDArray[np.float64]
 
 def import_PEER(filename: str) -> nparr:  # noqa: N802
     """
+    Import a PEER ground motion.
+
     Import a ground motion record from a specified PEER ground
     motion record file.
     Output is a two column matrix of time - acceleration pairs.
@@ -62,6 +66,8 @@ def import_PEER(filename: str) -> nparr:  # noqa: N802
 
 def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> nparr:  # noqa: N803
     """
+    Calculate a  response spectrum.
+
     Calculate the linear response spectrum of an acceleration
     time history of fixed time interval dt and values given in vector
     th, and damping ratio zeta.

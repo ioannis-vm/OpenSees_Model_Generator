@@ -46,6 +46,8 @@ class MaterialGenerator:
         node_j_uid: int,
     ) -> MaxStrainRange:
         """
+        Max strain range material.
+
         Sen, A. D., Roeder, C. W., Lehman, D. E., & Berman,
         J. W. (2019). Nonlinear modeling of concentrically braced
         frames. Journal of Constructional Steel Research, 157,
@@ -101,6 +103,8 @@ class MaterialGenerator:
         brace_length: float,
     ) -> Fatigue:
         """
+        Circular HSS brace fatigue material.
+
         Karamanaci and Lignos (2014). Computational Approach for
         Collapse Assessment of Concentrically Braced Frames in Seismic
         Regions. Journal of Structural Engineering

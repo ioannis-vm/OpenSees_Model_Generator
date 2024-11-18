@@ -23,9 +23,10 @@ nparr = npt.NDArray[np.float64]
 
 def test_a() -> None:
     """
-    Basic functionality tests
-    Simple frame model
-    Imperial units
+    Basic functionality tests.
+
+    Simple frame model.
+    Imperial units.
 
     """
     mdl = Model('test_model')

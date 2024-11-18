@@ -1,5 +1,6 @@
 """
 The following utility functions are used for data visualization
+
 https://plotly.com/python/reference/
 """
 #
@@ -866,6 +867,8 @@ def add_data__diaphragm_lines(
     data_dict: list[dict[str, object]], loadcase: LoadCase
 ) -> None:
     """
+    Diaphragm lines.
+
     Adds a trace containing lines indicating rigid diaphragm
     constraints.
 
@@ -914,6 +917,8 @@ def add_data__tributary_area_boundaries(
     data_dict: list[dict[str, object]], loadcase: LoadCase
 ) -> None:
     """
+    Tributary area boundaries.
+
     Adds a trace containing lines indicating tributary area boundaries
     that are used for load distribution.
 

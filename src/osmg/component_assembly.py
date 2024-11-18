@@ -1,5 +1,7 @@
 """
-Collection of objects which, as a group, represent some part of a
+Component assemblies.
+
+Collections of objects which, as a group, represent some part of a
 structure.
 """
 
@@ -32,6 +34,8 @@ nparr = npt.NDArray[np.float64]
 @dataclass
 class ComponentAssembly:
     """
+    Component asssembly object.
+
     A component assembly represents some part of a structure and holds
     various lower-level elements such as nodes and beamcolumn
     elements.
@@ -85,6 +89,8 @@ class ComponentAssembly:
         self,
     ) -> dict[int, obj_collections.CollectionWithConnectivity]:
         """
+        Dictionary of elements.
+
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
 
@@ -102,6 +108,8 @@ class ComponentAssembly:
         self,
     ) -> dict[tuple[int, ...], obj_collections.CollectionWithConnectivity]:
         """
+        Element connectivity.
+
         Returns the connectivity of all elements. Elements are
         connected to external nodes. Each component assembly can be
         represented by a tuple of node uids of its connected nodes in

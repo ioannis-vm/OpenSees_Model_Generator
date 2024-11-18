@@ -22,6 +22,7 @@ from osmg.graphics.visibility import NodeVisibility
 class Node:
     """
     OpenSees node
+
     https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
 
     Attributes:

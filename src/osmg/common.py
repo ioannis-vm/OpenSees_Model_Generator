@@ -32,6 +32,8 @@ TINY = 1.0e-12
 
 def methods(obj: object) -> list[str]:
     """
+    Get the methods of an object.
+
     Returns the names of all methods of an object,
     excluding the dunder methods.
 
@@ -71,6 +73,8 @@ def previous_element(
     dct: OrderedDict[Hashable, Any], key: Hashable
 ) -> Hashable | None:
     """
+    Get the previous element.
+
     Returns the value of the element that comes before the given key
     in an ordered dictionary.
     If the key is not in the dictionary, or if it is the first element

@@ -21,6 +21,7 @@ from typing import Optional
 class UniaxialMaterial:
     """
     OpenSees uniaxialMaterial
+
     https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
 
     """
@@ -33,6 +34,7 @@ class UniaxialMaterial:
 class Elastic(UniaxialMaterial):
     """
     OpenSees Elastic
+
     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
 
     """
@@ -40,10 +42,7 @@ class Elastic(UniaxialMaterial):
     e_mod: float
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-        """
+        """Returns the OpenSees arguments."""
         return ['Elastic', self.uid, self.e_mod]
 
 
@@ -51,6 +50,7 @@ class Elastic(UniaxialMaterial):
 class Steel02(UniaxialMaterial):
     """
     OpenSees Steel02
+
     https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
 
     """
@@ -69,11 +69,7 @@ class Steel02(UniaxialMaterial):
     sig_init: float | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         args = [
             'Steel02',
             self.uid,
@@ -102,6 +98,7 @@ class Steel02(UniaxialMaterial):
 class Steel4(UniaxialMaterial):
     """
     OpenSees Steel4
+
     https://openseespydoc.readthedocs.io/en/latest/src/steel4.html
 
     """
@@ -137,11 +134,7 @@ class Steel4(UniaxialMaterial):
     cycNum: float | None = field(default=None)  # noqa: N815
 
     def ops_args(self) -> list[object]:  # noqa: C901
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         # non-symmetric behavior
         if self.b_kc:
             assert self.R_0c is not None
@@ -221,6 +214,7 @@ class Steel4(UniaxialMaterial):
 class Bilin(UniaxialMaterial):
     """
     OpenSees Bilin Material
+
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
 
     """
@@ -251,11 +245,7 @@ class Bilin(UniaxialMaterial):
     nFactor: float  # noqa: N815
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'Bilin',
             self.uid,
@@ -290,6 +280,7 @@ class Bilin(UniaxialMaterial):
 class IMKBilin(UniaxialMaterial):
     """
     OpenSees IMKBilin Material
+
     https://portwooddigital.com/2019/12/08/an-update-of-the-imk-models/
 
     """
@@ -317,11 +308,7 @@ class IMKBilin(UniaxialMaterial):
     D_Neg: float
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'IMKBilin',
             self.uid,
@@ -353,6 +340,7 @@ class IMKBilin(UniaxialMaterial):
 class Pinching4(UniaxialMaterial):
     """
     OpenSees Pinching4 Material
+
     https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
 
     """
@@ -398,11 +386,7 @@ class Pinching4(UniaxialMaterial):
     dmgType: str  # noqa: N815
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'Pinching4',
             self.uid,
@@ -452,6 +436,7 @@ class Pinching4(UniaxialMaterial):
 class Hysteretic(UniaxialMaterial):
     """
     OpenSees Bilin Material
+
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
 
     """
@@ -469,11 +454,7 @@ class Hysteretic(UniaxialMaterial):
     beta: float
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'Hysteretic',
             self.uid,
@@ -495,6 +476,7 @@ class Hysteretic(UniaxialMaterial):
 class Fatigue(UniaxialMaterial):
     """
     OpenSees Fatigue Material
+
     https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
 
     """
@@ -506,11 +488,7 @@ class Fatigue(UniaxialMaterial):
     var_max: float = field(default=+1.0e16)
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'Fatigue',
             self.uid,
@@ -530,6 +508,7 @@ class Fatigue(UniaxialMaterial):
 class MaxStrainRange(UniaxialMaterial):
     """
     OpenSees MaxStrainRange Material
+
     ~not officially added yet~
 
     """
@@ -544,11 +523,7 @@ class MaxStrainRange(UniaxialMaterial):
     elements_to_remove: list[int] | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         args = [
             'MaxStrainRange',
             self.uid,
@@ -575,6 +550,7 @@ class MaxStrainRange(UniaxialMaterial):
 class MinMax(UniaxialMaterial):
     """
     OpenSees MinMax Material
+
     https://openseespydoc.readthedocs.io/en/latest/src/MinMax.html
 
     """
@@ -584,11 +560,7 @@ class MinMax(UniaxialMaterial):
     max_strain: float
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'MinMax',
             self.uid,

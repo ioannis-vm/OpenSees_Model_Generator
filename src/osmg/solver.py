@@ -376,6 +376,8 @@ class Analysis:
             mat: UniaxialMaterial, defined_materials: list[UniaxialMaterial]
         ) -> None:
             """
+            Recursively define materials with predecessors.
+
             A cute recursive function that defines materials with
             predecessors.
 
@@ -733,9 +735,9 @@ class Analysis:
 @dataclass
 class StaticAnalysis(Analysis):
     """
-    Static analysis.  Stores all results (for each load case) in one
-    single step.
+    Static analysis.
 
+    Stores all results (for each load case) in one single step.
     """
 
     def run(self, num_subdiv: int = 1) -> None:
@@ -1080,6 +1082,8 @@ class ModalAnalysis(Analysis):
 @dataclass
 class GravityPlusAnalysis(Analysis):
     """
+    Analysis involving the initial application of gravity loads.
+
     When performing nonlinear static or dynamic analysis, it is common
     to first apply gravitly loads on the model and then proceed with
     some other analysis, like static pushover or transient dynamic
@@ -1146,11 +1150,7 @@ class GravityPlusAnalysis(Analysis):
     def retrieve_node_abs_acceleration(
         self, uid: int, case_name: str
     ) -> pd.DataFrame:
-        """
-        Returns the absolute acceleration of a node for all analysis
-        steps
-
-        """
+        """Absolute acceleration of a node for all analysis steps."""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, THAnalysis)
@@ -1226,11 +1226,7 @@ class GravityPlusAnalysis(Analysis):
         return base_shear
 
     def retrieve_release_force_defo(self, uid: int, case_name: str) -> pd.DataFrame:
-        """
-        Returns the force-deformation of a zerolength element for all
-        analysis steps
-
-        """
+        """Force-deformation of a zerolength element for all steps."""
         num = len(self.results[case_name].release_force_defo[uid])
         res = np.zeros((num, 6))
         for i in range(num):
@@ -1635,6 +1631,8 @@ def define_lateral_load_pattern(
     redefine: bool = False,
 ) -> None:
     """
+    Define the lateral load pattern.
+
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
 
@@ -2327,6 +2325,8 @@ class ModalResponseSpectrumAnalysis:
 
     def combined_node_disp_diff(self, node_i_uid: int, node_j_uid: int) -> nparr:
         """
+        SRSS-combined displacement of relative displacement.
+
         Returns the SRSS-combined displacement difference between two
         nodes.
 

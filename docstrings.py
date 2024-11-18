@@ -1,4 +1,6 @@
 """
+Remove type hints from docstrings.
+
 This script was used to remove all type-hints from the docstrings,
 since the type hints exist in the code itself and Sphinx can pick them
 up just fine. If something is enclosed in parenthesis inside a
@@ -24,6 +26,8 @@ def list_directories(root_dir: str) -> list[Path]:
 
 def list_python_files(directory: str) -> list[Path]:
     """
+    List all python files.
+
     List all Python files in the specified directory and
     subdirectories.
 

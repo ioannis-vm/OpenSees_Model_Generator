@@ -1,4 +1,6 @@
 """
+Tributary area analysis.
+
 Defines objects associated with tributary area analysis for load
 distribution.
 

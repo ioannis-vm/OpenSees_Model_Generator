@@ -31,6 +31,8 @@ def split_component(
     component: ComponentAssembly, point: nparr
 ) -> tuple[Node, nparr]:
     """
+    Split component.
+
     Splits a beam-functioning component assembly to accomodate for a
     node required to connect another component assembly.
 

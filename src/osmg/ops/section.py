@@ -33,6 +33,7 @@ nparr = npt.NDArray[np.float64]
 class Section:
     """
     Section object.
+
     The axes are defined in the same way as they are
     defined in OpenSees. The colors assigned to
     the axes for plotting follow the
@@ -91,6 +92,8 @@ class ElasticSection(Section):
 
     def weight_per_length(self) -> list[object]:
         """
+        Weight per unit length.
+
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and
         connections.
@@ -199,6 +202,8 @@ class SectionComponent:
 
     def copy_alter_material(self, mat: UniaxialMaterial) -> SectionComponent:
         """
+        Shallow copy.
+
         Make a shallow copy of a section component and replace the old
         material with the given one.
 
@@ -212,6 +217,7 @@ class SectionComponent:
 class FiberSection(Section):
     """
     Fiber section object.
+
     Can consist of multiple materials.
     The primary part of the component must have the key "main".
 
@@ -244,11 +250,7 @@ class FiberSection(Section):
         return res
 
     def ops_args(self) -> list[object]:
-        """
-        Returns the arguments required to define the object in
-        OpenSees
-
-        """
+        """Returns the OpenSees arguments."""
         return [
             'Fiber',
             self.uid,
@@ -258,6 +260,8 @@ class FiberSection(Section):
 
     def weight_per_length(self) -> list[object]:
         """
+        Weight per unit length.
+
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and connections.
 
@@ -286,6 +290,8 @@ class FiberSection(Section):
         self, mat: UniaxialMaterial, new_uid: int
     ) -> FiberSection:
         """
+        Shallow copy.
+
         Returns a shallow copy of the section object in which all
         opensees_material objects have been replaced with the given
         material. Required for the modling of steel braced frames.

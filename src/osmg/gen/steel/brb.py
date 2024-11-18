@@ -28,6 +28,8 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class BRBGenSettings:
     """
+    Default values used by BRBGenerator objects.
+
     This object holds default values that are used by BRBGenerator
     objects, to better organize those values and improve the usability
     of the BRBGenerator objects by allowing their methods to have
@@ -60,6 +62,8 @@ class BRBGenSettings:
 @dataclass(repr=False)
 class BRBGenerator:
     """
+    Simplify the definition of BRB elements.
+
     Uses the lower-level `gen` classes to simplify the definition of
     BRB elements simulated using a corotational truss opensees element
     and the Steel4 material wrapped under a Fatigue material, as done

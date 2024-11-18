@@ -100,8 +100,9 @@ class Collection(dict[TK, TV]):
 
     def add(self, obj: Any) -> None:
         """
-        Add an object to the collection. The object needs to have
-        a unique id attribute, `uid`.
+        Add an object to the collection.
+
+        The object needs to have a unique id attribute, `uid`.
 
         Arguments:
           obj: Object to be added.
@@ -117,6 +118,8 @@ class Collection(dict[TK, TV]):
 
     def retrieve_by_attr(self, attr: str, val: Any) -> Any:
         """
+        Retrieve object by attribute value.
+
         Retrieve an object from the collection based on an attribute
         value. If more than one instances satisfy the criterion, the
         function returns the first occurrence.
@@ -271,8 +274,7 @@ class NodeCollection(Collection[int, node.Node]):
 @dataclass(repr=False)
 class CollectionWithConnectivity(Collection[TK, TV]):
     """
-    Collection of elements for which it is important to consider their
-    connectivity.
+    Collection of elements for which connectivity matters.
 
     Attributes:
     ----------
@@ -287,6 +289,7 @@ class CollectionWithConnectivity(Collection[TK, TV]):
     def add(self, obj: object) -> None:
         """
         Adds an element to the collection.
+
         The method also checks to see if an object having the same
         connectivity exists in the collection, and raises an error if
         it does.

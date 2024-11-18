@@ -63,6 +63,8 @@ def retrieve_snap_pt_global_offset(
     angle: float,
 ) -> nparr:
     """
+    Required offset for snap point.
+
     Returns the necessary offset to connect an element at a specified
     snap point of the section.
 
@@ -107,6 +109,8 @@ def beam_placement_lookup(  # noqa: C901
     snap: str,
 ) -> tuple[Node, nparr]:
     """
+    Find elements to connect to if they exist.
+
     Performs lookup operations before placing a beam-functioning
     component assembly to determine how to connect it with
     respect to the other existing objects in the model.
@@ -201,6 +205,8 @@ def beam_placement_lookup(  # noqa: C901
 
 def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
     """
+    Look for a panel zone.
+
     Determines if a panel zone joint component assembly is present
     at the specified node.
 
@@ -217,9 +223,10 @@ def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
 @dataclass(repr=False)
 class TrussBarGenerator:
     """
+    TrussBar generator object.
+
     Introduces bar elements to a model.
     Bar elements are linear elements that can only carry axial load.
-
     """
 
     model: Model = field(repr=False)
@@ -247,7 +254,8 @@ class TrussBarGenerator:
         split_existing_j: bool | None = None,
     ) -> ComponentAssembly:
         """
-        Adds a truss bar element.
+        Add a truss bar element.
+
         If offsets are required, they are implemented through the
         addition of RigidLink elements.
 
@@ -316,6 +324,8 @@ class TrussBarGenerator:
 
         def prepare_connection(node_x: Node, eo_x: nparr) -> Node:
             """
+            Add auxiliary elements to account for offsets.
+
             For each end of the bar element, creates a rigid link if
             an offset exists, and returns the node to which the bar
             element should connect to. This function is called twice,
@@ -419,6 +429,8 @@ class BeamColumnGenerator:
         n_y: float | None = None,
     ) -> ElasticBeamColumn | DispBeamColumn:
         """
+        Define a beamcolumn element.
+
         Adds a beamcolumn element to the model, connecting the
         specified nodes.
 
@@ -627,9 +639,10 @@ class BeamColumnGenerator:
         n_y: int | None = None,
     ) -> ComponentAssembly:
         """
+        Plain component assembly.
+
         Generates a plain component assembly, with line elements in
         series.
-
         """
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
@@ -693,6 +706,8 @@ class BeamColumnGenerator:
         zerolength_gen_args_j: dict[str, object],
     ) -> ComponentAssembly:
         """
+        Component assembly with hinges at the ends.
+
         Defines a component assembly that is comprised of
         beamcolumn elements connected in series with nonlinear springs
         attached at the ends, followed by another sequence of
@@ -882,7 +897,9 @@ class BeamColumnGenerator:
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
         """
-        Adds a vertical beamcolumn element to all active levels.  This
+        Vertical component assembly.
+
+        Adds a vertical component assembly to all active levels. This
         method assumes that the levels are defined in order, from
         lowest to highest elevation, with consecutive ascending
         integer keys.
@@ -1157,7 +1174,9 @@ class BeamColumnGenerator:
         zerolength_args: dict[str, object],
     ) -> dict[int, ComponentAssembly]:
         """
-        Adds a component assembly representing a steel W-section
+        Add a panel zone.
+
+        Add a component assembly representing a steel W-section
         panel zone joint.
 
         """

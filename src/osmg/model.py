@@ -39,6 +39,8 @@ nparr = npt.NDArray[np.float64]
 
 def transfer_component(other: Model, component: ComponentAssembly) -> None:
     """
+    Transfer a component between models.
+
     Transfers a single component assembly from one model to
     another, assuming the other model was generated with the
     :func:`~Model.initialize_empty_copy` method.
@@ -58,6 +60,7 @@ def transfer_component(other: Model, component: ComponentAssembly) -> None:
 class Settings:
     """
     General customization of a model.
+
         imperial_units:
             True for imperial:
                 in, lb, lb/(in/s2)
@@ -87,6 +90,7 @@ class Settings:
 class Model:
     """
     Model object.
+
     A model object is a representation of a structural model in
     OpenSees. It is the primary object of osmg.
     It contains levels, elastic sections, fiber sections,
@@ -152,13 +156,14 @@ class Model:
         self,
     ) -> dict[tuple[int, ...], ComponentAssembly]:
         """
-        Returns the connectivity of all component
-        assemblies. Component assemblies are collections of
-        lower-level components that are connected to primary
-        nodes. Each component assembly can be represented by a tuple
-        of node uids of its connected nodes in ascending order. This
-        method returns a dictionary having these tuples as keys, and
-        the associated components as values.
+        Connectivity of all component assemblies.
+
+        Component assemblies are collections of lower-level components
+        that are connected to primary nodes. Each component assembly
+        can be represented by a tuple of node uids of its connected
+        nodes in ascending order. This method returns a dictionary
+        having these tuples as keys, and the associated components as
+        values.
 
         """
         res = {}
@@ -192,7 +197,8 @@ class Model:
 
     def dict_of_primary_nodes(self) -> dict[int, Node]:
         """
-        Returns a dictionary of all the primary nodes in the model.
+        Dictionary of all the primary nodes in the model.
+
         The keys are the uids of the nodes.
         """
         dict_of_nodes: dict[int, Node] = {}
@@ -210,7 +216,8 @@ class Model:
 
     def dict_of_internal_nodes(self) -> dict[int, Node]:
         """
-        Returns a dictionary of all the internal nodes in the model.
+        Dictionary of all the internal nodes in the model.
+
         The keys are the uids of the nodes.
 
         """
@@ -231,7 +238,8 @@ class Model:
 
     def dict_of_all_nodes(self) -> dict[int, Node]:
         """
-        Returns a dictionary of all the nodes in the model.
+        Dictionary of all the nodes in the model.
+
         The keys are the uids of the nodes.
 
         """
@@ -249,8 +257,8 @@ class Model:
 
     def dict_of_components(self) -> dict[int, ComponentAssembly]:
         """
-        Returns a dictionary of all the component assemblies in the
-        model.
+        Dictionary of all the component assemblies in the model.
+
         The keys are the uids of the component assemblies.
 
         """
@@ -261,16 +269,13 @@ class Model:
         return comps
 
     def list_of_components(self) -> list[ComponentAssembly]:
-        """
-        Returns a list of all the component assembiles in the
-        model.
-
-        """
+        """List of all the component assembiles in the model."""
         return list(self.dict_of_components().values())
 
     def dict_of_elements(self) -> dict[int, element.Element]:
         """
-        Returns a dictionary of all element objects in the model.
+        Dictionary of all element objects in the model.
+
         The keys are the uids of the objects.
 
         """
@@ -288,8 +293,8 @@ class Model:
         self, element_class: type[element.Element]
     ) -> dict[int, element.Element]:
         """
-        Returns a dictionary of all element objects in the model of a
-        particular element class.
+        Element objects of a particular element class.
+
         The keys are the uids of the objects.
 
         """
@@ -304,8 +309,7 @@ class Model:
         self, element_class: type[element.Element]
     ) -> list[element.Element]:
         """
-        Returns a list of all element objects in the model of a
-        particular element class.
+        Element objects in the model of a particular element class.
 
         """
         return list(self.dict_of_specific_element(element_class).values())
@@ -325,8 +329,8 @@ class Model:
 
     def reference_length(self) -> float:
         """
-        Returns the largest dimension of the
-        bounding box of the building
+        Largest dimension of the bounding box of the building.
+
         (used in graphics)
 
         """
@@ -336,6 +340,7 @@ class Model:
     def initialize_empty_copy(self, name: str) -> Model:
         """
         Initializes a shallow empty copy of the model.
+
         Used to create subset models.
 
         """
@@ -356,6 +361,8 @@ class Model:
 
     def transfer_by_polygon_selection(self, other: Model, coords: nparr) -> None:
         """
+        Transfer components using a polygon selection.
+
         Uses :func:`~transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified
         polygon.

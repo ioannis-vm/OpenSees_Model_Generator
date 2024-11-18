@@ -19,6 +19,7 @@ from dataclasses import dataclass
 class PhysicalMaterial:
     """
     Physical material.
+
     We use this for self-weight, plotting enhancements etc.
 
     Example:

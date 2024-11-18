@@ -25,8 +25,10 @@ if TYPE_CHECKING:
 @dataclass
 class Level:
     """
-    Level Object. Levels are part of a model and they contain primary
-      nodes and component assemblies.
+    Level Object.
+
+    Levels are part of a model and they contain primary nodes and
+    component assemblies.
 
     Attributes:
     ----------

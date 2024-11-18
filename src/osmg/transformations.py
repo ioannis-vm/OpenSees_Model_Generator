@@ -49,6 +49,8 @@ def rotation_matrix_2d(ang: float) -> nparr:
 
 def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
     """
+    3D rotation matrix.
+
     Returns the rotation matrix associated with counterclockwise
     rotation about the given axis by theta radians.
 
@@ -94,6 +96,8 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
 
 def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
     """
+    Transformation matrix.
+
     Returns a transformation matrix that transforms points from
     the coordinate system in which the x, y and z axes are expressed,
     to the local coordinate system defined by them.
@@ -139,6 +143,8 @@ def local_axes_from_points_and_angle(
     point_i: nparr, point_j: nparr, ang: float
 ) -> tuple[nparr, nparr, nparr]:
     """
+    Local axes from two points and an orientation angle.
+
     Given a start point, and end point, and an angle,
     obtain the local coordinate system of a linear element.
 
@@ -209,6 +215,8 @@ def local_axes_from_points_and_angle(
 
 def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
     """
+    Offset transformation.
+
     Calculate the displacement at the end of a rigid offset by
     specifying the displacement and rotation of the other end.
 

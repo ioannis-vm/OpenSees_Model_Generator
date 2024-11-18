@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 class ElementVisibility:
     """
     Element visibility object.
+
     Controls whether an element is displayed in the plots
     and whether it is defined in OpenSees or not
     """
@@ -31,6 +32,7 @@ class ElementVisibility:
 class NodeVisibility:
     """
     Node visibility object.
+
     Controls whether a node is displayed in the plots
     """
 

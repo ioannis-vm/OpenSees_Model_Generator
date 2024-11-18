@@ -31,7 +31,8 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class LoadCombination:
     """
-    Load combinations
+    Load combinations.
+
     stuff in the first list are added.
     stuff inside the sub-list are enveloped
     """
@@ -43,8 +44,10 @@ class LoadCombination:
         self, elm: TrussBar | ElasticBeamColumn | DispBeamColumn, num_points: int
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
+        Calculate envelope.
+
         Calculates the envelope of the basic forces for the
-        given load combination
+        given load combination.
         """
         df_min = pd.DataFrame(
             np.full((num_points, 6), np.inf),
@@ -94,8 +97,10 @@ class LoadCombination:
         self, node_i: Node, node_j: Node
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
+        Calculate the envelope of relative displacement.
+
         Calculates the enveloped displacement difference between
-        two nodes
+        two nodes.
         """
         disp_min = np.full(6, np.inf)
         disp_max = np.full(6, -np.inf)

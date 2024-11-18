@@ -74,6 +74,8 @@ class NodeGenerator:
         self, x_loc: float, y_loc: float, z_loc: float, lvl: int
     ) -> Node:
         """
+        Add a node.
+
         Adds a node at the specified coordinates and level having a
         custom elevation.
 

@@ -28,10 +28,10 @@ if TYPE_CHECKING:
 @dataclass(repr=False)
 class RDAnalyzer:
     """
-    Rigid Diaphragm Analyzer object. Used to apply rigid diaphragm
-    constraints and optionally gather mass from the nodes of the level
-    to the primary nodes
+    Rigid Diaphragm Analyzer object.
 
+    Used to apply rigid diaphragm constraints and optionally gather
+    mass from the nodes of the level to the primary nodes.
     """
 
     parent_loadcase: LoadCase
@@ -39,6 +39,8 @@ class RDAnalyzer:
 
     def run(self, gather_mass: bool) -> None:
         """
+        Apply rigid diaphragm constraints.
+
         Applies rigid diaphragm constraints and optionally gathers
         mass from the nodes of the level to the primary nodes
 

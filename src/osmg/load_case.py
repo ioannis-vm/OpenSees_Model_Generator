@@ -92,10 +92,11 @@ class LineElementUDL:
 
     def add_glob(self, udl: nparr) -> None:
         """
-        Adds a uniformly distributed load to the existing udl The load
-        is defined with respect to the global coordinate system of the
-        building, and it is converted to the local coordinate system
-        prior to adding it.
+        Adds a uniformly distributed load to the existing udl.
+
+        The load is defined with respect to the global coordinate
+        system of the building, and it is converted to the local
+        coordinate system prior to adding it.
 
         Arguments:
           udl: Array of size 3 containing
@@ -136,6 +137,8 @@ class LineElementUDL:
 
     def to_global(self) -> nparr:
         """
+        Convert to global system coordinates.
+
         Returns the quantity expressed in the global coordinate
         system.
 
@@ -153,6 +156,7 @@ class LineElementUDL:
 class LoadCase:
     """
     Load Case object.
+
     Load cases contain information related to the specified loads,
     mass, parent nodes and rigid diaphragm constraints, etc.
     Analysis objects can use multiple load cases.
@@ -214,6 +218,8 @@ class LoadCase:
         self, level_uids: list[int], *, gather_mass: bool = False
     ) -> None:
         """
+        Add rigid diaphragms.
+
         Processes the geometry of the given levels and applies rigid
         diaphragm constraints.
 
@@ -225,6 +231,8 @@ class LoadCase:
 
     def number_of_free_dofs(self) -> int:
         """
+        Number of free DOFs.
+
         Calculates the number of free DOFS of the model, considering
         all (potentially) defined constraints, restraints and parent
         nodes.

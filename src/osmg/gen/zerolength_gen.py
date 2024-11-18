@@ -99,6 +99,8 @@ def imk_6(
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    IMK material at DOF6.
+
     Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
     steel components in support of collapse prediction of steel moment
     frames under earthquake loading. Journal of Structural
@@ -152,10 +154,7 @@ def imk_56(
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    release in the weak axis bending direction,
-    :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
-    direction
-
+    IMK material at DOFs 5 and 6.
     """
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
@@ -211,6 +210,8 @@ def imk_6_release_5(
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    IMK at DOF6, release at DOF5.
+
     release in the weak axis bending direction,
     :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
     direction
@@ -252,6 +253,8 @@ def gravity_shear_tab(
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    Gravity shear tab connection hinge.
+
     Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
     the overstrength and collapse capacity of steel frame buildings
     with perimeter special moment frames. Earthquake Engineering &
@@ -399,6 +402,8 @@ def steel_w_col_pz(
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    Panel zone hinge (parallelogram model).
+
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
     performance evaluation of steel moment resisting frame
     structures. Rep. No. 132.
@@ -471,6 +476,8 @@ def steel_w_col_pz_updated(  # noqa: PLR0914
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    Updated panel zone hinge (parallelogram model).
+
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
     Panel Zone Model for Seismic Design of Steel Moment-Resisting
     Frames." ASCE Journal of Structural Engineering. DOI:
@@ -684,6 +691,8 @@ def steel_brace_gusset(
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
+    Steel brace gusset plate hinge.
+
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved
     analytical model for special concentrically braced frames, Journal
     of Constructional Steel Research, Vol. 73, pp 80-94.

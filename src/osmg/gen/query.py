@@ -1,4 +1,6 @@
 """
+Query objects.
+
 Objects used to retrieve other objects, or information related to
 them, based on certain criteria.
 
@@ -41,8 +43,7 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class ElmQuery:
     """
-    Used to retrieve nodes and component
-    assemblies.
+    Retrieves nodes and component assemblies.
 
     Attributes:
     ----------
@@ -54,6 +55,8 @@ class ElmQuery:
 
     def search_connectivity(self, nodes: list[Node]) -> ComponentAssembly | None:
         """
+        Finds component assembly objects.
+
         Finds component assembly objects based on the nodes the are
         connected to.
 
@@ -114,6 +117,8 @@ class ElmQuery:
         self, nodes: list[Node], lvl_uid: int | None = None
     ) -> dict[int, ComponentAssembly]:
         """
+        Retrieves component assemblies.
+
         Retrieves component assemblies if at least one of their
         external nodes matches the given list of nodes.
 
@@ -145,6 +150,8 @@ class ElmQuery:
         self, nodes: list[Node], lvl_uid: int | None = None
     ) -> ComponentAssembly | None:
         """
+        Retrieves a single component assembly.
+
         Retrieves a single component assembly if all of its external
         nodes match the given list of nodes.
 
@@ -176,6 +183,8 @@ class ElmQuery:
         self, x_loc: float, y_loc: float, lvl: int
     ) -> ComponentAssembly | None:
         """
+        Retrieves a component assembly.
+
         Retrieves a component assembly of a level if any of its
         line elements passes trhough the specified point.
 
@@ -228,8 +237,7 @@ class ElmQuery:
 @dataclass
 class LoadCaseQuery:
     """
-    Load case query objects retrieve information associated with load
-    cases.
+    Retrieve information associated with load cases.
 
     Attributes:
     ----------

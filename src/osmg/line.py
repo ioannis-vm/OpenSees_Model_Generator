@@ -28,6 +28,7 @@ nparr = npt.NDArray[np.float64]
 class Line:
     """
     Finite-length line segment object.
+
     Used internally whenever operations involving lines are reuired.
 
     Attributes:
@@ -65,6 +66,8 @@ class Line:
 
     def direction(self) -> nparr:
         """
+        Line direction.
+
         Returns a unit vector pointing from the start to the end of
         the line.
 
@@ -79,6 +82,8 @@ class Line:
 
     def intersect(self, other: 'Line') -> nparr:
         """
+        Intersection point.
+
         Calculates the intersection point of this line with another
         line. Returns None if the lines don't intersect.  Note: 'line'
         is actually a finite-length line segment.
@@ -180,6 +185,8 @@ class Line:
 
     def point_distance(self, point: nparr) -> float | None:
         """
+        Minimum distance.
+
         Calculate the minimum distance between the line segment and a
         point.  If the point falls on the line but is outside of the
         line segment, returns None.
@@ -218,6 +225,8 @@ class Line:
 
     def project(self, point: nparr) -> nparr | None:
         """
+        Projection.
+
         Calculates the projection of a point on the line.
         If the projection falls on the line segment, it returns the
         projected point, otherwise it returns None.

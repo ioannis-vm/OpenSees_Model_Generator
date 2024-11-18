@@ -1,5 +1,6 @@
 """
 Common definitions used everywhere for consistency.
+
 https://plotly.com/python/reference/
 """
 #

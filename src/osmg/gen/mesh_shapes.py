@@ -58,6 +58,8 @@ def w_mesh(
     target_area: float | None = None,
 ) -> Mesh:
     """
+    W-section mesh.
+
     Defines a loop of counterclockwise halfedges that form the shape
     of the W section with the specified parameters.  The origin
     coincides with the centroid.
@@ -177,6 +179,8 @@ def w_mesh(
 
 def rect_mesh(dim_b: float, dim_h: float) -> Mesh:
     """
+    Rectangular mesh.
+
     Defines a loop of counterclockwise halfedges
     that form the shape of the rectangular section with
     the specified parameters.
@@ -199,6 +203,8 @@ def rect_mesh(dim_b: float, dim_h: float) -> Mesh:
 
 def circ_mesh(dim_d: float) -> Mesh:
     """
+    Circular mesh.
+
     Defines a loop of counterclockwise halfedges
     that form the shape of the circular section with
     the specified parameters.
