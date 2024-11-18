@@ -899,7 +899,7 @@ def show_deformed_shape(  # noqa: C901
     return metadata
 
 
-def show_basic_forces(  # noqa: C901, PLR0914
+def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
     analysis,
     case_name,
     step,
@@ -1416,7 +1416,7 @@ def show_basic_forces(  # noqa: C901, PLR0914
     return metadata
 
 
-def show_basic_forces_combo(  # noqa: C901, PLR0914
+def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     combo,
     *,
     scaling_global,
