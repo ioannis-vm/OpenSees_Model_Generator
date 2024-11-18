@@ -100,9 +100,7 @@ class TributaryAreaAnaysis:
     )
 
     @no_type_check
-    def run(
-        self, load_factor=1.00, massless_load_factor=1.00, perform_checks=True
-    ):
+    def run(self, load_factor=1.00, massless_load_factor=1.00, perform_checks=True):
         """
         Performs tributary area analysis
 
@@ -129,13 +127,13 @@ class TributaryAreaAnaysis:
         try:
             import skgeom as sg
         except ModuleNotFoundError:
-            msg = "One day, a custom implementation of the "
-            msg += "straight skeleton algorithm might be added to osmg...\n"
-            msg += "Until that day, the scikit-geometry package is required.\n"
-            msg += "Please install scikit-geometry.\n"
-            msg += "  $ conda install scikit-geometry -c conda-forge\n"
-            msg += "https://github.com/scikit-geometry/scikit-geometry"
-            print("~ skgeom is not installed ~")
+            msg = 'One day, a custom implementation of the '
+            msg += 'straight skeleton algorithm might be added to osmg...\n'
+            msg += 'Until that day, the scikit-geometry package is required.\n'
+            msg += 'Please install scikit-geometry.\n'
+            msg += '  $ conda install scikit-geometry -c conda-forge\n'
+            msg += 'https://github.com/scikit-geometry/scikit-geometry'
+            print('~ skgeom is not installed ~')
             print()
             print(msg)
             sys.exit()
@@ -145,9 +143,9 @@ class TributaryAreaAnaysis:
         horizontal_elements = []
         panel_zones = []
         for component in all_components:
-            if component.component_purpose == "horizontal_component":
+            if component.component_purpose == 'horizontal_component':
                 horizontal_elements.append(component)
-            elif component.component_purpose == "steel_W_panel_zone":
+            elif component.component_purpose == 'steel_W_panel_zone':
                 panel_zones.append(component)
 
         # # plotting - used while developing the code
@@ -181,37 +179,31 @@ class TributaryAreaAnaysis:
         pz_node = self.data.pz_node
 
         for panel_zone in panel_zones:
-            back_nd = panel_zone.external_nodes.named_contents["middle_back"]
-            front_nd = panel_zone.external_nodes.named_contents["middle_front"]
-            main_nd = panel_zone.external_nodes.named_contents["top_node"]
-            back_offset: nparr = np.array(main_nd.coords) - np.array(
-                back_nd.coords
-            )
+            back_nd = panel_zone.external_nodes.named_contents['middle_back']
+            front_nd = panel_zone.external_nodes.named_contents['middle_front']
+            main_nd = panel_zone.external_nodes.named_contents['top_node']
+            back_offset: nparr = np.array(main_nd.coords) - np.array(back_nd.coords)
             front_offset: nparr = np.array(main_nd.coords) - np.array(
                 front_nd.coords
             )
             pz_node[back_nd.uid] = {
-                "substitute_node": main_nd,
-                "additional_offset": -back_offset[0:2],
+                'substitute_node': main_nd,
+                'additional_offset': -back_offset[0:2],
             }
             pz_node[front_nd.uid] = {
-                "substitute_node": main_nd,
-                "additional_offset": -front_offset[0:2],
+                'substitute_node': main_nd,
+                'additional_offset': -front_offset[0:2],
             }
 
         for comp in horizontal_elements:
             line_elements = [
                 elm
                 for elm in comp.elements.values()
-                if isinstance(
-                    elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink)
-                )
+                if isinstance(elm, (ElasticBeamColumn, DispBeamColumn, TwoNodeLink))
             ]
 
             zerolength_elements = [
-                elm
-                for elm in comp.elements.values()
-                if isinstance(elm, ZeroLength)
+                elm for elm in comp.elements.values() if isinstance(elm, ZeroLength)
             ]
             for zelm in zerolength_elements:
                 zn_map[zelm.nodes[1].uid] = zelm.nodes[0].uid
@@ -233,12 +225,12 @@ class TributaryAreaAnaysis:
                     n_j = comp.internal_nodes[zn_map[n_j.uid]]
                 if n_i.uid in pz_node:
                     sub_data = pz_node[n_i.uid]
-                    n_i = sub_data["substitute_node"]
-                    eo_i = eo_i.copy() + sub_data["additional_offset"]
+                    n_i = sub_data['substitute_node']
+                    eo_i = eo_i.copy() + sub_data['additional_offset']
                 if n_j.uid in pz_node:
                     sub_data = pz_node[n_j.uid]
-                    n_j = sub_data["substitute_node"]
-                    eo_j = eo_j.copy() + sub_data["additional_offset"]
+                    n_j = sub_data['substitute_node']
+                    eo_j = eo_j.copy() + sub_data['additional_offset']
 
                 if n_i.uid not in vertex_map:
                     vrt_i = mesh.Vertex((n_i.coords[0], n_i.coords[1]))
@@ -275,9 +267,7 @@ class TributaryAreaAnaysis:
                     connecting_vertex_j = vrt_oj
                 else:
                     connecting_vertex_j = vrt_j
-                edg_interior = mesh.Edge(
-                    connecting_vertex_i, connecting_vertex_j
-                )
+                edg_interior = mesh.Edge(connecting_vertex_i, connecting_vertex_j)
                 edge_map[edg_interior.uid] = elm
                 edges[edg_interior.uid] = edg_interior
 
@@ -313,26 +303,24 @@ class TributaryAreaAnaysis:
             # verify that no edges overlap
             all_edges_list = list(edges.values())
             for index, considered_edge in enumerate(
-                tqdm(
-                    all_edges_list, desc="Checking plan's edges", unit="edges"
-                )
+                tqdm(all_edges_list, desc="Checking plan's edges", unit='edges')
             ):
                 if index == len(all_edges_list):
                     # we are done.
                     continue
-                remaining_edges = all_edges_list[(index + 1)::]
+                remaining_edges = all_edges_list[(index + 1) : :]
                 for other_edge in remaining_edges:
                     # check if the two edges overlap or cross each other
                     if considered_edge.overlaps_or_crosses(other_edge):
                         # the two edges overlap or cross each other
-                        msg = "Error: Analysis of the floor plan geometry "
-                        msg += "indicates the presence of "
-                        msg += "overlapping elements.\n"
-                        msg += "Check the model at the following locations:\n"
-                        msg += f"{considered_edge.v_i.coords}"
-                        msg += f"{considered_edge.v_j.coords}"
-                        msg += f"{other_edge.v_i.coords}"
-                        msg += f"{other_edge.v_j.coords}"
+                        msg = 'Error: Analysis of the floor plan geometry '
+                        msg += 'indicates the presence of '
+                        msg += 'overlapping elements.\n'
+                        msg += 'Check the model at the following locations:\n'
+                        msg += f'{considered_edge.v_i.coords}'
+                        msg += f'{considered_edge.v_j.coords}'
+                        msg += f'{other_edge.v_i.coords}'
+                        msg += f'{other_edge.v_j.coords}'
                         raise ValueError(msg)
 
         halfedges = mesh.define_halfedges(list(edges.values()))
@@ -356,8 +344,7 @@ class TributaryAreaAnaysis:
                 for loop in loops:
                     for other_halfedge in loop:
                         if (
-                            other_halfedge.vertex.point
-                            == halfedge.vertex.point
+                            other_halfedge.vertex.point == halfedge.vertex.point
                             and other_halfedge.next.vertex.point
                             == halfedge.next.vertex.point
                         ):
@@ -481,9 +468,7 @@ class TributaryAreaAnaysis:
 
                 if isinstance(loaded_elm, Node):
                     lcase.node_loads[loaded_elm.uid].add(
-                        np.array(
-                            [0.00, 0.00, -load_val * cmult, 0.00, 0.00, 0.00]
-                        )
+                        np.array([0.00, 0.00, -load_val * cmult, 0.00, 0.00, 0.00])
                     )
                     if not load.massless:
                         lcase.node_mass[loaded_elm.uid].add(
@@ -499,9 +484,7 @@ class TributaryAreaAnaysis:
                             )
                         )
 
-                elif isinstance(
-                    loaded_elm, (ElasticBeamColumn, DispBeamColumn)
-                ):
+                elif isinstance(loaded_elm, (ElasticBeamColumn, DispBeamColumn)):
                     length = loaded_elm.clear_length()
                     load_per_length = load_val / length
                     udl_obj = lcase.line_element_udl[loaded_elm.uid]
@@ -546,4 +529,4 @@ class TributaryAreaAnaysis:
                             )
 
                 else:
-                    raise TypeError("This should never happen!")
+                    raise TypeError('This should never happen!')

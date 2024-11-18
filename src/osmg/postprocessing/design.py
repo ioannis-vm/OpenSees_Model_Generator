@@ -34,9 +34,7 @@ class LoadCombination:
     """
 
     mdl: Model
-    combo: dict[str, list[tuple[float, Analysis, str]]] = field(
-        default_factory=dict
-    )
+    combo: dict[str, list[tuple[float, Analysis, str]]] = field(default_factory=dict)
 
     def envelope_basic_forces(self, elm, num_points):
         """
@@ -45,16 +43,16 @@ class LoadCombination:
         """
         df_min = pd.DataFrame(
             np.full((num_points, 6), np.inf),
-            columns=["nx", "qy", "qz", "tx", "mz", "my"],
+            columns=['nx', 'qy', 'qz', 'tx', 'mz', 'my'],
         )
         df_max = pd.DataFrame(
             np.full((num_points, 6), -np.inf),
-            columns=["nx", "qy", "qz", "tx", "mz", "my"],
+            columns=['nx', 'qy', 'qz', 'tx', 'mz', 'my'],
         )
         for component_to_envelope in self.combo.values():
             df_tot = pd.DataFrame(
                 np.full((num_points, 6), 0.00),
-                columns=["nx", "qy", "qz", "tx", "mz", "my"],
+                columns=['nx', 'qy', 'qz', 'tx', 'mz', 'my'],
             )
             for component_to_add in component_to_envelope:
                 factor, anl, case_name_str = component_to_add
@@ -78,14 +76,10 @@ class LoadCombination:
             for component_to_add in component_to_envelope:
                 factor, anl, case_name_str = component_to_add
                 if isinstance(anl, ModalResponseSpectrumAnalysis):
-                    disp: nparr = np.array(
-                        anl.combined_node_disp(node.uid) * factor
-                    )
+                    disp: nparr = np.array(anl.combined_node_disp(node.uid) * factor)
                 else:
                     disp = np.array(
-                        anl.results[case_name_str].node_displacements[
-                            node.uid
-                        ][0]
+                        anl.results[case_name_str].node_displacements[node.uid][0]
                     )
                 disp_tot += disp
             disp_min[disp_min > disp_tot] = disp_tot[disp_min > disp_tot]
@@ -106,19 +100,14 @@ class LoadCombination:
                 factor, anl, case_name_str = component_to_add
                 if isinstance(anl, ModalResponseSpectrumAnalysis):
                     disp: nparr = np.array(
-                        anl.combined_node_disp_diff(node_i.uid, node_j.uid)
-                        * factor
+                        anl.combined_node_disp_diff(node_i.uid, node_j.uid) * factor
                     )
                 else:
                     disp_i: nparr = np.array(
-                        anl.results[case_name_str].node_displacements[
-                            node_i.uid
-                        ][0]
+                        anl.results[case_name_str].node_displacements[node_i.uid][0]
                     )
                     disp_j: nparr = np.array(
-                        anl.results[case_name_str].node_displacements[
-                            node_j.uid
-                        ][0]
+                        anl.results[case_name_str].node_displacements[node_j.uid][0]
                     )
                     disp = disp_i - disp_j
                 disp_tot += disp

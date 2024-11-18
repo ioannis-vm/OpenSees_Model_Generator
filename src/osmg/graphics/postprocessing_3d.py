@@ -79,9 +79,7 @@ def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
     z_vec: nparr = np.cross(x_vec, y_vec)
 
     # global -> local transformation matrix
-    transf_global2local = transformations.transformation_matrix(
-        x_vec, y_vec, z_vec
-    )
+    transf_global2local = transformations.transformation_matrix(x_vec, y_vec, z_vec)
     transf_local2global = transf_global2local.T
 
     u_i_global = u_i
@@ -217,18 +215,18 @@ def add_data__extruded_line_elms_deformed_mesh(
 
         num_points = 8
         # translations and rotations at the offset ends
-        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][0:3]
-        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][3:6]
-        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][0:3]
-        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][3:6]
+        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            0:3
+        ]
+        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            3:6
+        ]
+        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            0:3
+        ]
+        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            3:6
+        ]
         # transferring them to the clear element ends
         if isinstance(elm, element.TrussBar):
             offset_i = np.zeros(3)
@@ -339,33 +337,29 @@ def add_data__extruded_line_elms_deformed_mesh(
                 i_list.extend((index + 0, index + 0))
                 j_list.extend((index + 1, index + 2))
                 k_list.extend((index + 2, index + 3))
-                intensity.append(
-                    float(np.sqrt(d_global[i, :] @ d_global[i, :]))
-                )
+                intensity.append(float(np.sqrt(d_global[i, :] @ d_global[i, :])))
                 intensity.append(
                     float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
                 intensity.append(
                     float(np.sqrt(d_global[i + 1, :] @ d_global[i + 1, :]))
                 )
-                intensity.append(
-                    float(np.sqrt(d_global[i, :] @ d_global[i, :]))
-                )
+                intensity.append(float(np.sqrt(d_global[i, :] @ d_global[i, :])))
                 index += 4
     data_dict.append(
         {
-            "type": "mesh3d",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "colorscale": [[0, "blue"], [1.0, "red"]],
-            "i": i_list,
-            "j": j_list,
-            "k": k_list,
-            "intensity": intensity,
-            "colorbar": {"title": "Displacement", "ypad": 300},
-            "hoverinfo": "skip",
-            "opacity": 0.65,
+            'type': 'mesh3d',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'colorscale': [[0, 'blue'], [1.0, 'red']],
+            'i': i_list,
+            'j': j_list,
+            'k': k_list,
+            'intensity': intensity,
+            'colorbar': {'title': 'Displacement', 'ypad': 300},
+            'hoverinfo': 'skip',
+            'opacity': 0.65,
         }
     )
 
@@ -389,18 +383,18 @@ def add_data__line_elms_deformed(
         if elm.visibility.hidden_at_line_plots:
             continue
         num_points = 20
-        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][0:3]
-        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][3:6]
-        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][0:3]
-        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][3:6]
+        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            0:3
+        ]
+        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            3:6
+        ]
+        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            0:3
+        ]
+        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            3:6
+        ]
         if not isinstance(elm, element.TrussBar):
             # transferring them to the clear element ends
             offset_i = elm.geomtransf.offset_i
@@ -419,9 +413,7 @@ def add_data__line_elms_deformed(
                     np.linspace(u_i[2], u_j[2], num_points),
                 )
             )
-        interpolation_points = interp_3d_points(
-            elm, d_global, num_points, scaling
-        )
+        interpolation_points = interp_3d_points(elm, d_global, num_points, scaling)
         for i in range(len(interpolation_points) - 1):
             x_list.extend(
                 (
@@ -447,13 +439,13 @@ def add_data__line_elms_deformed(
 
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
         }
     )
 
@@ -482,14 +474,14 @@ def add_data__line_elm_offsets_deformed(
         p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         offset_i = elm.geomtransf.offset_i
         u_i: nparr = np.array(
-            analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-                step
-            ][0:3]
+            analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+                0:3
+            ]
         )
         r_i: nparr = np.array(
-            analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-                step
-            ][3:6]
+            analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+                3:6
+            ]
         )
         u_io: nparr = transformations.offset_transformation(offset_i, u_i, r_i)
 
@@ -497,14 +489,14 @@ def add_data__line_elm_offsets_deformed(
         p_jo: nparr = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
         offset_j = elm.geomtransf.offset_j
         u_j: nparr = np.array(
-            analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-                step
-            ][0:3]
+            analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+                0:3
+            ]
         )
         r_j: nparr = np.array(
-            analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-                step
-            ][3:6]
+            analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+                3:6
+            ]
         )
         u_jo: nparr = transformations.offset_transformation(offset_j, u_j, r_j)
 
@@ -522,13 +514,13 @@ def add_data__line_elm_offsets_deformed(
 
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 8, "color": graphics_common.OFFSET_COLOR},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 8, 'color': graphics_common.OFFSET_COLOR},
         }
     )
 
@@ -556,13 +548,13 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
         z_list.extend((p_i[2], p_j[2], None))
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 5, "color": graphics_common.BEAM_MESH_COLOR},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 5, 'color': graphics_common.BEAM_MESH_COLOR},
         }
     )
 
@@ -579,9 +571,9 @@ def add_data__nodes_deformed(
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
     for i, node in enumerate(list_of_nodes):
         location_data[i, :] = node.coords
-        displacement_data[i, :] = analysis.results[
-            case_name
-        ].node_displacements[node.uid][step]
+        displacement_data[i, :] = analysis.results[case_name].node_displacements[
+            node.uid
+        ][step]
     dist = np.sqrt(
         displacement_data[:, 0] ** 2
         + displacement_data[:, 1] ** 2
@@ -593,44 +585,40 @@ def add_data__nodes_deformed(
     restraint_symbols = []
     for node in list_of_nodes:
         if True in node.restraint:
-            restraint_symbols.append("fixed")
+            restraint_symbols.append('fixed')
         else:
             restraint_symbols.append(function)
 
-    marker = [
-        graphics_common_3d.node_marker[sym][0] for sym in restraint_symbols
-    ]
-    size = [
-        graphics_common_3d.node_marker[sym][1] for sym in restraint_symbols
-    ]
-    if function == "internal":
+    marker = [graphics_common_3d.node_marker[sym][0] for sym in restraint_symbols]
+    size = [graphics_common_3d.node_marker[sym][1] for sym in restraint_symbols]
+    if function == 'internal':
         color = graphics_common.NODE_INTERNAL_COLOR
     else:
         color = graphics_common.NODE_PRIMARY_COLOR
 
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "markers",
-            "x": location_data[:, 0] + displacement_data[:, 0] * scaling,
-            "y": location_data[:, 1] + displacement_data[:, 1] * scaling,
-            "z": location_data[:, 2] + displacement_data[:, 2] * scaling,
-            "customdata": displacement_data,
-            "hovertemplate": (
-                "ux: %{customdata[0]:.6g}<br>"
-                + "uy: %{customdata[1]:.6g}<br>"
-                + "uz: %{customdata[2]:.6g}<br>"
-                + "combined: %{customdata[6]:.6g}<br>"
-                + "rx: %{customdata[3]:.6g} (rad)<br>"
-                + "ry: %{customdata[4]:.6g} (rad)<br>"
-                + "rz: %{customdata[5]:.6g} (rad)<br>"
-                + "<extra>Node %{customdata[7]:d}</extra>"
+            'type': 'scatter3d',
+            'mode': 'markers',
+            'x': location_data[:, 0] + displacement_data[:, 0] * scaling,
+            'y': location_data[:, 1] + displacement_data[:, 1] * scaling,
+            'z': location_data[:, 2] + displacement_data[:, 2] * scaling,
+            'customdata': displacement_data,
+            'hovertemplate': (
+                'ux: %{customdata[0]:.6g}<br>'
+                + 'uy: %{customdata[1]:.6g}<br>'
+                + 'uz: %{customdata[2]:.6g}<br>'
+                + 'combined: %{customdata[6]:.6g}<br>'
+                + 'rx: %{customdata[3]:.6g} (rad)<br>'
+                + 'ry: %{customdata[4]:.6g} (rad)<br>'
+                + 'rz: %{customdata[5]:.6g} (rad)<br>'
+                + '<extra>Node %{customdata[7]:d}</extra>'
             ),
-            "marker": {
-                "symbol": marker,
-                "color": color,
-                "size": size,
-                "line": {"color": color, "width": 4},
+            'marker': {
+                'symbol': marker,
+                'color': color,
+                'size': size,
+                'line': {'color': color, 'width': 4},
             },
         }
     )
@@ -652,18 +640,18 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     elms.extend(mdl.list_of_specific_element(element.DispBeamColumn))
 
     for elm in elms:
-        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][0:3]
-        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][
-            step
-        ][3:6]
-        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][0:3]
-        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][
-            step
-        ][3:6]
+        u_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            0:3
+        ]
+        r_i = analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
+            3:6
+        ]
+        u_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            0:3
+        ]
+        r_j = analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
+            3:6
+        ]
         d_global, _ = interp_3d_deformation(elm, u_i, r_i, u_j, r_j, 3)
         max_d = np.maximum(max_d, np.max(np.abs(d_global)))
     # scaling factor: max_d scaled = 10% of the reference length
@@ -738,9 +726,7 @@ def show_deformed_shape(
     list_of_line_elems.extend(
         mdl.list_of_specific_element(element.ElasticBeamColumn)
     )
-    list_of_line_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn)
-    )
+    list_of_line_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
     list_of_primary_nodes = mdl.list_of_primary_nodes()
     list_of_internal_nodes = mdl.list_of_internal_nodes()
     # list_of_parent_nodes = mdl.list_of_parent_nodes()
@@ -761,7 +747,7 @@ def show_deformed_shape(
         list_of_primary_nodes,
         first_step,
         scaling,
-        "free",
+        'free',
     )
     add_data__nodes_deformed(
         analysis,
@@ -770,7 +756,7 @@ def show_deformed_shape(
         list_of_internal_nodes,
         first_step,
         scaling,
-        "internal",
+        'internal',
     )
     # add data for the frame elements as lines
     add_data__line_elm_offsets_deformed(
@@ -794,10 +780,10 @@ def show_deformed_shape(
 
     def frame_args(duration):
         return {
-            "frame": {"duration": duration},
-            "mode": "immediate",
-            "fromcurrent": True,
-            "transition": {"duration": duration, "easing": "linear"},
+            'frame': {'duration': duration},
+            'mode': 'immediate',
+            'fromcurrent': True,
+            'transition': {'duration': duration, 'easing': 'linear'},
         }
 
     if animation:
@@ -815,7 +801,7 @@ def show_deformed_shape(
                 list_of_primary_nodes,
                 j,
                 scaling,
-                "free",
+                'free',
             )
             add_data__nodes_deformed(
                 analysis,
@@ -824,7 +810,7 @@ def show_deformed_shape(
                 list_of_internal_nodes,
                 j,
                 scaling,
-                "internal",
+                'internal',
             )
             # add data for the frame elements as lines
             add_data__line_elm_offsets_deformed(
@@ -866,15 +852,15 @@ def show_deformed_shape(
         fig = go.Figure(fig_datastructure)
         sliders = [
             {
-                "pad": {"b": 10, "t": 60},
-                "len": 0.9,
-                "x": 0.1,
-                "y": 0,
-                "steps": [
+                'pad': {'b': 10, 't': 60},
+                'len': 0.9,
+                'x': 0.1,
+                'y': 0,
+                'steps': [
                     {
-                        "args": [[f.name], frame_args(0)],
-                        "label": str(k),
-                        "method": "animate",
+                        'args': [[f.name], frame_args(0)],
+                        'label': str(k),
+                        'method': 'animate',
                     }
                     for k, f in enumerate(fig.frames)
                 ],
@@ -884,23 +870,23 @@ def show_deformed_shape(
         fig.update_layout(
             updatemenus=[
                 {
-                    "buttons": [
+                    'buttons': [
                         {
-                            "args": [None, frame_args(50)],
-                            "label": "&#9654;",  # play symbol
-                            "method": "animate",
+                            'args': [None, frame_args(50)],
+                            'label': '&#9654;',  # play symbol
+                            'method': 'animate',
                         },
                         {
-                            "args": [[None], frame_args(0)],
-                            "label": "&#9724;",  # pause symbol
-                            "method": "animate",
+                            'args': [[None], frame_args(0)],
+                            'label': '&#9724;',  # pause symbol
+                            'method': 'animate',
                         },
                     ],
-                    "direction": "left",
-                    "pad": {"r": 10, "t": 70},
-                    "type": "buttons",
-                    "x": 0.1,
-                    "y": 0,
+                    'direction': 'left',
+                    'pad': {'r': 10, 't': 70},
+                    'type': 'buttons',
+                    'x': 0.1,
+                    'y': 0,
                 }
             ],
             sliders=sliders,
@@ -910,14 +896,14 @@ def show_deformed_shape(
         fig = go.Figure(fig_datastructure)
 
     # show the plot (if it's not a test)
-    if "pytest" not in sys.modules:
+    if 'pytest' not in sys.modules:
         if to_html_file:
             fig.write_html(to_html_file)
         else:
             fig.show()
 
     # return plot-related metadata
-    metadata = {"scaling": scaling}
+    metadata = {'scaling': scaling}
     return metadata
 
 
@@ -974,9 +960,7 @@ def show_basic_forces(
         mdl = analysis.mdl
 
     elms: list[
-        Union[
-            element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn
-        ]
+        Union[element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn]
     ] = []
     elms.extend(mdl.list_of_specific_element(element.TrussBar))
     elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
@@ -1122,9 +1106,7 @@ def show_basic_forces(
         tx_vec = tx_vecs[elm.uid]
         my_vec = my_vecs[elm.uid]
         mz_vec = mz_vecs[elm.uid]
-        if isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        ):
+        if isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
@@ -1139,9 +1121,7 @@ def show_basic_forces(
                 x_vec,
                 y_vec,
                 z_vec,
-            ) = transformations.local_axes_from_points_and_angle(
-                p_i, p_j, 0.00
-            )
+            ) = transformations.local_axes_from_points_and_angle(p_i, p_j, 0.00)
 
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
@@ -1158,7 +1138,7 @@ def show_basic_forces(
             y1_a.extend((p_i[1], p_j[1], None))
             z1_a.extend((p_i[2], p_j[2], None))
             customdata_a.extend((nx_vec[i], nx_vec[i + 1], None))
-            colors1_a.extend(["red"] * 3)
+            colors1_a.extend(['red'] * 3)
 
             # torsion
             p_i = p_start + tx_vec[i] * z_vec * scaling_t * scaling_global
@@ -1167,7 +1147,7 @@ def show_basic_forces(
             y1_d.extend((p_i[1], p_j[1], None))
             z1_d.extend((p_i[2], p_j[2], None))
             customdata_d.extend((tx_vec[i], tx_vec[i + 1], None))
-            colors1_d.extend(["orange"] * 3)
+            colors1_d.extend(['orange'] * 3)
 
             # shear load on y and z axes
             p_i = p_start + qy_vec[i] * y_vec * scaling_q * scaling_global
@@ -1176,14 +1156,14 @@ def show_basic_forces(
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qy_vec[i], qy_vec[i + 1], None))
-            colors1_b.extend(["green"] * 3)
+            colors1_b.extend(['green'] * 3)
             p_i = p_start + qz_vec[i] * z_vec * scaling_q * scaling_global
             p_j = p_end + qz_vec[i + 1] * z_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qz_vec[i], qz_vec[i + 1], None))
-            colors1_b.extend(["green"] * 3)
+            colors1_b.extend(['green'] * 3)
 
             # moment around z and y axes
             p_i = p_start - mz_vec[i] * y_vec * scaling_m * scaling_global
@@ -1193,7 +1173,7 @@ def show_basic_forces(
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((mz_vec[i], mz_vec[i + 1], None))
-            colors1_c.extend(["blue"] * 3)
+            colors1_c.extend(['blue'] * 3)
             # moment around y axis
             p_i = p_start - my_vec[i] * z_vec * scaling_m * scaling_global
             p_j = p_end - my_vec[i + 1] * z_vec * scaling_m * scaling_global
@@ -1201,7 +1181,7 @@ def show_basic_forces(
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((my_vec[i], my_vec[i + 1], None))
-            colors1_c.extend(["blue"] * 3)
+            colors1_c.extend(['blue'] * 3)
 
             # shear load combined
             p_i = (
@@ -1226,7 +1206,7 @@ def show_basic_forces(
                     None,
                 )
             )
-            colors1_e.extend(["green"] * 3)
+            colors1_e.extend(['green'] * 3)
 
             # both moments combined!
             p_i = (
@@ -1250,84 +1230,84 @@ def show_basic_forces(
                     None,
                 )
             )
-            colors1_f.extend(["blue"] * 3)
+            colors1_f.extend(['blue'] * 3)
 
     dt_a = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_a,
-            "y": y1_a,
-            "z": z1_a,
-            "visible": False,
-            "customdata": customdata_a,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_a},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_a,
+            'y': y1_a,
+            'z': z1_a,
+            'visible': False,
+            'customdata': customdata_a,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_a},
         }
     ]
     dt_b = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_b,
-            "y": y1_b,
-            "z": z1_b,
-            "visible": False,
-            "customdata": customdata_b,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_b},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_b,
+            'y': y1_b,
+            'z': z1_b,
+            'visible': False,
+            'customdata': customdata_b,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_b},
         }
     ]
     dt_c = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_c,
-            "y": y1_c,
-            "z": z1_c,
-            "visible": False,
-            "customdata": customdata_c,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_c},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_c,
+            'y': y1_c,
+            'z': z1_c,
+            'visible': False,
+            'customdata': customdata_c,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_c},
         }
     ]
     dt_d = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_d,
-            "y": y1_d,
-            "z": z1_d,
-            "visible": False,
-            "customdata": customdata_d,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_d},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_d,
+            'y': y1_d,
+            'z': z1_d,
+            'visible': False,
+            'customdata': customdata_d,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_d},
         }
     ]
     dt_e = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_e,
-            "y": y1_e,
-            "z": z1_e,
-            "visible": False,
-            "customdata": customdata_e,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_e},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_e,
+            'y': y1_e,
+            'z': z1_e,
+            'visible': False,
+            'customdata': customdata_e,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_e},
         }
     ]
     dt_f = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_f,
-            "y": y1_f,
-            "z": z1_f,
-            "visible": False,
-            "customdata": customdata_f,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_f},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_f,
+            'y': y1_f,
+            'z': z1_f,
+            'visible': False,
+            'customdata': customdata_f,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_f},
         }
     ]
 
@@ -1338,34 +1318,30 @@ def show_basic_forces(
     fig.update_layout(
         updatemenus=[
             dict(
-                type="buttons",
+                type='buttons',
                 buttons=[
                     dict(
-                        label="None",
-                        method="update",
-                        args=[
-                            {"visible": [True] * len(data_dict) + [False] * 6}
-                        ],
+                        label='None',
+                        method='update',
+                        args=[{'visible': [True] * len(data_dict) + [False] * 6}],
                     ),
                     dict(
-                        label="Axial",
-                        method="update",
+                        label='Axial',
+                        method='update',
                         args=[
                             {
-                                "visible": (
-                                    [True] * len(data_dict)
-                                    + [True]
-                                    + [False] * 5
+                                'visible': (
+                                    [True] * len(data_dict) + [True] + [False] * 5
                                 )
                             }
                         ],
                     ),
                     dict(
-                        label="Shear",
-                        method="update",
+                        label='Shear',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False]
                                     + [True]
@@ -1375,11 +1351,11 @@ def show_basic_forces(
                         ],
                     ),
                     dict(
-                        label="Moment",
-                        method="update",
+                        label='Moment',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False] * 2
                                     + [True]
@@ -1389,11 +1365,11 @@ def show_basic_forces(
                         ],
                     ),
                     dict(
-                        label="Torsion",
-                        method="update",
+                        label='Torsion',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False] * 3
                                     + [True]
@@ -1403,11 +1379,11 @@ def show_basic_forces(
                         ],
                     ),
                     dict(
-                        label="Shear (combined)",
-                        method="update",
+                        label='Shear (combined)',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False] * 4
                                     + [True]
@@ -1417,14 +1393,12 @@ def show_basic_forces(
                         ],
                     ),
                     dict(
-                        label="Moment (combined)",
-                        method="update",
+                        label='Moment (combined)',
+                        method='update',
                         args=[
                             {
-                                "visible": (
-                                    [True] * len(data_dict)
-                                    + [False] * 5
-                                    + [True]
+                                'visible': (
+                                    [True] * len(data_dict) + [False] * 5 + [True]
                                 )
                             }
                         ],
@@ -1434,17 +1408,17 @@ def show_basic_forces(
         ]
     )
 
-    if "pytest" not in sys.modules:
+    if 'pytest' not in sys.modules:
         if to_html_file:
             fig.write_html(to_html_file)
         else:
             fig.show()
 
     metadata = {
-        "scaling_n": scaling_n,
-        "scaling_q": scaling_q,
-        "scaling_m": scaling_m,
-        "scaling_t": scaling_t,
+        'scaling_n': scaling_n,
+        'scaling_q': scaling_q,
+        'scaling_m': scaling_m,
+        'scaling_t': scaling_t,
     }
     return metadata
 
@@ -1501,9 +1475,7 @@ def show_basic_forces_combo(
     else:
         mdl = combo.mdl
     elms: list[
-        Union[
-            element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn
-        ]
+        Union[element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn]
     ] = []
     elms.extend(mdl.list_of_specific_element(element.TrussBar))
     elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
@@ -1578,27 +1550,25 @@ def show_basic_forces_combo(
 
         # store results in the preallocated arrays
 
-        nx_vecs_min[elm.uid] = df_min["nx"].to_numpy() * force_conversion
-        qy_vecs_min[elm.uid] = df_min["qy"].to_numpy() * force_conversion
-        qz_vecs_min[elm.uid] = df_min["qz"].to_numpy() * force_conversion
-        tx_vecs_min[elm.uid] = df_min["tx"].to_numpy() * moment_conversion
-        my_vecs_min[elm.uid] = df_min["my"].to_numpy() * moment_conversion
-        mz_vecs_min[elm.uid] = df_min["mz"].to_numpy() * moment_conversion
-        nx_vecs_max[elm.uid] = df_max["nx"].to_numpy() * force_conversion
-        qy_vecs_max[elm.uid] = df_max["qy"].to_numpy() * force_conversion
-        qz_vecs_max[elm.uid] = df_max["qz"].to_numpy() * force_conversion
-        tx_vecs_max[elm.uid] = df_max["tx"].to_numpy() * moment_conversion
-        my_vecs_max[elm.uid] = df_max["my"].to_numpy() * moment_conversion
-        mz_vecs_max[elm.uid] = df_max["mz"].to_numpy() * moment_conversion
+        nx_vecs_min[elm.uid] = df_min['nx'].to_numpy() * force_conversion
+        qy_vecs_min[elm.uid] = df_min['qy'].to_numpy() * force_conversion
+        qz_vecs_min[elm.uid] = df_min['qz'].to_numpy() * force_conversion
+        tx_vecs_min[elm.uid] = df_min['tx'].to_numpy() * moment_conversion
+        my_vecs_min[elm.uid] = df_min['my'].to_numpy() * moment_conversion
+        mz_vecs_min[elm.uid] = df_min['mz'].to_numpy() * moment_conversion
+        nx_vecs_max[elm.uid] = df_max['nx'].to_numpy() * force_conversion
+        qy_vecs_max[elm.uid] = df_max['qy'].to_numpy() * force_conversion
+        qz_vecs_max[elm.uid] = df_max['qz'].to_numpy() * force_conversion
+        tx_vecs_max[elm.uid] = df_max['tx'].to_numpy() * moment_conversion
+        my_vecs_max[elm.uid] = df_max['my'].to_numpy() * moment_conversion
+        mz_vecs_max[elm.uid] = df_max['mz'].to_numpy() * moment_conversion
 
     # calculate scaling factors
     ref_len = mdl.reference_length()
     factor = 0.05
     nx_max = np.max(
         np.abs(
-            np.column_stack(
-                list(nx_vecs_min.values()) + list(nx_vecs_max.values())
-            )
+            np.column_stack(list(nx_vecs_min.values()) + list(nx_vecs_max.values()))
         )
     )
     scaling_n = force_scaling_factor(ref_len, nx_max, factor)
@@ -1606,16 +1576,12 @@ def show_basic_forces_combo(
         scaling_t = 1.00
     qy_max = np.max(
         np.abs(
-            np.column_stack(
-                list(qy_vecs_min.values()) + list(qy_vecs_max.values())
-            )
+            np.column_stack(list(qy_vecs_min.values()) + list(qy_vecs_max.values()))
         )
     )
     qz_max = np.max(
         np.abs(
-            np.column_stack(
-                list(qz_vecs_min.values()) + list(qz_vecs_max.values())
-            )
+            np.column_stack(list(qz_vecs_min.values()) + list(qz_vecs_max.values()))
         )
     )
     scaling_qy = force_scaling_factor(ref_len, qy_max, factor)
@@ -1632,16 +1598,12 @@ def show_basic_forces_combo(
         scaling_q = 1.00
     my_max = np.max(
         np.abs(
-            np.column_stack(
-                list(my_vecs_min.values()) + list(my_vecs_max.values())
-            )
+            np.column_stack(list(my_vecs_min.values()) + list(my_vecs_max.values()))
         )
     )
     mz_max = np.max(
         np.abs(
-            np.column_stack(
-                list(mz_vecs_min.values()) + list(mz_vecs_max.values())
-            )
+            np.column_stack(list(mz_vecs_min.values()) + list(mz_vecs_max.values()))
         )
     )
     scaling_my = force_scaling_factor(ref_len, my_max, factor)
@@ -1676,9 +1638,7 @@ def show_basic_forces_combo(
         my_vec_max = my_vecs_max[elm.uid]
         mz_vec_max = mz_vecs_max[elm.uid]
 
-        if isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        ):
+        if isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
@@ -1693,9 +1653,7 @@ def show_basic_forces_combo(
                 x_vec,
                 y_vec,
                 z_vec,
-            ) = transformations.local_axes_from_points_and_angle(
-                p_i, p_j, 0.00
-            )
+            ) = transformations.local_axes_from_points_and_angle(p_i, p_j, 0.00)
 
         len_clr = np.linalg.norm(p_i - p_j)
         t_vec = np.linspace(0.00, len_clr, num=num_points)
@@ -1706,173 +1664,149 @@ def show_basic_forces_combo(
 
             # axial load
             p_i = p_start + nx_vec_min[i] * y_vec * scaling_n * scaling_global
-            p_j = (
-                p_end + nx_vec_min[i + 1] * y_vec * scaling_n * scaling_global
-            )
+            p_j = p_end + nx_vec_min[i + 1] * y_vec * scaling_n * scaling_global
             x1_a.extend((p_i[0], p_j[0], None))
             y1_a.extend((p_i[1], p_j[1], None))
             z1_a.extend((p_i[2], p_j[2], None))
             customdata_a.extend((nx_vec_min[i], nx_vec_min[i + 1], None))
-            colors1_a.extend(["red"] * 3)
+            colors1_a.extend(['red'] * 3)
             p_i = p_start + nx_vec_max[i] * y_vec * scaling_n * scaling_global
-            p_j = (
-                p_end + nx_vec_max[i + 1] * y_vec * scaling_n * scaling_global
-            )
+            p_j = p_end + nx_vec_max[i + 1] * y_vec * scaling_n * scaling_global
             x1_a.extend((p_i[0], p_j[0], None))
             y1_a.extend((p_i[1], p_j[1], None))
             z1_a.extend((p_i[2], p_j[2], None))
             customdata_a.extend((nx_vec_max[i], nx_vec_max[i + 1], None))
-            colors1_a.extend(["green"] * 3)
+            colors1_a.extend(['green'] * 3)
 
             # torsion
             p_i = p_start + tx_vec_min[i] * z_vec * scaling_t * scaling_global
-            p_j = (
-                p_end + tx_vec_min[i + 1] * z_vec * scaling_t * scaling_global
-            )
+            p_j = p_end + tx_vec_min[i + 1] * z_vec * scaling_t * scaling_global
             x1_d.extend((p_i[0], p_j[0], None))
             y1_d.extend((p_i[1], p_j[1], None))
             z1_d.extend((p_i[2], p_j[2], None))
             customdata_d.extend((tx_vec_min[i], tx_vec_min[i + 1], None))
-            colors1_d.extend(["red"] * 3)
+            colors1_d.extend(['red'] * 3)
             p_i = p_start + tx_vec_max[i] * z_vec * scaling_t * scaling_global
-            p_j = (
-                p_end + tx_vec_max[i + 1] * z_vec * scaling_t * scaling_global
-            )
+            p_j = p_end + tx_vec_max[i + 1] * z_vec * scaling_t * scaling_global
             x1_d.extend((p_i[0], p_j[0], None))
             y1_d.extend((p_i[1], p_j[1], None))
             z1_d.extend((p_i[2], p_j[2], None))
             customdata_d.extend((tx_vec_max[i], tx_vec_max[i + 1], None))
-            colors1_d.extend(["green"] * 3)
+            colors1_d.extend(['green'] * 3)
 
             # shear load on y and z axes
             p_i = p_start + qy_vec_min[i] * y_vec * scaling_q * scaling_global
-            p_j = (
-                p_end + qy_vec_min[i + 1] * y_vec * scaling_q * scaling_global
-            )
+            p_j = p_end + qy_vec_min[i + 1] * y_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qy_vec_min[i], qy_vec_min[i + 1], None))
-            colors1_b.extend(["red"] * 3)
+            colors1_b.extend(['red'] * 3)
             p_i = p_start + qy_vec_max[i] * y_vec * scaling_q * scaling_global
-            p_j = (
-                p_end + qy_vec_max[i + 1] * y_vec * scaling_q * scaling_global
-            )
+            p_j = p_end + qy_vec_max[i + 1] * y_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qy_vec_max[i], qy_vec_max[i + 1], None))
-            colors1_b.extend(["green"] * 3)
+            colors1_b.extend(['green'] * 3)
             p_i = p_start + qz_vec_min[i] * z_vec * scaling_q * scaling_global
-            p_j = (
-                p_end + qz_vec_min[i + 1] * z_vec * scaling_q * scaling_global
-            )
+            p_j = p_end + qz_vec_min[i + 1] * z_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qz_vec_min[i], qz_vec_min[i + 1], None))
-            colors1_b.extend(["red"] * 3)
+            colors1_b.extend(['red'] * 3)
             p_i = p_start + qz_vec_max[i] * z_vec * scaling_q * scaling_global
-            p_j = (
-                p_end + qz_vec_max[i + 1] * z_vec * scaling_q * scaling_global
-            )
+            p_j = p_end + qz_vec_max[i + 1] * z_vec * scaling_q * scaling_global
             x1_b.extend((p_i[0], p_j[0], None))
             y1_b.extend((p_i[1], p_j[1], None))
             z1_b.extend((p_i[2], p_j[2], None))
             customdata_b.extend((qz_vec_max[i], qz_vec_max[i + 1], None))
-            colors1_b.extend(["green"] * 3)
+            colors1_b.extend(['green'] * 3)
 
             # moment around z and y axes
             p_i = p_start - mz_vec_min[i] * y_vec * scaling_m * scaling_global
-            p_j = (
-                p_end - mz_vec_min[i + 1] * y_vec * scaling_m * scaling_global
-            )
+            p_j = p_end - mz_vec_min[i + 1] * y_vec * scaling_m * scaling_global
             # note: moments plotted upside down!
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((mz_vec_min[i], mz_vec_min[i + 1], None))
-            colors1_c.extend(["red"] * 3)
+            colors1_c.extend(['red'] * 3)
             p_i = p_start - mz_vec_max[i] * y_vec * scaling_m * scaling_global
-            p_j = (
-                p_end - mz_vec_max[i + 1] * y_vec * scaling_m * scaling_global
-            )
+            p_j = p_end - mz_vec_max[i + 1] * y_vec * scaling_m * scaling_global
             # note: moments plotted upside down!
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((mz_vec_max[i], mz_vec_max[i + 1], None))
-            colors1_c.extend(["green"] * 3)
+            colors1_c.extend(['green'] * 3)
             # moment around y axis
             p_i = p_start - my_vec_min[i] * z_vec * scaling_m * scaling_global
-            p_j = (
-                p_end - my_vec_min[i + 1] * z_vec * scaling_m * scaling_global
-            )
+            p_j = p_end - my_vec_min[i + 1] * z_vec * scaling_m * scaling_global
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((my_vec_min[i], my_vec_min[i + 1], None))
-            colors1_c.extend(["red"] * 3)
+            colors1_c.extend(['red'] * 3)
             p_i = p_start - my_vec_max[i] * z_vec * scaling_m * scaling_global
-            p_j = (
-                p_end - my_vec_max[i + 1] * z_vec * scaling_m * scaling_global
-            )
+            p_j = p_end - my_vec_max[i + 1] * z_vec * scaling_m * scaling_global
             x1_c.extend((p_i[0], p_j[0], None))
             y1_c.extend((p_i[1], p_j[1], None))
             z1_c.extend((p_i[2], p_j[2], None))
             customdata_c.extend((my_vec_max[i], my_vec_max[i + 1], None))
-            colors1_c.extend(["green"] * 3)
+            colors1_c.extend(['green'] * 3)
 
     dt_a = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_a,
-            "y": y1_a,
-            "z": z1_a,
-            "visible": False,
-            "customdata": customdata_a,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_a},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_a,
+            'y': y1_a,
+            'z': z1_a,
+            'visible': False,
+            'customdata': customdata_a,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_a},
         }
     ]
     dt_b = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_b,
-            "y": y1_b,
-            "z": z1_b,
-            "visible": False,
-            "customdata": customdata_b,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_b},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_b,
+            'y': y1_b,
+            'z': z1_b,
+            'visible': False,
+            'customdata': customdata_b,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_b},
         }
     ]
     dt_c = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_c,
-            "y": y1_c,
-            "z": z1_c,
-            "visible": False,
-            "customdata": customdata_c,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_c},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_c,
+            'y': y1_c,
+            'z': z1_c,
+            'visible': False,
+            'customdata': customdata_c,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_c},
         }
     ]
     dt_d = [
         {
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x1_d,
-            "y": y1_d,
-            "z": z1_d,
-            "visible": False,
-            "customdata": customdata_d,
-            "hovertemplate": " %{customdata:.0f}<br><extra></extra>",
-            "line": {"width": 3, "color": colors1_d},
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x1_d,
+            'y': y1_d,
+            'z': z1_d,
+            'visible': False,
+            'customdata': customdata_d,
+            'hovertemplate': ' %{customdata:.0f}<br><extra></extra>',
+            'line': {'width': 3, 'color': colors1_d},
         }
     ]
 
@@ -1883,34 +1817,30 @@ def show_basic_forces_combo(
     fig.update_layout(
         updatemenus=[
             dict(
-                type="buttons",
+                type='buttons',
                 buttons=[
                     dict(
-                        label="None",
-                        method="update",
-                        args=[
-                            {"visible": [True] * len(data_dict) + [False] * 4}
-                        ],
+                        label='None',
+                        method='update',
+                        args=[{'visible': [True] * len(data_dict) + [False] * 4}],
                     ),
                     dict(
-                        label="Axial",
-                        method="update",
+                        label='Axial',
+                        method='update',
                         args=[
                             {
-                                "visible": (
-                                    [True] * len(data_dict)
-                                    + [True]
-                                    + [False] * 3
+                                'visible': (
+                                    [True] * len(data_dict) + [True] + [False] * 3
                                 )
                             }
                         ],
                     ),
                     dict(
-                        label="Shear",
-                        method="update",
+                        label='Shear',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False]
                                     + [True]
@@ -1920,11 +1850,11 @@ def show_basic_forces_combo(
                         ],
                     ),
                     dict(
-                        label="Moment",
-                        method="update",
+                        label='Moment',
+                        method='update',
                         args=[
                             {
-                                "visible": (
+                                'visible': (
                                     [True] * len(data_dict)
                                     + [False] * 2
                                     + [True]
@@ -1934,14 +1864,12 @@ def show_basic_forces_combo(
                         ],
                     ),
                     dict(
-                        label="Torsion",
-                        method="update",
+                        label='Torsion',
+                        method='update',
                         args=[
                             {
-                                "visible": (
-                                    [True] * len(data_dict)
-                                    + [False] * 3
-                                    + [True]
+                                'visible': (
+                                    [True] * len(data_dict) + [False] * 3 + [True]
                                 )
                             }
                         ],
@@ -1951,16 +1879,16 @@ def show_basic_forces_combo(
         ]
     )
 
-    if "pytest" not in sys.modules:
+    if 'pytest' not in sys.modules:
         if to_html_file:
             fig.write_html(to_html_file)
         else:
             fig.show()
 
     metadata = {
-        "scaling_n": scaling_n,
-        "scaling_q": scaling_q,
-        "scaling_m": scaling_m,
-        "scaling_t": scaling_t,
+        'scaling_n': scaling_n,
+        'scaling_q': scaling_q,
+        'scaling_m': scaling_m,
+        'scaling_t': scaling_t,
     }
     return metadata

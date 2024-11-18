@@ -140,7 +140,7 @@ class BRBGenerator:
 
         trg = TrussBarGenerator(self.model)
 
-        uid = self.model.uid_generator.new("uniaxial material")
+        uid = self.model.uid_generator.new('uniaxial material')
         mat = Steel4(
             uid=uid,
             name=f'auto_BRB_{uid}',
@@ -164,7 +164,7 @@ class BRBGenerator:
             R_ic=self.settings.steel4_R_ic,
             l_yp=self.settings.steel4_l_yp,
         )
-        uid = self.model.uid_generator.new("uniaxial material")
+        uid = self.model.uid_generator.new('uniaxial material')
         mat_fatigue = Fatigue(
             uid=uid,
             name=f'auto_BRB_fatigue_{uid}',

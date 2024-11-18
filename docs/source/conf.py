@@ -8,13 +8,14 @@
 
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('../../'))
 
 project = 'osmg'
 author = 'John Vouvakis Manousakis'
-release = [line.split('=')[1]
-           for line in open('../../setup.cfg')
-           if 'version' in line][0].strip()
+release = [
+    line.split('=')[1] for line in open('../../setup.cfg') if 'version' in line
+][0].strip()
 copyright = '2023, Ioannis Vouvakis Manousakis'
 
 # -- General configuration ---------------------------------------------------
@@ -35,14 +36,16 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy/', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-    'matplotlib': ('http://matplotlib.sourceforge.net/', None)
+    'matplotlib': ('http://matplotlib.sourceforge.net/', None),
 }
 
 autosummary_generate = True
 
-html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
+html_show_sourcelink = (
+    False  # Remove 'view source code' from top of page (for html, not python)
+)
 nbsphinx_allow_errors = True  # Continue through Jupyter errors
-add_module_names = False # Remove namespaces from class/method signatures
+add_module_names = False  # Remove namespaces from class/method signatures
 
 # Napoleon settings
 napoleon_google_docstring = True

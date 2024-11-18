@@ -36,9 +36,7 @@ def import_PEER(filename):
                 units = (line.split(sep=' ')[-1]).strip()
             elif i == 3:
                 # Number of points
-                npts = int(
-                    re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0])
-                )  # noqa: W605
+                npts = int(re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0]))  # noqa: W605
                 # Time step
                 tmp = re.sub(r'DT=\s+', '', line.split(sep=', ')[1])
                 tmp = re.sub(r'\s* SEC', '', tmp)
@@ -51,7 +49,7 @@ def import_PEER(filename):
     assert npts == len(
         a_g
     ), 'Number of points reported in file does not match recovered points'
-    assert units == 'G', 'Expected file to be in G units, but it isn\'t'
+    assert units == 'G', "Expected file to be in G units, but it isn't"
 
     # Obtain the corresponding time values
     t = np.array([x * d_t for x in range(npts)])
@@ -105,9 +103,7 @@ def response_spectrum(th, dt, zeta, n_Pts=200):
     return rs
 
 
-def code_spectrum(
-    T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00
-) -> nparr:
+def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:
     """
     Generate a simplified ASCE code response spectrum.
     """
@@ -119,9 +115,7 @@ def code_spectrum(
     code_sa[T_vals >= Tl] = S1 * Tl / T_vals[T_vals >= Tl] ** 2
     sel = np.logical_and(T_vals > T_short, T_vals < Tl)
     code_sa[sel] = S1 / T_vals[sel]
-    code_sa[T_vals < T_zero] = Ss * (
-        0.40 + 0.60 * T_vals[T_vals < T_zero] / T_zero
-    )
+    code_sa[T_vals < T_zero] = Ss * (0.40 + 0.60 * T_vals[T_vals < T_zero] / T_zero)
     return np.column_stack((T_vals, code_sa))
 
 

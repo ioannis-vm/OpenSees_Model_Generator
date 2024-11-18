@@ -52,15 +52,15 @@ class PhysicalMaterial:
 
         """
 
-        return f"Physical material: {self.name}, {self.uid}"
+        return f'Physical material: {self.name}, {self.uid}'
 
     def __repr__(self):
-        res = ""
-        res += "Physical material object\n"
-        res += f"Name: {self.name}\n"
-        res += f"uid: {self.uid}\n"
-        res += f"variety: {self.variety}\n"
-        res += f"density: {self.density}\n"
-        res += f"E: {self.e_mod}\n"
-        res += f"G: {self.g_mod}\n"
+        res = ''
+        res += 'Physical material object\n'
+        res += f'Name: {self.name}\n'
+        res += f'uid: {self.uid}\n'
+        res += f'variety: {self.variety}\n'
+        res += f'density: {self.density}\n'
+        res += f'E: {self.e_mod}\n'
+        res += f'G: {self.g_mod}\n'
         return res

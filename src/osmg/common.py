@@ -55,7 +55,7 @@ def methods(obj: object) -> list[str]:
         for method_name in dir(obj)
         if callable(getattr(obj, method_name))
     ]
-    pattern = r"__.*__"
+    pattern = r'__.*__'
     return [s for s in object_methods if not re.match(pattern, s)]
 
 

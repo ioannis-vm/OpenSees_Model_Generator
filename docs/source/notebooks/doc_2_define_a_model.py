@@ -65,24 +65,20 @@ help(mdl.add_level)
 # %%
 # Define levels
 for i in range(3):
-    mdl.add_level(i, 144.00*(i))
+    mdl.add_level(i, 144.00 * (i))
 
 
 # %%
 defaults.load_default_steel(mdl)
-steel_phys_mat = mdl.physical_materials.retrieve_by_attr(
-    'name', 'default steel')
+steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')
 
 
 # %%
 # define line element sections
 secg = SectionGenerator(mdl)
 secg.load_aisc_from_database(
-    'W',
-    ["W24X94"],
-    'default steel',
-    'default steel',
-    ElasticSection)
+    'W', ['W24X94'], 'default steel', 'default steel', ElasticSection
+)
 
 
 # %%
@@ -92,8 +88,8 @@ mdl.levels.set_active([1, 2])
 
 # %%
 p1 = np.array((0.00, 0.00))
-p2 = np.array((360., 0.00))
-p3 = np.array((360., 360.))
+p2 = np.array((360.0, 0.00))
+p3 = np.array((360.0, 360.0))
 p4 = np.array((0.00, 360.00))
 
 
@@ -102,14 +98,17 @@ mcg = BeamColumnGenerator(mdl)
 sec = mdl.elastic_sections.retrieve_by_attr('name', 'W24X94')
 for pt in [p1, p2, p3, p4]:
     mcg.add_vertical_active(
-        x_coord=pt[0], y_coord=pt[1],
-        offset_i=np.zeros(3), offset_j=np.zeros(3),
+        x_coord=pt[0],
+        y_coord=pt[1],
+        offset_i=np.zeros(3),
+        offset_j=np.zeros(3),
         transf_type='Corotational',
         n_sub=4,
         section=sec,
         element_type=ElasticBeamColumn,
         placement='centroid',
-        angle=0.00)
+        angle=0.00,
+    )
 
 
 # %%
@@ -128,7 +127,8 @@ for pair in ((p1, p2), (p2, p3), (p3, p4), (p4, p1)):
         section=sec,
         element_type=ElasticBeamColumn,
         placement='top_center',
-        angle=0.00)
+        angle=0.00,
+    )
 
 
 # %%

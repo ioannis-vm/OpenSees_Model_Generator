@@ -72,9 +72,7 @@ def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
         trying to do that using `T` doesn't work.
 
     """
-    area_diff = target_area - (
-        sec_b * sec_tf * 2.0 + (sec_h - 2 * sec_tf) * sec_tw
-    )
+    area_diff = target_area - (sec_b * sec_tf * 2.0 + (sec_h - 2 * sec_tf) * sec_tw)
     if area_diff < 0:
         # This happens for W14X426
         area_diff = 1e-4
@@ -112,28 +110,19 @@ def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
         Vertex(
             (
                 -sec_b / 2.0 + k + dist * np.cos(1.0 * np.pi / 8.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(1.0 * np.pi / 8.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(1.0 * np.pi / 8.0),
             )
         ),
         Vertex(
             (
                 -sec_b / 2.0 + k + dist * np.cos(1.0 * np.pi / 4.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(1.0 * np.pi / 4.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(1.0 * np.pi / 4.0),
             )
         ),
         Vertex(
             (
                 -sec_b / 2.0 + k + dist * np.cos(3.0 * np.pi / 8.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(3.0 * np.pi / 8.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(3.0 * np.pi / 8.0),
             )
         ),
         Vertex((-sec_b / 2.0 + k, -sec_h / 2.0 + sec_tf)),
@@ -145,28 +134,19 @@ def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(3.0 * np.pi / 8.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(3.0 * np.pi / 8.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(3.0 * np.pi / 8.0),
             )
         ),
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(1.0 * np.pi / 4.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(1.0 * np.pi / 4.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(1.0 * np.pi / 4.0),
             )
         ),
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(1.0 * np.pi / 8.0),
-                -sec_h / 2.0
-                + sec_tf
-                + dist
-                - dist * np.sin(1.0 * np.pi / 8.0),
+                -sec_h / 2.0 + sec_tf + dist - dist * np.sin(1.0 * np.pi / 8.0),
             )
         ),
         Vertex((+sec_b / 2.0 - k - dist, -sec_h / 2.0 + sec_tf + dist)),
@@ -174,28 +154,19 @@ def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(1.0 * np.pi / 8.0),
-                +sec_h / 2.0
-                - sec_tf
-                - dist
-                + dist * np.sin(1.0 * np.pi / 8.0),
+                +sec_h / 2.0 - sec_tf - dist + dist * np.sin(1.0 * np.pi / 8.0),
             )
         ),
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(1.0 * np.pi / 4.0),
-                +sec_h / 2.0
-                - sec_tf
-                - dist
-                + dist * np.sin(1.0 * np.pi / 4.0),
+                +sec_h / 2.0 - sec_tf - dist + dist * np.sin(1.0 * np.pi / 4.0),
             )
         ),
         Vertex(
             (
                 +sec_b / 2.0 - k - dist * np.cos(3.0 * np.pi / 8.0),
-                +sec_h / 2.0
-                - sec_tf
-                - dist
-                + dist * np.sin(3.0 * np.pi / 8.0),
+                +sec_h / 2.0 - sec_tf - dist + dist * np.sin(3.0 * np.pi / 8.0),
             )
         ),
         Vertex((+sec_b / 2.0 - k, sec_h / 2.0 - sec_tf)),
@@ -247,9 +218,7 @@ def circ_mesh(dim_d):
     vertices = []
     for i in range(num_vertices):
         angle = i * angle_increment
-        vertices.append(
-            Vertex((radius * np.cos(angle), radius * np.sin(angle)))
-        )
+        vertices.append(Vertex((radius * np.cos(angle), radius * np.sin(angle))))
 
     edges = define_edges(vertices)
     return generate(edges)
@@ -264,13 +233,13 @@ def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
     snap_points: dict[str, nparr] = {}
-    snap_points["centroid"] = -np.array([0.0, 0.0])
-    snap_points["top_center"] = -np.array([0.0, y_max])
-    snap_points["top_left"] = -np.array([z_min, y_max])
-    snap_points["top_right"] = -np.array([z_max, y_max])
-    snap_points["center_left"] = -np.array([z_min, 0.0])
-    snap_points["center_right"] = -np.array([z_max, 0.0])
-    snap_points["bottom_center"] = -np.array([0.0, y_min])
-    snap_points["bottom_left"] = -np.array([z_min, y_min])
-    snap_points["bottom_right"] = -np.array([z_max, y_min])
+    snap_points['centroid'] = -np.array([0.0, 0.0])
+    snap_points['top_center'] = -np.array([0.0, y_max])
+    snap_points['top_left'] = -np.array([z_min, y_max])
+    snap_points['top_right'] = -np.array([z_max, y_max])
+    snap_points['center_left'] = -np.array([z_min, 0.0])
+    snap_points['center_right'] = -np.array([z_max, 0.0])
+    snap_points['bottom_center'] = -np.array([0.0, y_min])
+    snap_points['bottom_left'] = -np.array([z_min, y_min])
+    snap_points['bottom_right'] = -np.array([z_max, y_min])
     return snap_points

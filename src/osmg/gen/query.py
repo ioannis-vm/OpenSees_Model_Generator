@@ -50,9 +50,7 @@ class ElmQuery:
 
     model: Model
 
-    def search_connectivity(
-        self, nodes: list[Node]
-    ) -> Optional[ComponentAssembly]:
+    def search_connectivity(self, nodes: list[Node]) -> Optional[ComponentAssembly]:
         """
         Finds component assembly objects based on the nodes the are
         connected to.
@@ -212,12 +210,8 @@ class ElmQuery:
                     p_i = np.array(elm.nodes[0].coords)
                     p_j = np.array(elm.nodes[1].coords)
                 else:
-                    p_i = (
-                        np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-                    )
-                    p_j = (
-                        np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
-                    )
+                    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+                    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
                 if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
                     if (
                         np.linalg.norm(np.array((x_loc, y_loc)) - p_i[0:2])
@@ -225,7 +219,7 @@ class ElmQuery:
                     ):
                         return component
                 else:
-                    line = Line("", p_i[0:2], p_j[0:2])
+                    line = Line('', p_i[0:2], p_j[0:2])
                     line.intersects_pt(np.array((x_loc, y_loc)))
                     if line.intersects_pt(np.array((x_loc, y_loc))):
                         return component

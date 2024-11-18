@@ -11,6 +11,7 @@ import glob
 import re
 import numpy as np
 
+
 def list_directories(root_dir):
     res = []
     for path, directories, _ in os.walk(root_dir):
@@ -18,11 +19,13 @@ def list_directories(root_dir):
             res.append(os.path.join(path, directory))
     return res
 
+
 def list_python_files(dir):
     res = []
     for file in glob.glob(os.path.join(dir, '*.py')):
         res.append(file)
     return res
+
 
 res = list_directories('src/osmg/')
 
@@ -46,7 +49,7 @@ for module in files:
         with open(path, 'r', encoding='utf-8') as f:
             contents = f.read()
             if contents.startswith('"""'):
-                contents = '\n\n'+contents
+                contents = '\n\n' + contents
             contents_spl = np.array(contents.split('"""'))
             contents_docstr = contents_spl[1::2]
             for thing in contents_docstr:

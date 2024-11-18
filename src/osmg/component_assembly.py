@@ -54,9 +54,9 @@ class ComponentAssembly:
     component_purpose: str
     external_nodes: obj_collections.NodeCollection = field(init=False)
     internal_nodes: obj_collections.NodeCollection = field(init=False)
-    elements: (
-        obj_collections.CollectionWithConnectivity[int, element.Element]
-    ) = field(init=False)
+    elements: obj_collections.CollectionWithConnectivity[int, element.Element] = (
+        field(init=False)
+    )
 
     def __post_init__(self):
         self.external_nodes = obj_collections.NodeCollection(self)
@@ -67,16 +67,16 @@ class ComponentAssembly:
         """
         Short version of repr
         """
-        return f"Component assembly, uid: {self.uid}"
+        return f'Component assembly, uid: {self.uid}'
 
     def __repr__(self):
-        res = ""
-        res += "Component assembly object\n"
-        res += f"uid: {self.uid}\n"
-        res += f"component_purpose: {self.component_purpose}\n"
-        res += "External Nodes\n"
+        res = ''
+        res += 'Component assembly object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'component_purpose: {self.component_purpose}\n'
+        res += 'External Nodes\n'
         for node in self.external_nodes.values():
-            res += f"  {node.uid}, {node.coords}"
+            res += f'  {node.uid}, {node.coords}'
         return res
 
     def dict_of_elements(self):

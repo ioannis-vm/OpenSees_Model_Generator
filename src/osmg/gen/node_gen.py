@@ -63,7 +63,7 @@ class NodeGenerator:
         lvls = self.model.levels
         level = lvls[lvl]
         node = Node(
-            uid=self.model.uid_generator.new("node"),
+            uid=self.model.uid_generator.new('node'),
             coords=[x_loc, y_loc, level.elevation],
         )
         level.nodes.add(node)
@@ -102,7 +102,7 @@ class NodeGenerator:
         lvls = self.model.levels
         level = lvls[lvl]
         node = Node(
-            uid=self.model.uid_generator.new("node"),
+            uid=self.model.uid_generator.new('node'),
             coords=[x_loc, y_loc, z_loc],
         )
         level.nodes.add(node)
@@ -135,6 +135,6 @@ class NodeGenerator:
 
         """
         lvls = self.model.levels
-        assert lvls.active, "No active levels."
+        assert lvls.active, 'No active levels.'
         for key in lvls.active:
             self.add_node_lvl(x_loc, y_loc, key)

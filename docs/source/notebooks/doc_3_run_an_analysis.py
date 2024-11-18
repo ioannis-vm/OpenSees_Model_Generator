@@ -54,54 +54,57 @@ from osmg.load_case import LoadCase
 from osmg.preprocessing.self_weight_mass import self_weight
 from osmg.preprocessing.self_weight_mass import self_mass
 from osmg.graphics.preprocessing_3d import show
+
 mdl = model.Model('example_model')
 for i in range(3):
-    mdl.add_level(i, 144.00*(i))
+    mdl.add_level(i, 144.00 * (i))
 defaults.load_default_steel(mdl)
 defaults.load_default_fix_release(mdl)
 defaults.load_util_rigid_elastic(mdl)
-steel_phys_mat = mdl.physical_materials.retrieve_by_attr(
-    'name', 'default steel')
+steel_phys_mat = mdl.physical_materials.retrieve_by_attr('name', 'default steel')
 secg = SectionGenerator(mdl)
 secg.load_aisc_from_database(
-    'W',
-    ["W24X94"],
-    'default steel',
-    'default steel',
-    ElasticSection)
+    'W', ['W24X94'], 'default steel', 'default steel', ElasticSection
+)
 mdl.levels.set_active([1, 2])
 p1 = np.array((0.00, 0.00))
-p2 = np.array((360., 0.00))
-p3 = np.array((360., 360.))
+p2 = np.array((360.0, 0.00))
+p3 = np.array((360.0, 360.0))
 p4 = np.array((0.00, 360.00))
 mcg = BeamColumnGenerator(mdl)
 sec = mdl.elastic_sections.retrieve_by_attr('name', 'W24X94')
 for pt in [p1, p2, p3, p4]:
     mcg.add_pz_active(
-        pt[0], pt[1],
+        pt[0],
+        pt[1],
         sec,
         steel_phys_mat,
         0.00,
         24.00,
         24.00,
-        "steel_w_col_pz_updated",
-        {'pz_doubler_plate_thickness': 0.00,
-         'axial_load_ratio': 0.00,
-         'slab_depth': 0.00,
-         'consider_composite': False,
-         'location': 'interior',
-         'only_elastic': False,
-         'moment_modifier': 1.00,
-        })
+        'steel_w_col_pz_updated',
+        {
+            'pz_doubler_plate_thickness': 0.00,
+            'axial_load_ratio': 0.00,
+            'slab_depth': 0.00,
+            'consider_composite': False,
+            'location': 'interior',
+            'only_elastic': False,
+            'moment_modifier': 1.00,
+        },
+    )
     mcg.add_vertical_active(
-        x_coord=pt[0], y_coord=pt[1],
-        offset_i=np.zeros(3), offset_j=np.zeros(3),
+        x_coord=pt[0],
+        y_coord=pt[1],
+        offset_i=np.zeros(3),
+        offset_j=np.zeros(3),
         transf_type='Corotational',
         n_sub=1,
         section=sec,
         element_type=ElasticBeamColumn,
         placement='centroid',
-        angle=0.00)
+        angle=0.00,
+    )
 snap_i_list = ['centroid', 'middle_front', 'centroid', 'middle_back']
 snap_j_list = ['centroid', 'middle_back', 'centroid', 'middle_front']
 for i, pair in enumerate([(p1, p2), (p2, p3), (p3, p4), (p4, p1)]):
@@ -130,7 +133,7 @@ for i, pair in enumerate([(p1, p2), (p2, p3), (p3, p4), (p4, p1)]):
                 'section': sec,
                 'physical_material': steel_phys_mat,
                 'distance': 10.00,
-                'n_sub': 2
+                'n_sub': 2,
             },
             'zerolength_gen_j': gravity_shear_tab,
             'zerolength_gen_args_j': {
@@ -138,12 +141,12 @@ for i, pair in enumerate([(p1, p2), (p2, p3), (p3, p4), (p4, p1)]):
                 'section': sec,
                 'physical_material': steel_phys_mat,
                 'distance': 10.00,
-                'n_sub': 2
-            }
-        }
+                'n_sub': 2,
+            },
+        },
     )
 for node in mdl.levels[0].nodes.values():
-    node.restraint = [True]*6
+    node.restraint = [True] * 6
 testcase = LoadCase('test', mdl)
 self_weight(mdl, testcase)
 self_mass(mdl, testcase)
@@ -199,8 +202,9 @@ static_anl.results[testcase.name].node_displacements.items()
 analysis_step = 0
 direction = 1
 node_id = testcase.parent_nodes[2].uid
-static_anl.results[testcase.name].node_displacements[
-    node_id][analysis_step][direction]
+static_anl.results[testcase.name].node_displacements[node_id][analysis_step][
+    direction
+]
 
 
 # %% [markdown]
@@ -240,9 +244,8 @@ help(show_basic_forces)
 
 # %%
 show_basic_forces(
-    static_anl, testcase.name, 0,
-    1.00, 1.00, 1.00, 1.00, 1.00,
-    10, 1.00, 1.00, False)
+    static_anl, testcase.name, 0, 1.00, 1.00, 1.00, 1.00, 1.00, 10, 1.00, 1.00, False
+)
 
 
 # %% [markdown]
@@ -258,8 +261,7 @@ modalcase.rigid_diaphragms([1, 2])
 
 
 # %%
-modal_analysis = solver.ModalAnalysis(
-    mdl, {modalcase.name: modalcase}, num_modes=4)
+modal_analysis = solver.ModalAnalysis(mdl, {modalcase.name: modalcase}, num_modes=4)
 modal_analysis.run()
 
 
@@ -276,8 +278,8 @@ for modal analyses, step corresponds to mode
 
 # %%
 show_deformed_shape(
-    modal_analysis, modalcase.name, 3, 0.00,
-    extrude=False, animation=False)
+    modal_analysis, modalcase.name, 3, 0.00, extrude=False, animation=False
+)
 
 
 # %% [markdown]
@@ -299,10 +301,12 @@ ag_y = np.genfromtxt('groundmotions/1ya.txt')
 
 nlth_anl.run(
     0.01,
-    ag_x, ag_y, None,
+    ag_x,
+    ag_y,
+    None,
     0.005,
     damping={'type': 'rayleigh', 'ratio': 0.05, 'periods': [1.00, 0.30]},
-    print_progress=False
+    print_progress=False,
 )
 
 
@@ -312,7 +316,8 @@ parent_node_lvl2 = testcase.parent_nodes[2]
 
 # %%
 nlth_anl.plot_node_displacement_history(
-    testcase.name, parent_node_lvl2, 0, plotly=True)
+    testcase.name, parent_node_lvl2, 0, plotly=True
+)
 
 
 # %% [markdown]

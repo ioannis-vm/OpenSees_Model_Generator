@@ -19,11 +19,11 @@ import numpy as np
 
 # used for production plots
 node_marker = {
-    'fixed': ("square", 8),
-    'release': ("circle-open", 6),
-    'free': ("circle", 3),
-    'parent': ("circle-open", 15),
-    'internal': ("x", 2),
+    'fixed': ('square', 8),
+    'release': ('circle-open', 6),
+    'free': ('circle', 3),
+    'parent': ('circle-open', 15),
+    'internal': ('x', 2),
 }
 
 # # used for development plots
@@ -47,13 +47,13 @@ def global_layout(mdl, camera=None):
     p_min, p_max = mdl.bounding_box(padding=2.0 * ref_len)
 
     # view_type = "orthographic"
-    view_type = "perspective"
+    view_type = 'perspective'
     if not camera:
         camera = dict(
             up=dict(x=0, y=0, z=1),
             center=dict(x=0, y=0, z=0),
             eye=dict(x=0.7, y=1.00, z=0.30),
-            projection={"type": view_type},
+            projection={'type': view_type},
         )
     ref_len = np.linalg.norm(p_max - p_min)  # used in aspect ratio calcs
     return go.Layout(
@@ -61,7 +61,7 @@ def global_layout(mdl, camera=None):
             xaxis_visible=False,
             yaxis_visible=False,
             zaxis_visible=False,
-            bgcolor="white",
+            bgcolor='white',
             camera=camera,
             xaxis=dict(range=[p_min[0], p_max[0]], autorange=False),
             yaxis=dict(range=[p_min[1], p_max[1]], autorange=False),
@@ -80,5 +80,5 @@ def global_layout(mdl, camera=None):
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

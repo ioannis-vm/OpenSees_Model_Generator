@@ -67,10 +67,10 @@ class PointLoadMass:
         self.val += load
 
     def __repr__(self):
-        res = ""
-        res += "Point Load (or mass) object\n"
-        res += "Components: (global system)\n"
-        res += f"val: {self.val}\n"
+        res = ''
+        res += 'Point Load (or mass) object\n'
+        res += 'Components: (global system)\n'
+        res += f'val: {self.val}\n'
         return res
 
 
@@ -82,17 +82,15 @@ class LineElementUDL:
     """
 
     parent_load_case: LoadCase
-    parent_line_element: Union[
-        element.ElasticBeamColumn, element.DispBeamColumn
-    ]
+    parent_line_element: Union[element.ElasticBeamColumn, element.DispBeamColumn]
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
-        res = ""
-        res += "LineElementUDL object\n"
-        res += f"parent_line_element.uid: {self.parent_line_element.uid}\n"
-        res += "Components:\n"
-        res += f"  val: {self.val}\n"
+        res = ''
+        res += 'LineElementUDL object\n'
+        res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
+        res += 'Components:\n'
+        res += f'  val: {self.val}\n'
         return res
 
     def add_glob(self, udl: nparr) -> None:
@@ -121,21 +119,15 @@ class LineElementUDL:
         # process is always valid without requiring any special
         # transformation.
         elm = self.parent_line_element
-        assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        )
-        if elm.geomtransf.transf_type == "Corotational":
+        assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
+        if elm.geomtransf.transf_type == 'Corotational':
             elm_len = elm.clear_length()
             force = udl * elm_len / 2.00
             node_i_uid = elm.nodes[0].uid
             node_j_uid = elm.nodes[1].uid
             lcase = self.parent_load_case
-            lcase.node_loads[node_i_uid].add(
-                np.concatenate((force, np.zeros(3)))
-            )
-            lcase.node_loads[node_j_uid].add(
-                np.concatenate((force, np.zeros(3)))
-            )
+            lcase.node_loads[node_i_uid].add(np.concatenate((force, np.zeros(3))))
+            lcase.node_loads[node_j_uid].add(np.concatenate((force, np.zeros(3))))
         else:
             transf_mat = transformations.transformation_matrix(
                 self.parent_line_element.geomtransf.x_axis,
@@ -188,12 +180,8 @@ class LoadCase:
 
     name: str
     parent_model: Model
-    node_loads: obj_collections.Collection[int, PointLoadMass] = field(
-        init=False
-    )
-    node_mass: obj_collections.Collection[int, PointLoadMass] = field(
-        init=False
-    )
+    node_loads: obj_collections.Collection[int, PointLoadMass] = field(init=False)
+    node_mass: obj_collections.Collection[int, PointLoadMass] = field(init=False)
     line_element_udl: obj_collections.Collection[int, LineElementUDL] = field(
         init=False
     )
@@ -221,9 +209,7 @@ class LoadCase:
             self.line_element_udl[elm.uid] = LineElementUDL(self, elm)
         # initialize tributary area analysis for each level
         for lvlkey, lvl in self.parent_model.levels.items():
-            self.tributary_area_analysis[lvlkey] = TributaryAreaAnaysis(
-                self, lvl
-            )
+            self.tributary_area_analysis[lvlkey] = TributaryAreaAnaysis(self, lvl)
 
     def rigid_diaphragms(
         self, level_uids: list[int], gather_mass: bool = False
@@ -257,7 +243,7 @@ class LoadCase:
             np.ones((len(all_nodes), 6), dtype=int),
             index=all_nodes.keys(),
             columns=[1, 2, 3, 4, 5, 6],
-        ).sort_index(axis="index")
+        ).sort_index(axis='index')
 
         # consider the restraints
         def restraints(row, all_nodes):
@@ -280,8 +266,8 @@ class LoadCase:
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self):
-        res = ""
-        res += "LoadCase object\n"
-        res += f"name: {self.name}\n"
-        res += f"parent_model: {self.parent_model.name}\n"
+        res = ''
+        res += 'LoadCase object\n'
+        res += f'name: {self.name}\n'
+        res += f'parent_model: {self.parent_model.name}\n'
         return res

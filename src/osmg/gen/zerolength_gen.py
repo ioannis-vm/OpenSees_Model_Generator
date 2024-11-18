@@ -15,7 +15,6 @@ Objects that generate ZeroLength elements.
 
 # pylint: disable=unused-argument
 
-
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from typing import Optional
@@ -43,8 +42,8 @@ def fix_all(
 
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 3
     return dirs, mats
 
@@ -59,8 +58,8 @@ def release_6(
 
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 2
     return dirs, mats
 
@@ -75,8 +74,8 @@ def release_5(
 
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 2
     return dirs, mats
 
@@ -91,8 +90,8 @@ def release_56(
 
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat]
     return dirs, mats
 
@@ -137,15 +136,15 @@ def imk_6(
         rbs_factor,
         consider_composite,
         axial_load_ratio,
-        direction="strong",
+        direction='strong',
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
         only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
@@ -183,7 +182,7 @@ def imk_56(
         rbs_factor,
         consider_composite,
         axial_load_ratio,
-        direction="strong",
+        direction='strong',
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
         only_elastic=only_elastic,
@@ -197,14 +196,14 @@ def imk_56(
         rbs_factor,
         consider_composite,
         axial_load_ratio,
-        direction="weak",
+        direction='weak',
         moment_modifier=moment_modifier,
         only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat, mat_weak, mat_strong]
     return dirs, mats
 
@@ -242,15 +241,15 @@ def imk_6_release_5(
         rbs_factor,
         consider_composite,
         axial_load_ratio,
-        direction="strong",
+        direction='strong',
         moment_modifier=moment_modifier,
         n_parameter=n_parameter,
         only_elastic=only_elastic,
     )
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat, mat_strong]
     return dirs, mats
 
@@ -270,11 +269,9 @@ def gravity_shear_tab(
 
     """
 
-    assert section.name[0] == "W", "Error: Only W sections can be used."
+    assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
-    assert (
-        model.settings.imperial_units
-    ), "Error: Only imperial units supported."
+    assert model.settings.imperial_units, 'Error: Only imperial units supported.'
     assert section.properties
 
     moment_modifier = kwargs.get('moment_modifier', 1.00)
@@ -283,7 +280,7 @@ def gravity_shear_tab(
     assert isinstance(moment_modifier, float)
     mat_fy = physical_material.f_y / 1.0e3
     # Plastic modulus (unreduced)
-    sec_zx = section.properties["Zx"]
+    sec_zx = section.properties['Zx']
     # Plastic moment of the section
     sec_mp = sec_zx * mat_fy * 1.0e3 * moment_modifier
 
@@ -316,7 +313,7 @@ def gravity_shear_tab(
         gdlim = 0.1
         gflim = 0.0
         g_e = 10
-        dmgtype = "energy"
+        dmgtype = 'energy'
     else:
         m_max_pos = 0.35 * sec_mp
         m_max_neg = 0.64 * 0.35 * sec_mp
@@ -346,11 +343,11 @@ def gravity_shear_tab(
         gdlim = 0.05
         gflim = 0.05
         g_e = 10
-        dmgtype = "energy"
+        dmgtype = 'energy'
 
     mat = Pinching4(
-        model.uid_generator.new("uniaxial material"),
-        "auto_gravity_shear_tab",
+        model.uid_generator.new('uniaxial material'),
+        'auto_gravity_shear_tab',
         m1_p,
         th_1_p,
         m2_p,
@@ -393,9 +390,9 @@ def gravity_shear_tab(
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
-    release_mat = mat_repo.retrieve_by_attr("name", "release")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
+    release_mat = mat_repo.retrieve_by_attr('name', 'release')
     mats = [fix_mat] * 3 + [fix_rot_mat, release_mat, mat]
     return dirs, mats
 
@@ -418,18 +415,16 @@ def steel_w_col_pz(
 
     """
 
-    assert section.name[0] == "W", "Error: Only W sections can be used."
+    assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
-    assert (
-        model.settings.imperial_units
-    ), "Error: Only imperial units supported."
+    assert model.settings.imperial_units, 'Error: Only imperial units supported.'
     assert section.properties
     f_y = physical_material.f_y
     hardening = pz_hardening
-    d_c = section.properties["d"]
-    bfc = section.properties["bf"]
-    t_p = section.properties["tw"] + pz_doubler_plate_thickness
-    t_f = section.properties["tf"]
+    d_c = section.properties['d']
+    bfc = section.properties['bf']
+    t_p = section.properties['tw'] + pz_doubler_plate_thickness
+    t_f = section.properties['tf']
     v_y = 0.55 * f_y * d_c * t_p
     g_mod = physical_material.g_mod
     k_e = 0.95 * g_mod * t_p * d_c
@@ -439,21 +434,18 @@ def steel_w_col_pz(
     gamma_3 = 100.0 * gamma_1
     m1y = gamma_1 * k_e * pz_length * moment_modifier
     m2y = m1y + k_p * pz_length * (gamma_2 - gamma_1) * moment_modifier
-    m3y = (
-        m2y
-        + (hardening * k_e * pz_length) * (gamma_3 - gamma_2) * moment_modifier
-    )
+    m3y = m2y + (hardening * k_e * pz_length) * (gamma_3 - gamma_2) * moment_modifier
 
     if only_elastic:
         mat: UniaxialMaterial = Elastic(
-            model.uid_generator.new("uniaxial material"),
-            "auto_steel_W_PZ",
+            model.uid_generator.new('uniaxial material'),
+            'auto_steel_W_PZ',
             m1y / gamma_1,
         )
     else:
         mat = Hysteretic(
-            model.uid_generator.new("uniaxial material"),
-            "auto_steel_W_PZ",
+            model.uid_generator.new('uniaxial material'),
+            'auto_steel_W_PZ',
             (m1y, gamma_1),
             (m2y, gamma_2),
             (m3y, gamma_3),
@@ -468,8 +460,8 @@ def steel_w_col_pz(
         )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
@@ -496,22 +488,20 @@ def steel_w_col_pz_updated(
 
     """
 
-    assert section.name[0] == "W", "Error: Only W sections can be used."
+    assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
-    assert (
-        model.settings.imperial_units
-    ), "Error: Only imperial units supported."
+    assert model.settings.imperial_units, 'Error: Only imperial units supported.'
     assert section.properties
     f_y = physical_material.f_y
     e_mod = physical_material.e_mod
     g_mod = physical_material.g_mod
-    tw_Col = section.properties["tw"]
+    tw_Col = section.properties['tw']
     tdp = pz_doubler_plate_thickness
-    d_Col = section.properties["d"]
+    d_Col = section.properties['d']
     d_Beam = pz_length
-    tf_Col = section.properties["tf"]
-    bf_Col = section.properties["bf"]
-    Ix_Col = section.properties["Ix"]
+    tf_Col = section.properties['tf']
+    bf_Col = section.properties['bf']
+    Ix_Col = section.properties['Ix']
     ts = slab_depth
     n = axial_load_ratio
     trib = slab_depth
@@ -538,16 +528,7 @@ def steel_w_col_pz_updated(
     # flange stiffness: shear contribution
     Ksf = 2.0 * (bf_Col * tf_Col) * g_mod
     # flange stiffness: bending contribution
-    Kbf = (
-        2.0
-        * 12.0
-        * e_mod
-        * bf_Col
-        * (tf_Col**3)
-        / 12.0
-        / (d_Beam**3)
-        * d_Beam
-    )
+    Kbf = 2.0 * 12.0 * e_mod * bf_Col * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam
     # flange stiffness: total contribution
     Kef = (Ksf * Kbf) / (Ksf + Kbf)
 
@@ -680,14 +661,14 @@ def steel_w_col_pz_updated(
     if only_elastic:
         m1y, gamma_1 = args[0]  # type: ignore
         mat: UniaxialMaterial = Elastic(
-            model.uid_generator.new("uniaxial material"),
-            "auto_steel_W_PZ",
+            model.uid_generator.new('uniaxial material'),
+            'auto_steel_W_PZ',
             m1y / gamma_1,  # type: ignore
         )
     else:
         mat = Hysteretic(
-            model.uid_generator.new("uniaxial material"),
-            "auto_steel_W_pz_updated",
+            model.uid_generator.new('uniaxial material'),
+            'auto_steel_W_pz_updated',
             *args,
         )
     # minmaxmat = MinMax(
@@ -697,8 +678,8 @@ def steel_w_col_pz_updated(
     # print(mat.ops_args())
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat] * 2 + [mat]
     return dirs, mats
 
@@ -737,8 +718,8 @@ def steel_brace_gusset(
     var_k_rot = var_e * var_i / l_b
     var_b = 0.01
     gusset_mat = Steel02(
-        model.uid_generator.new("uniaxial material"),
-        "auto_steel_gusset",
+        model.uid_generator.new('uniaxial material'),
+        'auto_steel_gusset',
         var_my,
         var_k_rot,
         var_g,
@@ -754,7 +735,7 @@ def steel_brace_gusset(
     )
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
-    fix_mat = mat_repo.retrieve_by_attr("name", "fix")
-    fix_rot_mat = mat_repo.retrieve_by_attr("name", "fix_rot")
+    fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
+    fix_rot_mat = mat_repo.retrieve_by_attr('name', 'fix_rot')
     mats = [fix_mat] * 3 + [fix_rot_mat, gusset_mat, fix_mat]
     return dirs, mats

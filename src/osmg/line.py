@@ -41,10 +41,10 @@ class Line:
     end: nparr = field(repr=False)
 
     def __repr__(self):
-        res = ""
-        res += "Line object\n"
-        res += f"  start: {self.start}\n"
-        res += f"  end: {self.end}\n"
+        res = ''
+        res += 'Line object\n'
+        res += f'  start: {self.start}\n'
+        res += f'  end: {self.end}\n'
         return res
 
     def length(self):
@@ -76,7 +76,7 @@ class Line:
 
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: "Line") -> nparr:
+    def intersect(self, other: 'Line') -> nparr:
         """
         Calculates the intersection point of this line with another
         line. Returns None if the lines don't intersect.  Note: 'line'
@@ -96,9 +96,7 @@ class Line:
 
         ra_dir = self.direction()
         rb_dir = other.direction()
-        mat: nparr = np.array(
-            [[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]]
-        )
+        mat: nparr = np.array([[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]])
         if np.abs(np.linalg.det(mat)) <= common.EPSILON:
             # The lines are parallel
             # in this case, we check if they have

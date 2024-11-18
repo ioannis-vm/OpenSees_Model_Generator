@@ -98,33 +98,33 @@ class ElasticSection(Section):
 
         """
 
-        if self.name[0] == "W":
+        if self.name[0] == 'W':
             res = self.sec_w * 1.15  # misc steel and connections
         else:
             res = self.sec_w
         return res
 
     def __repr__(self):
-        res = ""
-        res += "ElasticSection object\n"
-        res += f"name: {self.name}\n"
-        res += f"uid: {self.uid}\n"
-        res += "Properties:"
-        res += f"  E: {self.e_mod}\n"
-        res += f"  A: {self.area}\n"
-        res += f"  Iy: {self.i_y}\n"
-        res += f"  Ix: {self.i_x}\n"
-        res += f"  G: {self.g_mod}\n"
-        res += f"  J: {self.j_mod}\n"
-        res += f"  W: {self.sec_w}\n"
+        res = ''
+        res += 'ElasticSection object\n'
+        res += f'name: {self.name}\n'
+        res += f'uid: {self.uid}\n'
+        res += 'Properties:'
+        res += f'  E: {self.e_mod}\n'
+        res += f'  A: {self.area}\n'
+        res += f'  Iy: {self.i_y}\n'
+        res += f'  Ix: {self.i_x}\n'
+        res += f'  G: {self.g_mod}\n'
+        res += f'  J: {self.j_mod}\n'
+        res += f'  W: {self.sec_w}\n'
         if self.outside_shape:
-            res += "outside_shape: specified\n"
+            res += 'outside_shape: specified\n'
         else:
-            res += "outside_shape: None\n"
+            res += 'outside_shape: None\n'
         if self.snap_points:
-            res += "snap_points: specified\n"
+            res += 'snap_points: specified\n'
         else:
-            res += "snap_points: None\n"
+            res += 'snap_points: None\n'
         return res
 
 
@@ -150,18 +150,18 @@ class SectionComponent:
     parent_section: Optional[FiberSection] = field(default=None)
 
     def __repr__(self):
-        res = ""
-        res += "SectionComponent object\n"
+        res = ''
+        res += 'SectionComponent object\n'
         if self.outside_shape:
-            res += "outside_shape: specified\n"
+            res += 'outside_shape: specified\n'
         else:
-            res += "outside_shape: None\n"
+            res += 'outside_shape: None\n'
         if self.holes:
-            res += "holes: exist\n"
+            res += 'holes: exist\n'
         else:
-            res += "holes: no holes\n"
-        res += f"ops_material: {self.ops_material.name}\n"
-        res += f"physical_material: {self.physical_material.name}\n"
+            res += 'holes: no holes\n'
+        res += f'ops_material: {self.ops_material.name}\n'
+        res += f'physical_material: {self.physical_material.name}\n'
         return res
 
     def cut_into_tiny_little_pieces(self):
@@ -174,18 +174,18 @@ class SectionComponent:
         # certain way
         assert self.parent_section
         sec_name = self.parent_section.name
-        if "HSS" in sec_name and len(sec_name.split("X")) == 3:
+        if 'HSS' in sec_name and len(sec_name.split('X')) == 3:
             # rectangular HSS section!
             pieces = mesh.subdivide_hss_rect(
-                self.parent_section.properties["Ht"],
-                self.parent_section.properties["B"],
-                self.parent_section.properties["tdes"],
+                self.parent_section.properties['Ht'],
+                self.parent_section.properties['B'],
+                self.parent_section.properties['tdes'],
             )
         elif 'HSS' in sec_name and len(sec_name.split('X')) == 2:
             # circular HSS section!
             pieces = mesh.subdivide_hss_circ(
-                self.parent_section.properties["OD"],
-                self.parent_section.properties["tdes"],
+                self.parent_section.properties['OD'],
+                self.parent_section.properties['tdes'],
             )
 
         else:
@@ -234,15 +234,15 @@ class FiberSection(Section):
             self.section_parts[part].parent_section = self
 
     def __repr__(self):
-        res = ""
-        res += "FiberSection object\n"
+        res = ''
+        res += 'FiberSection object\n'
         for part in self.section_parts:
             res += part.__repr__()
         if self.snap_points:
-            res += "snap_points: specified\n"
+            res += 'snap_points: specified\n'
         else:
-            res += "snap_points: None\n"
-        res += f"n_x: {self.n_x}, n_y: {self.n_y}\n"
+            res += 'snap_points: None\n'
+        res += f'n_x: {self.n_x}, n_y: {self.n_y}\n'
         return res
 
     def ops_args(self):
@@ -253,10 +253,10 @@ class FiberSection(Section):
         """
 
         return [
-            "Fiber",
+            'Fiber',
             self.uid,
-            "-GJ",
-            self.j_mod * self.section_parts["main"].physical_material.g_mod,
+            '-GJ',
+            self.j_mod * self.section_parts['main'].physical_material.g_mod,
         ]
 
     def weight_per_length(self):
@@ -266,7 +266,7 @@ class FiberSection(Section):
 
         """
 
-        if self.name[0] == "W":
+        if self.name[0] == 'W':
             mult = 1.15  # misc steel and connections
         else:
             mult = 1.00
@@ -301,7 +301,7 @@ class FiberSection(Section):
             new_part = val.copy_alter_material(mat)
             new_section_parts[key] = new_part
         other_sec = FiberSection(
-            f"auto_{self.name}",
+            f'auto_{self.name}',
             new_uid,
             self.outside_shape,
             new_section_parts,

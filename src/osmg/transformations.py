@@ -41,7 +41,7 @@ def rotation_matrix_2d(ang: float) -> nparr:
     """
 
     if not isinstance(ang, float):
-        raise TypeError("ang parameter should be a float.")
+        raise TypeError('ang parameter should be a float.')
     return np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
 
 
@@ -189,7 +189,7 @@ def local_axes_from_points_and_angle(
         # check if the element is upside down
         diff = np.abs(np.linalg.norm(x_axis - np.array([0.00, 0.00, 1.00])))
         if diff < common.EPSILON:
-            raise ValueError("Vertical element defined upside down")
+            raise ValueError('Vertical element defined upside down')
         up_direction: nparr = np.array([0.0, 0.0, 1.0])
         # orthogonalize with respect to x-axis
         y_axis = up_direction - np.dot(up_direction, x_axis) * x_axis

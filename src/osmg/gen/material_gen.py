@@ -59,10 +59,10 @@ class MaterialGenerator:
         param_c_r2 = 0.15
 
         assert section.properties is not None
-        sec_b = section.properties["B"]
-        sec_t = section.properties["tdes"]
+        sec_b = section.properties['B']
+        sec_t = section.properties['tdes']
         var_lc = brace_length
-        sec_r = min(section.properties["rx"], section.properties["ry"])
+        sec_r = min(section.properties['rx'], section.properties['ry'])
         mat_e = physical_material.e_mod
         mat_g = physical_material.g_mod
         mat_fy = physical_material.f_y
@@ -74,8 +74,8 @@ class MaterialGenerator:
         )
 
         steel02_mat = Steel02(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_steel02_brace_mat",
+            self.model.uid_generator.new('uniaxial material'),
+            'auto_steel02_brace_mat',
             mat_fy,
             mat_e,
             mat_g,
@@ -86,8 +86,8 @@ class MaterialGenerator:
         )
 
         maxstrainrange_mat = MaxStrainRange(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_maxstrainrange_brace_mat",
+            self.model.uid_generator.new('uniaxial material'),
+            'auto_maxstrainrange_brace_mat',
             steel02_mat,
             var_msr,
             tangent_ratio=1.0e-5,
@@ -116,10 +116,10 @@ class MaterialGenerator:
         param_c_r2 = 0.25
 
         assert section.properties is not None
-        sec_d = section.properties["OD"]
-        sec_t = section.properties["tdes"]
+        sec_d = section.properties['OD']
+        sec_t = section.properties['tdes']
         var_lc = brace_length
-        sec_r = min(section.properties["rx"], section.properties["ry"])
+        sec_r = min(section.properties['rx'], section.properties['ry'])
         mat_e = physical_material.e_mod
         mat_g = physical_material.g_mod
         mat_fy = physical_material.f_y
@@ -132,8 +132,8 @@ class MaterialGenerator:
         var_m = -0.300
 
         steel02_mat = Steel02(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_steel02_brace_mat",
+            self.model.uid_generator.new('uniaxial material'),
+            'auto_steel02_brace_mat',
             mat_fy,
             mat_e,
             mat_g,
@@ -148,8 +148,8 @@ class MaterialGenerator:
         )
 
         fatigue_mat = Fatigue(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_fatigue_brace_mat",
+            self.model.uid_generator.new('uniaxial material'),
+            'auto_fatigue_brace_mat',
             steel02_mat,
             var_e0,
             var_m,
@@ -167,7 +167,7 @@ class MaterialGenerator:
         rbs_factor,
         consider_composite,
         axial_load_ratio,
-        direction="strong",
+        direction='strong',
         moment_modifier=1.00,
         n_parameter=0.00,
         only_elastic=False,
@@ -187,33 +187,33 @@ class MaterialGenerator:
         """
 
         # gather necessary data and check interpolation range
-        assert section.name[0] == "W", "Error: Only W sections can be used."
+        assert section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(section, ElasticSection)
         assert (
             self.model.settings.imperial_units
-        ), "Error: Only imperial units supported."
+        ), 'Error: Only imperial units supported.'
         assert section.properties
         # Yield stress
         mat_fy = physical_material.f_y / 1.0e3
         # Moment of inertia - strong axis - original section
-        if direction == "strong":
-            sec_i = section.properties["Ix"]
+        if direction == 'strong':
+            sec_i = section.properties['Ix']
         else:
-            sec_i = section.properties["Iy"]
+            sec_i = section.properties['Iy']
         # Section depth
-        sec_d = section.properties["d"]
+        sec_d = section.properties['d']
         # Flange width
-        sec_bf = section.properties["bf"]
+        sec_bf = section.properties['bf']
         # Flange and web thicknesses
-        sec_tf = section.properties["tf"]
-        sec_tw = section.properties["tw"]
+        sec_tf = section.properties['tf']
+        sec_tw = section.properties['tw']
         # Plastic modulus (unreduced)
-        if direction == "strong":
-            sec_z = section.properties["Zx"]
+        if direction == 'strong':
+            sec_z = section.properties['Zx']
         else:
-            sec_z = section.properties["Zy"]
+            sec_z = section.properties['Zy']
         # Radius of gyration
-        sec_ry = section.properties["ry"]
+        sec_ry = section.properties['ry']
         # Clear length
         elm_h = element_length
         # Shear span
@@ -225,43 +225,39 @@ class MaterialGenerator:
 
         if rbs_factor:
             # RBS case
-            assert direction == "strong"
-            assert rbs_factor <= 1.00, "rbs_factor must be <= 1.00"
+            assert direction == 'strong'
+            assert rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
             # checks ~ acceptable range
             if not 20.00 < sec_d / sec_tw < 55.00:
                 print(
-                    f"Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}"
-                    " outside regression range"
+                    f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
+                    ' outside regression range'
                 )
-                print("20.00 < sec_d/sec_tw < 55.00")
-                print(section.name, "\n")
+                print('20.00 < sec_d/sec_tw < 55.00')
+                print(section.name, '\n')
             if not 20.00 < lbry < 80.00:
-                print(f"Warning: Lb/ry={lbry:.2f} outside regression range")
-                print("20.00 < lbry < 80.00")
-                print(section.name, "\n")
+                print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
+                print('20.00 < lbry < 80.00')
+                print(section.name, '\n')
             if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:
                 print(
-                    f"Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}"
-                    " outside regression range"
+                    f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
+                    ' outside regression range'
                 )
-                print("4.00 < (sec_bf/(2.*sec_tf)) < 8.00")
-                print(section.name, "\n")
+                print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
+                print(section.name, '\n')
             if not 2.5 < elm_l / sec_d < 7.0:
-                print(
-                    f"Warning: L/d={elm_l/sec_d:.2f}  outside regression range"
-                )
-                print("2.5 < elm_l/sec_d < 7.0")
-                print(section.name, "\n")
+                print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
+                print('2.5 < elm_l/sec_d < 7.0')
+                print(section.name, '\n')
             if not 4.00 < sec_d < 36.00:
-                print(
-                    f"Warning: Section d={sec_d:.2f} outside regression range"
-                )
-                print("4.00 < sec_d < 36.00")
-                print(section.name, "\n")
+                print(f'Warning: Section d={sec_d:.2f} outside regression range')
+                print('4.00 < sec_d < 36.00')
+                print(section.name, '\n')
             if not 35.00 < mat_fy < 65.00:
-                print(f"Warning: Fy={mat_fy:.2f} outside regression range")
-                print("35.00 < mat_fy < 65.00")
-                print(section.name, "\n")
+                print(f'Warning: Fy={mat_fy:.2f} outside regression range')
+                print('35.00 < mat_fy < 65.00')
+                print(section.name, '\n')
             # calculate parameters
             theta_p = (
                 0.19
@@ -404,8 +400,8 @@ class MaterialGenerator:
                 axial_load_ratio == 0.00
             ), "Can't consider composite action for columns"
             assert (
-                direction == "strong"
-            ), "Composite action affects the behavior in strong-axis bending"
+                direction == 'strong'
+            ), 'Composite action affects the behavior in strong-axis bending'
 
             theta_p_plus *= 1.80
             theta_p_minus *= 0.95
@@ -465,14 +461,14 @@ class MaterialGenerator:
         # new model
         if only_elastic:
             elastic_mat = Elastic(
-                self.model.uid_generator.new("uniaxial material"),
-                "auto_IMK",
+                self.model.uid_generator.new('uniaxial material'),
+                'auto_IMK',
                 stiffness * moment_modifier,
             )
             return elastic_mat
         bilin_mat = IMKBilin(
-            self.model.uid_generator.new("uniaxial material"),
-            "auto_IMK",
+            self.model.uid_generator.new('uniaxial material'),
+            'auto_IMK',
             stiffness * moment_modifier,
             theta_p_plus,
             theta_pc_plus,

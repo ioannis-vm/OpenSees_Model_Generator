@@ -77,29 +77,29 @@ class ZeroLength(Element):
         """
 
         return [
-            "zeroLength",
+            'zeroLength',
             self.uid,
             *[n.uid for n in self.nodes],
-            "-mat",
+            '-mat',
             *[m.uid for m in self.mats],
-            "-dir",
+            '-dir',
             *self.dirs,
-            "-doRayleigh",
+            '-doRayleigh',
             1,
-            "-orient",
+            '-orient',
             *self.vecx,
             *self.vecyp,
         ]
 
     def __repr__(self):
-        res = ""
-        res += "ZeroLength element object\n"
-        res += f"uid: {self.uid}"
-        res += "Materials:"
+        res = ''
+        res += 'ZeroLength element object\n'
+        res += f'uid: {self.uid}'
+        res += 'Materials:'
         for mat, direction in zip(self.mats, self.dirs):
-            res += f"  {direction}: {mat.name}\n"
-        res += f"vecx: {self.vecx}\n"
-        res += f"vecyp: {self.vecyp}\n"
+            res += f'  {direction}: {mat.name}\n'
+        res += f'vecx: {self.vecx}\n'
+        res += f'vecyp: {self.vecyp}\n'
         return res
 
 
@@ -124,26 +124,26 @@ class TwoNodeLink(Element):
         """
 
         return [
-            "twoNodeLink",
+            'twoNodeLink',
             self.uid,
             *[n.uid for n in self.nodes],
-            "-mat",
+            '-mat',
             *[m.uid for m in self.mats],
-            "-dir",
+            '-dir',
             *self.dirs,
-            "-orient",
+            '-orient',
             *self.vecyp,
         ]
 
     def __repr__(self):
-        res = ""
-        res += "TwoNodeLink element object\n"
-        res += f"uid: {self.uid}"
-        res += "Materials:"
+        res = ''
+        res += 'TwoNodeLink element object\n'
+        res += f'uid: {self.uid}'
+        res += 'Materials:'
         for mat, direction in zip(self.mats, self.dirs):
-            res += f"  {direction}: {mat.name}\n"
-        res += f"vecx: {self.vecx}\n"
-        res += f"vecyp: {self.vecyp}\n"
+            res += f'  {direction}: {mat.name}\n'
+        res += f'vecx: {self.vecx}\n'
+        res += f'vecyp: {self.vecyp}\n'
         return res
 
 
@@ -204,13 +204,13 @@ class TrussBar(Element):
 
     def __repr__(self):
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
-        res = ""
-        res += f"{elm_name[self.transf_type]} element object\n"
-        res += f"uid: {self.uid}\n"
-        res += f"node_i.uid: {self.nodes[0].uid}\n"
-        res += f"node_j.uid: {self.nodes[1].uid}\n"
-        res += f"node_i.coords: {self.nodes[0].coords}\n"
-        res += f"node_j.coords: {self.nodes[1].coords}\n"
+        res = ''
+        res += f'{elm_name[self.transf_type]} element object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'node_i.uid: {self.nodes[0].uid}\n'
+        res += f'node_j.uid: {self.nodes[1].uid}\n'
+        res += f'node_i.coords: {self.nodes[0].coords}\n'
+        res += f'node_j.coords: {self.nodes[1].coords}\n'
         return res
 
 
@@ -242,7 +242,7 @@ class GeomTransf:
             self.transf_type,
             self.uid,
             *self.z_axis,
-            "-jntOffset",
+            '-jntOffset',
             *self.offset_i,
             *self.offset_j,
         ]
@@ -282,7 +282,7 @@ class ElasticBeamColumn(Element):
 
         if self.n_x is not None and self.n_y is None:
             return [
-                "ModElasticBeam3d",
+                'ModElasticBeam3d',
                 self.uid,
                 self.nodes[0].uid,
                 self.nodes[1].uid,
@@ -303,7 +303,7 @@ class ElasticBeamColumn(Element):
 
         if self.n_y is not None and self.n_x is None:
             return [
-                "ModElasticBeam3d",
+                'ModElasticBeam3d',
                 self.uid,
                 self.nodes[0].uid,
                 self.nodes[1].uid,
@@ -324,7 +324,7 @@ class ElasticBeamColumn(Element):
 
         if self.n_x is not None and self.n_y is not None:
             return [
-                "ModElasticBeam3d",
+                'ModElasticBeam3d',
                 self.uid,
                 self.nodes[0].uid,
                 self.nodes[1].uid,
@@ -344,7 +344,7 @@ class ElasticBeamColumn(Element):
             ]
 
         return [
-            "elasticBeamColumn",
+            'elasticBeamColumn',
             self.uid,
             self.nodes[0].uid,
             self.nodes[1].uid,
@@ -369,19 +369,19 @@ class ElasticBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
-        res = ""
-        res += "elasticBeamColumn element object\n"
-        res += f"uid: {self.uid}\n"
-        res += f"node_i.uid: {self.nodes[0].uid}\n"
-        res += f"node_j.uid: {self.nodes[1].uid}\n"
-        res += f"node_i.coords: {self.nodes[0].coords}\n"
-        res += f"node_j.coords: {self.nodes[1].coords}\n"
-        res += f"offset_i: {self.geomtransf.offset_i}\n"
-        res += f"offset_j: {self.geomtransf.offset_j}\n"
-        res += f"x_axis: {self.geomtransf.x_axis}\n"
-        res += f"y_axis: {self.geomtransf.y_axis}\n"
-        res += f"z_axis: {self.geomtransf.z_axis}\n"
-        res += f"section.name: {self.section.name}\n"
+        res = ''
+        res += 'elasticBeamColumn element object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'node_i.uid: {self.nodes[0].uid}\n'
+        res += f'node_j.uid: {self.nodes[1].uid}\n'
+        res += f'node_i.coords: {self.nodes[0].coords}\n'
+        res += f'node_j.coords: {self.nodes[1].coords}\n'
+        res += f'offset_i: {self.geomtransf.offset_i}\n'
+        res += f'offset_j: {self.geomtransf.offset_j}\n'
+        res += f'x_axis: {self.geomtransf.x_axis}\n'
+        res += f'y_axis: {self.geomtransf.y_axis}\n'
+        res += f'z_axis: {self.geomtransf.z_axis}\n'
+        res += f'section.name: {self.section.name}\n'
         return res
 
 
@@ -414,7 +414,7 @@ class Lobatto(BeamIntegration):
 
         """
 
-        return ["Lobatto", self.uid, self.parent_section.uid, self.n_p]
+        return ['Lobatto', self.uid, self.parent_section.uid, self.n_p]
 
 
 @dataclass
@@ -437,7 +437,7 @@ class DispBeamColumn(Element):
         """
 
         return [
-            "dispBeamColumn",
+            'dispBeamColumn',
             self.uid,
             self.nodes[0].uid,
             self.nodes[1].uid,
@@ -460,17 +460,17 @@ class DispBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self):
-        res = ""
-        res += "dispBeamColumn element object\n"
-        res += f"uid: {self.uid}\n"
-        res += f"node_i.uid: {self.nodes[0].uid}\n"
-        res += f"node_j.uid: {self.nodes[1].uid}\n"
-        res += f"node_i.coords: {self.nodes[0].coords}\n"
-        res += f"node_j.coords: {self.nodes[1].coords}\n"
-        res += f"offset_i: {self.geomtransf.offset_i}\n"
-        res += f"offset_j: {self.geomtransf.offset_j}\n"
-        res += f"x_axis: {self.geomtransf.x_axis}\n"
-        res += f"y_axis: {self.geomtransf.y_axis}\n"
-        res += f"z_axis: {self.geomtransf.z_axis}\n"
-        res += f"section.name: {self.section.name}\n"
+        res = ''
+        res += 'dispBeamColumn element object\n'
+        res += f'uid: {self.uid}\n'
+        res += f'node_i.uid: {self.nodes[0].uid}\n'
+        res += f'node_j.uid: {self.nodes[1].uid}\n'
+        res += f'node_i.coords: {self.nodes[0].coords}\n'
+        res += f'node_j.coords: {self.nodes[1].coords}\n'
+        res += f'offset_i: {self.geomtransf.offset_i}\n'
+        res += f'offset_j: {self.geomtransf.offset_j}\n'
+        res += f'x_axis: {self.geomtransf.x_axis}\n'
+        res += f'y_axis: {self.geomtransf.y_axis}\n'
+        res += f'z_axis: {self.geomtransf.z_axis}\n'
+        res += f'section.name: {self.section.name}\n'
         return res

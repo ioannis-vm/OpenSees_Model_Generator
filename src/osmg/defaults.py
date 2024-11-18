@@ -38,9 +38,9 @@ def load_util_rigid_elastic(model: Model) -> None:
 
     """
 
-    new_uid = model.uid_generator.new("section")
+    new_uid = model.uid_generator.new('section')
     sec = ElasticSection(
-        name="rigid_link_section",
+        name='rigid_link_section',
         uid=new_uid,
         outside_shape=None,
         snap_points=None,
@@ -83,8 +83,8 @@ def load_default_steel(model: Model) -> None:
     if model.settings.imperial_units:
         # force: lb, length: in
         uniaxial_mat = Steel02(
-            model.uid_generator.new("uniaxial material"),
-            "default steel",
+            model.uid_generator.new('uniaxial material'),
+            'default steel',
             55000.00,
             29000000.00,
             11153846.15,
@@ -94,9 +94,9 @@ def load_default_steel(model: Model) -> None:
             0.15,
         )
         physical_mat = PhysicalMaterial(
-            model.uid_generator.new("physical material"),
-            "default steel",
-            "A992-Fy50",
+            model.uid_generator.new('physical material'),
+            'default steel',
+            'A992-Fy50',
             0.2835648148148148 / common.G_CONST_IMPERIAL,
             29000000.00,
             11153846.15,
@@ -107,8 +107,8 @@ def load_default_steel(model: Model) -> None:
         # converted to SI, instead of the properties of 'typical'
         # european steel.
         uniaxial_mat = Steel02(
-            model.uid_generator.new("uniaxial material"),
-            "default steel",
+            model.uid_generator.new('uniaxial material'),
+            'default steel',
             379211.65,
             199947961.12,
             76903062.09,
@@ -118,9 +118,9 @@ def load_default_steel(model: Model) -> None:
             0.15,
         )
         physical_mat = PhysicalMaterial(
-            model.uid_generator.new("physical material"),
-            "default steel",
-            "A992-Fy50",
+            model.uid_generator.new('physical material'),
+            'default steel',
+            'A992-Fy50',
             773.37062406 / common.G_CONST_IMPERIAL,
             199947961.12,
             76903062.09,
@@ -138,20 +138,20 @@ def load_default_fix_release(model: Model) -> None:
     """
 
     uniaxial_mat = Elastic(
-        uid=model.uid_generator.new("uniaxial material"),
-        name="fix_rot",
+        uid=model.uid_generator.new('uniaxial material'),
+        name='fix_rot',
         e_mod=common.STIFF_ROT,
     )
     model.uniaxial_materials.add(uniaxial_mat)
     uniaxial_mat = Elastic(
-        uid=model.uid_generator.new("uniaxial material"),
-        name="fix",
+        uid=model.uid_generator.new('uniaxial material'),
+        name='fix',
         e_mod=common.STIFF,
     )
     model.uniaxial_materials.add(uniaxial_mat)
     uniaxial_mat = Elastic(
-        uid=model.uid_generator.new("uniaxial material"),
-        name="release",
+        uid=model.uid_generator.new('uniaxial material'),
+        name='release',
         e_mod=common.TINY,
     )
     model.uniaxial_materials.add(uniaxial_mat)

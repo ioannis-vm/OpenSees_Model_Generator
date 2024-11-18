@@ -28,8 +28,8 @@ from .ops import element
 nparr = npt.NDArray[np.float64]
 
 # pylint: disable=invalid-name
-TK = TypeVar("TK")
-TV = TypeVar("TV")
+TK = TypeVar('TK')
+TV = TypeVar('TV')
 # pylint: enable=invalid-name
 
 
@@ -110,10 +110,10 @@ class Collection(dict[TK, TV]):
           obj: Object to be added.
 
         """
-        if not hasattr(obj, "uid"):
-            raise KeyError("Object does not have a uid attribute")
+        if not hasattr(obj, 'uid'):
+            raise KeyError('Object does not have a uid attribute')
         if obj.uid in self:
-            raise KeyError(f"uid {obj.uid} already exists")
+            raise KeyError(f'uid {obj.uid} already exists')
         self[obj.uid] = obj
 
     def retrieve_by_attr(self, attr: str, val: Any) -> Any:
@@ -150,14 +150,14 @@ class Collection(dict[TK, TV]):
         Concise version of `repr`.
 
         """
-        return f"[Collection of {len(self)} items]"
+        return f'[Collection of {len(self)} items]'
 
     def __repr__(self):
-        res = ""
-        res += "Collection Object\n"
-        res += f"ID: {id(self)}\n"
-        res += f"Parent object: {self.parent}\n"
-        res += f"Registry size: {len(self)}\n"
+        res = ''
+        res += 'Collection Object\n'
+        res += f'ID: {id(self)}\n'
+        res += f'Parent object: {self.parent}\n'
+        res += f'Registry size: {len(self)}\n'
         return res
 
 
@@ -210,7 +210,7 @@ class CollectionActive(Collection[TK, TV]):
         """
         for uid in uids:
             if uid not in self:
-                raise KeyError(f"uid {uid} not present in collection.")
+                raise KeyError(f'uid {uid} not present in collection.')
         self.active = uids
 
     def set_active_all(self):
@@ -263,9 +263,7 @@ class NodeCollection(Collection[int, node.Node]):
         Returns the node that occupies a given point if it exists
         """
 
-        candidate_pt: nparr = np.array(
-            [x_coord, y_coord, self.parent.elevation]
-        )
+        candidate_pt: nparr = np.array([x_coord, y_coord, self.parent.elevation])
         for other_node in self.values():
             other_pt: nparr = np.array(other_node.coords)
             if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
@@ -306,5 +304,5 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         uids.sort()
         uids_tuple = (*uids,)
         if uids_tuple in obj.parent_component.element_connectivity():
-            raise ValueError("This should never happen!")
+            raise ValueError('This should never happen!')
         super().add(obj)

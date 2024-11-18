@@ -98,7 +98,7 @@ class Vertex:
 
         """
 
-        return f"(V{self.uid} @ {self.coords}) "
+        return f'(V{self.uid} @ {self.coords}) '
 
 
 class Edge:
@@ -136,7 +136,7 @@ class Edge:
 
         """
 
-        return f"(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) "
+        return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
 
     def define_halfedge(self, vertex: Vertex) -> Halfedge:
         """
@@ -152,15 +152,15 @@ class Edge:
                 halfedge = Halfedge(self.v_i, self)
                 self.h_i = halfedge
             else:
-                raise ValueError("Halfedge h_i already defined")
+                raise ValueError('Halfedge h_i already defined')
         elif vertex == self.v_j:
             if not self.h_j:
                 halfedge = Halfedge(self.v_j, self)
                 self.h_j = halfedge
             else:
-                raise ValueError("Halfedge h_j already defined")
+                raise ValueError('Halfedge h_j already defined')
         else:
-            raise ValueError("The edge is not connected to the given vertex.")
+            raise ValueError('The edge is not connected to the given vertex.')
         return halfedge
 
     def other_vertex(self, vertex):
@@ -191,7 +191,7 @@ class Edge:
         elif self.v_j == vertex:
             v_other = self.v_i
         else:
-            raise ValueError("The edge is not connected to the given vertex")
+            raise ValueError('The edge is not connected to the given vertex')
         return v_other
 
     def overlaps_or_crosses(self, other: Edge) -> bool:
@@ -371,11 +371,11 @@ class Halfedge:
 
         if self.nxt:
             out = (
-                f"(H{self.uid} from E{self.edge.uid}"
-                f" to E{self.nxt.edge.uid} next H{self.nxt.uid})"
+                f'(H{self.uid} from E{self.edge.uid}'
+                f' to E{self.nxt.edge.uid} next H{self.nxt.uid})'
             )
         else:
-            out = f"(H{self.uid}"
+            out = f'(H{self.uid}'
         return out
 
     def __lt__(self, other):
@@ -426,7 +426,7 @@ class Mesh:
 
     def __repr__(self):
         num = len(self.halfedges)
-        return f"Mesh object containing {num} halfedges."
+        return f'Mesh object containing {num} halfedges.'
 
     def geometric_properties(self):
         """
@@ -482,9 +482,7 @@ def polygon_area(coords: nparr) -> float:
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     return float(
-        np.sum(
-            x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
-        )
+        np.sum(x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
         / 2.00
     )
 
@@ -517,19 +515,13 @@ def polygon_centroid(coords: nparr) -> nparr:
     x_cent = (
         np.sum(
             (x_coords + np.roll(x_coords, -1))
-            * (
-                x_coords * np.roll(y_coords, -1)
-                - np.roll(x_coords, -1) * y_coords
-            )
+            * (x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
         )
     ) / (6.0 * area)
     y_cent = (
         np.sum(
             (y_coords + np.roll(y_coords, -1))
-            * (
-                x_coords * np.roll(y_coords, -1)
-                - np.roll(x_coords, -1) * y_coords
-            )
+            * (x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
         )
     ) / (6.0 * area)
     return np.array((x_cent, y_cent))
@@ -619,7 +611,7 @@ def polygon_inertia(coords):
     # mass moment of inertia wrt in-plane rotation
     ir_mass = (ixx + iyy) / area
 
-    return {"ixx": ixx, "iyy": iyy, "ixy": ixy, "ir": i_r, "ir_mass": ir_mass}
+    return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
 def geometric_properties(coords):
@@ -635,7 +627,7 @@ def geometric_properties(coords):
     coords_centered = coords - centroid
     inertia = polygon_inertia(coords_centered)
 
-    return {"area": area, "centroid": centroid, "inertia": inertia}
+    return {'area': area, 'centroid': centroid, 'inertia': inertia}
 
 
 ##################################
@@ -839,8 +831,7 @@ def orient_loops(loops):
     external_loops = []
     trivial_loops = []
     loop_areas = [
-        polygon_area(np.array([h.vertex.coords for h in loop]))
-        for loop in loops
+        polygon_area(np.array([h.vertex.coords for h in loop])) for loop in loops
     ]
     for i, area in enumerate(loop_areas):
         if area > common.EPSILON:
@@ -873,9 +864,7 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
 
     """
 
-    outside_polygon = shapely_Polygon(
-        [h.vertex.coords for h in outside.halfedges]
-    )
+    outside_polygon = shapely_Polygon([h.vertex.coords for h in outside.halfedges])
     hole_polygons = []
     for hole in holes.values():
         hole_polygons.append(
@@ -904,7 +893,7 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
     if plot:
         fig = plt.figure()
         ax_1 = fig.add_subplot(111)
-        ax_1.set_aspect("equal")
+        ax_1.set_aspect('equal')
         patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
         ax_1.add_patch(patch)
         for subregion in pieces:
@@ -984,7 +973,7 @@ def subdivide_hss_rect(
     if plot:
         fig = plt.figure()
         ax_1 = fig.add_subplot(111)
-        ax_1.set_aspect("equal")
+        ax_1.set_aspect('equal')
         # patch = PolygonPatch(remaining_polygon, alpha=0.5, zorder=2)
         # ax_1.add_patch(patch)
         for subregion in pieces:
@@ -1060,17 +1049,17 @@ def print_halfedge_results(halfedges):
     """
 
     results: dict[str, list[Any]] = {
-        "halfedge": [],
-        "vertex": [],
-        "edge": [],
-        "next": [],
+        'halfedge': [],
+        'vertex': [],
+        'edge': [],
+        'next': [],
     }
 
     for halfedge in halfedges:
-        results["halfedge"].append(halfedge)
-        results["vertex"].append(halfedge.vertex)
-        results["edge"].append(halfedge.edge)
-        results["next"].append(halfedge.nxt)
+        results['halfedge'].append(halfedge)
+        results['vertex'].append(halfedge.vertex)
+        results['edge'].append(halfedge.edge)
+        results['next'].append(halfedge.nxt)
 
     print(results)
 
@@ -1115,14 +1104,14 @@ def sanity_checks(external, trivial):
 
     #   We expect no trivial loops
     if trivial:
-        print("Warning: Found trivial loop")
+        print('Warning: Found trivial loop')
         for i, trv in enumerate(trivial):
             for halfedge in trv:
                 print(halfedge.vertex.coords)
             plot_loop(trv)
     #   We expect a single external loop
     if len(external) > 1:
-        print("Warning: Found multiple external loops")
+        print('Warning: Found multiple external loops')
         for i, ext in enumerate(external):
             print(i + 1)
             for halfedge in ext:
@@ -1130,5 +1119,5 @@ def sanity_checks(external, trivial):
             plot_loop(ext)
 
 
-if __name__ == "__main()__":
+if __name__ == '__main()__':
     pass

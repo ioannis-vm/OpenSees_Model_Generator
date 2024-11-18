@@ -91,7 +91,7 @@ class SectionGenerator:
 
         sec = ElasticSection(
             name=name,
-            uid=self.model.uid_generator.new("section"),
+            uid=self.model.uid_generator.new('section'),
             outside_shape=None,
             snap_points=None,
             e_mod=1.00,
@@ -116,15 +116,15 @@ class SectionGenerator:
             z_min = -0.15
             sec.outside_shape = rect_mesh(0.30, 0.50)
         snap_points: dict[str, nparr] = {
-            "centroid": np.array([0.0, 0.0]),
-            "top_center": np.array([0.0, -y_max]),
-            "top_left": np.array([-z_min, -y_max]),
-            "top_right": np.array([-z_max, -y_max]),
-            "center_left": np.array([-z_min, 0.0]),
-            "center_right": np.array([-z_max, 0.0]),
-            "bottom_center": np.array([0.0, -y_min]),
-            "bottom_left": np.array([-z_min, -y_min]),
-            "bottom_right": np.array([-z_max, -y_min]),
+            'centroid': np.array([0.0, 0.0]),
+            'top_center': np.array([0.0, -y_max]),
+            'top_left': np.array([-z_min, -y_max]),
+            'top_right': np.array([-z_max, -y_max]),
+            'center_left': np.array([-z_min, 0.0]),
+            'center_right': np.array([-z_max, 0.0]),
+            'bottom_center': np.array([0.0, -y_min]),
+            'bottom_left': np.array([-z_min, -y_min]),
+            'bottom_right': np.array([-z_max, -y_min]),
         }
         sec.snap_points = snap_points
         self.model.elastic_sections.add(sec)
@@ -189,55 +189,53 @@ class SectionGenerator:
         """
 
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
-            "name", ops_material
+            'name', ops_material
         )
         phs_mat = self.model.physical_materials.retrieve_by_attr(
-            "name", physical_material
+            'name', physical_material
         )
-        filename = "../sections.json"
+        filename = '../sections.json'
         contents = pkgutil.get_data(__name__, filename)
         assert isinstance(contents, bytes)
         section_dictionary = json.loads(contents)
-        assert self.model.settings.imperial_units, "SI not supported"
+        assert self.model.settings.imperial_units, 'SI not supported'
         returned_sections: dict[str, ElasticSection | FiberSection] = {}
         for label in labels:
             try:
                 sec_data = section_dictionary[label]
             except KeyError as exc:
-                raise KeyError(f"Section {label} not found in file.") from exc
-            if sec_shape_designation == "W":
-                assert sec_data["Type"] == "W"
-                sec_b = sec_data["bf"]
-                sec_h = sec_data["d"]
-                sec_tw = sec_data["tw"]
-                sec_tf = sec_data["tf"]
-                area = sec_data["A"]
+                raise KeyError(f'Section {label} not found in file.') from exc
+            if sec_shape_designation == 'W':
+                assert sec_data['Type'] == 'W'
+                sec_b = sec_data['bf']
+                sec_h = sec_data['d']
+                sec_tw = sec_data['tw']
+                sec_tf = sec_data['tf']
+                area = sec_data['A']
                 outside_shape = mesh_shapes.w_mesh(
                     sec_b, sec_h, sec_tw, sec_tf, area
                 )
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
                 snap_points: dict[str, nparr] = {
-                    "centroid": np.array([0.0, 0.0]),
-                    "top_center": np.array([0.0, -y_max]),
-                    "top_left": np.array([-z_min, -y_max]),
-                    "top_right": np.array([-z_max, -y_max]),
-                    "center_left": np.array([-z_min, 0.0]),
-                    "center_right": np.array([-z_max, 0.0]),
-                    "bottom_center": np.array([0.0, -y_min]),
-                    "bottom_left": np.array([-z_min, -y_min]),
-                    "bottom_right": np.array([-z_max, -y_min]),
+                    'centroid': np.array([0.0, 0.0]),
+                    'top_center': np.array([0.0, -y_max]),
+                    'top_left': np.array([-z_min, -y_max]),
+                    'top_right': np.array([-z_max, -y_max]),
+                    'center_left': np.array([-z_min, 0.0]),
+                    'center_right': np.array([-z_max, 0.0]),
+                    'bottom_center': np.array([0.0, -y_min]),
+                    'bottom_left': np.array([-z_min, -y_min]),
+                    'bottom_right': np.array([-z_max, -y_min]),
                 }
-                if sec_type.__name__ == "FiberSection":
-                    main_part = SectionComponent(
-                        outside_shape, {}, ops_mat, phs_mat
-                    )
+                if sec_type.__name__ == 'FiberSection':
+                    main_part = SectionComponent(outside_shape, {}, ops_mat, phs_mat)
                     sec_fib = FiberSection(
                         name=label,
-                        uid=self.model.uid_generator.new("section"),
+                        uid=self.model.uid_generator.new('section'),
                         outside_shape=outside_shape,
-                        section_parts={"main": main_part},
-                        j_mod=sec_data["J"],
+                        section_parts={'main': main_part},
+                        j_mod=sec_data['J'],
                         snap_points=snap_points,
                         properties=sec_data,
                         n_x=10,
@@ -247,17 +245,17 @@ class SectionGenerator:
                         self.model.fiber_sections.add(sec_fib)
                     if return_section:
                         returned_sections[sec_fib.name] = sec_fib
-                elif sec_type.__name__ == "ElasticSection":
+                elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
-                        self.model.uid_generator.new("section"),
+                        self.model.uid_generator.new('section'),
                         phs_mat.e_mod,
-                        sec_data["A"],
-                        sec_data["Iy"],
-                        sec_data["Ix"],
+                        sec_data['A'],
+                        sec_data['Iy'],
+                        sec_data['Ix'],
                         phs_mat.g_mod,
-                        sec_data["J"],
-                        sec_data["W"] / 12.00,  # lb/in
+                        sec_data['J'],
+                        sec_data['W'] / 12.00,  # lb/in
                         outside_shape,
                         snap_points,
                         properties=sec_data,
@@ -268,15 +266,15 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     raise ValueError(
-                        f"Unsupported section type: {sec_type.__name__}"
+                        f'Unsupported section type: {sec_type.__name__}'
                     )
-            elif sec_shape_designation == "HSS_rect":
-                assert sec_data["Type"] == "HSS"
+            elif sec_shape_designation == 'HSS_rect':
+                assert sec_data['Type'] == 'HSS'
                 # must be rectangle: name will have 2 X's.
-                assert len(label.split("X")) == 3
-                sec_ht = sec_data["Ht"]
-                sec_b = sec_data["B"]
-                sec_t = sec_data["tdes"]
+                assert len(label.split('X')) == 3
+                sec_ht = sec_data['Ht']
+                sec_b = sec_data['B']
+                sec_t = sec_data['tdes']
                 outside_shape = mesh_shapes.rect_mesh(sec_b, sec_ht)
                 hole = mesh_shapes.rect_mesh(
                     sec_b - 2.00 * sec_t, sec_ht - 2.00 * sec_t
@@ -284,26 +282,26 @@ class SectionGenerator:
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
                 snap_points = {
-                    "centroid": np.array([0.0, 0.0]),
-                    "top_center": np.array([0.0, -y_max]),
-                    "top_left": np.array([-z_min, -y_max]),
-                    "top_right": np.array([-z_max, -y_max]),
-                    "center_left": np.array([-z_min, 0.0]),
-                    "center_right": np.array([-z_max, 0.0]),
-                    "bottom_center": np.array([0.0, -y_min]),
-                    "bottom_left": np.array([-z_min, -y_min]),
-                    "bottom_right": np.array([-z_max, -y_min]),
+                    'centroid': np.array([0.0, 0.0]),
+                    'top_center': np.array([0.0, -y_max]),
+                    'top_left': np.array([-z_min, -y_max]),
+                    'top_right': np.array([-z_max, -y_max]),
+                    'center_left': np.array([-z_min, 0.0]),
+                    'center_right': np.array([-z_max, 0.0]),
+                    'bottom_center': np.array([0.0, -y_min]),
+                    'bottom_left': np.array([-z_min, -y_min]),
+                    'bottom_right': np.array([-z_max, -y_min]),
                 }
-                if sec_type.__name__ == "FiberSection":
+                if sec_type.__name__ == 'FiberSection':
                     main_part = SectionComponent(
-                        outside_shape, {"hole": hole}, ops_mat, phs_mat
+                        outside_shape, {'hole': hole}, ops_mat, phs_mat
                     )
                     sec_fib = FiberSection(
                         label,
-                        self.model.uid_generator.new("section"),
+                        self.model.uid_generator.new('section'),
                         outside_shape,
-                        {"main": main_part},
-                        sec_data["J"],
+                        {'main': main_part},
+                        sec_data['J'],
                         snap_points,
                         sec_data,
                         n_x=10,
@@ -313,17 +311,17 @@ class SectionGenerator:
                         self.model.fiber_sections.add(sec_fib)
                     if return_section:
                         returned_sections[sec_fib.name] = sec_fib
-                elif sec_type.__name__ == "ElasticSection":
+                elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
-                        self.model.uid_generator.new("section"),
+                        self.model.uid_generator.new('section'),
                         phs_mat.e_mod,
-                        sec_data["A"],
-                        sec_data["Iy"],
-                        sec_data["Ix"],
+                        sec_data['A'],
+                        sec_data['Iy'],
+                        sec_data['Ix'],
                         phs_mat.g_mod,
-                        sec_data["J"],
-                        sec_data["W"] / 12.00,  # lb/in
+                        sec_data['J'],
+                        sec_data['W'] / 12.00,  # lb/in
                         outside_shape,
                         snap_points,
                         properties=sec_data,
@@ -334,41 +332,41 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     raise ValueError(
-                        f"Unsupported section type: {sec_type.__name__}"
+                        f'Unsupported section type: {sec_type.__name__}'
                     )
-            elif sec_shape_designation == "HSS_circ":
+            elif sec_shape_designation == 'HSS_circ':
                 # TODO: eliminate some redundant code here by merging
                 # suare and round HSS
-                assert sec_data["Type"] == "HSS"
+                assert sec_data['Type'] == 'HSS'
                 # must be circular: name will have 1.
-                assert len(label.split("X")) == 2
-                sec_h = sec_data["OD"]
-                sec_t = sec_data["tdes"]
+                assert len(label.split('X')) == 2
+                sec_h = sec_data['OD']
+                sec_t = sec_data['tdes']
                 outside_shape = mesh_shapes.circ_mesh(sec_h)
                 hole = mesh_shapes.circ_mesh(sec_h - 2.00 * sec_t)
                 bbox = outside_shape.bounding_box()
                 z_min, y_min, z_max, y_max = bbox.flatten()
                 snap_points = {
-                    "centroid": np.array([0.0, 0.0]),
-                    "top_center": np.array([0.0, -y_max]),
-                    "top_left": np.array([-z_min, -y_max]),
-                    "top_right": np.array([-z_max, -y_max]),
-                    "center_left": np.array([-z_min, 0.0]),
-                    "center_right": np.array([-z_max, 0.0]),
-                    "bottom_center": np.array([0.0, -y_min]),
-                    "bottom_left": np.array([-z_min, -y_min]),
-                    "bottom_right": np.array([-z_max, -y_min]),
+                    'centroid': np.array([0.0, 0.0]),
+                    'top_center': np.array([0.0, -y_max]),
+                    'top_left': np.array([-z_min, -y_max]),
+                    'top_right': np.array([-z_max, -y_max]),
+                    'center_left': np.array([-z_min, 0.0]),
+                    'center_right': np.array([-z_max, 0.0]),
+                    'bottom_center': np.array([0.0, -y_min]),
+                    'bottom_left': np.array([-z_min, -y_min]),
+                    'bottom_right': np.array([-z_max, -y_min]),
                 }
-                if sec_type.__name__ == "FiberSection":
+                if sec_type.__name__ == 'FiberSection':
                     main_part = SectionComponent(
-                        outside_shape, {"hole": hole}, ops_mat, phs_mat
+                        outside_shape, {'hole': hole}, ops_mat, phs_mat
                     )
                     sec_fib = FiberSection(
                         label,
-                        self.model.uid_generator.new("section"),
+                        self.model.uid_generator.new('section'),
                         outside_shape,
-                        {"main": main_part},
-                        sec_data["J"],
+                        {'main': main_part},
+                        sec_data['J'],
                         snap_points,
                         sec_data,
                         n_x=10,
@@ -378,17 +376,17 @@ class SectionGenerator:
                         self.model.fiber_sections.add(sec_fib)
                     if return_section:
                         returned_sections[sec_fib.name] = sec_fib
-                elif sec_type.__name__ == "ElasticSection":
+                elif sec_type.__name__ == 'ElasticSection':
                     sec_el = ElasticSection(
                         label,
-                        self.model.uid_generator.new("section"),
+                        self.model.uid_generator.new('section'),
                         phs_mat.e_mod,
-                        sec_data["A"],
-                        sec_data["Iy"],
-                        sec_data["Ix"],
+                        sec_data['A'],
+                        sec_data['Iy'],
+                        sec_data['Ix'],
                         phs_mat.g_mod,
-                        sec_data["J"],
-                        sec_data["W"] / 12.00,  # lb/in
+                        sec_data['J'],
+                        sec_data['W'] / 12.00,  # lb/in
                         outside_shape,
                         snap_points,
                         properties=sec_data,
@@ -399,11 +397,10 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     raise ValueError(
-                        f"Unsupported section type: {sec_type.__name__}"
+                        f'Unsupported section type: {sec_type.__name__}'
                     )
             else:
                 raise ValueError(
-                    "Unsupported section designtation:"
-                    f" {sec_shape_designation}"
+                    'Unsupported section designtation:' f' {sec_shape_designation}'
                 )
         return returned_sections

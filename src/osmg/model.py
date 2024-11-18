@@ -51,7 +51,7 @@ def transfer_component(other: Model, component: ComponentAssembly) -> None:
     # note: we don't copy the component assemblies and their contents.
     # we just add the same objects to the other model.
     level = component.parent_collection.parent
-    other_level = other.levels.retrieve_by_attr("uid", level.uid)
+    other_level = other.levels.retrieve_by_attr('uid', level.uid)
     for node in component.external_nodes.values():
         if node.uid not in other_level.nodes:
             other_level.nodes.add(node)
@@ -78,11 +78,11 @@ class Settings:
     ndf: int = field(default=6)  # that's all we support
 
     def __repr__(self):
-        res = ""
-        res += "~~~ Model Settings ~~~\n"
-        res += f"  Imperial units: {self.imperial_units}\n"
-        res += f"  ndm           : {self.ndm}\n"
-        res += f"  ndf           : {self.ndf}\n"
+        res = ''
+        res += '~~~ Model Settings ~~~\n'
+        res += f'  Imperial units: {self.imperial_units}\n'
+        res += f'  ndm           : {self.ndm}\n'
+        res += f'  ndf           : {self.ndf}\n'
         return res
 
 
@@ -120,15 +120,13 @@ class Model:
     elastic_sections: obj_collections.Collection[int, ElasticSection] = field(
         init=False
     )
-    fiber_sections: obj_collections.Collection[int, FiberSection] = field(
+    fiber_sections: obj_collections.Collection[int, FiberSection] = field(init=False)
+    uniaxial_materials: obj_collections.Collection[int, UniaxialMaterial] = field(
         init=False
     )
-    uniaxial_materials: obj_collections.Collection[
-        int, UniaxialMaterial
-    ] = field(init=False)
-    physical_materials: obj_collections.Collection[
-        int, PhysicalMaterial
-    ] = field(init=False)
+    physical_materials: obj_collections.Collection[int, PhysicalMaterial] = field(
+        init=False
+    )
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
@@ -140,14 +138,14 @@ class Model:
         self.physical_materials = obj_collections.Collection(self)
 
     def __repr__(self):
-        res = ""
-        res += "~~~ Model Object ~~~\n"
-        res += f"ID: {id(self)}\n"
-        res += f"levels: {self.levels.__srepr__()}\n"
-        res += f"elastic_sections: {self.elastic_sections.__srepr__()}\n"
-        res += f"fiber_sections: {self.fiber_sections.__srepr__()}\n"
-        res += f"uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n"
-        res += f"physical_materials: {self.physical_materials.__srepr__()}\n"
+        res = ''
+        res += '~~~ Model Object ~~~\n'
+        res += f'ID: {id(self)}\n'
+        res += f'levels: {self.levels.__srepr__()}\n'
+        res += f'elastic_sections: {self.elastic_sections.__srepr__()}\n'
+        res += f'fiber_sections: {self.fiber_sections.__srepr__()}\n'
+        res += f'uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n'
+        res += f'physical_materials: {self.physical_materials.__srepr__()}\n'
         return res
 
     def component_connectivity(
@@ -170,7 +168,7 @@ class Model:
             uids = [node.uid for node in component.external_nodes.values()]
             uids.sort()
             uids_tuple = (*uids,)
-            assert uids_tuple not in res, "Error! Duplicate component found."
+            assert uids_tuple not in res, 'Error! Duplicate component found.'
             res[uids_tuple] = component
         return res
 
@@ -388,9 +386,7 @@ class Model:
         res.uniaxial_materials = self.uniaxial_materials
         return res
 
-    def transfer_by_polygon_selection(
-        self, other: Model, coords: nparr
-    ) -> None:
+    def transfer_by_polygon_selection(self, other: Model, coords: nparr) -> None:
         """
         Uses :func:`~transfer_component` to transfer all components of which
         the projection to the XY plane falls inside the specified

@@ -58,9 +58,9 @@ def add_data__nodes(data_dict, mdl, load_case):
     restraint_symbols = []
     for node in list_of_nodes:
         if True in node.restraint:
-            restraint_symbols.append("fixed")
+            restraint_symbols.append('fixed')
         else:
-            restraint_symbols.append("free")
+            restraint_symbols.append('free')
     for node in list_of_nodes:
         if load_case:
             customdata_lst.append(
@@ -72,44 +72,44 @@ def add_data__nodes(data_dict, mdl, load_case):
             )
         else:
             customdata_lst.append((node.uid,))
-    customdata: nparr = np.array(customdata_lst, dtype="object")
+    customdata: nparr = np.array(customdata_lst, dtype='object')
     if load_case:
         data_dict.append(
             {
-                "name": "Primary nodes",
-                "type": "scatter3d",
-                "mode": "markers",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "customdata": customdata,
-                "text": restraints,
-                "hovertemplate": (
-                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                    + "Restraint: %{text}<br>"
-                    + "Mass: (%{customdata[1]:.3g}, "
-                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
-                    + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
-                    + "%{customdata[6]:.3g})<br>"
-                    + "Load: (%{customdata[7]:.3g}, "
-                    + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
-                    + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
-                    + "%{customdata[12]:.3g})"
-                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                'name': 'Primary nodes',
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'customdata': customdata,
+                'text': restraints,
+                'hovertemplate': (
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    + 'Restraint: %{text}<br>'
+                    + 'Mass: (%{customdata[1]:.3g}, '
+                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
+                    + '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
+                    + '%{customdata[6]:.3g})<br>'
+                    + 'Load: (%{customdata[7]:.3g}, '
+                    + '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
+                    + '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
+                    + '%{customdata[12]:.3g})'
+                    + '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
-                "marker": {
-                    "symbol": [
+                'marker': {
+                    'symbol': [
                         graphics_common_3d.node_marker[sym][0]
                         for sym in restraint_symbols
                     ],
-                    "color": graphics_common.NODE_PRIMARY_COLOR,
-                    "size": [
+                    'color': graphics_common.NODE_PRIMARY_COLOR,
+                    'size': [
                         graphics_common_3d.node_marker[sym][1]
                         for sym in restraint_symbols
                     ],
-                    "line": {
-                        "color": graphics_common.NODE_PRIMARY_COLOR,
-                        "width": 4,
+                    'line': {
+                        'color': graphics_common.NODE_PRIMARY_COLOR,
+                        'width': 4,
                     },
                 },
             }
@@ -117,32 +117,32 @@ def add_data__nodes(data_dict, mdl, load_case):
     else:
         data_dict.append(
             {
-                "name": "Primary nodes",
-                "type": "scatter3d",
-                "mode": "markers",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "customdata": customdata,
-                "text": restraints,
-                "hovertemplate": (
-                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                    + "Restraint: %{text}<br>"
-                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                'name': 'Primary nodes',
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'customdata': customdata,
+                'text': restraints,
+                'hovertemplate': (
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    + 'Restraint: %{text}<br>'
+                    + '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
-                "marker": {
-                    "symbol": [
+                'marker': {
+                    'symbol': [
                         graphics_common_3d.node_marker[sym][0]
                         for sym in restraint_symbols
                     ],
-                    "color": graphics_common.NODE_PRIMARY_COLOR,
-                    "size": [
+                    'color': graphics_common.NODE_PRIMARY_COLOR,
+                    'size': [
                         graphics_common_3d.node_marker[sym][1]
                         for sym in restraint_symbols
                     ],
-                    "line": {
-                        "color": graphics_common.NODE_PRIMARY_COLOR,
-                        "width": 4,
+                    'line': {
+                        'color': graphics_common.NODE_PRIMARY_COLOR,
+                        'width': 4,
                     },
                 },
             }
@@ -178,38 +178,38 @@ def add_data__parent_nodes(
             )
         )
 
-    customdata: nparr = np.array(customdata_list, dtype="object")
+    customdata: nparr = np.array(customdata_list, dtype='object')
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "markers",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "customdata": customdata,
-            "text": restraints,
-            "hovertemplate": (
-                "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                + "Restraint: %{text}<br>"
-                + "Mass: (%{customdata[1]:.3g}, "
-                + "%{customdata[2]:.3g}, %{customdata[3]:.3g}, "
-                + "%{customdata[4]:.3g}, %{customdata[5]:.3g}, "
-                + "%{customdata[6]:.3g})<br>"
-                + "Load: (%{customdata[7]:.3g}, "
-                + "%{customdata[8]:.3g}, %{customdata[9]:.3g}, "
-                + "%{customdata[10]:.3g}, %{customdata[11]:.3g}, "
-                + "%{customdata[12]:.3g})"
-                + "<extra>Parent Node: %{customdata[0]:d}</extra>"
+            'type': 'scatter3d',
+            'mode': 'markers',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'customdata': customdata,
+            'text': restraints,
+            'hovertemplate': (
+                'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                + 'Restraint: %{text}<br>'
+                + 'Mass: (%{customdata[1]:.3g}, '
+                + '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
+                + '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
+                + '%{customdata[6]:.3g})<br>'
+                + 'Load: (%{customdata[7]:.3g}, '
+                + '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
+                + '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
+                + '%{customdata[12]:.3g})'
+                + '<extra>Parent Node: %{customdata[0]:d}</extra>'
             ),
-            "marker": {
-                "symbol": [graphics_common_3d.node_marker["parent"][0]]
+            'marker': {
+                'symbol': [graphics_common_3d.node_marker['parent'][0]]
                 * len(list_of_nodes),
-                "color": graphics_common.NODE_PRIMARY_COLOR,
-                "size": [graphics_common_3d.node_marker["parent"][1]]
+                'color': graphics_common.NODE_PRIMARY_COLOR,
+                'size': [graphics_common_3d.node_marker['parent'][1]]
                 * len(list_of_nodes),
-                "line": {
-                    "color": graphics_common.NODE_PRIMARY_COLOR,
-                    "width": 4,
+                'line': {
+                    'color': graphics_common.NODE_PRIMARY_COLOR,
+                    'width': 4,
                 },
             },
         }
@@ -241,11 +241,11 @@ def add_data__internal_nodes(
     restraint_symbols = []
     for node in list_of_nodes:
         if True in node.restraint:
-            restraint_symbols.append("fixed")
+            restraint_symbols.append('fixed')
         elif node.visibility.connected_to_zerolength:
-            restraint_symbols.append("release")
+            restraint_symbols.append('release')
         else:
-            restraint_symbols.append("internal")
+            restraint_symbols.append('internal')
     for node in list_of_nodes:
         if load_case:
             customdata.append(
@@ -260,36 +260,36 @@ def add_data__internal_nodes(
     if load_case:
         data_dict.append(
             {
-                "name": "Internal nodes",
-                "type": "scatter3d",
-                "mode": "markers",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "customdata": customdata,
-                "text": restraints,
-                "hovertemplate": (
-                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                    + "Restraint: %{text}<br>"
-                    + "Mass: (%{customdata[1]:.3g}, "
-                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>"
-                    + "Load: (%{customdata[4]:.3g}, "
-                    + "%{customdata[5]:.3g}, %{customdata[6]:.3g})"
-                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                'name': 'Internal nodes',
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'customdata': customdata,
+                'text': restraints,
+                'hovertemplate': (
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    + 'Restraint: %{text}<br>'
+                    + 'Mass: (%{customdata[1]:.3g}, '
+                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>'
+                    + 'Load: (%{customdata[4]:.3g}, '
+                    + '%{customdata[5]:.3g}, %{customdata[6]:.3g})'
+                    + '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
-                "marker": {
-                    "symbol": [
+                'marker': {
+                    'symbol': [
                         graphics_common_3d.node_marker[sym][0]
                         for sym in restraint_symbols
                     ],
-                    "color": graphics_common.NODE_INTERNAL_COLOR,
-                    "size": [
+                    'color': graphics_common.NODE_INTERNAL_COLOR,
+                    'size': [
                         graphics_common_3d.node_marker[sym][1]
                         for sym in restraint_symbols
                     ],
-                    "line": {
-                        "color": graphics_common.NODE_INTERNAL_COLOR,
-                        "width": 2,
+                    'line': {
+                        'color': graphics_common.NODE_INTERNAL_COLOR,
+                        'width': 2,
                     },
                 },
             }
@@ -297,32 +297,32 @@ def add_data__internal_nodes(
     else:
         data_dict.append(
             {
-                "name": "Internal nodes",
-                "type": "scatter3d",
-                "mode": "markers",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "customdata": customdata,
-                "text": restraints,
-                "hovertemplate": (
-                    "Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>"
-                    + "Restraint: %{text}<br>"
-                    + "<extra>Node: %{customdata[0]:d}</extra>"
+                'name': 'Internal nodes',
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'customdata': customdata,
+                'text': restraints,
+                'hovertemplate': (
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    + 'Restraint: %{text}<br>'
+                    + '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
-                "marker": {
-                    "symbol": [
+                'marker': {
+                    'symbol': [
                         graphics_common_3d.node_marker[sym][0]
                         for sym in restraint_symbols
                     ],
-                    "color": graphics_common.NODE_INTERNAL_COLOR,
-                    "size": [
+                    'color': graphics_common.NODE_INTERNAL_COLOR,
+                    'size': [
                         graphics_common_3d.node_marker[sym][1]
                         for sym in restraint_symbols
                     ],
-                    "line": {
-                        "color": graphics_common.NODE_INTERNAL_COLOR,
-                        "width": 2,
+                    'line': {
+                        'color': graphics_common.NODE_INTERNAL_COLOR,
+                        'width': 2,
                     },
                 },
             }
@@ -349,19 +349,19 @@ def add_data__release_nodes(
     z_list = [node.coords[2] for node in list_of_nodes]
     data_dict.append(
         {
-            "type": "scatter3d",
-            "mode": "markers",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "marker": {
-                "symbol": graphics_common_3d.node_marker["pinned"][0],
-                "color": graphics_common.NODE_INTERNAL_COLOR,
-                "size": graphics_common_3d.node_marker["pinned"][1],
-                "line": {
-                    "color": graphics_common.NODE_INTERNAL_COLOR,
-                    "width": 2,
+            'type': 'scatter3d',
+            'mode': 'markers',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'marker': {
+                'symbol': graphics_common_3d.node_marker['pinned'][0],
+                'color': graphics_common.NODE_INTERNAL_COLOR,
+                'size': graphics_common_3d.node_marker['pinned'][1],
+                'line': {
+                    'color': graphics_common.NODE_INTERNAL_COLOR,
+                    'width': 2,
                 },
             },
         }
@@ -384,9 +384,7 @@ def add_data__frames(
 
     """
 
-    line_elems: list[
-        Union[element.ElasticBeamColumn, element.DispBeamColumn]
-    ] = []
+    line_elems: list[Union[element.ElasticBeamColumn, element.DispBeamColumn]] = []
 
     # >>>
     # it feels ridiculous to do this, but it's the only way I am
@@ -451,47 +449,47 @@ def add_data__frames(
             customdata_list.append((None,) * 3)
 
     if load_case:
-        customdata: nparr = np.array(customdata_list, dtype="object")
+        customdata: nparr = np.array(customdata_list, dtype='object')
         data_dict.append(
             {
-                "name": "Frame elements",
-                "type": "scatter3d",
-                "mode": "lines",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "text": section_names,
-                "customdata": customdata,
-                "hovertemplate": (
-                    "Section: %{text}<br>"
-                    + "UDL (local): (%{customdata[1]:.3g}, "
-                    + "%{customdata[2]:.3g}, %{customdata[3]:.3g})"
-                    + "<extra>Element: %{customdata[0]:d}<br>"
-                    + "Node @ this end: %{customdata[4]:d}<br>"
-                    "Parent: %{customdata[5]}</extra>"
+                'name': 'Frame elements',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'text': section_names,
+                'customdata': customdata,
+                'hovertemplate': (
+                    'Section: %{text}<br>'
+                    + 'UDL (local): (%{customdata[1]:.3g}, '
+                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g})'
+                    + '<extra>Element: %{customdata[0]:d}<br>'
+                    + 'Node @ this end: %{customdata[4]:d}<br>'
+                    'Parent: %{customdata[5]}</extra>'
                 ),
-                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+                'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
             }
         )
     else:
-        customdata = np.array(customdata_list, dtype="object")
+        customdata = np.array(customdata_list, dtype='object')
         data_dict.append(
             {
-                "name": "Frame elements",
-                "type": "scatter3d",
-                "mode": "lines",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "text": section_names,
-                "customdata": customdata,
-                "hovertemplate": (
-                    "Section: %{text}<br>"
-                    + "<extra>Element: %{customdata[0]:d}<br>"
-                    + "Node @ this end: %{customdata[1]:d}<br>"
-                    "Parent: %{customdata[2]}</extra>"
+                'name': 'Frame elements',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'text': section_names,
+                'customdata': customdata,
+                'hovertemplate': (
+                    'Section: %{text}<br>'
+                    + '<extra>Element: %{customdata[0]:d}<br>'
+                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    'Parent: %{customdata[2]}</extra>'
                 ),
-                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+                'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
             }
         )
 
@@ -560,52 +558,50 @@ def add_data__bars(
             customdata_list.append((None,) * 3)
 
     if load_case:
-        customdata: nparr = np.array(customdata_list, dtype="object")
+        customdata: nparr = np.array(customdata_list, dtype='object')
         data_dict.append(
             {
-                "name": "Truss elements",
-                "type": "scatter3d",
-                "mode": "lines",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "text": section_areas,
-                "customdata": customdata,
-                "hovertemplate": (
-                    "Section area: %{text}<br>"
-                    + "<extra>Element: %{customdata[0]:d}<br>"
-                    + "Node @ this end: %{customdata[1]:d}<br>"
-                    "Parent: %{customdata[2]}</extra>"
+                'name': 'Truss elements',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'text': section_areas,
+                'customdata': customdata,
+                'hovertemplate': (
+                    'Section area: %{text}<br>'
+                    + '<extra>Element: %{customdata[0]:d}<br>'
+                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    'Parent: %{customdata[2]}</extra>'
                 ),
-                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+                'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
             }
         )
     else:
-        customdata = np.array(customdata_list, dtype="object")
+        customdata = np.array(customdata_list, dtype='object')
         data_dict.append(
             {
-                "name": "Truss elements",
-                "type": "scatter3d",
-                "mode": "lines",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "text": section_areas,
-                "customdata": customdata,
-                "hovertemplate": (
-                    "Section area: %{text}<br>"
-                    + "<extra>Element: %{customdata[0]:d}<br>"
-                    + "Node @ this end: %{customdata[1]:d}<br>"
-                    "Parent: %{customdata[2]}</extra>"
+                'name': 'Truss elements',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'text': section_areas,
+                'customdata': customdata,
+                'hovertemplate': (
+                    'Section area: %{text}<br>'
+                    + '<extra>Element: %{customdata[0]:d}<br>'
+                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    'Parent: %{customdata[2]}</extra>'
                 ),
-                "line": {"width": 5, "color": graphics_common.FRAME_COLOR},
+                'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
             }
         )
 
 
-def add_data__twonodelinks(
-    data_dict: list[dict[str, object]], mdl: Model
-) -> None:
+def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
     Adds a trace containing twonodelink elements
 
@@ -616,9 +612,7 @@ def add_data__twonodelinks(
     """
 
     link_elems = [
-        elm
-        for elm in mdl.list_of_elements()
-        if isinstance(elm, element.TwoNodeLink)
+        elm for elm in mdl.list_of_elements() if isinstance(elm, element.TwoNodeLink)
     ]
 
     if not link_elems:
@@ -633,39 +627,33 @@ def add_data__twonodelinks(
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
-        customdata_list.append(
-            (elm.uid, elm.nodes[0].uid, elm.parent_component.uid)
-        )
-        customdata_list.append(
-            (elm.uid, elm.nodes[1].uid, elm.parent_component.uid)
-        )
+        customdata_list.append((elm.uid, elm.nodes[0].uid, elm.parent_component.uid))
+        customdata_list.append((elm.uid, elm.nodes[1].uid, elm.parent_component.uid))
         customdata_list.append((None,) * 3)
 
-    customdata: nparr = np.array(customdata_list, dtype="object")
+    customdata: nparr = np.array(customdata_list, dtype='object')
     data_dict.append(
         {
-            "name": "TwoNodeLink elements",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
+            'name': 'TwoNodeLink elements',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
             # "text": section_names,
-            "customdata": customdata,
-            "hovertemplate": (
-                "Section: %{text}<br>"
-                + "<extra>Element: %{customdata[0]:d}<br>"
-                + "Node @ this end: %{customdata[1]:d}<br>"
-                "Parent: %{customdata[2]}</extra>"
+            'customdata': customdata,
+            'hovertemplate': (
+                'Section: %{text}<br>'
+                + '<extra>Element: %{customdata[0]:d}<br>'
+                + 'Node @ this end: %{customdata[1]:d}<br>'
+                'Parent: %{customdata[2]}</extra>'
             ),
-            "line": {"width": 5, "color": graphics_common.LINK_COLOR},
+            'line': {'width': 5, 'color': graphics_common.LINK_COLOR},
         }
     )
 
 
-def add_data__frame_offsets(
-    data_dict: list[dict[str, object]], mdl: Model
-) -> None:
+def add_data__frame_offsets(data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
     Adds a trace containing frame element rigid offset lines
 
@@ -676,12 +664,8 @@ def add_data__frame_offsets(
     """
 
     beamcolumn_elems: list[element.Element] = []
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn)
-    )
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn)
-    )
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
 
     if not beamcolumn_elems:
         return
@@ -691,9 +675,7 @@ def add_data__frame_offsets(
     z_list: list[Optional[float]] = []
 
     for elm in beamcolumn_elems:
-        assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        )
+        assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         p_i: nparr = np.array(elm.nodes[0].coords)
         p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j: nparr = np.array(elm.nodes[1].coords)
@@ -708,14 +690,14 @@ def add_data__frame_offsets(
 
     data_dict.append(
         {
-            "name": "Rigid offsets",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 8, "color": graphics_common.OFFSET_COLOR},
+            'name': 'Rigid offsets',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 8, 'color': graphics_common.OFFSET_COLOR},
         }
     )
 
@@ -735,12 +717,8 @@ def add_data__frame_axes(
 
     beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.TrussBar))
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn)
-    )
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn)
-    )
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
     if not beamcolumn_elems:
         return
     scaling = ref_len * 0.025
@@ -749,9 +727,7 @@ def add_data__frame_axes(
     z_list: list[Optional[float]] = []
     colors: list[Optional[str]] = []
     for elm in beamcolumn_elems:
-        assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        )
+        assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_at_line_plots:
             continue
         x_vec = elm.geomtransf.x_axis
@@ -763,25 +739,25 @@ def add_data__frame_axes(
         x_list.extend((mid_pos[0], mid_pos[0] + x_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + x_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + x_vec[2] * scaling, None))
-        colors.extend(["red"] * 3)
+        colors.extend(['red'] * 3)
         x_list.extend((mid_pos[0], mid_pos[0] + y_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + y_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + y_vec[2] * scaling, None))
-        colors.extend(["green"] * 3)
+        colors.extend(['green'] * 3)
         x_list.extend((mid_pos[0], mid_pos[0] + z_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + z_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + z_vec[2] * scaling, None))
-        colors.extend(["blue"] * 3)
+        colors.extend(['blue'] * 3)
     data_dict.append(
         {
-            "name": "Frame axes",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 8, "color": colors},
+            'name': 'Frame axes',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 8, 'color': colors},
         }
     )
 
@@ -800,9 +776,7 @@ def add_data__zerolength_axes(
     """
 
     zerolength_elements: list[element.Element] = []
-    zerolength_elements.extend(
-        mdl.list_of_specific_element(element.ZeroLength)
-    )
+    zerolength_elements.extend(mdl.list_of_specific_element(element.ZeroLength))
     if not zerolength_elements:
         return
     scaling = ref_len * 0.025
@@ -819,25 +793,25 @@ def add_data__zerolength_axes(
         x_list.extend((mid_pos[0], mid_pos[0] + x_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + x_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + x_vec[2] * scaling, None))
-        colors.extend(["red"] * 3)
+        colors.extend(['red'] * 3)
         x_list.extend((mid_pos[0], mid_pos[0] + y_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + y_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + y_vec[2] * scaling, None))
-        colors.extend(["green"] * 3)
+        colors.extend(['green'] * 3)
         x_list.extend((mid_pos[0], mid_pos[0] + z_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + z_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + z_vec[2] * scaling, None))
-        colors.extend(["blue"] * 3)
+        colors.extend(['blue'] * 3)
     data_dict.append(
         {
-            "name": "Zerolength axes",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 8, "color": colors},
+            'name': 'Zerolength axes',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 8, 'color': colors},
         }
     )
 
@@ -872,21 +846,21 @@ def add_data__global_axes(
     x_list.extend((0.00, z_vec[0] * scaling, None))
     y_list.extend((0.00, z_vec[1] * scaling, None))
     z_list.extend((0.00, z_vec[2] * scaling, None))
-    colors.extend(["red"] * 3)
-    colors.extend(["green"] * 3)
-    colors.extend(["blue"] * 3)
+    colors.extend(['red'] * 3)
+    colors.extend(['green'] * 3)
+    colors.extend(['blue'] * 3)
     # we add it twice in order for the animations to work
     # see https://plotly.com/python/animations/
     data_dict.extend(
         [
             {
-                "type": "scatter3d",
-                "mode": "lines",
-                "x": x_list,
-                "y": y_list,
-                "z": z_list,
-                "hoverinfo": "skip",
-                "line": {"width": 3, "color": colors},
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': x_list,
+                'y': y_list,
+                'z': z_list,
+                'hoverinfo': 'skip',
+                'line': {'width': 3, 'color': colors},
             }
         ]
         * 2
@@ -930,14 +904,14 @@ def add_data__diaphragm_lines(
 
     data_dict.append(
         {
-            "name": "Rigid Diaphragms",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 2, "color": graphics_common.GRID_COLOR},
+            'name': 'Rigid Diaphragms',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 2, 'color': graphics_common.GRID_COLOR},
         }
     )
 
@@ -978,14 +952,14 @@ def add_data__tributary_area_boundaries(
 
     data_dict.append(
         {
-            "name": "Trib. Area",
-            "type": "scatter3d",
-            "mode": "lines",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "hoverinfo": "skip",
-            "line": {"width": 2, "color": graphics_common.BISECTOR_COLOR},
+            'name': 'Trib. Area',
+            'type': 'scatter3d',
+            'mode': 'lines',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'hoverinfo': 'skip',
+            'line': {'width': 2, 'color': graphics_common.BISECTOR_COLOR},
         }
     )
 
@@ -1003,12 +977,8 @@ def add_data__extruded_frames_mesh(
     """
 
     beamcolumn_elems: list[element.Element] = []
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.ElasticBeamColumn)
-    )
-    beamcolumn_elems.extend(
-        mdl.list_of_specific_element(element.DispBeamColumn)
-    )
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
+    beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
     if not beamcolumn_elems:
         return
     x_list: list[Optional[float]] = []
@@ -1019,9 +989,7 @@ def add_data__extruded_frames_mesh(
     k_list: list[Optional[int]] = []
     index = 0
     for elm in beamcolumn_elems:
-        assert isinstance(
-            elm, (element.ElasticBeamColumn, element.DispBeamColumn)
-        )
+        assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_when_extruded:
             continue
         side_a = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -1063,16 +1031,16 @@ def add_data__extruded_frames_mesh(
             index += 4
     data_dict.append(
         {
-            "type": "mesh3d",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "i": i_list,
-            "j": j_list,
-            "k": k_list,
-            "hoverinfo": "skip",
-            "color": graphics_common.BEAM_MESH_COLOR,
-            "opacity": 0.70,
+            'type': 'mesh3d',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'i': i_list,
+            'j': j_list,
+            'k': k_list,
+            'hoverinfo': 'skip',
+            'color': graphics_common.BEAM_MESH_COLOR,
+            'opacity': 0.70,
         }
     )
 
@@ -1108,9 +1076,7 @@ def add_data__extruded_bars_mesh(
 
         side_a = np.array(elm.nodes[0].coords)
         side_b = np.array(elm.nodes[1].coords)
-        x_vec, y_vec, z_vec = local_axes_from_points_and_angle(
-            side_a, side_b, 0.00
-        )
+        x_vec, y_vec, z_vec = local_axes_from_points_and_angle(side_a, side_b, 0.00)
 
         # cut out the two ends for a nicer visual effect
         # (after all we can't plot the exact connection geometry)
@@ -1150,16 +1116,16 @@ def add_data__extruded_bars_mesh(
             index += 4
     data_dict.append(
         {
-            "type": "mesh3d",
-            "x": x_list,
-            "y": y_list,
-            "z": z_list,
-            "i": i_list,
-            "j": j_list,
-            "k": k_list,
-            "hoverinfo": "skip",
-            "color": graphics_common.BEAM_MESH_COLOR,
-            "opacity": 0.30,
+            'type': 'mesh3d',
+            'x': x_list,
+            'y': y_list,
+            'z': z_list,
+            'i': i_list,
+            'j': j_list,
+            'k': k_list,
+            'hoverinfo': 'skip',
+            'color': graphics_common.BEAM_MESH_COLOR,
+            'opacity': 0.30,
         }
     )
 
@@ -1250,7 +1216,7 @@ def show(
     fig_datastructure = dict(data=data_dict, layout=layout)
     fig = go.Figure(fig_datastructure)
 
-    if "pytest" not in sys.modules:
+    if 'pytest' not in sys.modules:
         if to_html_file:
             fig.write_html(to_html_file)
         elif to_figure:

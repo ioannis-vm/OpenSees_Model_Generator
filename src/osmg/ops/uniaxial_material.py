@@ -48,7 +48,7 @@ class Elastic(UniaxialMaterial):
         Returns the arguments required to define the object in
         OpenSees
         """
-        return ["Elastic", self.uid, self.e_mod]
+        return ['Elastic', self.uid, self.e_mod]
 
 
 @dataclass
@@ -80,7 +80,7 @@ class Steel02(UniaxialMaterial):
         """
 
         args = [
-            "Steel02",
+            'Steel02',
             self.uid,
             self.Fy,
             self.E0,
@@ -196,7 +196,7 @@ class Steel4(UniaxialMaterial):
         #
 
         # these are required and will always be there
-        args = ["Steel4", self.uid, self.Fy, self.E0]
+        args = ['Steel4', self.uid, self.Fy, self.E0]
 
         # optional arguments:
         if asym:
@@ -264,7 +264,7 @@ class Bilin(UniaxialMaterial):
         """
 
         return [
-            "Bilin",
+            'Bilin',
             self.uid,
             self.K0,
             self.as_Plus,
@@ -331,7 +331,7 @@ class IMKBilin(UniaxialMaterial):
         """
 
         return [
-            "IMKBilin",
+            'IMKBilin',
             self.uid,
             self.K0,
             self.theta_p_Plus,
@@ -413,7 +413,7 @@ class Pinching4(UniaxialMaterial):
         """
 
         return [
-            "Pinching4",
+            'Pinching4',
             self.uid,
             self.ePf1,
             self.ePf2,
@@ -485,7 +485,7 @@ class Hysteretic(UniaxialMaterial):
         """
 
         return [
-            "Hysteretic",
+            'Hysteretic',
             self.uid,
             *self.p1,
             *self.p2,
@@ -523,16 +523,16 @@ class Fatigue(UniaxialMaterial):
         """
 
         return [
-            "Fatigue",
+            'Fatigue',
             self.uid,
             self.predecessor.uid,
-            "-E0",
+            '-E0',
             self.e_mod,
-            "-m",
+            '-m',
             self.var_m,
-            "-min",
+            '-min',
             self.var_min,
-            "-max",
+            '-max',
             self.var_max,
         ]
 
@@ -562,23 +562,23 @@ class MaxStrainRange(UniaxialMaterial):
         """
 
         args = [
-            "MaxStrainRange",
+            'MaxStrainRange',
             self.uid,
             self.predecessor.uid,
             self.msr_fracture,
         ]
         if self.min_fracture:
-            args.extend(["-min", self.min_fracture])
+            args.extend(['-min', self.min_fracture])
         if self.max_fracture:
-            args.extend(["-max", self.max_fracture])
+            args.extend(['-max', self.max_fracture])
         if self.tangent_ratio:
-            args.extend(["-tangentRatio", self.tangent_ratio])
+            args.extend(['-tangentRatio', self.tangent_ratio])
         if self.def_coeff:
-            args.extend(["-defCoeff", self.def_coeff])
+            args.extend(['-defCoeff', self.def_coeff])
         if self.node_tags:
-            args.extend(["-nodeTags", *self.node_tags])
+            args.extend(['-nodeTags', *self.node_tags])
         if self.elements_to_remove:
-            args.extend(["-eleTag", *self.elements_to_remove])
+            args.extend(['-eleTag', *self.elements_to_remove])
 
         return args
 
@@ -603,7 +603,7 @@ class MinMax(UniaxialMaterial):
         """
 
         args = [
-            "MinMax",
+            'MinMax',
             self.uid,
             self.predecessor.uid,
             '-min',
