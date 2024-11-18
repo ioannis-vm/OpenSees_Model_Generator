@@ -9,6 +9,7 @@ up.
 import glob
 import os
 import re
+from pathlib import Path
 
 import numpy as np
 
@@ -47,24 +48,23 @@ pattern = r'\(*?\):'  # type: ignore (this is so silly)
 
 for module in files:
     for path in files[module]:
-        with open(path, encoding='utf-8') as f:
-            contents = f.read()
-            if contents.startswith('"""'):
-                contents = '\n\n' + contents
-            contents_spl = np.array(contents.split('"""'))
-            contents_docstr = contents_spl[1::2]
-            for thing in contents_docstr:
-                lines = thing.split('\n')
-                for line in lines:
-                    if '>>>' in line:
-                        continue
-                    if '...' in line:
-                        continue
-                    if '(most recent call last):' in line:
-                        continue
-                    match = re.search(pattern, line)
-                    if match:
-                        print('~~~')
-                        print(line)
-                        print('~~~')
-                        print()
+        contents = Path(path).read_text(encoding='utf-8')
+        if contents.startswith('"""'):
+            contents = '\n\n' + contents
+        contents_spl = np.array(contents.split('"""'))
+        contents_docstr = contents_spl[1::2]
+        for thing in contents_docstr:
+            lines = thing.split('\n')
+            for line in lines:
+                if '>>>' in line:
+                    continue
+                if '...' in line:
+                    continue
+                if '(most recent call last):' in line:
+                    continue
+                match = re.search(pattern, line)
+                if match:
+                    print('~~~')
+                    print(line)
+                    print('~~~')
+                    print()
