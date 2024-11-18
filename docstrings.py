@@ -64,7 +64,7 @@ for module, paths in files.items():
                     continue
                 match = re.search(pattern, line)
                 if match:
-                    print('~~~')
-                    print(line)
-                    print('~~~')
-                    print()
+                    print('~~~')  # noqa: T201
+                    print(line)  # noqa: T201
+                    print('~~~')  # noqa: T201
+                    print()  # noqa: T201

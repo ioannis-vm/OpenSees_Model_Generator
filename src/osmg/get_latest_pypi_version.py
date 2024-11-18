@@ -28,4 +28,4 @@ if __name__ == '__main__':
 
     package = args.package_name
     version = get_latest_version(package)
-    print(version)
+    print(version)  # noqa: T201

@@ -131,9 +131,9 @@ class TributaryAreaAnaysis:
             msg += 'Please install scikit-geometry.\n'
             msg += '  $ conda install scikit-geometry -c conda-forge\n'
             msg += 'https://github.com/scikit-geometry/scikit-geometry'
-            print('~ skgeom is not installed ~')
-            print()
-            print(msg)
+            print('~ skgeom is not installed ~')  # noqa: T201
+            print()  # noqa: T201
+            print(msg)  # noqa: T201
             sys.exit()
 
         lvl = self.parent_level

@@ -63,14 +63,14 @@ def print_methods(obj: object) -> None:
     Prints the methods of an object.
     """
     object_methods = methods(obj)
-    pprint(object_methods)
+    pprint(object_methods)  # noqa: T203
 
 
 def print_dir(obj: object) -> None:
     """
     Prints the entire output of `dir()` of an object
     """
-    pprint(dir(obj))
+    pprint(dir(obj))  # noqa: T203
 
 
 def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:

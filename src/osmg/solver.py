@@ -216,17 +216,6 @@ class Analysis:
             # logger might not have been initialized yet
             self.logger.info(msg)
 
-    def print(self, thing: Any, end: str = '\n') -> None:
-        """
-        Prints a message to stdout.
-
-        """
-        if not self.settings.silent:
-            print(thing, end=end)
-        if self.logger:
-            # logger might not have been initialized yet
-            self.log(thing)
-
     def _init_results(self):  # noqa: C901
         # initialize output directory
         if self.output_directory and not os.path.exists(self.output_directory):
@@ -2223,10 +2212,10 @@ class THAnalysis(GravityPlusAnalysis):
                 velocity_threshold = 1e-6
                 if vel_norm < velocity_threshold:
                     if pbar is not None:
-                        print()
+                        print()  # noqa: T201
                     break
                 if pbar is not None:
-                    print(f'{vel_norm:5.3e} > 1.000e-06', end='\r')
+                    print(f'{vel_norm:5.3e} > 1.000e-06', end='\r')  # noqa: T201
 
         self.log('Analysis finished')
         metadata: dict[str, Union[int, str, float]] = {

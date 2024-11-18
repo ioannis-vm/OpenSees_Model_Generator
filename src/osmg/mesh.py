@@ -1072,7 +1072,7 @@ def print_halfedge_results(halfedges):
         results['edge'].append(halfedge.edge)
         results['next'].append(halfedge.nxt)
 
-    print(results)
+    print(results)  # noqa: T201
 
 
 def plot_loop(halfedge_loop):
@@ -1112,18 +1112,18 @@ def sanity_checks(external, trivial):
     """
     #   We expect no trivial loops
     if trivial:
-        print('Warning: Found trivial loop')
+        print('Warning: Found trivial loop')  # noqa: T201
         for trv in trivial:
             for halfedge in trv:
-                print(halfedge.vertex.coords)
+                print(halfedge.vertex.coords)  # noqa: T201
             plot_loop(trv)
     #   We expect a single external loop
     if len(external) > 1:
-        print('Warning: Found multiple external loops')
+        print('Warning: Found multiple external loops')  # noqa: T201
         for i, ext in enumerate(external):
-            print(i + 1)
+            print(i + 1)  # noqa: T201
             for halfedge in ext:
-                print(halfedge.vertex.coords)
+                print(halfedge.vertex.coords)  # noqa: T201
             plot_loop(ext)
 
 

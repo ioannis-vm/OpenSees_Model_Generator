@@ -262,7 +262,7 @@ modal_analysis.run()
 
 
 # %%
-print(modal_analysis.results[modalcase.name].periods)
+print(modal_analysis.results[modalcase.name].periods)  # noqa: T201
 
 
 # %% [markdown]
