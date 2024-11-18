@@ -66,12 +66,6 @@ class ComponentAssembly:
         self.internal_nodes = obj_collections.NodeCollection(self)
         self.elements = obj_collections.CollectionWithConnectivity(self)
 
-    def __srepr__(self):
-        """
-        Short version of repr
-        """
-        return f'Component assembly, uid: {self.uid}'
-
     def __repr__(self):
         res = ''
         res += 'Component assembly object\n'

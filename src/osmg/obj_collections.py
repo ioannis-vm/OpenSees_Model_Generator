@@ -148,13 +148,6 @@ class Collection(dict[TK, TV]):
             raise ValueError(msg)
         return res
 
-    def __srepr__(self):
-        """
-        Concise version of `repr`.
-
-        """
-        return f'[Collection of {len(self)} items]'
-
     def __repr__(self):
         res = ''
         res += 'Collection Object\n'

@@ -47,13 +47,6 @@ class PhysicalMaterial:
     g_mod: float
     f_y: float
 
-    def __srepr__(self):
-        """
-        Short version of repr.
-
-        """
-        return f'Physical material: {self.name}, {self.uid}'
-
     def __repr__(self):
         res = ''
         res += 'Physical material object\n'

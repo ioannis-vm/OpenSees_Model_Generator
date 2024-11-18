@@ -91,6 +91,25 @@ class Vertex:
         """
         return self.uid == other.uid
 
+    def __hash__(self):
+        """
+        Returns a hash value for the vertex based on its uid.
+
+        Returns
+        -------
+            int: Hash value of the vertex.
+
+        Example:
+            >>> from osmg.mesh import Vertex
+            >>> v1 = Vertex((0, 0))
+            >>> hash(v1)
+            0
+            >>> v2 = Vertex((1, 1))
+            >>> hash(v2)
+            1
+        """
+        return hash(self.uid)
+
     def __repr__(self):
         """
         Returns a string representation of the vertex.
