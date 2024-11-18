@@ -20,12 +20,12 @@ from typing import TYPE_CHECKING, Any, Optional
 import numpy as np
 import numpy.typing as npt
 
-from .. import common, mesh
-from ..mesh import Mesh, polygon_area
+from osmg import common, mesh
+from osmg.mesh import Mesh, polygon_area
 
 if TYPE_CHECKING:
     from .uniaxial_material import UniaxialMaterial
-    from ..physical_material import PhysicalMaterial
+    from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 

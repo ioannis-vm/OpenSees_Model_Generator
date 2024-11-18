@@ -18,7 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ..ops.node import Node
+from osmg.ops.node import Node
 
 if TYPE_CHECKING:
     from .model import Model

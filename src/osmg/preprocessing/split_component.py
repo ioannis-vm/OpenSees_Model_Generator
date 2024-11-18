@@ -17,15 +17,15 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from .. import common
-from ..line import Line
-from ..ops.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
-from ..ops.node import Node
-from ..ops.section import ElasticSection, FiberSection
+from osmg import common
+from osmg.line import Line
+from osmg.ops.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
+from osmg.ops.node import Node
+from osmg.ops.section import ElasticSection, FiberSection
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..component_assembly import ComponentAssembly
+    from osmg.component_assembly import ComponentAssembly
 
 nparr = npt.NDArray[np.float64]
 

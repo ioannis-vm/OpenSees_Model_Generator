@@ -21,8 +21,8 @@ from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
-from ..ops.section import ElasticSection
-from ..ops.uniaxial_material import (
+from osmg.ops.section import ElasticSection
+from osmg.ops.uniaxial_material import (
     Elastic,
     Hysteretic,
     Pinching4,
@@ -32,8 +32,8 @@ from ..ops.uniaxial_material import (
 from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:
-    from ..model import Model
-    from ..physical_material import PhysicalMaterial
+    from osmg.model import Model
+    from osmg.physical_material import PhysicalMaterial
 
 
 def fix_all(

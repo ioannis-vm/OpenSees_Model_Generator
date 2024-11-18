@@ -22,14 +22,14 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 import plotly.io as pio
 
-from ..ops import element
-from ..ops import node as node_module
-from ..transformations import local_axes_from_points_and_angle
+from osmg.ops import element
+from osmg.ops import node as node_module
+from osmg.transformations import local_axes_from_points_and_angle
 from . import graphics_common, graphics_common_3d
 
 if TYPE_CHECKING:
-    from ..load_case import LoadCase
-    from ..model import Model
+    from osmg.load_case import LoadCase
+    from osmg.model import Model
 
 nparr = npt.NDArray[np.float64]
 

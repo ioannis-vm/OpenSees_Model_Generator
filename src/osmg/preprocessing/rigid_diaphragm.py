@@ -19,12 +19,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .. import common, load_case
-from ..ops.node import Node
+from osmg import common, load_case
+from osmg.ops.node import Node
 
 if TYPE_CHECKING:
-    from ..level import Level
-    from ..load_case import LoadCase
+    from osmg.level import Level
+    from osmg.load_case import LoadCase
 
 
 @dataclass(repr=False)

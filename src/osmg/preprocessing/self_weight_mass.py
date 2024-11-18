@@ -15,8 +15,8 @@ using a given model.
 
 import numpy as np
 
-from .. import common
-from ..ops import element
+from osmg import common
+from osmg.ops import element
 
 
 def self_weight(mdl, lcase, factor=1.00):

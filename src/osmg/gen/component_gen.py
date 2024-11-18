@@ -23,10 +23,10 @@ from typing import TYPE_CHECKING, Callable, Optional, Type, Union
 import numpy as np
 import numpy.typing as npt
 
-from .. import common
-from ..component_assembly import ComponentAssembly
-from ..gen import zerolength_gen
-from ..ops.element import (
+from osmg import common
+from osmg.component_assembly import ComponentAssembly
+from osmg.gen import zerolength_gen
+from osmg.ops.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     GeomTransf,
@@ -35,19 +35,22 @@ from ..ops.element import (
     TwoNodeLink,
     ZeroLength,
 )
-from ..ops.node import Node
-from ..ops.section import ElasticSection, FiberSection
-from ..preprocessing.split_component import split_component
-from ..transformations import local_axes_from_points_and_angle, transformation_matrix
+from osmg.ops.node import Node
+from osmg.ops.section import ElasticSection, FiberSection
+from osmg.preprocessing.split_component import split_component
+from osmg.transformations import (
+    local_axes_from_points_and_angle,
+    transformation_matrix,
+)
 from .node_gen import NodeGenerator
 from .query import ElmQuery
 
 if TYPE_CHECKING:
-    from ..ops.uniaxial_material import UniaxialMaterial
-    from ..physical_material import PhysicalMaterial
-    from ..mesh import Mesh
-    from ..level import Level
-    from ..model import Model
+    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.physical_material import PhysicalMaterial
+    from osmg.mesh import Mesh
+    from osmg.level import Level
+    from osmg.model import Model
 
 
 nparr = npt.NDArray[np.float64]

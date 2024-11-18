@@ -16,7 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
 
-from ..graphics.visibility import NodeVisibility
+from osmg.graphics.visibility import NodeVisibility
 
 
 @dataclass

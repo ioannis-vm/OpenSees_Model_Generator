@@ -18,16 +18,16 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
-from ..model import Model
-from ..ops.section import ElasticSection, FiberSection
-from ..ops.uniaxial_material import (
+from osmg.model import Model
+from osmg.ops.section import ElasticSection, FiberSection
+from osmg.ops.uniaxial_material import (
     Elastic,
     Fatigue,
     IMKBilin,
     MaxStrainRange,
     Steel02,
 )
-from ..physical_material import PhysicalMaterial
+from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 

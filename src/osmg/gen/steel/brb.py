@@ -18,10 +18,10 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
-from ...gen.component_gen import TrussBarGenerator
-from ...gen.mesh_shapes import rect_mesh
-from ...model import Model
-from ...ops.uniaxial_material import Fatigue, Steel4
+from osmg.gen.component_gen import TrussBarGenerator
+from osmg.gen.mesh_shapes import rect_mesh
+from osmg.model import Model
+from osmg.ops.uniaxial_material import Fatigue, Steel4
 
 # pylint: disable=invalid-name
 

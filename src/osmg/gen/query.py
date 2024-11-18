@@ -24,15 +24,15 @@ from typing import TYPE_CHECKING, Optional, Union
 import numpy as np
 import numpy.typing as npt
 
-from .. import common
-from ..line import Line
-from ..ops import element
+from osmg import common
+from osmg.line import Line
+from osmg.ops import element
 
 if TYPE_CHECKING:
-    from ..load_case import LoadCase
-    from ..component_assembly import ComponentAssembly
-    from ..model import Model
-    from ..ops.node import Node
+    from osmg.load_case import LoadCase
+    from osmg.component_assembly import ComponentAssembly
+    from osmg.model import Model
+    from osmg.ops.node import Node
 
 
 nparr = npt.NDArray[np.float64]

@@ -25,14 +25,19 @@ import numpy as np
 import numpy.typing as npt
 from tqdm import tqdm
 
-from .. import common, mesh
-from ..ops.element import DispBeamColumn, ElasticBeamColumn, TwoNodeLink, ZeroLength
-from ..ops.node import Node
+from osmg import common, mesh
+from osmg.ops.element import (
+    DispBeamColumn,
+    ElasticBeamColumn,
+    TwoNodeLink,
+    ZeroLength,
+)
+from osmg.ops.node import Node
 
 if TYPE_CHECKING:
-    from ..level import Level
-    from ..load_case import LoadCase
-    from ..mesh import Edge, Halfedge, Vertex
+    from osmg.level import Level
+    from osmg.load_case import LoadCase
+    from osmg.mesh import Edge, Halfedge, Vertex
 
 # pylint: disable=no-member
 # pylint: disable=import-outside-toplevel
