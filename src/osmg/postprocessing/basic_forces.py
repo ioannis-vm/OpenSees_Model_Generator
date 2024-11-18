@@ -14,13 +14,14 @@ method.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from ..ops.element import TrussBar
-from ..ops.element import ElasticBeamColumn
-from ..ops.element import DispBeamColumn
+
+from ..ops.element import DispBeamColumn, ElasticBeamColumn, TrussBar
 from ..solver import ModalResponseSpectrumAnalysis
 
 if TYPE_CHECKING:
@@ -55,7 +56,6 @@ def basic_forces(
         DataFrame or a tuple.
 
     """
-
     if isinstance(anl, ModalResponseSpectrumAnalysis):
         forces = anl.combined_basic_forces(elm.uid)
         w_x, w_y, w_z = (0.00, 0.00, 0.00)
@@ -89,15 +89,14 @@ def basic_forces(
 
     if as_tuple:
         return (nx_vec, qy_vec, qz_vec, tx_vec, mz_vec, my_vec)
-    else:
-        dframe = pd.DataFrame.from_dict(
-            {
-                'nx': nx_vec,
-                'qy': qy_vec,
-                'qz': qz_vec,
-                'tx': tx_vec,
-                'mz': mz_vec,
-                'my': my_vec,
-            }
-        )
-        return dframe
+    dframe = pd.DataFrame.from_dict(
+        {
+            'nx': nx_vec,
+            'qy': qy_vec,
+            'qz': qz_vec,
+            'tx': tx_vec,
+            'mz': mz_vec,
+            'my': my_vec,
+        }
+    )
+    return dframe

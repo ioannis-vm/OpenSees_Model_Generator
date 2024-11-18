@@ -13,23 +13,23 @@ https://plotly.com/python/reference/
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Optional
-from typing import Union
-from typing import Any
+
 import sys
-import plotly.graph_objects as go  # type: ignore
-import plotly.io as pio
+from typing import TYPE_CHECKING, Any, Optional, Union
+
 import numpy as np
 import numpy.typing as npt
-from . import graphics_common, graphics_common_3d
+import plotly.graph_objects as go  # type: ignore
+import plotly.io as pio
+
 from ..ops import element
 from ..ops import node as node_module
 from ..transformations import local_axes_from_points_and_angle
+from . import graphics_common, graphics_common_3d
 
 if TYPE_CHECKING:
-    from ..model import Model
     from ..load_case import LoadCase
+    from ..model import Model
 
 nparr = npt.NDArray[np.float64]
 
@@ -45,7 +45,6 @@ def add_data__nodes(data_dict, mdl, load_case):
       load_case: the load_case to be visualized
 
     """
-
     # TODO: this was written very sloppily, because I was in a rush.
     # I need to improve this code, avoid code repetition
     # TODO: merge this method with the other methods that plot nodes.
@@ -162,7 +161,6 @@ def add_data__parent_nodes(
       load_case: the load_case to be visualized
 
     """
-
     list_of_nodes = load_case.parent_nodes.values()
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
@@ -231,7 +229,6 @@ def add_data__internal_nodes(
       load_case: the load_case to be visualized
 
     """
-
     list_of_nodes = mdl.list_of_internal_nodes()
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
@@ -343,7 +340,6 @@ def add_data__release_nodes(
       load_case: the load_case to be visualized
 
     """
-
     x_list = [node.coords[0] for node in list_of_nodes]
     y_list = [node.coords[1] for node in list_of_nodes]
     z_list = [node.coords[2] for node in list_of_nodes]
@@ -383,7 +379,6 @@ def add_data__frames(
       load_case: the load_case to be visualized
 
     """
-
     line_elems: list[Union[element.ElasticBeamColumn, element.DispBeamColumn]] = []
 
     # >>>
@@ -508,7 +503,6 @@ def add_data__bars(
       load_case: the load_case to be visualized
 
     """
-
     line_elems = [
         elm
         for elm in mdl.list_of_specific_element(element.TrussBar)
@@ -610,7 +604,6 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
       mdl: the model to be visualized
 
     """
-
     link_elems = [
         elm for elm in mdl.list_of_elements() if isinstance(elm, element.TwoNodeLink)
     ]
@@ -662,7 +655,6 @@ def add_data__frame_offsets(data_dict: list[dict[str, object]], mdl: Model) -> N
       mdl: the model to be visualized
 
     """
-
     beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
@@ -714,7 +706,6 @@ def add_data__frame_axes(
       ref_len: model reference length to scale the axes
 
     """
-
     beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.TrussBar))
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
@@ -774,7 +765,6 @@ def add_data__zerolength_axes(
       ref_len: model reference length to scale the axes
 
     """
-
     zerolength_elements: list[element.Element] = []
     zerolength_elements.extend(mdl.list_of_specific_element(element.ZeroLength))
     if not zerolength_elements:
@@ -827,7 +817,6 @@ def add_data__global_axes(
       ref_len: model reference length to scale the axes
 
     """
-
     scaling = ref_len
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
@@ -879,7 +868,6 @@ def add_data__diaphragm_lines(
       loadcase: loadcase
 
     """
-
     # if parent nodes don't exist, we don't have rigid diaphragms
     pnodes = loadcase.parent_nodes
     if not pnodes:
@@ -928,7 +916,6 @@ def add_data__tributary_area_boundaries(
       loadcase: loadcase
 
     """
-
     trib_area_analysis_collection = loadcase.tributary_area_analysis
 
     x_list: list[Optional[float]] = []
@@ -975,7 +962,6 @@ def add_data__extruded_frames_mesh(
       mdl: the model to be visualized
 
     """
-
     beamcolumn_elems: list[element.Element] = []
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
@@ -1056,7 +1042,6 @@ def add_data__extruded_bars_mesh(
       mdl: the model to be visualized
 
     """
-
     line_elems = mdl.list_of_specific_element(element.TrussBar)
     if not line_elems:
         return
@@ -1169,7 +1154,6 @@ def show(
       to_figure: If a path is specified, the figure is
         saved in the specified format.
     """
-
     layout = graphics_common_3d.global_layout(mdl, camera)
     data_dict: list[dict[str, object]] = []
 

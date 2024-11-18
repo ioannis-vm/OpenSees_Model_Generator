@@ -31,7 +31,8 @@ class UIDGenerator:
         Arguments:
             object_type: The type of object for which to generate a uid.
 
-        Returns:
+        Returns
+        -------
             A unique identifier for an object of the given type.
 
         Example:

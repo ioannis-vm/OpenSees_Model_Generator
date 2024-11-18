@@ -14,17 +14,17 @@ Objects that generate sections.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Type
-from dataclasses import dataclass
+
 import json
 import pkgutil
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Type
+
 import numpy as np
 import numpy.typing as npt
-from ..ops.section import SectionComponent
-from ..ops.section import ElasticSection
-from ..ops.section import FiberSection
+
 from ..gen import mesh_shapes
+from ..ops.section import ElasticSection, FiberSection, SectionComponent
 from .mesh_shapes import rect_mesh
 
 if TYPE_CHECKING:
@@ -39,7 +39,8 @@ class SectionGenerator:
     """
     Used to populate the section repository of a model.
 
-    Attributes:
+    Attributes
+    ----------
       model: Model to act upon
 
     """
@@ -64,7 +65,8 @@ class SectionGenerator:
                 The product of the shear modulus and the torsional
                 moment of inertia.
 
-        Returns:
+        Returns
+        -------
             ElasticSection: An ElasticSection object with the
                 specified properties.
 
@@ -88,7 +90,6 @@ class SectionGenerator:
             500.0
 
         """
-
         sec = ElasticSection(
             name=name,
             uid=self.model.uid_generator.new('section'),
@@ -156,7 +157,8 @@ class SectionGenerator:
                 in the model.
             return_section: If True, the created sections are returned.
 
-        Returns:
+        Returns
+        -------
             If `return_section` is True, a dictionary containing the
             created sections. The keys are the labels of the sections,
             and the values are the sections themselves.
@@ -187,7 +189,6 @@ class SectionGenerator:
             }
 
         """
-
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
             'name', ops_material
         )

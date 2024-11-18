@@ -6,22 +6,20 @@ Basic Test Suite.
 # import pytest
 import numpy as np
 import numpy.typing as npt
-from osmg.model import Model
-from osmg.graphics.preprocessing_3d import show
-from osmg import defaults
-from osmg.gen.section_gen import SectionGenerator
-from osmg.ops.section import ElasticSection
-from osmg.gen.component_gen import BeamColumnGenerator
-from osmg.ops.element import ElasticBeamColumn
-from osmg.load_case import LoadCase
-from osmg.gen.query import ElmQuery
-from osmg.preprocessing.self_weight_mass import self_weight
-from osmg.preprocessing.self_weight_mass import self_mass
-from osmg.solver import PushoverAnalysis
-from osmg.graphics.postprocessing_3d import show_deformed_shape
-from osmg.graphics.postprocessing_3d import show_basic_forces
-from osmg.gen.zerolength_gen import gravity_shear_tab
 
+from osmg import defaults
+from osmg.gen.component_gen import BeamColumnGenerator
+from osmg.gen.query import ElmQuery
+from osmg.gen.section_gen import SectionGenerator
+from osmg.gen.zerolength_gen import gravity_shear_tab
+from osmg.graphics.postprocessing_3d import show_basic_forces, show_deformed_shape
+from osmg.graphics.preprocessing_3d import show
+from osmg.load_case import LoadCase
+from osmg.model import Model
+from osmg.ops.element import ElasticBeamColumn
+from osmg.ops.section import ElasticSection
+from osmg.preprocessing.self_weight_mass import self_mass, self_weight
+from osmg.solver import PushoverAnalysis
 
 nparr = npt.NDArray[np.float64]
 
@@ -33,7 +31,6 @@ def test_a():
     Imperial units
 
     """
-
     mdl = Model('test_model')
     mdl.settings.imperial_units = True
 

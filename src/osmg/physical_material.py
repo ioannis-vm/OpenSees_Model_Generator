@@ -13,6 +13,7 @@ Defines PhysicalMaterial objects.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 
 
@@ -51,7 +52,6 @@ class PhysicalMaterial:
         Short version of repr.
 
         """
-
         return f'Physical material: {self.name}, {self.uid}'
 
     def __repr__(self):

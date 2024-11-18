@@ -13,14 +13,15 @@ Model Generator for OpenSees ~ level
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from dataclasses import dataclass, field
-from .obj_collections import Collection
-from .obj_collections import NodeCollection
+from typing import TYPE_CHECKING
+
+from .obj_collections import Collection, NodeCollection
 
 if TYPE_CHECKING:
-    from .model import Model
     from .component_assembly import ComponentAssembly
+    from .model import Model
 
 
 @dataclass
@@ -29,7 +30,8 @@ class Level:
     Level Object. Levels are part of a model and they contain primary
       nodes and component assemblies.
 
-    Attributes:
+    Attributes
+    ----------
         parent_model (Model)
         uid (int)
         elevation (float)

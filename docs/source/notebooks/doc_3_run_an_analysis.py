@@ -43,17 +43,16 @@ First we define a model.
 # %%
 # This cell defines the model from notebook 2_Define_a_Model
 import numpy as np
-from osmg import model
-import osmg.defaults as defaults
-from osmg.gen.section_gen import SectionGenerator
-from osmg.ops.section import ElasticSection
+
+from osmg import defaults, model
 from osmg.gen.component_gen import BeamColumnGenerator
-from osmg.ops.element import ElasticBeamColumn
+from osmg.gen.section_gen import SectionGenerator
 from osmg.gen.zerolength_gen import gravity_shear_tab
-from osmg.load_case import LoadCase
-from osmg.preprocessing.self_weight_mass import self_weight
-from osmg.preprocessing.self_weight_mass import self_mass
 from osmg.graphics.preprocessing_3d import show
+from osmg.load_case import LoadCase
+from osmg.ops.element import ElasticBeamColumn
+from osmg.ops.section import ElasticSection
+from osmg.preprocessing.self_weight_mass import self_mass, self_weight
 
 mdl = model.Model('example_model')
 for i in range(3):
@@ -164,7 +163,6 @@ show(mdl, testcase, extrude=True)
 # %%
 from osmg import solver
 
-
 # %%
 # instantiate analysis object
 static_anl = solver.StaticAnalysis(mdl, {testcase.name: testcase})
@@ -227,9 +225,7 @@ visualize. Static analyses only have a single step, so we specify 0.
 """
 
 # %%
-from osmg.graphics.postprocessing_3d import show_deformed_shape
-from osmg.graphics.postprocessing_3d import show_basic_forces
-
+from osmg.graphics.postprocessing_3d import show_basic_forces, show_deformed_shape
 
 # %%
 help(show_deformed_shape)

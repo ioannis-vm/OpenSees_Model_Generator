@@ -13,14 +13,16 @@ Model Generator for OpenSees ~ design library
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from ..solver import Analysis
-from .basic_forces import basic_forces
+
 from ..model import Model
-from ..solver import ModalResponseSpectrumAnalysis
+from ..solver import Analysis, ModalResponseSpectrumAnalysis
+from .basic_forces import basic_forces
 
 nparr = npt.NDArray[np.float64]
 

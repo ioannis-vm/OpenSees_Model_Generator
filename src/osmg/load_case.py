@@ -15,18 +15,18 @@ Defines :obj:`~osmg.load_case.LoadCase` objects.
 # pylint: disable=W1512
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
-from typing import Union
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, Union
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from . import transformations
-from . import obj_collections
-from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
-from .preprocessing.rigid_diaphragm import RDAnalyzer
+
+from . import obj_collections, transformations
 from .ops import element
+from .preprocessing.rigid_diaphragm import RDAnalyzer
+from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 
 if TYPE_CHECKING:
     from .model import Model
@@ -40,7 +40,8 @@ class PointLoadMass:
     """
     Point load/mass object. Global coordinate system.
 
-    Attributes:
+    Attributes
+    ----------
         val: Value for each DOF.
 
     """
@@ -63,7 +64,6 @@ class PointLoadMass:
             array([ 2.,  4.,  6.,  8., 10., 12.])
 
         """
-
         self.val += load
 
     def __repr__(self):
@@ -107,11 +107,11 @@ class LineElementUDL:
             the global x, y, and z directions, in the direction of
             the global axes.
 
-        Returns:
+        Returns
+        -------
           None
 
         """
-
         # STOP! if the element has the Corotational transformation, we
         # can't apply a UDL on it. We need to lump the provided UDL to
         # its external nodes.  Since the Corotational transformation
@@ -161,7 +161,8 @@ class LoadCase:
     Analysis objects can use multiple load cases.
     Load combination objects utilize load cases as well.
 
-    Attributes:
+    Attributes
+    ----------
       name: A string representing the name of the load case.
       parent_model: A Model object representing the parent model of
         the load case.
@@ -219,7 +220,6 @@ class LoadCase:
         diaphragm constraints.
 
         """
-
         for lvl_uid in level_uids:
             lvl = self.parent_model.levels[lvl_uid]
             rda = RDAnalyzer(self, lvl)
@@ -232,7 +232,6 @@ class LoadCase:
         nodes.
 
         """
-
         mdl = self.parent_model
         all_nodes = mdl.dict_of_all_nodes()
         # parent_nodes = {

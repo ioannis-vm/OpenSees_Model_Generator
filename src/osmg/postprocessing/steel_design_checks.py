@@ -13,6 +13,7 @@ Model Generator for OpenSees ~ steel design checks
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from typing import Optional
 
 

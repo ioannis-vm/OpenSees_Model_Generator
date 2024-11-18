@@ -13,16 +13,18 @@ Defines the RDAnalyzer object.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
 import numpy as np
+
+from .. import common, load_case
 from ..ops.node import Node
-from .. import common
-from .. import load_case
 
 if TYPE_CHECKING:
-    from ..load_case import LoadCase
     from ..level import Level
+    from ..load_case import LoadCase
 
 
 @dataclass(repr=False)
@@ -43,7 +45,6 @@ class RDAnalyzer:
         mass from the nodes of the level to the primary nodes
 
         """
-
         lvl = self.parent_level
         loadcase = self.parent_loadcase
         # gather all nodes of the level

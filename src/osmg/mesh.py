@@ -13,15 +13,17 @@ Defines objects used in mesing operations.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import Optional
-from typing import Any
+
 from itertools import count
-from descartes.patch import PolygonPatch  # type: ignore
+from typing import Any, Optional
+
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
 import numpy.typing as npt
-import matplotlib.pyplot as plt  # type: ignore
+from descartes.patch import PolygonPatch  # type: ignore
 from matplotlib.patches import Polygon
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
+
 from . import common
 
 nparr = npt.NDArray[np.float64]
@@ -34,7 +36,8 @@ class Vertex:
     It knows all the halfedges leaving from it.
     Each instance has an automatically generated unique id.
 
-    Attributes:
+    Attributes
+    ----------
         coords: Coordinates of the vertex.
         edges: List of edges connected to the vertex.
         halfedges: List of halfedges leaving from the vertex.
@@ -56,7 +59,6 @@ class Vertex:
             coords: Coordinates of the vertex.
 
         """
-
         self.coords = coords
         self.edges: list[Edge] = []
         self.halfedges: list[Halfedge] = []
@@ -69,7 +71,8 @@ class Vertex:
         Arguments:
             other: Other vertex to compare with.
 
-        Returns:
+        Returns
+        -------
             bool: `True` if the two vertices are equal, `False`
                   otherwise.
 
@@ -86,18 +89,17 @@ class Vertex:
             True
 
         """
-
         return self.uid == other.uid
 
     def __repr__(self):
         """
         Returns a string representation of the vertex.
 
-        Returns:
+        Returns
+        -------
             String representation of the vertex.
 
         """
-
         return f'(V{self.uid} @ {self.coords}) '
 
 
@@ -118,7 +120,6 @@ class Edge:
         this edge is added to their list of edges.
 
         """
-
         self.v_i = v_i
         self.v_j = v_j
         self.uid = next(self._ids)
@@ -135,7 +136,6 @@ class Edge:
         `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
 
         """
-
         return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
 
     def define_halfedge(self, vertex: Vertex) -> Halfedge:
@@ -146,7 +146,6 @@ class Edge:
         We create it if it does not exist.
 
         """
-
         if vertex == self.v_i:
             if not self.h_i:
                 halfedge = Halfedge(self.v_i, self)
@@ -185,7 +184,6 @@ class Edge:
             ValueError: The edge is not connected to the given vertex
 
         """
-
         if self.v_i == vertex:
             v_other = self.v_j
         elif self.v_j == vertex:
@@ -235,7 +233,6 @@ class Edge:
             False
 
         """
-
         # location of this edge
         vec_ra: nparr = np.array(self.v_i.coords)
         # direction of this edge
@@ -356,7 +353,6 @@ class Halfedge:
             edge: The edge that the halfedge is a part of.
 
         """
-
         self.vertex = vertex
         self.edge = edge
         self.uid: int = next(self._ids)
@@ -368,7 +364,6 @@ class Halfedge:
         `(H0 from E0 to E0 next H1)`
 
         """
-
         if self.nxt:
             out = (
                 f'(H{self.uid} from E{self.edge.uid}'
@@ -383,7 +378,6 @@ class Halfedge:
         Comparison function used for sorting. Compares the halfedge ids.
 
         """
-
         return self.uid < other.uid
 
     def direction(self):
@@ -404,7 +398,6 @@ class Halfedge:
             True
 
         """
-
         drct: nparr = np.array(
             self.edge.other_vertex(self.vertex).coords
         ) - np.array(self.vertex.coords)
@@ -434,7 +427,6 @@ class Mesh:
         the mesh
 
         """
-
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         return geometric_properties(coords)
 
@@ -443,7 +435,6 @@ class Mesh:
         Returns a bounding box of the mesh
 
         """
-
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -469,7 +460,8 @@ def polygon_area(coords: nparr) -> float:
                 at the end, as this is done
                 automatically.
 
-    Returns:
+    Returns
+    -------
         area: The area of the polygon.
 
     Example:
@@ -478,7 +470,6 @@ def polygon_area(coords: nparr) -> float:
         1.0
 
     """
-
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     return float(
@@ -499,7 +490,8 @@ def polygon_centroid(coords: nparr) -> nparr:
                 at the end, as this is done
                 automatically.
 
-    Returns:
+    Returns
+    -------
         centroid: The centroid of the polygon.
 
     Example:
@@ -508,7 +500,6 @@ def polygon_centroid(coords: nparr) -> nparr:
         array([0.5, 0.5])
 
     """
-
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     area = polygon_area(coords)
@@ -539,7 +530,8 @@ def polygon_inertia(coords):
                 at the end, as this is done
                 automatically.
 
-    Returns:
+    Returns
+    -------
         dictionary, containing:
         'ixx': (float) - Moment of inertia around
                          the x axis
@@ -564,7 +556,6 @@ def polygon_inertia(coords):
         True
 
     """
-
     x_coords = coords[:, 0]
     y_coords = coords[:, 1]
     area = polygon_area(coords)
@@ -619,7 +610,6 @@ def geometric_properties(coords):
     Aggregates the results of the previous functions.
 
     """
-
     # repeat the first row at the end to close the shape
     coords = np.vstack((coords, coords[0, :]))
     area = polygon_area(coords)
@@ -642,7 +632,6 @@ def ang_reduce(ang):
     Brings and angle expressed in radians in the interval [0, 2pi)
 
     """
-
     while ang < 0:
         ang += 2.0 * np.pi
     while ang >= 2.0 * np.pi:
@@ -688,7 +677,8 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     Arguments:
         edges: List of Edge objects
 
-    Returns:
+    Returns
+    -------
         halfedges: List of Halfedge objects
 
     Example:
@@ -711,7 +701,6 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         ...     assert h.nxt.vertex == h.edge.other_vertex(h.vertex)
 
     """
-
     all_halfedges = []
     for edge in edges:
         v_i = edge.v_i
@@ -786,7 +775,8 @@ def obtain_closed_loops(halfedges):
     Arguments:
         halfedges: list of halfedges
 
-    Returns:
+    Returns
+    -------
         loops with the aforementioned property.
 
     """
@@ -820,13 +810,13 @@ def orient_loops(loops):
     Arguments:
         loops (list[list[Halfedge]]) (see `obtain_closed_loops`)
 
-    Returns:
+    Returns
+    -------
         external_loops (list[list[Halfedge]])
         internal_loops (list[list[Halfedge]])
         trivial_loops (list[list[Halfedge]])
 
     """
-
     internal_loops = []
     external_loops = []
     trivial_loops = []
@@ -859,11 +849,11 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
         n_y: Number of spatial partitions in the y direction
         plot: Plots the resulting polygons for debugging
 
-    Returns:
+    Returns
+    -------
         pieces: shapely_Polygon objects that represent single fibers.
 
     """
-
     outside_polygon = shapely_Polygon([h.vertex.coords for h in outside.halfedges])
     hole_polygons = []
     for hole in holes.values():
@@ -917,11 +907,11 @@ def subdivide_hss_rect(
       sec_b: Section width
       sec_t: Section thickness
 
-    Returns:
+    Returns
+    -------
         pieces: shapely_Polygon objects that represent single fibers.
 
     """
-
     outside_polygon = shapely_Polygon(
         np.array(
             (
@@ -997,11 +987,11 @@ def subdivide_hss_circ(
       sec_d: Section diameter
       sec_t: Section thickness
 
-    Returns:
+    Returns
+    -------
         pieces: shapely_Polygon objects that represent single fibers.
 
     """
-
     num_subdiv_t = 3
     num_subdiv_circ = 12
 
@@ -1047,7 +1037,6 @@ def print_halfedge_results(halfedges):
     next, for debugging.
 
     """
-
     results: dict[str, list[Any]] = {
         'halfedge': [],
         'vertex': [],
@@ -1069,7 +1058,6 @@ def plot_loop(halfedge_loop):
     Plots the vertices/edges of a list of halfedges.
 
     """
-
     num = len(halfedge_loop)
     coords = np.full((num + 1, 2), 0.00)
     for i, halfedge in enumerate(halfedge_loop):
@@ -1086,7 +1074,6 @@ def plot_edges(edges):
     Plots the given edges.
 
     """
-
     fig = plt.figure()
     for edge in edges:
         coords = np.full((2, 2), 0.00)
@@ -1101,7 +1088,6 @@ def sanity_checks(external, trivial):
     Perform some checks to make sure assumptions are not violated.
 
     """
-
     #   We expect no trivial loops
     if trivial:
         print('Warning: Found trivial loop')

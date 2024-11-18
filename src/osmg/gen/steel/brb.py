@@ -14,14 +14,14 @@ BRB element generator.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from dataclasses import dataclass, field
+
 import numpy as np
 import numpy.typing as npt
+
+from ...gen.component_gen import TrussBarGenerator
 from ...gen.mesh_shapes import rect_mesh
 from ...model import Model
-from ...gen.component_gen import TrussBarGenerator
-from ...ops.uniaxial_material import Steel4
-from ...ops.uniaxial_material import Fatigue
-
+from ...ops.uniaxial_material import Fatigue, Steel4
 
 # pylint: disable=invalid-name
 
@@ -102,7 +102,8 @@ class BRBGenerator:
         """
         Adds a BRB element to the model.
 
-        Parameters:
+        Parameters
+        ----------
           xi_coord: x coordinate of the i-end
           yi_coord: y coordinate of the i-end
           lvl_key_i: Level ID of the i-end
@@ -137,7 +138,6 @@ class BRBGenerator:
             called.
 
         """
-
         trg = TrussBarGenerator(self.model)
 
         uid = self.model.uid_generator.new('uniaxial material')

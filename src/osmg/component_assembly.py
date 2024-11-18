@@ -14,12 +14,14 @@ structure.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 import numpy as np
 import numpy.typing as npt
-from .ops import element
-from . import obj_collections
 
+from . import obj_collections
+from .ops import element
 
 nparr = npt.NDArray[np.float64]
 
@@ -31,7 +33,8 @@ class ComponentAssembly:
     various lower-level elements such as nodes and beamcolumn
     elements.
 
-    Attributes:
+    Attributes
+    ----------
       uid: Unique identifier of the component assembly
       parent_collection: The collection of
         elements to which the component assembly belongs.
@@ -85,7 +88,6 @@ class ComponentAssembly:
         The keys are the uids of the objects.
 
         """
-
         res = {}
         for elm in self.elements.values():
             res[elm.uid] = elm
@@ -96,7 +98,6 @@ class ComponentAssembly:
         Returns a list of all element objects in the model.
 
         """
-
         return list(self.dict_of_elements().values())
 
     def element_connectivity(self):
@@ -108,7 +109,6 @@ class ComponentAssembly:
         tuples as keys, and the associated components as values.
 
         """
-
         res = {}
         elms = self.list_of_elements()
         for elm in elms:

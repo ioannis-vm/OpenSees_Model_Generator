@@ -14,16 +14,15 @@ Collections are designated containers of objects of a particular type.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import Any
-from typing import List
-from typing import TypeVar
+
 from dataclasses import dataclass, field
+from typing import Any, List, TypeVar
+
 import numpy as np
 import numpy.typing as npt
-from . import common
-from .ops import node
-from .ops import element
 
+from . import common
+from .ops import element, node
 
 nparr = npt.NDArray[np.float64]
 
@@ -38,7 +37,8 @@ class Collection(dict[TK, TV]):
     """
     Collection of objects.
 
-    Attributes:
+    Attributes
+    ----------
         parent: Object to which the Collection belongs.
 
     Example:
@@ -166,7 +166,8 @@ class CollectionActive(Collection[TK, TV]):
     """
     Collection with support for currently active objects.
 
-    Attributes:
+    Attributes
+    ----------
       active: List of unique IDs that correspond to the active
         objects.
 
@@ -231,7 +232,8 @@ class NodeCollection(Collection[int, node.Node]):
     """
     Node collection.
 
-    Attributes:
+    Attributes
+    ----------
         parent: Object to which the Collection belongs.
 
     Example:
@@ -262,7 +264,6 @@ class NodeCollection(Collection[int, node.Node]):
         """
         Returns the node that occupies a given point if it exists
         """
-
         candidate_pt: nparr = np.array([x_coord, y_coord, self.parent.elevation])
         for other_node in self.values():
             other_pt: nparr = np.array(other_node.coords)
@@ -280,7 +281,8 @@ class CollectionWithConnectivity(Collection[TK, TV]):
     Collection of elements for which it is important to consider their
     connectivity.
 
-    Attributes:
+    Attributes
+    ----------
         parent: Object to which the Collection belongs.
 
     """

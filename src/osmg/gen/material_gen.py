@@ -14,17 +14,20 @@ Objects that generate materials.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from dataclasses import dataclass
+
 import numpy as np
 import numpy.typing as npt
-from ..ops.section import FiberSection
-from ..physical_material import PhysicalMaterial
+
 from ..model import Model
-from ..ops.uniaxial_material import Elastic
-from ..ops.uniaxial_material import Steel02
-from ..ops.uniaxial_material import Fatigue
-from ..ops.uniaxial_material import MaxStrainRange
-from ..ops.uniaxial_material import IMKBilin
-from ..ops.section import ElasticSection
+from ..ops.section import ElasticSection, FiberSection
+from ..ops.uniaxial_material import (
+    Elastic,
+    Fatigue,
+    IMKBilin,
+    MaxStrainRange,
+    Steel02,
+)
+from ..physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -52,7 +55,6 @@ class MaterialGenerator:
         103-120.
 
         """
-
         param_b = 0.001
         param_r0 = 15
         param_c_r1 = 0.925
@@ -109,7 +111,6 @@ class MaterialGenerator:
         Regions. Journal of Structural Engineering
 
         """
-
         param_b = 0.005
         param_r0 = 24.00
         param_c_r1 = 0.925
@@ -185,7 +186,6 @@ class MaterialGenerator:
         Dynamics, 43(13), 1935-1954.
 
         """
-
         # gather necessary data and check interpolation range
         assert section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(section, ElasticSection)
@@ -230,7 +230,7 @@ class MaterialGenerator:
             # checks ~ acceptable range
             if not 20.00 < sec_d / sec_tw < 55.00:
                 print(
-                    f'Warning: sec_d/sec_tw={sec_d/sec_tw:.2f}'
+                    f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
                     ' outside regression range'
                 )
                 print('20.00 < sec_d/sec_tw < 55.00')
@@ -241,13 +241,13 @@ class MaterialGenerator:
                 print(section.name, '\n')
             if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:
                 print(
-                    f'Warning: bf/(2 tf)={sec_bf/(2.*sec_tf):.2f}'
+                    f'Warning: bf/(2 tf)={sec_bf / (2. * sec_tf):.2f}'
                     ' outside regression range'
                 )
                 print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
                 print(section.name, '\n')
             if not 2.5 < elm_l / sec_d < 7.0:
-                print(f'Warning: L/d={elm_l/sec_d:.2f}  outside regression range')
+                print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')
                 print('2.5 < elm_l/sec_d < 7.0')
                 print(section.name, '\n')
             if not 4.00 < sec_d < 36.00:
@@ -288,93 +288,92 @@ class MaterialGenerator:
             mcmy_plus = 1.10
             mcmy_minus = 1.10
 
-        else:
-            # Other-than-RBS case
-            if axial_load_ratio:
-                # column case
-                theta_p = (
-                    294.00
-                    * (sec_d / sec_tw) ** (-1.70)
-                    * lbry ** (-0.70)
-                    * (1.00 - axial_load_ratio) ** (1.60)
-                )
-                theta_pc = (
-                    90.00
-                    * (sec_d / sec_tw) ** (-0.80)
-                    * lbry ** (-0.80)
-                    * (1.00 - axial_load_ratio) ** (2.50)
-                )
-                theta_p = min(theta_p, 0.20)
-                theta_pc = min(theta_pc, 0.30)
-                if axial_load_ratio <= 0.35:
-                    lamda = (
-                        25500.00
-                        * (sec_d / sec_tw) ** (-2.14)
-                        * lbry ** (-0.53)
-                        * (1.00 - axial_load_ratio) ** (4.29)
-                    )
-                else:
-                    lamda = (
-                        268000.00
-                        * (sec_d / sec_tw) ** (-2.30)
-                        * lbry ** (-1.30)
-                        * (1.00 - axial_load_ratio) ** (1.19)
-                    )
-                if axial_load_ratio <= 0.20:
-                    sec_m = (
-                        1.15
-                        / 1.10
-                        * (sec_z * mat_fy)
-                        * 1.0e3
-                        * (1.00 - axial_load_ratio / 2.00)
-                    )
-                else:
-                    sec_m = (
-                        1.15
-                        / 1.10
-                        * (sec_z * mat_fy)
-                        * 1.0e3
-                        * 9.0
-                        / 8.0
-                        * (1.00 - axial_load_ratio)
-                    )
-                mcmy = (
-                    12.5
-                    * (sec_d / sec_tw) ** (-0.20)
-                    * lbry ** (-0.40)
-                    * (1.00 - axial_load_ratio) ** (0.40)
-                )
-                mcmy = min(mcmy, 1.00)
-                mcmy = max(mcmy, 1.30)
-                mcmy_plus = mcmy
-                mcmy_minus = mcmy
-
-            else:
-                # non-RBS beam case
-                theta_p = (
-                    0.0865
-                    * (sec_d / sec_tw) ** (-0.365)
-                    * (sec_bf / (2.0 * sec_tf)) ** (-0.14)
-                    * (elm_l / sec_d) ** 0.34
-                    * (25.4 * sec_d / 533.0) ** (-0.721)
-                    * (6.895 * mat_fy / 355.0) ** (-0.23)
-                )
-                theta_pc = (
-                    5.63
-                    * (sec_d / sec_tw) ** (-0.565)
-                    * (sec_bf / (2.0 * sec_tf)) ** (-0.800)
-                    * (25.4 * sec_d / 533.0) ** (-0.28)
-                    * (6.895 * mat_fy / 355.0) ** (-0.43)
-                )
+        # Other-than-RBS case
+        elif axial_load_ratio:
+            # column case
+            theta_p = (
+                294.00
+                * (sec_d / sec_tw) ** (-1.70)
+                * lbry ** (-0.70)
+                * (1.00 - axial_load_ratio) ** (1.60)
+            )
+            theta_pc = (
+                90.00
+                * (sec_d / sec_tw) ** (-0.80)
+                * lbry ** (-0.80)
+                * (1.00 - axial_load_ratio) ** (2.50)
+            )
+            theta_p = min(theta_p, 0.20)
+            theta_pc = min(theta_pc, 0.30)
+            if axial_load_ratio <= 0.35:
                 lamda = (
-                    495.0
-                    * (sec_d / sec_tw) ** (-1.34)
-                    * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
-                    * (6.895 * mat_fy / 355.0) ** (-0.36)
+                    25500.00
+                    * (sec_d / sec_tw) ** (-2.14)
+                    * lbry ** (-0.53)
+                    * (1.00 - axial_load_ratio) ** (4.29)
                 )
-                sec_m = 1.17 * sec_z * mat_fy * 1.0e3
-                mcmy_plus = 1.10
-                mcmy_minus = 1.10
+            else:
+                lamda = (
+                    268000.00
+                    * (sec_d / sec_tw) ** (-2.30)
+                    * lbry ** (-1.30)
+                    * (1.00 - axial_load_ratio) ** (1.19)
+                )
+            if axial_load_ratio <= 0.20:
+                sec_m = (
+                    1.15
+                    / 1.10
+                    * (sec_z * mat_fy)
+                    * 1.0e3
+                    * (1.00 - axial_load_ratio / 2.00)
+                )
+            else:
+                sec_m = (
+                    1.15
+                    / 1.10
+                    * (sec_z * mat_fy)
+                    * 1.0e3
+                    * 9.0
+                    / 8.0
+                    * (1.00 - axial_load_ratio)
+                )
+            mcmy = (
+                12.5
+                * (sec_d / sec_tw) ** (-0.20)
+                * lbry ** (-0.40)
+                * (1.00 - axial_load_ratio) ** (0.40)
+            )
+            mcmy = min(mcmy, 1.00)
+            mcmy = max(mcmy, 1.30)
+            mcmy_plus = mcmy
+            mcmy_minus = mcmy
+
+        else:
+            # non-RBS beam case
+            theta_p = (
+                0.0865
+                * (sec_d / sec_tw) ** (-0.365)
+                * (sec_bf / (2.0 * sec_tf)) ** (-0.14)
+                * (elm_l / sec_d) ** 0.34
+                * (25.4 * sec_d / 533.0) ** (-0.721)
+                * (6.895 * mat_fy / 355.0) ** (-0.23)
+            )
+            theta_pc = (
+                5.63
+                * (sec_d / sec_tw) ** (-0.565)
+                * (sec_bf / (2.0 * sec_tf)) ** (-0.800)
+                * (25.4 * sec_d / 533.0) ** (-0.28)
+                * (6.895 * mat_fy / 355.0) ** (-0.43)
+            )
+            lamda = (
+                495.0
+                * (sec_d / sec_tw) ** (-1.34)
+                * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
+                * (6.895 * mat_fy / 355.0) ** (-0.36)
+            )
+            sec_m = 1.17 * sec_z * mat_fy * 1.0e3
+            mcmy_plus = 1.10
+            mcmy_minus = 1.10
 
         theta_u = 0.20
         residual_plus = 0.40

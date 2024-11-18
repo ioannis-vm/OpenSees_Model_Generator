@@ -14,6 +14,7 @@ Defines :obj:`~osmg.ops.node.Node` objects.
 
 from dataclasses import dataclass, field
 from functools import total_ordering
+
 from ..graphics.visibility import NodeVisibility
 
 
@@ -24,7 +25,8 @@ class Node:
     OpenSees node
     https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
 
-    Attributes:
+    Attributes
+    ----------
         uid: Unique ID of the node.
         coords: List of node coordinates.
         restraint: List of boolean values identifying whether the

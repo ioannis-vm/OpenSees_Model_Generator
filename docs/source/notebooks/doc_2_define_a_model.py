@@ -44,14 +44,13 @@ You can also use `pydoc <osmg.name_of_module>` in a terminal window.
 # %%
 # imports
 import numpy as np
-from osmg import model
-import osmg.defaults as defaults
-from osmg.gen.section_gen import SectionGenerator
-from osmg.ops.section import ElasticSection
-from osmg.gen.component_gen import BeamColumnGenerator
-from osmg.ops.element import ElasticBeamColumn
-from osmg.graphics.preprocessing_3d import show
 
+from osmg import defaults, model
+from osmg.gen.component_gen import BeamColumnGenerator
+from osmg.gen.section_gen import SectionGenerator
+from osmg.graphics.preprocessing_3d import show
+from osmg.ops.element import ElasticBeamColumn
+from osmg.ops.section import ElasticSection
 
 # %%
 # Instantiate a model
@@ -171,9 +170,7 @@ Loads, mass, and diaphragm constraints are load_case-specific.
 # %%
 # imports
 from osmg.load_case import LoadCase
-from osmg.preprocessing.self_weight_mass import self_weight
-from osmg.preprocessing.self_weight_mass import self_mass
-
+from osmg.preprocessing.self_weight_mass import self_mass, self_weight
 
 # %%
 testcase = LoadCase('test', mdl)

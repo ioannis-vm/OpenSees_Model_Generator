@@ -14,21 +14,20 @@ Defines utility functions used for data visualization.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 import sys
-from typing import Optional
-from typing import Union
-from typing import Any
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional, Union
+
 import numpy as np
 import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
+
 from .. import transformations
-from . import graphics_common
-from . import graphics_common_3d
-from .preprocessing_3d import add_data__global_axes
-from ..postprocessing.basic_forces import basic_forces
-from ..ops import element
 from ..model import Model
+from ..ops import element
+from ..postprocessing.basic_forces import basic_forces
+from . import graphics_common, graphics_common_3d
+from .preprocessing_3d import add_data__global_axes
 
 if TYPE_CHECKING:
     from ..solver import Analysis
@@ -67,13 +66,13 @@ def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
       u_j, r_j: similar to u_i, r_i.
       num_points: Number of interpolation points
 
-    Returns:
+    Returns
+    -------
       Displacements (global system) and rotations (local system). The
         rotations are needed for plotting the deformed shape with
         extruded frame elements.
 
     """
-
     x_vec: nparr = elm.geomtransf.x_axis
     y_vec: nparr = elm.geomtransf.y_axis
     z_vec: nparr = np.cross(x_vec, y_vec)
@@ -164,7 +163,6 @@ def interp_3d_points(elm, d_global, num_points, scaling):
     deformations.
 
     """
-
     if not isinstance(elm, element.TrussBar):
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
         p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
@@ -192,7 +190,6 @@ def add_data__extruded_line_elms_deformed_mesh(
     in its deformed state.
 
     """
-
     if not list_of_line_elems:
         return
     x_list: list[float] = []
@@ -209,9 +206,8 @@ def add_data__extruded_line_elms_deformed_mesh(
         if isinstance(elm, element.TrussBar):
             if elm.outside_shape is None:
                 continue
-        else:
-            if elm.section.outside_shape is None:
-                continue
+        elif elm.section.outside_shape is None:
+            continue
 
         num_points = 8
         # translations and rotations at the offset ends
@@ -372,7 +368,6 @@ def add_data__line_elms_deformed(
     in their deformed state.
 
     """
-
     if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
@@ -458,7 +453,6 @@ def add_data__line_elm_offsets_deformed(
     in their deformed state.
 
     """
-
     if not list_of_line_elems:
         return
     x_list: list[Optional[float]] = []
@@ -530,7 +524,6 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
     Adds a trace containing frame element centroidal axis lines
 
     """
-
     x_list: list[Optional[float]] = []
     y_list: list[Optional[float]] = []
     z_list: list[Optional[float]] = []
@@ -631,7 +624,6 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     the building's bounding box.
 
     """
-
     ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
@@ -703,7 +695,6 @@ def show_deformed_shape(
         an html file instead of being shown.
 
     """
-
     if subset_model:
         # if a subset model is specified, only show its components
         mdl = subset_model
@@ -953,7 +944,6 @@ def show_basic_forces(
         an html file instead of being shown.
 
     """
-
     if subset_model:
         mdl = subset_model
     else:
@@ -1467,7 +1457,6 @@ def show_basic_forces_combo(
         an html file instead of being shown.
 
     """
-
     # TODO: merge code repetitions with the previous function
 
     if subset_model:

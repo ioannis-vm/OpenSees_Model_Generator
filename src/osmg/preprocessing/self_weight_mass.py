@@ -14,6 +14,7 @@ using a given model.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import numpy as np
+
 from .. import common
 from ..ops import element
 
@@ -23,7 +24,6 @@ def self_weight(mdl, lcase, factor=1.00):
     Assigns the structure's self weight to its members.
 
     """
-
     for elm in mdl.list_of_elements():
         if isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn)):
             weight_per_length = elm.section.weight_per_length()
@@ -60,7 +60,6 @@ def self_mass(mdl, lcase):
     Assigns the structure's self mass to its members
 
     """
-
     if mdl.settings.imperial_units:
         g_const = common.G_CONST_IMPERIAL
     else:

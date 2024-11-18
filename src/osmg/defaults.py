@@ -14,16 +14,17 @@ Introduces some default objects to a model.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 import numpy as np
 import numpy.typing as npt
-from .physical_material import PhysicalMaterial
-from . import common
-from .ops.uniaxial_material import Elastic
-from .ops.uniaxial_material import Steel02
-from .ops.section import ElasticSection
-from .gen.section_gen import SectionGenerator
 
+from . import common
+from .gen.section_gen import SectionGenerator
+from .ops.section import ElasticSection
+from .ops.uniaxial_material import Elastic, Steel02
+from .physical_material import PhysicalMaterial
 
 if TYPE_CHECKING:
     from .model import Model
@@ -37,7 +38,6 @@ def load_util_rigid_elastic(model: Model) -> None:
     to the model.
 
     """
-
     new_uid = model.uid_generator.new('section')
     sec = ElasticSection(
         name='rigid_link_section',
@@ -61,7 +61,6 @@ def load_default_elastic(model: Model, sec_name: str) -> None:
     sections to the model.
 
     """
-
     # intantiate a section generator object for the model
     sgen = SectionGenerator(model)
     # generate a default elastic section and add it to the model
@@ -79,7 +78,6 @@ def load_default_steel(model: Model) -> None:
     user-side and added to the model instead of calling this method.
 
     """
-
     if model.settings.imperial_units:
         # force: lb, length: in
         uniaxial_mat = Steel02(
@@ -136,7 +134,6 @@ def load_default_fix_release(model: Model) -> None:
     used to simulate moment releases using zerolength elements.
 
     """
-
     uniaxial_mat = Elastic(
         uid=model.uid_generator.new('uniaxial material'),
         name='fix_rot',

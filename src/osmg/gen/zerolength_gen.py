@@ -16,15 +16,19 @@ Objects that generate ZeroLength elements.
 # pylint: disable=unused-argument
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Optional
+
+from typing import TYPE_CHECKING, Optional
+
 import numpy as np
+
 from ..ops.section import ElasticSection
-from ..ops.uniaxial_material import UniaxialMaterial
-from ..ops.uniaxial_material import Elastic
-from ..ops.uniaxial_material import Steel02
-from ..ops.uniaxial_material import Pinching4
-from ..ops.uniaxial_material import Hysteretic
+from ..ops.uniaxial_material import (
+    Elastic,
+    Hysteretic,
+    Pinching4,
+    Steel02,
+    UniaxialMaterial,
+)
 from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:
@@ -39,7 +43,6 @@ def fix_all(
     Fixed in all directions.
 
     """
-
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -55,7 +58,6 @@ def release_6(
     Frees strong axis bending.
 
     """
-
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -71,7 +73,6 @@ def release_5(
     Frees weak axis bending.
 
     """
-
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -87,7 +88,6 @@ def release_56(
     Frees both strong and weak axis bending.
 
     """
-
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -121,7 +121,6 @@ def imk_6(
     Dynamics, 43(13), 1935-1954.
 
     """
-
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
     only_elastic = kwargs.get('only_elastic', False)
@@ -167,7 +166,6 @@ def imk_56(
     direction
 
     """
-
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
     only_elastic = kwargs.get('only_elastic', False)
@@ -226,7 +224,6 @@ def imk_6_release_5(
     direction
 
     """
-
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
     only_elastic = kwargs.get('only_elastic', False)
@@ -268,7 +265,6 @@ def gravity_shear_tab(
     Structural Dynamics, 44(8), 1289-1307.
 
     """
-
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
     assert model.settings.imperial_units, 'Error: Only imperial units supported.'
@@ -414,7 +410,6 @@ def steel_w_col_pz(
     structures. Rep. No. 132.
 
     """
-
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
     assert model.settings.imperial_units, 'Error: Only imperial units supported.'
@@ -487,7 +482,6 @@ def steel_w_col_pz_updated(
     10.1061/(ASCE)ST.1943-541X.0002935.
 
     """
-
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
     assert model.settings.imperial_units, 'Error: Only imperial units supported.'
@@ -707,7 +701,6 @@ def steel_brace_gusset(
       l_b: gusset plate average buckling length
 
     """
-
     var_w = d_brace + 2.00 * l_c * np.tan(30.00 / 180.00 * np.pi)
     var_i = var_w * t_p**3 / 12.00
     var_z = var_w * t_p**2 / 6.00

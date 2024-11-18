@@ -14,9 +14,7 @@ Common definitions
 
 import re
 from pprint import pprint
-from typing import OrderedDict
-from typing import Optional
-from typing import Any
+from typing import Any, Optional, OrderedDict
 
 # very big, very small numbers used for
 # comparing floats and hashing
@@ -86,7 +84,8 @@ def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:
         key: The key of the element whose previous element we want to
         find.
 
-    Returns:
+    Returns
+    -------
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
 

@@ -16,40 +16,38 @@ Objects that generate component assemblies for a model.
 # pylint: disable=dangerous-default-value
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Type
-from typing import Union
-from typing import Optional
-from typing import Callable
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Callable, Optional, Type, Union
+
 import numpy as np
 import numpy.typing as npt
-from .query import ElmQuery
-from .node_gen import NodeGenerator
+
+from .. import common
+from ..component_assembly import ComponentAssembly
+from ..gen import zerolength_gen
+from ..mesh import Mesh
+from ..ops.element import (
+    DispBeamColumn,
+    ElasticBeamColumn,
+    GeomTransf,
+    Lobatto,
+    TrussBar,
+    TwoNodeLink,
+    ZeroLength,
+)
+from ..ops.node import Node
+from ..ops.section import ElasticSection, FiberSection
 from ..ops.uniaxial_material import UniaxialMaterial
 from ..physical_material import PhysicalMaterial
-from ..mesh import Mesh
-from ..ops.node import Node
-from ..component_assembly import ComponentAssembly
-from ..ops.element import TrussBar
-from ..ops.element import ElasticBeamColumn
-from ..ops.element import DispBeamColumn
-from ..ops.element import ZeroLength
-from ..ops.element import TwoNodeLink
-from ..ops.element import GeomTransf
-from ..ops.element import Lobatto
-from ..ops.section import ElasticSection
-from ..ops.section import FiberSection
 from ..preprocessing.split_component import split_component
-from ..transformations import local_axes_from_points_and_angle
-from ..transformations import transformation_matrix
-from ..gen import zerolength_gen
-from .. import common
-
+from ..transformations import local_axes_from_points_and_angle, transformation_matrix
+from .node_gen import NodeGenerator
+from .query import ElmQuery
 
 if TYPE_CHECKING:
-    from ..model import Model
     from ..level import Level
+    from ..model import Model
 
 
 nparr = npt.NDArray[np.float64]
@@ -74,11 +72,11 @@ def retrieve_snap_pt_global_offset(
       p_i: Internal point at the i-end.
       p_j: Internal point at the j-end.
 
-    Returns:
+    Returns
+    -------
       The offset.
 
     """
-
     if section.snap_points and (placement != 'centroid'):
         # obtain offset from section (local system)
         d_z, d_y = section.snap_points[placement]
@@ -111,7 +109,6 @@ def beam_placement_lookup(
     respect to the other existing objects in the model.
 
     """
-
     lvl = lvls[key]
     node = query.search_node_lvl(x_coord, y_coord, lvl.uid)
     pinit = np.array((x_coord, y_coord, lvl.elevation)) + user_offset
@@ -204,7 +201,6 @@ def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
     at the specified node.
 
     """
-
     components = query.retrieve_components_from_nodes([node], lvl.uid)
     result_node = node
     for component in components.values():
@@ -251,7 +247,6 @@ class TrussBarGenerator:
         addition of RigidLink elements.
 
         """
-
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -323,7 +318,6 @@ class TrussBarGenerator:
             of clarity, the index x will be used here, assuming that
             it will be substituted with i and j.
             """
-
             # if there is an offset at the x-end, create an internal node
             # and add a rigidlink element to the component assembly
             if np.linalg.norm(eo_x) > common.EPSILON:
@@ -427,7 +421,6 @@ class BeamColumnGenerator:
         specified nodes.
 
         """
-
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
         axes = local_axes_from_points_and_angle(p_i, p_j, angle)  # type: ignore
@@ -494,7 +487,6 @@ class BeamColumnGenerator:
         Defines a zerolength element.
 
         """
-
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         elm = ZeroLength(
             assembly,
@@ -521,7 +513,6 @@ class BeamColumnGenerator:
         Defines a TwoNodeLink element.
 
         """
-
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         elm = TwoNodeLink(
             assembly,
@@ -555,7 +546,6 @@ class BeamColumnGenerator:
         Adds beamcolumn elemens in series.
 
         """
-
         if (n_x is not None) or (n_y is not None):
             assert n_sub == 1
 
@@ -648,7 +638,6 @@ class BeamColumnGenerator:
         series.
 
         """
-
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
 
@@ -717,7 +706,6 @@ class BeamColumnGenerator:
         beamcolumn elements (in order to be able to specify rigid offsets).
 
         """
-
         uids = [node.uid for node in (node_i, node_j)]
         uids.sort()
         uids_tuple = (*uids,)
@@ -924,7 +912,6 @@ class BeamColumnGenerator:
         integer keys.
 
         """
-
         ndg = NodeGenerator(self.model)
         query = ElmQuery(self.model)
         lvls = self.model.levels
@@ -1007,7 +994,6 @@ class BeamColumnGenerator:
         Adds a diagonal beamcolumn element to all active levels.
 
         """
-
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -1117,7 +1103,6 @@ class BeamColumnGenerator:
         Adds a diagonal beamcolumn element to all active levels.
 
         """
-
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -1211,7 +1196,6 @@ class BeamColumnGenerator:
         panel zone joint.
 
         """
-
         ndg = NodeGenerator(self.model)
         query = ElmQuery(self.model)
         lvls = self.model.levels

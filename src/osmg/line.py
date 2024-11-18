@@ -14,8 +14,10 @@ Defines :obj:`~osmg.line.Line` objects.
 
 from dataclasses import dataclass, field
 from typing import Optional
+
 import numpy as np
 import numpy.typing as npt
+
 from osmg import common
 
 # pylint: disable=no-else-return
@@ -29,7 +31,8 @@ class Line:
     Finite-length line segment object.
     Used internally whenever operations involving lines are reuired.
 
-    Attributes:
+    Attributes
+    ----------
       tag: line tag.
       start: starting point.
       end: end point.
@@ -58,7 +61,6 @@ class Line:
             True
 
         """
-
         return np.linalg.norm(self.end - self.start)
 
     def direction(self):
@@ -73,7 +75,6 @@ class Line:
             array([0.70710678, 0.70710678])
 
         """
-
         return (self.end - self.start) / self.length()
 
     def intersect(self, other: 'Line') -> nparr:
@@ -82,7 +83,8 @@ class Line:
         line. Returns None if the lines don't intersect.  Note: 'line'
         is actually a finite-length line segment.
 
-        Parameters:
+        Parameters
+        ----------
           other: the other line
 
         Example:
@@ -93,7 +95,6 @@ class Line:
             array([1., 1.])
 
         """
-
         ra_dir = self.direction()
         rb_dir = other.direction()
         mat: nparr = np.array([[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]])
@@ -103,13 +104,9 @@ class Line:
             # a common starting or ending point
             # (we ignore the case of a common segment,
             #  as it has no practical use for our purposes).
-            if np.linalg.norm(self.start - other.start) <= common.EPSILON:
+            if np.linalg.norm(self.start - other.start) <= common.EPSILON or np.linalg.norm(self.start - other.end) <= common.EPSILON:
                 result = self.start
-            elif np.linalg.norm(self.start - other.end) <= common.EPSILON:
-                result = self.start
-            elif np.linalg.norm(self.end - other.start) <= common.EPSILON:
-                result = self.end
-            elif np.linalg.norm(self.end - other.end) <= common.EPSILON:
+            elif np.linalg.norm(self.end - other.start) <= common.EPSILON or np.linalg.norm(self.end - other.end) <= common.EPSILON:
                 result = self.end
             else:
                 result = None
@@ -145,7 +142,8 @@ class Line:
         """
         Check whether the given point pt lies on the line.
 
-        Parameters:
+        Parameters
+        ----------
             point: a point
 
         Returns: True if the point lies on the line, False otherwise
@@ -163,7 +161,6 @@ class Line:
             False
 
         """
-
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
         if np.abs(norm2) < 1.0e-4:
@@ -183,7 +180,8 @@ class Line:
         point.  If the point falls on the line but is outside of the
         line segment, returns None.
 
-        Parameters:
+        Parameters
+        ----------
             point: the point
 
         Returns: the minimum distance
@@ -205,7 +203,6 @@ class Line:
             >>> line.point_distance(point)
 
         """
-
         r_a = self.end - self.start
         r_b = point - self.start
         proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a
@@ -235,11 +232,9 @@ class Line:
             >>> line.project(np.array([15, 5]))
 
         """
-
         r_a = self.end - self.start
         r_b = point - self.start
         proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
         if self.intersects_pt(proj_point):
             return proj_point
-        else:
-            return None
+        return None

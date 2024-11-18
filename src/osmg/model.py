@@ -16,24 +16,24 @@ Defines Model objects.
 # pylint: disable=W1512
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Type
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Type
+
 import numpy as np
 import numpy.typing as npt
-from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 from shapely.geometry import Point  # type: ignore
+from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
-from .gen.uid_gen import UIDGenerator
 from . import obj_collections
+from .gen.uid_gen import UIDGenerator
 from .level import Level
 
 if TYPE_CHECKING:
-    from .ops.node import Node
-    from .ops import element
     from .component_assembly import ComponentAssembly
-    from .ops.section import ElasticSection
-    from .ops.section import FiberSection
+    from .ops import element
+    from .ops.node import Node
+    from .ops.section import ElasticSection, FiberSection
     from .ops.uniaxial_material import UniaxialMaterial
     from .physical_material import PhysicalMaterial
 
@@ -47,7 +47,6 @@ def transfer_component(other: Model, component: ComponentAssembly) -> None:
     :func:`~Model.initialize_empty_copy` method.
 
     """
-
     # note: we don't copy the component assemblies and their contents.
     # we just add the same objects to the other model.
     level = component.parent_collection.parent
@@ -97,7 +96,8 @@ class Model:
     nodes, elements, and component assemblies that exist inside each level.
     Those objects are populated by generator objects. See `osmg.gen`.
 
-    Attributes:
+    Attributes
+    ----------
         name: Name of the model.
         levels:
             Collection of levels in the model.
@@ -161,7 +161,6 @@ class Model:
         the associated components as values.
 
         """
-
         res = {}
         components = self.list_of_components()
         for component in components:
@@ -188,7 +187,6 @@ class Model:
             '[Collection of 1 items]'
 
         """
-
         lvl = Level(self, uid=uid, elevation=elevation)
         self.levels.add(lvl)
 
@@ -207,7 +205,6 @@ class Model:
         Returns a list of all the primary nodes in the model.
 
         """
-
         list_of_nodes = []
         for lvl in self.levels.values():
             for node in lvl.nodes.values():
@@ -220,7 +217,6 @@ class Model:
         The keys are the uids of the nodes.
 
         """
-
         dict_of_nodes: dict[int, Node] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -232,7 +228,6 @@ class Model:
         Returns a list of all the internal nodes in the model.
 
         """
-
         list_of_nodes = []
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -246,7 +241,6 @@ class Model:
         The keys are the uids of the nodes.
 
         """
-
         dict_of_nodes: dict[int, Node] = {}
         dict_of_nodes.update(self.dict_of_primary_nodes())
         dict_of_nodes.update(self.dict_of_internal_nodes())
@@ -257,7 +251,6 @@ class Model:
         Returns a list of all the nodes in the model.
 
         """
-
         list_of_nodes = []
         list_of_nodes.extend(self.list_of_primary_nodes())
         list_of_nodes.extend(self.list_of_internal_nodes())
@@ -270,7 +263,6 @@ class Model:
         The keys are the uids of the component assemblies.
 
         """
-
         comps: dict[int, ComponentAssembly] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -283,7 +275,6 @@ class Model:
         model.
 
         """
-
         return list(self.dict_of_components().values())
 
     def dict_of_elements(self) -> dict[int, element.Element]:
@@ -292,7 +283,6 @@ class Model:
         The keys are the uids of the objects.
 
         """
-
         elems: dict[int, element.Element] = {}
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -304,7 +294,6 @@ class Model:
         Returns a list of all element objects in the model.
 
         """
-
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
@@ -316,7 +305,6 @@ class Model:
         The keys are the uids of the objects.
 
         """
-
         all_elements = self.dict_of_elements()
         res: dict[int, element.Element] = {}
         for uid, elm in all_elements.items():
@@ -332,7 +320,6 @@ class Model:
         particular element class.
 
         """
-
         return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
@@ -340,7 +327,6 @@ class Model:
         Returns the axis-aligned bouding box of the building
 
         """
-
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():
@@ -359,7 +345,6 @@ class Model:
         (used in graphics)
 
         """
-
         p_min, p_max = self.bounding_box(padding=0.00)
         ref_len = np.max(p_max - p_min)
         return ref_len
@@ -370,7 +355,6 @@ class Model:
         Used to create subset models.
 
         """
-
         res = Model(name)
         # copy the settings attributes
         res.settings.imperial_units = self.settings.imperial_units
@@ -393,7 +377,6 @@ class Model:
         polygon.
 
         """
-
         all_components = self.list_of_components()
         selected_components = []
         shape = shapely_Polygon(coords)

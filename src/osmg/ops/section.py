@@ -13,17 +13,16 @@ Defines :obj:`~osmg.ops.section.Section` objects.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Optional
-from typing import Any
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Optional
+
 import numpy as np
 import numpy.typing as npt
-from ..mesh import Mesh
-from ..mesh import polygon_area
-from .. import common
+
+from .. import common, mesh
+from ..mesh import Mesh, polygon_area
 from .uniaxial_material import UniaxialMaterial
-from .. import mesh
 
 if TYPE_CHECKING:
     from ..physical_material import PhysicalMaterial
@@ -62,7 +61,8 @@ class ElasticSection(Section):
     """
     Elastic Section Object.
 
-    Attributes:
+    Attributes
+    ----------
       e_mod: Young's modulus.
       area: Cross-sectional area.
       i_y: Moment of inertia for strong-axis bending.
@@ -97,7 +97,6 @@ class ElasticSection(Section):
         connections.
 
         """
-
         if self.name[0] == 'W':
             res = self.sec_w * 1.15  # misc steel and connections
         else:
@@ -169,7 +168,6 @@ class SectionComponent:
         Returns data used to define fibers in OpenSees.
 
         """
-
         # if we have an AISC HSS section, we need to discretize in a
         # certain way
         assert self.parent_section
@@ -205,7 +203,6 @@ class SectionComponent:
         material with the given one.
 
         """
-
         new_component = SectionComponent(
             self.outside_shape, self.holes, mat, self.physical_material
         )
@@ -251,7 +248,6 @@ class FiberSection(Section):
         OpenSees
 
         """
-
         return [
             'Fiber',
             self.uid,
@@ -265,7 +261,6 @@ class FiberSection(Section):
         For steel W sections, it adds 15% for misc. steel and connections.
 
         """
-
         if self.name[0] == 'W':
             mult = 1.15  # misc steel and connections
         else:
@@ -295,7 +290,6 @@ class FiberSection(Section):
         material. Required for the modling of steel braced frames.
 
         """
-
         new_section_parts = {}
         for key, val in self.section_parts.items():
             new_part = val.copy_alter_material(mat)

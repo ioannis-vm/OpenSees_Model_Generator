@@ -3,6 +3,7 @@ Determine the latest version of the osmg package on PyPI
 """
 
 import argparse
+
 import requests
 
 

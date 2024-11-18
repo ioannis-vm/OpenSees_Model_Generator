@@ -13,10 +13,8 @@ Defines OpenSees uniaxialMaterial interfrace objects.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from dataclasses import dataclass, field
 from typing import Optional
-from dataclasses import dataclass
-from dataclasses import field
-
 
 # pylint: disable=invalid-name
 
@@ -78,7 +76,6 @@ class Steel02(UniaxialMaterial):
         OpenSees
 
         """
-
         args = [
             'Steel02',
             self.uid,
@@ -147,7 +144,6 @@ class Steel4(UniaxialMaterial):
         OpenSees
 
         """
-
         # non-symmetric behavior
         if self.b_kc:
             assert self.R_0c is not None
@@ -262,7 +258,6 @@ class Bilin(UniaxialMaterial):
         OpenSees
 
         """
-
         return [
             'Bilin',
             self.uid,
@@ -329,7 +324,6 @@ class IMKBilin(UniaxialMaterial):
         OpenSees
 
         """
-
         return [
             'IMKBilin',
             self.uid,
@@ -411,7 +405,6 @@ class Pinching4(UniaxialMaterial):
         OpenSees
 
         """
-
         return [
             'Pinching4',
             self.uid,
@@ -483,7 +476,6 @@ class Hysteretic(UniaxialMaterial):
         OpenSees
 
         """
-
         return [
             'Hysteretic',
             self.uid,
@@ -521,7 +513,6 @@ class Fatigue(UniaxialMaterial):
         OpenSees
 
         """
-
         return [
             'Fatigue',
             self.uid,
@@ -560,7 +551,6 @@ class MaxStrainRange(UniaxialMaterial):
         OpenSees
 
         """
-
         args = [
             'MaxStrainRange',
             self.uid,
@@ -601,7 +591,6 @@ class MinMax(UniaxialMaterial):
         OpenSees
 
         """
-
         args = [
             'MinMax',
             self.uid,

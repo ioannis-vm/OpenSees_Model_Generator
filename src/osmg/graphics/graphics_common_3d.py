@@ -12,8 +12,8 @@ https://plotly.com/python/reference/
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-import plotly.graph_objects as go  # type: ignore
 import numpy as np
+import plotly.graph_objects as go  # type: ignore
 
 # pio.renderers.default = 'browser'
 
@@ -41,7 +41,6 @@ def global_layout(mdl, camera=None):
     Some general definitions that are often needed.
 
     """
-
     # get a proper boudning box form the model
     ref_len = mdl.reference_length()
     p_min, p_max = mdl.bounding_box(padding=2.0 * ref_len)

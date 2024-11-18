@@ -17,21 +17,22 @@ them, based on certain criteria.
 # pylint: disable=inconsistent-return-statements
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Union
-from typing import Optional
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Optional, Union
+
 import numpy as np
 import numpy.typing as npt
+
+from .. import common
 from ..line import Line
 from ..load_case import LoadCase
-from .. import common
 from ..ops import element
 
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
-    from ..ops.node import Node
     from ..model import Model
+    from ..ops.node import Node
 
 
 nparr = npt.NDArray[np.float64]
@@ -43,7 +44,8 @@ class ElmQuery:
     Used to retrieve nodes and component
     assemblies.
 
-    Attributes:
+    Attributes
+    ----------
       model: Model to be searched.
 
     """
@@ -182,7 +184,8 @@ class ElmQuery:
           y_loc: y-coordinate
           lvl: Key of the level to be searched.
 
-        Returns:
+        Returns
+        -------
           The first element found, None otherwise.
 
         """
@@ -232,7 +235,8 @@ class LoadCaseQuery:
     Load case query objects retrieve information associated with load
     cases.
 
-    Attributes:
+    Attributes
+    ----------
       model: Model object to be searched.
       loadcase: LoadCase object to be searched.
 

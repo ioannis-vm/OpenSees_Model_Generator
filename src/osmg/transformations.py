@@ -15,6 +15,7 @@ Coordinate transformation operations.
 
 import numpy as np
 import numpy.typing as npt
+
 from . import common
 
 nparr = npt.NDArray[np.float64]
@@ -24,10 +25,12 @@ def rotation_matrix_2d(ang: float) -> nparr:
     """
     Returns a 2D transformation matrix.
 
-    Parameters:
+    Parameters
+    ----------
         ang: Angle in radians to rotate the matrix by.
 
-    Returns:
+    Returns
+    -------
         A 2x2 transformation matrix.
 
     Example:
@@ -35,11 +38,11 @@ def rotation_matrix_2d(ang: float) -> nparr:
         array([[ 6.123234e-17, -1.000000e+00],
                [ 1.000000e+00,  6.123234e-17]])
 
-    Raises:
+    Raises
+    ------
         TypeError: If `ang` is not a float.
 
     """
-
     if not isinstance(ang, float):
         raise TypeError('ang parameter should be a float.')
     return np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
@@ -50,11 +53,13 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
     Returns the rotation matrix associated with counterclockwise
     rotation about the given axis by theta radians.
 
-    Parameters:
+    Parameters
+    ----------
         axis: 3D vector representing the axis of rotation.
         theta: Angle of rotation in radians.
 
-    Returns:
+    Returns
+    -------
         3x3 transformation matrix representing the rotation.
 
     Example:
@@ -68,7 +73,6 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
         >>> assert np.allclose(res, expected_res)
 
     """
-
     v_a = np.cos(theta / 2.0)
     v_b, v_c, v_d = -axis * np.sin(theta / 2.0)
     v_aa, v_bb, v_cc, v_dd = v_a * v_a, v_b * v_b, v_c * v_c, v_d * v_d
@@ -100,7 +104,8 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
         vec_y: (similar)
         vec_z: (similar)
 
-    Returns:
+    Returns
+    -------
         global to local transformation matrix.
 
     Note: For orthogonal axes, transpose to obtain the inverse transform.
@@ -127,7 +132,6 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
         >>> assert np.allclose(res, expected_result)
 
     """
-
     tr_global_to_local: nparr = np.vstack((vec_x, vec_y, vec_z))
     return tr_global_to_local
 
@@ -148,13 +152,15 @@ def local_axes_from_points_and_angle(
           z axis coincides with the local x axis, and horizontal
           elements whose local z axis is horizontal.
 
-    Returns:
+    Returns
+    -------
         Local coordinate system
         vectors. The first element is the local x axis, the second
         element is the local y axis, and the third element is the
         local z axis.
 
-    Raises:
+    Raises
+    ------
         ValueError: If the start point and end point define a vertical element
             that is defined upside down (i.e., with the start point at a lower
             height than the end point).
@@ -174,7 +180,6 @@ def local_axes_from_points_and_angle(
         (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))
 
     """
-
     # x-axis
     x_axis = point_j - point_i
     x_axis = x_axis / np.linalg.norm(x_axis)
@@ -225,7 +230,8 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
           as a vector of the form [rx, ry, rz] representing the
           rotation around the x, y, and z axes, respectively.
 
-    Returns:
+    Returns
+    -------
         Displacement at the other end of the rigid offset,
         given in the global coordinate system.
 
@@ -240,7 +246,6 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
         array([ 0.01  , -0.0199,  0.0053])
 
     """
-
     t_rigid: nparr = np.array(
         [
             [0.00, +offset[2], -offset[1]],

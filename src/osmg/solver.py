@@ -21,33 +21,32 @@ Defines Analysis objects.
 # mypy: disable-error-code="attr-defined"
 
 from __future__ import annotations
-from typing import Optional
-from typing import Any
-from typing import Union
-from dataclasses import dataclass, field
+
+import logging
+import os
+import pickle
 import platform
 import socket
 import sys
+from dataclasses import dataclass, field
 from time import perf_counter
-import os
-import pickle
-import logging
-from tqdm import tqdm
+from typing import Any, Optional, Union
+
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 from scipy import integrate
 from scipy.interpolate import interp1d
-import pandas as pd
-import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+from . import common, transformations
+from .gen.query import LoadCaseQuery
+from .graphics import general_2d
 from .load_case import LoadCase
 from .model import Model
-from .ops import element
-from . import common
-from .graphics import general_2d
-from . import transformations
 from .obj_collections import Collection
-from .gen.query import LoadCaseQuery
-from .ops import uniaxial_material
+from .ops import element, uniaxial_material
 
 try:
     import opensees.openseespy as ops
@@ -66,7 +65,8 @@ class Results:
     """
     Stores analysis results.
 
-    Attributes:
+    Attributes
+    ----------
       node_displacements: Displacements, stored in a dictionary. The
         keys correspond to the node UIDs. Each value is a dictionary,
         of which the keys are the analysis step. Each value of that is
@@ -118,7 +118,8 @@ class AnalysisSettings:
     """
     Analysis settings object.
 
-    Attributes:
+    Attributes
+    ----------
       log_file: If specified, the log messages are written to this
         file.
       silent: If True, no messages are printed to the console.
@@ -168,7 +169,6 @@ class Warnings:
           message: Warning message.
 
         """
-
         if message not in self.issued_warnings:
             self.parent_analysis.log(f'WARNING: {message}')
             self.issued_warnings.append(message)
@@ -179,7 +179,8 @@ class Analysis:
     """
     Parent analysis class.
 
-    Attributes:
+    Attributes
+    ----------
       mdl: a given model
       load_cases: Dictionary containing load case names and
         load case objects in which those load cases reside.
@@ -211,7 +212,6 @@ class Analysis:
         Adds a message to the log file.
 
         """
-
         if self.logger:
             # logger might not have been initialized yet
             self.logger.info(msg)
@@ -221,7 +221,6 @@ class Analysis:
         Prints a message to stdout.
 
         """
-
         if not self.settings.silent:
             print(thing, end=end)
         if self.logger:
@@ -296,7 +295,6 @@ class Analysis:
         Pickles the results.
 
         """
-
         with open(f'{self.output_directory}/main_results.pcl', 'wb') as file:
             pickle.dump(self.results, file)
 
@@ -305,7 +303,6 @@ class Analysis:
         Reads back results from a pickle file.
 
         """
-
         with open(f'{self.output_directory}/main_results.pcl', 'rb') as file:
             self.results = pickle.load(file)
 
@@ -314,7 +311,6 @@ class Analysis:
         Defines the model in OpenSeesPy.
 
         """
-
         # initialize
         ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
@@ -401,7 +397,6 @@ class Analysis:
             predecessors.
 
             """
-
             # if the actual material has not been defined yet,
             if mat.uid not in defined_materials:
                 while (
@@ -700,7 +695,6 @@ class Analysis:
         Calculates and returns the global reaction forces.
 
         """
-
         reactions = np.full(6, 0.00)
         # for lvl in self.mdl.levels.values():
         lvl = list(self.mdl.levels.values())[0]  # temporary fix
@@ -757,7 +751,6 @@ class StaticAnalysis(Analysis):
         Runs the static analysis.
 
         """
-
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -1006,7 +999,6 @@ class ModalAnalysis(Analysis):
         Runs the modal analysis.
 
         """
-
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -1073,7 +1065,6 @@ class ModalAnalysis(Analysis):
         Calculates modal participation factors
 
         """
-
         dof_dir = {'x': 0, 'y': 1, 'z': 2}
         ntgs = list(self.mdl.dict_of_all_nodes().keys())
         # if there is a rigid diaphragm, we also need to include the parent nodes
@@ -1139,7 +1130,6 @@ class GravityPlusAnalysis(Analysis):
         Returns the displacement of a node for all analysis steps
 
         """
-
         if case_name not in self.results:
             raise ValueError(f'case_name {case_name} not found in results.')
         res = np.zeros((self.results[case_name].n_steps_success, 6))
@@ -1155,7 +1145,6 @@ class GravityPlusAnalysis(Analysis):
         Returns the acceleration of a node for all analysis steps
 
         """
-
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
@@ -1169,7 +1158,6 @@ class GravityPlusAnalysis(Analysis):
         Returns the velocity of a node for all analysis steps
 
         """
-
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
@@ -1184,7 +1172,6 @@ class GravityPlusAnalysis(Analysis):
         steps
 
         """
-
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, THAnalysis)
@@ -1220,7 +1207,6 @@ class GravityPlusAnalysis(Analysis):
         Returns the absolute velocity of a node for all analysis steps
 
         """
-
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, THAnalysis)
@@ -1272,7 +1258,6 @@ class GravityPlusAnalysis(Analysis):
         analysis steps
 
         """
-
         num = len(self.results[case_name].release_force_defo[uid])
         res = np.zeros((num, 6))
         for i in range(num):
@@ -1377,7 +1362,6 @@ class PushoverAnalysis(GravityPlusAnalysis):
             incremental loads are distributed to all nodes.
 
         """
-
         self.log(f'Direction: {direction}')
         if direction == 'x':
             control_dof = 0
@@ -1497,7 +1481,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                 int(control_node.uid), control_dof + 1
                             )
                             self.print(
-                                f'Loop ({i_loop+1}/'
+                                f'Loop ({i_loop + 1}/'
                                 f'{len(target_displacements)}) | '
                                 'Target displacement: '
                                 f'(Unloading)'
@@ -1582,7 +1566,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                     int(control_node.uid), control_dof + 1
                                 )
                                 self.print(
-                                    f'Loop ({i_loop+1}/'
+                                    f'Loop ({i_loop + 1}/'
                                     f'{len(target_displacements)}) | '
                                     'Target displacement: '
                                     f'{target_displacement:.2f}'
@@ -1615,7 +1599,6 @@ class PushoverAnalysis(GravityPlusAnalysis):
         Returns the force deformation results
 
         """
-
         if direction == 'x':
             control_dof = 0
         elif direction == 'y':
@@ -1644,7 +1627,6 @@ class PushoverAnalysis(GravityPlusAnalysis):
         Plots the pushover curve
 
         """
-
         # TODO: units
         displacement, base_shear = self.table_pushover_curve(
             case_name, direction, node
@@ -1669,7 +1651,6 @@ def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, redefine=False
     previously parsed files with a constant dt
 
     """
-
     if redefine:
         for tag in (2, 3, 4):
             try:
@@ -1713,7 +1694,6 @@ def plot_ground_motion(filename, file_time_incr, gmunit='g', plotly=False):
     Plots a ground motion input file.
 
     """
-
     y_vals = np.loadtxt(filename)
     n_points = len(y_vals)
     x_vals = np.arange(0.00, n_points * file_time_incr, file_time_incr)
@@ -1797,7 +1777,6 @@ class THAnalysis(GravityPlusAnalysis):
               will not output the correct values after dampening starts.
 
         """
-
         self._init_results()
         self.log('Running TH analysis')
 
@@ -1939,7 +1918,7 @@ class THAnalysis(GravityPlusAnalysis):
             self.log('Eigenvalue analysis finished')
             assert isinstance(damping_ratio, float)
             ops.modalDampingQ(damping_ratio)
-            self.log(f'{damping_ratio*100.00:.2f}% modal damping defined')
+            self.log(f'{damping_ratio * 100.00:.2f}% modal damping defined')
 
         if damping_type == 'modal+stiffness':
             self.log('Using modal+stiffness damping')
@@ -2136,7 +2115,7 @@ class THAnalysis(GravityPlusAnalysis):
                                                 self.results[
                                                     case_name
                                                 ].node_displacements[
-                                                    pnodes[lvl_idx].uid
+                                                    pnode.uid
                                                 ][n_steps_success][0:2]
                                             )
                                             - np.array(
@@ -2148,13 +2127,12 @@ class THAnalysis(GravityPlusAnalysis):
                                             )
                                         )
                                         / (
-                                            pnodes[lvl_idx].coords[2]
+                                            pnode.coords[2]
                                             - pnodes[lvl_idx - 1].coords[2]
                                         )
                                     )
                                 )
-                            if drift > peak_drift:
-                                peak_drift = drift
+                            peak_drift = max(drift, peak_drift)
                         if peak_drift > drift_check:
                             # terminate analysis
                             if self.logger:
@@ -2268,7 +2246,6 @@ class THAnalysis(GravityPlusAnalysis):
         Plots the displacement history of the specified node.
 
         """
-
         time_vec = self.time_vector
         uid = node.uid
         results = []
@@ -2320,7 +2297,6 @@ class ModalResponseSpectrumAnalysis:
         Run the modal response spectrum analysis.
 
         """
-
         spectrum_ifun = interp1d(self.periods, self.spectrum, kind='linear')
         anl = ModalAnalysis(
             self.mdl,
@@ -2358,7 +2334,6 @@ class ModalResponseSpectrumAnalysis:
         Returns the SRSS-combined node displacement of a node.
 
         """
-
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -2381,7 +2356,6 @@ class ModalResponseSpectrumAnalysis:
         nodes.
 
         """
-
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -2413,7 +2387,6 @@ class ModalResponseSpectrumAnalysis:
         Returns the SRSS-combined basic forces of a line element.
 
         """
-
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):

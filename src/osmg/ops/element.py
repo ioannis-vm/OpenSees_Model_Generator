@@ -13,18 +13,18 @@ Defines OpenSees Element interfrace objects.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Union
-from typing import Optional
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
+
 import numpy as np
 import numpy.typing as npt
-from .uniaxial_material import UniaxialMaterial
-from .node import Node
-from .section import ElasticSection
-from .section import FiberSection
-from ..mesh import Mesh
+
 from ..graphics.visibility import ElementVisibility
+from ..mesh import Mesh
+from .node import Node
+from .section import ElasticSection, FiberSection
+from .uniaxial_material import UniaxialMaterial
 
 if TYPE_CHECKING:
     from ..component_assembly import ComponentAssembly
@@ -39,7 +39,8 @@ class Element:
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
 
-    Attributes:
+    Attributes
+    ----------
         parent_component:
           the parent component assembly that this element belongs to.
         uid: the unique identifier of this element.
@@ -75,7 +76,6 @@ class ZeroLength(Element):
         OpenSees
 
         """
-
         return [
             'zeroLength',
             self.uid,
@@ -122,7 +122,6 @@ class TwoNodeLink(Element):
         OpenSees
 
         """
-
         return [
             'twoNodeLink',
             self.uid,
@@ -173,7 +172,6 @@ class TrussBar(Element):
         OpenSees
 
         """
-
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
 
         return [
@@ -197,7 +195,6 @@ class TrussBar(Element):
         offsets)
 
         """
-
         p_i = np.array(self.nodes[0].coords)
         p_j = np.array(self.nodes[1].coords)
         return np.linalg.norm(p_i - p_j)
@@ -237,7 +234,6 @@ class GeomTransf:
         OpenSees
 
         """
-
         return [
             self.transf_type,
             self.uid,
@@ -267,7 +263,6 @@ class ElasticBeamColumn(Element):
         OpenSees
 
         """
-
         if self.n_x is not None:
             n_x = self.n_x
             k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
@@ -363,7 +358,6 @@ class ElasticBeamColumn(Element):
         offsets)
 
         """
-
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
@@ -413,7 +407,6 @@ class Lobatto(BeamIntegration):
         OpenSees
 
         """
-
         return ['Lobatto', self.uid, self.parent_section.uid, self.n_p]
 
 
@@ -435,7 +428,6 @@ class DispBeamColumn(Element):
         OpenSees
 
         """
-
         return [
             'dispBeamColumn',
             self.uid,
@@ -454,7 +446,6 @@ class DispBeamColumn(Element):
         offsets)
 
         """
-
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)

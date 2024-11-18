@@ -4,6 +4,7 @@ spectra.
 """
 
 import re
+
 import numpy as np
 import numpy.typing as npt
 
@@ -17,26 +18,25 @@ def import_PEER(filename):
     Output is a two column matrix of time - acceleration pairs.
     Acceleration is in [g] units.
     """
-
     # Get all data except for the last line, where it may have fewer
     # columns and cause an error
     a_g = np.genfromtxt(filename, skip_header=4, skip_footer=1)
     # Manually read the last line and append
-    with open(filename, 'r', encoding='utf-8') as file:
+    with open(filename, encoding='utf-8') as file:
         lines = file.readlines()
         last_line = lines[-1]
     last = np.fromstring(last_line, sep='  ')
     a_g = np.append(a_g, last)
 
     # Read metadata
-    with open(filename, 'r', encoding='utf-8') as file:
+    with open(filename, encoding='utf-8') as file:
         for i, line in enumerate(file):
             if i == 2:
                 # Units
                 units = (line.split(sep=' ')[-1]).strip()
             elif i == 3:
                 # Number of points
-                npts = int(re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0]))  # noqa: W605
+                npts = int(re.sub(r'NPTS=\s+', '', line.split(sep=', ')[0]))
                 # Time step
                 tmp = re.sub(r'DT=\s+', '', line.split(sep=', ')[1])
                 tmp = re.sub(r'\s* SEC', '', tmp)

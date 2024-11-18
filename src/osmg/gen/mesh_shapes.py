@@ -15,13 +15,16 @@ Generates meshes for preconfigured sections.
 
 import numpy as np
 import numpy.typing as npt
-from ..mesh import Mesh
-from ..mesh import Vertex
-from ..mesh import Edge
-from ..mesh import orient_loops
-from ..mesh import obtain_closed_loops
-from ..mesh import sanity_checks
-from ..mesh import define_halfedges
+
+from ..mesh import (
+    Edge,
+    Mesh,
+    Vertex,
+    define_halfedges,
+    obtain_closed_loops,
+    orient_loops,
+    sanity_checks,
+)
 
 nparr = npt.NDArray[np.float64]
 
@@ -31,7 +34,6 @@ def generate(edges):
     Generates halfedges from the given edges.
 
     """
-
     halfedges = define_halfedges(edges)
     loops = obtain_closed_loops(halfedges)
     _, internal, trivial = orient_loops(loops)
@@ -44,7 +46,6 @@ def define_edges(vertices):
     Defines edges from an ordered list of vertices.
 
     """
-
     n_v = len(vertices)
     edges = []
     for i in range(n_v - 1):
@@ -188,7 +189,6 @@ def rect_mesh(dim_b, dim_h):
         h: total height
 
     """
-
     vertices = [
         Vertex((dim_b / 2.0, dim_h / 2.0)),
         Vertex((-dim_b / 2.0, dim_h / 2.0)),
@@ -229,7 +229,6 @@ def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     Generates generic snap poitns for a section object.
 
     """
-
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
     snap_points: dict[str, nparr] = {}

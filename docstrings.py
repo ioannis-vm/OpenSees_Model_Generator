@@ -6,9 +6,10 @@ docstring, immediately followed by a colon symbol, the code picks it
 up.
 """
 
-import os
 import glob
+import os
 import re
+
 import numpy as np
 
 
@@ -20,9 +21,9 @@ def list_directories(root_dir):
     return res
 
 
-def list_python_files(dir):
+def list_python_files(directory):
     res = []
-    for file in glob.glob(os.path.join(dir, '*.py')):
+    for file in glob.glob(os.path.join(directory, '*.py')):
         res.append(file)
     return res
 
@@ -42,11 +43,11 @@ files = {}
 for thing in not_backup:
     files[thing] = list_python_files(thing)
 
-pattern = '\(*?\):'  # type: ignore (this is so silly)
+pattern = r'\(*?\):'  # type: ignore (this is so silly)
 
 for module in files:
     for path in files[module]:
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, encoding='utf-8') as f:
             contents = f.read()
             if contents.startswith('"""'):
                 contents = '\n\n' + contents

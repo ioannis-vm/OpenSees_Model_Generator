@@ -16,26 +16,23 @@ distribution.
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import no_type_check
-from typing import Optional
-from dataclasses import dataclass, field
+
 import sys
-from tqdm import tqdm
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Optional, no_type_check
+
 import numpy as np
 import numpy.typing as npt
-from .. import mesh
+from tqdm import tqdm
+
+from .. import common, mesh
+from ..ops.element import DispBeamColumn, ElasticBeamColumn, TwoNodeLink, ZeroLength
 from ..ops.node import Node
-from .. import common
-from ..ops.element import ElasticBeamColumn
-from ..ops.element import DispBeamColumn
-from ..ops.element import TwoNodeLink
-from ..ops.element import ZeroLength
 
 if TYPE_CHECKING:
-    from ..load_case import LoadCase
     from ..level import Level
-    from ..mesh import Edge, Vertex, Halfedge
+    from ..load_case import LoadCase
+    from ..mesh import Edge, Halfedge, Vertex
 
 # pylint: disable=no-member
 # pylint: disable=import-outside-toplevel
@@ -123,7 +120,6 @@ class TributaryAreaAnaysis:
             analysis has verified that the checks are satisfied.
 
         """
-
         try:
             import skgeom as sg
         except ModuleNotFoundError:
@@ -308,7 +304,7 @@ class TributaryAreaAnaysis:
                 if index == len(all_edges_list):
                     # we are done.
                     continue
-                remaining_edges = all_edges_list[(index + 1) : :]
+                remaining_edges = all_edges_list[(index + 1) :]
                 for other_edge in remaining_edges:
                     # check if the two edges overlap or cross each other
                     if considered_edge.overlaps_or_crosses(other_edge):
@@ -332,7 +328,7 @@ class TributaryAreaAnaysis:
         for internal_loop in internal:
             poly = sg.Polygon([h.vertex.coords for h in internal_loop])
             skel = sg.skeleton.create_interior_straight_skeleton(poly)
-            # todo: what we need to get rid of this is to end up with a list
+            # TODO: what we need to get rid of this is to end up with a list
             # of halfedges defining the subloops.
 
             # something like:
@@ -448,7 +444,7 @@ class TributaryAreaAnaysis:
         # fig.show()
 
         # apply loads and mass
-        # todo (future): account for the shape of the loaded area
+        # TODO (future): account for the shape of the loaded area
         mdl = self.parent_level.parent_model
         if mdl.settings.imperial_units:
             g_const = common.G_CONST_IMPERIAL

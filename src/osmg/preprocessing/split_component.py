@@ -15,17 +15,13 @@ Defines the :func:`~split_component` method.
 
 import numpy as np
 import numpy.typing as npt
-from ..line import Line
-from ..ops.element import ElasticBeamColumn
-from ..ops.element import DispBeamColumn
-from ..ops.element import GeomTransf
-from ..ops.section import ElasticSection
-from ..ops.section import FiberSection
-from ..ops.node import Node
-from ..component_assembly import ComponentAssembly
-from .. import common
-from ..ops.element import Lobatto
 
+from .. import common
+from ..component_assembly import ComponentAssembly
+from ..line import Line
+from ..ops.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
+from ..ops.node import Node
+from ..ops.section import ElasticSection, FiberSection
 
 nparr = npt.NDArray[np.float64]
 
@@ -46,7 +42,6 @@ def split_component(
       perhaps updated.
 
     """
-
     uid_generator = component.parent_collection.parent.parent_model.uid_generator
 
     elms = []
