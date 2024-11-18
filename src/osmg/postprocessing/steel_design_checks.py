@@ -1,4 +1,4 @@
-"""Model Generator for OpenSees ~ steel design checks"""
+"""Model Generator for OpenSees ~ steel design checks."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -32,7 +32,7 @@ def smrf_scwb(
     ry_coeff: float = 1.15,
     omega_coeff: float = 1.10,
 ) -> float:
-    """SMRF strong column weak beam check"""
+    """SMRF strong column weak beam check."""
     # in3
     zc_below = col_sec_properties['Zx']
     # in2
@@ -110,7 +110,7 @@ def smrf_pz_doubler_plate_requirement(
     ry_coeff: float = 1.15,
     omega_coeff: float = 1.10,
 ) -> float:
-    """Calculates the required doubler plate thickness"""
+    """Calculates the required doubler plate thickness."""
     # in
     c_rbs = beam_sec_properties['bf'] * (1.0 - rbs_proportion) / 2.0
     # in3

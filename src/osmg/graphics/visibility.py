@@ -1,4 +1,4 @@
-"""Model Generator for OpenSees ~ visibility"""
+"""Model Generator for OpenSees ~ visibility."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

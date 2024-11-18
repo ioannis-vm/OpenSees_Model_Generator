@@ -55,7 +55,7 @@ def self_weight(mdl: Model, lcase: LoadCase, factor: float = 1.00) -> None:
 
 
 def self_mass(mdl: Model, lcase: LoadCase) -> None:
-    """Assigns the structure's self mass to its members"""
+    """Assigns the structure's self mass to its members."""
     if mdl.settings.imperial_units:
         g_const = common.G_CONST_IMPERIAL
     else:

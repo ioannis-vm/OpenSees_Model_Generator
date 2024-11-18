@@ -1,4 +1,4 @@
-"""Common definitions"""
+"""Common definitions."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -65,7 +65,7 @@ def print_methods(obj: object) -> None:
 
 
 def print_dir(obj: object) -> None:
-    """Prints the entire output of `dir()` of an object"""
+    """Prints the entire output of `dir()` of an object."""
     pprint(dir(obj))  # noqa: T203
 
 

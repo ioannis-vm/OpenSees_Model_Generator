@@ -1050,7 +1050,7 @@ class ModalAnalysis(Analysis):
     def modal_participation_factors(
         self, case_name: str, direction: str
     ) -> tuple[nparr, nparr, nparr]:
-        """Calculates modal participation factors"""
+        """Calculates modal participation factors."""
         dof_dir = {'x': 0, 'y': 1, 'z': 2}
         ntgs = list(self.mdl.dict_of_all_nodes().keys())
         # if there is a rigid diaphragm, we also need to include the parent nodes
@@ -1115,7 +1115,7 @@ class GravityPlusAnalysis(Analysis):
             raise ValueError(msg)
 
     def retrieve_node_displacement(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Returns the displacement of a node for all analysis steps"""
+        """Returns the displacement of a node for all analysis steps."""
         if case_name not in self.results:
             msg = f'case_name {case_name} not found in results.'
             raise ValueError(msg)
@@ -1128,7 +1128,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_acceleration(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Returns the acceleration of a node for all analysis steps"""
+        """Returns the acceleration of a node for all analysis steps."""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
@@ -1138,7 +1138,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Returns the velocity of a node for all analysis steps"""
+        """Returns the velocity of a node for all analysis steps."""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
@@ -1182,7 +1182,7 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_abs_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Returns the absolute velocity of a node for all analysis steps"""
+        """Returns the absolute velocity of a node for all analysis steps."""
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, THAnalysis)
@@ -1218,7 +1218,7 @@ class GravityPlusAnalysis(Analysis):
         return dfrmae
 
     def retrieve_base_shear(self, case_name: str) -> pd.DataFrame:
-        """Returns the base shear response history"""
+        """Returns the base shear response history."""
         base_shear_lst = []
         for step in range(self.results[case_name].n_steps_success):  # type:ignore
             base_shear_lst.append(self.global_reactions(case_name, step)[0:3])  # noqa: PERF401
@@ -1238,7 +1238,7 @@ class GravityPlusAnalysis(Analysis):
 
 @dataclass
 class PushoverAnalysis(GravityPlusAnalysis):
-    """Pushover analysis"""
+    """Pushover analysis."""
 
     def _apply_lateral_load(
         self,
@@ -1316,7 +1316,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         loaded_node: Node | None = None,
     ) -> None:
         """
-        Run pushover analysis
+        Run pushover analysis.
 
         Arguments:
           direction: can be any of 'x', 'y', 'z'
@@ -1575,7 +1575,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def table_pushover_curve(
         self, case_name: str, direction: str, node: Node
     ) -> tuple[nparr, nparr]:
-        """Returns the force deformation results"""
+        """Returns the force deformation results."""
         if direction == 'x':
             control_dof = 0
         elif direction == 'y':
@@ -1603,7 +1603,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def plot_pushover_curve(
         self, case_name: str, direction: str, node: Node
     ) -> None:
-        """Plots the pushover curve"""
+        """Plots the pushover curve."""
         # TODO(JVM): units
         displacement, base_shear = self.table_pushover_curve(
             case_name, direction, node
@@ -1706,7 +1706,7 @@ def plot_ground_motion(
 
 @dataclass
 class THAnalysis(GravityPlusAnalysis):
-    """Dynamic time-history analysis"""
+    """Dynamic time-history analysis."""
 
     time_vector: list[float] = field(default_factory=list, repr=False)
     a_g: dict[int, npt.NDArray[np.float64]] = field(default_factory=dict, repr=False)
@@ -1731,7 +1731,7 @@ class THAnalysis(GravityPlusAnalysis):
         test_tolerance: float = 1e-12,
     ) -> dict[str, int | str | float]:
         """
-        Run the time-history analysis
+        Run the time-history analysis.
 
         Arguments:
             ag_vec_x, y, z: 1-D numpy arrays containing the fixed-step

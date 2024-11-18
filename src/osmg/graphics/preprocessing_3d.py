@@ -1,5 +1,5 @@
 """
-The following utility functions are used for data visualization
+The following utility functions are used for data visualization.
 
 https://plotly.com/python/reference/
 """
@@ -39,7 +39,7 @@ def add_data__nodes(
     data_dict: list[dict[str, object]], mdl: Model, load_case: str
 ) -> None:
     """
-    Adds a trace containing nodes
+    Adds a trace containing nodes.
 
     Arguments:
       data_dict:
@@ -155,7 +155,7 @@ def add_data__parent_nodes(
     data_dict: list[dict[str, object]], load_case: LoadCase
 ) -> None:
     """
-    Adds a trace containing parent nodes
+    Adds a trace containing parent nodes.
 
     Arguments:
       data_dict:
@@ -223,7 +223,7 @@ def add_data__internal_nodes(
     load_case: LoadCase | None = None,
 ) -> None:
     """
-    Adds a trace containing internal nodes
+    Adds a trace containing internal nodes.
 
     Arguments:
       data_dict:
@@ -333,7 +333,7 @@ def add_data__release_nodes(
     data_dict: list[dict[str, object]], list_of_nodes: list[node_module.Node]
 ) -> None:
     """
-    Adds a trace containing release nodes
+    Adds a trace containing release nodes.
 
     Arguments:
       data_dict:
@@ -373,7 +373,7 @@ def add_data__frames(
     load_case: LoadCase | None = None,
 ) -> None:
     """
-    Adds a trace containing frame element centroidal axis lines
+    Adds a trace containing frame element centroidal axis lines.
 
     Arguments:
       data_dict:
@@ -498,7 +498,7 @@ def add_data__bars(
     load_case: LoadCase | None = None,
 ) -> None:
     """
-    Adds a trace containing frame element centroidal axis lines
+    Adds a trace containing frame element centroidal axis lines.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -600,7 +600,7 @@ def add_data__bars(
 
 def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
-    Adds a trace containing twonodelink elements
+    Adds a trace containing twonodelink elements.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -655,7 +655,7 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
 
 def add_data__frame_offsets(data_dict: list[dict[str, object]], mdl: Model) -> None:
     """
-    Adds a trace containing frame element rigid offset lines
+    Adds a trace containing frame element rigid offset lines.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -705,7 +705,7 @@ def add_data__frame_axes(
     data_dict: list[dict[str, object]], mdl: Model, ref_len: float
 ) -> None:
     """
-    Adds a trace containing frame element local axis lines
+    Adds a trace containing frame element local axis lines.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -764,7 +764,7 @@ def add_data__zerolength_axes(
     data_dict: list[dict[str, object]], mdl: Model, ref_len: float
 ) -> None:
     """
-    Adds a trace containing zerolength element local axis lines
+    Adds a trace containing zerolength element local axis lines.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -817,7 +817,7 @@ def add_data__global_axes(
     data_dict: list[dict[str, object]], ref_len: float
 ) -> None:
     """
-    Adds a trace containing global axes
+    Adds a trace containing global axes.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -966,7 +966,7 @@ def add_data__extruded_frames_mesh(
     data_dict: list[dict[str, object]], mdl: Model
 ) -> None:
     """
-    Adds a trace containing frame element extrusion mesh
+    Adds a trace containing frame element extrusion mesh.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -1046,7 +1046,7 @@ def add_data__extruded_bars_mesh(
     data_dict: list[dict[str, object]], mdl: Model
 ) -> None:
     """
-    Adds a trace containing frame element extrusion mesh
+    Adds a trace containing frame element extrusion mesh.
 
     Arguments:
       data_dict: dictionary containing figure data
@@ -1143,7 +1143,7 @@ def show(  # noqa: C901
     to_figure: str | None = None,
 ) -> None:
     """
-    Visualize the model
+    Visualize the model.
 
     Arguments:
       mdl: the model to be visualized

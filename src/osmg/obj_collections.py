@@ -259,7 +259,7 @@ class NodeCollection(Collection[int, node.Node]):
     named_contents: dict[str, node.Node] = field(default_factory=dict)
 
     def search_xy(self, x_coord: float, y_coord: float) -> Node | None:
-        """Returns the node that occupies a given point if it exists"""
+        """Returns the node that occupies a given point if it exists."""
         candidate_pt: nparr = np.array([x_coord, y_coord, self.parent.elevation])
         for other_node in self.values():
             other_pt: nparr = np.array(other_node.coords)

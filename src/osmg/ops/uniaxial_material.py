@@ -20,7 +20,7 @@ from typing import Optional
 @dataclass
 class UniaxialMaterial:
     """
-    OpenSees uniaxialMaterial
+    OpenSees uniaxialMaterial.
 
     https://openseespydoc.readthedocs.io/en/latest/src/uniaxialMaterial.html
 
@@ -33,7 +33,7 @@ class UniaxialMaterial:
 @dataclass
 class Elastic(UniaxialMaterial):
     """
-    OpenSees Elastic
+    OpenSees Elastic.
 
     https://openseespydoc.readthedocs.io/en/latest/src/ElasticUni.html
 
@@ -49,7 +49,7 @@ class Elastic(UniaxialMaterial):
 @dataclass
 class Steel02(UniaxialMaterial):
     """
-    OpenSees Steel02
+    OpenSees Steel02.
 
     https://openseespydoc.readthedocs.io/en/latest/src/steel02.html
 
@@ -97,7 +97,7 @@ class Steel02(UniaxialMaterial):
 @dataclass
 class Steel4(UniaxialMaterial):
     """
-    OpenSees Steel4
+    OpenSees Steel4.
 
     https://openseespydoc.readthedocs.io/en/latest/src/steel4.html
 
@@ -213,7 +213,7 @@ class Steel4(UniaxialMaterial):
 @dataclass
 class Bilin(UniaxialMaterial):
     """
-    OpenSees Bilin Material
+    OpenSees Bilin Material.
 
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
 
@@ -279,7 +279,7 @@ class Bilin(UniaxialMaterial):
 @dataclass
 class IMKBilin(UniaxialMaterial):
     """
-    OpenSees IMKBilin Material
+    OpenSees IMKBilin Material.
 
     https://portwooddigital.com/2019/12/08/an-update-of-the-imk-models/
 
@@ -339,7 +339,7 @@ class IMKBilin(UniaxialMaterial):
 @dataclass
 class Pinching4(UniaxialMaterial):
     """
-    OpenSees Pinching4 Material
+    OpenSees Pinching4 Material.
 
     https://openseespydoc.readthedocs.io/en/latest/src/Pinching4.html
 
@@ -435,7 +435,7 @@ class Pinching4(UniaxialMaterial):
 @dataclass
 class Hysteretic(UniaxialMaterial):
     """
-    OpenSees Bilin Material
+    OpenSees Bilin Material.
 
     https://openseespydoc.readthedocs.io/en/latest/src/Bilin.html
 
@@ -475,7 +475,7 @@ class Hysteretic(UniaxialMaterial):
 @dataclass
 class Fatigue(UniaxialMaterial):
     """
-    OpenSees Fatigue Material
+    OpenSees Fatigue Material.
 
     https://openseespydoc.readthedocs.io/en/latest/src/Fatigue.html
 
@@ -507,7 +507,7 @@ class Fatigue(UniaxialMaterial):
 @dataclass
 class MaxStrainRange(UniaxialMaterial):
     """
-    OpenSees MaxStrainRange Material
+    OpenSees MaxStrainRange Material.
 
     ~not officially added yet~
 
@@ -549,7 +549,7 @@ class MaxStrainRange(UniaxialMaterial):
 @dataclass
 class MinMax(UniaxialMaterial):
     """
-    OpenSees MinMax Material
+    OpenSees MinMax Material.
 
     https://openseespydoc.readthedocs.io/en/latest/src/MinMax.html
 

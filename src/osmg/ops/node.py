@@ -21,7 +21,7 @@ from osmg.graphics.visibility import NodeVisibility
 @total_ordering
 class Node:
     """
-    OpenSees node
+    OpenSees node.
 
     https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
 

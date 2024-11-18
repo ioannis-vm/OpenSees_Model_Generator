@@ -34,7 +34,7 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class Element:
     """
-    OpenSees element
+    OpenSees element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
 
@@ -60,7 +60,7 @@ class Element:
 @dataclass(repr=False)
 class ZeroLength(Element):
     """
-    OpenSees ZeroLength element
+    OpenSees ZeroLength element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
 
@@ -104,7 +104,7 @@ class ZeroLength(Element):
 @dataclass(repr=False)
 class TwoNodeLink(Element):
     """
-    OpenSees TwoNodeLink element
+    OpenSees TwoNodeLink element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/twoNodeLink.html
 
@@ -145,7 +145,7 @@ class TwoNodeLink(Element):
 @dataclass(repr=False)
 class TrussBar(Element):
     """
-    Truss and Corotational Truss
+    Truss and Corotational Truss.
 
     Implements both of the following:
     OpenSees Truss Element
@@ -211,7 +211,7 @@ class TrussBar(Element):
 @dataclass(repr=False)
 class GeomTransf:
     """
-    OpenSees geomTransf object
+    OpenSees geomTransf object.
 
     https://openseespydoc.readthedocs.io/en/latest/src/ZeroLength.html
     https://openseespydoc.readthedocs.io/en/latest/src/geomTransf.html?highlight=geometric%20transformation
@@ -241,7 +241,7 @@ class GeomTransf:
 @dataclass(repr=False)
 class ElasticBeamColumn(Element):
     """
-    OpenSees Elastic Beam Column Element
+    OpenSees Elastic Beam Column Element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
 
@@ -405,7 +405,7 @@ class Lobatto(BeamIntegration):
 @dataclass
 class DispBeamColumn(Element):
     """
-    OpenSees dispBeamColumn element
+    OpenSees dispBeamColumn element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/ForceBeamColumn.html
 

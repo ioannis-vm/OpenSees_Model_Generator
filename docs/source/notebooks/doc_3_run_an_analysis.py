@@ -15,7 +15,7 @@
 
 # %% [markdown]
 """
-# Running an analysis
+# Running an analysis.
 
 The `solver` module is used to interact with OpenSees.
 

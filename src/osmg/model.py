@@ -315,7 +315,7 @@ class Model:
         return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
-        """Returns the axis-aligned bouding box of the building"""
+        """Returns the axis-aligned bouding box of the building."""
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():

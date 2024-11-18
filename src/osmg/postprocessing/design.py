@@ -1,4 +1,4 @@
-"""Model Generator for OpenSees ~ design library"""
+"""Model Generator for OpenSees ~ design library."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -74,7 +74,7 @@ class LoadCombination:
         return df_min, df_max
 
     def envelope_node_displacement(self, node: Node) -> list[nparr, nparr]:
-        """Calculates the enveloped node displacement"""
+        """Calculates the enveloped node displacement."""
         disp_min: nparr = np.full(6, np.inf)
         disp_max: nparr = np.full(6, -np.inf)
         for component_to_envelope in self.combo.values():

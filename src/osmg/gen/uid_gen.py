@@ -1,4 +1,4 @@
-"""Objects that generate unique IDs"""
+"""Objects that generate unique IDs."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|

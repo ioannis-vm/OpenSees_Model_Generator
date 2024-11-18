@@ -15,7 +15,7 @@
 
 # %% [markdown]
 """
-# Defining a Model
+# Defining a Model.
 
 This section demonstrates the model definition process.
 

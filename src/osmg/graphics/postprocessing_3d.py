@@ -555,7 +555,7 @@ def add_data__line_elm_offsets_deformed(
 def add_data__frames_undeformed(
     data_dict: dict[str, object], list_of_line_elems: list[element.Element]
 ) -> None:
-    """Adds a trace containing frame element centroidal axis lines"""
+    """Adds a trace containing frame element centroidal axis lines."""
     x_list: list[float | None] = []
     y_list: list[float | None] = []
     z_list: list[float | None] = []
@@ -713,7 +713,7 @@ def show_deformed_shape(  # noqa: C901
     to_html_file: str | None = None,
 ) -> dict[str, Any]:
     """
-    Visualize the model in its deformed state
+    Visualize the model in its deformed state.
 
     Arguments:
       analysis: an analysis object

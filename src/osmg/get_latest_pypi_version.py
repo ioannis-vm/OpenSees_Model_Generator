@@ -1,4 +1,4 @@
-"""Determine the latest version of the osmg package on PyPI"""
+"""Determine the latest version of the osmg package on PyPI."""
 
 import argparse
 
@@ -6,7 +6,7 @@ import requests
 
 
 def get_latest_version(package_name: str) -> str:
-    """Determine the latest version of the osmg package on PyPI"""
+    """Determine the latest version of the osmg package on PyPI."""
     url = f'https://pypi.org/pypi/{package_name}/json'
 
     response = requests.get(url, timeout=10)

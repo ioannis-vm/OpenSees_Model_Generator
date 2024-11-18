@@ -460,7 +460,7 @@ class Mesh:
         return geometric_properties(coords)
 
     def bounding_box(self) -> nparr:
-        """Returns a bounding box of the mesh"""
+        """Returns a bounding box of the mesh."""
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -651,7 +651,7 @@ def geometric_properties(coords: nparr) -> dict[str, float]:
 
 
 def ang_reduce(ang: float) -> float:
-    """Brings and angle expressed in radians in the interval [0, 2pi)"""
+    """Brings and angle expressed in radians in the interval [0, 2pi)."""
     while ang < 0:
         ang += 2.0 * np.pi
     while ang >= 2.0 * np.pi:
