@@ -1535,23 +1535,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
                     if total_fail:
                         break
 
-                    # determine push direction
-                    if curr_displ < target_displacement:
-                        displ_incr = abs(displ_incr)
-                        sign = +1.00
-                    else:
-                        displ_incr = -abs(displ_incr)
-                        sign = -1.00
-
-                    while curr_displ * sign < target_displacement * sign:
-                        # determine increment
-                        if (
-                            abs(curr_displ - target_displacement)
-                            < abs(displ_incr) * scale[num_subdiv]
-                        ):
-                            incr = sign * abs(curr_displ - target_displacement)
-                        else:
-                            incr = displ_incr * scale[num_subdiv]
+                    if target_displacement is None:
+                        # Need to unload
                         ops.test(
                             "NormDispIncr",
                             norm[num_subdiv],
@@ -1559,47 +1544,14 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             0,
                         )
                         ops.algorithm(*algorithms[algorithm_idx])
-                        if integrator == 'DisplacementControl':
-                            ops.integrator(
-                                "DisplacementControl",
-                                int(control_node.uid),
-                                control_dof + 1,
-                                incr,
-                            )
-                        elif integrator == 'ArcLength':
-                            ops.integrator("ArcLength", incr, 1e-7)
-                        else:
-                            raise ValueError(
-                                f'Invalid integrator: {integrator}'
-                            )
-                        ops.system(self.settings.solver)
-                        ops.analysis("Static")
-                        flag = ops.analyze(1)
-                        if flag != 0:
-                            if num_subdiv == len(scale) - 1:
-                                # can't refine further
-                                self.print("===========================")
-                                self.print("Analysis failed to converge")
-                                self.print("===========================")
-                                if self.logger:
-                                    self.logger.warning(
-                                        "Analysis failed"
-                                        f" at disp {curr_displ:.5f}"
-                                    )
-                                total_fail = True
-                                break
-                            # can still reduce step size
-                            if algorithm_idx != len(algorithms) - 1:
-                                algorithm_idx += 1
-                            else:
-                                algorithm_idx = 0
-                                num_subdiv += 1
-                                # how many times to run with reduced step size
-                                num_times = 50
-                        else:
-                            # analysis was successful
-                            if num_times != 0:
-                                num_times -= 1
+                        current_load = ops.getLoadFactor(2)
+                        while current_load > 1e-4:
+                            increment = -current_load / 10.00
+                            ops.integrator('LoadControl', increment)
+                            flag = ops.analyze(1)
+                            if flag != 0:
+                                raise ValueError('Failed to unload.')
+                            current_load = ops.getLoadFactor(2)
                             n_steps_success += 1
                             self._read_opensees_results(
                                 case_name,
@@ -1608,7 +1560,6 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                 line_elems,
                                 zerolength_elems,
                             )
-
                             curr_displ = ops.nodeDisp(
                                 int(control_node.uid), control_dof + 1
                             )
@@ -1616,15 +1567,104 @@ class PushoverAnalysis(GravityPlusAnalysis):
                                 f"Loop ({i_loop+1}/"
                                 f"{len(target_displacements)}) | "
                                 "Target displacement: "
-                                f"{target_displacement:.2f}"
+                                f"(Unloading)"
                                 f" | Current: {curr_displ:.4f}",
                                 end="\r",
                             )
-                            algorithm_idx = 0
-                            if num_subdiv != 0:
-                                if num_times == 0:
-                                    num_subdiv -= 1
-                                    num_times = 10
+
+                    else:
+                        # determine push direction
+                        if curr_displ < target_displacement:
+                            displ_incr = abs(displ_incr)
+                            sign = +1.00
+                        else:
+                            displ_incr = -abs(displ_incr)
+                            sign = -1.00
+
+                        while curr_displ * sign < target_displacement * sign:
+                            # determine increment
+                            if (
+                                abs(curr_displ - target_displacement)
+                                < abs(displ_incr) * scale[num_subdiv]
+                            ):
+                                incr = sign * abs(
+                                    curr_displ - target_displacement
+                                )
+                            else:
+                                incr = displ_incr * scale[num_subdiv]
+                            ops.test(
+                                "NormDispIncr",
+                                norm[num_subdiv],
+                                steps[num_subdiv],
+                                0,
+                            )
+                            ops.algorithm(*algorithms[algorithm_idx])
+                            if integrator == 'DisplacementControl':
+                                ops.integrator(
+                                    "DisplacementControl",
+                                    int(control_node.uid),
+                                    control_dof + 1,
+                                    incr,
+                                )
+                            elif integrator == 'ArcLength':
+                                ops.integrator("ArcLength", incr, 1e-7)
+                            else:
+                                raise ValueError(
+                                    f'Invalid integrator: {integrator}'
+                                )
+                            ops.system(self.settings.solver)
+                            ops.analysis("Static")
+                            flag = ops.analyze(1)
+                            if flag != 0:
+                                if num_subdiv == len(scale) - 1:
+                                    # can't refine further
+                                    self.print("===========================")
+                                    self.print("Analysis failed to converge")
+                                    self.print("===========================")
+                                    if self.logger:
+                                        self.logger.warning(
+                                            "Analysis failed"
+                                            f" at disp {curr_displ:.5f}"
+                                        )
+                                    total_fail = True
+                                    break
+                                # can still reduce step size
+                                if algorithm_idx != len(algorithms) - 1:
+                                    algorithm_idx += 1
+                                else:
+                                    algorithm_idx = 0
+                                    num_subdiv += 1
+                                    # how many times to run with reduced step size
+                                    num_times = 50
+                            else:
+                                # analysis was successful
+                                if num_times != 0:
+                                    num_times -= 1
+                                n_steps_success += 1
+                                self._read_opensees_results(
+                                    case_name,
+                                    n_steps_success,
+                                    nodes,
+                                    line_elems,
+                                    zerolength_elems,
+                                )
+
+                                curr_displ = ops.nodeDisp(
+                                    int(control_node.uid), control_dof + 1
+                                )
+                                self.print(
+                                    f"Loop ({i_loop+1}/"
+                                    f"{len(target_displacements)}) | "
+                                    "Target displacement: "
+                                    f"{target_displacement:.2f}"
+                                    f" | Current: {curr_displ:.4f}",
+                                    end="\r",
+                                )
+                                algorithm_idx = 0
+                                if num_subdiv != 0:
+                                    if num_times == 0:
+                                        num_subdiv -= 1
+                                        num_times = 10
 
             except KeyboardInterrupt:
                 self.print("Analysis interrupted")
