@@ -18,7 +18,7 @@ project = 'osmg'
 author = 'John Vouvakis Manousakis'
 with Path('../../setup.cfg').open('r', encoding='utf-8') as f:
     lines = f.readlines()
-release = [line.split('=')[1] for line in lines if 'version' in line][0].strip()
+release = next(line.split('=')[1] for line in lines if 'version' in line).strip()
 copyright = '2023, Ioannis Vouvakis Manousakis'  # noqa: A001
 
 # -- General configuration ---------------------------------------------------

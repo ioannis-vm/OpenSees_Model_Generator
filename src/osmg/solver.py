@@ -690,7 +690,7 @@ class Analysis:
         """
         reactions = np.full(6, 0.00)
         # for lvl in self.mdl.levels.values():
-        lvl = list(self.mdl.levels.values())[0]  # temporary fix
+        lvl = next(iter(self.mdl.levels.values()))  # temporary fix
         for node in lvl.nodes.values():
             if True in node.restraint:
                 uid = node.uid
@@ -1790,7 +1790,7 @@ class THAnalysis(GravityPlusAnalysis):
         # note: only runs the first load case provided.
         # th should not have load cases.
         # will be fixed in the future.
-        case_name = list(self.load_cases.keys())[0]
+        case_name = next(iter(self.load_cases.keys()))
         self.log(f'Case Name: {case_name}')
         pnodes = self.load_cases[case_name].parent_nodes
         nodes.extend(pnodes.values())

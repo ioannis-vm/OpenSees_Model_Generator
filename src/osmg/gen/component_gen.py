@@ -243,8 +243,8 @@ class TrussBarGenerator:
         weight_per_length: float = 0.00,
         component_purpose: str = 'Truss Element',
         *,
-        split_existing_i: bool = None,
-        split_existing_j: bool = None,
+        split_existing_i: bool | None = None,
+        split_existing_j: bool | None = None,
     ) -> ComponentAssembly:
         """
         Adds a truss bar element.

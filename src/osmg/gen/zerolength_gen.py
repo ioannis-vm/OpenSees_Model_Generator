@@ -120,7 +120,7 @@ def imk_6(
     Engineering-Reston, 137(11), 1291.
 
     Elkady, A., & Lignos, D. G. (2014). Modeling of the composite
-    action in fully restrained beam‐to‐column connections:
+    action in fully restrained beam-to-column connections:
     implications in the seismic design and collapse capacity of steel
     special moment frames. Earthquake Engineering & Structural
     Dynamics, 43(13), 1935-1954.
