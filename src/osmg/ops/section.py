@@ -26,6 +26,7 @@ from osmg.mesh import Mesh, polygon_area
 if TYPE_CHECKING:
     from .uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
+    from shapely.geometry import Polygon as shapely_Polygon
 
 nparr = npt.NDArray[np.float64]
 
@@ -90,7 +91,7 @@ class ElasticSection(Section):
     snap_points: dict[str, nparr] | None = field(default=None, repr=False)
     properties: dict[str, Any] | None = field(default=None, repr=False)
 
-    def weight_per_length(self):
+    def weight_per_length(self) -> list[object]:
         """
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and
@@ -163,7 +164,7 @@ class SectionComponent:
         res += f'physical_material: {self.physical_material.name}\n'
         return res
 
-    def cut_into_tiny_little_pieces(self):
+    def cut_into_tiny_little_pieces(self) -> list[shapely_Polygon]:
         """
         Returns data used to define fibers in OpenSees.
 
@@ -243,7 +244,7 @@ class FiberSection(Section):
         res += f'n_x: {self.n_x}, n_y: {self.n_y}\n'
         return res
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -256,7 +257,7 @@ class FiberSection(Section):
             self.j_mod * self.section_parts['main'].physical_material.g_mod,
         ]
 
-    def weight_per_length(self):
+    def weight_per_length(self) -> list[object]:
         """
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and connections.

@@ -11,7 +11,7 @@ import numpy.typing as npt
 nparr = npt.NDArray[np.float64]
 
 
-def import_PEER(filename: str):  # noqa: N802
+def import_PEER(filename: str) -> nparr:  # noqa: N802
     """
     Import a ground motion record from a specified PEER ground
     motion record file.
@@ -60,7 +60,7 @@ def import_PEER(filename: str):  # noqa: N802
     return np.column_stack((t, a_g))
 
 
-def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200):  # noqa: N803
+def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> nparr:  # noqa: N803
     """
     Calculate the linear response spectrum of an acceleration
     time history of fixed time interval dt and values given in vector

@@ -43,7 +43,7 @@ class LoadCombination:
 
     def envelope_basic_forces(
         self, elm: TrussBar | ElasticBeamColumn | DispBeamColumn, num_points: int
-    ):
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Calculates the envelope of the basic forces for the
         given load combination
@@ -72,7 +72,7 @@ class LoadCombination:
 
         return df_min, df_max
 
-    def envelope_node_displacement(self, node: Node):
+    def envelope_node_displacement(self, node: Node) -> list[nparr, nparr]:
         """
         Calculates the enveloped node displacement
         """
@@ -94,7 +94,9 @@ class LoadCombination:
 
         return disp_min, disp_max
 
-    def envelope_node_displacement_diff(self, node_i: Node, node_j: Node):
+    def envelope_node_displacement_diff(
+        self, node_i: Node, node_j: Node
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Calculates the enveloped displacement difference between
         two nodes

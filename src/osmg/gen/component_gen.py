@@ -639,7 +639,7 @@ class BeamColumnGenerator:
         camber_3: float,
         n_x: int | None = None,
         n_y: int | None = None,
-    ):
+    ) -> ComponentAssembly:
         """
         Generates a plain component assembly, with line elements in
         series.
@@ -705,7 +705,7 @@ class BeamColumnGenerator:
         zerolength_gen_args_i: dict[str, object],
         zerolength_gen_j: Callable,
         zerolength_gen_args_j: dict[str, object],
-    ):
+    ) -> ComponentAssembly:
         """
         Defines a component assembly that is comprised of
         beamcolumn elements connected in series with nonlinear springs

@@ -241,7 +241,7 @@ class LoadCaseQuery:
     model: Model
     loadcase: LoadCase
 
-    def level_masses(self):
+    def level_masses(self) -> nparr:
         """
         Returns the total mass of each level.
 

@@ -190,7 +190,7 @@ class Model:
         lvl = Level(self, uid=uid, elevation=elevation)
         self.levels.add(lvl)
 
-    def dict_of_primary_nodes(self):
+    def dict_of_primary_nodes(self) -> dict[int, Node]:
         """
         Returns a dictionary of all the primary nodes in the model.
         The keys are the uids of the nodes.
@@ -200,7 +200,7 @@ class Model:
             dict_of_nodes.update(lvl.nodes)
         return dict_of_nodes
 
-    def list_of_primary_nodes(self):
+    def list_of_primary_nodes(self) -> list[Node]:
         """
         Returns a list of all the primary nodes in the model.
 
@@ -211,7 +211,7 @@ class Model:
                 list_of_nodes.append(node)  # noqa: PERF402
         return list_of_nodes
 
-    def dict_of_internal_nodes(self):
+    def dict_of_internal_nodes(self) -> dict[int, Node]:
         """
         Returns a dictionary of all the internal nodes in the model.
         The keys are the uids of the nodes.
@@ -223,7 +223,7 @@ class Model:
                 dict_of_nodes.update(component.internal_nodes)
         return dict_of_nodes
 
-    def list_of_internal_nodes(self):
+    def list_of_internal_nodes(self) -> list[Node]:
         """
         Returns a list of all the internal nodes in the model.
 
@@ -235,7 +235,7 @@ class Model:
                     list_of_nodes.append(inode)  # noqa: PERF402
         return list_of_nodes
 
-    def dict_of_all_nodes(self):
+    def dict_of_all_nodes(self) -> dict[int, Node]:
         """
         Returns a dictionary of all the nodes in the model.
         The keys are the uids of the nodes.
@@ -246,7 +246,7 @@ class Model:
         dict_of_nodes.update(self.dict_of_internal_nodes())
         return dict_of_nodes
 
-    def list_of_all_nodes(self):
+    def list_of_all_nodes(self) -> list[Node]:
         """
         Returns a list of all the nodes in the model.
 
@@ -256,7 +256,7 @@ class Model:
         list_of_nodes.extend(self.list_of_internal_nodes())
         return list_of_nodes
 
-    def dict_of_components(self):
+    def dict_of_components(self) -> dict[int, ComponentAssembly]:
         """
         Returns a dictionary of all the component assemblies in the
         model.
@@ -269,7 +269,7 @@ class Model:
                 comps[component.uid] = component
         return comps
 
-    def list_of_components(self):
+    def list_of_components(self) -> list[ComponentAssembly]:
         """
         Returns a list of all the component assembiles in the
         model.
@@ -338,7 +338,7 @@ class Model:
         # type hints gone mad  >.<   ...
         return p_min, p_max  # type:ignore
 
-    def reference_length(self):
+    def reference_length(self) -> float:
         """
         Returns the largest dimension of the
         bounding box of the building
@@ -348,7 +348,7 @@ class Model:
         p_min, p_max = self.bounding_box(padding=0.00)
         return np.max(p_max - p_min)
 
-    def initialize_empty_copy(self, name: str):
+    def initialize_empty_copy(self, name: str) -> Model:
         """
         Initializes a shallow empty copy of the model.
         Used to create subset models.

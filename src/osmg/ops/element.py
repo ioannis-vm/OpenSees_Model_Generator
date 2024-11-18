@@ -70,7 +70,7 @@ class ZeroLength(Element):
     vecx: nparr
     vecyp: nparr
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -116,7 +116,7 @@ class TwoNodeLink(Element):
     vecx: nparr
     vecyp: nparr
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -166,7 +166,7 @@ class TrussBar(Element):
     cflag: int = field(default=0)
     rflag: int = field(default=0)
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -189,7 +189,7 @@ class TrussBar(Element):
             self.rflag,
         ]
 
-    def clear_length(self):
+    def clear_length(self) -> float:
         """
         Returns the clear length of the element (without the rigid
         offsets)
@@ -228,7 +228,7 @@ class GeomTransf:
     y_axis: nparr
     z_axis: nparr
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -257,7 +257,7 @@ class ElasticBeamColumn(Element):
     n_x: float | None = field(default=None)
     n_y: float | None = field(default=None)
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -352,7 +352,7 @@ class ElasticBeamColumn(Element):
             self.geomtransf.uid,
         ]
 
-    def clear_length(self):
+    def clear_length(self) -> list[object]:
         """
         Returns the clear length of the element (without the rigid
         offsets)
@@ -401,7 +401,7 @@ class Lobatto(BeamIntegration):
 
     n_p: int
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -422,7 +422,7 @@ class DispBeamColumn(Element):
     geomtransf: GeomTransf
     integration: BeamIntegration
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -440,7 +440,7 @@ class DispBeamColumn(Element):
             # 1e-1
         ]
 
-    def clear_length(self):
+    def clear_length(self) -> list[object]:
         """
         Returns the clear length of the element (without the rigid
         offsets)

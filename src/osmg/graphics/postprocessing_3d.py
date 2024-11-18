@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def force_scaling_factor(ref_len: float, fmax: float, factor: float):
+def force_scaling_factor(ref_len: float, fmax: float, factor: float) -> float:
     """
     Applies a scaling factor to basic forces.
 
@@ -62,7 +62,7 @@ def interp_3d_deformation(
     u_j: nparr,
     r_j: nparr,
     num_points: int,
-):
+) -> tuple[nparr, nparr]:
     """
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
@@ -170,7 +170,7 @@ def interp_3d_points(
     d_global: nparr,
     num_points: int,
     scaling: float,
-):
+) -> nparr:
     """
     Calculates intermediate points based on end locations and
     deformations.
@@ -653,7 +653,7 @@ def add_data__nodes_deformed(
 
 def get_auto_scaling_deformation(
     analysis: Analysis, case_name: str, mdl: Model, step: int
-):
+) -> float:
     """
     Automatically calculate a scaling value that makes the maximum
     displacement appear approximately 10% of the largest dimention of
@@ -950,7 +950,7 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
     camera: dict[str, object] | None = None,
     subset_model: Model | None = None,
     to_html_file: str | None = None,
-):
+) -> dict[str, float]:
     """
     Visualize the model and plot the frame element basic forces.
 
@@ -1464,7 +1464,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     camera: dict[str, object] | None = None,
     subset_model: Model = None,
     to_html_file: str | None = None,
-):
+) -> dict[str, float]:
     """
     Visualize the model and plot the enveloped frame element basic forces
     for a load combination.

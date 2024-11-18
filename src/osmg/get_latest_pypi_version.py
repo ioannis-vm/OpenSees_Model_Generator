@@ -7,7 +7,7 @@ import argparse
 import requests
 
 
-def get_latest_version(package_name: str):
+def get_latest_version(package_name: str) -> str:
     """
     Determine the latest version of the osmg package on PyPI
     """

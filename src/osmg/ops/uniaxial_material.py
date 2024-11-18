@@ -42,7 +42,7 @@ class Elastic(UniaxialMaterial):
 
     e_mod: float
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -71,7 +71,7 @@ class Steel02(UniaxialMaterial):
     a4: float | None = field(default=None)
     sig_init: float | None = field(default=None)
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -139,7 +139,7 @@ class Steel4(UniaxialMaterial):
     sig_init: float | None = field(default=None)
     cycNum: float | None = field(default=None)  # noqa: N815
 
-    def ops_args(self):  # noqa: C901
+    def ops_args(self) -> list[object]:  # noqa: C901
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -253,7 +253,7 @@ class Bilin(UniaxialMaterial):
     D_Neg: float
     nFactor: float  # noqa: N815
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -319,7 +319,7 @@ class IMKBilin(UniaxialMaterial):
     D_Plus: float
     D_Neg: float
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -400,7 +400,7 @@ class Pinching4(UniaxialMaterial):
     gE: float  # noqa: N815
     dmgType: str  # noqa: N815
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -471,7 +471,7 @@ class Hysteretic(UniaxialMaterial):
     damage2: float
     beta: float
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -508,7 +508,7 @@ class Fatigue(UniaxialMaterial):
     var_min: float = field(default=-1.0e16)
     var_max: float = field(default=+1.0e16)
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -546,7 +546,7 @@ class MaxStrainRange(UniaxialMaterial):
     node_tags: tuple[int, int] | None = field(default=None)
     elements_to_remove: list[int] | None = field(default=None)
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees
@@ -586,7 +586,7 @@ class MinMax(UniaxialMaterial):
     min_strain: float
     max_strain: float
 
-    def ops_args(self):
+    def ops_args(self) -> list[object]:
         """
         Returns the arguments required to define the object in
         OpenSees

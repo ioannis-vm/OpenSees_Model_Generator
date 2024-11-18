@@ -184,7 +184,7 @@ class Edge:
             raise ValueError(msg)
         return halfedge
 
-    def other_vertex(self, vertex: Vertex):
+    def other_vertex(self, vertex: Vertex) -> Vertex:
         """
         Returns the vertex of this edge that is not the given vertex.
         If the given vertex is not connected to this edge, a ValueError
@@ -397,7 +397,7 @@ class Halfedge:
         """
         return self.uid < other.uid
 
-    def direction(self):
+    def direction(self) -> float:
         """
         Calculates the angular direction of the halfedge
         using the arctan2 function (in radians).
@@ -438,7 +438,7 @@ class Mesh:
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 
-    def geometric_properties(self):
+    def geometric_properties(self) -> dict[str, float]:
         """
         Calculates the geometric properties of the shape defined by
         the mesh
@@ -447,7 +447,7 @@ class Mesh:
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         return geometric_properties(coords)
 
-    def bounding_box(self):
+    def bounding_box(self) -> nparr:
         """
         Returns a bounding box of the mesh
 
@@ -535,7 +535,7 @@ def polygon_centroid(coords: nparr) -> nparr:
     return np.array((x_cent, y_cent))
 
 
-def polygon_inertia(coords: nparr):
+def polygon_inertia(coords: nparr) -> dict[str, float]:
     """
     Calculates the moments of inertia of a polygon.
 
@@ -622,7 +622,7 @@ def polygon_inertia(coords: nparr):
     return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
-def geometric_properties(coords: nparr):
+def geometric_properties(coords: nparr) -> dict[str, float]:
     """
     Aggregates the results of the previous functions.
 
@@ -644,7 +644,7 @@ def geometric_properties(coords: nparr):
 # auxiliary functions
 
 
-def ang_reduce(ang: float):
+def ang_reduce(ang: float) -> float:
     """
     Brings and angle expressed in radians in the interval [0, 2pi)
 
@@ -779,7 +779,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     # plt.show()
 
 
-def obtain_closed_loops(halfedges: list[Halfedge]):
+def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
     """
     Given a list of halfedges, this function uses their `next`
     attribute to group them into sequences of closed loops (ordered
@@ -814,7 +814,13 @@ def obtain_closed_loops(halfedges: list[Halfedge]):
     return loops
 
 
-def orient_loops(loops: list[list[Halfedge]]):
+def orient_loops(
+    loops: list[list[Halfedge]],
+) -> tuple[
+    list[list[Halfedge]],
+    list[list[Halfedge]],
+    list[list[Halfedge]],
+]:
     """
     Separates loops to internal (counterclockwise) and external
     (clockwise). Also gathers trivial loops, i.e. halfedge sequences
@@ -853,7 +859,7 @@ def orient_loops(loops: list[list[Halfedge]]):
 
 def subdivide_polygon(
     *, outside: Mesh, holes: list[Mesh], n_x: int, n_y: int, plot: bool = False
-):
+) -> list[shapely_Polygon]:
     """
     Used to define the fibers of fiber sections.
 

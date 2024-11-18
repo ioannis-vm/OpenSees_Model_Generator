@@ -42,7 +42,7 @@ def generate(edges: list[Edge]) -> Mesh:
     return Mesh(internal[0])
 
 
-def define_edges(vertices: list[Vertex]):
+def define_edges(vertices: list[Vertex]) -> list[Edge]:
     """
     Defines edges from an ordered list of vertices.
 
@@ -65,7 +65,7 @@ def w_mesh(
     sec_tw: float,
     sec_tf: float,
     target_area: float | None = None,
-):
+) -> Mesh:
     """
     Defines a loop of counterclockwise halfedges that form the shape
     of the W section with the specified parameters.  The origin
@@ -184,7 +184,7 @@ def w_mesh(
     return generate(edges)
 
 
-def rect_mesh(dim_b: float, dim_h: float):
+def rect_mesh(dim_b: float, dim_h: float) -> Mesh:
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the rectangular section with
@@ -206,7 +206,7 @@ def rect_mesh(dim_b: float, dim_h: float):
     return generate(edges)
 
 
-def circ_mesh(dim_d: float):
+def circ_mesh(dim_d: float) -> Mesh:
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the circular section with

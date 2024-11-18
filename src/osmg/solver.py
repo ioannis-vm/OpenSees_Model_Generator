@@ -700,7 +700,7 @@ class Analysis:
     # Numeric Result Post-processing #
     ##################################
 
-    def global_reactions(self, case_name: str, step: int):
+    def global_reactions(self, case_name: str, step: int) -> nparr:
         """
         Calculates and returns the global reaction forces.
 
@@ -1072,7 +1072,9 @@ class ModalAnalysis(Analysis):
         if self.settings.serialize_results:
             self._write_results_to_disk()
 
-    def modal_participation_factors(self, case_name: str, direction: str):
+    def modal_participation_factors(
+        self, case_name: str, direction: str
+    ) -> tuple[nparr, nparr, nparr]:
         """
         Calculates modal participation factors
 
@@ -1138,7 +1140,7 @@ class GravityPlusAnalysis(Analysis):
             msg = 'Analysis Failed'
             raise ValueError(msg)
 
-    def retrieve_node_displacement(self, uid: int, case_name: str):
+    def retrieve_node_displacement(self, uid: int, case_name: str) -> pd.DataFrame:
         """
         Returns the displacement of a node for all analysis steps
 
@@ -1154,7 +1156,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_acceleration(self, uid: int, case_name: str):
+    def retrieve_node_acceleration(self, uid: int, case_name: str) -> pd.DataFrame:
         """
         Returns the acceleration of a node for all analysis steps
 
@@ -1167,7 +1169,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_velocity(self, uid: int, case_name: str):
+    def retrieve_node_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
         """
         Returns the velocity of a node for all analysis steps
 
@@ -1180,7 +1182,9 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_abs_acceleration(self, uid: int, case_name: str):
+    def retrieve_node_abs_acceleration(
+        self, uid: int, case_name: str
+    ) -> pd.DataFrame:
         """
         Returns the absolute acceleration of a node for all analysis
         steps
@@ -1216,7 +1220,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_abs_velocity(self, uid: int, case_name: str):
+    def retrieve_node_abs_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
         """
         Returns the absolute velocity of a node for all analysis steps
 
@@ -1255,7 +1259,7 @@ class GravityPlusAnalysis(Analysis):
         dfrmae.index.name = 'step'
         return dfrmae
 
-    def retrieve_base_shear(self, case_name: str):
+    def retrieve_base_shear(self, case_name: str) -> pd.DataFrame:
         """
         Returns the base shear response history
 
@@ -1266,7 +1270,7 @@ class GravityPlusAnalysis(Analysis):
         base_shear: nparr = np.array(base_shear_lst)
         return base_shear
 
-    def retrieve_release_force_defo(self, uid: int, case_name: str):
+    def retrieve_release_force_defo(self, uid: int, case_name: str) -> pd.DataFrame:
         """
         Returns the force-deformation of a zerolength element for all
         analysis steps
@@ -1620,7 +1624,9 @@ class PushoverAnalysis(GravityPlusAnalysis):
         if self.settings.serialize_results:
             self._write_results_to_disk()
 
-    def table_pushover_curve(self, case_name: str, direction: str, node: Node):
+    def table_pushover_curve(
+        self, case_name: str, direction: str, node: Node
+    ) -> tuple[nparr, nparr]:
         """
         Returns the force deformation results
 
@@ -2370,7 +2376,7 @@ class ModalResponseSpectrumAnalysis:
         self.vb_modal = vb_modal
         self.anl = anl
 
-    def combined_node_disp(self, node_uid: int):
+    def combined_node_disp(self, node_uid: int) -> nparr:
         """
         Returns the SRSS-combined node displacement of a node.
 
@@ -2391,7 +2397,7 @@ class ModalResponseSpectrumAnalysis:
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
-    def combined_node_disp_diff(self, node_i_uid: int, node_j_uid: int):
+    def combined_node_disp_diff(self, node_i_uid: int, node_j_uid: int) -> nparr:
         """
         Returns the SRSS-combined displacement difference between two
         nodes.
@@ -2423,7 +2429,7 @@ class ModalResponseSpectrumAnalysis:
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
-    def combined_basic_forces(self, element_uid: int):
+    def combined_basic_forces(self, element_uid: int) -> nparr:
         """
         Returns the SRSS-combined basic forces of a line element.
 

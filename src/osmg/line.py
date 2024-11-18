@@ -51,7 +51,7 @@ class Line:
         res += f'  end: {self.end}\n'
         return res
 
-    def length(self):
+    def length(self) -> nparr:
         """
         Returns the length of the line.
 
@@ -64,7 +64,7 @@ class Line:
         """
         return np.linalg.norm(self.end - self.start)
 
-    def direction(self):
+    def direction(self) -> nparr:
         """
         Returns a unit vector pointing from the start to the end of
         the line.

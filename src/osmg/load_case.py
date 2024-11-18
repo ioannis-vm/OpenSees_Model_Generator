@@ -225,7 +225,7 @@ class LoadCase:
             rda = RDAnalyzer(self, lvl)
             rda.run(gather_mass)
 
-    def number_of_free_dofs(self):
+    def number_of_free_dofs(self) -> int:
         """
         Calculates the number of free DOFS of the model, considering
         all (potentially) defined constraints, restraints and parent

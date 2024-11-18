@@ -36,7 +36,7 @@ node_marker = {
 # }
 
 
-def global_layout(mdl: Model, camera: dict[str, object] = None):
+def global_layout(mdl: Model, camera: dict[str, object] = None) -> go.Layout:
     """
     Some general definitions that are often needed.
 
