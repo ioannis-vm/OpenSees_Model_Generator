@@ -23,10 +23,17 @@ def list_directories(root_dir):
 
 
 def list_python_files(directory):
-    res = []
-    for file in glob.glob(Path(directory) / '*.py'):  # TODO(JVM): Is this correct?
-        res.append(file)  # noqa: PERF402
-    return res
+    """
+    List all Python files in the specified directory and
+    subdirectories.
+
+    Args:
+        directory (str): The directory to search in.
+
+    Returns:
+        list[str]: A list of paths to Python files.
+    """
+    return [str(file) for file in Path(directory).rglob('*.py')]
 
 
 res = list_directories('src/osmg/')
