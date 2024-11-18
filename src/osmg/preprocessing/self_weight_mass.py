@@ -19,7 +19,7 @@ from osmg import common
 from osmg.ops import element
 
 
-def self_weight(mdl, lcase, factor=1.00):
+def self_weight(mdl: Model, lcase: LoadCase, factor: float = 1.00) -> None:
     """
     Assigns the structure's self weight to its members.
 
@@ -55,7 +55,7 @@ def self_weight(mdl, lcase, factor=1.00):
             )
 
 
-def self_mass(mdl, lcase):
+def self_mass(mdl: Model, lcase: LoadCase) -> None:
     """
     Assigns the structure's self mass to its members
 

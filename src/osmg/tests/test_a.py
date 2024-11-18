@@ -24,7 +24,7 @@ from osmg.solver import PushoverAnalysis
 nparr = npt.NDArray[np.float64]
 
 
-def test_a():
+def test_a() -> None:
     """
     Basic functionality tests
     Simple frame model

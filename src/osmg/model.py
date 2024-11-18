@@ -76,7 +76,7 @@ class Settings:
     ndm: int = field(default=3)  # that's all we support
     ndf: int = field(default=6)  # that's all we support
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += '~~~ Model Settings ~~~\n'
         res += f'  Imperial units: {self.imperial_units}\n'
@@ -137,7 +137,7 @@ class Model:
         self.uniaxial_materials = obj_collections.Collection(self)
         self.physical_materials = obj_collections.Collection(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += '~~~ Model Object ~~~\n'
         res += f'ID: {id(self)}\n'
@@ -348,7 +348,7 @@ class Model:
         p_min, p_max = self.bounding_box(padding=0.00)
         return np.max(p_max - p_min)
 
-    def initialize_empty_copy(self, name):
+    def initialize_empty_copy(self, name: str):
         """
         Initializes a shallow empty copy of the model.
         Used to create subset models.

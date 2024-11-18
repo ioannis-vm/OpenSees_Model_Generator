@@ -113,7 +113,7 @@ class NodeGenerator:
         level.nodes.add(node)
         return node
 
-    def add_node_active(self, x_loc, y_loc):
+    def add_node_active(self, x_loc: float, y_loc: float) -> None:
         """
         Adds a node[/s] at the specified coordinates to all active levels.
 

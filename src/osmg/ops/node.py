@@ -43,10 +43,10 @@ class Node:
     def __post_init__(self):
         self.restraint = [False] * 6
 
-    def __le__(self, other):
+    def __le__(self, other: type[self]):
         return self.uid < other.uid
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Node object\n'
         res += f'  uid: {self.uid}\n'

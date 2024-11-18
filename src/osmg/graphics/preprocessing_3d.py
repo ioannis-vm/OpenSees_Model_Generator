@@ -34,7 +34,9 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def add_data__nodes(data_dict, mdl, load_case):
+def add_data__nodes(
+    data_dict: list[dict[str, object]], mdl: Model, load_case: str
+) -> None:
     """
     Adds a trace containing nodes
 

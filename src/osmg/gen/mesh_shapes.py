@@ -30,7 +30,7 @@ from osmg.mesh import (
 nparr = npt.NDArray[np.float64]
 
 
-def generate(edges):
+def generate(edges: list[Edge]) -> Mesh:
     """
     Generates halfedges from the given edges.
 
@@ -42,7 +42,7 @@ def generate(edges):
     return Mesh(internal[0])
 
 
-def define_edges(vertices):
+def define_edges(vertices: list[Vertex]):
     """
     Defines edges from an ordered list of vertices.
 
@@ -59,7 +59,13 @@ def define_edges(vertices):
     return edges
 
 
-def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
+def w_mesh(
+    sec_b: float,
+    sec_h: float,
+    sec_tw: float,
+    sec_tf: float,
+    target_area: float | None = None,
+):
     """
     Defines a loop of counterclockwise halfedges that form the shape
     of the W section with the specified parameters.  The origin
@@ -178,7 +184,7 @@ def w_mesh(sec_b, sec_h, sec_tw, sec_tf, target_area=None):
     return generate(edges)
 
 
-def rect_mesh(dim_b, dim_h):
+def rect_mesh(dim_b: float, dim_h: float):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the rectangular section with
@@ -200,7 +206,7 @@ def rect_mesh(dim_b, dim_h):
     return generate(edges)
 
 
-def circ_mesh(dim_d):
+def circ_mesh(dim_d: float):
     """
     Defines a loop of counterclockwise halfedges
     that form the shape of the circular section with

@@ -91,7 +91,7 @@ class ZeroLength(Element):
             *self.vecyp,
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
@@ -134,7 +134,7 @@ class TwoNodeLink(Element):
             *self.vecyp,
         ]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
@@ -199,7 +199,7 @@ class TrussBar(Element):
         p_j = np.array(self.nodes[1].coords)
         return np.linalg.norm(p_i - p_j)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
         res = ''
         res += f'{elm_name[self.transf_type]} element object\n'
@@ -362,7 +362,7 @@ class ElasticBeamColumn(Element):
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'elasticBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
@@ -450,7 +450,7 @@ class DispBeamColumn(Element):
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'dispBeamColumn element object\n'
         res += f'uid: {self.uid}\n'

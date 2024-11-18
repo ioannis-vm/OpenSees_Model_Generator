@@ -41,7 +41,9 @@ class LoadCombination:
     mdl: Model
     combo: dict[str, list[tuple[float, Analysis, str]]] = field(default_factory=dict)
 
-    def envelope_basic_forces(self, elm, num_points):
+    def envelope_basic_forces(
+        self, elm: TrussBar | ElasticBeamColumn | DispBeamColumn, num_points: int
+    ):
         """
         Calculates the envelope of the basic forces for the
         given load combination
@@ -70,7 +72,7 @@ class LoadCombination:
 
         return df_min, df_max
 
-    def envelope_node_displacement(self, node):
+    def envelope_node_displacement(self, node: Node):
         """
         Calculates the enveloped node displacement
         """
@@ -92,7 +94,7 @@ class LoadCombination:
 
         return disp_min, disp_max
 
-    def envelope_node_displacement_diff(self, node_i, node_j):
+    def envelope_node_displacement_diff(self, node_i: Node, node_j: Node):
         """
         Calculates the enveloped displacement difference between
         two nodes

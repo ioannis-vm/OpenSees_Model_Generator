@@ -39,7 +39,7 @@ class RDAnalyzer:
     parent_loadcase: LoadCase
     parent_level: Level
 
-    def run(self, gather_mass):
+    def run(self, gather_mass: bool) -> None:
         """
         Applies rigid diaphragm constraints and optionally gathers
         mass from the nodes of the level to the primary nodes

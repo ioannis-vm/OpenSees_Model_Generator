@@ -156,19 +156,19 @@ class MaterialGenerator:
 
     def generate_steel_w_imk_material(  # noqa: C901
         self,
-        section,
-        physical_material,
-        element_length,
-        lboverl,
-        loverh,
-        rbs_factor,
-        consider_composite,
-        axial_load_ratio,
-        direction='strong',
-        moment_modifier=1.00,
-        n_parameter=0.00,
         *,
-        only_elastic=False,
+        section: ElasticSection,
+        physical_material: PhysicalMaterial,
+        element_length: float,
+        lboverl: float,
+        loverh: float,
+        rbs_factor: float,
+        consider_composite: bool,
+        axial_load_ratio: floatn,
+        direction: str = 'strong',
+        moment_modifier: float = 1.00,
+        n_parameter: float = 0.00,
+        only_elastic: bool = False,
     ):
         """
         Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of

@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 nparr = npt.NDArray[np.float64]
 
 
-def force_scaling_factor(ref_len, fmax, factor):
+def force_scaling_factor(ref_len: float, fmax: float, factor: float):
     """
     Applies a scaling factor to basic forces.
 
@@ -55,7 +55,14 @@ def force_scaling_factor(ref_len, fmax, factor):
     return result
 
 
-def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
+def interp_3d_deformation(
+    elm: element.Element,
+    u_i: nparr,
+    r_i: nparr,
+    u_j: nparr,
+    r_j: nparr,
+    num_points: int,
+):
     """
     Given the deformations of the ends of a Bernoulli beam,
     use its shape functions to obtain intermediate points.
@@ -158,7 +165,12 @@ def interp_3d_deformation(elm, u_i, r_i, u_j, r_j, num_points):
     return d_global, r_local
 
 
-def interp_3d_points(elm, d_global, num_points, scaling):
+def interp_3d_points(
+    elm: element.Element,
+    d_global: nparr,
+    num_points: int,
+    scaling: float,
+):
     """
     Calculates intermediate points based on end locations and
     deformations.
@@ -182,8 +194,13 @@ def interp_3d_points(elm, d_global, num_points, scaling):
 
 
 def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
-    analysis, case_name, data_dict, list_of_line_elems, step, scaling
-):
+    analysis: Analysis,
+    case_name: str,
+    data_dict: dict[str, object],
+    list_of_line_elems: list[element.Element],
+    step: int,
+    scaling: float,
+) -> None:
     """
     Adds a trace containing frame element extrusion mesh
     in its deformed state.
@@ -360,8 +377,13 @@ def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
 
 
 def add_data__line_elms_deformed(
-    analysis, case_name, data_dict, list_of_line_elems, step, scaling
-):
+    analysis: Analysis,
+    case_name: str,
+    data_dict: dict[str, object],
+    list_of_line_elems: list[element.Element],
+    step: int,
+    scaling: float,
+) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
     in their deformed state.
@@ -445,8 +467,13 @@ def add_data__line_elms_deformed(
 
 
 def add_data__line_elm_offsets_deformed(
-    analysis, case_name, data_dict, list_of_line_elems, step, scaling
-):
+    analysis: Analysis,
+    case_name: str,
+    data_dict: dict[str, object],
+    list_of_line_elems: list[element.Element],
+    step: int,
+    scaling: float,
+) -> None:
     """
     Adds a trace containing frame element rigid offset lines
     in their deformed state.
@@ -518,7 +545,9 @@ def add_data__line_elm_offsets_deformed(
     )
 
 
-def add_data__frames_undeformed(data_dict, list_of_line_elems):
+def add_data__frames_undeformed(
+    data_dict: dict[str, object], list_of_line_elems: list[element.Element]
+) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
 
@@ -552,8 +581,14 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
 
 
 def add_data__nodes_deformed(
-    analysis, case_name, data_dict, list_of_nodes, step, scaling, function
-):
+    analysis: Analysis,
+    case_name: str,
+    data_dict: dict[str, object],
+    list_of_nodes: list[Node],
+    step: int,
+    scaling: float,
+    function: str,
+) -> None:
     """
     Adds a trace containing nodes in their deformed locations.
 
@@ -616,7 +651,9 @@ def add_data__nodes_deformed(
     )
 
 
-def get_auto_scaling_deformation(analysis, case_name, mdl, step):
+def get_auto_scaling_deformation(
+    analysis: Analysis, case_name: str, mdl: Model, step: int
+):
     """
     Automatically calculate a scaling value that makes the maximum
     displacement appear approximately 10% of the largest dimention of
@@ -768,7 +805,7 @@ def show_deformed_shape(  # noqa: C901
 
     # create the plot
 
-    def frame_args(duration):
+    def frame_args(duration: float):
         return {
             'frame': {'duration': duration},
             'mode': 'immediate',
@@ -897,22 +934,22 @@ def show_deformed_shape(  # noqa: C901
 
 
 def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
-    analysis,
-    case_name,
-    step,
-    scaling_global,
-    scaling_n,
-    scaling_q,
-    scaling_m,
-    scaling_t,
-    num_points,
-    force_conversion=1.00,
-    moment_conversion=1.00,
+    analysis: Analysis,
+    case_name: str,
+    step: int,
+    scaling_global: float,
+    scaling_n: float,
+    scaling_q: float,
+    scaling_m: float,
+    scaling_t: float,
+    num_points: int,
+    force_conversion: float = 1.00,
+    moment_conversion: float = 1.00,
     *,
-    global_axes=False,
-    camera=None,
-    subset_model=None,
-    to_html_file=None,
+    global_axes: bool = False,
+    camera: dict[str, object] | None = None,
+    subset_model: Model | None = None,
+    to_html_file: str | None = None,
 ):
     """
     Visualize the model and plot the frame element basic forces.
@@ -1413,20 +1450,20 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
 
 
 def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
-    combo,
+    combo: dict[str, list[tuple[float, Analysis, str]]],
     *,
-    scaling_global,
-    scaling_n,
-    scaling_q,
-    scaling_m,
-    scaling_t,
-    num_points,
-    force_conversion=1.00,
-    moment_conversion=1.00,
-    global_axes=False,
-    camera=None,
-    subset_model=None,
-    to_html_file=None,
+    scaling_global: float,
+    scaling_n: float,
+    scaling_q: float,
+    scaling_m: float,
+    scaling_t: float,
+    num_points: int,
+    force_conversion: float = 1.00,
+    moment_conversion: float = 1.00,
+    global_axes: bool = False,
+    camera: dict[str, object] | None = None,
+    subset_model: Model = None,
+    to_html_file: str | None = None,
 ):
     """
     Visualize the model and plot the enveloped frame element basic forces

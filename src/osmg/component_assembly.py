@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
-from . import obj_collections
+from osmg import obj_collections
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -64,12 +64,12 @@ class ComponentAssembly:
         field(init=False)
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.external_nodes = obj_collections.NodeCollection(self)
         self.internal_nodes = obj_collections.NodeCollection(self)
         self.elements = obj_collections.CollectionWithConnectivity(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'
@@ -79,7 +79,9 @@ class ComponentAssembly:
             res += f'  {node.uid}, {node.coords}'
         return res
 
-    def dict_of_elements(self):
+    def dict_of_elements(
+        self,
+    ) -> dict[int, obj_collections.CollectionWithConnectivity]:
         """
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
@@ -90,14 +92,16 @@ class ComponentAssembly:
             res[elm.uid] = elm
         return res
 
-    def list_of_elements(self):
+    def list_of_elements(self) -> list[obj_collections.CollectionWithConnectivity]:
         """
         Returns a list of all element objects in the model.
 
         """
         return list(self.dict_of_elements().values())
 
-    def element_connectivity(self):
+    def element_connectivity(
+        self,
+    ) -> dict[tuple[int, ...], obj_collections.CollectionWithConnectivity]:
         """
         Returns the connectivity of all elements. Elements are
         connected to external nodes. Each component assembly can be

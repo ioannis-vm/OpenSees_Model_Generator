@@ -15,7 +15,7 @@ Common definitions
 from __future__ import annotations
 import re
 from pprint import pprint
-from typing import Any, Optional, OrderedDict
+from typing import Any, Optional, OrderedDict, Hashable
 
 # very big, very small numbers used for
 # comparing floats and hashing
@@ -73,7 +73,9 @@ def print_dir(obj: object) -> None:
     pprint(dir(obj))  # noqa: T203
 
 
-def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Any | None:
+def previous_element(
+    dct: OrderedDict[Hashable, Any], key: Hashable
+) -> Hashable | None:
     """
     Returns the value of the element that comes before the given key
     in an ordered dictionary.

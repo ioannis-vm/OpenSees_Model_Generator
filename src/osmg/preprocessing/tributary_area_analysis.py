@@ -103,8 +103,12 @@ class TributaryAreaAnaysis:
 
     @no_type_check
     def run(  # noqa: PLR0912, PLR0914, PLR0915
-        self, *, load_factor=1.00, massless_load_factor=1.00, perform_checks=True
-    ):  # noqa: C901
+        self,
+        *,
+        load_factor: float = 1.00,
+        massless_load_factor: float = 1.00,
+        perform_checks: bool = True,
+    ) -> None:  # noqa: C901
         """
         Performs tributary area analysis
 
@@ -343,7 +347,9 @@ class TributaryAreaAnaysis:
 
             subloops: list[list[Halfedge]] = []
 
-            def is_in_some_subloop(halfedge, loops):
+            def is_in_some_subloop(
+                halfedge: Halfedge, loops: list[list[Halfedge]]
+            ) -> bool:
                 for loop in loops:
                     for other_halfedge in loop:
                         if (

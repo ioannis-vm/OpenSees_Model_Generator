@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from osmg.mesh import Mesh
     from osmg.level import Level
     from osmg.model import Model
+    from osmg.obj_collections import CollectionActive
 
 
 nparr = npt.NDArray[np.float64]
@@ -95,17 +96,18 @@ def retrieve_snap_pt_global_offset(
 
 
 def beam_placement_lookup(  # noqa: C901
-    x_coord,
-    y_coord,
-    query,
-    ndg,
-    lvls,
-    key,
-    user_offset,
-    section_offset,
-    split_existing,
-    snap,
-):
+    x_coord: nparr,
+    y_coord: nparr,
+    query: ElmQuery,
+    ndg: NodeGenerator,
+    lvls: CollectionActive,
+    key: str,
+    *,
+    user_offset: nparr,
+    section_offset: nparr,
+    split_existing: bool,
+    snap: str,
+) -> tuple[Node, nparr]:
     """
     Performs lookup operations before placing a beam-functioning
     component assembly to determine how to connect it with
@@ -531,21 +533,21 @@ class BeamColumnGenerator:
 
     def add_beamcolumn_elements_in_series(
         self,
-        component,
-        node_i,
-        node_j,
-        eo_i,
-        eo_j,
-        n_sub,
-        transf_type,
-        section,
-        element_type,
-        angle,
-        camber_2,
-        camber_3,
-        n_x=None,
-        n_y=None,
-    ):
+        component: ComponentAssembly,
+        node_i: Node,
+        node_j: Node,
+        eo_i: nparr,
+        eo_j: nparr,
+        n_sub: int,
+        transf_type: str,
+        section: ElasticSection | FiberSection,
+        element_type: type[ElasticBeamColumn, DispBeamColumn],
+        angle: float,
+        camber_2: float,
+        camber_3: float,
+        n_x: int | None = None,
+        n_y: int | None = None,
+    ) -> None:
         """
         Adds beamcolumn elemens in series.
 
@@ -622,21 +624,21 @@ class BeamColumnGenerator:
 
     def generate_plain_component_assembly(
         self,
-        component_purpose,
-        lvl,
-        node_i,
-        node_j,
-        n_sub,
-        eo_i,
-        eo_j,
-        section,
-        element_type,
-        transf_type,
-        angle,
-        camber_2,
-        camber_3,
-        n_x=None,
-        n_y=None,
+        component_purpose: str,
+        lvl: Level,
+        node_i: Node,
+        node_j: Node,
+        n_sub: int,
+        eo_i: nparr,
+        eo_j: nparr,
+        section: ElasticSection | FiberSection,
+        element_type: type[ElasticBeamColumn, DispBeamColumn],
+        transf_type: str,
+        angle: float,
+        camber_2: float,
+        camber_3: float,
+        n_x: int | None = None,
+        n_y: int | None = None,
     ):
         """
         Generates a plain component assembly, with line elements in
@@ -684,25 +686,25 @@ class BeamColumnGenerator:
 
     def generate_hinged_component_assembly(  # noqa: C901, PLR0913, PLR0917
         self,
-        component_purpose,
-        lvl,
-        node_i,
-        node_j,
-        n_sub,
-        eo_i,
-        eo_j,
-        section,
-        element_type,
-        transf_type,
-        angle,
-        camber_2,
-        camber_3,
-        n_x,
-        n_y,
-        zerolength_gen_i,
-        zerolength_gen_args_i,
-        zerolength_gen_j,
-        zerolength_gen_args_j,
+        component_purpose: str,
+        lvl: Level,
+        node_i: Node,
+        node_j: Node,
+        n_sub: int,
+        eo_i: nparr,
+        eo_j: nparr,
+        section: ElasticSection | FiberSection,
+        element_type: type[ElasticBeamColumn, DispBeamColumn],
+        transf_type: str,
+        angle: float,
+        camber_2: float,
+        camber_3: float,
+        n_x: int,
+        n_y: int,
+        zerolength_gen_i: Callable,
+        zerolength_gen_args_i: dict[str, object],
+        zerolength_gen_j: Callable,
+        zerolength_gen_args_j: dict[str, object],
     ):
         """
         Defines a component assembly that is comprised of

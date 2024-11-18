@@ -47,7 +47,7 @@ class PhysicalMaterial:
     g_mod: float
     f_y: float
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Physical material object\n'
         res += f'Name: {self.name}\n'

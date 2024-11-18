@@ -220,7 +220,7 @@ class Analysis:
             # logger might not have been initialized yet
             self.logger.info(msg)
 
-    def _init_results(self):  # noqa: C901
+    def _init_results(self) -> None:  # noqa: C901
         # initialize output directory
         if self.output_directory and not Path(self.output_directory).exists():
             Path(self.output_directory).mkdir(parents=True)
@@ -284,7 +284,7 @@ class Analysis:
             self.log(f'Hostname: {socket.gethostname()}')
         self.log(f'Python Version: {sys.version}')
 
-    def _write_results_to_disk(self):
+    def _write_results_to_disk(self) -> None:
         """
         Serializes the results to a JSON file using json-tricks.
 
@@ -293,7 +293,7 @@ class Analysis:
             json_data = dumps(self.results, indent=4)
             file.write(json_data)
 
-    def read_results_from_disk(self):
+    def read_results_from_disk(self) -> None:
         """
         Reads back results from a JSON file using json-tricks.
 
@@ -301,7 +301,7 @@ class Analysis:
         with Path(f'{self.output_directory}/main_results.json').open('r') as file:
             self.results = loads(file.read())
 
-    def _to_opensees_domain(self, case_name):  # noqa: C901
+    def _to_opensees_domain(self, case_name: str) -> None:  # noqa: C901
         """
         Defines the model in OpenSeesPy.
 
@@ -387,7 +387,9 @@ class Analysis:
 
         elms = self.mdl.list_of_specific_element(element.DispBeamColumn)
 
-        def define_material(mat, defined_materials):
+        def define_material(
+            mat: UniaxialMaterial, defined_materials: list[UniaxialMaterial]
+        ) -> None:
             """
             A cute recursive function that defines materials with
             predecessors.
@@ -528,7 +530,7 @@ class Analysis:
                     6,
                 )
 
-    def _define_loads(self, case_name, factor=1.00):
+    def _define_loads(self, case_name: str, factor: float = 1.00) -> None:
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
         elms_with_udl: list[element.ElasticBeamColumn | element.DispBeamColumn] = []
@@ -573,7 +575,9 @@ class Analysis:
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def _read_node_displacements(self, case_name, step, nodes):
+    def _read_node_displacements(
+        self, case_name: str, step: int, nodes: list[Node]
+    ) -> None:
         for node in nodes:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
@@ -581,7 +585,9 @@ class Analysis:
             val = ops.nodeDisp(node.uid)
             self.results[case_name].node_displacements[node.uid][step] = val
 
-    def _read_node_velocities(self, case_name, step, nodes):
+    def _read_node_velocities(
+        self, case_name: str, step: int, nodes: list[Node]
+    ) -> None:
         for node in nodes:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
@@ -589,7 +595,9 @@ class Analysis:
             val = ops.nodeVel(node.uid)
             self.results[case_name].node_velocities[node.uid][step] = val
 
-    def _read_node_accelerations(self, case_name, step, nodes):
+    def _read_node_accelerations(
+        self, case_name: str, step: int, nodes: list[Node]
+    ) -> None:
         for node in nodes:
             if self.settings.specific_nodes:
                 if node.uid not in self.settings.specific_nodes:
@@ -597,14 +605,18 @@ class Analysis:
             val = ops.nodeAccel(node.uid)
             self.results[case_name].node_accelerations[node.uid][step] = val
 
-    def _read_node_reactions(self, case_name, step, nodes):
+    def _read_node_reactions(
+        self, case_name: str, step: int, nodes: list[Node]
+    ) -> None:
         ops.reactions()
         for node in nodes:
             if True in node.restraint:
                 val = ops.nodeReaction(node.uid)
                 self.results[case_name].node_reactions[node.uid][step] = val
 
-    def _read_frame_element_forces(self, case_name, step, elems):
+    def _read_frame_element_forces(
+        self, case_name: str, step: int, elems: list[Element]
+    ) -> None:
         for elm in elems:
             uid = elm.uid
             global_values: nparr = np.array(ops.eleForce(uid))
@@ -634,7 +646,9 @@ class Analysis:
             forces: nparr = np.array((n_i, qy_i, qz_i, t_i, my_i, mz_i))
             self.results[case_name].element_forces[uid][step] = forces
 
-    def _read_release_moment_rot(self, case_name, step, zerolength_elms):
+    def _read_release_moment_rot(
+        self, case_name: str, step: int, zerolength_elms: list[ZeroLengthElement]
+    ) -> None:
         for release in zerolength_elms:
             # force_global = ops.eleResponse(
             #     release.uid, 'force')[:3]
@@ -660,12 +674,14 @@ class Analysis:
 
     def _read_opensees_results(
         self,
-        case_name,
-        step,
-        nodes,
-        line_elements,
-        zerolength_elements,
-    ):
+        case_name: str,
+        step: int,
+        nodes: list[Node],
+        line_elements: list[
+            element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
+        ],
+        zerolength_elements: list[element.ZeroLengthElement],
+    ) -> None:
         self.results[case_name].clock.append(perf_counter())
         self.results[case_name].iters.append(ops.testIter())
         self._read_node_displacements(case_name, step, nodes)
@@ -684,7 +700,7 @@ class Analysis:
     # Numeric Result Post-processing #
     ##################################
 
-    def global_reactions(self, case_name, step):
+    def global_reactions(self, case_name: str, step: int):
         """
         Calculates and returns the global reaction forces.
 
@@ -740,7 +756,7 @@ class StaticAnalysis(Analysis):
 
     """
 
-    def run(self, num_subdiv=1):
+    def run(self, num_subdiv: int = 1) -> None:
         """
         Runs the static analysis.
 
@@ -804,7 +820,7 @@ class ModalAnalysis(Analysis):
     # Methods that read back information from OpenSees #
     ####################################################
 
-    def _read_node_displacements_modal(self, case_name):
+    def _read_node_displacements_modal(self, case_name: str) -> None:
         nodes = self.mdl.list_of_all_nodes()
         nodes.extend(self.load_cases[case_name].parent_nodes.values())
         for node in nodes:
@@ -812,7 +828,9 @@ class ModalAnalysis(Analysis):
                 val = ops.nodeEigenvector(node.uid, i + 1)
                 self.results[case_name].node_displacements[node.uid][i] = val
 
-    def _read_frame_element_forces_modal(self, case_name, elems):
+    def _read_frame_element_forces_modal(
+        self, case_name: str, elems: list[element.Element]
+    ) -> None:
         # note: opensees does not output the element forces that correspond
         # to the displacement field of each obtained mode.
         # to overcome this, we run a separate analysis imposing those
@@ -989,7 +1007,7 @@ class ModalAnalysis(Analysis):
                     ][step]
                 ) = forces_vector_local
 
-    def run(self):
+    def run(self) -> None:
         """
         Runs the modal analysis.
 
@@ -1054,7 +1072,7 @@ class ModalAnalysis(Analysis):
         if self.settings.serialize_results:
             self._write_results_to_disk()
 
-    def modal_participation_factors(self, case_name, direction):
+    def modal_participation_factors(self, case_name: str, direction: str):
         """
         Calculates modal participation factors
 
@@ -1098,7 +1116,7 @@ class GravityPlusAnalysis(Analysis):
 
     """
 
-    def _run_gravity_analysis(self, num_steps=1):
+    def _run_gravity_analysis(self, num_steps: int = 1) -> None:
         self.log("G: Setting test to ('EnergyIncr', 1.0e-6, 100, 3)")
         ops.test('EnergyIncr', 1.0e-6, 100, 3)
         system = self.settings.solver
@@ -1120,7 +1138,7 @@ class GravityPlusAnalysis(Analysis):
             msg = 'Analysis Failed'
             raise ValueError(msg)
 
-    def retrieve_node_displacement(self, uid, case_name):
+    def retrieve_node_displacement(self, uid: int, case_name: str):
         """
         Returns the displacement of a node for all analysis steps
 
@@ -1136,7 +1154,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_acceleration(self, uid, case_name):
+    def retrieve_node_acceleration(self, uid: int, case_name: str):
         """
         Returns the acceleration of a node for all analysis steps
 
@@ -1149,7 +1167,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_velocity(self, uid, case_name):
+    def retrieve_node_velocity(self, uid: int, case_name: str):
         """
         Returns the velocity of a node for all analysis steps
 
@@ -1162,7 +1180,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_abs_acceleration(self, uid, case_name):
+    def retrieve_node_abs_acceleration(self, uid: int, case_name: str):
         """
         Returns the absolute acceleration of a node for all analysis
         steps
@@ -1198,7 +1216,7 @@ class GravityPlusAnalysis(Analysis):
         dframe.index.name = 'step'
         return dframe
 
-    def retrieve_node_abs_velocity(self, uid, case_name):
+    def retrieve_node_abs_velocity(self, uid: int, case_name: str):
         """
         Returns the absolute velocity of a node for all analysis steps
 
@@ -1237,7 +1255,7 @@ class GravityPlusAnalysis(Analysis):
         dfrmae.index.name = 'step'
         return dfrmae
 
-    def retrieve_base_shear(self, case_name):
+    def retrieve_base_shear(self, case_name: str):
         """
         Returns the base shear response history
 
@@ -1248,7 +1266,7 @@ class GravityPlusAnalysis(Analysis):
         base_shear: nparr = np.array(base_shear_lst)
         return base_shear
 
-    def retrieve_release_force_defo(self, uid, case_name):
+    def retrieve_release_force_defo(self, uid: int, case_name: str):
         """
         Returns the force-deformation of a zerolength element for all
         analysis steps
@@ -1270,7 +1288,13 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
     """
 
-    def _apply_lateral_load(self, case_name, direction, modeshape=None, node=None):  # noqa: C901
+    def _apply_lateral_load(
+        self,
+        case_name: str,
+        direction: str,
+        modeshape: nparr | None = None,
+        node: Node | None = None,
+    ) -> None:  # noqa: C901
         query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
         distribution = query.level_masses()
         distribution /= np.linalg.norm(distribution)
@@ -1331,14 +1355,14 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
     def run(  # noqa: C901
         self,
-        direction,
-        target_displacements,
-        control_node,
-        displ_incr,
-        integrator='DisplacementControl',
-        modeshape=None,
-        loaded_node=None,
-    ):
+        direction: str,
+        target_displacements: list[float | None],
+        control_node: Node,
+        displ_incr: float,
+        integrator: str = 'DisplacementControl',
+        modeshape: nparr | None = None,
+        loaded_node: Node | None = None,
+    ) -> None:
         """
         Run pushover analysis
 
@@ -1596,7 +1620,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         if self.settings.serialize_results:
             self._write_results_to_disk()
 
-    def table_pushover_curve(self, case_name, direction, node):
+    def table_pushover_curve(self, case_name: str, direction: str, node: Node):
         """
         Returns the force deformation results
 
@@ -1625,7 +1649,9 @@ class PushoverAnalysis(GravityPlusAnalysis):
         displacement: nparr = np.array(displacement_lst)
         return displacement, base_shear
 
-    def plot_pushover_curve(self, case_name, direction, node):
+    def plot_pushover_curve(
+        self, case_name: str, direction: str, node: Node
+    ) -> None:
         """
         Plots the pushover curve
 
@@ -1648,7 +1674,14 @@ class PushoverAnalysis(GravityPlusAnalysis):
         )
 
 
-def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, *, redefine=False):
+def define_lateral_load_pattern(
+    ag_x: nparr,
+    ag_y: nparr,
+    ag_z: nparr,
+    file_time_incr: float,
+    *,
+    redefine: bool = False,
+) -> None:
     """
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
@@ -1693,7 +1726,9 @@ def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, *, redefine=Fa
             ops.pattern('UniformExcitation', i, j, '-accel', i)
 
 
-def plot_ground_motion(filename, file_time_incr, gmunit='g', *, plotly=False):
+def plot_ground_motion(
+    filename: str, file_time_incr: float, gmunit: str = 'g', *, plotly: bool = False
+) -> None:
     """
     Plots a ground motion input file.
 
@@ -2246,8 +2281,8 @@ class THAnalysis(GravityPlusAnalysis):
     #         breakpoint()
 
     def plot_node_displacement_history(
-        self, case_name, node, direction, *, plotly=False
-    ):
+        self, case_name: str, node: Node, direction: str, *, plotly: bool = False
+    ) -> None:
         """
         Plots the displacement history of the specified node.
 
@@ -2298,7 +2333,7 @@ class ModalResponseSpectrumAnalysis:
     vb_modal: nparr | None = field(default=None)
     anl: Analysis | None = field(default=None)
 
-    def run(self):
+    def run(self) -> None:
         """
         Run the modal response spectrum analysis.
 
@@ -2335,7 +2370,7 @@ class ModalResponseSpectrumAnalysis:
         self.vb_modal = vb_modal
         self.anl = anl
 
-    def combined_node_disp(self, node_uid):
+    def combined_node_disp(self, node_uid: int):
         """
         Returns the SRSS-combined node displacement of a node.
 
@@ -2356,7 +2391,7 @@ class ModalResponseSpectrumAnalysis:
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
-    def combined_node_disp_diff(self, node_i_uid, node_j_uid):
+    def combined_node_disp_diff(self, node_i_uid: int, node_j_uid: int):
         """
         Returns the SRSS-combined displacement difference between two
         nodes.
@@ -2388,7 +2423,7 @@ class ModalResponseSpectrumAnalysis:
         all_vals_np: nparr = np.column_stack(all_vals)
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
-    def combined_basic_forces(self, element_uid):
+    def combined_basic_forces(self, element_uid: int):
         """
         Returns the SRSS-combined basic forces of a line element.
 

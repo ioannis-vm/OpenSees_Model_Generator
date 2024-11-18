@@ -51,7 +51,7 @@ class Vertex:
 
     _ids = count(0)
 
-    def __init__(self, coords: tuple[float, float]):
+    def __init__(self, coords: tuple[float, float]) -> None:
         """
         Initializes a new instance of the `Vertex` class.
 
@@ -64,7 +64,7 @@ class Vertex:
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
 
-    def __eq__(self, other):
+    def __eq__(self, other: type[self]):
         """
         Check for equality based on the uid of the vertex.
 
@@ -110,7 +110,7 @@ class Vertex:
         """
         return hash(self.uid)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns a string representation of the vertex.
 
@@ -132,7 +132,7 @@ class Edge:
 
     _ids = count(0)
 
-    def __init__(self, v_i: Vertex, v_j: Vertex):
+    def __init__(self, v_i: Vertex, v_j: Vertex) -> None:
         """
         Initializes a new edge with the given vertices.
         If the vertices don't already have an edge connecting them,
@@ -149,7 +149,7 @@ class Edge:
         if self not in self.v_j.edges:
             self.v_j.edges.append(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns a string representation of this edge, in the form
         `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
@@ -184,7 +184,7 @@ class Edge:
             raise ValueError(msg)
         return halfedge
 
-    def other_vertex(self, vertex):
+    def other_vertex(self, vertex: Vertex):
         """
         Returns the vertex of this edge that is not the given vertex.
         If the given vertex is not connected to this edge, a ValueError
@@ -361,7 +361,7 @@ class Halfedge:
 
     _ids = count(0)
 
-    def __init__(self, vertex: Vertex, edge: Edge):
+    def __init__(self, vertex: Vertex, edge: Edge) -> None:
         """
         Initializes the halfedge object.
 
@@ -375,7 +375,7 @@ class Halfedge:
         self.uid: int = next(self._ids)
         self.nxt = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns a string representation of the halfedge, in the form
         `(H0 from E0 to E0 next H1)`
@@ -390,7 +390,7 @@ class Halfedge:
             out = f'(H{self.uid}'
         return out
 
-    def __lt__(self, other):
+    def __lt__(self, other: type[self]):
         """
         Comparison function used for sorting. Compares the halfedge ids.
 
@@ -431,10 +431,10 @@ class Mesh:
 
     """
 
-    def __init__(self, halfedges: list[Halfedge]):
+    def __init__(self, halfedges: list[Halfedge]) -> None:
         self.halfedges = halfedges
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 
@@ -535,7 +535,7 @@ def polygon_centroid(coords: nparr) -> nparr:
     return np.array((x_cent, y_cent))
 
 
-def polygon_inertia(coords):
+def polygon_inertia(coords: nparr):
     """
     Calculates the moments of inertia of a polygon.
 
@@ -622,7 +622,7 @@ def polygon_inertia(coords):
     return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
-def geometric_properties(coords):
+def geometric_properties(coords: nparr):
     """
     Aggregates the results of the previous functions.
 
@@ -644,7 +644,7 @@ def geometric_properties(coords):
 # auxiliary functions
 
 
-def ang_reduce(ang):
+def ang_reduce(ang: float):
     """
     Brings and angle expressed in radians in the interval [0, 2pi)
 
@@ -779,7 +779,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     # plt.show()
 
 
-def obtain_closed_loops(halfedges):
+def obtain_closed_loops(halfedges: list[Halfedge]):
     """
     Given a list of halfedges, this function uses their `next`
     attribute to group them into sequences of closed loops (ordered
@@ -797,7 +797,7 @@ def obtain_closed_loops(halfedges):
 
     """
 
-    def is_in_some_loop(halfedge, loops):
+    def is_in_some_loop(halfedge: list[Halfedge], loops: list[list[Halfedge]]):
         return any(halfedge in loop for loop in loops)
 
     loops: list[list[Halfedge]] = []
@@ -814,7 +814,7 @@ def obtain_closed_loops(halfedges):
     return loops
 
 
-def orient_loops(loops):
+def orient_loops(loops: list[list[Halfedge]]):
     """
     Separates loops to internal (counterclockwise) and external
     (clockwise). Also gathers trivial loops, i.e. halfedge sequences
@@ -851,7 +851,9 @@ def orient_loops(loops):
 #######################################
 
 
-def subdivide_polygon(*, outside, holes, n_x, n_y, plot=False):
+def subdivide_polygon(
+    *, outside: Mesh, holes: list[Mesh], n_x: int, n_y: int, plot: bool = False
+):
     """
     Used to define the fibers of fiber sections.
 
@@ -1044,7 +1046,7 @@ def subdivide_hss_circ(
 #############
 
 
-def print_halfedge_results(halfedges):
+def print_halfedge_results(halfedges: list[Halfedge]) -> None:
     """
     Prints the ids of the defined halfedges and their vertex, edge and
     next, for debugging.
@@ -1066,7 +1068,7 @@ def print_halfedge_results(halfedges):
     print(results)  # noqa: T201
 
 
-def plot_loop(halfedge_loop):
+def plot_loop(halfedge_loop: list[Halfedge]) -> None:
     """
     Plots the vertices/edges of a list of halfedges.
 
@@ -1082,7 +1084,7 @@ def plot_loop(halfedge_loop):
     fig.show()
 
 
-def plot_edges(edges):
+def plot_edges(edges: list[Edge]) -> None:
     """
     Plots the given edges.
 
@@ -1096,7 +1098,7 @@ def plot_edges(edges):
     fig.show()
 
 
-def sanity_checks(external, trivial):
+def sanity_checks(external: list[Halfedge], trivial: list[Halfedge]) -> None:
     """
     Perform some checks to make sure assumptions are not violated.
 

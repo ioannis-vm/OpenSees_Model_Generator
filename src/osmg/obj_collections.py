@@ -148,7 +148,7 @@ class Collection(dict[TK, TV]):
             raise ValueError(msg)
         return res
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Collection Object\n'
         res += f'ID: {id(self)}\n'
@@ -211,7 +211,7 @@ class CollectionActive(Collection[TK, TV]):
                 raise KeyError(msg)
         self.active = uids
 
-    def set_active_all(self):
+    def set_active_all(self) -> None:
         """
         Sets the active objects.
 
@@ -257,7 +257,7 @@ class NodeCollection(Collection[int, node.Node]):
 
     named_contents: dict[str, node.Node] = field(default_factory=dict)
 
-    def search_xy(self, x_coord, y_coord):
+    def search_xy(self, x_coord: float, y_coord: float):
         """
         Returns the node that occupies a given point if it exists
         """
@@ -288,7 +288,7 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         default_factory=dict
     )
 
-    def add(self, obj):
+    def add(self, obj: object) -> None:
         """
         Adds an element to the collection.
         The method also checks to see if an object having the same

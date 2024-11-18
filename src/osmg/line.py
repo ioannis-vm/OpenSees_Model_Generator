@@ -44,7 +44,7 @@ class Line:
     start: nparr = field(repr=False)
     end: nparr = field(repr=False)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Line object\n'
         res += f'  start: {self.start}\n'

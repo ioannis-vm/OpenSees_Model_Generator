@@ -103,7 +103,7 @@ class ElasticSection(Section):
             res = self.sec_w
         return res
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'ElasticSection object\n'
         res += f'name: {self.name}\n'
@@ -148,7 +148,7 @@ class SectionComponent:
     physical_material: PhysicalMaterial
     parent_section: FiberSection | None = field(default=None)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'SectionComponent object\n'
         if self.outside_shape:
@@ -231,7 +231,7 @@ class FiberSection(Section):
         for part in self.section_parts:
             self.section_parts[part].parent_section = self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'FiberSection object\n'
         for part in self.section_parts:

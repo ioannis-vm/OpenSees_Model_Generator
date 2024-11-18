@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 
 
-def list_directories(root_dir):
+def list_directories(root_dir: str) -> list[Path]:
     res = []
     for path, directories, _ in os.walk(root_dir):
         for directory in directories:
@@ -22,7 +22,7 @@ def list_directories(root_dir):
     return res
 
 
-def list_python_files(directory):
+def list_python_files(directory: str) -> list[Path]:
     """
     List all Python files in the specified directory and
     subdirectories.
@@ -30,7 +30,8 @@ def list_python_files(directory):
     Args:
         directory (str): The directory to search in.
 
-    Returns:
+    Returns
+    -------
         list[str]: A list of paths to Python files.
     """
     return [str(file) for file in Path(directory).rglob('*.py')]

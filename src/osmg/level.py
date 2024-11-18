@@ -64,7 +64,7 @@ class Level:
         self.nodes = NodeCollection(self)
         self.components = Collection(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Level object\n'
         res += f'parent_model: {self.parent_model.name}\n'

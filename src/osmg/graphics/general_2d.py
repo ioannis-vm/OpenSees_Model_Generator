@@ -39,17 +39,17 @@ C_HOVERLABEL_BG = '#BB9457'
 
 
 def line_plot_interactive(
-    title_text,
-    x_vals,
-    y_vals,
-    mode,
-    xlab='x',
-    xunit=None,
-    xhoverformat='.0f',
-    ylab='y',
-    yunit=None,
-    yhoverformat='.0f',
-):
+    title_text: str,
+    x_vals: nparr,
+    y_vals: nparr,
+    mode: str,
+    xlab: str = 'x',
+    xunit: str | None = None,
+    xhoverformat: str = '.0f',
+    ylab: str = 'y',
+    yunit: str | Nonen = None,
+    yhoverformat: str = '.0f',
+) -> None:
     """
     Gneric polty line plot
     """

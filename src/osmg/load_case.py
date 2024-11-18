@@ -66,7 +66,7 @@ class PointLoadMass:
         """
         self.val += load
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'Point Load (or mass) object\n'
         res += 'Components: (global system)\n'
@@ -85,7 +85,7 @@ class LineElementUDL:
     parent_line_element: element.ElasticBeamColumn | element.DispBeamColumn
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'LineElementUDL object\n'
         res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
@@ -245,7 +245,7 @@ class LoadCase:
         ).sort_index(axis='index')
 
         # consider the restraints
-        def restraints(row, all_nodes):
+        def restraints(row: pd.Series, all_nodes: dict[int, Node]) -> None:
             uid = row.name
             node = all_nodes[uid]
             restraints = node.restraint
@@ -264,7 +264,7 @@ class LoadCase:
                 free_dofs.loc[constrained_node.uid, :] = (0, 0, 1, 1, 1, 0)
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         res = ''
         res += 'LoadCase object\n'
         res += f'name: {self.name}\n'
