@@ -1008,7 +1008,7 @@ class ModalAnalysis(Analysis):
             # tags = ops.getNodeTags()
             # self.print(len(tags))
             ops.constraints(*CONSTRAINTS)
-            if self.settings.solver.lower() in ('sparsesym', 'sparsespd'):
+            if self.settings.solver.lower() in {'sparsesym', 'sparsespd'}:
                 msg = (
                     f'{self.settings.solver} is unable '
                     'to run a modal analysis. Use UmfPack.'
@@ -1300,7 +1300,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
             raise ValueError(msg)
 
         if modeshape is not None:
-            if direction not in ['x', 'y']:
+            if direction not in {'x', 'y'}:
                 raise ValueError(
                     "Can't apply lateral loads based on the 1st "
                     'mode shape in the z direction.'

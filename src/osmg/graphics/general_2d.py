@@ -54,10 +54,10 @@ def line_plot_interactive(
     Gneric polty line plot
     """
     assert len(x_vals) == len(y_vals), "Dimensions don't match"
-    assert mode in [
+    assert mode in {
         'spline+markers',
         'line',
-    ], 'mode can either be `spline+markers` or `line`'
+    }, 'mode can either be `spline+markers` or `line`'
 
     if mode == 'line':
         lshape = 'linear'

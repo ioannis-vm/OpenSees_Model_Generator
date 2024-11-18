@@ -126,19 +126,19 @@ def beam_placement_lookup(  # noqa: C901
         components = query.retrieve_components_from_nodes([node], lvl.uid)
         for component in components.values():
             if component.component_purpose == 'steel_W_panel_zone':
-                if snap in [
+                if snap in {
                     'middle_front',
                     'middle_back',
                     'top_node',
                     'bottom_node',
-                ]:
+                }:
                     result_node = component.external_nodes.named_contents[snap]
                     e_o += np.array(
                         (0.00, 0.00, node.coords[2] - result_node.coords[2])
                     )
                     node = result_node
                     return node, e_o
-                if snap in [
+                if snap in {
                     'centroid',
                     'top_center',
                     'top_left',
@@ -148,7 +148,7 @@ def beam_placement_lookup(  # noqa: C901
                     'bottom_center',
                     'bottom_left',
                     'bottom_right',
-                ]:
+                }:
                     elm = component.elements.named_contents['elm_interior']
                     d_z, d_y = elm.section.snap_points[snap]
                     sec_offset_local: nparr = -np.array([0.00, d_y, d_z])
@@ -750,10 +750,10 @@ class BeamColumnGenerator:
                 element_type_i = zerolength_gen_args_i['element_type']
             else:
                 element_type_i = element_type
-            if element_type_i.__name__ in (
+            if element_type_i.__name__ in {
                 'ElasticBeamColumn',
                 'DispBeamColumn',
-            ):
+            }:
                 if 'section' in zerolength_gen_args_i:
                     section_i = zerolength_gen_args_i['section']
                 else:
@@ -820,10 +820,10 @@ class BeamColumnGenerator:
                 element_type_j = zerolength_gen_args_j['element_type']
             else:
                 element_type_j = element_type
-            if element_type_j.__name__ in (
+            if element_type_j.__name__ in {
                 'ElasticBeamColumn',
                 'DispBeamColumn',
-            ):
+            }:
                 if 'section' in zerolength_gen_args_j:
                     section_j = zerolength_gen_args_j['section']
                 else:
