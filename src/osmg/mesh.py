@@ -435,6 +435,7 @@ class Mesh:
         self.halfedges = halfedges
 
     def __repr__(self) -> str:
+        """String representation."""
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 

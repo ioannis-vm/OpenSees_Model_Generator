@@ -67,6 +67,7 @@ class PointLoadMass:
         self.val += load
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Point Load (or mass) object\n'
         res += 'Components: (global system)\n'
@@ -86,6 +87,7 @@ class LineElementUDL:
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'LineElementUDL object\n'
         res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
@@ -193,6 +195,7 @@ class LoadCase:
     equaldof: int | None = field(default=None)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.node_loads = obj_collections.Collection(self)
         self.node_mass = obj_collections.Collection(self)
         self.line_element_udl = obj_collections.Collection(self)
@@ -265,6 +268,7 @@ class LoadCase:
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'LoadCase object\n'
         res += f'name: {self.name}\n'

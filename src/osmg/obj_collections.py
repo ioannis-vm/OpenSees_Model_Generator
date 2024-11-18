@@ -149,6 +149,7 @@ class Collection(dict[TK, TV]):
         return res
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Collection Object\n'
         res += f'ID: {id(self)}\n'

@@ -41,12 +41,15 @@ class Node:
     visibility: NodeVisibility = field(default_factory=NodeVisibility)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.restraint = [False] * 6
 
     def __le__(self, other: type[self]):
+        """Less or equal determination rule."""
         return self.uid < other.uid
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Node object\n'
         res += f'  uid: {self.uid}\n'

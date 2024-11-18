@@ -61,10 +61,12 @@ class Level:
     components: Collection[int, ComponentAssembly] = field(init=False, repr=False)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.nodes = NodeCollection(self)
         self.components = Collection(self)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Level object\n'
         res += f'parent_model: {self.parent_model.name}\n'

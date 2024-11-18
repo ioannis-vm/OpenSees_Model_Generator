@@ -108,6 +108,7 @@ class Results:
     metadata: dict[str, object] | None = field(default=None)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.node_displacements = Collection(self)
         self.node_velocities = Collection(self)
         self.node_accelerations = Collection(self)
@@ -208,6 +209,7 @@ class Analysis:
     backend: str = field(default='OpenSeesPy')
 
     def __post_init__(self):
+        """Post-initialization."""
         # instantiate a Warnings object
         self.warning = Warnings(self)
 

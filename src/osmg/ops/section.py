@@ -105,6 +105,7 @@ class ElasticSection(Section):
         return res
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'ElasticSection object\n'
         res += f'name: {self.name}\n'
@@ -150,6 +151,7 @@ class SectionComponent:
     parent_section: FiberSection | None = field(default=None)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'SectionComponent object\n'
         if self.outside_shape:
@@ -229,10 +231,12 @@ class FiberSection(Section):
     n_y: int
 
     def __post_init__(self):
+        """Post-initialization."""
         for part in self.section_parts:
             self.section_parts[part].parent_section = self
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'FiberSection object\n'
         for part in self.section_parts:

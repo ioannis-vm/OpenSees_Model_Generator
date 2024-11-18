@@ -65,11 +65,13 @@ class ComponentAssembly:
     )
 
     def __post_init__(self) -> None:
+        """Post-initialization."""
         self.external_nodes = obj_collections.NodeCollection(self)
         self.internal_nodes = obj_collections.NodeCollection(self)
         self.elements = obj_collections.CollectionWithConnectivity(self)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'

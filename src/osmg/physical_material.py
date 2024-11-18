@@ -48,6 +48,7 @@ class PhysicalMaterial:
     f_y: float
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Physical material object\n'
         res += f'Name: {self.name}\n'

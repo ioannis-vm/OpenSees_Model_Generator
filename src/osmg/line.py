@@ -45,6 +45,7 @@ class Line:
     end: nparr = field(repr=False)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'Line object\n'
         res += f'  start: {self.start}\n'

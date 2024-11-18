@@ -54,6 +54,7 @@ class Element:
     visibility: ElementVisibility = field(init=False)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.visibility = ElementVisibility()
 
 
@@ -92,6 +93,7 @@ class ZeroLength(Element):
         ]
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
@@ -135,6 +137,7 @@ class TwoNodeLink(Element):
         ]
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
@@ -200,6 +203,7 @@ class TrussBar(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
+        """String representation."""
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
         res = ''
         res += f'{elm_name[self.transf_type]} element object\n'
@@ -363,6 +367,7 @@ class ElasticBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'elasticBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
@@ -451,6 +456,7 @@ class DispBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += 'dispBeamColumn element object\n'
         res += f'uid: {self.uid}\n'

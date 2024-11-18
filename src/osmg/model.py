@@ -77,6 +77,7 @@ class Settings:
     ndf: int = field(default=6)  # that's all we support
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += '~~~ Model Settings ~~~\n'
         res += f'  Imperial units: {self.imperial_units}\n'
@@ -131,6 +132,7 @@ class Model:
     settings: Settings = field(default_factory=Settings)
 
     def __post_init__(self):
+        """Post-initialization."""
         self.levels = obj_collections.CollectionActive(self)
         self.elastic_sections = obj_collections.Collection(self)
         self.fiber_sections = obj_collections.Collection(self)
@@ -138,6 +140,7 @@ class Model:
         self.physical_materials = obj_collections.Collection(self)
 
     def __repr__(self) -> str:
+        """String representation."""
         res = ''
         res += '~~~ Model Object ~~~\n'
         res += f'ID: {id(self)}\n'
