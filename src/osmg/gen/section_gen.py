@@ -137,7 +137,7 @@ class SectionGenerator:
         labels: list[str],
         ops_material: str,
         physical_material: str,
-        sec_type: Type[Section],
+        sec_type: type[Section],
         *,
         store_in_model: bool = True,
         return_section: bool = False,

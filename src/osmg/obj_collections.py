@@ -195,9 +195,9 @@ class CollectionActive(Collection[TK, TV]):
 
     """
 
-    active: List[TK] = field(default_factory=list)
+    active: list[TK] = field(default_factory=list)
 
-    def set_active(self, uids: List[TK]) -> None:
+    def set_active(self, uids: list[TK]) -> None:
         """
         Sets the active objects.
 

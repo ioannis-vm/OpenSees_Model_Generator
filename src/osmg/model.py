@@ -297,7 +297,7 @@ class Model:
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
-        self, element_class: Type[element.Element]
+        self, element_class: type[element.Element]
     ) -> dict[int, element.Element]:
         """
         Returns a dictionary of all element objects in the model of a
@@ -313,7 +313,7 @@ class Model:
         return res
 
     def list_of_specific_element(
-        self, element_class: Type[element.Element]
+        self, element_class: type[element.Element]
     ) -> list[element.Element]:
         """
         Returns a list of all element objects in the model of a
