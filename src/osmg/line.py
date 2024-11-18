@@ -12,6 +12,7 @@ Defines :obj:`~osmg.line.Line` objects.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -180,7 +181,7 @@ class Line:
             res = False
         return res
 
-    def point_distance(self, point: nparr) -> Optional[float]:
+    def point_distance(self, point: nparr) -> float | None:
         """
         Calculate the minimum distance between the line segment and a
         point.  If the point falls on the line but is outside of the
@@ -213,12 +214,12 @@ class Line:
         r_b = point - self.start
         proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a
         if self.intersects_pt(proj_point + self.start):
-            res: Optional[float] = float(np.linalg.norm(r_b - proj_point))
+            res: float | None = float(np.linalg.norm(r_b - proj_point))
         else:
             res = None
         return res
 
-    def project(self, point: nparr) -> Optional[nparr]:
+    def project(self, point: nparr) -> nparr | None:
         """
         Calculates the projection of a point on the line.
         If the projection falls on the line segment, it returns the
