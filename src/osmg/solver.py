@@ -528,9 +528,7 @@ class Analysis:
     def _define_loads(self, case_name, factor=1.00):
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
-        elms_with_udl: list[
-            element.ElasticBeamColumn | element.DispBeamColumn
-        ] = []
+        elms_with_udl: list[element.ElasticBeamColumn | element.DispBeamColumn] = []
         elms_with_udl.extend(
             [
                 elm
@@ -1018,7 +1016,9 @@ class ModalAnalysis(Analysis):
             self._read_node_displacements_modal(case_name)
             if self.settings.store_forces:
                 line_elements: list[
-                    element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
+                    element.TrussBar
+                    | element.ElasticBeamColumn
+                    | element.DispBeamColumn
                 ] = []
                 line_elements.extend(
                     [
@@ -1288,10 +1288,11 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
         if modeshape is not None:
             if direction not in {'x', 'y'}:
-                raise ValueError(
+                msg = (
                     "Can't apply lateral loads based on the 1st "
                     'mode shape in the z direction.'
                 )
+                raise ValueError(msg)
             modeshape_ampl = modeshape / modeshape[-1]
         else:
             modeshape_ampl = np.ones(len(self.mdl.levels.values()))
