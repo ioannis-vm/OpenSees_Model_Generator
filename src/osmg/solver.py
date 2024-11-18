@@ -1383,7 +1383,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         self.log('Initializing containers')
         self._init_results()
 
-        for case_name in self.load_cases:
+        for case_name in self.load_cases:  # noqa: PLR1702
             self.log(f'Load case: {case_name}')
             nodes = self.mdl.list_of_all_nodes()
             nodes.extend(self.load_cases[case_name].parent_nodes.values())
@@ -2018,7 +2018,7 @@ class THAnalysis(GravityPlusAnalysis):
         self.log('Initiating time traversal')
         self.log(f'Max time step: {analysis_time_increment}')
 
-        try:
+        try:  # noqa: PLR1702
             while curr_time + common.EPSILON < target_timestamp:
                 if analysis_failed:
                     break

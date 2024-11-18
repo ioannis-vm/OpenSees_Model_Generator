@@ -327,7 +327,7 @@ class TributaryAreaAnaysis:
         # Sanity checks.
         mesh.sanity_checks(external, trivial)
 
-        for internal_loop in internal:
+        for internal_loop in internal:  # noqa: PLR1702
             poly = sg.Polygon([h.vertex.coords for h in internal_loop])
             skel = sg.skeleton.create_interior_straight_skeleton(poly)
             # TODO: what we need to get rid of this is to end up with a list

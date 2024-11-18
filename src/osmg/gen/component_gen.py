@@ -113,7 +113,7 @@ def beam_placement_lookup(  # noqa: C901
     node = query.search_node_lvl(x_coord, y_coord, lvl.uid)
     pinit = np.array((x_coord, y_coord, lvl.elevation)) + user_offset
     e_o = user_offset.copy() + section_offset
-    if not node:
+    if not node:  # noqa: PLR1702
         if split_existing:
             node, offset = split_component(split_existing, pinit)
             e_o += offset
