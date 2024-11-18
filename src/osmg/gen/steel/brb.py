@@ -40,8 +40,8 @@ class BRBGenSettings:
 
     steel4_b_k: float = field(default=0.003)
     steel4_b_kc: float = field(default=0.023)
-    steel4_R_0: float = field(default=25.00)
-    steel4_R_0c: float = field(default=25.00)
+    steel4_R_0: float = field(default=25.00)  # noqa: N815
+    steel4_R_0c: float = field(default=25.00)  # noqa: N815
     steel4_r_1: float = field(default=0.90)
     steel4_r_1c: float = field(default=0.90)
     steel4_r_2: float = field(default=0.15)
@@ -52,8 +52,8 @@ class BRBGenSettings:
     steel4_rho_ic: float = field(default=0.77)
     steel4_b_l: float = field(default=0.004)
     steel4_b_lc: float = field(default=0.004)
-    steel4_R_i: float = field(default=1.0)
-    steel4_R_ic: float = field(default=1.0)
+    steel4_R_i: float = field(default=1.0)  # noqa: N815
+    steel4_R_ic: float = field(default=1.0)  # noqa: N815
     steel4_l_yp: float = field(default=1.0)
     fatigue_e_mod: float = field(default=0.12)
     fatigue_var_m: float = field(default=-0.458)

@@ -11,7 +11,7 @@ import numpy.typing as npt
 nparr = npt.NDArray[np.float64]
 
 
-def import_PEER(filename):
+def import_PEER(filename):  # noqa: N802
     """
     Import a ground motion record from a specified PEER ground
     motion record file.
@@ -58,14 +58,16 @@ def import_PEER(filename):
     return np.column_stack((t, a_g))
 
 
-def response_spectrum(th, dt, zeta, n_Pts=200):
+def response_spectrum(th, dt, zeta, n_Pts=200):  # noqa: N803
     """
     Calculate the linear response spectrum of an acceleration
     time history of fixed time interval dt and values given in vector
     th, and damping ratio zeta.
     n_Pts is the number of log-spaced points of the response spectrum
     """
-    T = np.logspace(-2, 1, n_Pts - 1)  # -1 becuase we also include PGA @ T=0s
+    T = np.logspace(  # noqa: N806
+        -2, 1, n_Pts - 1
+    )  # -1 becuase we also include PGA @ T=0s  # noqa: N806
     # we may have to upsample the ground motion time history
     # to ensure convergence of the central difference method
     if dt > 0.1 * T[0]:
@@ -97,20 +99,20 @@ def response_spectrum(th, dt, zeta, n_Pts=200):
     sa = umax * omega**2
     # rs = np.column_stack((T, sa))  # not yet
     # Include T = 0 s ~ PGA
-    Ts = np.concatenate((np.array([0.00]), T))
+    Ts = np.concatenate((np.array([0.00]), T))  # noqa: N806
     sas = np.concatenate((np.array([np.max(np.abs(th))]), sa))
     rs = np.column_stack((Ts, sas))
     return rs
 
 
-def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:
+def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:  # noqa: N803
     """
     Generate a simplified ASCE code response spectrum.
     """
     num_vals = len(T_vals)
     code_sa = np.full(num_vals, 0.00)
-    T_short = S1 / Ss
-    T_zero = 0.20 * T_short
+    T_short = S1 / Ss  # noqa: N806
+    T_zero = 0.20 * T_short  # noqa: N806
     code_sa[T_vals <= T_short] = Ss
     code_sa[T_vals >= Tl] = S1 * Tl / T_vals[T_vals >= Tl] ** 2
     sel = np.logical_and(T_vals > T_short, T_vals < Tl)

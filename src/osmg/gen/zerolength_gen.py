@@ -480,7 +480,7 @@ def steel_w_col_pz_updated(
     slab_depth: float,
     location: str,
     moment_modifier: float = 1.00,
-    *, 
+    *,
     consider_composite: bool,
     only_elastic: bool = False,
     **kwargs: dict[object, object],  # noqa: ARG001
@@ -499,42 +499,42 @@ def steel_w_col_pz_updated(
     f_y = physical_material.f_y
     e_mod = physical_material.e_mod
     g_mod = physical_material.g_mod
-    tw_Col = section.properties['tw']
+    tw_Col = section.properties['tw']  # noqa: N806
     tdp = pz_doubler_plate_thickness
-    d_Col = section.properties['d']
-    d_Beam = pz_length
-    tf_Col = section.properties['tf']
-    bf_Col = section.properties['bf']
-    Ix_Col = section.properties['Ix']
+    d_Col = section.properties['d']  # noqa: N806
+    d_Beam = pz_length  # noqa: N806
+    tf_Col = section.properties['tf']  # noqa: N806
+    bf_Col = section.properties['bf']  # noqa: N806
+    Ix_Col = section.properties['Ix']  # noqa: N806
     ts = slab_depth
     n = axial_load_ratio
     trib = slab_depth
 
     tpz = tw_Col + tdp  # total PZ thickness
     # effective depth in positive moment
-    d_BeamP = d_Beam
+    d_BeamP = d_Beam  # noqa: N806
     if consider_composite:
-        d_BeamP = d_Beam + trib + 0.50 * ts
+        d_BeamP = d_Beam + trib + 0.50 * ts  # noqa: N806
     # effective depth in negative moment
-    d_BeamN = d_Beam
+    d_BeamN = d_Beam  # noqa: N806
 
     # Stiffness Calculation
-    Ks = tpz * (d_Col - tf_Col) * g_mod
-    Kb = (
+    Ks = tpz * (d_Col - tf_Col) * g_mod  # noqa: N806
+    Kb = (  # noqa: N806
         12.0
         * e_mod
         * (Ix_Col + tdp * ((d_Col - 2.0 * tf_Col) ** 3) / 12.00)
         / (d_Beam**3)
         * d_Beam
     )
-    Ke = Ks * Kb / (Ks + Kb)
+    Ke = Ks * Kb / (Ks + Kb)  # noqa: N806
 
     # flange stiffness: shear contribution
-    Ksf = 2.0 * (bf_Col * tf_Col) * g_mod
+    Ksf = 2.0 * (bf_Col * tf_Col) * g_mod  # noqa: N806
     # flange stiffness: bending contribution
-    Kbf = 2.0 * 12.0 * e_mod * bf_Col * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam
+    Kbf = 2.0 * 12.0 * e_mod * bf_Col * (tf_Col**3) / 12.0 / (d_Beam**3) * d_Beam  # noqa: N806
     # flange stiffness: total contribution
-    Kef = (Ksf * Kbf) / (Ksf + Kbf)
+    Kef = (Ksf * Kbf) / (Ksf + Kbf)  # noqa: N806
 
     ay = (0.58 * Kef / Ke + 0.88) / (1.0 - Kef / Ke)
 
@@ -546,9 +546,9 @@ def steel_w_col_pz_updated(
     # reduction factor accounting for axial load
     r = np.sqrt(1.0 - (n**2))
 
-    Vy = r * 0.577 * f_y * ay * (d_Col - tf_Col) * tpz
+    Vy = r * 0.577 * f_y * ay * (d_Col - tf_Col) * tpz  # noqa: N806
     # Plastic Shear Force at 4 gammaY
-    Vp_4gamma = (
+    Vp_4gamma = (  # noqa: N806
         r
         * 0.577
         * f_y
@@ -558,7 +558,7 @@ def steel_w_col_pz_updated(
         )
     )
     # Plastic Shear Force at 6 gammaY
-    Vp_6gamma = (
+    Vp_6gamma = (  # noqa: N806
         r
         * 0.577
         * f_y
@@ -571,37 +571,37 @@ def steel_w_col_pz_updated(
     gamma_y = Vy / Ke
     gamma4_y = 4.0 * gamma_y
 
-    My_P = Vy * d_BeamP
-    Mp_4gamma_P = Vp_4gamma * d_BeamP
-    Mp_6gamma_P = Vp_6gamma * d_BeamP
+    My_P = Vy * d_BeamP  # noqa: N806
+    Mp_4gamma_P = Vp_4gamma * d_BeamP  # noqa: N806
+    Mp_6gamma_P = Vp_6gamma * d_BeamP  # noqa: N806
 
-    My_N = Vy * d_BeamN
-    Mp_4gamma_N = Vp_4gamma * d_BeamN
-    Mp_6gamma_N = Vp_6gamma * d_BeamN
+    My_N = Vy * d_BeamN  # noqa: N806
+    Mp_4gamma_N = Vp_4gamma * d_BeamN  # noqa: N806
+    Mp_6gamma_N = Vp_6gamma * d_BeamN  # noqa: N806
 
-    Slope_4to6gamma_y_P = (Mp_6gamma_P - Mp_4gamma_P) / (2.0 * gamma_y)
-    Slope_4to6gamma_y_N = (Mp_6gamma_N - Mp_4gamma_N) / (2.0 * gamma_y)
+    Slope_4to6gamma_y_P = (Mp_6gamma_P - Mp_4gamma_P) / (2.0 * gamma_y)  # noqa: N806
+    Slope_4to6gamma_y_N = (Mp_6gamma_N - Mp_4gamma_N) / (2.0 * gamma_y)  # noqa: N806
 
     # Defining the 3 Points used to construct the trilinear backbone curve
     gamma1 = gamma_y
     gamma2 = gamma4_y
     gamma3 = 100.0 * gamma_y
 
-    M1_P = My_P
-    M2_P = Mp_4gamma_P
-    M3_P = Mp_4gamma_P + Slope_4to6gamma_y_P * (100 * gamma_y - gamma4_y)
+    M1_P = My_P  # noqa: N806
+    M2_P = Mp_4gamma_P  # noqa: N806
+    M3_P = Mp_4gamma_P + Slope_4to6gamma_y_P * (100 * gamma_y - gamma4_y)  # noqa: N806
 
-    M1_N = My_N
-    M2_N = Mp_4gamma_N
-    M3_N = Mp_4gamma_N + Slope_4to6gamma_y_N * (100 * gamma_y - gamma4_y)
+    M1_N = My_N  # noqa: N806
+    M2_N = Mp_4gamma_N  # noqa: N806
+    M3_N = Mp_4gamma_N + Slope_4to6gamma_y_N * (100 * gamma_y - gamma4_y)  # noqa: N806
 
     # apply moment modifier
-    M1_P *= moment_modifier
-    M2_P *= moment_modifier
-    M3_P *= moment_modifier
-    M1_N *= moment_modifier
-    M2_N *= moment_modifier
-    M3_N *= moment_modifier
+    M1_P *= moment_modifier  # noqa: N806
+    M2_P *= moment_modifier  # noqa: N806
+    M3_P *= moment_modifier  # noqa: N806
+    M1_N *= moment_modifier  # noqa: N806
+    M2_N *= moment_modifier  # noqa: N806
+    M3_N *= moment_modifier  # noqa: N806
 
     if not consider_composite:
         args = (

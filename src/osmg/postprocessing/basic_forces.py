@@ -39,7 +39,7 @@ def basic_forces(
     step: int,
     elm: TrussBar | ElasticBeamColumn | DispBeamColumn,
     num_points: int,
-    *, 
+    *,
     as_tuple: bool = False,
 ) -> object:
     """

@@ -137,7 +137,7 @@ class Steel4(UniaxialMaterial):
     R_ic: Optional[float] = field(default=None)
 
     sig_init: Optional[float] = field(default=None)
-    cycNum: Optional[float] = field(default=None)
+    cycNum: Optional[float] = field(default=None)  # noqa: N815
 
     def ops_args(self):  # noqa: C901
         """
@@ -229,29 +229,29 @@ class Bilin(UniaxialMaterial):
     """
 
     K0: float
-    as_Plus: float
-    as_Neg: float
+    as_Plus: float  # noqa: N815
+    as_Neg: float  # noqa: N815
     My_Plus: float
     My_Neg: float
     Lamda_S: float
     Lamda_C: float
     Lamda_A: float
     Lamda_K: float
-    c_S: float
-    c_C: float
-    c_A: float
-    c_K: float
-    theta_p_Plus: float
-    theta_p_Neg: float
-    theta_pc_Plus: float
-    theta_pc_Neg: float
+    c_S: float  # noqa: N815
+    c_C: float  # noqa: N815
+    c_A: float  # noqa: N815
+    c_K: float  # noqa: N815
+    theta_p_Plus: float  # noqa: N815
+    theta_p_Neg: float  # noqa: N815
+    theta_pc_Plus: float  # noqa: N815
+    theta_pc_Neg: float  # noqa: N815
     Res_Pos: float
     Res_Neg: float
-    theta_u_Plus: float
-    theta_u_Neg: float
+    theta_u_Plus: float  # noqa: N815
+    theta_u_Neg: float  # noqa: N815
     D_Plus: float
     D_Neg: float
-    nFactor: float
+    nFactor: float  # noqa: N815
 
     def ops_args(self):
         """
@@ -298,24 +298,24 @@ class IMKBilin(UniaxialMaterial):
     """
 
     K0: float
-    theta_p_Plus: float
-    theta_pc_Plus: float
-    theta_u_Plus: float
+    theta_p_Plus: float  # noqa: N815
+    theta_pc_Plus: float  # noqa: N815
+    theta_u_Plus: float  # noqa: N815
     My_Plus: float
-    as_Plus: float
+    as_Plus: float  # noqa: N815
     Res_Pos: float
-    theta_p_Neg: float
-    theta_pc_Neg: float
-    theta_u_Neg: float
+    theta_p_Neg: float  # noqa: N815
+    theta_pc_Neg: float  # noqa: N815
+    theta_u_Neg: float  # noqa: N815
     My_Neg: float
-    as_Neg: float
+    as_Neg: float  # noqa: N815
     Res_Neg: float
     Lamda_S: float
     Lamda_C: float
     Lamda_K: float
-    c_S: float
-    c_C: float
-    c_K: float
+    c_S: float  # noqa: N815
+    c_C: float  # noqa: N815
+    c_K: float  # noqa: N815
     D_Plus: float
     D_Neg: float
 
@@ -360,45 +360,45 @@ class Pinching4(UniaxialMaterial):
 
     """
 
-    ePf1: float
-    ePf2: float
-    ePf3: float
-    ePf4: float
-    ePd1: float
-    ePd2: float
-    ePd3: float
-    ePd4: float
-    eNf1: float
-    eNf2: float
-    eNf3: float
-    eNf4: float
-    eNd1: float
-    eNd2: float
-    eNd3: float
-    eNd4: float
-    rDispP: float
-    fForceP: float
-    uForceP: float
-    rDispN: float
-    fFoceN: float
-    uForceN: float
-    gK1: float
-    gK2: float
-    gK3: float
-    gK4: float
-    gKLim: float
-    gD1: float
-    gD2: float
-    gD3: float
-    gD4: float
-    gDLim: float
-    gF1: float
-    gF2: float
-    gF3: float
-    gF4: float
-    gFLim: float
-    gE: float
-    dmgType: str
+    ePf1: float  # noqa: N815
+    ePf2: float  # noqa: N815
+    ePf3: float  # noqa: N815
+    ePf4: float  # noqa: N815
+    ePd1: float  # noqa: N815
+    ePd2: float  # noqa: N815
+    ePd3: float  # noqa: N815
+    ePd4: float  # noqa: N815
+    eNf1: float  # noqa: N815
+    eNf2: float  # noqa: N815
+    eNf3: float  # noqa: N815
+    eNf4: float  # noqa: N815
+    eNd1: float  # noqa: N815
+    eNd2: float  # noqa: N815
+    eNd3: float  # noqa: N815
+    eNd4: float  # noqa: N815
+    rDispP: float  # noqa: N815
+    fForceP: float  # noqa: N815
+    uForceP: float  # noqa: N815
+    rDispN: float  # noqa: N815
+    fFoceN: float  # noqa: N815
+    uForceN: float  # noqa: N815
+    gK1: float  # noqa: N815
+    gK2: float  # noqa: N815
+    gK3: float  # noqa: N815
+    gK4: float  # noqa: N815
+    gKLim: float  # noqa: N815
+    gD1: float  # noqa: N815
+    gD2: float  # noqa: N815
+    gD3: float  # noqa: N815
+    gD4: float  # noqa: N815
+    gDLim: float  # noqa: N815
+    gF1: float  # noqa: N815
+    gF2: float  # noqa: N815
+    gF3: float  # noqa: N815
+    gF4: float  # noqa: N815
+    gFLim: float  # noqa: N815
+    gE: float  # noqa: N815
+    dmgType: str  # noqa: N815
 
     def ops_args(self):
         """
@@ -465,8 +465,8 @@ class Hysteretic(UniaxialMaterial):
     n1: tuple[float, float]
     n2: tuple[float, float]
     n3: tuple[float, float]
-    pinchX: float
-    pinchY: float
+    pinchX: float  # noqa: N815
+    pinchY: float  # noqa: N815
     damage1: float
     damage2: float
     beta: float
