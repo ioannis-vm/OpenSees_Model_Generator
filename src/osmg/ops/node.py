@@ -12,6 +12,7 @@ Defines :obj:`~osmg.ops.node.Node` objects.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 from dataclasses import dataclass, field
 from functools import total_ordering
 

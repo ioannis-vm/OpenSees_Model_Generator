@@ -12,6 +12,7 @@ Common definitions
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 import re
 from pprint import pprint
 from typing import Any, Optional, OrderedDict

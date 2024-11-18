@@ -268,9 +268,7 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     msg = f'Unsupported section type: {sec_type.__name__}'
-                    raise ValueError(
-                        msg
-                    )
+                    raise ValueError(msg)
             elif sec_shape_designation == 'HSS_rect':
                 assert sec_data['Type'] == 'HSS'
                 # must be rectangle: name will have 2 X's.
@@ -335,9 +333,7 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     msg = f'Unsupported section type: {sec_type.__name__}'
-                    raise ValueError(
-                        msg
-                    )
+                    raise ValueError(msg)
             elif sec_shape_designation == 'HSS_circ':
                 # TODO: eliminate some redundant code here by merging
                 # suare and round HSS
@@ -401,12 +397,8 @@ class SectionGenerator:
                         returned_sections[sec_el.name] = sec_el
                 else:
                     msg = f'Unsupported section type: {sec_type.__name__}'
-                    raise ValueError(
-                        msg
-                    )
+                    raise ValueError(msg)
             else:
                 msg = 'Unsupported section designtation:' f' {sec_shape_designation}'
-                raise ValueError(
-                    msg
-                )
+                raise ValueError(msg)
         return returned_sections

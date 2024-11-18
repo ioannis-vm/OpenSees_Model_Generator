@@ -13,6 +13,7 @@ Coordinate transformation operations.
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 

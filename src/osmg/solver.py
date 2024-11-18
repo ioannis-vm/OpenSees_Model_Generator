@@ -922,9 +922,7 @@ class ModalAnalysis(Analysis):
                         'Oops! Need to extend the code '
                         'to support dispBeamColumn elements'
                     )
-                    raise ValueError(
-                        msg
-                    )
+                    raise ValueError(msg)
 
                 length = elm.clear_length()
 
@@ -1015,9 +1013,7 @@ class ModalAnalysis(Analysis):
                     f'{self.settings.solver} is unable '
                     'to run a modal analysis. Use UmfPack.'
                 )
-                raise ValueError(
-                    msg
-                )
+                raise ValueError(msg)
             ops.system(self.settings.solver)
             # note: using SparseSYM results in wrong eigen decomposition
             num_inertial_nodes = 0

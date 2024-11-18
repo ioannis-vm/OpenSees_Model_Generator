@@ -145,9 +145,7 @@ class Collection(dict[TK, TV]):
                 f'Item having the value "{val}" '
                 f'in the attribute "{attr}" not found in collection.'
             )
-            raise ValueError(
-                msg
-            )
+            raise ValueError(msg)
         return res
 
     def __srepr__(self):
