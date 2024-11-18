@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import logging
 import os
-import pickle
 import platform
 import socket
 import sys
@@ -39,6 +38,8 @@ import pandas as pd
 from scipy import integrate
 from scipy.interpolate import interp1d
 from tqdm import tqdm
+from json_tricks import dumps, loads
+
 
 from . import common, transformations
 from .gen.query import LoadCaseQuery
@@ -132,7 +133,7 @@ class AnalysisSettings:
         deformations.
       specific_nodes: List of node numbers to store. If empty, all
         nodes are stored.
-      pickle_results: If True, the results are stored using pickle.
+      serialize_results: If True, the results are stored in a JSON file.
       solver: The solver to use. The default is 'UmfPack'.
       restrict_dof: An optional list of booleans. If it is provided,
         the corresponding global DOF will be restricted. If all items
@@ -149,7 +150,7 @@ class AnalysisSettings:
     store_fiber: bool = field(default=True)
     store_release_force_defo: bool = field(default=True)
     specific_nodes: list[int] = field(default_factory=list)
-    pickle_results: bool = field(default=False)
+    serialize_results: bool = field(default=False)
     solver: str = field(default='UmfPack')
     restrict_dof: list[bool] | None = field(default=None)
 
@@ -187,7 +188,7 @@ class Analysis:
       load_cases: Dictionary containing load case names and
         load case objects in which those load cases reside.
       output_directory: Where to place the results
-        when it is requested for them to be pickled.
+        when it is requested for them to be serialized.
       settings: analysis settings
       results: analysis results
       logger: Logger object
@@ -234,7 +235,7 @@ class Analysis:
             self.logger = logging.getLogger('OpenSees_Model_Generator')
             self.logger.setLevel(logging.DEBUG)
 
-        if self.settings.pickle_results and not self.output_directory:
+        if self.settings.serialize_results and not self.output_directory:
             msg = 'Specify an output directory for the results.'
             raise ValueError(msg)
 
@@ -284,19 +285,20 @@ class Analysis:
 
     def _write_results_to_disk(self):
         """
-        Pickles the results.
+        Serializes the results to a JSON file using json-tricks.
 
         """
-        with open(f'{self.output_directory}/main_results.pcl', 'wb') as file:
-            pickle.dump(self.results, file)
+        with open(f'{self.output_directory}/main_results.json', 'w') as file:
+            json_data = dumps(self.results, indent=4)
+            file.write(json_data)
 
     def read_results_from_disk(self):
         """
-        Reads back results from a pickle file.
+        Reads back results from a JSON file using json-tricks.
 
         """
-        with open(f'{self.output_directory}/main_results.pcl', 'rb') as file:
-            self.results = pickle.load(file)
+        with open(f'{self.output_directory}/main_results.json', 'r') as file:
+            self.results = loads(file.read())
 
     def _to_opensees_domain(self, case_name):  # noqa: C901
         """
@@ -784,7 +786,7 @@ class StaticAnalysis(Analysis):
                 line_elems,
                 zerolength_elems,
             )
-            if self.settings.pickle_results:
+            if self.settings.serialize_results:
                 self._write_results_to_disk()
 
 
@@ -1048,7 +1050,7 @@ class ModalAnalysis(Analysis):
                     ]
                 )
                 self._read_frame_element_forces_modal(case_name, line_elements)
-        if self.settings.pickle_results:
+        if self.settings.serialize_results:
             self._write_results_to_disk()
 
     def modal_participation_factors(self, case_name, direction):
@@ -1590,7 +1592,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
             self.results[case_name].n_steps_success = n_steps_success
             self.results[case_name].metadata = metadata
         # done with all cases.
-        if self.settings.pickle_results:
+        if self.settings.serialize_results:
             self._write_results_to_disk()
 
     def table_pushover_curve(self, case_name, direction, node):
@@ -2222,7 +2224,7 @@ class THAnalysis(GravityPlusAnalysis):
             'analysis_finished_successfully': not analysis_failed,
         }
         self.results[case_name].n_steps_success = len(self.time_vector)
-        if self.settings.pickle_results:
+        if self.settings.serialize_results:
             self._write_results_to_disk()
 
         return metadata
@@ -2306,7 +2308,7 @@ class ModalResponseSpectrumAnalysis:
             {self.load_case.name: self.load_case},
             num_modes=self.num_modes,
         )
-        anl.settings.pickle_results = False
+        anl.settings.serialize_results = False
         anl.settings.store_fiber = False
         anl.settings.store_forces = True
         anl.settings.store_reactions = False
