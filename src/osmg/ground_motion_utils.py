@@ -22,14 +22,14 @@ def import_PEER(filename):  # noqa: N802
     # columns and cause an error
     a_g = np.genfromtxt(filename, skip_header=4, skip_footer=1)
     # Manually read the last line and append
-    with open(filename, encoding='utf-8') as file:
+    with Path(filename).open(encoding='utf-8') as file:
         lines = file.readlines()
         last_line = lines[-1]
     last = np.fromstring(last_line, sep='  ')
     a_g = np.append(a_g, last)
 
     # Read metadata
-    with open(filename, encoding='utf-8') as file:
+    with Path(filename).open(encoding='utf-8') as file:
         line_containing_units = 2
         line_containing_number_of_points = 3
         for i, line in enumerate(file):

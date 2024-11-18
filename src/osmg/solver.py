@@ -289,7 +289,7 @@ class Analysis:
         Serializes the results to a JSON file using json-tricks.
 
         """
-        with open(f'{self.output_directory}/main_results.json', 'w') as file:
+        with Path(f'{self.output_directory}/main_results.json').open('w') as file:
             json_data = dumps(self.results, indent=4)
             file.write(json_data)
 
@@ -298,7 +298,7 @@ class Analysis:
         Reads back results from a JSON file using json-tricks.
 
         """
-        with open(f'{self.output_directory}/main_results.json', 'r') as file:
+        with Path(f'{self.output_directory}/main_results.json').open('r') as file:
             self.results = loads(file.read())
 
     def _to_opensees_domain(self, case_name):  # noqa: C901
