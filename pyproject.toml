@@ -20,7 +20,7 @@ line-length = 85
 
 [tool.ruff.lint]
 # Enable all known categories
-select = ["PLR6201"]
+select = ["PLW1514"]
 ignore = ["ANN101", "CPY001", "D211", "D212", "Q000", "Q003", "COM812", "D203", "ISC001", "E501", "ERA001", "PGH003", "FIX002", "TD003", "S101", "N801", "S311", "G004", "SIM102", "SIM108", "NPY002", "F401"]
 preview = true
 [tool.ruff.lint.per-file-ignores]

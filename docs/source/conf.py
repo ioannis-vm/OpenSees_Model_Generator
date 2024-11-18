@@ -16,7 +16,9 @@ sys.path.insert(0, os.path.abspath('../../'))
 project = 'osmg'
 author = 'John Vouvakis Manousakis'
 release = [
-    line.split('=')[1] for line in open('../../setup.cfg') if 'version' in line
+    line.split('=')[1]
+    for line in open('../../setup.cfg', encoding='utf-8')
+    if 'version' in line
 ][0].strip()
 copyright = '2023, Ioannis Vouvakis Manousakis'  # noqa: A001
 
