@@ -114,7 +114,8 @@ class Collection(dict[TK, TV]):
             msg = 'Object does not have a uid attribute'
             raise KeyError(msg)
         if obj.uid in self:
-            raise KeyError(f'uid {obj.uid} already exists')
+            msg = f'uid {obj.uid} already exists'
+            raise KeyError(msg)
         self[obj.uid] = obj
 
     def retrieve_by_attr(self, attr: str, val: Any) -> Any:
@@ -140,9 +141,12 @@ class Collection(dict[TK, TV]):
             if found:
                 break
         if res is None:
-            raise ValueError(
+            msg = (
                 f'Item having the value "{val}" '
                 f'in the attribute "{attr}" not found in collection.'
+            )
+            raise ValueError(
+                msg
             )
         return res
 
@@ -212,7 +216,8 @@ class CollectionActive(Collection[TK, TV]):
         """
         for uid in uids:
             if uid not in self:
-                raise KeyError(f'uid {uid} not present in collection.')
+                msg = f'uid {uid} not present in collection.'
+                raise KeyError(msg)
         self.active = uids
 
     def set_active_all(self):

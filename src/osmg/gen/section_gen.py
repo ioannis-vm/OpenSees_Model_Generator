@@ -205,7 +205,8 @@ class SectionGenerator:
             try:
                 sec_data = section_dictionary[label]
             except KeyError as exc:
-                raise KeyError(f'Section {label} not found in file.') from exc
+                msg = f'Section {label} not found in file.'
+                raise KeyError(msg) from exc
             if sec_shape_designation == 'W':
                 assert sec_data['Type'] == 'W'
                 sec_b = sec_data['bf']
@@ -266,8 +267,9 @@ class SectionGenerator:
                     if return_section:
                         returned_sections[sec_el.name] = sec_el
                 else:
+                    msg = f'Unsupported section type: {sec_type.__name__}'
                     raise ValueError(
-                        f'Unsupported section type: {sec_type.__name__}'
+                        msg
                     )
             elif sec_shape_designation == 'HSS_rect':
                 assert sec_data['Type'] == 'HSS'
@@ -332,8 +334,9 @@ class SectionGenerator:
                     if return_section:
                         returned_sections[sec_el.name] = sec_el
                 else:
+                    msg = f'Unsupported section type: {sec_type.__name__}'
                     raise ValueError(
-                        f'Unsupported section type: {sec_type.__name__}'
+                        msg
                     )
             elif sec_shape_designation == 'HSS_circ':
                 # TODO: eliminate some redundant code here by merging
@@ -397,11 +400,13 @@ class SectionGenerator:
                     if return_section:
                         returned_sections[sec_el.name] = sec_el
                 else:
+                    msg = f'Unsupported section type: {sec_type.__name__}'
                     raise ValueError(
-                        f'Unsupported section type: {sec_type.__name__}'
+                        msg
                     )
             else:
+                msg = 'Unsupported section designtation:' f' {sec_shape_designation}'
                 raise ValueError(
-                    'Unsupported section designtation:' f' {sec_shape_designation}'
+                    msg
                 )
         return returned_sections

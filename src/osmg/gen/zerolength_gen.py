@@ -654,7 +654,8 @@ def steel_w_col_pz_updated(
             0.0,
         )
     else:
-        raise ValueError(f'Invalid Location: {location}')
+        msg = f'Invalid Location: {location}'
+        raise ValueError(msg)
 
     if only_elastic:
         m1y, gamma_1 = args[0]  # type: ignore

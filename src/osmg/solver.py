@@ -337,7 +337,8 @@ class Analysis:
         all_nodes.update(parent_nodes)
         for uid, node in all_nodes.items():
             if uid in defined_nodes:
-                raise KeyError(f'Node already defined: {uid}')
+                msg = f'Node already defined: {uid}'
+                raise KeyError(msg)
             defined_nodes[uid] = node
             ops.node(node.uid, *node.coords)
 
@@ -1010,9 +1011,12 @@ class ModalAnalysis(Analysis):
             # self.print(len(tags))
             ops.constraints(*CONSTRAINTS)
             if self.settings.solver.lower() in ('sparsesym', 'sparsespd'):
-                raise ValueError(
+                msg = (
                     f'{self.settings.solver} is unable '
                     'to run a modal analysis. Use UmfPack.'
+                )
+                raise ValueError(
+                    msg
                 )
             ops.system(self.settings.solver)
             # note: using SparseSYM results in wrong eigen decomposition
@@ -1136,7 +1140,8 @@ class GravityPlusAnalysis(Analysis):
 
         """
         if case_name not in self.results:
-            raise ValueError(f'case_name {case_name} not found in results.')
+            msg = f'case_name {case_name} not found in results.'
+            raise ValueError(msg)
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_displacements[uid])
         for i in range(num):
@@ -1532,7 +1537,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             elif integrator == 'ArcLength':
                                 ops.integrator('ArcLength', incr, 1e-7)
                             else:
-                                raise ValueError(f'Invalid integrator: {integrator}')
+                                msg = f'Invalid integrator: {integrator}'
+                                raise ValueError(msg)
                             ops.system(self.settings.solver)
                             ops.analysis('Static')
                             flag = ops.analyze(1)

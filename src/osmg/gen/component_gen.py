@@ -162,7 +162,8 @@ def beam_placement_lookup(  # noqa: C901
                     result_node = node
                     e_o += sec_offset_global
                     return node, e_o
-                raise ValueError(f'Unsupported snap keyword: {snap}')
+                msg = f'Unsupported snap keyword: {snap}'
+                raise ValueError(msg)
 
         # else check if a column-like component assembly exists
         if key - 1 in lvls:
@@ -600,7 +601,8 @@ class BeamColumnGenerator:
                 'ElasticBeamColumn',
                 'DispBeamColumn',
             }:
-                raise TypeError(f'Unsupported element type: {element_type.__name__}')
+                msg = f'Unsupported element type: {element_type.__name__}'
+                raise TypeError(msg)
             element = self.define_beamcolumn(
                 assembly=component,
                 node_i=n_i,
@@ -785,7 +787,8 @@ class BeamColumnGenerator:
                 )
                 component.elements.add(elm)
             else:
-                raise ValueError(f'Invalid element_type_i: {element_type_i}')
+                msg = f'Invalid element_type_i: {element_type_i}'
+                raise ValueError(msg)
             zerolen_elm = self.define_zerolength(
                 component,
                 nh_i_out,
@@ -854,7 +857,8 @@ class BeamColumnGenerator:
                 )
                 component.elements.add(elm)
             else:
-                raise ValueError(f'Invalid element_type_j: {element_type_j}')
+                msg = f'Invalid element_type_j: {element_type_j}'
+                raise ValueError(msg)
             zerolen_elm = self.define_zerolength(
                 component,
                 nh_j_out,
