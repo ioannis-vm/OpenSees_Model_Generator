@@ -1017,7 +1017,7 @@ def subdivide_hss_circ(
             pieces.append(pol)
 
     if plot:
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.set_aspect('equal')
         for piece in pieces:
             patch = Polygon(piece.exterior.coords, alpha=0.5, zorder=2)
