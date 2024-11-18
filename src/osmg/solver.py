@@ -222,7 +222,7 @@ class Analysis:
 
     def _init_results(self):  # noqa: C901
         # initialize output directory
-        if self.output_directory and not os.path.exists(self.output_directory):
+        if self.output_directory and not Path(self.output_directory).exists():
             Path(self.output_directory).mkdir(parents=True)
 
         # initialize logger
