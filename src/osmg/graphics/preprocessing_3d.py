@@ -168,7 +168,7 @@ def add_data__parent_nodes(
     customdata_list = []
     restraints = [node.restraint for node in list_of_nodes]
     for node in list_of_nodes:
-        customdata_list.append(
+        customdata_list.append(  # noqa: PERF401
             (
                 node.uid,
                 *load_case.node_mass[node.uid].val,

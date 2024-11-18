@@ -174,7 +174,7 @@ def beam_placement_lookup(  # noqa: C901
                     elms = []
                     for dctkey in column.element_connectivity().keys():
                         if node.uid in dctkey:
-                            elms.append(column.element_connectivity()[dctkey])
+                            elms.append(column.element_connectivity()[dctkey])  # noqa: PERF401
                     assert elms, 'There should be an element here.'
                     assert len(elms) == 1, 'There should only be one element here.'
                     elm = elms[0]

@@ -208,7 +208,7 @@ class Model:
         list_of_nodes = []
         for lvl in self.levels.values():
             for node in lvl.nodes.values():
-                list_of_nodes.append(node)
+                list_of_nodes.append(node)  # noqa: PERF402
         return list_of_nodes
 
     def dict_of_internal_nodes(self):
@@ -232,7 +232,7 @@ class Model:
         for lvl in self.levels.values():
             for component in lvl.components.values():
                 for inode in component.internal_nodes.values():
-                    list_of_nodes.append(inode)
+                    list_of_nodes.append(inode)  # noqa: PERF402
         return list_of_nodes
 
     def dict_of_all_nodes(self):

@@ -1254,7 +1254,7 @@ class GravityPlusAnalysis(Analysis):
         """
         base_shear_lst = []
         for step in range(self.results[case_name].n_steps_success):  # type:ignore
-            base_shear_lst.append(self.global_reactions(case_name, step)[0:3])
+            base_shear_lst.append(self.global_reactions(case_name, step)[0:3])  # noqa: PERF401
         base_shear: nparr = np.array(base_shear_lst)
         return base_shear
 
@@ -1667,7 +1667,7 @@ def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, *, redefine=Fa
             try:
                 ops.remove('loadPattern', tag)
                 ops.remove('timeSeries', tag)
-            except ops.OpenSeesError:
+            except ops.OpenSeesError:  # noqa: PERF203
                 pass
 
     if all((ag_x is None, ag_y is None, ag_z is None)):
@@ -2263,7 +2263,7 @@ class THAnalysis(GravityPlusAnalysis):
         uid = node.uid
         results = []
         for k in range(self.results[case_name].n_steps_success):  # type:ignore
-            results.append(
+            results.append(  # noqa: PERF401
                 self.results[case_name].node_displacements[uid][k][direction]
             )
         vals: nparr = np.array(results)

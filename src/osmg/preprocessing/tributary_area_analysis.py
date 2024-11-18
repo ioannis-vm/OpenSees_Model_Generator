@@ -123,7 +123,7 @@ class TributaryAreaAnaysis:
 
         """
         try:
-            import skgeom as sg
+            import skgeom as sg  # noqa: PLC0415
         except ModuleNotFoundError:
             msg = 'One day, a custom implementation of the '
             msg += 'straight skeleton algorithm might be added to osmg...\n'

@@ -860,7 +860,7 @@ def subdivide_polygon(*, outside, holes, n_x, n_y, plot=False):
     outside_polygon = shapely_Polygon([h.vertex.coords for h in outside.halfedges])
     hole_polygons = []
     for hole in holes.values():
-        hole_polygons.append(
+        hole_polygons.append(  # noqa: PERF401
             shapely_Polygon([h.vertex.coords for h in hole.halfedges])
         )
     remaining_polygon = outside_polygon

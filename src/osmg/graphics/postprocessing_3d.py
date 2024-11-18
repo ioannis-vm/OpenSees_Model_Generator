@@ -781,7 +781,7 @@ def show_deformed_shape(  # noqa: C901
     if animation:
         step_of_frame = []
         for j in range(first_step, step + 1, step_skip + 1):
-            step_of_frame.append(j)
+            step_of_frame.append(j)  # noqa: PERF402
         for j in step_of_frame:
             frame_data_dict.append([])
             add_data__global_axes(frame_data_dict[-1], ref_len)

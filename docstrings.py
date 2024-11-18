@@ -18,14 +18,14 @@ def list_directories(root_dir):
     res = []
     for path, directories, _ in os.walk(root_dir):
         for directory in directories:
-            res.append(os.path.join(path, directory))
+            res.append(os.path.join(path, directory))  # noqa: PERF401
     return res
 
 
 def list_python_files(directory):
     res = []
     for file in glob.glob(os.path.join(directory, '*.py')):
-        res.append(file)
+        res.append(file)  # noqa: PERF402
     return res
 
 
@@ -35,7 +35,7 @@ not_backup = []
 
 for thing in res:
     if '.~' not in thing:
-        not_backup.append(thing)
+        not_backup.append(thing)  # noqa: PERF401
 
 not_backup.append('src/osmg')
 
@@ -46,8 +46,8 @@ for thing in not_backup:
 
 pattern = r'\(*?\):'  # type: ignore (this is so silly)
 
-for module in files:
-    for path in files[module]:
+for module, paths in files.items():
+    for path in paths:
         contents = Path(path).read_text(encoding='utf-8')
         if contents.startswith('"""'):
             contents = '\n\n' + contents
