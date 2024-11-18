@@ -599,13 +599,13 @@ def add_data__nodes_deformed(
             'customdata': displacement_data,
             'hovertemplate': (
                 'ux: %{customdata[0]:.6g}<br>'
-                + 'uy: %{customdata[1]:.6g}<br>'
-                + 'uz: %{customdata[2]:.6g}<br>'
-                + 'combined: %{customdata[6]:.6g}<br>'
-                + 'rx: %{customdata[3]:.6g} (rad)<br>'
-                + 'ry: %{customdata[4]:.6g} (rad)<br>'
-                + 'rz: %{customdata[5]:.6g} (rad)<br>'
-                + '<extra>Node %{customdata[7]:d}</extra>'
+                'uy: %{customdata[1]:.6g}<br>'
+                'uz: %{customdata[2]:.6g}<br>'
+                'combined: %{customdata[6]:.6g}<br>'
+                'rx: %{customdata[3]:.6g} (rad)<br>'
+                'ry: %{customdata[4]:.6g} (rad)<br>'
+                'rz: %{customdata[5]:.6g} (rad)<br>'
+                '<extra>Node %{customdata[7]:d}</extra>'
             ),
             'marker': {
                 'symbol': marker,

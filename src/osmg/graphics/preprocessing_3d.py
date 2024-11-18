@@ -85,16 +85,16 @@ def add_data__nodes(data_dict, mdl, load_case):
                 'text': restraints,
                 'hovertemplate': (
                     'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    + 'Restraint: %{text}<br>'
-                    + 'Mass: (%{customdata[1]:.3g}, '
-                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
-                    + '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
-                    + '%{customdata[6]:.3g})<br>'
-                    + 'Load: (%{customdata[7]:.3g}, '
-                    + '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
-                    + '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
-                    + '%{customdata[12]:.3g})'
-                    + '<extra>Node: %{customdata[0]:d}</extra>'
+                    'Restraint: %{text}<br>'
+                    'Mass: (%{customdata[1]:.3g}, '
+                    '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
+                    '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
+                    '%{customdata[6]:.3g})<br>'
+                    'Load: (%{customdata[7]:.3g}, '
+                    '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
+                    '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
+                    '%{customdata[12]:.3g})'
+                    '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
                 'marker': {
                     'symbol': [
@@ -126,8 +126,8 @@ def add_data__nodes(data_dict, mdl, load_case):
                 'text': restraints,
                 'hovertemplate': (
                     'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    + 'Restraint: %{text}<br>'
-                    + '<extra>Node: %{customdata[0]:d}</extra>'
+                    'Restraint: %{text}<br>'
+                    '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
                 'marker': {
                     'symbol': [
@@ -188,16 +188,16 @@ def add_data__parent_nodes(
             'text': restraints,
             'hovertemplate': (
                 'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                + 'Restraint: %{text}<br>'
-                + 'Mass: (%{customdata[1]:.3g}, '
-                + '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
-                + '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
-                + '%{customdata[6]:.3g})<br>'
-                + 'Load: (%{customdata[7]:.3g}, '
-                + '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
-                + '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
-                + '%{customdata[12]:.3g})'
-                + '<extra>Parent Node: %{customdata[0]:d}</extra>'
+                'Restraint: %{text}<br>'
+                'Mass: (%{customdata[1]:.3g}, '
+                '%{customdata[2]:.3g}, %{customdata[3]:.3g}, '
+                '%{customdata[4]:.3g}, %{customdata[5]:.3g}, '
+                '%{customdata[6]:.3g})<br>'
+                'Load: (%{customdata[7]:.3g}, '
+                '%{customdata[8]:.3g}, %{customdata[9]:.3g}, '
+                '%{customdata[10]:.3g}, %{customdata[11]:.3g}, '
+                '%{customdata[12]:.3g})'
+                '<extra>Parent Node: %{customdata[0]:d}</extra>'
             ),
             'marker': {
                 'symbol': [graphics_common_3d.node_marker['parent'][0]]
@@ -267,12 +267,12 @@ def add_data__internal_nodes(
                 'text': restraints,
                 'hovertemplate': (
                     'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    + 'Restraint: %{text}<br>'
-                    + 'Mass: (%{customdata[1]:.3g}, '
-                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>'
-                    + 'Load: (%{customdata[4]:.3g}, '
-                    + '%{customdata[5]:.3g}, %{customdata[6]:.3g})'
-                    + '<extra>Node: %{customdata[0]:d}</extra>'
+                    'Restraint: %{text}<br>'
+                    'Mass: (%{customdata[1]:.3g}, '
+                    '%{customdata[2]:.3g}, %{customdata[3]:.3g})<br>'
+                    'Load: (%{customdata[4]:.3g}, '
+                    '%{customdata[5]:.3g}, %{customdata[6]:.3g})'
+                    '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
                 'marker': {
                     'symbol': [
@@ -304,8 +304,8 @@ def add_data__internal_nodes(
                 'text': restraints,
                 'hovertemplate': (
                     'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    + 'Restraint: %{text}<br>'
-                    + '<extra>Node: %{customdata[0]:d}</extra>'
+                    'Restraint: %{text}<br>'
+                    '<extra>Node: %{customdata[0]:d}</extra>'
                 ),
                 'marker': {
                     'symbol': [
@@ -457,10 +457,10 @@ def add_data__frames(
                 'customdata': customdata,
                 'hovertemplate': (
                     'Section: %{text}<br>'
-                    + 'UDL (local): (%{customdata[1]:.3g}, '
-                    + '%{customdata[2]:.3g}, %{customdata[3]:.3g})'
-                    + '<extra>Element: %{customdata[0]:d}<br>'
-                    + 'Node @ this end: %{customdata[4]:d}<br>'
+                    'UDL (local): (%{customdata[1]:.3g}, '
+                    '%{customdata[2]:.3g}, %{customdata[3]:.3g})'
+                    '<extra>Element: %{customdata[0]:d}<br>'
+                    'Node @ this end: %{customdata[4]:d}<br>'
                     'Parent: %{customdata[5]}</extra>'
                 ),
                 'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
@@ -480,8 +480,8 @@ def add_data__frames(
                 'customdata': customdata,
                 'hovertemplate': (
                     'Section: %{text}<br>'
-                    + '<extra>Element: %{customdata[0]:d}<br>'
-                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    '<extra>Element: %{customdata[0]:d}<br>'
+                    'Node @ this end: %{customdata[1]:d}<br>'
                     'Parent: %{customdata[2]}</extra>'
                 ),
                 'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
@@ -565,8 +565,8 @@ def add_data__bars(
                 'customdata': customdata,
                 'hovertemplate': (
                     'Section area: %{text}<br>'
-                    + '<extra>Element: %{customdata[0]:d}<br>'
-                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    '<extra>Element: %{customdata[0]:d}<br>'
+                    'Node @ this end: %{customdata[1]:d}<br>'
                     'Parent: %{customdata[2]}</extra>'
                 ),
                 'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
@@ -586,8 +586,8 @@ def add_data__bars(
                 'customdata': customdata,
                 'hovertemplate': (
                     'Section area: %{text}<br>'
-                    + '<extra>Element: %{customdata[0]:d}<br>'
-                    + 'Node @ this end: %{customdata[1]:d}<br>'
+                    '<extra>Element: %{customdata[0]:d}<br>'
+                    'Node @ this end: %{customdata[1]:d}<br>'
                     'Parent: %{customdata[2]}</extra>'
                 ),
                 'line': {'width': 5, 'color': graphics_common.FRAME_COLOR},
@@ -641,8 +641,8 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
             'customdata': customdata,
             'hovertemplate': (
                 'Section: %{text}<br>'
-                + '<extra>Element: %{customdata[0]:d}<br>'
-                + 'Node @ this end: %{customdata[1]:d}<br>'
+                '<extra>Element: %{customdata[0]:d}<br>'
+                'Node @ this end: %{customdata[1]:d}<br>'
                 'Parent: %{customdata[2]}</extra>'
             ),
             'line': {'width': 5, 'color': graphics_common.LINK_COLOR},

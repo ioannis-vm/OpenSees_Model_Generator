@@ -1303,7 +1303,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
             if direction not in ['x', 'y']:
                 raise ValueError(
                     "Can't apply lateral loads based on the 1st "
-                    + 'mode shape in the z direction.'
+                    'mode shape in the z direction.'
                 )
             modeshape_ampl = modeshape / modeshape[-1]
         else:
