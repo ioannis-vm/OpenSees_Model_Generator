@@ -68,7 +68,8 @@ def line_plot_interactive(
         lmode = 'lines+markers'
         lwidth = 4
     else:
-        raise ValueError('oops! This should never run. Strange.')
+        msg = 'oops! This should never run. Strange.'
+        raise ValueError(msg)
 
     if xunit:
         xtitle = f'{xlab} ({xunit})'

@@ -62,7 +62,8 @@ class RDAnalyzer:
             coords.append(node.coords[0:2])
         total_mass = sum(masses)
         if np.abs(total_mass) <= common.EPSILON:
-            raise ValueError("Can't generate parent node without defined mass.")
+            msg = "Can't generate parent node without defined mass."
+            raise ValueError(msg)
         coords_np = np.array(coords) * np.column_stack((masses, masses))
         center = np.sum(coords_np / total_mass, axis=0)
         parent_node = Node(

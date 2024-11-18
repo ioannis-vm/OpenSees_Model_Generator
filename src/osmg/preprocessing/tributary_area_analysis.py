@@ -525,4 +525,5 @@ class TributaryAreaAnaysis:
                             )
 
                 else:
-                    raise TypeError('This should never happen!')
+                    msg = 'This should never happen!'
+                    raise TypeError(msg)

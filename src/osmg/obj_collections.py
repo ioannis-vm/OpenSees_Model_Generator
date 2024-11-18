@@ -111,7 +111,8 @@ class Collection(dict[TK, TV]):
 
         """
         if not hasattr(obj, 'uid'):
-            raise KeyError('Object does not have a uid attribute')
+            msg = 'Object does not have a uid attribute'
+            raise KeyError(msg)
         if obj.uid in self:
             raise KeyError(f'uid {obj.uid} already exists')
         self[obj.uid] = obj
@@ -306,5 +307,6 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         uids.sort()
         uids_tuple = (*uids,)
         if uids_tuple in obj.parent_component.element_connectivity():
-            raise ValueError('This should never happen!')
+            msg = 'This should never happen!'
+            raise ValueError(msg)
         super().add(obj)

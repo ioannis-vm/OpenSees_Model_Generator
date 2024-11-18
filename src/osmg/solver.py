@@ -244,7 +244,8 @@ class Analysis:
             self.logger.setLevel(logging.DEBUG)
 
         if self.settings.pickle_results and not self.output_directory:
-            raise ValueError('Specify an output directory for the results.')
+            msg = 'Specify an output directory for the results.'
+            raise ValueError(msg)
 
         # initialize result collections
         assert isinstance(self.load_cases, dict)
@@ -916,9 +917,12 @@ class ModalAnalysis(Analysis):
                     etimesi_min = elm.section.e_mod * elm.section.i_y
                     gtimesj = elm.section.g_mod * elm.section.j_mod
                 else:
-                    raise ValueError(
+                    msg = (
                         'Oops! Need to extend the code '
                         'to support dispBeamColumn elements'
+                    )
+                    raise ValueError(
+                        msg
                     )
 
                 length = elm.clear_length()
@@ -1123,7 +1127,8 @@ class GravityPlusAnalysis(Analysis):
         check = ops.analyze(num_steps)
         if check != 0:
             self.log('Gravity analysis failed. Unable to continue...')
-            raise ValueError('Analysis Failed')
+            msg = 'Analysis Failed'
+            raise ValueError(msg)
 
     def retrieve_node_displacement(self, uid, case_name):
         """
@@ -1290,7 +1295,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
         elif direction == 'z':
             load_dir = np.array([0.0, 0.0, 1.0, 0.0, 0.0, 0.0])
         else:
-            raise ValueError('Invalid direction')
+            msg = 'Invalid direction'
+            raise ValueError(msg)
 
         if modeshape is not None:
             if direction not in ['x', 'y']:
@@ -1370,7 +1376,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
         elif direction == 'z':
             control_dof = 2
         else:
-            raise ValueError("Direction can be 'x', 'y' or 'z'")
+            msg = "Direction can be 'x', 'y' or 'z'"
+            raise ValueError(msg)
 
         self.log('Initializing containers')
         self._init_results()
@@ -1467,7 +1474,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
                             ops.integrator('LoadControl', increment)
                             flag = ops.analyze(1)
                             if flag != 0:
-                                raise ValueError('Failed to unload.')
+                                msg = 'Failed to unload.'
+                                raise ValueError(msg)
                             current_load = ops.getLoadFactor(2)
                             n_steps_success += 1
                             self._read_opensees_results(
@@ -1606,7 +1614,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
         elif direction == 'z':
             control_dof = 2
         else:
-            raise ValueError("Direction can be 'x', 'y' or 'z'")
+            msg = "Direction can be 'x', 'y' or 'z'"
+            raise ValueError(msg)
         base_shear_lst = []
         displacement_lst = []
         for step in range(self.results[case_name].n_steps_success):  # type:ignore
@@ -1660,7 +1669,8 @@ def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, redefine=False
                 pass
 
     if all((ag_x is None, ag_y is None, ag_z is None)):
-        raise ValueError('No input files specified.')
+        msg = 'No input files specified.'
+        raise ValueError(msg)
 
     for ag_dir, i, j in zip((ag_x, ag_y, ag_z), (2, 3, 4), (1, 2, 3)):
         if ag_dir is not None:

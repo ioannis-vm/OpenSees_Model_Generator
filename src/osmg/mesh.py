@@ -151,15 +151,18 @@ class Edge:
                 halfedge = Halfedge(self.v_i, self)
                 self.h_i = halfedge
             else:
-                raise ValueError('Halfedge h_i already defined')
+                msg = 'Halfedge h_i already defined'
+                raise ValueError(msg)
         elif vertex == self.v_j:
             if not self.h_j:
                 halfedge = Halfedge(self.v_j, self)
                 self.h_j = halfedge
             else:
-                raise ValueError('Halfedge h_j already defined')
+                msg = 'Halfedge h_j already defined'
+                raise ValueError(msg)
         else:
-            raise ValueError('The edge is not connected to the given vertex.')
+            msg = 'The edge is not connected to the given vertex.'
+            raise ValueError(msg)
         return halfedge
 
     def other_vertex(self, vertex):
@@ -189,7 +192,8 @@ class Edge:
         elif self.v_j == vertex:
             v_other = self.v_i
         else:
-            raise ValueError('The edge is not connected to the given vertex')
+            msg = 'The edge is not connected to the given vertex'
+            raise ValueError(msg)
         return v_other
 
     def overlaps_or_crosses(self, other: Edge) -> bool:

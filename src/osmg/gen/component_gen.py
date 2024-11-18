@@ -470,7 +470,8 @@ class BeamColumnGenerator:
             )
             res = elm_disp
         else:
-            raise ValueError('Invalid element type: {element_type.__name__}')
+            msg = 'Invalid element type: {element_type.__name__}'
+            raise ValueError(msg)
         return res
 
     def define_zerolength(
