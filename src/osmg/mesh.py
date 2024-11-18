@@ -333,13 +333,10 @@ class Edge:
             ):
                 # they share one vertex without overlap
                 return False
-            if (c_i < 0.00 - epsilon and c_j < 0.00 - epsilon) or (
-                c_i > 1.00 + epsilon and c_j > 1.00 + epsilon
-            ):
-                # definitely no overlap
-                return False
-            # in any other case, they overlap
-            return True
+            return not (
+                (c_i < 0.00 - epsilon and c_j < 0.00 - epsilon)
+                or (c_i > 1.00 + epsilon and c_j > 1.00 + epsilon)
+            )
 
         # Otherwise they are not parallel.
         # there is at least one solution
@@ -348,10 +345,7 @@ class Edge:
         # the edges overlap within their length
         # otherwise, their extensions overlap, which
         # is not an issue.
-        if 0.00 < sol[0] < 1.00 and 0.00 < sol[1] < 1.00:
-            return True
-
-        return False
+        return bool(0.0 < sol[0] < 1.0 and 0.0 < sol[1] < 1.0)
 
 
 class Halfedge:
@@ -804,10 +798,7 @@ def obtain_closed_loops(halfedges):
     """
 
     def is_in_some_loop(halfedge, loops):
-        for loop in loops:
-            if halfedge in loop:
-                return True
-        return False
+        return any(halfedge in loop for loop in loops)
 
     loops: list[list[Halfedge]] = []
     for halfedge in halfedges:

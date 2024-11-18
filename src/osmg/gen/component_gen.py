@@ -175,7 +175,7 @@ def beam_placement_lookup(  # noqa: C901
                 column = query.search_connectivity([node, node_below])
                 if column:
                     elms = []
-                    for dctkey in column.element_connectivity().keys():
+                    for dctkey in column.element_connectivity():
                         if node.uid in dctkey:
                             elms.append(column.element_connectivity()[dctkey])  # noqa: PERF401
                     assert elms, 'There should be an element here.'
@@ -749,22 +749,13 @@ class BeamColumnGenerator:
             nh_i_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_i_out)
             component.internal_nodes.add(nh_i_in)
-            if 'element_type' in zerolength_gen_args_i:
-                element_type_i = zerolength_gen_args_i['element_type']
-            else:
-                element_type_i = element_type
+            element_type_i = zerolength_gen_args_i.get('element_type', element_type)
             if element_type_i.__name__ in {
                 'ElasticBeamColumn',
                 'DispBeamColumn',
             }:
-                if 'section' in zerolength_gen_args_i:
-                    section_i = zerolength_gen_args_i['section']
-                else:
-                    section_i = section
-                if 'transf_type' in zerolength_gen_args_i:
-                    transf_type_i = zerolength_gen_args_i['transf_type']
-                else:
-                    transf_type_i = transf_type
+                section_i = zerolength_gen_args_i.get('section', section)
+                transf_type_i = zerolength_gen_args_i.get('transf_type', transf_type)
                 self.add_beamcolumn_elements_in_series(
                     component,
                     node_i,
@@ -819,22 +810,13 @@ class BeamColumnGenerator:
             nh_j_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_j_out)
             component.internal_nodes.add(nh_j_in)
-            if 'element_type' in zerolength_gen_args_j:
-                element_type_j = zerolength_gen_args_j['element_type']
-            else:
-                element_type_j = element_type
+            element_type_j = zerolength_gen_args_j.get('element_type', element_type)
             if element_type_j.__name__ in {
                 'ElasticBeamColumn',
                 'DispBeamColumn',
             }:
-                if 'section' in zerolength_gen_args_j:
-                    section_j = zerolength_gen_args_j['section']
-                else:
-                    section_j = section
-                if 'transf_type' in zerolength_gen_args_j:
-                    transf_type_j = zerolength_gen_args_j['transf_type']
-                else:
-                    transf_type_j = transf_type
+                section_j = zerolength_gen_args_j.get('section', section)
+                transf_type_j = zerolength_gen_args_j.get('transf_type', transf_type)
                 self.add_beamcolumn_elements_in_series(
                     component,
                     nh_j_out,

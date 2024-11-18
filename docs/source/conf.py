@@ -10,16 +10,15 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.abspath('../../'))
 
 project = 'osmg'
 author = 'John Vouvakis Manousakis'
-release = [
-    line.split('=')[1]
-    for line in open('../../setup.cfg', encoding='utf-8')
-    if 'version' in line
-][0].strip()
+with Path('../../setup.cfg').open('r', encoding='utf-8') as f:
+    lines = f.readlines()
+release = [line.split('=')[1] for line in lines if 'version' in line][0].strip()
 copyright = '2023, Ioannis Vouvakis Manousakis'  # noqa: A001
 
 # -- General configuration ---------------------------------------------------

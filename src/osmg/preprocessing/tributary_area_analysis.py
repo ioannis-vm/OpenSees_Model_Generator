@@ -458,7 +458,7 @@ class TributaryAreaAnaysis:
         else:
             g_const = common.G_CONST_SI
         lcase = self.parent_loadcase
-        for uid in edges.keys():
+        for uid in edges:
             area = edge_area[uid]
             loaded_elm = edge_map[uid]
             for load in self.polygon_loads:
