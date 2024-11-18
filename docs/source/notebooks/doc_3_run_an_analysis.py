@@ -232,7 +232,7 @@ help(show_deformed_shape)
 
 
 # %%
-show_deformed_shape(static_anl, testcase.name, 0, 0.00, False)
+show_deformed_shape(static_anl, testcase.name, 0, 0.00, extrude=False)
 
 # %%
 help(show_basic_forces)
@@ -240,7 +240,7 @@ help(show_basic_forces)
 
 # %%
 show_basic_forces(
-    static_anl, testcase.name, 0, 1.00, 1.00, 1.00, 1.00, 1.00, 10, 1.00, 1.00, False
+    static_anl, testcase.name, 0, 1.00, 1.00, 1.00, 1.00, 1.00, 10, 1.00, 1.00
 )
 
 

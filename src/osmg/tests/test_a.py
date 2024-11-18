@@ -144,7 +144,7 @@ def test_a():
         testcase.name,
         anl.results[testcase.name].n_steps_success,
         0.00,
-        True,
+        extrude=True,
         animation=False,
     )
 
