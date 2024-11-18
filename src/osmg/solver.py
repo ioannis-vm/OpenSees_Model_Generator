@@ -1232,7 +1232,7 @@ class GravityPlusAnalysis(Analysis):
                     self.time_vector,
                     initial=0,
                 )
-                res[:, j] = res[:, j] + v_g
+                res[:, j] += +v_g
         dfrmae = pd.DataFrame(
             res,
             columns=[
@@ -1283,7 +1283,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def _apply_lateral_load(self, case_name, direction, modeshape=None, node=None):  # noqa: C901
         query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
         distribution = query.level_masses()
-        distribution = distribution / np.linalg.norm(distribution)
+        distribution /= np.linalg.norm(distribution)
 
         # define the load pattern
         ops.timeSeries('Linear', 2)
@@ -1326,7 +1326,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                         for n in node_list
                     ]
                 )
-                masses = masses / np.linalg.norm(masses)
+                masses /= np.linalg.norm(masses)
                 for j, some_node in enumerate(node_list):
                     ops.load(
                         some_node.uid,

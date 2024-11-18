@@ -184,7 +184,7 @@ def local_axes_from_points_and_angle(
     """
     # x-axis
     x_axis = point_j - point_i
-    x_axis = x_axis / np.linalg.norm(x_axis)
+    x_axis /= np.linalg.norm(x_axis)
     # y and z axes
     diff = np.abs(np.linalg.norm(x_axis - np.array([0.00, 0.00, -1.00])))
     if diff < common.EPSILON:
@@ -202,7 +202,7 @@ def local_axes_from_points_and_angle(
         # orthogonalize with respect to x-axis
         y_axis = up_direction - np.dot(up_direction, x_axis) * x_axis
         # ..and normalize
-        y_axis = y_axis / np.linalg.norm(y_axis)
+        y_axis /= np.linalg.norm(y_axis)
         y_axis = np.dot(rotation_matrix_3d(x_axis, ang), y_axis)
         # z-axis
         z_axis = np.cross(x_axis, y_axis)
