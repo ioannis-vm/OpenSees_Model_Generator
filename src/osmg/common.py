@@ -73,7 +73,7 @@ def print_dir(obj: object) -> None:
     pprint(dir(obj))  # noqa: T203
 
 
-def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Optional[Any]:
+def previous_element(dct: OrderedDict[Any, Any], key: Any) -> Any | None:
     """
     Returns the value of the element that comes before the given key
     in an ordered dictionary.

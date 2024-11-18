@@ -160,7 +160,7 @@ class TrussBar(Element):
     transf_type: str
     area: float
     mat: UniaxialMaterial
-    outside_shape: Optional[Mesh] = field(default=None)
+    outside_shape: Mesh | None = field(default=None)
     weight_per_length: float = field(default=0.00)
     rho: float = field(default=0.00)
     cflag: int = field(default=0)
@@ -254,8 +254,8 @@ class ElasticBeamColumn(Element):
 
     section: ElasticSection
     geomtransf: GeomTransf
-    n_x: Optional[float] = field(default=None)
-    n_y: Optional[float] = field(default=None)
+    n_x: float | None = field(default=None)
+    n_y: float | None = field(default=None)
 
     def ops_args(self):
         """
@@ -388,7 +388,7 @@ class BeamIntegration:
     """
 
     uid: int
-    parent_section: Union[ElasticSection, FiberSection] = field(repr=False)
+    parent_section: ElasticSection | FiberSection = field(repr=False)
 
 
 @dataclass

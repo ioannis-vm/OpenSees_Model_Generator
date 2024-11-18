@@ -101,9 +101,9 @@ class Results:
     clock: list[float] = field(init=False)
     iters: list[int] = field(init=False)
     subdivision_level: list[int] = field(init=False)
-    periods: Optional[nparr] = field(default=None)
+    periods: nparr | None = field(default=None)
     n_steps_success: int = field(default=0)
-    metadata: Optional[dict[str, object]] = field(default=None)
+    metadata: dict[str, object] | None = field(default=None)
 
     def __post_init__(self):
         self.node_displacements = Collection(self)
@@ -142,7 +142,7 @@ class AnalysisSettings:
 
     """
 
-    log_file: Optional[str] = field(default=None)
+    log_file: str | None = field(default=None)
     silent: bool = field(default=False)
     store_forces: bool = field(default=True)
     store_reactions: bool = field(default=True)
@@ -151,7 +151,7 @@ class AnalysisSettings:
     specific_nodes: list[int] = field(default_factory=list)
     pickle_results: bool = field(default=False)
     solver: str = field(default='UmfPack')
-    restrict_dof: Optional[list[bool]] = field(default=None)
+    restrict_dof: list[bool] | None = field(default=None)
 
 
 @dataclass(repr=False)
@@ -198,10 +198,10 @@ class Analysis:
 
     mdl: Model
     load_cases: dict[str, LoadCase]
-    output_directory: Optional[str] = field(default=None)
+    output_directory: str | None = field(default=None)
     settings: AnalysisSettings = field(default_factory=AnalysisSettings)
     results: dict[str, Results] = field(default_factory=dict)
-    logger: Optional[object] = field(default=None)
+    logger: object | None = field(default=None)
     warning: Warnings = field(init=False)
     backend: str = field(default='OpenSeesPy')
 
@@ -529,7 +529,7 @@ class Analysis:
         ops.timeSeries('Linear', 1)
         ops.pattern('Plain', 1, 1)
         elms_with_udl: list[
-            Union[element.ElasticBeamColumn, element.DispBeamColumn]
+            element.ElasticBeamColumn | element.DispBeamColumn
         ] = []
         elms_with_udl.extend(
             [
@@ -1018,11 +1018,7 @@ class ModalAnalysis(Analysis):
             self._read_node_displacements_modal(case_name)
             if self.settings.store_forces:
                 line_elements: list[
-                    Union[
-                        element.TrussBar,
-                        element.ElasticBeamColumn,
-                        element.DispBeamColumn,
-                    ]
+                    element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
                 ] = []
                 line_elements.extend(
                     [
@@ -1735,22 +1731,22 @@ class THAnalysis(GravityPlusAnalysis):
     def run(  # noqa: C901, PLR0914, PLR0915
         self,
         analysis_time_increment: float,
-        ag_vec_x: Optional[nparr],
-        ag_vec_y: Optional[nparr],
-        ag_vec_z: Optional[nparr],
+        ag_vec_x: nparr | None,
+        ag_vec_y: nparr | None,
+        ag_vec_z: nparr | None,
         ag_vec_time_incr: float,
         finish_time: float = 0.00,
         skip_steps: int = 1,
-        damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {  # noqa: B006
+        damping: dict[str, str | float | int | list[float] | None] = {  # noqa: B006
             'type': None
         },
         *,
         print_progress: bool = True,
         drift_check: float = 0.00,
-        time_limit: Optional[float] = None,
+        time_limit: float | None = None,
         dampen_out_residual: bool = False,
         test_tolerance: float = 1e-12,
-    ) -> dict[str, Union[int, str, float]]:
+    ) -> dict[str, int | str | float]:
         """
         Run the time-history analysis
 
@@ -2220,7 +2216,7 @@ class THAnalysis(GravityPlusAnalysis):
                     print(f'{vel_norm:5.3e} > 1.000e-06', end='\r')  # noqa: T201
 
         self.log('Analysis finished')
-        metadata: dict[str, Union[int, str, float]] = {
+        metadata: dict[str, int | str | float] = {
             'successful steps': n_steps_success,
             'analysis_finished_successfully': not analysis_failed,
         }
@@ -2294,9 +2290,9 @@ class ModalResponseSpectrumAnalysis:
     periods: nparr
     spectrum: nparr
     direction: str
-    modal_q0: Optional[nparr] = field(default=None)
-    vb_modal: Optional[nparr] = field(default=None)
-    anl: Optional[Analysis] = field(default=None)
+    modal_q0: nparr | None = field(default=None)
+    vb_modal: nparr | None = field(default=None)
+    anl: Analysis | None = field(default=None)
 
     def run(self):
         """

@@ -416,10 +416,10 @@ class BeamColumnGenerator:
         offset_j: nparr,
         transf_type: str,
         section: ElasticSection | FiberSection,
-        element_type: type[Union[ElasticBeamColumn, DispBeamColumn]],
+        element_type: type[ElasticBeamColumn | DispBeamColumn],
         angle: float = 0.00,
-        n_x: Optional[float] = None,
-        n_y: Optional[float] = None,
+        n_x: float | None = None,
+        n_y: float | None = None,
     ) -> ElasticBeamColumn | DispBeamColumn:
         """
         Adds a beamcolumn element to the model, connecting the
@@ -447,7 +447,7 @@ class BeamColumnGenerator:
                 n_x=n_x,
                 n_y=n_y,
             )
-            res: Union[ElasticBeamColumn, DispBeamColumn] = elm_el
+            res: ElasticBeamColumn | DispBeamColumn = elm_el
         elif element_type.__name__ == 'DispBeamColumn':
             assert isinstance(section, FiberSection)
             assert n_x is None
@@ -906,7 +906,7 @@ class BeamColumnGenerator:
         transf_type: str,
         n_sub: int,
         section: ElasticSection | FiberSection,
-        element_type: type[Union[ElasticBeamColumn, DispBeamColumn]],
+        element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
         camber_2: float = 0.00,
@@ -985,13 +985,13 @@ class BeamColumnGenerator:
         transf_type: str,
         n_sub: int,
         section: ElasticSection,
-        element_type: type[Union[ElasticBeamColumn, DispBeamColumn]],
+        element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
         camber_2: float = 0.00,
         camber_3: float = 0.00,
-        split_existing_i: Optional[ComponentAssembly] = None,
-        split_existing_j: Optional[ComponentAssembly] = None,
+        split_existing_i: ComponentAssembly | None = None,
+        split_existing_j: ComponentAssembly | None = None,
         h_offset_i: float = 0.00,
         h_offset_j: float = 0.00,
         method: str = 'generate_plain_component_assembly',
@@ -1094,13 +1094,13 @@ class BeamColumnGenerator:
         transf_type: str,
         n_sub: int,
         section: ElasticSection,
-        element_type: type[Union[ElasticBeamColumn, DispBeamColumn]],
+        element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
         camber_2: float = 0.00,
         camber_3: float = 0.00,
-        split_existing_i: Optional[ComponentAssembly] = None,
-        split_existing_j: Optional[ComponentAssembly] = None,
+        split_existing_i: ComponentAssembly | None = None,
+        split_existing_j: ComponentAssembly | None = None,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
         """

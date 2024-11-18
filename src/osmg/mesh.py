@@ -142,8 +142,8 @@ class Edge:
         self.v_i = v_i
         self.v_j = v_j
         self.uid = next(self._ids)
-        self.h_i: Optional[Halfedge] = None
-        self.h_j: Optional[Halfedge] = None
+        self.h_i: Halfedge | None = None
+        self.h_j: Halfedge | None = None
         if self not in self.v_i.edges:
             self.v_i.edges.append(self)
         if self not in self.v_j.edges:

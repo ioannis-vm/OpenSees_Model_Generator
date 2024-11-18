@@ -52,7 +52,7 @@ class ElmQuery:
 
     model: Model
 
-    def search_connectivity(self, nodes: list[Node]) -> Optional[ComponentAssembly]:
+    def search_connectivity(self, nodes: list[Node]) -> ComponentAssembly | None:
         """
         Finds component assembly objects based on the nodes the are
         connected to.
@@ -77,10 +77,10 @@ class ElmQuery:
         x_loc: float,
         y_loc: float,
         lvl: int,
-        z_loc: Optional[float] = None,
+        z_loc: float | None = None,
         *,
         internal: bool = False,
-    ) -> Optional[Node]:
+    ) -> Node | None:
         """
         Looks if a primary node exists at the specified location.
 
@@ -112,7 +112,7 @@ class ElmQuery:
         return res
 
     def retrieve_components_from_nodes(
-        self, nodes: list[Node], lvl_uid: Optional[int] = None
+        self, nodes: list[Node], lvl_uid: int | None = None
     ) -> dict[int, ComponentAssembly]:
         """
         Retrieves component assemblies if at least one of their
@@ -143,8 +143,8 @@ class ElmQuery:
         return retrieved_components
 
     def retrieve_component_from_nodes(
-        self, nodes: list[Node], lvl_uid: Optional[int] = None
-    ) -> Optional[ComponentAssembly]:
+        self, nodes: list[Node], lvl_uid: int | None = None
+    ) -> ComponentAssembly | None:
         """
         Retrieves a single component assembly if all of its external
         nodes match the given list of nodes.
@@ -175,7 +175,7 @@ class ElmQuery:
 
     def retrieve_component(  # noqa: C901
         self, x_loc: float, y_loc: float, lvl: int
-    ) -> Optional[ComponentAssembly]:
+    ) -> ComponentAssembly | None:
         """
         Retrieves a component assembly of a level if any of its
         line elements passes trhough the specified point.
@@ -195,11 +195,7 @@ class ElmQuery:
             if len(component.external_nodes) != 2:  # noqa: PLR2004
                 continue
             line_elems: list[
-                Union[
-                    element.TrussBar,
-                    element.ElasticBeamColumn,
-                    element.DispBeamColumn,
-                ]
+                element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
             ] = []
             for elm in component.elements.values():
                 if isinstance(elm, element.TrussBar):

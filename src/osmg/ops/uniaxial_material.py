@@ -65,11 +65,11 @@ class Steel02(UniaxialMaterial):
     c_r0: float
     c_r1: float
     c_r2: float
-    a1: Optional[float] = field(default=None)
-    a2: Optional[float] = field(default=None)
-    a3: Optional[float] = field(default=None)
-    a4: Optional[float] = field(default=None)
-    sig_init: Optional[float] = field(default=None)
+    a1: float | None = field(default=None)
+    a2: float | None = field(default=None)
+    a3: float | None = field(default=None)
+    a4: float | None = field(default=None)
+    sig_init: float | None = field(default=None)
 
     def ops_args(self):
         """
@@ -111,33 +111,33 @@ class Steel4(UniaxialMaterial):
 
     Fy: float
     E0: float
-    b_k: Optional[float] = field(default=None)
+    b_k: float | None = field(default=None)
     R_0: float = field(default=20.00)
     r_1: float = field(default=0.90)
     r_2: float = field(default=0.15)
 
-    b_kc: Optional[float] = field(default=False)
+    b_kc: float | None = field(default=False)
     R_0c: float = field(default=20.00)
     r_1c: float = field(default=0.90)
     r_2c: float = field(default=0.15)
 
-    b_i: Optional[float] = field(default=None)
-    b_l: Optional[float] = field(default=None)
-    rho_i: Optional[float] = field(default=None)
-    R_i: Optional[float] = field(default=None)
-    l_yp: Optional[float] = field(default=None)
-    f_u: Optional[float] = field(default=None)
-    R_u: Optional[float] = field(default=None)
+    b_i: float | None = field(default=None)
+    b_l: float | None = field(default=None)
+    rho_i: float | None = field(default=None)
+    R_i: float | None = field(default=None)
+    l_yp: float | None = field(default=None)
+    f_u: float | None = field(default=None)
+    R_u: float | None = field(default=None)
 
-    f_uc: Optional[float] = field(default=None)
-    R_uc: Optional[float] = field(default=None)
-    b_ic: Optional[float] = field(default=None)
-    b_lc: Optional[float] = field(default=None)
-    rho_ic: Optional[float] = field(default=None)
-    R_ic: Optional[float] = field(default=None)
+    f_uc: float | None = field(default=None)
+    R_uc: float | None = field(default=None)
+    b_ic: float | None = field(default=None)
+    b_lc: float | None = field(default=None)
+    rho_ic: float | None = field(default=None)
+    R_ic: float | None = field(default=None)
 
-    sig_init: Optional[float] = field(default=None)
-    cycNum: Optional[float] = field(default=None)  # noqa: N815
+    sig_init: float | None = field(default=None)
+    cycNum: float | None = field(default=None)  # noqa: N815
 
     def ops_args(self):  # noqa: C901
         """
@@ -539,12 +539,12 @@ class MaxStrainRange(UniaxialMaterial):
 
     predecessor: UniaxialMaterial
     msr_fracture: float
-    min_fracture: Optional[float] = field(default=None)
-    max_fracture: Optional[float] = field(default=None)
-    tangent_ratio: Optional[float] = field(default=None)
-    def_coeff: Optional[float] = field(default=None)
-    node_tags: Optional[tuple[int, int]] = field(default=None)
-    elements_to_remove: Optional[list[int]] = field(default=None)
+    min_fracture: float | None = field(default=None)
+    max_fracture: float | None = field(default=None)
+    tangent_ratio: float | None = field(default=None)
+    def_coeff: float | None = field(default=None)
+    node_tags: tuple[int, int] | None = field(default=None)
+    elements_to_remove: list[int] | None = field(default=None)
 
     def ops_args(self):
         """

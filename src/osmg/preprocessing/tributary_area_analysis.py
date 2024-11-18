@@ -55,8 +55,8 @@ class PolygonLoad:
 
     name: str
     value: float
-    outside_shape: Optional[PolygonShape]
-    holes: Optional[list[PolygonShape]]
+    outside_shape: PolygonShape | None
+    holes: list[PolygonShape] | None
     massless: bool
 
 

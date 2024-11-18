@@ -371,9 +371,9 @@ def add_data__line_elms_deformed(
     """
     if not list_of_line_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
 
     for elm in list_of_line_elems:
         if elm.visibility.hidden_at_line_plots:
@@ -456,9 +456,9 @@ def add_data__line_elm_offsets_deformed(
     """
     if not list_of_line_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
     for elm in list_of_line_elems:
         if isinstance(elm, element.TrussBar):
             continue
@@ -525,9 +525,9 @@ def add_data__frames_undeformed(data_dict, list_of_line_elems):
     Adds a trace containing frame element centroidal axis lines
 
     """
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
 
     for elm in list_of_line_elems:
         if isinstance(elm, element.TrussBar):
@@ -628,7 +628,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     ref_len = mdl.reference_length()
     # maximum displacement
     max_d = 0.00
-    elms: list[Union[element.ElasticBeamColumn, element.DispBeamColumn]] = []
+    elms: list[element.ElasticBeamColumn | element.DispBeamColumn] = []
     elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
     elms.extend(mdl.list_of_specific_element(element.DispBeamColumn))
 
@@ -668,12 +668,12 @@ def show_deformed_shape(  # noqa: C901
     scaling: float,
     *,
     extrude: bool,
-    camera: Optional[dict[str, object]] = None,
+    camera: dict[str, object] | None = None,
     subset_model: Model = None,
     animation: bool = False,
     init_step: int = 0,
     step_skip: int = 0,
-    to_html_file: Optional[str] = None,
+    to_html_file: str | None = None,
 ) -> dict[str, Any]:
     """
     Visualize the model in its deformed state
@@ -953,7 +953,7 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
         mdl = analysis.mdl
 
     elms: list[
-        Union[element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn]
+        element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
     ] = []
     elms.extend(mdl.list_of_specific_element(element.TrussBar))
     elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
@@ -980,41 +980,41 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
     # d: torsion
     # e: shear combined
     # f: moment combined
-    x1_a: list[Optional[float]] = []
-    y1_a: list[Optional[float]] = []
-    z1_a: list[Optional[float]] = []
-    colors1_a: list[Optional[str]] = []
-    customdata_a: list[Optional[float]] = []
+    x1_a: list[float | None] = []
+    y1_a: list[float | None] = []
+    z1_a: list[float | None] = []
+    colors1_a: list[str | None] = []
+    customdata_a: list[float | None] = []
 
-    x1_b: list[Optional[float]] = []
-    y1_b: list[Optional[float]] = []
-    z1_b: list[Optional[float]] = []
-    colors1_b: list[Optional[str]] = []
-    customdata_b: list[Optional[float]] = []
+    x1_b: list[float | None] = []
+    y1_b: list[float | None] = []
+    z1_b: list[float | None] = []
+    colors1_b: list[str | None] = []
+    customdata_b: list[float | None] = []
 
-    x1_c: list[Optional[float]] = []
-    y1_c: list[Optional[float]] = []
-    z1_c: list[Optional[float]] = []
-    colors1_c: list[Optional[str]] = []
-    customdata_c: list[Optional[float]] = []
+    x1_c: list[float | None] = []
+    y1_c: list[float | None] = []
+    z1_c: list[float | None] = []
+    colors1_c: list[str | None] = []
+    customdata_c: list[float | None] = []
 
-    x1_d: list[Optional[float]] = []
-    y1_d: list[Optional[float]] = []
-    z1_d: list[Optional[float]] = []
-    colors1_d: list[Optional[str]] = []
-    customdata_d: list[Optional[float]] = []
+    x1_d: list[float | None] = []
+    y1_d: list[float | None] = []
+    z1_d: list[float | None] = []
+    colors1_d: list[str | None] = []
+    customdata_d: list[float | None] = []
 
-    x1_e: list[Optional[float]] = []
-    y1_e: list[Optional[float]] = []
-    z1_e: list[Optional[float]] = []
-    colors1_e: list[Optional[str]] = []
-    customdata_e: list[Optional[float]] = []
+    x1_e: list[float | None] = []
+    y1_e: list[float | None] = []
+    z1_e: list[float | None] = []
+    colors1_e: list[str | None] = []
+    customdata_e: list[float | None] = []
 
-    x1_f: list[Optional[float]] = []
-    y1_f: list[Optional[float]] = []
-    z1_f: list[Optional[float]] = []
-    colors1_f: list[Optional[str]] = []
-    customdata_f: list[Optional[float]] = []
+    x1_f: list[float | None] = []
+    y1_f: list[float | None] = []
+    z1_f: list[float | None] = []
+    colors1_f: list[str | None] = []
+    customdata_f: list[float | None] = []
 
     # (we do this to determine the internal forces
     #  for all elements before we even start plotting
@@ -1469,7 +1469,7 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     else:
         mdl = combo.mdl
     elms: list[
-        Union[element.TrussBar, element.ElasticBeamColumn, element.DispBeamColumn]
+        element.TrussBar | element.ElasticBeamColumn | element.DispBeamColumn
     ] = []
     elms.extend(mdl.list_of_specific_element(element.TrussBar))
     elms.extend(mdl.list_of_specific_element(element.ElasticBeamColumn))
@@ -1495,29 +1495,29 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     # d: torsion
     # e: shear combined
     # f: moment combined
-    x1_a: list[Optional[float]] = []
-    y1_a: list[Optional[float]] = []
-    z1_a: list[Optional[float]] = []
-    colors1_a: list[Optional[str]] = []
-    customdata_a: list[Optional[float]] = []
+    x1_a: list[float | None] = []
+    y1_a: list[float | None] = []
+    z1_a: list[float | None] = []
+    colors1_a: list[str | None] = []
+    customdata_a: list[float | None] = []
 
-    x1_b: list[Optional[float]] = []
-    y1_b: list[Optional[float]] = []
-    z1_b: list[Optional[float]] = []
-    colors1_b: list[Optional[str]] = []
-    customdata_b: list[Optional[float]] = []
+    x1_b: list[float | None] = []
+    y1_b: list[float | None] = []
+    z1_b: list[float | None] = []
+    colors1_b: list[str | None] = []
+    customdata_b: list[float | None] = []
 
-    x1_c: list[Optional[float]] = []
-    y1_c: list[Optional[float]] = []
-    z1_c: list[Optional[float]] = []
-    colors1_c: list[Optional[str]] = []
-    customdata_c: list[Optional[float]] = []
+    x1_c: list[float | None] = []
+    y1_c: list[float | None] = []
+    z1_c: list[float | None] = []
+    colors1_c: list[str | None] = []
+    customdata_c: list[float | None] = []
 
-    x1_d: list[Optional[float]] = []
-    y1_d: list[Optional[float]] = []
-    z1_d: list[Optional[float]] = []
-    colors1_d: list[Optional[str]] = []
-    customdata_d: list[Optional[float]] = []
+    x1_d: list[float | None] = []
+    y1_d: list[float | None] = []
+    z1_d: list[float | None] = []
+    colors1_d: list[str | None] = []
+    customdata_d: list[float | None] = []
 
     # (we do this to determine the internal forces
     #  for all elements before we even start plotting

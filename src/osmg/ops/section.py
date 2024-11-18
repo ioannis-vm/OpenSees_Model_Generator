@@ -86,9 +86,9 @@ class ElasticSection(Section):
     g_mod: float
     j_mod: float
     sec_w: float
-    outside_shape: Optional[Mesh] = field(default=None, repr=False)
-    snap_points: Optional[dict[str, nparr]] = field(default=None, repr=False)
-    properties: Optional[dict[str, Any]] = field(default=None, repr=False)
+    outside_shape: Mesh | None = field(default=None, repr=False)
+    snap_points: dict[str, nparr] | None = field(default=None, repr=False)
+    properties: dict[str, Any] | None = field(default=None, repr=False)
 
     def weight_per_length(self):
         """
@@ -146,7 +146,7 @@ class SectionComponent:
     holes: dict[str, Mesh]
     ops_material: UniaxialMaterial
     physical_material: PhysicalMaterial
-    parent_section: Optional[FiberSection] = field(default=None)
+    parent_section: FiberSection | None = field(default=None)
 
     def __repr__(self):
         res = ''

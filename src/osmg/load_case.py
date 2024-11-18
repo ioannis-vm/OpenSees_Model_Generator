@@ -82,7 +82,7 @@ class LineElementUDL:
     """
 
     parent_load_case: LoadCase
-    parent_line_element: Union[element.ElasticBeamColumn, element.DispBeamColumn]
+    parent_line_element: element.ElasticBeamColumn | element.DispBeamColumn
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self):
@@ -190,7 +190,7 @@ class LoadCase:
         int, TributaryAreaAnaysis
     ] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
-    equaldof: Optional[int] = field(default=None)
+    equaldof: int | None = field(default=None)
 
     def __post_init__(self):
         self.node_loads = obj_collections.Collection(self)

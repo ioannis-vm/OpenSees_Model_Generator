@@ -217,7 +217,7 @@ def add_data__parent_nodes(
 def add_data__internal_nodes(
     data_dict: list[dict[str, object]],
     mdl: Model,
-    load_case: Optional[LoadCase] = None,
+    load_case: LoadCase | None = None,
 ) -> None:
     """
     Adds a trace containing internal nodes
@@ -367,7 +367,7 @@ def add_data__release_nodes(
 def add_data__frames(
     data_dict: list[dict[str, object]],
     mdl: Model,
-    load_case: Optional[LoadCase] = None,
+    load_case: LoadCase | None = None,
 ) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
@@ -379,7 +379,7 @@ def add_data__frames(
       load_case: the load_case to be visualized
 
     """
-    line_elems: list[Union[element.ElasticBeamColumn, element.DispBeamColumn]] = []
+    line_elems: list[element.ElasticBeamColumn | element.DispBeamColumn] = []
 
     # >>>
     # it feels ridiculous to do this, but it's the only way I am
@@ -401,9 +401,9 @@ def add_data__frames(
     if not line_elems:
         return
 
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
     customdata_list = []
     section_names = []
     for elm in line_elems:
@@ -492,7 +492,7 @@ def add_data__frames(
 def add_data__bars(
     data_dict: list[dict[str, object]],
     mdl: Model,
-    load_case: Optional[LoadCase] = None,
+    load_case: LoadCase | None = None,
 ) -> None:
     """
     Adds a trace containing frame element centroidal axis lines
@@ -510,9 +510,9 @@ def add_data__bars(
     ]
     if not line_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
     customdata_list: list[tuple[Any, ...]] = []
     section_areas = []
     for elm in line_elems:
@@ -610,9 +610,9 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
 
     if not link_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
     customdata_list: list[tuple[Any, ...]] = []
     for elm in link_elems:
         p_i: nparr = np.array(elm.nodes[0].coords)
@@ -666,9 +666,9 @@ def add_data__frame_offsets(data_dict: list[dict[str, object]], mdl: Model) -> N
     if not beamcolumn_elems:
         return
 
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
 
     for elm in beamcolumn_elems:
         assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
@@ -717,10 +717,10 @@ def add_data__frame_axes(
     if not beamcolumn_elems:
         return
     scaling = ref_len * 0.025
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
-    colors: list[Optional[str]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
+    colors: list[str | None] = []
     for elm in beamcolumn_elems:
         assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_at_line_plots:
@@ -774,10 +774,10 @@ def add_data__zerolength_axes(
     if not zerolength_elements:
         return
     scaling = ref_len * 0.025
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
-    colors: list[Optional[str]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
+    colors: list[str | None] = []
     for elm in zerolength_elements:
         assert isinstance(elm, element.ZeroLength)
         x_vec: nparr = elm.vecx
@@ -822,10 +822,10 @@ def add_data__global_axes(
 
     """
     scaling = ref_len
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
-    colors: list[Optional[str]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
+    colors: list[str | None] = []
     x_vec: nparr = np.array([1.00, 0.00, 0.00])
     y_vec: nparr = np.array([0.00, 1.00, 0.00])
     z_vec: nparr = np.array([0.00, 0.00, 1.00])
@@ -879,9 +879,9 @@ def add_data__diaphragm_lines(
 
     # otherwise, rigid diaphragms exist and we will plot lines, so we
     # prepare containers
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
 
     # for each level that has a parent node, draw the lines
     mdl = loadcase.parent_model
@@ -922,9 +922,9 @@ def add_data__tributary_area_boundaries(
     """
     trib_area_analysis_collection = loadcase.tributary_area_analysis
 
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
 
     for analysis in trib_area_analysis_collection.values():
         level = analysis.parent_level
@@ -971,12 +971,12 @@ def add_data__extruded_frames_mesh(
     beamcolumn_elems.extend(mdl.list_of_specific_element(element.DispBeamColumn))
     if not beamcolumn_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
-    i_list: list[Optional[int]] = []
-    j_list: list[Optional[int]] = []
-    k_list: list[Optional[int]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
+    i_list: list[int | None] = []
+    j_list: list[int | None] = []
+    k_list: list[int | None] = []
     index = 0
     for elm in beamcolumn_elems:
         assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
@@ -1049,12 +1049,12 @@ def add_data__extruded_bars_mesh(
     line_elems = mdl.list_of_specific_element(element.TrussBar)
     if not line_elems:
         return
-    x_list: list[Optional[float]] = []
-    y_list: list[Optional[float]] = []
-    z_list: list[Optional[float]] = []
-    i_list: list[Optional[int]] = []
-    j_list: list[Optional[int]] = []
-    k_list: list[Optional[int]] = []
+    x_list: list[float | None] = []
+    y_list: list[float | None] = []
+    z_list: list[float | None] = []
+    i_list: list[int | None] = []
+    j_list: list[int | None] = []
+    k_list: list[int | None] = []
     index = 0
     for elm in line_elems:
         assert isinstance(elm, element.TrussBar)
@@ -1122,7 +1122,7 @@ def add_data__extruded_bars_mesh(
 def show(  # noqa: C901
     mdl: Model,
     *,
-    load_case: Optional[LoadCase] = None,
+    load_case: LoadCase | None = None,
     extrude: bool = False,
     offsets: bool = True,
     global_axes: bool = True,
@@ -1131,9 +1131,9 @@ def show(  # noqa: C901
     zerolength_axes: bool = False,
     diaphragm_lines: bool = True,
     tributary_area_boundaries: bool = True,
-    camera: Optional[dict[str, object]] = None,
-    to_html_file: Optional[str] = None,
-    to_figure: Optional[str] = None,
+    camera: dict[str, object] | None = None,
+    to_html_file: str | None = None,
+    to_figure: str | None = None,
 ) -> None:
     """
     Visualize the model
