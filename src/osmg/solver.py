@@ -29,6 +29,7 @@ import socket
 import sys
 from dataclasses import dataclass, field
 from time import perf_counter
+from pathlib import Path
 from typing import Any, Optional, Union, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
@@ -222,7 +223,7 @@ class Analysis:
     def _init_results(self):  # noqa: C901
         # initialize output directory
         if self.output_directory and not os.path.exists(self.output_directory):
-            os.makedirs(self.output_directory, exist_ok=True)
+            Path(self.output_directory).mkdir(parents=True)
 
         # initialize logger
         if self.settings.log_file:
