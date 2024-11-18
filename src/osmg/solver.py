@@ -911,7 +911,7 @@ class ModalAnalysis(Analysis):
                         'Oops! Need to extend the code '
                         'to support dispBeamColumn elements'
                     )
-                    raise ValueError(msg)
+                    raise TypeError(msg)
 
                 length = elm.clear_length()
 
