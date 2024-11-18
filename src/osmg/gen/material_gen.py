@@ -171,6 +171,7 @@ class MaterialGenerator:
         direction='strong',
         moment_modifier=1.00,
         n_parameter=0.00,
+        *,
         only_elastic=False,
     ):
         """

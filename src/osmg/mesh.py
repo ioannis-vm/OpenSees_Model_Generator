@@ -842,7 +842,7 @@ def orient_loops(loops):
 #######################################
 
 
-def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
+def subdivide_polygon(*, outside, holes, n_x, n_y, plot=False):
     """
     Used to define the fibers of fiber sections.
 

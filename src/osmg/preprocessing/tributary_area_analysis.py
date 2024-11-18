@@ -97,7 +97,7 @@ class TributaryAreaAnaysis:
     )
 
     @no_type_check
-    def run(self, load_factor=1.00, massless_load_factor=1.00, perform_checks=True):  # noqa: C901
+    def run(self, *, load_factor=1.00, massless_load_factor=1.00, perform_checks=True):  # noqa: C901
         """
         Performs tributary area analysis
 

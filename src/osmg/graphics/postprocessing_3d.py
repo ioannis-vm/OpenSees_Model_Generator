@@ -911,6 +911,7 @@ def show_basic_forces(  # noqa: C901
     num_points,
     force_conversion=1.00,
     moment_conversion=1.00,
+    *,
     global_axes=False,
     camera=None,
     subset_model=None,
@@ -1417,6 +1418,7 @@ def show_basic_forces(  # noqa: C901
 
 def show_basic_forces_combo(  # noqa: C901
     combo,
+    *,
     scaling_global,
     scaling_n,
     scaling_q,

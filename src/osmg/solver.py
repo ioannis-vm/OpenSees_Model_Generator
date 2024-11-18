@@ -1656,7 +1656,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         )
 
 
-def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, redefine=False):
+def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, *, redefine=False):
     """
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
@@ -1701,7 +1701,7 @@ def define_lateral_load_pattern(ag_x, ag_y, ag_z, file_time_incr, redefine=False
             ops.pattern('UniformExcitation', i, j, '-accel', i)
 
 
-def plot_ground_motion(filename, file_time_incr, gmunit='g', plotly=False):
+def plot_ground_motion(filename, file_time_incr, gmunit='g', *, plotly=False):
     """
     Plots a ground motion input file.
 
@@ -2253,7 +2253,7 @@ class THAnalysis(GravityPlusAnalysis):
     #         breakpoint()
 
     def plot_node_displacement_history(
-        self, case_name, node, direction, plotly=False
+        self, case_name, node, direction, *, plotly=False
     ):
         """
         Plots the displacement history of the specified node.
