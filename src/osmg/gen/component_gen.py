@@ -238,9 +238,10 @@ class TrussBarGenerator:
         mat: UniaxialMaterial,
         outside_shape: Mesh,
         weight_per_length: float = 0.00,
+        component_purpose: str = 'Truss Element',
+        *,
         split_existing_i: bool = None,
         split_existing_j: bool = None,
-        component_purpose: str = 'Truss Element',
     ) -> ComponentAssembly:
         """
         Adds a truss bar element.

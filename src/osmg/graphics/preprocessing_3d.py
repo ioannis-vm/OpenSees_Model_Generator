@@ -1117,6 +1117,7 @@ def add_data__extruded_bars_mesh(
 
 def show(  # noqa: C901
     mdl: Model,
+    *,
     load_case: Optional[LoadCase] = None,
     extrude: bool = False,
     offsets: bool = True,

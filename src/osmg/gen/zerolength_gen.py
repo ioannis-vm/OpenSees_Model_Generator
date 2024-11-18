@@ -106,10 +106,11 @@ def imk_6(
     lboverl: float,
     loverh: float,
     rbs_factor: Optional[float],
-    consider_composite: bool,
     axial_load_ratio: float,
     section: ElasticSection,
     physical_material: PhysicalMaterial,
+    *,
+    consider_composite: bool,
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -158,10 +159,11 @@ def imk_56(
     lboverl: float,
     loverh: float,
     rbs_factor: Optional[float],
-    consider_composite: bool,
     axial_load_ratio: float,
     section: ElasticSection,
     physical_material: PhysicalMaterial,
+    *,
+    consider_composite: bool,
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -216,10 +218,11 @@ def imk_6_release_5(
     lboverl: float,
     loverh: float,
     rbs_factor: Optional[float],
-    consider_composite: bool,
     axial_load_ratio: float,
     section: ElasticSection,
     physical_material: PhysicalMaterial,
+    *,
+    consider_composite: bool,
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -257,9 +260,10 @@ def imk_6_release_5(
 
 def gravity_shear_tab(
     model: Model,
-    consider_composite: bool,
     section: ElasticSection,
     physical_material: PhysicalMaterial,
+    *,
+    consider_composite: bool,
     **kwargs: dict[object, object],
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -404,8 +408,9 @@ def steel_w_col_pz(
     pz_length: float,
     pz_doubler_plate_thickness: float,
     pz_hardening: float,
-    only_elastic: bool = False,
     moment_modifier: float = 1.00,
+    *,
+    only_elastic: bool = False,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
@@ -473,10 +478,11 @@ def steel_w_col_pz_updated(
     pz_doubler_plate_thickness: float,
     axial_load_ratio: float,
     slab_depth: float,
-    consider_composite: bool,
     location: str,
-    only_elastic: bool = False,
     moment_modifier: float = 1.00,
+    *, 
+    consider_composite: bool,
+    only_elastic: bool = False,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """

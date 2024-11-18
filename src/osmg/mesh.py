@@ -901,7 +901,7 @@ def subdivide_polygon(outside, holes, n_x, n_y, plot=False):
 
 
 def subdivide_hss_rect(
-    sec_h: float, sec_b: float, sec_t: float, plot: bool = False
+    sec_h: float, sec_b: float, sec_t: float, *, plot: bool = False
 ) -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.
@@ -982,7 +982,7 @@ def subdivide_hss_rect(
 
 
 def subdivide_hss_circ(
-    sec_d: float, sec_t: float, plot: bool = False
+    sec_d: float, sec_t: float, *, plot: bool = False
 ) -> list[shapely_Polygon]:
     """
     Used to define the fibers of steel HSS fiber sections.

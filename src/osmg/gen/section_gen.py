@@ -138,6 +138,7 @@ class SectionGenerator:
         ops_material: str,
         physical_material: str,
         sec_type: Type[Section],
+        *,
         store_in_model: bool = True,
         return_section: bool = False,
     ) -> dict[str, ElasticSection | FiberSection]:

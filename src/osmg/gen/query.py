@@ -78,6 +78,7 @@ class ElmQuery:
         y_loc: float,
         lvl: int,
         z_loc: Optional[float] = None,
+        *,
         internal: bool = False,
     ) -> Optional[Node]:
         """

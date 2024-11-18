@@ -665,6 +665,7 @@ def show_deformed_shape(  # noqa: C901
     case_name: str,
     step: int,
     scaling: float,
+    *,
     extrude: bool,
     camera: Optional[dict[str, object]] = None,
     subset_model: Model = None,

@@ -1752,6 +1752,7 @@ class THAnalysis(GravityPlusAnalysis):
         damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {  # noqa: B006
             'type': None
         },
+        *,
         print_progress: bool = True,
         drift_check: float = 0.00,
         time_limit: Optional[float] = None,

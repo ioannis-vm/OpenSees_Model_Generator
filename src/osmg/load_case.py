@@ -213,7 +213,7 @@ class LoadCase:
             self.tributary_area_analysis[lvlkey] = TributaryAreaAnaysis(self, lvl)
 
     def rigid_diaphragms(
-        self, level_uids: list[int], gather_mass: bool = False
+        self, level_uids: list[int], *, gather_mass: bool = False
     ) -> None:
         """
         Processes the geometry of the given levels and applies rigid
