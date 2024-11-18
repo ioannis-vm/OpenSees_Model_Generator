@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 def fix_all(
-    model: Model, **kwargs: dict[object, object]
+    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Fixed in all directions.
@@ -52,7 +52,7 @@ def fix_all(
 
 
 def release_6(
-    model: Model, **kwargs: dict[object, object]
+    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees strong axis bending.
@@ -67,7 +67,7 @@ def release_6(
 
 
 def release_5(
-    model: Model, **kwargs: dict[object, object]
+    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees weak axis bending.
@@ -82,7 +82,7 @@ def release_5(
 
 
 def release_56(
-    model: Model, **kwargs: dict[object, object]
+    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees both strong and weak axis bending.
@@ -402,7 +402,7 @@ def steel_w_col_pz(
     pz_hardening: float,
     only_elastic: bool = False,
     moment_modifier: float = 1.00,
-    **kwargs: dict[object, object],
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
@@ -473,7 +473,7 @@ def steel_w_col_pz_updated(
     location: str,
     only_elastic: bool = False,
     moment_modifier: float = 1.00,
-    **kwargs: dict[object, object],
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
@@ -685,7 +685,7 @@ def steel_brace_gusset(
     l_c: float,
     t_p: float,
     l_b: float,
-    **kwargs: dict[object, object],
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Hsiao, P-C., Lehman, D.E., and Roeder, C.W., 2012, Improved

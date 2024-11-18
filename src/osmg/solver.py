@@ -341,10 +341,10 @@ class Analysis:
             ops.node(node.uid, *node.coords)
 
         # restraints
-        for uid, node in primary_nodes.items():
+        for node in primary_nodes.values():
             ops.fix(node.uid, *[int(x) for x in node.restraint])
 
-        for uid, node in internal_nodes.items():
+        for node in internal_nodes.values():
             # (this is super unusual, but who knows..)
             ops.fix(node.uid, *[int(x) for x in node.restraint])
 
@@ -352,7 +352,7 @@ class Analysis:
             ops.fix(node.uid, *[int(x) for x in node.restraint])
 
         # lumped nodal mass
-        for uid, node in all_nodes.items():
+        for node in all_nodes.values():
             # retrieve osmg node mass
             specified_mass = self.load_cases[case_name].node_mass[node.uid].val
             # replace zeros with a small mass
@@ -1737,7 +1737,7 @@ class THAnalysis(GravityPlusAnalysis):
         ag_vec_time_incr: float,
         finish_time: float = 0.00,
         skip_steps: int = 1,
-        damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {
+        damping: dict[str, Optional[Union[str, float, int, list[float]]]] = {  # noqa: B006
             'type': None
         },
         print_progress: bool = True,

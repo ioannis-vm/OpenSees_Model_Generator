@@ -903,7 +903,6 @@ class BeamColumnGenerator:
         camber_2: float = 0.00,
         camber_3: float = 0.00,
         method: str = 'generate_plain_component_assembly',
-        additional_args: dict[str, object] = {},
     ) -> dict[int, ComponentAssembly]:
         """
         Adds a vertical beamcolumn element to all active levels.  This
@@ -959,7 +958,6 @@ class BeamColumnGenerator:
                 'camber_3': camber_3,
             }
 
-            args.update(additional_args)
             assert hasattr(self, method), f'Method not available: {method}'
             mthd = getattr(self, method)
             defined_component_assemblies[key] = mthd(**args)
@@ -988,7 +986,6 @@ class BeamColumnGenerator:
         h_offset_i: float = 0.00,
         h_offset_j: float = 0.00,
         method: str = 'generate_plain_component_assembly',
-        additional_args: dict[str, object] = {},
     ) -> dict[int, ComponentAssembly]:
         """
         Adds a diagonal beamcolumn element to all active levels.
@@ -1070,7 +1067,6 @@ class BeamColumnGenerator:
                 'camber_3': camber_3,
             }
 
-            args.update(additional_args)
             assert hasattr(self, method), f'Method not available: {method}'
             mthd = getattr(self, method)
             defined_component_assemblies[key] = mthd(**args)
@@ -1097,7 +1093,6 @@ class BeamColumnGenerator:
         split_existing_i: Optional[ComponentAssembly] = None,
         split_existing_j: Optional[ComponentAssembly] = None,
         method: str = 'generate_plain_component_assembly',
-        additional_args: dict[str, object] = {},
     ) -> dict[int, ComponentAssembly]:
         """
         Adds a diagonal beamcolumn element to all active levels.
@@ -1173,7 +1168,6 @@ class BeamColumnGenerator:
                 'camber_3': camber_3,
             }
 
-            args.update(additional_args)
             assert hasattr(self, method), f'Method not available: {method}'
             mthd = getattr(self, method)
             defined_component_assemblies[key] = mthd(**args)

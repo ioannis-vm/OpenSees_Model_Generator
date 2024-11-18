@@ -1091,7 +1091,7 @@ def sanity_checks(external, trivial):
     #   We expect no trivial loops
     if trivial:
         print('Warning: Found trivial loop')
-        for i, trv in enumerate(trivial):
+        for trv in trivial:
             for halfedge in trv:
                 print(halfedge.vertex.coords)
             plot_loop(trv)
