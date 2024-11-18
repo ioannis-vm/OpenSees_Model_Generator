@@ -307,7 +307,7 @@ class Edge:
             # when making comparisons.
             epsilon = common.EPSILON
             if (
-                (c_i < 0.00 - epsilon and np.isclose(c_j, 0.00))
+                (c_i < 0.00 - epsilon and np.isclose(c_j, 0.00))  # noqa: PLR0916
                 or (c_i > 1.00 + epsilon and np.isclose(c_j, 1.00))
                 or (np.isclose(c_i, 1.00) and c_j > 1.00 + epsilon)
                 or (np.isclose(c_i, 0.00) and c_j < 0.00 - epsilon)
