@@ -18,13 +18,13 @@ def list_directories(root_dir):
     res = []
     for path, directories, _ in os.walk(root_dir):
         for directory in directories:
-            res.append(os.path.join(path, directory))  # noqa: PERF401
+            res.append(Path(path) / directory)  # noqa: PERF401
     return res
 
 
 def list_python_files(directory):
     res = []
-    for file in glob.glob(os.path.join(directory, '*.py')):
+    for file in glob.glob(Path(directory) / '*.py'):  # TODO(JVM): Is this correct?
         res.append(file)  # noqa: PERF402
     return res
 
