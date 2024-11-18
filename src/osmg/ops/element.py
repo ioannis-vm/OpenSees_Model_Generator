@@ -39,7 +39,7 @@ class Element:
     OpenSees element
     https://openseespydoc.readthedocs.io/en/latest/src/element.html
 
-    Attributes
+    Attributes:
     ----------
         parent_component:
           the parent component assembly that this element belongs to.

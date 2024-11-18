@@ -44,7 +44,7 @@ class ElmQuery:
     Used to retrieve nodes and component
     assemblies.
 
-    Attributes
+    Attributes:
     ----------
       model: Model to be searched.
 
@@ -184,7 +184,7 @@ class ElmQuery:
           y_loc: y-coordinate
           lvl: Key of the level to be searched.
 
-        Returns
+        Returns:
         -------
           The first element found, None otherwise.
 
@@ -231,7 +231,7 @@ class LoadCaseQuery:
     Load case query objects retrieve information associated with load
     cases.
 
-    Attributes
+    Attributes:
     ----------
       model: Model object to be searched.
       loadcase: LoadCase object to be searched.

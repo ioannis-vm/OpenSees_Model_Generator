@@ -30,7 +30,7 @@ def rotation_matrix_2d(ang: float) -> nparr:
     ----------
         ang: Angle in radians to rotate the matrix by.
 
-    Returns
+    Returns:
     -------
         A 2x2 transformation matrix.
 
@@ -39,7 +39,7 @@ def rotation_matrix_2d(ang: float) -> nparr:
         array([[ 6.123234e-17, -1.000000e+00],
                [ 1.000000e+00,  6.123234e-17]])
 
-    Raises
+    Raises:
     ------
         TypeError: If `ang` is not a float.
 
@@ -60,7 +60,7 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
         axis: 3D vector representing the axis of rotation.
         theta: Angle of rotation in radians.
 
-    Returns
+    Returns:
     -------
         3x3 transformation matrix representing the rotation.
 
@@ -106,7 +106,7 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
         vec_y: (similar)
         vec_z: (similar)
 
-    Returns
+    Returns:
     -------
         global to local transformation matrix.
 
@@ -154,14 +154,14 @@ def local_axes_from_points_and_angle(
           z axis coincides with the local x axis, and horizontal
           elements whose local z axis is horizontal.
 
-    Returns
+    Returns:
     -------
         Local coordinate system
         vectors. The first element is the local x axis, the second
         element is the local y axis, and the third element is the
         local z axis.
 
-    Raises
+    Raises:
     ------
         ValueError: If the start point and end point define a vertical element
             that is defined upside down (i.e., with the start point at a lower
@@ -233,7 +233,7 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
           as a vector of the form [rx, ry, rz] representing the
           rotation around the x, y, and z axes, respectively.
 
-    Returns
+    Returns:
     -------
         Displacement at the other end of the rigid offset,
         given in the global coordinate system.

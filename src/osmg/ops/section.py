@@ -62,7 +62,7 @@ class ElasticSection(Section):
     """
     Elastic Section Object.
 
-    Attributes
+    Attributes:
     ----------
       e_mod: Young's modulus.
       area: Cross-sectional area.

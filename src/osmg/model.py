@@ -96,7 +96,7 @@ class Model:
     nodes, elements, and component assemblies that exist inside each level.
     Those objects are populated by generator objects. See `osmg.gen`.
 
-    Attributes
+    Attributes:
     ----------
         name: Name of the model.
         levels:

@@ -40,7 +40,7 @@ class PointLoadMass:
     """
     Point load/mass object. Global coordinate system.
 
-    Attributes
+    Attributes:
     ----------
         val: Value for each DOF.
 
@@ -107,7 +107,7 @@ class LineElementUDL:
             the global x, y, and z directions, in the direction of
             the global axes.
 
-        Returns
+        Returns:
         -------
           None
 
@@ -161,7 +161,7 @@ class LoadCase:
     Analysis objects can use multiple load cases.
     Load combination objects utilize load cases as well.
 
-    Attributes
+    Attributes:
     ----------
       name: A string representing the name of the load case.
       parent_model: A Model object representing the parent model of

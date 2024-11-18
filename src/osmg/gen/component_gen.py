@@ -76,7 +76,7 @@ def retrieve_snap_pt_global_offset(
       p_i: Internal point at the i-end.
       p_j: Internal point at the j-end.
 
-    Returns
+    Returns:
     -------
       The offset.
 

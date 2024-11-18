@@ -30,7 +30,7 @@ class Level:
     Level Object. Levels are part of a model and they contain primary
       nodes and component assemblies.
 
-    Attributes
+    Attributes:
     ----------
         parent_model (Model)
         uid (int)

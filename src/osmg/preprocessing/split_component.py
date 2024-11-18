@@ -41,7 +41,7 @@ def split_component(
       component: Component assembly to split.
       point: Point to be used to split the component.
 
-    WARNING:
+    Warning:
       This function might no longer work. Needs to be tested and
       perhaps updated.
 

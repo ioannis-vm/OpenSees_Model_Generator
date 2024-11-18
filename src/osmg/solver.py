@@ -69,7 +69,7 @@ class Results:
     """
     Stores analysis results.
 
-    Attributes
+    Attributes:
     ----------
       node_displacements: Displacements, stored in a dictionary. The
         keys correspond to the node UIDs. Each value is a dictionary,
@@ -122,7 +122,7 @@ class AnalysisSettings:
     """
     Analysis settings object.
 
-    Attributes
+    Attributes:
     ----------
       log_file: If specified, the log messages are written to this
         file.
@@ -183,7 +183,7 @@ class Analysis:
     """
     Parent analysis class.
 
-    Attributes
+    Attributes:
     ----------
       mdl: a given model
       load_cases: Dictionary containing load case names and

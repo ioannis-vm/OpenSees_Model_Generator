@@ -30,7 +30,7 @@ def list_python_files(directory: str) -> list[Path]:
     Args:
         directory (str): The directory to search in.
 
-    Returns
+    Returns:
     -------
         list[str]: A list of paths to Python files.
     """

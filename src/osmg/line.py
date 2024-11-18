@@ -32,7 +32,7 @@ class Line:
     Finite-length line segment object.
     Used internally whenever operations involving lines are reuired.
 
-    Attributes
+    Attributes:
     ----------
       tag: line tag.
       start: starting point.

@@ -36,7 +36,7 @@ class ComponentAssembly:
     various lower-level elements such as nodes and beamcolumn
     elements.
 
-    Attributes
+    Attributes:
     ----------
       uid: Unique identifier of the component assembly
       parent_collection: The collection of

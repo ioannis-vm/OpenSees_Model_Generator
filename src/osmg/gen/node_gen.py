@@ -29,7 +29,7 @@ class NodeGenerator:
     """
     NodeGenerator objects introduce node objects to a model.
 
-    Attributes
+    Attributes:
     ----------
       model: Model to act upon.
 
@@ -46,7 +46,7 @@ class NodeGenerator:
           y_loc: y coordinate of the node.
           lvl: Level at which the node should be added.
 
-        Returns
+        Returns:
         -------
           The node object that was added.
 
@@ -86,7 +86,7 @@ class NodeGenerator:
             z_loc: Elevation of the node.
             lvl: Level uid at which the node should be added.
 
-        Returns
+        Returns:
         -------
             The node object that was added.
 

@@ -37,7 +37,7 @@ class Collection(dict[TK, TV]):
     """
     Collection of objects.
 
-    Attributes
+    Attributes:
     ----------
         parent: Object to which the Collection belongs.
 
@@ -162,7 +162,7 @@ class CollectionActive(Collection[TK, TV]):
     """
     Collection with support for currently active objects.
 
-    Attributes
+    Attributes:
     ----------
       active: List of unique IDs that correspond to the active
         objects.
@@ -229,7 +229,7 @@ class NodeCollection(Collection[int, node.Node]):
     """
     Node collection.
 
-    Attributes
+    Attributes:
     ----------
         parent: Object to which the Collection belongs.
 
@@ -278,7 +278,7 @@ class CollectionWithConnectivity(Collection[TK, TV]):
     Collection of elements for which it is important to consider their
     connectivity.
 
-    Attributes
+    Attributes:
     ----------
         parent: Object to which the Collection belongs.
 

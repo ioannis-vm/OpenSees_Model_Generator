@@ -74,7 +74,7 @@ def interp_3d_deformation(
       u_j, r_j: similar to u_i, r_i.
       num_points: Number of interpolation points
 
-    Returns
+    Returns:
     -------
       Displacements (global system) and rotations (local system). The
         rotations are needed for plotting the deformed shape with

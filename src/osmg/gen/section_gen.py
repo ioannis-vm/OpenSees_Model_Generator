@@ -39,7 +39,7 @@ class SectionGenerator:
     """
     Used to populate the section repository of a model.
 
-    Attributes
+    Attributes:
     ----------
       model: Model to act upon
 
@@ -65,7 +65,7 @@ class SectionGenerator:
                 The product of the shear modulus and the torsional
                 moment of inertia.
 
-        Returns
+        Returns:
         -------
             ElasticSection: An ElasticSection object with the
                 specified properties.
@@ -158,7 +158,7 @@ class SectionGenerator:
                 in the model.
             return_section: If True, the created sections are returned.
 
-        Returns
+        Returns:
         -------
             If `return_section` is True, a dictionary containing the
             created sections. The keys are the labels of the sections,

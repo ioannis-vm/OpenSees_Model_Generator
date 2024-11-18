@@ -26,7 +26,7 @@ class Node:
     OpenSees node
     https://openseespydoc.readthedocs.io/en/latest/src/node.html?highlight=node
 
-    Attributes
+    Attributes:
     ----------
         uid: Unique ID of the node.
         coords: List of node coordinates.

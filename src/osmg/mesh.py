@@ -36,7 +36,7 @@ class Vertex:
     It knows all the halfedges leaving from it.
     Each instance has an automatically generated unique id.
 
-    Attributes
+    Attributes:
     ----------
         coords: Coordinates of the vertex.
         edges: List of edges connected to the vertex.
@@ -71,7 +71,7 @@ class Vertex:
         Arguments:
             other: Other vertex to compare with.
 
-        Returns
+        Returns:
         -------
             bool: `True` if the two vertices are equal, `False`
                   otherwise.
@@ -95,7 +95,7 @@ class Vertex:
         """
         Returns a hash value for the vertex based on its uid.
 
-        Returns
+        Returns:
         -------
             int: Hash value of the vertex.
 
@@ -114,7 +114,7 @@ class Vertex:
         """
         Returns a string representation of the vertex.
 
-        Returns
+        Returns:
         -------
             String representation of the vertex.
 
@@ -477,7 +477,7 @@ def polygon_area(coords: nparr) -> float:
                 at the end, as this is done
                 automatically.
 
-    Returns
+    Returns:
     -------
         area: The area of the polygon.
 
@@ -507,7 +507,7 @@ def polygon_centroid(coords: nparr) -> nparr:
                 at the end, as this is done
                 automatically.
 
-    Returns
+    Returns:
     -------
         centroid: The centroid of the polygon.
 
@@ -547,7 +547,7 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
                 at the end, as this is done
                 automatically.
 
-    Returns
+    Returns:
     -------
         dictionary, containing:
         'ixx': (float) - Moment of inertia around
@@ -694,7 +694,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     Arguments:
         edges: List of Edge objects
 
-    Returns
+    Returns:
     -------
         halfedges: List of Halfedge objects
 
@@ -791,7 +791,7 @@ def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
     Arguments:
         halfedges: list of halfedges
 
-    Returns
+    Returns:
     -------
         loops with the aforementioned property.
 
@@ -829,7 +829,7 @@ def orient_loops(
     Arguments:
         loops (list[list[Halfedge]]) (see `obtain_closed_loops`)
 
-    Returns
+    Returns:
     -------
         external_loops (list[list[Halfedge]])
         internal_loops (list[list[Halfedge]])
@@ -870,7 +870,7 @@ def subdivide_polygon(
         n_y: Number of spatial partitions in the y direction
         plot: Plots the resulting polygons for debugging
 
-    Returns
+    Returns:
     -------
         pieces: shapely_Polygon objects that represent single fibers.
 
@@ -928,7 +928,7 @@ def subdivide_hss_rect(
       sec_b: Section width
       sec_t: Section thickness
 
-    Returns
+    Returns:
     -------
         pieces: shapely_Polygon objects that represent single fibers.
 
@@ -1008,7 +1008,7 @@ def subdivide_hss_circ(
       sec_d: Section diameter
       sec_t: Section thickness
 
-    Returns
+    Returns:
     -------
         pieces: shapely_Polygon objects that represent single fibers.
 

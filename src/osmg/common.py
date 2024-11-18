@@ -87,7 +87,7 @@ def previous_element(
         key: The key of the element whose previous element we want to
         find.
 
-    Returns
+    Returns:
     -------
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
