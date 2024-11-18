@@ -20,9 +20,12 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from ..model import Model
 from ..solver import Analysis, ModalResponseSpectrumAnalysis
 from .basic_forces import basic_forces
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..model import Model
 
 nparr = npt.NDArray[np.float64]
 

@@ -21,7 +21,10 @@ import numpy as np
 import numpy.typing as npt
 
 from . import obj_collections
-from .ops import element
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .ops import element
 
 nparr = npt.NDArray[np.float64]
 

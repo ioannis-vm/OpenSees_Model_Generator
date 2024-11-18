@@ -26,7 +26,6 @@ import numpy.typing as npt
 from .. import common
 from ..component_assembly import ComponentAssembly
 from ..gen import zerolength_gen
-from ..mesh import Mesh
 from ..ops.element import (
     DispBeamColumn,
     ElasticBeamColumn,
@@ -38,14 +37,15 @@ from ..ops.element import (
 )
 from ..ops.node import Node
 from ..ops.section import ElasticSection, FiberSection
-from ..ops.uniaxial_material import UniaxialMaterial
-from ..physical_material import PhysicalMaterial
 from ..preprocessing.split_component import split_component
 from ..transformations import local_axes_from_points_and_angle, transformation_matrix
 from .node_gen import NodeGenerator
 from .query import ElmQuery
 
 if TYPE_CHECKING:
+    from ..ops.uniaxial_material import UniaxialMaterial
+    from ..physical_material import PhysicalMaterial
+    from ..mesh import Mesh
     from ..level import Level
     from ..model import Model
 

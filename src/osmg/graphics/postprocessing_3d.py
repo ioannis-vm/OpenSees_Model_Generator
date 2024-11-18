@@ -23,7 +23,6 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 
 from .. import transformations
-from ..model import Model
 from ..ops import element
 from ..postprocessing.basic_forces import basic_forces
 from . import graphics_common, graphics_common_3d
@@ -31,6 +30,7 @@ from .preprocessing_3d import add_data__global_axes
 from osmg.common import TINY, ALPHA
 
 if TYPE_CHECKING:
+    from ..model import Model
     from ..solver import Analysis
 
 

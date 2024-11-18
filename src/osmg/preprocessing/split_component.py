@@ -18,11 +18,14 @@ import numpy as np
 import numpy.typing as npt
 
 from .. import common
-from ..component_assembly import ComponentAssembly
 from ..line import Line
 from ..ops.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
 from ..ops.node import Node
 from ..ops.section import ElasticSection, FiberSection
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..component_assembly import ComponentAssembly
 
 nparr = npt.NDArray[np.float64]
 

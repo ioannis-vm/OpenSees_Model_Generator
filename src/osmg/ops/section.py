@@ -22,9 +22,9 @@ import numpy.typing as npt
 
 from .. import common, mesh
 from ..mesh import Mesh, polygon_area
-from .uniaxial_material import UniaxialMaterial
 
 if TYPE_CHECKING:
+    from .uniaxial_material import UniaxialMaterial
     from ..physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]

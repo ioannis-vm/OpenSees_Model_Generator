@@ -30,7 +30,7 @@ import socket
 import sys
 from dataclasses import dataclass, field
 from time import perf_counter
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -43,10 +43,12 @@ from tqdm import tqdm
 from . import common, transformations
 from .gen.query import LoadCaseQuery
 from .graphics import general_2d
-from .load_case import LoadCase
-from .model import Model
 from .obj_collections import Collection
 from .ops import element, uniaxial_material
+
+if TYPE_CHECKING:
+    from .model import Model
+    from .load_case import LoadCase
 
 try:
     import opensees.openseespy as ops

@@ -26,10 +26,10 @@ import numpy.typing as npt
 
 from .. import common
 from ..line import Line
-from ..load_case import LoadCase
 from ..ops import element
 
 if TYPE_CHECKING:
+    from ..load_case import LoadCase
     from ..component_assembly import ComponentAssembly
     from ..model import Model
     from ..ops.node import Node
