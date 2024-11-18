@@ -1740,7 +1740,7 @@ class THAnalysis(GravityPlusAnalysis):
     time_vector: list[float] = field(default_factory=list, repr=False)
     a_g: dict[int, npt.NDArray[np.float64]] = field(default_factory=dict, repr=False)
 
-    def run(  # noqa: C901
+    def run(  # noqa: C901, PLR0914
         self,
         analysis_time_increment: float,
         ag_vec_x: Optional[nparr],

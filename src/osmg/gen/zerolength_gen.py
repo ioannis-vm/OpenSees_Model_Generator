@@ -470,7 +470,7 @@ def steel_w_col_pz(
     return dirs, mats
 
 
-def steel_w_col_pz_updated(
+def steel_w_col_pz_updated(  # noqa: PLR0914
     model: Model,
     section: ElasticSection,
     physical_material: PhysicalMaterial,

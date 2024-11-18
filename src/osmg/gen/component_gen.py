@@ -221,7 +221,7 @@ class TrussBarGenerator:
 
     model: Model = field(repr=False)
 
-    def add(
+    def add(  # noqa: PLR0913
         self,
         xi_coord: float,
         yi_coord: float,
@@ -681,7 +681,7 @@ class BeamColumnGenerator:
 
         return component
 
-    def generate_hinged_component_assembly(  # noqa: C901
+    def generate_hinged_component_assembly(  # noqa: C901, PLR0913
         self,
         component_purpose,
         lvl,
@@ -969,7 +969,7 @@ class BeamColumnGenerator:
             defined_component_assemblies[key] = mthd(**args)
         return defined_component_assemblies
 
-    def add_horizontal_active(
+    def add_horizontal_active(  # noqa: PLR0913
         self,
         xi_coord: float,
         yi_coord: float,
@@ -1078,7 +1078,7 @@ class BeamColumnGenerator:
             defined_component_assemblies[key] = mthd(**args)
         return defined_component_assemblies
 
-    def add_diagonal_active(
+    def add_diagonal_active(  # noqa: PLR0913
         self,
         xi_coord: float,
         yi_coord: float,
@@ -1179,7 +1179,7 @@ class BeamColumnGenerator:
             defined_component_assemblies[key] = mthd(**args)
         return defined_component_assemblies
 
-    def add_pz_active(
+    def add_pz_active(  # noqa: PLR0914
         self,
         x_coord: float,
         y_coord: float,
