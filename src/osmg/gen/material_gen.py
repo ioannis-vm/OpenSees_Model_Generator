@@ -158,7 +158,7 @@ class MaterialGenerator:
 
         return fatigue_mat
 
-    def generate_steel_w_imk_material(
+    def generate_steel_w_imk_material(  # noqa: C901
         self,
         section,
         physical_material,

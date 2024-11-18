@@ -91,7 +91,7 @@ def retrieve_snap_pt_global_offset(
     return sec_offset_global
 
 
-def beam_placement_lookup(
+def beam_placement_lookup(  # noqa: C901
     x_coord,
     y_coord,
     query,
@@ -677,7 +677,7 @@ class BeamColumnGenerator:
 
         return component
 
-    def generate_hinged_component_assembly(
+    def generate_hinged_component_assembly(  # noqa: C901
         self,
         component_purpose,
         lvl,

@@ -138,7 +138,7 @@ class Steel4(UniaxialMaterial):
     sig_init: Optional[float] = field(default=None)
     cycNum: Optional[float] = field(default=None)
 
-    def ops_args(self):
+    def ops_args(self):  # noqa: C901
         """
         Returns the arguments required to define the object in
         OpenSees

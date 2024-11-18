@@ -182,7 +182,7 @@ def interp_3d_points(elm, d_global, num_points, scaling):
     return interpolation_points
 
 
-def add_data__extruded_line_elms_deformed_mesh(
+def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
     analysis, case_name, data_dict, list_of_line_elems, step, scaling
 ):
     """
@@ -660,7 +660,7 @@ def get_auto_scaling_deformation(analysis, case_name, mdl, step):
     return scaling
 
 
-def show_deformed_shape(
+def show_deformed_shape(  # noqa: C901
     analysis: Analysis,
     case_name: str,
     step: int,
@@ -831,14 +831,14 @@ def show_deformed_shape(
                     scaling,
                 )
 
-        fig_datastructure = dict(
-            data=data_dict,
-            layout=layout,
-            frames=[
+        fig_datastructure = {
+            'data': data_dict,
+            'layout': layout,
+            'frames': [
                 go.Frame(data=frame_data_dict[j], name=str(step_of_frame[j]))
                 for j in range(len(step_of_frame))
             ],
-        )
+        }
 
         fig = go.Figure(fig_datastructure)
         sliders = [
@@ -883,7 +883,7 @@ def show_deformed_shape(
             sliders=sliders,
         )
     else:  # (not animation)
-        fig_datastructure = dict(data=data_dict, layout=layout)
+        fig_datastructure = {'data': data_dict, 'layout': layout}
         fig = go.Figure(fig_datastructure)
 
     # show the plot (if it's not a test)
@@ -898,7 +898,7 @@ def show_deformed_shape(
     return metadata
 
 
-def show_basic_forces(
+def show_basic_forces(  # noqa: C901
     analysis,
     case_name,
     step,
@@ -1301,35 +1301,36 @@ def show_basic_forces(
         }
     ]
 
-    fig_datastructure = dict(
-        data=data_dict + dt_a + dt_b + dt_c + dt_d + dt_e + dt_f, layout=layout
-    )
+    fig_datastructure = {
+        'data': data_dict + dt_a + dt_b + dt_c + dt_d + dt_e + dt_f,
+        'layout': layout,
+    }
     fig = go.Figure(fig_datastructure)
     fig.update_layout(
         updatemenus=[
-            dict(
-                type='buttons',
-                buttons=[
-                    dict(
-                        label='None',
-                        method='update',
-                        args=[{'visible': [True] * len(data_dict) + [False] * 6}],
-                    ),
-                    dict(
-                        label='Axial',
-                        method='update',
-                        args=[
+            {
+                'type': 'buttons',
+                'buttons': [
+                    {
+                        'label': 'None',
+                        'method': 'update',
+                        'args': [{'visible': [True] * len(data_dict) + [False] * 6}],
+                    },
+                    {
+                        'label': 'Axial',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict) + [True] + [False] * 5
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Shear',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Shear',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1339,11 +1340,11 @@ def show_basic_forces(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Moment',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Moment',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1353,11 +1354,11 @@ def show_basic_forces(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Torsion',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Torsion',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1367,11 +1368,11 @@ def show_basic_forces(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Shear (combined)',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Shear (combined)',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1381,20 +1382,20 @@ def show_basic_forces(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Moment (combined)',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Moment (combined)',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict) + [False] * 5 + [True]
                                 )
                             }
                         ],
-                    ),
+                    },
                 ],
-            )
+            }
         ]
     )
 
@@ -1413,7 +1414,7 @@ def show_basic_forces(
     return metadata
 
 
-def show_basic_forces_combo(
+def show_basic_forces_combo(  # noqa: C901
     combo,
     scaling_global,
     scaling_n,
@@ -1799,35 +1800,36 @@ def show_basic_forces_combo(
         }
     ]
 
-    fig_datastructure = dict(
-        data=data_dict + dt_a + dt_b + dt_c + dt_d, layout=layout
-    )
+    fig_datastructure = {
+        'data': data_dict + dt_a + dt_b + dt_c + dt_d,
+        'layout': layout,
+    }
     fig = go.Figure(fig_datastructure)
     fig.update_layout(
         updatemenus=[
-            dict(
-                type='buttons',
-                buttons=[
-                    dict(
-                        label='None',
-                        method='update',
-                        args=[{'visible': [True] * len(data_dict) + [False] * 4}],
-                    ),
-                    dict(
-                        label='Axial',
-                        method='update',
-                        args=[
+            {
+                'type': 'buttons',
+                'buttons': [
+                    {
+                        'label': 'None',
+                        'method': 'update',
+                        'args': [{'visible': [True] * len(data_dict) + [False] * 4}],
+                    },
+                    {
+                        'label': 'Axial',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict) + [True] + [False] * 3
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Shear',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Shear',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1837,11 +1839,11 @@ def show_basic_forces_combo(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Moment',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Moment',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict)
@@ -1851,20 +1853,20 @@ def show_basic_forces_combo(
                                 )
                             }
                         ],
-                    ),
-                    dict(
-                        label='Torsion',
-                        method='update',
-                        args=[
+                    },
+                    {
+                        'label': 'Torsion',
+                        'method': 'update',
+                        'args': [
                             {
                                 'visible': (
                                     [True] * len(data_dict) + [False] * 3 + [True]
                                 )
                             }
                         ],
-                    ),
+                    },
                 ],
-            )
+            }
         ]
     )
 

@@ -172,7 +172,7 @@ class ElmQuery:
                 retrieved_component = component
         return retrieved_component
 
-    def retrieve_component(
+    def retrieve_component(  # noqa: C901
         self, x_loc: float, y_loc: float, lvl: int
     ) -> Optional[ComponentAssembly]:
         """

@@ -37,7 +37,8 @@ if TYPE_CHECKING:
 
 
 def fix_all(
-    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
+    model: Model,
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Fixed in all directions.
@@ -52,7 +53,8 @@ def fix_all(
 
 
 def release_6(
-    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
+    model: Model,
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees strong axis bending.
@@ -67,7 +69,8 @@ def release_6(
 
 
 def release_5(
-    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
+    model: Model,
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees weak axis bending.
@@ -82,7 +85,8 @@ def release_5(
 
 
 def release_56(
-    model: Model, **kwargs: dict[object, object]  # noqa: ARG001
+    model: Model,
+    **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     Frees both strong and weak axis bending.

@@ -227,7 +227,7 @@ class Analysis:
             # logger might not have been initialized yet
             self.log(thing)
 
-    def _init_results(self):
+    def _init_results(self):  # noqa: C901
         # initialize output directory
         if self.output_directory and not os.path.exists(self.output_directory):
             os.makedirs(self.output_directory, exist_ok=True)
@@ -306,7 +306,7 @@ class Analysis:
         with open(f'{self.output_directory}/main_results.pcl', 'rb') as file:
             self.results = pickle.load(file)
 
-    def _to_opensees_domain(self, case_name):
+    def _to_opensees_domain(self, case_name):  # noqa: C901
         """
         Defines the model in OpenSeesPy.
 
@@ -1274,7 +1274,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
     """
 
-    def _apply_lateral_load(self, case_name, direction, modeshape=None, node=None):
+    def _apply_lateral_load(self, case_name, direction, modeshape=None, node=None):  # noqa: C901
         query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
         distribution = query.level_masses()
         distribution = distribution / np.linalg.norm(distribution)
@@ -1331,7 +1331,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
                         ),
                     )
 
-    def run(
+    def run(  # noqa: C901
         self,
         direction,
         target_displacements,
@@ -1728,7 +1728,7 @@ class THAnalysis(GravityPlusAnalysis):
     time_vector: list[float] = field(default_factory=list, repr=False)
     a_g: dict[int, npt.NDArray[np.float64]] = field(default_factory=dict, repr=False)
 
-    def run(
+    def run(  # noqa: C901
         self,
         analysis_time_increment: float,
         ag_vec_x: Optional[nparr],
@@ -2114,9 +2114,9 @@ class THAnalysis(GravityPlusAnalysis):
                                             np.array(
                                                 self.results[
                                                     case_name
-                                                ].node_displacements[
-                                                    pnode.uid
-                                                ][n_steps_success][0:2]
+                                                ].node_displacements[pnode.uid][
+                                                    n_steps_success
+                                                ][0:2]
                                             )
                                             - np.array(
                                                 self.results[

@@ -103,71 +103,75 @@ def line_plot_interactive(
             y=y_vals,
             mode=lmode,
             line_shape=lshape,
-            line=dict(color=C_LINE, width=lwidth),
-            marker=dict(
-                color=C_BACKGROUND, size=10, line=dict(color=C_LINE, width=4)
-            ),
+            line={'color': C_LINE, 'width': lwidth},
+            marker={
+                'color': C_BACKGROUND,
+                'size': 10,
+                'line': {'color': C_LINE, 'width': 4},
+            },
             customdata=np.reshape(indices, (-1, 1)),
             hovertemplate=my_hovertemplate,
         )
     )
     fig.update_layout(
-        xaxis=dict(
-            showline=True,
-            showgrid=True,
-            gridcolor=C_GRID,
-            showticklabels=True,
-            linecolor=C_BACKGROUND,
-            zerolinecolor=C_AXIS_LINE,
-            linewidth=0,
-            ticks='outside',
-            tickcolor=C_GRID,
-            tickfont=dict(
-                family='Cambria',
-                size=14,
-                color=C_AXIS_LINE,
-            ),
-        ),
-        yaxis=dict(
-            showline=True,
-            showgrid=True,
-            gridcolor=C_GRID,
-            showticklabels=True,
-            linecolor=C_BACKGROUND,
-            zerolinecolor=C_AXIS_LINE,
-            linewidth=0,
-            ticks='outside',
-            tickcolor=C_GRID,
-            tickfont=dict(
-                family='Cambria',
-                size=14,
-                color=C_AXIS_LINE,
-            ),
-        ),
+        xaxis={
+            'showline': True,
+            'showgrid': True,
+            'gridcolor': C_GRID,
+            'showticklabels': True,
+            'linecolor': C_BACKGROUND,
+            'zerolinecolor': C_AXIS_LINE,
+            'linewidth': 0,
+            'ticks': 'outside',
+            'tickcolor': C_GRID,
+            'tickfont': {
+                'family': 'Cambria',
+                'size': 14,
+                'color': C_AXIS_LINE,
+            },
+        },
+        yaxis={
+            'showline': True,
+            'showgrid': True,
+            'gridcolor': C_GRID,
+            'showticklabels': True,
+            'linecolor': C_BACKGROUND,
+            'zerolinecolor': C_AXIS_LINE,
+            'linewidth': 0,
+            'ticks': 'outside',
+            'tickcolor': C_GRID,
+            'tickfont': {
+                'family': 'Cambria',
+                'size': 14,
+                'color': C_AXIS_LINE,
+            },
+        },
         showlegend=False,
         plot_bgcolor=C_BACKGROUND,
     )
     annotations = [
-        dict(
-            xref='paper',
-            yref='paper',
-            x=0.0,
-            y=1.00,
-            xanchor='left',
-            yanchor='bottom',
-            text=title_text,
-            font=dict(family='Cambria', size=28, color=C_TITLE_COLOR),
-            showarrow=False,
-        )
+        {
+            'xref': 'paper',
+            'yref': 'paper',
+            'x': 0.0,
+            'y': 1.00,
+            'xanchor': 'left',
+            'yanchor': 'bottom',
+            'text': title_text,
+            'font': {'family': 'Cambria', 'size': 28, 'color': C_TITLE_COLOR},
+            'showarrow': False,
+        }
     ]
     fig.update_layout(annotations=annotations)
     fig.update_layout(
         xaxis_title=xtitle,
         yaxis_title=ytitle,
-        font=dict(family='Cambria', size=18, color=C_LABEL_COLOR),
-        hoverlabel=dict(
-            bgcolor=C_HOVERLABEL_BG, font_size=15, font_family='Cambria'
-        ),
+        font={'family': 'Cambria', 'size': 18, 'color': C_LABEL_COLOR},
+        hoverlabel={
+            'bgcolor': C_HOVERLABEL_BG,
+            'font_size': 15,
+            'font_family': 'Cambria',
+        },
     )
     if 'pytest' not in sys.modules:
         fig.show()

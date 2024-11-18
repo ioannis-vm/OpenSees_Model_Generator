@@ -104,9 +104,15 @@ class Line:
             # a common starting or ending point
             # (we ignore the case of a common segment,
             #  as it has no practical use for our purposes).
-            if np.linalg.norm(self.start - other.start) <= common.EPSILON or np.linalg.norm(self.start - other.end) <= common.EPSILON:
+            if (
+                np.linalg.norm(self.start - other.start) <= common.EPSILON
+                or np.linalg.norm(self.start - other.end) <= common.EPSILON
+            ):
                 result = self.start
-            elif np.linalg.norm(self.end - other.start) <= common.EPSILON or np.linalg.norm(self.end - other.end) <= common.EPSILON:
+            elif (
+                np.linalg.norm(self.end - other.start) <= common.EPSILON
+                or np.linalg.norm(self.end - other.end) <= common.EPSILON
+            ):
                 result = self.end
             else:
                 result = None

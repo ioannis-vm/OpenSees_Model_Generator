@@ -1115,7 +1115,7 @@ def add_data__extruded_bars_mesh(
     )
 
 
-def show(
+def show(  # noqa: C901
     mdl: Model,
     load_case: Optional[LoadCase] = None,
     extrude: bool = False,
@@ -1197,7 +1197,7 @@ def show(
         if load_case:
             add_data__parent_nodes(data_dict, load_case)
 
-    fig_datastructure = dict(data=data_dict, layout=layout)
+    fig_datastructure = {'data': data_dict, 'layout': layout}
     fig = go.Figure(fig_datastructure)
 
     if 'pytest' not in sys.modules:

@@ -131,7 +131,7 @@ class SectionGenerator:
         self.model.elastic_sections.add(sec)
         return sec
 
-    def load_aisc_from_database(
+    def load_aisc_from_database(  # noqa: C901
         self,
         sec_shape_designation: str,
         labels: list[str],

@@ -48,34 +48,34 @@ def global_layout(mdl, camera=None):
     # view_type = "orthographic"
     view_type = 'perspective'
     if not camera:
-        camera = dict(
-            up=dict(x=0, y=0, z=1),
-            center=dict(x=0, y=0, z=0),
-            eye=dict(x=0.7, y=1.00, z=0.30),
-            projection={'type': view_type},
-        )
+        camera = {
+            'up': {'x': 0, 'y': 0, 'z': 1},
+            'center': {'x': 0, 'y': 0, 'z': 0},
+            'eye': {'x': 0.7, 'y': 1.00, 'z': 0.30},
+            'projection': {'type': view_type},
+        }
     ref_len = np.linalg.norm(p_max - p_min)  # used in aspect ratio calcs
     return go.Layout(
-        scene=dict(
-            xaxis_visible=False,
-            yaxis_visible=False,
-            zaxis_visible=False,
-            bgcolor='white',
-            camera=camera,
-            xaxis=dict(range=[p_min[0], p_max[0]], autorange=False),
-            yaxis=dict(range=[p_min[1], p_max[1]], autorange=False),
-            zaxis=dict(range=[p_min[2], p_max[2]], autorange=False),
+        scene={
+            'xaxis_visible': False,
+            'yaxis_visible': False,
+            'zaxis_visible': False,
+            'bgcolor': 'white',
+            'camera': camera,
+            'xaxis': {'range': [p_min[0], p_max[0]], 'autorange': False},
+            'yaxis': {'range': [p_min[1], p_max[1]], 'autorange': False},
+            'zaxis': {'range': [p_min[2], p_max[2]], 'autorange': False},
             # it's interesting that we have to do this to get the
             # axes aspect ratio right.. but hey! it works
-            aspectratio=dict(
-                x=(p_max[0] - p_min[0]) / (ref_len / 4.0),
-                y=(p_max[1] - p_min[1]) / (ref_len / 4.0),
-                z=(p_max[2] - p_min[2]) / (ref_len / 4.0),
-            ),
+            'aspectratio': {
+                'x': (p_max[0] - p_min[0]) / (ref_len / 4.0),
+                'y': (p_max[1] - p_min[1]) / (ref_len / 4.0),
+                'z': (p_max[2] - p_min[2]) / (ref_len / 4.0),
+            },
             # note:
             # aspectmode='data': was causing issues with
             # the camera 'moving' across different animation frames
-        )
+        }
     )
 
 
