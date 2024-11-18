@@ -20,10 +20,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements_dev.txt
-          python -m pip install openseespy
-          python -m pip install -e .
-      - name: flake8
-        run: flake8 src
+          python -m pip install -e .[dev]
       - name: Unit tests
-        run: python -m pytest src/osmg/
+        run: python -m pytest -cov=pelicun --cov-report xml src/osmg/
