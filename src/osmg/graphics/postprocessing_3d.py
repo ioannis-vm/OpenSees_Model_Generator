@@ -28,8 +28,8 @@ from . import graphics_common, graphics_common_3d
 from .preprocessing_3d import add_data__global_axes
 
 if TYPE_CHECKING:
-    from osmg.ops.node import Node
     from osmg.model import Model
+    from osmg.ops.node import Node
     from osmg.solver import Analysis
 
 

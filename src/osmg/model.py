@@ -352,7 +352,7 @@ class Model:
         res: dict[int, element.Element] = {}
         for uid, elm in all_elements.items():
             if isinstance(elm, element_class):
-                res[uid] = elm
+                res[uid] = elm  # noqa: PERF403
         return res
 
     def list_of_specific_element(

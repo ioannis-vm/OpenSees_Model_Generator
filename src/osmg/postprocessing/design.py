@@ -25,8 +25,8 @@ from .basic_forces import basic_forces
 
 if TYPE_CHECKING:
     from osmg.model import Model
+    from osmg.ops.element import DispBeamColumn, ElasticBeamColumn, TrussBar
     from osmg.ops.node import Node
-    from osmg.ops.element import TrussBar, ElasticBeamColumn, DispBeamColumn
 
 nparr = npt.NDArray[np.float64]
 

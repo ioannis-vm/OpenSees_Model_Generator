@@ -126,13 +126,12 @@ class Line:
                 or np.linalg.norm(self.start - other.end) <= common.EPSILON
             ):
                 return self.start
-            elif (
+            if (
                 np.linalg.norm(self.end - other.start) <= common.EPSILON
                 or np.linalg.norm(self.end - other.end) <= common.EPSILON
             ):
                 return self.end
-            else:
-                return None
+            return None
         # Get the origins
         ra_ori = self.start
         rb_ori = other.start

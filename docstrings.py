@@ -9,6 +9,7 @@ up.
 """
 
 from __future__ import annotations
+
 import glob
 import os
 import re

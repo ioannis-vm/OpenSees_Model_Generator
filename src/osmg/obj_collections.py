@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List, TypeVar
 
 import numpy as np
 import numpy.typing as npt

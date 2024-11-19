@@ -45,12 +45,12 @@ from .obj_collections import Collection
 from .ops import element, uniaxial_material
 
 if TYPE_CHECKING:
-    from .load_case import LoadCase
-    from .model import Model
+    from osmg.ops.element import Element, ZeroLengthElement
     from osmg.ops.node import Node
     from osmg.ops.uniaxial_material import UniaxialMaterial
-    from osmg.ops.element import Element
-    from osmg.ops.element import ZeroLengthElement
+
+    from .load_case import LoadCase
+    from .model import Model
 
 try:
     import opensees.openseespy as ops
@@ -283,13 +283,17 @@ class Analysis:
 
     def _write_results_to_disk(self) -> None:
         """Serialize the results to a JSON file using json-tricks."""
-        with Path(f'{self.output_directory}/main_results.json').open('w') as file:
+        with Path(f'{self.output_directory}/main_results.json').open(
+            'w', encoding='utf-8'
+        ) as file:
             json_data = dumps(self.results, indent=4)
             file.write(json_data)
 
     def read_results_from_disk(self) -> None:
         """Read back results from a JSON file using json-tricks."""
-        with Path(f'{self.output_directory}/main_results.json').open('r') as file:
+        with Path(f'{self.output_directory}/main_results.json').open(
+            'r', encoding='utf-8'
+        ) as file:
             self.results = loads(file.read())
 
     def _to_opensees_domain(self, case_name: str) -> None:  # noqa: C901

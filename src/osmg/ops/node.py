@@ -12,9 +12,9 @@
 
 from __future__ import annotations
 
-from typing import Self
 from dataclasses import dataclass, field
 from functools import total_ordering
+from typing import Self
 
 from osmg.graphics.visibility import NodeVisibility
 
