@@ -1298,7 +1298,7 @@ class GravityPlusAnalysis(Analysis):
 class PushoverAnalysis(GravityPlusAnalysis):
     """Pushover analysis."""
 
-    def _apply_lateral_load(
+    def _apply_lateral_load(  # noqa: C901
         self,
         case_name: str,
         direction: str,

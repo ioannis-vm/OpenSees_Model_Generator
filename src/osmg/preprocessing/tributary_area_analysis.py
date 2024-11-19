@@ -95,7 +95,7 @@ class TributaryAreaAnaysis:
     )
 
     @no_type_check
-    def run(  # noqa: PLR0912, PLR0914, PLR0915
+    def run(  # noqa: C901, PLR0912, PLR0914, PLR0915
         self,
         *,
         load_factor: float = 1.00,

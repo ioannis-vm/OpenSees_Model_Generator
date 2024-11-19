@@ -159,7 +159,6 @@ class MaterialGenerator:
         )
 
 
-class YourClass:
     @overload
     def generate_steel_w_imk_material(
         self,
@@ -178,7 +177,7 @@ class YourClass:
         only_elastic: Literal[True],
     ) -> Elastic: ...
 
-    def generate_steel_w_imk_material(
+    def generate_steel_w_imk_material(  # noqa: C901
         self,
         *,
         section: ElasticSection,

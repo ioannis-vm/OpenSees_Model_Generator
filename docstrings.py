@@ -58,7 +58,7 @@ for thing in not_backup:
 
 pattern = r'\(*?\):'  # type: ignore (this is so silly)
 
-for module, paths in files.items():
+for paths in files.values():
     for path in paths:
         contents = Path(path).read_text(encoding='utf-8')
         if contents.startswith('"""'):
