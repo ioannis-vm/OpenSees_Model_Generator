@@ -125,14 +125,14 @@ class Line:
                 np.linalg.norm(self.start - other.start) <= common.EPSILON
                 or np.linalg.norm(self.start - other.end) <= common.EPSILON
             ):
-                result = self.start
+                return self.start
             elif (
                 np.linalg.norm(self.end - other.start) <= common.EPSILON
                 or np.linalg.norm(self.end - other.end) <= common.EPSILON
             ):
-                result = self.end
+                return self.end
             else:
-                result = None
+                return None
         # Get the origins
         ra_ori = self.start
         rb_ori = other.start
@@ -148,13 +148,13 @@ class Line:
         # Terminate if the intersection point
         # does not lie on both lines
         if uvvec[0] < 0 - common.EPSILON:
-            result = None
+            return None
         if uvvec[1] < 0 - common.EPSILON:
-            result = None
+            return None
         if uvvec[0] > self.length() + common.EPSILON:
-            result = None
+            return None
         if uvvec[1] > other.length() + common.EPSILON:
-            result = None
+            return None
         # Otherwise the point is valid
         point = ra_ori + ra_dir * uvvec[0]
         return np.array([point[0], point[1]])

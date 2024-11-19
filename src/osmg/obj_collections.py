@@ -322,5 +322,6 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         """
         uids = [nd.uid for nd in obj.nodes]
         uids.sort()
-        uids_tuple = (*uids,)
+        uids_tuple = (*uids,)  # noqa: F841
+        # TODO(JVM): Fix this region.
         super().add(obj)
