@@ -33,7 +33,7 @@ nparr = npt.NDArray[np.float64]
 
 @dataclass(repr=False)
 class MaterialGenerator:
-    """This object introduces element-specific materials to a model."""
+    """Introduces element-specific materials to a model."""
 
     model: Model
 
