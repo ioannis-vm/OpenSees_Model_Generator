@@ -28,7 +28,12 @@ nparr = npt.NDArray[np.float64]
 
 
 def generate(edges: list[Edge]) -> Mesh:
-    """Generate halfedges from the given edges."""
+    """
+    Generate a mesh from the given edges.
+
+    Returns:
+      The generated mesh.
+    """
     halfedges = define_halfedges(edges)
     loops = obtain_closed_loops(halfedges)
     _, internal, trivial = orient_loops(loops)
@@ -37,7 +42,12 @@ def generate(edges: list[Edge]) -> Mesh:
 
 
 def define_edges(vertices: list[Vertex]) -> list[Edge]:
-    """Define edges from an ordered list of vertices."""
+    """
+    Define edges from an ordered list of vertices.
+
+    Returns:
+      The defined edges.
+    """
     n_v = len(vertices)
     edges = []
     for i in range(n_v - 1):
@@ -72,6 +82,8 @@ def w_mesh(
       target_area: AISC database area to determine fillets, because
         trying to do that using `T` doesn't work.
 
+    Returns:
+      The generated mesh.
     """
     area_diff = target_area - (sec_b * sec_tf * 2.0 + (sec_h - 2 * sec_tf) * sec_tw)
     if area_diff < 0:
@@ -190,6 +202,8 @@ def rect_mesh(dim_b: float, dim_h: float) -> Mesh:
         b: total width
         h: total height
 
+    Returns:
+      The generated mesh.
     """
     vertices = [
         Vertex((dim_b / 2.0, dim_h / 2.0)),
@@ -213,6 +227,8 @@ def circ_mesh(dim_d: float) -> Mesh:
     Arguments:
         d: total diameter
 
+    Returns:
+      The generated mesh.
     """
     radius = dim_d / 2.0
     num_vertices = 32  # Number of vertices on the circumference
@@ -229,7 +245,12 @@ def circ_mesh(dim_d: float) -> Mesh:
 
 
 def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
-    """Generate generic snap poitns for a section object."""
+    """
+    Generate generic snap poitns for a section object.
+
+    Returns:
+      The snap points.
+    """
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
     snap_points: dict[str, nparr] = {}

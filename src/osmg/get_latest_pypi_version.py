@@ -6,7 +6,12 @@ import requests
 
 
 def get_latest_version(package_name: str) -> str:
-    """Determine the latest version of the osmg package on PyPI."""
+    """
+    Determine the latest version of the osmg package on PyPI.
+
+    Returns:
+      The latest version.
+    """
     url = f'https://pypi.org/pypi/{package_name}/json'
 
     response = requests.get(url, timeout=10)

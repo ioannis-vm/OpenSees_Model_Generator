@@ -48,6 +48,9 @@ class LoadCombination:
 
         Calculates the envelope of the basic forces for the
         given load combination.
+
+        Returns:
+          The envelope.
         """
         df_min = pd.DataFrame(
             np.full((num_points, 6), np.inf),
@@ -74,7 +77,12 @@ class LoadCombination:
         return df_min, df_max
 
     def envelope_node_displacement(self, node: Node) -> list[nparr, nparr]:
-        """Calculate the enveloped node displacement."""
+        """
+        Calculate the enveloped node displacement.
+
+        Returns:
+          The displacement envelope.
+        """
         disp_min: nparr = np.full(6, np.inf)
         disp_max: nparr = np.full(6, -np.inf)
         for component_to_envelope in self.combo.values():
@@ -101,6 +109,9 @@ class LoadCombination:
 
         Calculates the enveloped displacement difference between
         two nodes.
+
+        Returns:
+          The relative displacement envelope.
         """
         disp_min = np.full(6, np.inf)
         disp_max = np.full(6, -np.inf)

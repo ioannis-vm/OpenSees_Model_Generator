@@ -98,6 +98,8 @@ class ElasticSection(Section):
         For steel W sections, it adds 15% for misc. steel and
         connections.
 
+        Returns:
+          The weight per unit length.
         """
         if self.name[0] == 'W':
             res = self.sec_w * 1.15  # misc steel and connections
@@ -106,7 +108,12 @@ class ElasticSection(Section):
         return res
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'ElasticSection object\n'
         res += f'name: {self.name}\n'
@@ -152,7 +159,12 @@ class SectionComponent:
     parent_section: FiberSection | None = field(default=None)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'SectionComponent object\n'
         if self.outside_shape:
@@ -168,7 +180,12 @@ class SectionComponent:
         return res
 
     def cut_into_tiny_little_pieces(self) -> list[shapely_Polygon]:
-        """Obtain data used to define fibers in OpenSees."""
+        """
+        Obtain data used to define fibers in OpenSees.
+
+        Returns:
+          The data.
+        """
         # if we have an AISC HSS section, we need to discretize in a
         # certain way
         assert self.parent_section
@@ -202,11 +219,13 @@ class SectionComponent:
 
     def copy_alter_material(self, mat: UniaxialMaterial) -> SectionComponent:
         """
-        Shallow copy.
+        Shallow copy of a material.
 
         Make a shallow copy of a section component and replace the old
         material with the given one.
 
+        Returns:
+          The shallow copy of the material.
         """
         return SectionComponent(
             self.outside_shape, self.holes, mat, self.physical_material
@@ -237,7 +256,12 @@ class FiberSection(Section):
             self.section_parts[part].parent_section = self
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'FiberSection object\n'
         for part in self.section_parts:
@@ -250,7 +274,12 @@ class FiberSection(Section):
         return res
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'Fiber',
             self.uid,
@@ -265,6 +294,8 @@ class FiberSection(Section):
         Returns the weight per length of a section.
         For steel W sections, it adds 15% for misc. steel and connections.
 
+        Returns:
+          The weight per unit length.
         """
         if self.name[0] == 'W':
             mult = 1.15  # misc steel and connections
@@ -296,6 +327,8 @@ class FiberSection(Section):
         opensees_material objects have been replaced with the given
         material. Required for the modling of steel braced frames.
 
+        Returns:
+          The shallow copy of the section object.
         """
         new_section_parts = {}
         for key, val in self.section_parts.items():

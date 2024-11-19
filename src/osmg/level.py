@@ -66,7 +66,12 @@ class Level:
         self.components = Collection(self)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Level object\n'
         res += f'parent_model: {self.parent_model.name}\n'

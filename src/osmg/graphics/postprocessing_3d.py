@@ -44,6 +44,8 @@ def force_scaling_factor(ref_len: float, fmax: float, factor: float) -> float:
       fmax: Largest value in the basic forces.
       factor: Required scaling factor.
 
+    Returns:
+      The scale factor.
     """
     if fmax == 0.00:
         result = 0.00
@@ -176,6 +178,8 @@ def interp_3d_points(
     Calculates intermediate points based on end locations and
     deformations.
 
+    Returns:
+      The interpolated points.
     """
     if not isinstance(elm, element.TrussBar):
         p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
@@ -662,6 +666,8 @@ def get_auto_scaling_deformation(
     displacement appear approximately 10% of the largest dimention of
     the building's bounding box.
 
+    Returns:
+      The scaling factor.
     """
     ref_len = mdl.reference_length()
     # maximum displacement
@@ -733,6 +739,8 @@ def show_deformed_shape(  # noqa: C901
       to_html_file: If a path is specified, the figure is written in
         an html file instead of being shown.
 
+    Returns:
+      Metdata.
     """
     if subset_model:
         # if a subset model is specified, only show its components
@@ -982,6 +990,8 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
       to_html_file: If a path is specified, the figure is written in
         an html file instead of being shown.
 
+    Returns:
+      Metadata.
     """
     if subset_model:
         mdl = subset_model
@@ -1498,6 +1508,8 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
       to_html_file: If a path is specified, the figure is written in
         an html file instead of being shown.
 
+    Returns:
+      Metadata.
     """
     # TODO(JVM): merge code repetitions with the previous function
 

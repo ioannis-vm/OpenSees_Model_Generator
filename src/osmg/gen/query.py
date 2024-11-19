@@ -67,6 +67,8 @@ class ElmQuery:
             partially connected to the nodes (e.g. connected to them,
             but also to other nodes), it is not returned.
 
+        Returns:
+          The connectivity data.
         """
         uids = [node.uid for node in nodes]
         uids.sort()
@@ -91,6 +93,8 @@ class ElmQuery:
           y_loc: y-coordinate
           lvl: Key of the level to be searched.
 
+        Returns:
+          The node if found.
         """
         lvls = self.model.levels
         level = lvls[lvl]
@@ -127,6 +131,8 @@ class ElmQuery:
           lvl_uid: ID of the level to be searched. If None is
             specified, the method searches all levels.
 
+        Returns:
+          The retrieved components.
         """
         retrieved_components = {}
         if lvl_uid:
@@ -160,6 +166,8 @@ class ElmQuery:
           lvl_uid: Key of the level to be searched. If None is
             specified, the method searches all levels.
 
+        Returns:
+          The retrieved component.
         """
         retrieved_component = None
         if lvl_uid:

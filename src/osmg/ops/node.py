@@ -44,11 +44,21 @@ class Node:
         self.restraint = [False] * 6
 
     def __le__(self, other: type[self]):
-        """Less or equal determination rule."""
+        """
+        Less or equal determination rule.
+
+        Returns:
+          The outcome of the less or equal operation.
+        """
         return self.uid < other.uid
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Node object\n'
         res += f'  uid: {self.uid}\n'

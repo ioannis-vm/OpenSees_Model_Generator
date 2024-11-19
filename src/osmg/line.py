@@ -44,7 +44,12 @@ class Line:
     end: nparr = field(repr=False)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Line object\n'
         res += f'  start: {self.start}\n'
@@ -61,6 +66,8 @@ class Line:
             >>> l1.length() == 2.8284271247461903
             True
 
+        Returns:
+          The string representation of the object.
         """
         return np.linalg.norm(self.end - self.start)
 
@@ -77,6 +84,8 @@ class Line:
             >>> l1.direction()
             array([0.70710678, 0.70710678])
 
+        Returns:
+          The string representation of the object.
         """
         return (self.end - self.start) / self.length()
 
@@ -99,6 +108,8 @@ class Line:
             >>> l1.intersect(l2)
             array([1., 1.])
 
+        Returns:
+          The intersection point if it exists.
         """
         ra_dir = self.direction()
         rb_dir = other.direction()
@@ -169,6 +180,8 @@ class Line:
             >>> l.intersects_pt(np.array([2, 2]))
             False
 
+        Returns:
+          Whether the given point pt lies on the line.
         """
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
@@ -191,11 +204,11 @@ class Line:
         point.  If the point falls on the line but is outside of the
         line segment, returns None.
 
-        Parameters
-        ----------
+        Parameters:
             point: the point
 
-        Returns: the minimum distance
+        Returns:
+          The minimum distance.
 
         Example:
             >>> line = Line(tag='line',
@@ -244,6 +257,8 @@ class Line:
 
             >>> line.project(np.array([15, 5]))
 
+        Returns:
+          The projection point if it exists.
         """
         r_a = self.end - self.start
         r_b = point - self.start

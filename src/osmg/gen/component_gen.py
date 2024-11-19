@@ -115,6 +115,10 @@ def beam_placement_lookup(  # noqa: C901
     component assembly to determine how to connect it with
     respect to the other existing objects in the model.
 
+    Returns:
+      A node and offest to connect to, either existing or newly
+      created.
+
     """
     lvl = lvls[key]
     node = query.search_node_lvl(x_coord, y_coord, lvl.uid)
@@ -210,6 +214,9 @@ def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
     Determines if a panel zone joint component assembly is present
     at the specified node.
 
+    Returns:
+      The given node if there is no panel zone present, or the bottom
+      node of the panel zone if it exists at this X-Y location.
     """
     components = query.retrieve_components_from_nodes([node], lvl.uid)
     result_node = node
@@ -259,6 +266,8 @@ class TrussBarGenerator:
         If offsets are required, they are implemented through the
         addition of RigidLink elements.
 
+        Returns:
+          The added component.
         """
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
@@ -332,6 +341,9 @@ class TrussBarGenerator:
             once for the i-end and once for the j-end.  For purposes
             of clarity, the index x will be used here, assuming that
             it will be substituted with i and j.
+
+            Returns:
+              A newly created node, considering the specified offest.
             """
             # if there is an offset at the x-end, create an internal node
             # and add a rigidlink element to the component assembly
@@ -434,6 +446,8 @@ class BeamColumnGenerator:
         Adds a beamcolumn element to the model, connecting the
         specified nodes.
 
+        Returns:
+          The added element.
         """
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
@@ -498,7 +512,12 @@ class BeamColumnGenerator:
         zerolength_gen: Callable,  # type: ignore
         zerolength_gen_args: dict[str, object],
     ) -> ZeroLength:
-        """Define a zerolength element."""
+        """
+        Define a zerolength element.
+
+        Returns:
+          The added element.
+        """
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         return ZeroLength(
             assembly,
@@ -520,7 +539,12 @@ class BeamColumnGenerator:
         zerolength_gen: Callable,  # type: ignore
         zerolength_gen_args: dict[str, object],
     ) -> TwoNodeLink:
-        """Define a TwoNodeLink element."""
+        """
+        Define a TwoNodeLink element.
+
+        Returns:
+          The added element.
+        """
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         return TwoNodeLink(
             assembly,
@@ -643,6 +667,9 @@ class BeamColumnGenerator:
 
         Generates a plain component assembly, with line elements in
         series.
+
+        Returns:
+          The created component assembly.
         """
         assert isinstance(node_i, Node)
         assert isinstance(node_j, Node)
@@ -713,6 +740,8 @@ class BeamColumnGenerator:
         attached at the ends, followed by another sequence of
         beamcolumn elements (in order to be able to specify rigid offsets).
 
+        Returns:
+          The defined component.
         """
         uids = [node.uid for node in (node_i, node_j)]
         uids.sort()
@@ -904,6 +933,9 @@ class BeamColumnGenerator:
         lowest to highest elevation, with consecutive ascending
         integer keys.
 
+        Returns:
+          The defined component assemblies.
+
         """
         ndg = NodeGenerator(self.model)
         query = ElmQuery(self.model)
@@ -981,7 +1013,12 @@ class BeamColumnGenerator:
         h_offset_j: float = 0.00,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
-        """Add a diagonal beamcolumn element to all active levels."""
+        """
+        Add a diagonal beamcolumn element to all active levels.
+
+        Returns:
+          The defined element.
+        """
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -1085,7 +1122,12 @@ class BeamColumnGenerator:
         split_existing_j: ComponentAssembly | None = None,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
-        """Add a diagonal beamcolumn element to all active levels."""
+        """
+        Add a diagonal beamcolumn element to all active levels.
+
+        Returns:
+          The defined component assemblies.
+        """
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -1179,6 +1221,8 @@ class BeamColumnGenerator:
         Add a component assembly representing a steel W-section
         panel zone joint.
 
+        Returns:
+          The defined panel zones.
         """
         ndg = NodeGenerator(self.model)
         query = ElmQuery(self.model)

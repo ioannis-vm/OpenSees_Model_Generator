@@ -44,6 +44,8 @@ def split_component(
       This function might no longer work. Needs to be tested and
       perhaps updated.
 
+    Returns:
+      A node and offset to connect to.
     """
     uid_generator = component.parent_collection.parent.parent_model.uid_generator
 

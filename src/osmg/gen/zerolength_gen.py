@@ -37,7 +37,12 @@ def fix_all(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """Fix all directions."""
+    """
+    Fix all directions.
+
+    Returns:
+      The directions and materials.
+    """
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -50,7 +55,12 @@ def release_6(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """Frees strong axis bending."""
+    """
+    Frees strong axis bending.
+
+    Returns:
+      The directions and materials.
+    """
     dirs = [1, 2, 3, 4, 5]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -63,7 +73,12 @@ def release_5(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """Frees weak axis bending."""
+    """
+    Frees weak axis bending.
+
+    Returns:
+      The directions and materials.
+    """
     dirs = [1, 2, 3, 4, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -76,7 +91,12 @@ def release_56(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """Frees both strong and weak axis bending."""
+    """
+    Frees both strong and weak axis bending.
+
+    Returns:
+      The directions and materials.
+    """
     dirs = [1, 2, 3, 4]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -112,6 +132,8 @@ def imk_6(
     special moment frames. Earthquake Engineering & Structural
     Dynamics, 43(13), 1935-1954.
 
+    Returns:
+      The directions and materials.
     """
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
@@ -155,6 +177,9 @@ def imk_56(
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
     IMK material at DOFs 5 and 6.
+
+    Returns:
+      The directions and materials.
     """
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
@@ -216,6 +241,8 @@ def imk_6_release_5(
     :func:`~osmg.gen.zerolength_gen.imk_6` in the strong axis bending
     direction
 
+    Returns:
+      The directions and materials.
     """
     moment_modifier = kwargs.get('moment_modifier', 1.00)
     n_parameter = kwargs.get('n_parameter', 0.00)
@@ -260,6 +287,8 @@ def gravity_shear_tab(
     with perimeter special moment frames. Earthquake Engineering &
     Structural Dynamics, 44(8), 1289-1307.
 
+    Returns:
+      The directions and materials.
     """
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
@@ -408,6 +437,8 @@ def steel_w_col_pz(
     performance evaluation of steel moment resisting frame
     structures. Rep. No. 132.
 
+    Returns:
+      The directions and materials.
     """
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
@@ -483,6 +514,8 @@ def steel_w_col_pz_updated(  # noqa: PLR0914
     Frames." ASCE Journal of Structural Engineering. DOI:
     10.1061/(ASCE)ST.1943-541X.0002935.
 
+    Returns:
+      The directions and materials.
     """
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)
@@ -705,6 +738,8 @@ def steel_brace_gusset(
       t_p: gusset plate thickness
       l_b: gusset plate average buckling length
 
+    Returns:
+      The directions and materials.
     """
     var_w = d_brace + 2.00 * l_c * np.tan(30.00 / 180.00 * np.pi)
     var_i = var_w * t_p**3 / 12.00

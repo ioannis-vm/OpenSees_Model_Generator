@@ -688,7 +688,12 @@ class Analysis:
     ##################################
 
     def global_reactions(self, case_name: str, step: int) -> nparr:
-        """Calculate and returns the global reaction forces."""
+        """
+        Calculate and returns the global reaction forces.
+
+        Returns:
+          The global reaction forces.
+        """
         reactions = np.full(6, 0.00)
         # for lvl in self.mdl.levels.values():
         lvl = next(iter(self.mdl.levels.values()))  # temporary fix
@@ -1050,7 +1055,12 @@ class ModalAnalysis(Analysis):
     def modal_participation_factors(
         self, case_name: str, direction: str
     ) -> tuple[nparr, nparr, nparr]:
-        """Calculate modal participation factors."""
+        """
+        Calculate modal participation factors.
+
+        Returns:
+          Modal participation factor data.
+        """
         dof_dir = {'x': 0, 'y': 1, 'z': 2}
         ntgs = list(self.mdl.dict_of_all_nodes().keys())
         # if there is a rigid diaphragm, we also need to include the parent nodes
@@ -1115,7 +1125,12 @@ class GravityPlusAnalysis(Analysis):
             raise ValueError(msg)
 
     def retrieve_node_displacement(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Obtain the displacement of a node for all analysis steps."""
+        """
+        Obtain the displacement of a node for all analysis steps.
+
+        Returns:
+          The nodal displacement.
+        """
         if case_name not in self.results:
             msg = f'case_name {case_name} not found in results.'
             raise ValueError(msg)
@@ -1128,7 +1143,12 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_acceleration(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Obtain the acceleration of a node for all analysis steps."""
+        """
+        Obtain the acceleration of a node for all analysis steps.
+
+        Returns:
+          The nodal acceleration.
+        """
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         for i in range(num):
@@ -1138,7 +1158,12 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Obtain the velocity of a node for all analysis steps."""
+        """
+        Obtain the velocity of a node for all analysis steps.
+
+        Returns:
+          The nodal velocity.
+        """
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         for i in range(num):
@@ -1150,7 +1175,12 @@ class GravityPlusAnalysis(Analysis):
     def retrieve_node_abs_acceleration(
         self, uid: int, case_name: str
     ) -> pd.DataFrame:
-        """Absolute acceleration of a node for all analysis steps."""
+        """
+        Absolute acceleration of a node for all analysis steps.
+
+        Returns:
+          The absolute acceleration.
+        """
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_accelerations[uid])
         assert isinstance(self, THAnalysis)
@@ -1182,7 +1212,12 @@ class GravityPlusAnalysis(Analysis):
         return dframe
 
     def retrieve_node_abs_velocity(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Obtain the absolute velocity of a node for all analysis steps."""
+        """
+        Obtain the absolute velocity of a node for all analysis steps.
+
+        Returns:
+          The absolute velocity.
+        """
         res = np.zeros((self.results[case_name].n_steps_success, 6))
         num = len(self.results[case_name].node_velocities[uid])
         assert isinstance(self, THAnalysis)
@@ -1218,7 +1253,12 @@ class GravityPlusAnalysis(Analysis):
         return dfrmae
 
     def retrieve_base_shear(self, case_name: str) -> pd.DataFrame:
-        """Obtain the base shear response history."""
+        """
+        Obtain the base shear response history.
+
+        Returns:
+          The base shear.
+        """
         base_shear_lst = []
         for step in range(self.results[case_name].n_steps_success):  # type:ignore
             base_shear_lst.append(self.global_reactions(case_name, step)[0:3])  # noqa: PERF401
@@ -1226,7 +1266,12 @@ class GravityPlusAnalysis(Analysis):
         return base_shear
 
     def retrieve_release_force_defo(self, uid: int, case_name: str) -> pd.DataFrame:
-        """Force-deformation of a zerolength element for all steps."""
+        """
+        Force-deformation of a zerolength element for all steps.
+
+        Returns:
+          The force-deformation data.
+        """
         num = len(self.results[case_name].release_force_defo[uid])
         res = np.zeros((num, 6))
         for i in range(num):
@@ -1575,7 +1620,12 @@ class PushoverAnalysis(GravityPlusAnalysis):
     def table_pushover_curve(
         self, case_name: str, direction: str, node: Node
     ) -> tuple[nparr, nparr]:
-        """Obtain the force deformation results."""
+        """
+        Obtain the force deformation results.
+
+        Returns:
+          The pushover curve.
+        """
         if direction == 'x':
             control_dof = 0
         elif direction == 'y':
@@ -1760,6 +1810,8 @@ class THAnalysis(GravityPlusAnalysis):
               Note that retrieving the absolute velocity and acceleration
               will not output the correct values after dampening starts.
 
+        Returns:
+          Analysis metadata.
         """
         self._init_results()
         self.log('Running TH analysis')
@@ -2306,7 +2358,12 @@ class ModalResponseSpectrumAnalysis:
         self.anl = anl
 
     def combined_node_disp(self, node_uid: int) -> nparr:
-        """Obtain the SRSS-combined node displacement of a node."""
+        """
+        Obtain the SRSS-combined node displacement of a node.
+
+        Returns:
+          The SRSS-combined node displacement.
+        """
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):
@@ -2327,9 +2384,8 @@ class ModalResponseSpectrumAnalysis:
         """
         SRSS-combined displacement of relative displacement.
 
-        Returns the SRSS-combined displacement difference between two
-        nodes.
-
+        Returns:
+          The SRSS-combined displacement difference between two nodes.
         """
         all_vals = []
         assert self.anl is not None
@@ -2358,7 +2414,12 @@ class ModalResponseSpectrumAnalysis:
         return np.sqrt(np.sum(all_vals_np**2, axis=1))
 
     def combined_basic_forces(self, element_uid: int) -> nparr:
-        """Obtain the SRSS-combined basic forces of a line element."""
+        """
+        Obtain the SRSS-combined basic forces of a line element.
+
+        Returns:
+          The SRSS-combined basic forces.
+        """
         all_vals = []
         assert self.anl is not None
         for i in range(self.num_modes):

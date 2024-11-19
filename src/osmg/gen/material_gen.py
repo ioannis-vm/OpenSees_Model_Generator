@@ -53,6 +53,8 @@ class MaterialGenerator:
         frames. Journal of Constructional Steel Research, 157,
         103-120.
 
+        Returns:
+          The defined material.
         """
         param_b = 0.001
         param_r0 = 15
@@ -109,6 +111,8 @@ class MaterialGenerator:
         Collapse Assessment of Concentrically Braced Frames in Seismic
         Regions. Journal of Structural Engineering
 
+        Returns:
+          The defined material.
         """
         param_b = 0.005
         param_r0 = 24.00

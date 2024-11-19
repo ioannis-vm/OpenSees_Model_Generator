@@ -42,7 +42,12 @@ class Elastic(UniaxialMaterial):
     e_mod: float
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return ['Elastic', self.uid, self.e_mod]
 
 
@@ -69,7 +74,12 @@ class Steel02(UniaxialMaterial):
     sig_init: float | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         args = [
             'Steel02',
             self.uid,
@@ -134,7 +144,12 @@ class Steel4(UniaxialMaterial):
     cycNum: float | None = field(default=None)  # noqa: N815
 
     def ops_args(self) -> list[object]:  # noqa: C901
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         # non-symmetric behavior
         if self.b_kc:
             assert self.R_0c is not None
@@ -245,7 +260,12 @@ class Bilin(UniaxialMaterial):
     nFactor: float  # noqa: N815
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'Bilin',
             self.uid,
@@ -308,7 +328,12 @@ class IMKBilin(UniaxialMaterial):
     D_Neg: float
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'IMKBilin',
             self.uid,
@@ -386,7 +411,12 @@ class Pinching4(UniaxialMaterial):
     dmgType: str  # noqa: N815
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'Pinching4',
             self.uid,
@@ -454,7 +484,12 @@ class Hysteretic(UniaxialMaterial):
     beta: float
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'Hysteretic',
             self.uid,
@@ -488,7 +523,12 @@ class Fatigue(UniaxialMaterial):
     var_max: float = field(default=+1.0e16)
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'Fatigue',
             self.uid,
@@ -523,7 +563,12 @@ class MaxStrainRange(UniaxialMaterial):
     elements_to_remove: list[int] | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         args = [
             'MaxStrainRange',
             self.uid,
@@ -560,7 +605,12 @@ class MinMax(UniaxialMaterial):
     max_strain: float
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'MinMax',
             self.uid,

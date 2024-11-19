@@ -21,6 +21,9 @@ def import_PEER(filename: str) -> nparr:  # noqa: N802
     motion record file.
     Output is a two column matrix of time - acceleration pairs.
     Acceleration is in [g] units.
+
+    Returns:
+      The data in the file.
     """
     # Get all data except for the last line, where it may have fewer
     # columns and cause an error
@@ -72,6 +75,9 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
     time history of fixed time interval dt and values given in vector
     th, and damping ratio zeta.
     n_Pts is the number of log-spaced points of the response spectrum
+
+    Returns:
+      The response spectrum.
     """
     T = np.logspace(  # noqa: N806
         -2, 1, n_Pts - 1
@@ -113,7 +119,12 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
 
 
 def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:  # noqa: N803
-    """Generate a simplified ASCE code response spectrum."""
+    """
+    Generate a simplified ASCE code response spectrum.
+
+    Returns:
+      The response spectrum.
+    """
     num_vals = len(T_vals)
     code_sa = np.full(num_vals, 0.00)
     T_short = S1 / Ss  # noqa: N806

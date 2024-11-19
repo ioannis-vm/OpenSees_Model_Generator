@@ -34,8 +34,9 @@ def methods(obj: object) -> list[str]:
     """
     Get the methods of an object.
 
-    Returns the names of all methods of an object,
-    excluding the dunder methods.
+    Returns:
+      The names of all methods of an object, excluding the dunder
+      methods.
 
     Example:
         >>> class TestClass:
@@ -86,7 +87,6 @@ def previous_element(
         find.
 
     Returns:
-    -------
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
 

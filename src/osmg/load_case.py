@@ -65,7 +65,12 @@ class PointLoadMass:
         self.val += load
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Point Load (or mass) object\n'
         res += 'Components: (global system)\n'
@@ -82,7 +87,12 @@ class LineElementUDL:
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'LineElementUDL object\n'
         res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
@@ -142,6 +152,8 @@ class LineElementUDL:
         Returns the quantity expressed in the global coordinate
         system.
 
+        Returns:
+          The coordinates in the global system.
         """
         udl = self.val
         transf_mat = transformations.transformation_matrix(
@@ -237,6 +249,8 @@ class LoadCase:
         all (potentially) defined constraints, restraints and parent
         nodes.
 
+        Returns:
+          The number of free DOFs.
         """
         mdl = self.parent_model
         all_nodes = mdl.dict_of_all_nodes()
@@ -271,7 +285,12 @@ class LoadCase:
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'LoadCase object\n'
         res += f'name: {self.name}\n'

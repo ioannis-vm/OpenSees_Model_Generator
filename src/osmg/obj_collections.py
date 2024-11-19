@@ -128,6 +128,8 @@ class Collection(dict[TK, TV]):
           attr: The name of the attribute.
           val: The value that the attribute should have.
 
+        Returns:
+          The retrieved object.
         """
         res = None
         for thing in self.values():
@@ -149,7 +151,12 @@ class Collection(dict[TK, TV]):
         return res
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Collection Object\n'
         res += f'ID: {id(self)}\n'
@@ -259,7 +266,12 @@ class NodeCollection(Collection[int, node.Node]):
     named_contents: dict[str, node.Node] = field(default_factory=dict)
 
     def search_xy(self, x_coord: float, y_coord: float) -> Node | None:
-        """Obtain the node that occupies a given point if it exists."""
+        """
+        Obtain the node that occupies a given point if it exists.
+
+        Returns:
+          The node.
+        """
         candidate_pt: nparr = np.array([x_coord, y_coord, self.parent.elevation])
         for other_node in self.values():
             other_pt: nparr = np.array(other_node.coords)

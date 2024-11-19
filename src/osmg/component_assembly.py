@@ -75,7 +75,12 @@ class ComponentAssembly:
         self.elements = obj_collections.CollectionWithConnectivity(self)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'
@@ -91,9 +96,9 @@ class ComponentAssembly:
         """
         Get dictionary of elements.
 
-        Returns a dictionary of all element objects in the model.
-        The keys are the uids of the objects.
-
+        Returns:
+          A dictionary of all element objects in the model. The keys
+          are the uids of the objects.
         """
         res = {}
         for elm in self.elements.values():
@@ -101,7 +106,12 @@ class ComponentAssembly:
         return res
 
     def list_of_elements(self) -> list[obj_collections.CollectionWithConnectivity]:
-        """Get a list of all element objects in the model."""
+        """
+        Get a list of all element objects in the model.
+
+        Returns:
+          The list of all element objects in the model.
+        """
         return list(self.dict_of_elements().values())
 
     def element_connectivity(
@@ -110,12 +120,12 @@ class ComponentAssembly:
         """
         Element connectivity.
 
-        Returns the connectivity of all elements. Elements are
-        connected to external nodes. Each component assembly can be
-        represented by a tuple of node uids of its connected nodes in
-        ascending order. This method returns a dictionary having these
-        tuples as keys, and the associated components as values.
-
+        Returns:
+          The connectivity of all elements. Elements are connected to
+          external nodes. Each component assembly can be represented
+          by a tuple of node uids of its connected nodes in ascending
+          order. This method returns a dictionary having these tuples
+          as keys, and the associated components as values.
         """
         res = {}
         elms = self.list_of_elements()

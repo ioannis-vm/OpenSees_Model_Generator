@@ -72,7 +72,12 @@ class ZeroLength(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'zeroLength',
             self.uid,
@@ -89,7 +94,12 @@ class ZeroLength(Element):
         ]
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
@@ -116,7 +126,12 @@ class TwoNodeLink(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'twoNodeLink',
             self.uid,
@@ -130,7 +145,12 @@ class TwoNodeLink(Element):
         ]
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
@@ -165,7 +185,12 @@ class TrussBar(Element):
     rflag: int = field(default=0)
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
 
         return [
@@ -190,13 +215,20 @@ class TrussBar(Element):
         Returns the clear length of the element (without the rigid
         offsets)
 
+        Returns:
+          The clear length.
         """
         p_i = np.array(self.nodes[0].coords)
         p_j = np.array(self.nodes[1].coords)
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
         res = ''
         res += f'{elm_name[self.transf_type]} element object\n'
@@ -227,7 +259,12 @@ class GeomTransf:
     z_axis: nparr
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             self.transf_type,
             self.uid,
@@ -253,7 +290,12 @@ class ElasticBeamColumn(Element):
     n_y: float | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         if self.n_x is not None:
             n_x = self.n_x
             k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
@@ -350,13 +392,20 @@ class ElasticBeamColumn(Element):
         Returns the clear length of the element (without the rigid
         offsets)
 
+        Returns:
+          The clear length.
         """
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'elasticBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
@@ -398,7 +447,12 @@ class Lobatto(BeamIntegration):
     n_p: int
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return ['Lobatto', self.uid, self.parent_section.uid, self.n_p]
 
 
@@ -416,7 +470,12 @@ class DispBeamColumn(Element):
     integration: BeamIntegration
 
     def ops_args(self) -> list[object]:
-        """Obtain the OpenSees arguments."""
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
         return [
             'dispBeamColumn',
             self.uid,
@@ -436,13 +495,20 @@ class DispBeamColumn(Element):
         Returns the clear length of the element (without the rigid
         offsets)
 
+        Returns:
+          The clear length.
         """
         p_i = np.array(self.nodes[0].coords) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coords) + self.geomtransf.offset_j
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         res = ''
         res += 'dispBeamColumn element object\n'
         res += f'uid: {self.uid}\n'

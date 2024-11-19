@@ -155,8 +155,9 @@ class Edge:
         """
         Obtain a string representation of this edge.
 
-        Returns a string representation of this edge in the form
-        `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
+        Returns:
+          A string representation of this edge in the form
+          `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
 
         """
         return f'(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid}) '
@@ -170,6 +171,8 @@ class Edge:
         away from the given vertex.
         We create it if it does not exist.
 
+        Returns:
+          The halfedge.
         """
         if vertex == self.v_i:
             if not self.h_i:
@@ -212,6 +215,8 @@ class Edge:
                 ...
             ValueError: The edge is not connected to the given vertex
 
+        Returns:
+          The other vertex.
         """
         if self.v_i == vertex:
             v_other = self.v_j
@@ -233,10 +238,6 @@ class Edge:
             other : Edge
                 The other edge to check for overlap or cross with this
                 edge.
-
-        Returns: bool
-            True if this edge overlaps or crosses the other edge,
-            False otherwise.
 
         Example:
             >>> from osmg.mesh import Vertex, Edge
@@ -262,6 +263,10 @@ class Edge:
             False
             >>> e6.overlaps_or_crosses(e5)
             False
+
+        Returns:
+            True if this edge overlaps or crosses the other edge,
+            False otherwise.
 
         """
         # location of this edge
@@ -389,8 +394,9 @@ class Halfedge:
         """
         Obtain a string representation of the halfedge.
 
-        Returns a string representation of the halfedge, in the form
-        `(H0 from E0 to E0 next H1)`
+        Returns:
+          A string representation of the halfedge, in the form
+          `(H0 from E0 to E0 next H1)`
 
         """
         if self.nxt:
@@ -403,7 +409,12 @@ class Halfedge:
         return out
 
     def __lt__(self, other: type[self]):
-        """Comparison function used for sorting. Compares the halfedge ids."""
+        """
+        Comparison function used for sorting. Compares the halfedge ids.
+
+        Returns:
+          Whether the other object is less than the current.
+        """
         return self.uid < other.uid
 
     def direction(self) -> float:
@@ -425,6 +436,8 @@ class Halfedge:
             >>> halfedge2.direction() == -2.356194490192345
             True
 
+        Returns:
+          The angular diection.
         """
         drct: nparr = np.array(
             self.edge.other_vertex(self.vertex).coords
@@ -447,7 +460,12 @@ class Mesh:
         self.halfedges = halfedges
 
     def __repr__(self) -> str:
-        """Get string representation."""
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 
@@ -455,12 +473,19 @@ class Mesh:
         """
         Calculate the geometric properties of the mesh.
 
+        Returns:
+          The geometric properties.
         """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         return geometric_properties(coords)
 
     def bounding_box(self) -> nparr:
-        """Obtain a bounding box of the mesh."""
+        """
+        Obtain a bounding box of the mesh.
+
+        Returns:
+          The bounding box.
+        """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -632,7 +657,12 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
 
 
 def geometric_properties(coords: nparr) -> dict[str, float]:
-    """Aggregate the results of the previous functions."""
+    """
+    Aggregate the results of the previous functions.
+
+    Returns:
+      The aggregated results.
+    """
     # repeat the first row at the end to close the shape
     coords = np.vstack((coords, coords[0, :]))
     area = polygon_area(coords)
@@ -651,7 +681,12 @@ def geometric_properties(coords: nparr) -> dict[str, float]:
 
 
 def ang_reduce(ang: float) -> float:
-    """Brings and angle expressed in radians in the interval [0, 2pi)."""
+    """
+    Brings and angle expressed in radians in the interval [0, 2pi).
+
+    Returns:
+      The reduced angle.
+    """
     while ang < 0:
         ang += 2.0 * np.pi
     while ang >= 2.0 * np.pi:

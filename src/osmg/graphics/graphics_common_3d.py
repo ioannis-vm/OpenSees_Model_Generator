@@ -38,7 +38,12 @@ node_marker = {
 
 
 def global_layout(mdl: Model, camera: dict[str, object] = None) -> go.Layout:
-    """Make some general definitions that are often needed."""
+    """
+    Make some general definitions that are often needed.
+
+    Returns:
+      A general layout.
+    """
     # get a proper boudning box form the model
     ref_len = mdl.reference_length()
     p_min, p_max = mdl.bounding_box(padding=2.0 * ref_len)

@@ -58,6 +58,8 @@ def basic_forces(
       as_tupe: Whether to return the results in the form of a pandas
         DataFrame or a tuple.
 
+    Returns:
+      The basic forces.
     """
     if isinstance(anl, ModalResponseSpectrumAnalysis):
         forces = anl.combined_basic_forces(elm.uid)
