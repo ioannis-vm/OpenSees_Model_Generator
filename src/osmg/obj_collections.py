@@ -98,7 +98,7 @@ class Collection(dict[TK, TV]):
 
     parent: Any = field(repr=False)
 
-    def add(self, obj: Any) -> None:
+    def add(self, obj: object) -> None:
         """
         Add an object to the collection.
 
@@ -119,7 +119,7 @@ class Collection(dict[TK, TV]):
             raise KeyError(msg)
         self[obj.uid] = obj
 
-    def retrieve_by_attr(self, attr: str, val: Any) -> Any:
+    def retrieve_by_attr(self, attr: str, val: object) -> object:
         """
         Retrieve object by attribute value.
 
