@@ -70,10 +70,11 @@ def interp_3d_deformation(
     use its shape functions to obtain intermediate points.
 
     Arguments:
-      element: A line element
+      elm: A line element
       u_i: 3 displacements at end i, global system
       r_i: 3 rotations at end i, global system
-      u_j, r_j: similar to u_i, r_i.
+      u_j: 3 displacements at end j, global system
+      r_j: 3 rotations at end j, global system
       num_points: Number of interpolation points
 
     Returns:
@@ -970,12 +971,12 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
       analysis: an analysis object
       case_name: the name of the load_case to be visualized
       step: the analysis step to be visualized
-      scaling_global: I don't even remember what this
-        does. It's kind of a mess right now.
-      scaling_n:
-      scaling_q:
-      scaling_m:
-      scaling_t:
+      scaling_global: Additional scaling factor, applies to all basic
+      forces.
+      scaling_n: Scaling factor for axial forces.
+      scaling_q: Scaling factor for shear forces.
+      scaling_m: Scaling factor for bending moments.
+      scaling_t: Scaling factor for torsional moments.
       num_points: number of points to include in the basic force
         curves
       force_conversion: Conversion factor to be applied at the
@@ -1488,12 +1489,12 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
     Arguments:
       combo: a load combination object
       step: the analysis step to be visualized
-      scaling_global: I don't even remember what this
-        does. It's kind of a mess right now.
-      scaling_n:
-      scaling_q:
-      scaling_m:
-      scaling_t:
+      scaling_global: Additional scaling factor, applies to all basic
+      forces.
+      scaling_n: Scaling factor for axial forces.
+      scaling_q: Scaling factor for shear forces.
+      scaling_m: Scaling factor for bending moments.
+      scaling_t: Scaling factor for torsional moments.
       num_points: number of points to include in the basic force
         curves
       force_conversion: Conversion factor to be applied at the

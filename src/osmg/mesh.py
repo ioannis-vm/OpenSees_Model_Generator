@@ -880,7 +880,7 @@ def orient_loops(
     that define polygons that have no area (e.g. h1 -> h2 -> h1).
 
     Arguments:
-        loops (list[list[Halfedge]]) (see `obtain_closed_loops`)
+        loops: (see `obtain_closed_loops`)
 
     Returns:
     -------
@@ -917,11 +917,12 @@ def subdivide_polygon(
     Define the fibers of fiber sections.
 
     Arguments:
-        halfedges: Sequence of halfedges that defines the shape of a
-                  section.
-        n_x: Number of spatial partitions in the x direction
-        n_y: Number of spatial partitions in the y direction
-        plot: Plots the resulting polygons for debugging
+      outside: Sequence of halfedges that defines the outside shape
+      of a section.
+      holes: List of sequences of halfedges that define holes.
+      n_x: Number of spatial partitions in the x direction
+      n_y: Number of spatial partitions in the y direction
+      plot: Plots the resulting polygons for debugging
 
     Returns:
     -------
@@ -980,6 +981,8 @@ def subdivide_hss_rect(
       sec_h: Section height
       sec_b: Section width
       sec_t: Section thickness
+      plot: Whether to create a verification plot, used for debugging
+      purposes.
 
     Returns:
     -------
@@ -1060,6 +1063,8 @@ def subdivide_hss_circ(
     Arguments:
       sec_d: Section diameter
       sec_t: Section thickness
+      plot: Whether to create a verification plot, used for debugging
+      purposes.
 
     Returns:
     -------

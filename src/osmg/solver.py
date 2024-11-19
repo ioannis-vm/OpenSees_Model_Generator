@@ -1386,7 +1386,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
             is queried)
           displ_incr: initial displacement increment or arc length.
           integrator: Any of 'DisplacementControl' or 'ArcLength'
-          mode shape: array containing a mode shape that is used to
+          modeshape: array containing a mode shape that is used to
             distribute the applied incremental loads. If no mode shape
             is specified, the distribution is uniform.
           loaded_node: if a loaded node is specified, all incremental
@@ -1804,31 +1804,39 @@ class THAnalysis(GravityPlusAnalysis):
         Run the time-history analysis.
 
         Arguments:
-            ag_vec_x, y, z: 1-D numpy arrays containing the fixed-step
-                            ground acceleration records.
-            ag_vec_time_incr:   The corresponding time increment
-            finish_time: Specify a target time (s) to stop the analysis
-                         the default value of 0.00 means that it will
-                         run for the entire duration of the files.
-            damping: Can be any of:
-                     {'type': None},
-                     {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
-                     {'type': 'stiffness', 'ratio': r, 'period': t1}
-                     {'type': 'modal', 'num_modes': n, 'ratio': r}
-                     {'type': 'modal+stiffness', 'num_modes': n,
-                     'ratio_modal': r, 'period': t1,
-                     'ratio_stiffness': r}
-            print_progress: Controls whether the current time is printed out
-            drift_check: If a value other than 0.00 is specified, the
-              analysis stops if the drift ratio in each orthogonal
-              direction exceeds the specified value. Levels that have
-              no parent nodes are excempt from this check.
-            time_limit: Maximum analysis time allowed, in hours.
-              When reached, the anlysis is interrupted.
-            dampen_out_residual: When the analysis finishes, whether to
-              dampen out the motion to reveal the residual deformations.
-              Note that retrieving the absolute velocity and acceleration
-              will not output the correct values after dampening starts.
+          analysis_time_increment: Time increment.
+          ag_vec_x: 1-D numpy arrays containing the fixed-step
+          ground acceleration record in the X axis direction.
+          ag_vec_y: 1-D numpy arrays containing the fixed-step
+          ground acceleration record in the Y axis direction.
+          ag_vec_z: 1-D numpy arrays containing the fixed-step
+          ground acceleration record in the Z axis direction.
+          ag_vec_time_incr:   The corresponding time increment
+          finish_time: Specify a target time (s) to stop the analysis
+          the default value of 0.00 means that it will
+          run for the entire duration of the files.
+          skip_steps: Avoid storing results for all steps. 2 means
+          every other step, 3 means every third step, and so on.
+          damping: Can be any of:
+          {'type': None},
+          {'type': 'rayleigh', 'ratio': r, 'periods': [t1, t2]},
+          {'type': 'stiffness', 'ratio': r, 'period': t1}
+          {'type': 'modal', 'num_modes': n, 'ratio': r}
+          {'type': 'modal+stiffness', 'num_modes': n,
+          'ratio_modal': r, 'period': t1,
+          'ratio_stiffness': r}
+          print_progress: Controls whether the current time is printed out
+          drift_check: If a value other than 0.00 is specified, the
+          analysis stops if the drift ratio in each orthogonal
+          direction exceeds the specified value. Levels that have
+          no parent nodes are excempt from this check.
+          time_limit: Maximum analysis time allowed, in hours.
+          When reached, the anlysis is interrupted.
+          dampen_out_residual: When the analysis finishes, whether to
+          dampen out the motion to reveal the residual deformations.
+          Note that retrieving the absolute velocity and acceleration
+          will not output the correct values after dampening starts.
+          test_tolerance: Tolerance to use when testing convergence.
 
         Returns:
           Analysis metadata.

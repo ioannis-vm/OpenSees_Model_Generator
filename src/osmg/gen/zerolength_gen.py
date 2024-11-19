@@ -735,12 +735,13 @@ def steel_brace_gusset(
     of Constructional Steel Research, Vol. 73, pp 80-94.
 
     Arguments:
-      model: Model object
-      physical_mat: physical material object
-      d_brace: brace section height
-      l_c: brace-to-gusset connection length
-      t_p: gusset plate thickness
-      l_b: gusset plate average buckling length
+      model: Model object.
+      physical_mat: physical material object.
+      d_brace: brace section height.
+      l_c: brace-to-gusset connection length.
+      t_p: gusset plate thickness.
+      l_b: gusset plate average buckling length.
+      **kwargs: Other keyword arguments.
 
     Returns:
       The directions and materials.

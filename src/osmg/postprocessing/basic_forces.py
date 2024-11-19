@@ -55,7 +55,7 @@ def basic_forces(
       num_points: Number of points along the length of the element for
         which to report the basic forces (oftentimes called `stations`
         in analysis software.)
-      as_tupe: Whether to return the results in the form of a pandas
+      as_tuple: Whether to return the results in the form of a pandas
         DataFrame or a tuple.
 
     Returns:

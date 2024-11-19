@@ -89,9 +89,11 @@ class ElmQuery:
         Look if a primary node exists at the specified location.
 
         Arguments:
-          x_loc: x-coordinate
-          y_loc: y-coordinate
+          x_loc: x-coordinate.
+          y_loc: y-coordinate.
           lvl: Key of the level to be searched.
+          z_loc: z-coordinate.
+          internal: Whether to include internal nodes in the search.
 
         Returns:
           The node if found.

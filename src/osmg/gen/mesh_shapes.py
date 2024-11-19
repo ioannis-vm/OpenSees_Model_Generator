@@ -76,10 +76,10 @@ def w_mesh(
     coincides with the centroid.
 
     Arguments:
-      b: total width
-      h: total height
-      tw: web thickness
-      tf: flange thickness
+      sec_b: total width
+      sec_h: total height
+      sec_tw: web thickness
+      sec_tf: flange thickness
       target_area: AISC database area to determine fillets, because
         trying to do that using `T` doesn't work.
 
@@ -200,8 +200,8 @@ def rect_mesh(dim_b: float, dim_h: float) -> Mesh:
     The origin coincides with the centroid.
 
     Arguments:
-        b: total width
-        h: total height
+        dim_b: total width
+        dim_h: total height
 
     Returns:
       The generated mesh.
@@ -226,7 +226,7 @@ def circ_mesh(dim_d: float) -> Mesh:
     The origin coincides with the centroid.
 
     Arguments:
-        d: total diameter
+        dim_d: total diameter
 
     Returns:
       The generated mesh.

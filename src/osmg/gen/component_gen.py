@@ -76,6 +76,7 @@ def retrieve_snap_pt_global_offset(
       section: Section object.
       p_i: Internal point at the i-end.
       p_j: Internal point at the j-end.
+      angle: Longitudinal orientation angle of the element.
 
     Returns:
     -------
