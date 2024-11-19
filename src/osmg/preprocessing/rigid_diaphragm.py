@@ -37,7 +37,7 @@ class RDAnalyzer:
     parent_loadcase: LoadCase
     parent_level: Level
 
-    def run(self, gather_mass: bool) -> None:
+    def run(self, *, gather_mass: bool) -> None:
         """
         Apply rigid diaphragm constraints.
 
