@@ -17,6 +17,12 @@ import numpy as np
 
 
 def list_directories(root_dir: str) -> list[Path]:
+    """
+    List directories.
+
+    Returns:
+      List of directories.
+    """
     res = []
     for path, directories, _ in os.walk(root_dir):
         for directory in directories:

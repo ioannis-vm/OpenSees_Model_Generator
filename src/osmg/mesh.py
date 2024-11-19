@@ -463,6 +463,7 @@ class Mesh:
     """
 
     def __init__(self, halfedges: list[Halfedge]) -> None:
+        """Initialize a Mesh object."""
         self.halfedges = halfedges
 
     def __repr__(self) -> str:
