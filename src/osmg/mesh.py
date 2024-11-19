@@ -63,7 +63,7 @@ class Vertex:
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
 
-    def __eq__(self, other: type[self]):
+    def __eq__(self, other: type[self]) -> bool:
         """
         Check for equality based on the uid of the vertex.
 
@@ -90,7 +90,7 @@ class Vertex:
         """
         return self.uid == other.uid
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """
         Obtain a hash value for the vertex based on its uid.
 
@@ -414,7 +414,7 @@ class Halfedge:
             out = f'(H{self.uid}'
         return out
 
-    def __lt__(self, other: type[self]):
+    def __lt__(self, other: type[self]) -> bool:
         """
         Comparison function used for sorting. Compares the halfedge ids.
 

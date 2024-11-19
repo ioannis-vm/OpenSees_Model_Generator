@@ -200,7 +200,7 @@ class LoadCase:
     parent_nodes: dict[int, Node] = field(default_factory=dict)
     equaldof: int | None = field(default=None)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.node_loads = obj_collections.Collection(self)
         self.node_mass = obj_collections.Collection(self)

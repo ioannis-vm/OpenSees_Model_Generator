@@ -252,7 +252,7 @@ class FiberSection(Section):
     n_x: int
     n_y: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         for part in self.section_parts:
             self.section_parts[part].parent_section = self

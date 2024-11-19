@@ -137,7 +137,7 @@ class Model:
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.levels = obj_collections.CollectionActive(self)
         self.elastic_sections = obj_collections.Collection(self)

@@ -103,7 +103,7 @@ class Results:
     n_steps_success: int = field(default=0)
     metadata: dict[str, object] | None = field(default=None)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.node_displacements = Collection(self)
         self.node_velocities = Collection(self)
@@ -202,7 +202,7 @@ class Analysis:
     warning: Warnings = field(init=False)
     backend: str = field(default='OpenSeesPy')
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         # instantiate a Warnings object
         self.warning = Warnings(self)

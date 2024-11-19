@@ -40,11 +40,11 @@ class Node:
     restraint: list[bool] = field(init=False)
     visibility: NodeVisibility = field(default_factory=NodeVisibility)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.restraint = [False] * 6
 
-    def __le__(self, other: type[self]):
+    def __le__(self, other: type[self]) -> bool:
         """
         Less or equal determination rule.
 

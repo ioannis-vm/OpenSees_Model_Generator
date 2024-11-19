@@ -60,7 +60,7 @@ class Level:
     nodes: NodeCollection = field(init=False, repr=False)
     components: Collection[int, ComponentAssembly] = field(init=False, repr=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.nodes = NodeCollection(self)
         self.components = Collection(self)
