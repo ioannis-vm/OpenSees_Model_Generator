@@ -13,14 +13,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
 from osmg.solver import Analysis, ModalResponseSpectrumAnalysis
+
 from .basic_forces import basic_forces
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from osmg.model import Model

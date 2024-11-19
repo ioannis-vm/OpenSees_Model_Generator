@@ -11,11 +11,10 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from dataclasses import dataclass
+from typing import Literal, overload
 
 import numpy as np
 import numpy.typing as npt
-
-from typing import overload, Literal
 
 from osmg.model import Model
 from osmg.ops.section import ElasticSection, FiberSection

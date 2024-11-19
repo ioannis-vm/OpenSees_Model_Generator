@@ -18,12 +18,12 @@ structure.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
 from osmg import obj_collections
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .ops import element

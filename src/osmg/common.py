@@ -11,9 +11,10 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 import re
 from pprint import pprint
-from typing import Any, Optional, OrderedDict, Hashable
+from typing import Any, Hashable, Optional, OrderedDict
 
 # very big, very small numbers used for
 # comparing floats and hashing

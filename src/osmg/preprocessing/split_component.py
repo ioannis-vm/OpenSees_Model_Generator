@@ -11,6 +11,9 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 import numpy.typing as npt
 
@@ -19,7 +22,6 @@ from osmg.line import Line
 from osmg.ops.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
 from osmg.ops.node import Node
 from osmg.ops.section import ElasticSection, FiberSection
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from osmg.component_assembly import ComponentAssembly

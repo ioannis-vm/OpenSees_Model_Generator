@@ -26,6 +26,7 @@ import plotly.io as pio
 from osmg.ops import element
 from osmg.ops import node as node_module
 from osmg.transformations import local_axes_from_points_and_angle
+
 from . import graphics_common, graphics_common_3d
 
 if TYPE_CHECKING:

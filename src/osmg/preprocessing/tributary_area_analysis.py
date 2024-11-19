@@ -101,7 +101,7 @@ class TributaryAreaAnaysis:
         load_factor: float = 1.00,
         massless_load_factor: float = 1.00,
         perform_checks: bool = True,
-    ) -> None:  # noqa: C901
+    ) -> None:
         """
         Perform tributary area analysis.
 

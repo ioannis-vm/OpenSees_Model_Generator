@@ -25,19 +25,18 @@ import platform
 import socket
 import sys
 from dataclasses import dataclass, field
-from time import perf_counter
 from pathlib import Path
-from typing import Any, Optional, Union, TYPE_CHECKING
+from time import perf_counter
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from json_tricks import dumps, loads
 from scipy import integrate
 from scipy.interpolate import interp1d
 from tqdm import tqdm
-from json_tricks import dumps, loads
-
 
 from . import common, transformations
 from .gen.query import LoadCaseQuery
@@ -46,8 +45,8 @@ from .obj_collections import Collection
 from .ops import element, uniaxial_material
 
 if TYPE_CHECKING:
-    from .model import Model
     from .load_case import LoadCase
+    from .model import Model
 
 try:
     import opensees.openseespy as ops
@@ -1305,7 +1304,7 @@ class PushoverAnalysis(GravityPlusAnalysis):
         direction: str,
         modeshape: nparr | None = None,
         node: Node | None = None,
-    ) -> None:  # noqa: C901
+    ) -> None:
         query = LoadCaseQuery(self.mdl, self.load_cases[case_name])
         distribution = query.level_masses()
         distribution /= np.linalg.norm(distribution)

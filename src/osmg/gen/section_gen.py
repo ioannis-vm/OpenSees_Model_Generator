@@ -22,6 +22,7 @@ import numpy.typing as npt
 
 from osmg.gen import mesh_shapes
 from osmg.ops.section import ElasticSection, FiberSection, SectionComponent
+
 from .mesh_shapes import rect_mesh
 
 if TYPE_CHECKING:

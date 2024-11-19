@@ -21,11 +21,12 @@ import numpy.typing as npt
 from osmg.graphics.visibility import ElementVisibility
 
 if TYPE_CHECKING:
-    from .uniaxial_material import UniaxialMaterial
-    from .section import ElasticSection, FiberSection
-    from .node import Node
-    from osmg.mesh import Mesh
     from osmg.component_assembly import ComponentAssembly
+    from osmg.mesh import Mesh
+
+    from .node import Node
+    from .section import ElasticSection, FiberSection
+    from .uniaxial_material import UniaxialMaterial
 
 
 nparr = npt.NDArray[np.float64]

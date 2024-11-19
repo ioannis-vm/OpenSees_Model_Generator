@@ -31,8 +31,8 @@ from osmg.line import Line
 from osmg.ops import element
 
 if TYPE_CHECKING:
-    from osmg.load_case import LoadCase
     from osmg.component_assembly import ComponentAssembly
+    from osmg.load_case import LoadCase
     from osmg.model import Model
     from osmg.ops.node import Node
 

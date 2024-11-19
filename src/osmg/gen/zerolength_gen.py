@@ -26,6 +26,7 @@ from osmg.ops.uniaxial_material import (
     Steel02,
     UniaxialMaterial,
 )
+
 from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:

@@ -11,6 +11,7 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -89,7 +90,7 @@ class Line:
         """
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: 'Line') -> nparr:
+    def intersect(self, other: Line) -> nparr:
         """
         Intersection point.
 

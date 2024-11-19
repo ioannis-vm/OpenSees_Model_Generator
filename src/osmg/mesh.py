@@ -845,7 +845,9 @@ def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
 
     """
 
-    def is_in_some_loop(halfedge: list[Halfedge], loops: list[list[Halfedge]]):
+    def is_in_some_loop(
+        halfedge: list[Halfedge], loops: list[list[Halfedge]]
+    ) -> bool:
         return any(halfedge in loop for loop in loops)
 
     loops: list[list[Halfedge]] = []

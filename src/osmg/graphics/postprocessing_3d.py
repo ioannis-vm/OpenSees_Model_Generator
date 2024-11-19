@@ -20,11 +20,12 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 
 from osmg import transformations
+from osmg.common import ALPHA, TINY
 from osmg.ops import element
 from osmg.postprocessing.basic_forces import basic_forces
+
 from . import graphics_common, graphics_common_3d
 from .preprocessing_3d import add_data__global_axes
-from osmg.common import TINY, ALPHA
 
 if TYPE_CHECKING:
     from osmg.model import Model
@@ -816,7 +817,7 @@ def show_deformed_shape(  # noqa: C901
 
     # create the plot
 
-    def frame_args(duration: float):
+    def frame_args(duration: float) -> dict[str, object]:
         return {
             'frame': {'duration': duration},
             'mode': 'immediate',

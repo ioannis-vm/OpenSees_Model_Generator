@@ -40,16 +40,17 @@ from osmg.transformations import (
     local_axes_from_points_and_angle,
     transformation_matrix,
 )
+
 from .node_gen import NodeGenerator
 from .query import ElmQuery
 
 if TYPE_CHECKING:
-    from osmg.ops.uniaxial_material import UniaxialMaterial
-    from osmg.physical_material import PhysicalMaterial
-    from osmg.mesh import Mesh
     from osmg.level import Level
+    from osmg.mesh import Mesh
     from osmg.model import Model
     from osmg.obj_collections import CollectionActive
+    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.physical_material import PhysicalMaterial
 
 
 nparr = npt.NDArray[np.float64]
@@ -720,7 +721,7 @@ class BeamColumnGenerator:
 
         return component
 
-    def generate_hinged_component_assembly(  # noqa: C901, PLR0913, PLR0917
+    def generate_hinged_component_assembly(  # noqa: PLR0913, PLR0917
         self,
         component_purpose: str,
         lvl: Level,

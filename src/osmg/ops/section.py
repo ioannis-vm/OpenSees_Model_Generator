@@ -22,9 +22,11 @@ from osmg import common, mesh
 from osmg.mesh import Mesh, polygon_area
 
 if TYPE_CHECKING:
-    from .uniaxial_material import UniaxialMaterial
-    from osmg.physical_material import PhysicalMaterial
     from shapely.geometry import Polygon as shapely_Polygon
+
+    from osmg.physical_material import PhysicalMaterial
+
+    from .uniaxial_material import UniaxialMaterial
 
 nparr = npt.NDArray[np.float64]
 
