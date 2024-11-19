@@ -52,7 +52,7 @@ class Vertex:
 
     def __init__(self, coords: tuple[float, float]) -> None:
         """
-        Initializes a new instance of the `Vertex` class.
+        Initialize a new instance of the `Vertex` class.
 
         Arguments:
             coords: Coordinates of the vertex.
@@ -92,7 +92,7 @@ class Vertex:
 
     def __hash__(self):
         """
-        Returns a hash value for the vertex based on its uid.
+        Obtain a hash value for the vertex based on its uid.
 
         Returns:
         -------
@@ -111,7 +111,7 @@ class Vertex:
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the vertex.
+        Obtain a string representation of the vertex.
 
         Returns:
         -------
@@ -135,7 +135,7 @@ class Edge:
 
     def __init__(self, v_i: Vertex, v_j: Vertex) -> None:
         """
-        Initializes a new edge with the given vertices.
+        Initialize a new edge with the given vertices.
 
         If the vertices don't already have an edge connecting them,
         this edge is added to their list of edges.
@@ -153,7 +153,7 @@ class Edge:
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of this edge.
+        Obtain a string representation of this edge.
 
         Returns a string representation of this edge in the form
         `(E{self.uid} @ V{self.v_i.uid}, V{self.v_j.uid})`
@@ -192,7 +192,7 @@ class Edge:
 
     def other_vertex(self, vertex: Vertex) -> Vertex:
         """
-        Returns the vertex of this edge that is not the given vertex.
+        Obtain the vertex of this edge that is not the given vertex.
 
         If the given vertex is not connected to this edge, a ValueError
         is raised.
@@ -224,7 +224,7 @@ class Edge:
 
     def overlaps_or_crosses(self, other: Edge) -> bool:
         """
-        Returns True if this edge overlaps or crosses another edge.
+        Obtain True if this edge overlaps or crosses another edge.
 
         Edges are allowed to share one vertex (returns False), but not
         both (returns True).
@@ -373,7 +373,7 @@ class Halfedge:
 
     def __init__(self, vertex: Vertex, edge: Edge) -> None:
         """
-        Initializes the halfedge object.
+        Initialize the halfedge object.
 
         Arguments:
             vertex: The vertex that the halfedge originates from.
@@ -387,7 +387,7 @@ class Halfedge:
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the halfedge.
+        Obtain a string representation of the halfedge.
 
         Returns a string representation of the halfedge, in the form
         `(H0 from E0 to E0 next H1)`
@@ -408,7 +408,7 @@ class Halfedge:
 
     def direction(self) -> float:
         """
-        Calculates the angular direction of the halfedge.
+        Calculate the angular direction of the halfedge.
 
         Calculates the angular direction of the halfedge
         using the arctan2 function (in radians).
@@ -447,20 +447,20 @@ class Mesh:
         self.halfedges = halfedges
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 
     def geometric_properties(self) -> dict[str, float]:
         """
-        Calculates the geometric properties of the mesh.
+        Calculate the geometric properties of the mesh.
 
         """
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         return geometric_properties(coords)
 
     def bounding_box(self) -> nparr:
-        """Returns a bounding box of the mesh."""
+        """Obtain a bounding box of the mesh."""
         coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
         xmin = min(coords[:, 0])
         xmax = max(coords[:, 0])
@@ -476,7 +476,7 @@ class Mesh:
 
 def polygon_area(coords: nparr) -> float:
     """
-    Calculates the area of a polygon.
+    Calculate the area of a polygon.
 
     Arguments:
         coords: A matrix whose columns represent
@@ -506,7 +506,7 @@ def polygon_area(coords: nparr) -> float:
 
 def polygon_centroid(coords: nparr) -> nparr:
     """
-    Calculates the centroid of a polygon.
+    Calculate the centroid of a polygon.
 
     Arguments:
         coords: A matrix whose columns represent
@@ -546,7 +546,7 @@ def polygon_centroid(coords: nparr) -> nparr:
 
 def polygon_inertia(coords: nparr) -> dict[str, float]:
     """
-    Calculates the moments of inertia of a polygon.
+    Calculate the moments of inertia of a polygon.
 
     Arguments:
         coords: A matrix whose columns represent
@@ -632,7 +632,7 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
 
 
 def geometric_properties(coords: nparr) -> dict[str, float]:
-    """Aggregates the results of the previous functions."""
+    """Aggregate the results of the previous functions."""
     # repeat the first row at the end to close the shape
     coords = np.vstack((coords, coords[0, :]))
     area = polygon_area(coords)
@@ -661,7 +661,7 @@ def ang_reduce(ang: float) -> float:
 
 def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     """
-    Defines all halfedges.
+    Define all halfedges.
 
     Given a list of edges, defines all the halfedges and
     associates them with their `next`.
@@ -870,7 +870,7 @@ def subdivide_polygon(
     *, outside: Mesh, holes: list[Mesh], n_x: int, n_y: int, plot: bool = False
 ) -> list[shapely_Polygon]:
     """
-    Used to define the fibers of fiber sections.
+    Define the fibers of fiber sections.
 
     Arguments:
         halfedges: Sequence of halfedges that defines the shape of a
@@ -930,7 +930,7 @@ def subdivide_hss_rect(
     sec_h: float, sec_b: float, sec_t: float, *, plot: bool = False
 ) -> list[shapely_Polygon]:
     """
-    Used to define the fibers of steel HSS fiber sections.
+    Define the fibers of steel HSS fiber sections.
 
     Arguments:
       sec_h: Section height
@@ -1011,7 +1011,7 @@ def subdivide_hss_circ(
     sec_d: float, sec_t: float, *, plot: bool = False
 ) -> list[shapely_Polygon]:
     """
-    Used to define the fibers of steel HSS fiber sections.
+    Define the fibers of steel HSS fiber sections.
 
     Arguments:
       sec_d: Section diameter
@@ -1063,7 +1063,7 @@ def subdivide_hss_circ(
 
 def print_halfedge_results(halfedges: list[Halfedge]) -> None:
     """
-    Prints the ids.
+    Print the ids of defined halfedges.
 
     Prints the ids of the defined halfedges and their vertex, edge and
     next, for debugging.
@@ -1086,7 +1086,7 @@ def print_halfedge_results(halfedges: list[Halfedge]) -> None:
 
 
 def plot_loop(halfedge_loop: list[Halfedge]) -> None:
-    """Plots the vertices/edges of a list of halfedges."""
+    """Plot the vertices/edges of a list of halfedges."""
     num = len(halfedge_loop)
     coords = np.full((num + 1, 2), 0.00)
     for i, halfedge in enumerate(halfedge_loop):
@@ -1099,7 +1099,7 @@ def plot_loop(halfedge_loop: list[Halfedge]) -> None:
 
 
 def plot_edges(edges: list[Edge]) -> None:
-    """Plots the given edges."""
+    """Plot the given edges."""
     fig = plt.figure()
     for edge in edges:
         coords = np.full((2, 2), 0.00)

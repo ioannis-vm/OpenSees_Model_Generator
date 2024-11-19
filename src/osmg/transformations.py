@@ -21,7 +21,7 @@ nparr = npt.NDArray[np.float64]
 
 def rotation_matrix_2d(ang: float) -> nparr:
     """
-    Returns a 2D transformation matrix.
+    Obtain a 2D transformation matrix.
 
     Parameters
     ----------
@@ -96,7 +96,7 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
 
 def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
     """
-    Transformation matrix.
+    Obtain a transformation matrix.
 
     Returns a transformation matrix that transforms points from
     the coordinate system in which the x, y and z axes are expressed,

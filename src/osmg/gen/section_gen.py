@@ -48,7 +48,7 @@ class SectionGenerator:
         self, name: str, e_times_a: float, e_times_i: float, g_times_j: float
     ) -> ElasticSection:
         """
-        Generates an ElasticSection object with the specified properties.
+        Generate an ElasticSection object with the specified properties.
 
         Arguments:
             name: Name of the section.
@@ -140,7 +140,7 @@ class SectionGenerator:
         return_section: bool = False,
     ) -> dict[str, ElasticSection | FiberSection]:
         """
-        Loads a section from the AISC steel section database.
+        Load a section from the AISC steel section database.
 
         Arguments:
             sec_shape_designation: Designation of the type of section

@@ -36,7 +36,7 @@ nparr = npt.NDArray[np.float64]
 
 def force_scaling_factor(ref_len: float, fmax: float, factor: float) -> float:
     """
-    Applies a scaling factor to basic forces.
+    Apply a scaling factor to basic forces.
 
     Arguments:
       ref_len: :func:`~osmg.model.Model.reference_length` of the
@@ -555,7 +555,7 @@ def add_data__line_elm_offsets_deformed(
 def add_data__frames_undeformed(
     data_dict: dict[str, object], list_of_line_elems: list[element.Element]
 ) -> None:
-    """Adds a trace containing frame element centroidal axis lines."""
+    """Add a trace containing frame element centroidal axis lines."""
     x_list: list[float | None] = []
     y_list: list[float | None] = []
     z_list: list[float | None] = []
@@ -593,7 +593,7 @@ def add_data__nodes_deformed(
     scaling: float,
     function: str,
 ) -> None:
-    """Adds a trace containing nodes in their deformed locations."""
+    """Add a trace containing nodes in their deformed locations."""
     ids_list = [int(node.uid) for node in list_of_nodes]
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)

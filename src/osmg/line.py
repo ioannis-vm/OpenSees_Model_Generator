@@ -44,7 +44,7 @@ class Line:
     end: nparr = field(repr=False)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'Line object\n'
         res += f'  start: {self.start}\n'
@@ -53,7 +53,7 @@ class Line:
 
     def length(self) -> nparr:
         """
-        Returns the length of the line.
+        Obtain the length of the line.
 
         Example:
             >>> from osmg.line import Line

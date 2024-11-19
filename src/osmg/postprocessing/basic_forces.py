@@ -45,7 +45,7 @@ def basic_forces(
     as_tuple: bool = False,
 ) -> object:
     """
-    Returns the basic forces of a specified element.
+    Obtain the basic forces of a specified element.
 
     Arguments:
       anl: Analysis object.

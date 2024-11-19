@@ -101,7 +101,7 @@ class BRBGenerator:
         unit_weight: float,
     ) -> None:
         """
-        Adds a BRB element to the model.
+        Add a BRB element to the model.
 
         Parameters
         ----------

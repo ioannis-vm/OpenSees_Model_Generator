@@ -72,7 +72,7 @@ class ZeroLength(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return [
             'zeroLength',
             self.uid,
@@ -89,7 +89,7 @@ class ZeroLength(Element):
         ]
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
@@ -116,7 +116,7 @@ class TwoNodeLink(Element):
     vecyp: nparr
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return [
             'twoNodeLink',
             self.uid,
@@ -130,7 +130,7 @@ class TwoNodeLink(Element):
         ]
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
@@ -165,7 +165,7 @@ class TrussBar(Element):
     rflag: int = field(default=0)
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
 
         return [
@@ -196,7 +196,7 @@ class TrussBar(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         elm_name = {'Linear': 'Truss', 'Corotational': 'corotTruss'}
         res = ''
         res += f'{elm_name[self.transf_type]} element object\n'
@@ -227,7 +227,7 @@ class GeomTransf:
     z_axis: nparr
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return [
             self.transf_type,
             self.uid,
@@ -253,7 +253,7 @@ class ElasticBeamColumn(Element):
     n_y: float | None = field(default=None)
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         if self.n_x is not None:
             n_x = self.n_x
             k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
@@ -356,7 +356,7 @@ class ElasticBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'elasticBeamColumn element object\n'
         res += f'uid: {self.uid}\n'
@@ -398,7 +398,7 @@ class Lobatto(BeamIntegration):
     n_p: int
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return ['Lobatto', self.uid, self.parent_section.uid, self.n_p]
 
 
@@ -416,7 +416,7 @@ class DispBeamColumn(Element):
     integration: BeamIntegration
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return [
             'dispBeamColumn',
             self.uid,
@@ -442,7 +442,7 @@ class DispBeamColumn(Element):
         return np.linalg.norm(p_i - p_j)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'dispBeamColumn element object\n'
         res += f'uid: {self.uid}\n'

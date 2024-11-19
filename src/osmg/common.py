@@ -59,13 +59,13 @@ def methods(obj: object) -> list[str]:
 
 
 def print_methods(obj: object) -> None:
-    """Prints the methods of an object."""
+    """Print the methods of an object."""
     object_methods = methods(obj)
     pprint(object_methods)  # noqa: T203
 
 
 def print_dir(obj: object) -> None:
-    """Prints the entire output of `dir()` of an object."""
+    """Print the entire output of `dir()` of an object."""
     pprint(dir(obj))  # noqa: T203
 
 

@@ -36,7 +36,7 @@ class NodeGenerator:
 
     def add_node_lvl(self, x_loc: float, y_loc: float, lvl: int) -> Node:
         """
-        Adds a node at the specified coordinates and level.
+        Add a node at the specified coordinates and level.
 
         Arguments:
           x_loc: x coordinate of the node.
@@ -114,7 +114,7 @@ class NodeGenerator:
 
     def add_node_active(self, x_loc: float, y_loc: float) -> None:
         """
-        Adds a node[/s] at the specified coordinates to all active levels.
+        Add a node[/s] at the specified coordinates to all active levels.
 
         Arguments:
             x_loc: x coordinate of the node[/s].

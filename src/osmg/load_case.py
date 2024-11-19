@@ -48,7 +48,7 @@ class PointLoadMass:
 
     def add(self, load: nparr) -> None:
         """
-        Adds some quantity to the existing quantity.
+        Add some quantity to the existing quantity.
 
         Example:
             >>> from osmg.load_case import PointLoadMass
@@ -65,7 +65,7 @@ class PointLoadMass:
         self.val += load
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'Point Load (or mass) object\n'
         res += 'Components: (global system)\n'
@@ -82,7 +82,7 @@ class LineElementUDL:
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'LineElementUDL object\n'
         res += f'parent_line_element.uid: {self.parent_line_element.uid}\n'
@@ -92,7 +92,7 @@ class LineElementUDL:
 
     def add_glob(self, udl: nparr) -> None:
         """
-        Adds a uniformly distributed load to the existing udl.
+        Add a uniformly distributed load to the existing udl.
 
         The load is defined with respect to the global coordinate
         system of the building, and it is converted to the local
@@ -231,7 +231,7 @@ class LoadCase:
 
     def number_of_free_dofs(self) -> int:
         """
-        Number of free DOFs.
+        Obtain the number of free DOFs.
 
         Calculates the number of free DOFS of the model, considering
         all (potentially) defined constraints, restraints and parent
@@ -271,7 +271,7 @@ class LoadCase:
         return int(free_dofs.to_numpy().sum() + num_diaphragms * 3)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'LoadCase object\n'
         res += f'name: {self.name}\n'

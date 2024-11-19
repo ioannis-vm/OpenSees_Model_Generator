@@ -75,7 +75,7 @@ class ComponentAssembly:
         self.elements = obj_collections.CollectionWithConnectivity(self)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'
@@ -89,7 +89,7 @@ class ComponentAssembly:
         self,
     ) -> dict[int, obj_collections.CollectionWithConnectivity]:
         """
-        Dictionary of elements.
+        Get dictionary of elements.
 
         Returns a dictionary of all element objects in the model.
         The keys are the uids of the objects.
@@ -101,7 +101,7 @@ class ComponentAssembly:
         return res
 
     def list_of_elements(self) -> list[obj_collections.CollectionWithConnectivity]:
-        """Returns a list of all element objects in the model."""
+        """Get a list of all element objects in the model."""
         return list(self.dict_of_elements().values())
 
     def element_connectivity(

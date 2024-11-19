@@ -103,7 +103,7 @@ class TributaryAreaAnaysis:
         perform_checks: bool = True,
     ) -> None:  # noqa: C901
         """
-        Performs tributary area analysis.
+        Perform tributary area analysis.
 
         Arguments:
           load_factor: Factor by which to multiply the surface

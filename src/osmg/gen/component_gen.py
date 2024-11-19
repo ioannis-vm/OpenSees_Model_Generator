@@ -63,7 +63,7 @@ def retrieve_snap_pt_global_offset(
     angle: float,
 ) -> nparr:
     """
-    Required offset for snap point.
+    Calculate required offset for snap point.
 
     Returns the necessary offset to connect an element at a specified
     snap point of the section.
@@ -498,7 +498,7 @@ class BeamColumnGenerator:
         zerolength_gen: Callable,  # type: ignore
         zerolength_gen_args: dict[str, object],
     ) -> ZeroLength:
-        """Defines a zerolength element."""
+        """Define a zerolength element."""
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         return ZeroLength(
             assembly,
@@ -520,7 +520,7 @@ class BeamColumnGenerator:
         zerolength_gen: Callable,  # type: ignore
         zerolength_gen_args: dict[str, object],
     ) -> TwoNodeLink:
-        """Defines a TwoNodeLink element."""
+        """Define a TwoNodeLink element."""
         dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
         return TwoNodeLink(
             assembly,
@@ -549,7 +549,7 @@ class BeamColumnGenerator:
         n_x: int | None = None,
         n_y: int | None = None,
     ) -> None:
-        """Adds beamcolumn elemens in series."""
+        """Add beamcolumn elemens in series."""
         if (n_x is not None) or (n_y is not None):
             assert n_sub == 1
 
@@ -981,7 +981,7 @@ class BeamColumnGenerator:
         h_offset_j: float = 0.00,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
-        """Adds a diagonal beamcolumn element to all active levels."""
+        """Add a diagonal beamcolumn element to all active levels."""
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels
@@ -1085,7 +1085,7 @@ class BeamColumnGenerator:
         split_existing_j: ComponentAssembly | None = None,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
-        """Adds a diagonal beamcolumn element to all active levels."""
+        """Add a diagonal beamcolumn element to all active levels."""
         query = ElmQuery(self.model)
         ndg = NodeGenerator(self.model)
         lvls = self.model.levels

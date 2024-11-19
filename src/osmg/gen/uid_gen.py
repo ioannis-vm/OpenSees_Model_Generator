@@ -20,7 +20,7 @@ class UIDGenerator:
 
     def new(self, thing: str) -> int:
         """
-        Generates a new uid for an object of the given type.
+        Generate a new uid for an object of the given type.
 
         Arguments:
             object_type: The type of object for which to generate a uid.

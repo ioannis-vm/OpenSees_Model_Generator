@@ -77,7 +77,7 @@ class Settings:
     ndf: int = field(default=6)  # that's all we support
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += '~~~ Model Settings ~~~\n'
         res += f'  Imperial units: {self.imperial_units}\n'
@@ -141,7 +141,7 @@ class Model:
         self.physical_materials = obj_collections.Collection(self)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += '~~~ Model Object ~~~\n'
         res += f'ID: {id(self)}\n'
@@ -156,7 +156,7 @@ class Model:
         self,
     ) -> dict[tuple[int, ...], ComponentAssembly]:
         """
-        Connectivity of all component assemblies.
+        Obtain the connectivity of all component assemblies.
 
         Component assemblies are collections of lower-level components
         that are connected to primary nodes. Each component assembly
@@ -178,7 +178,7 @@ class Model:
 
     def add_level(self, uid: int, elevation: float) -> None:
         """
-        Adds a level to the model.
+        Add a level to the model.
 
         Arguments:
             uid: Unique ID for the level.
@@ -197,7 +197,7 @@ class Model:
 
     def dict_of_primary_nodes(self) -> dict[int, Node]:
         """
-        Dictionary of all the primary nodes in the model.
+        Obtain a dictionary of all the primary nodes in the model.
 
         The keys are the uids of the nodes.
         """
@@ -207,7 +207,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_primary_nodes(self) -> list[Node]:
-        """Returns a list of all the primary nodes in the model."""
+        """Obtain a list of all the primary nodes in the model."""
         list_of_nodes = []
         for lvl in self.levels.values():
             for node in lvl.nodes.values():
@@ -216,7 +216,7 @@ class Model:
 
     def dict_of_internal_nodes(self) -> dict[int, Node]:
         """
-        Dictionary of all the internal nodes in the model.
+        Obtain a dictionary of all the internal nodes in the model.
 
         The keys are the uids of the nodes.
 
@@ -228,7 +228,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_internal_nodes(self) -> list[Node]:
-        """Returns a list of all the internal nodes in the model."""
+        """Obtain a list of all the internal nodes in the model."""
         list_of_nodes = []
         for lvl in self.levels.values():
             for component in lvl.components.values():
@@ -238,7 +238,7 @@ class Model:
 
     def dict_of_all_nodes(self) -> dict[int, Node]:
         """
-        Dictionary of all the nodes in the model.
+        Obtain a dictionary of all the nodes in the model.
 
         The keys are the uids of the nodes.
 
@@ -249,7 +249,7 @@ class Model:
         return dict_of_nodes
 
     def list_of_all_nodes(self) -> list[Node]:
-        """Returns a list of all the nodes in the model."""
+        """Obtain a list of all the nodes in the model."""
         list_of_nodes = []
         list_of_nodes.extend(self.list_of_primary_nodes())
         list_of_nodes.extend(self.list_of_internal_nodes())
@@ -257,7 +257,7 @@ class Model:
 
     def dict_of_components(self) -> dict[int, ComponentAssembly]:
         """
-        Dictionary of all the component assemblies in the model.
+        Obtain a dict of all the component assemblies in the model.
 
         The keys are the uids of the component assemblies.
 
@@ -274,7 +274,7 @@ class Model:
 
     def dict_of_elements(self) -> dict[int, element.Element]:
         """
-        Dictionary of all element objects in the model.
+        Obtain a dictionary of all element objects in the model.
 
         The keys are the uids of the objects.
 
@@ -286,7 +286,7 @@ class Model:
         return elems
 
     def list_of_elements(self) -> list[element.Element]:
-        """Returns a list of all element objects in the model."""
+        """Obtain a list of all element objects in the model."""
         return list(self.dict_of_elements().values())
 
     def dict_of_specific_element(
@@ -315,7 +315,7 @@ class Model:
         return list(self.dict_of_specific_element(element_class).values())
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
-        """Returns the axis-aligned bouding box of the building."""
+        """Obtain the axis-aligned bouding box of the building."""
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():
@@ -339,7 +339,7 @@ class Model:
 
     def initialize_empty_copy(self, name: str) -> Model:
         """
-        Initializes a shallow empty copy of the model.
+        Initialize a shallow empty copy of the model.
 
         Used to create subset models.
 

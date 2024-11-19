@@ -55,7 +55,7 @@ class ElmQuery:
 
     def search_connectivity(self, nodes: list[Node]) -> ComponentAssembly | None:
         """
-        Finds component assembly objects.
+        Find component assembly objects.
 
         Finds component assembly objects based on the nodes the are
         connected to.
@@ -84,7 +84,7 @@ class ElmQuery:
         internal: bool = False,
     ) -> Node | None:
         """
-        Looks if a primary node exists at the specified location.
+        Look if a primary node exists at the specified location.
 
         Arguments:
           x_loc: x-coordinate
@@ -117,7 +117,7 @@ class ElmQuery:
         self, nodes: list[Node], lvl_uid: int | None = None
     ) -> dict[int, ComponentAssembly]:
         """
-        Retrieves component assemblies.
+        Retrieve component assemblies.
 
         Retrieves component assemblies if at least one of their
         external nodes matches the given list of nodes.
@@ -150,7 +150,7 @@ class ElmQuery:
         self, nodes: list[Node], lvl_uid: int | None = None
     ) -> ComponentAssembly | None:
         """
-        Retrieves a single component assembly.
+        Retrieve a single component assembly.
 
         Retrieves a single component assembly if all of its external
         nodes match the given list of nodes.
@@ -183,7 +183,7 @@ class ElmQuery:
         self, x_loc: float, y_loc: float, lvl: int
     ) -> ComponentAssembly | None:
         """
-        Retrieves a component assembly.
+        Retrieve a component assembly.
 
         Retrieves a component assembly of a level if any of its
         line elements passes trhough the specified point.
@@ -250,7 +250,7 @@ class LoadCaseQuery:
     loadcase: LoadCase
 
     def level_masses(self) -> nparr:
-        """Returns the total mass of each level."""
+        """Return the total mass of each level."""
         mdl = self.model
         num_lvls = len(mdl.levels)
         distr = np.zeros(num_lvls)

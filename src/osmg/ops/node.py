@@ -48,7 +48,7 @@ class Node:
         return self.uid < other.uid
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'Node object\n'
         res += f'  uid: {self.uid}\n'

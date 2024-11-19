@@ -110,7 +110,7 @@ def smrf_pz_doubler_plate_requirement(
     ry_coeff: float = 1.15,
     omega_coeff: float = 1.10,
 ) -> float:
-    """Calculates the required doubler plate thickness."""
+    """Calculate the required doubler plate thickness."""
     # in
     c_rbs = beam_sec_properties['bf'] * (1.0 - rbs_proportion) / 2.0
     # in3

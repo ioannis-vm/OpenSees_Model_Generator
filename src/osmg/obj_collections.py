@@ -149,7 +149,7 @@ class Collection(dict[TK, TV]):
         return res
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'Collection Object\n'
         res += f'ID: {id(self)}\n'
@@ -200,7 +200,7 @@ class CollectionActive(Collection[TK, TV]):
 
     def set_active(self, uids: list[TK]) -> None:
         """
-        Sets the active objects.
+        Set the active objects.
 
         Arguments:
             uids: uids of the objects to set as active
@@ -214,7 +214,7 @@ class CollectionActive(Collection[TK, TV]):
 
     def set_active_all(self) -> None:
         """
-        Sets the active objects.
+        Set the active objects.
 
         Arguments:
             uids: uids of the objects to set as active
@@ -259,7 +259,7 @@ class NodeCollection(Collection[int, node.Node]):
     named_contents: dict[str, node.Node] = field(default_factory=dict)
 
     def search_xy(self, x_coord: float, y_coord: float) -> Node | None:
-        """Returns the node that occupies a given point if it exists."""
+        """Obtain the node that occupies a given point if it exists."""
         candidate_pt: nparr = np.array([x_coord, y_coord, self.parent.elevation])
         for other_node in self.values():
             other_pt: nparr = np.array(other_node.coords)
@@ -288,7 +288,7 @@ class CollectionWithConnectivity(Collection[TK, TV]):
 
     def add(self, obj: object) -> None:
         """
-        Adds an element to the collection.
+        Add an element to the collection.
 
         The method also checks to see if an object having the same
         connectivity exists in the collection, and raises an error if

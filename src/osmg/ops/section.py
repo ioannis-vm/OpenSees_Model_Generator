@@ -106,7 +106,7 @@ class ElasticSection(Section):
         return res
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'ElasticSection object\n'
         res += f'name: {self.name}\n'
@@ -152,7 +152,7 @@ class SectionComponent:
     parent_section: FiberSection | None = field(default=None)
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'SectionComponent object\n'
         if self.outside_shape:
@@ -168,7 +168,7 @@ class SectionComponent:
         return res
 
     def cut_into_tiny_little_pieces(self) -> list[shapely_Polygon]:
-        """Returns data used to define fibers in OpenSees."""
+        """Obtain data used to define fibers in OpenSees."""
         # if we have an AISC HSS section, we need to discretize in a
         # certain way
         assert self.parent_section
@@ -237,7 +237,7 @@ class FiberSection(Section):
             self.section_parts[part].parent_section = self
 
     def __repr__(self) -> str:
-        """String representation."""
+        """Get string representation."""
         res = ''
         res += 'FiberSection object\n'
         for part in self.section_parts:
@@ -250,7 +250,7 @@ class FiberSection(Section):
         return res
 
     def ops_args(self) -> list[object]:
-        """Returns the OpenSees arguments."""
+        """Obtain the OpenSees arguments."""
         return [
             'Fiber',
             self.uid,

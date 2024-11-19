@@ -37,7 +37,7 @@ def fix_all(
     model: Model,
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
-    """Fixed in all directions."""
+    """Fix all directions."""
     dirs = [1, 2, 3, 4, 5, 6]
     mat_repo = model.uniaxial_materials
     fix_mat = mat_repo.retrieve_by_attr('name', 'fix')
@@ -476,7 +476,7 @@ def steel_w_col_pz_updated(  # noqa: PLR0914
     **kwargs: dict[object, object],  # noqa: ARG001
 ) -> tuple[list[int], list[UniaxialMaterial]]:
     """
-    Updated panel zone hinge (parallelogram model).
+    Define updated panel zone hinge (parallelogram model).
 
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
     Panel Zone Model for Seismic Design of Steel Moment-Resisting
