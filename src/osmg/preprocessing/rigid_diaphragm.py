@@ -44,6 +44,8 @@ class RDAnalyzer:
         Applies rigid diaphragm constraints and optionally gathers
         mass from the nodes of the level to the primary nodes
 
+        Raises:
+          ValueError: If mass is not defined.
         """
         lvl = self.parent_level
         loadcase = self.parent_loadcase

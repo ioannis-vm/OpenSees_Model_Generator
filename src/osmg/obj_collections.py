@@ -107,6 +107,9 @@ class Collection(dict[TK, TV]):
         Arguments:
           obj: Object to be added.
 
+        Raises:
+          KeyError: If the object does not have a uid attribute.
+          KeyError: If the object already exists.
         """
         if not hasattr(obj, 'uid'):
             msg = 'Object does not have a uid attribute'
@@ -130,6 +133,9 @@ class Collection(dict[TK, TV]):
 
         Returns:
           The retrieved object.
+
+        Raises:
+          ValueError: If the object is not found.
         """
         res = None
         for thing in self.values():
@@ -212,6 +218,8 @@ class CollectionActive(Collection[TK, TV]):
         Arguments:
             uids: uids of the objects to set as active
 
+        Raises:
+          KeyError: IF the uid is not present in the collection.
         """
         for uid in uids:
             if uid not in self:
@@ -308,12 +316,8 @@ class CollectionWithConnectivity(Collection[TK, TV]):
 
         Arguments:
           obj: Object to be added.
-
         """
         uids = [nd.uid for nd in obj.nodes]
         uids.sort()
         uids_tuple = (*uids,)
-        if uids_tuple in obj.parent_component.element_connectivity():
-            msg = 'This should never happen!'
-            raise ValueError(msg)
         super().add(obj)

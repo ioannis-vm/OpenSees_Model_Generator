@@ -182,11 +182,15 @@ class Line:
 
         Returns:
           Whether the given point pt lies on the line.
+
+        Raises:
+          ValueError: If the line has zero length.
         """
         r_a = self.end - self.start
         norm2 = np.dot(r_a, r_a)
         if np.abs(norm2) < common.EPSILON:
-            raise ValueError
+            msg = 'Line has zero length.'
+            raise ValueError(msg)
         r_b = point - self.start
         cross = np.linalg.norm(np.cross(r_a, r_b))
         dot_normalized = np.dot(r_a, r_b) / norm2  # type: ignore

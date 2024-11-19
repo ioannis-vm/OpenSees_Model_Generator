@@ -516,6 +516,9 @@ def steel_w_col_pz_updated(  # noqa: PLR0914
 
     Returns:
       The directions and materials.
+
+    Raises:
+      ValueError: If an unsupported location is provided.
     """
     assert section.name[0] == 'W', 'Error: Only W sections can be used.'
     assert isinstance(section, ElasticSection)

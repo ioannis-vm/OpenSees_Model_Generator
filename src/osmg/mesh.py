@@ -173,6 +173,9 @@ class Edge:
 
         Returns:
           The halfedge.
+
+        Raises:
+          ValueError: If the halfedge is already defined.
         """
         if vertex == self.v_i:
             if not self.h_i:
@@ -217,6 +220,9 @@ class Edge:
 
         Returns:
           The other vertex.
+
+        Raises:
+          ValueError: If the edge is not connected to the given vertex.
         """
         if self.v_i == vertex:
             v_other = self.v_j

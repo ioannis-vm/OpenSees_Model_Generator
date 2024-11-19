@@ -48,7 +48,12 @@ def line_plot_interactive(
     yunit: str | Nonen = None,
     yhoverformat: str = '.0f',
 ) -> None:
-    """Gneric polty line plot."""
+    """
+    Generic polty line plot.
+
+    Raises:
+      ValueError: If an invalid `lshape` parameter is provided.
+    """
     assert len(x_vals) == len(y_vals), "Dimensions don't match"
     assert mode in {
         'spline+markers',
@@ -64,7 +69,7 @@ def line_plot_interactive(
         lmode = 'lines+markers'
         lwidth = 4
     else:
-        msg = 'oops! This should never run. Strange.'
+        msg = f'Invalid `lshape` parameter: {lshape}'
         raise ValueError(msg)
 
     if xunit:

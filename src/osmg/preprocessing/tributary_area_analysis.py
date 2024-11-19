@@ -123,6 +123,11 @@ class TributaryAreaAnaysis:
             subsequent analyses to enhance performance if that a prior
             analysis has verified that the checks are satisfied.
 
+        Raises:
+          ValueError: In case of ill-configured geometry causing
+          overlaping elements.
+          TypeError: If a loaded element has an unsupported object
+          type.
         """
         try:
             import skgeom as sg  # noqa: PLC0415
@@ -531,5 +536,5 @@ class TributaryAreaAnaysis:
                             )
 
                 else:
-                    msg = 'This should never happen!'
+                    msg = f'Unsupported object type: {type(loaded_elm)}'
                     raise TypeError(msg)

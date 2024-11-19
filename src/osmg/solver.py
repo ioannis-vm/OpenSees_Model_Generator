@@ -290,7 +290,12 @@ class Analysis:
             self.results = loads(file.read())
 
     def _to_opensees_domain(self, case_name: str) -> None:  # noqa: C901
-        """Define the model in OpenSeesPy."""
+        """
+        Define the model in OpenSeesPy.
+
+        Raises:
+          KeyError: If a node is already defined.
+        """
         # initialize
         ops.wipe()
         ops.model('basic', '-ndm', 3, '-ndf', 6)
@@ -991,7 +996,13 @@ class ModalAnalysis(Analysis):
                 ) = forces_vector_local
 
     def run(self) -> None:
-        """Run the modal analysis."""
+        """
+        Run the modal analysis.
+
+        Raises:
+          ValueError: When solver known to not work for modal analysis
+          is specified.
+        """
         self._init_results()
         for case_name in self.load_cases:
             self._to_opensees_domain(case_name)
@@ -1130,6 +1141,9 @@ class GravityPlusAnalysis(Analysis):
 
         Returns:
           The nodal displacement.
+
+        Raises:
+          ValueError: If no loadcase with the given name exists.
         """
         if case_name not in self.results:
             msg = f'case_name {case_name} not found in results.'
@@ -1380,6 +1394,8 @@ class PushoverAnalysis(GravityPlusAnalysis):
             load is applied entirely on that node.  Otherwise, the
             incremental loads are distributed to all nodes.
 
+        Raises:
+          ValueError: If an invalid direction string is provided.
         """
         self.log(f'Direction: {direction}')
         if direction == 'x':
@@ -1625,6 +1641,9 @@ class PushoverAnalysis(GravityPlusAnalysis):
 
         Returns:
           The pushover curve.
+
+        Raises:
+          ValueError: If an invalid direction string is provided.
         """
         if direction == 'x':
             control_dof = 0
@@ -1686,6 +1705,8 @@ def define_lateral_load_pattern(
     Defines the load pattern for a time-history analysis from
     previously parsed files with a constant dt
 
+    Raises:
+      ValueError: If no input file is specified.
     """
     if redefine:
         for tag in (2, 3, 4):

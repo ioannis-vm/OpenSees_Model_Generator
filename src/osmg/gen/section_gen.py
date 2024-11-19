@@ -186,6 +186,9 @@ class SectionGenerator:
             snap_points: specified
             }
 
+        Raises:
+          KeyError: If the specified section is not found.
+          ValueError: If an unsupported section type is provided.
         """
         ops_mat = self.model.uniaxial_materials.retrieve_by_attr(
             'name', ops_material

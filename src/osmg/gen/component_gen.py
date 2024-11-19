@@ -119,6 +119,8 @@ def beam_placement_lookup(  # noqa: C901
       A node and offest to connect to, either existing or newly
       created.
 
+    Raises:
+      ValueError: If an unsupported snap keyword is provided.
     """
     lvl = lvls[key]
     node = query.search_node_lvl(x_coord, y_coord, lvl.uid)
@@ -448,6 +450,9 @@ class BeamColumnGenerator:
 
         Returns:
           The added element.
+
+        Raises:
+          ValueError: If an invalid element type is provided.
         """
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
@@ -573,7 +578,12 @@ class BeamColumnGenerator:
         n_x: int | None = None,
         n_y: int | None = None,
     ) -> None:
-        """Add beamcolumn elemens in series."""
+        """
+        Add beamcolumn elemens in series.
+
+        Raises:
+          TypeError: If an unsupported element type is provided.
+        """
         if (n_x is not None) or (n_y is not None):
             assert n_sub == 1
 
@@ -742,6 +752,10 @@ class BeamColumnGenerator:
 
         Returns:
           The defined component.
+
+        Raises:
+          ValueError: If an invalid element_type_i is provided.
+          ValueError: If an invalid element_type_j is provided.
         """
         uids = [node.uid for node in (node_i, node_j)]
         uids.sort()
