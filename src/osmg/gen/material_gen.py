@@ -158,7 +158,6 @@ class MaterialGenerator:
             var_m,
         )
 
-
     @overload
     def generate_steel_w_imk_material(
         self,
@@ -193,6 +192,23 @@ class MaterialGenerator:
         n_parameter: float = 0.00,
         only_elastic: bool = False,
     ):
+        """
+        Steel W-shape IMK material.
+
+        Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
+        steel components in support of collapse prediction of steel moment
+        frames under earthquake loading. Journal of Structural
+        Engineering-Reston, 137(11), 1291.
+
+        Elkady, A., & Lignos, D. G. (2014). Modeling of the composite
+        action in fully restrained beam-to-column connections:
+        implications in the seismic design and collapse capacity of steel
+        special moment frames. Earthquake Engineering & Structural
+        Dynamics, 43(13), 1935-1954.
+
+        Returns:
+          The defined material.
+        """
         # gather necessary data and check interpolation range
         assert section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(section, ElasticSection)
