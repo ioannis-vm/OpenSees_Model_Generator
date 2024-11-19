@@ -18,6 +18,7 @@
 # https://coolors.co/  <- amazing color palette generator
 #
 
+from __future__ import annotations
 import sys
 
 import numpy as np

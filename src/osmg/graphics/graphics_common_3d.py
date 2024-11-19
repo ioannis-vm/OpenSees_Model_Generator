@@ -13,6 +13,7 @@ https://plotly.com/python/reference/
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
