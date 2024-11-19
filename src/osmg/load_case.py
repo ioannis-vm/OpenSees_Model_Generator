@@ -114,11 +114,6 @@ class LineElementUDL:
             applied to the clear length of the element, acting on
             the global x, y, and z directions, in the direction of
             the global axes.
-
-        Returns:
-        -------
-          None
-
         """
         # STOP! if the element has the Corotational transformation, we
         # can't apply a UDL on it. We need to lump the provided UDL to
