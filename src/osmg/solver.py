@@ -47,6 +47,10 @@ from .ops import element, uniaxial_material
 if TYPE_CHECKING:
     from .load_case import LoadCase
     from .model import Model
+    from osmg.ops.node import Node
+    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.ops.element import Element
+    from osmg.ops.element import ZeroLengthElement
 
 try:
     import opensees.openseespy as ops

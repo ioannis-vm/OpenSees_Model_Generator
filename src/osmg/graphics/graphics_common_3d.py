@@ -13,8 +13,12 @@ https://plotly.com/python/reference/
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
+from typing import TYPE_CHECKING
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
+
+if TYPE_CHECKING:
+    from osmg.model import Model
 
 # pio.renderers.default = 'browser'
 

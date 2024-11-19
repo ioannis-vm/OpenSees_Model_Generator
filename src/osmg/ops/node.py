@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+from typing import Self
 from dataclasses import dataclass, field
 from functools import total_ordering
 
@@ -44,7 +45,7 @@ class Node:
         """Post-initialization."""
         self.restraint = [False] * 6
 
-    def __le__(self, other: type[self]) -> bool:
+    def __le__(self, other: Self) -> bool:
         """
         Less or equal determination rule.
 

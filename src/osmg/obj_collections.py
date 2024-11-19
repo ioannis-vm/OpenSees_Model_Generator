@@ -13,13 +13,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, TypeVar
+from typing import Any, List, TypeVar, TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
 from . import common
 from .ops import element, node
+
+if TYPE_CHECKING:
+    from osmg.ops.node import Node
 
 nparr = npt.NDArray[np.float64]
 

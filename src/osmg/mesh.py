@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from itertools import count
-from typing import Any, Optional
+from typing import Any, Optional, Self
 
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
@@ -63,7 +63,7 @@ class Vertex:
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
 
-    def __eq__(self, other: type[self]) -> bool:
+    def __eq__(self, other: Self) -> bool:
         """
         Check for equality based on the uid of the vertex.
 
@@ -414,7 +414,7 @@ class Halfedge:
             out = f'(H{self.uid}'
         return out
 
-    def __lt__(self, other: type[self]) -> bool:
+    def __lt__(self, other: Self) -> bool:
         """
         Comparison function used for sorting. Compares the halfedge ids.
 

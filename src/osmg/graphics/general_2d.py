@@ -45,7 +45,7 @@ def line_plot_interactive(
     xunit: str | None = None,
     xhoverformat: str = '.0f',
     ylab: str = 'y',
-    yunit: str | Nonen = None,
+    yunit: str | None = None,
     yhoverformat: str = '.0f',
 ) -> None:
     """
