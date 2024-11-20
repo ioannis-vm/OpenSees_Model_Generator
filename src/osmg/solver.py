@@ -38,23 +38,22 @@ from scipy import integrate
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
-from . import common, transformations
-from .gen.query import LoadCaseQuery
-from .graphics import general_2d
-from .obj_collections import Collection
-from .ops import element, uniaxial_material
+from osmg import common, transformations
+from osmg.gen.query import LoadCaseQuery
+from osmg.graphics import general_2d
+from osmg.obj_collections import Collection
+from osmg.ops import element, uniaxial_material
 
 if TYPE_CHECKING:
+    from osmg.load_case import LoadCase
+    from osmg.model import Model
     from osmg.ops.element import Element, ZeroLengthElement
     from osmg.ops.node import Node
     from osmg.ops.uniaxial_material import UniaxialMaterial
 
-    from .load_case import LoadCase
-    from .model import Model
-
 try:
     import opensees.openseespy as ops
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     import openseespy.opensees as ops
 
 

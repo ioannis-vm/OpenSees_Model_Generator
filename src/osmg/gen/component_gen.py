@@ -24,6 +24,8 @@ import numpy.typing as npt
 from osmg import common
 from osmg.component_assembly import ComponentAssembly
 from osmg.gen import zerolength_gen
+from osmg.gen.node_gen import NodeGenerator
+from osmg.gen.query import ElmQuery
 from osmg.ops.element import (
     DispBeamColumn,
     ElasticBeamColumn,
@@ -40,9 +42,6 @@ from osmg.transformations import (
     local_axes_from_points_and_angle,
     transformation_matrix,
 )
-
-from .node_gen import NodeGenerator
-from .query import ElmQuery
 
 if TYPE_CHECKING:
     from osmg.level import Level
@@ -1077,10 +1076,10 @@ class BeamColumnGenerator:
                 ndg,
                 lvls,
                 key,
-                offset_i,
-                sec_offset_global,
-                split_existing_i,
-                snap_i,
+                user_offset=offset_i,
+                section_offset=sec_offset_global,
+                split_existing=split_existing_i,
+                snap=snap_i,
             )
             node_j, eo_j = beam_placement_lookup(
                 xj_coord,
@@ -1089,10 +1088,10 @@ class BeamColumnGenerator:
                 ndg,
                 lvls,
                 key,
-                offset_j,
-                sec_offset_global,
-                split_existing_j,
-                snap_j,
+                user_offset=offset_j,
+                section_offset=sec_offset_global,
+                split_existing=split_existing_j,
+                snap=snap_j,
             )
 
             args = {

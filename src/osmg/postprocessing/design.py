@@ -19,9 +19,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
+from osmg.postprocessing.basic_forces import basic_forces
 from osmg.solver import Analysis, ModalResponseSpectrumAnalysis
-
-from .basic_forces import basic_forces
 
 if TYPE_CHECKING:
     from osmg.model import Model

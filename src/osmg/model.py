@@ -22,17 +22,17 @@ import numpy.typing as npt
 from shapely.geometry import Point  # type: ignore
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
-from . import obj_collections
-from .gen.uid_gen import UIDGenerator
-from .level import Level
+from osmg import obj_collections
+from osmg.gen.uid_gen import UIDGenerator
+from osmg.level import Level
 
 if TYPE_CHECKING:
-    from .component_assembly import ComponentAssembly
-    from .ops import element
-    from .ops.node import Node
-    from .ops.section import ElasticSection, FiberSection
-    from .ops.uniaxial_material import UniaxialMaterial
-    from .physical_material import PhysicalMaterial
+    from osmg.component_assembly import ComponentAssembly
+    from osmg.ops import element
+    from osmg.ops.node import Node
+    from osmg.ops.section import ElasticSection, FiberSection
+    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 

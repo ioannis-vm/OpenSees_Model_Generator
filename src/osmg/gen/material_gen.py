@@ -449,37 +449,6 @@ class MaterialGenerator:
         beta_plus = (mcmy_plus - 1.0) * m_plus / theta_p_plus / stiffness
         beta_minus = -(mcmy_minus - 1.0) * m_minus / theta_p_minus / stiffness
 
-        # # old model
-        # from ..ops.uniaxial_material import Bilin
-        # bilin_mat = Bilin(
-        #     self.model.uid_generator.new("uniaxial material"),
-        #     "auto_IMK",
-        #     stiffness * moment_modifier,
-        #     beta_plus,
-        #     beta_minus,
-        #     m_plus*moment_modifier,
-        #     m_minus*moment_modifier,
-        #     lamda,
-        #     lamda,
-        #     lamda,
-        #     lamda,
-        #     1.00,
-        #     1.00,
-        #     1.00,
-        #     1.00,
-        #     theta_p_plus,
-        #     theta_p_minus,
-        #     theta_pc_plus,
-        #     theta_pc_minus,
-        #     residual_plus,
-        #     residual_minus,
-        #     theta_u,
-        #     theta_u,
-        #     d_plus,
-        #     d_minus,
-        #     0.00,
-        # )
-
         # new model
         if only_elastic:
             return Elastic(

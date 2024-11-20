@@ -18,8 +18,8 @@ from typing import TYPE_CHECKING, Any, List, TypeVar
 import numpy as np
 import numpy.typing as npt
 
-from . import common
-from .ops import element, node
+from osmg import common
+from osmg.ops import element, node
 
 if TYPE_CHECKING:
     from osmg.ops.node import Node

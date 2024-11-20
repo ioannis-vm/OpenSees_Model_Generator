@@ -21,11 +21,10 @@ import plotly.graph_objects as go  # type: ignore
 
 from osmg import transformations
 from osmg.common import ALPHA, TINY
+from osmg.graphics import graphics_common, graphics_common_3d
+from osmg.graphics.preprocessing_3d import add_data__global_axes
 from osmg.ops import element
 from osmg.postprocessing.basic_forces import basic_forces
-
-from . import graphics_common, graphics_common_3d
-from .preprocessing_3d import add_data__global_axes
 
 if TYPE_CHECKING:
     from osmg.model import Model

@@ -23,10 +23,9 @@ from osmg.graphics.visibility import ElementVisibility
 if TYPE_CHECKING:
     from osmg.component_assembly import ComponentAssembly
     from osmg.mesh import Mesh
-
-    from .node import Node
-    from .section import ElasticSection, FiberSection
-    from .uniaxial_material import UniaxialMaterial
+    from osmg.ops.node import Node
+    from osmg.ops.section import ElasticSection, FiberSection
+    from osmg.ops.uniaxial_material import UniaxialMaterial
 
 
 nparr = npt.NDArray[np.float64]

@@ -17,14 +17,14 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from . import common
-from .gen.section_gen import SectionGenerator
-from .ops.section import ElasticSection
-from .ops.uniaxial_material import Elastic, Steel02
-from .physical_material import PhysicalMaterial
+from osmg import common
+from osmg.gen.section_gen import SectionGenerator
+from osmg.ops.section import ElasticSection
+from osmg.ops.uniaxial_material import Elastic, Steel02
+from osmg.physical_material import PhysicalMaterial
 
 if TYPE_CHECKING:
-    from .model import Model
+    from osmg.model import Model
 
 nparr = npt.NDArray[np.float64]
 

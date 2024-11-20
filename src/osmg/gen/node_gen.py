@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 from osmg.ops.node import Node
 
 if TYPE_CHECKING:
-    from .model import Model
+    from osmg.model import Model
 
 
 @dataclass(repr=False)

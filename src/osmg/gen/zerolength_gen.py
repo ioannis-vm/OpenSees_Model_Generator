@@ -18,6 +18,7 @@ from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 
+from osmg.gen.material_gen import MaterialGenerator
 from osmg.ops.section import ElasticSection
 from osmg.ops.uniaxial_material import (
     Elastic,
@@ -26,8 +27,6 @@ from osmg.ops.uniaxial_material import (
     Steel02,
     UniaxialMaterial,
 )
-
-from .material_gen import MaterialGenerator
 
 if TYPE_CHECKING:
     from osmg.model import Model

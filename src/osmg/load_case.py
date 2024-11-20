@@ -21,14 +21,14 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from . import obj_collections, transformations
-from .ops import element
-from .preprocessing.rigid_diaphragm import RDAnalyzer
-from .preprocessing.tributary_area_analysis import TributaryAreaAnaysis
+from osmg import obj_collections, transformations
+from osmg.ops import element
+from osmg.preprocessing.rigid_diaphragm import RDAnalyzer
+from osmg.preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 
 if TYPE_CHECKING:
-    from .model import Model
-    from .ops.node import Node
+    from osmg.model import Model
+    from osmg.ops.node import Node
 
 nparr = npt.NDArray[np.float64]
 

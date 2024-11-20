@@ -24,9 +24,8 @@ from osmg.mesh import Mesh, polygon_area
 if TYPE_CHECKING:
     from shapely.geometry import Polygon as shapely_Polygon
 
+    from osmg.ops.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
-
-    from .uniaxial_material import UniaxialMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -211,10 +210,10 @@ class SectionComponent:
         else:
             # fallback: use the default rectangular mesh chopper
             pieces = mesh.subdivide_polygon(
-                self.outside_shape,
-                self.holes,
-                self.parent_section.n_x,
-                self.parent_section.n_y,
+                outside=self.outside_shape,
+                holes=self.holes,
+                n_x=self.parent_section.n_x,
+                n_y=self.parent_section.n_y,
             )
 
         return pieces

@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from . import common
+from osmg import common
 
 nparr = npt.NDArray[np.float64]
 

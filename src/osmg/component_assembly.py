@@ -26,7 +26,7 @@ import numpy.typing as npt
 from osmg import obj_collections
 
 if TYPE_CHECKING:
-    from .ops import element
+    from osmg.ops import element
 
 nparr = npt.NDArray[np.float64]
 
