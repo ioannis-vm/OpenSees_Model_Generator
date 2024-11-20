@@ -486,7 +486,7 @@ def add_data__line_elm_offsets_deformed(
     scaling: float,
 ) -> None:
     """
-    Element offests.
+    Element offsets.
 
     Adds a trace containing frame element rigid offset lines
     in their deformed state.
@@ -665,7 +665,7 @@ def get_auto_scaling_deformation(
     Get scaling factor.
 
     Automatically calculate a scaling value that makes the maximum
-    displacement appear approximately 10% of the largest dimention of
+    displacement appear approximately 10% of the largest dimension of
     the building's bounding box.
 
     Returns:
@@ -729,7 +729,7 @@ def show_deformed_shape(  # noqa: C901
       step: the analysis step to be visualized
       scaling: scaling factor for the deformations. If 0.00 is
         provided, the scaling factor is calculated automatically.
-      extrude: wether to extrude frame elements
+      extrude: whether to extrude frame elements
       camera: custom positioning of the camera
       subset_model: subset model used to only show certain
         components
@@ -742,7 +742,7 @@ def show_deformed_shape(  # noqa: C901
         an html file instead of being shown.
 
     Returns:
-      Metdata.
+      Metadata.
     """
     if subset_model:
         # if a subset model is specified, only show its components

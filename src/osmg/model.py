@@ -368,7 +368,7 @@ class Model:
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
         """
-        Obtain the axis-aligned bouding box of the building.
+        Obtain the axis-aligned bounding box of the building.
 
         Returns:
           The bounding box.

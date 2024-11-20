@@ -320,7 +320,7 @@ class CollectionWithConnectivity(Collection[TK, TV]):
         Arguments:
           obj: Object to be added.
         """
-        uids = [nd.uid for nd in obj.nodes]
+        uids = [x.uid for x in obj.nodes]
         uids.sort()
         uids_tuple = (*uids,)  # noqa: F841
         # TODO(JVM): Fix this region.

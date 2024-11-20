@@ -125,7 +125,7 @@ class TributaryAreaAnaysis:
 
         Raises:
           ValueError: In case of ill-configured geometry causing
-          overlaping elements.
+          overlapping elements.
           TypeError: If a loaded element has an unsupported object
           type.
         """

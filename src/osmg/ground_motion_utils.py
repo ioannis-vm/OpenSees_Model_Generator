@@ -82,7 +82,7 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
     """
     T = np.logspace(  # noqa: N806
         -2, 1, n_Pts - 1
-    )  # -1 becuase we also include PGA @ T=0s
+    )  # -1 because we also include PGA @ T=0s
     # we may have to upsample the ground motion time history
     # to ensure convergence of the central difference method
     if dt > 0.1 * T[0]:

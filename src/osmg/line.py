@@ -30,7 +30,7 @@ class Line:
     """
     Finite-length line segment object.
 
-    Used internally whenever operations involving lines are reuired.
+    Used internally whenever operations involving lines are required.
 
     Attributes:
     ----------

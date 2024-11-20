@@ -106,9 +106,9 @@ def previous_element(
         key_list = list(dct.keys())
         idx = key_list.index(key)
         if idx == 0:
-            ans = None
+            result = None
         else:
-            ans = dct[key_list[idx - 1]]
+            result = dct[key_list[idx - 1]]
     else:
-        ans = None
-    return ans
+        result = None
+    return result

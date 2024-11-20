@@ -51,7 +51,7 @@ def global_layout(mdl: Model, camera: dict[str, object] | None = None) -> go.Lay
     Returns:
       A general layout.
     """
-    # get a proper boudning box form the model
+    # get a proper bounding box form the model
     ref_len = mdl.reference_length()
     p_min, p_max = mdl.bounding_box(padding=2.0 * ref_len)
 

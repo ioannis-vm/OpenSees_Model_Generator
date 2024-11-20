@@ -196,7 +196,7 @@ class ElmQuery:
         Retrieve a component assembly.
 
         Retrieves a component assembly of a level if any of its
-        line elements passes trhough the specified point.
+        line elements passes through the specified point.
 
         Arguments:
           x_loc: x-coordinate

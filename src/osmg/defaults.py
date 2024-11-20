@@ -62,7 +62,7 @@ def load_default_elastic(model: Model, sec_name: str) -> None:
     sections to the model.
 
     """
-    # intantiate a section generator object for the model
+    # instantiate a section generator object for the model
     sgen = SectionGenerator(model)
     # generate a default elastic section and add it to the model
     sgen.generate_generic_elastic(

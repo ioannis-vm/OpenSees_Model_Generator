@@ -34,7 +34,7 @@ nparr = npt.NDArray[np.float64]
 @dataclass
 class ComponentAssembly:
     """
-    Component asssembly object.
+    Component assembly object.
 
     A component assembly represents some part of a structure and holds
     various lower-level elements such as nodes and beamcolumn
@@ -130,7 +130,7 @@ class ComponentAssembly:
         res = {}
         elms = self.list_of_elements()
         for elm in elms:
-            uids = [nd.uid for nd in elm.nodes]
+            uids = [x.uid for x in elm.nodes]
             uids.sort()
             uids_tuple = (*uids,)
             res[uids_tuple] = elm

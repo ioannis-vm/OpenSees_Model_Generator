@@ -118,7 +118,7 @@ class LineElementUDL:
         # STOP! if the element has the Corotational transformation, we
         # can't apply a UDL on it. We need to lump the provided UDL to
         # its external nodes.  Since the Corotational transformation
-        # also does not support rigid end offests, that lumping
+        # also does not support rigid end offsets, that lumping
         # process is always valid without requiring any special
         # transformation.
         elm = self.parent_line_element

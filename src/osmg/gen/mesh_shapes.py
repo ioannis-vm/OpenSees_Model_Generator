@@ -247,7 +247,7 @@ def circ_mesh(dim_d: float) -> Mesh:
 
 def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     """
-    Generate generic snap poitns for a section object.
+    Generate generic snap points for a section object.
 
     Returns:
       The snap points.

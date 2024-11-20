@@ -243,7 +243,7 @@ class Analysis:
             if self.settings.specific_nodes:
                 node_uids.extend(self.settings.specific_nodes)
             else:
-                node_uids.extend(nd.uid for nd in self.mdl.list_of_all_nodes())
+                node_uids.extend(x.uid for x in self.mdl.list_of_all_nodes())
                 node_uids.extend(
                     [n.uid for n in self.load_cases[case_name].parent_nodes.values()]
                 )
@@ -472,7 +472,7 @@ class Analysis:
                 lvl = self.mdl.levels[parent_node_to_lvl[uid]]
                 nodes = lvl.nodes.values()
                 good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-                ops.rigidDiaphragm(3, uid, *[nd.uid for nd in good_nodes])
+                ops.rigidDiaphragm(3, uid, *[x.uid for x in good_nodes])
         else:
             dof = self.load_cases[case_name].equaldof
             for uid in parent_nodes:
@@ -1836,9 +1836,9 @@ class THAnalysis(GravityPlusAnalysis):
           drift_check: If a value other than 0.00 is specified, the
           analysis stops if the drift ratio in each orthogonal
           direction exceeds the specified value. Levels that have
-          no parent nodes are excempt from this check.
+          no parent nodes are exempt from this check.
           time_limit: Maximum analysis time allowed, in hours.
-          When reached, the anlysis is interrupted.
+          When reached, the analysis is interrupted.
           dampen_out_residual: When the analysis finishes, whether to
           dampen out the motion to reveal the residual deformations.
           Note that retrieving the absolute velocity and acceleration
@@ -2270,7 +2270,7 @@ class THAnalysis(GravityPlusAnalysis):
                 )
                 self.results[case_name].subdivision_level.append(0)
                 self.time_vector.append(curr_time + last_time)
-                # determine if the struture has stopped moving
+                # determine if the structure has stopped moving
                 vel = np.zeros(6)
                 node_tags = ops.getNodeTags()
                 num_nodes = len(node_tags)

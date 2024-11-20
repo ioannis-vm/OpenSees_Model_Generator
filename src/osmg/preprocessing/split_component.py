@@ -35,7 +35,7 @@ def split_component(
     """
     Split component.
 
-    Splits a beam-functioning component assembly to accomodate for a
+    Splits a beam-functioning component assembly to accommodate for a
     node required to connect another component assembly.
 
     Arguments:

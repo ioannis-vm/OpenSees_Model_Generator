@@ -443,7 +443,7 @@ class Halfedge:
             True
 
         Returns:
-          The angular diection.
+          The angular direction.
         """
         drct: nparr = np.array(
             self.edge.other_vertex(self.vertex).coords

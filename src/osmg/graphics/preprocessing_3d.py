@@ -1148,7 +1148,7 @@ def show(  # noqa: C901
     Arguments:
       mdl: the model to be visualized
       load_case: the load_case to be visualized
-      extrude: wether to extrude frame elements
+      extrude: whether to extrude frame elements
       offsets: whether to show frame element rigid offsets
       global_axes: whether to show global axes
       diaphragm_lines: whether to show lines indicating rigid

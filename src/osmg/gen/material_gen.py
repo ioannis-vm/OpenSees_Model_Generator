@@ -298,7 +298,7 @@ class MaterialGenerator:
                 * lbry ** (-0.108)
                 * (6.895 * mat_fy / 355.0) ** (-0.36)
             )
-            lamda = (
+            lambda_var = (
                 585.0
                 * (sec_d / sec_tw) ** (-1.14)
                 * (sec_bf / (2.0 * sec_tf)) ** (-0.632)
@@ -329,14 +329,14 @@ class MaterialGenerator:
             theta_p = min(theta_p, 0.20)
             theta_pc = min(theta_pc, 0.30)
             if axial_load_ratio <= 0.35:  # noqa: PLR2004
-                lamda = (
+                lambda_var = (
                     25500.00
                     * (sec_d / sec_tw) ** (-2.14)
                     * lbry ** (-0.53)
                     * (1.00 - axial_load_ratio) ** (4.29)
                 )
             else:
-                lamda = (
+                lambda_var = (
                     268000.00
                     * (sec_d / sec_tw) ** (-2.30)
                     * lbry ** (-1.30)
@@ -388,7 +388,7 @@ class MaterialGenerator:
                 * (25.4 * sec_d / 533.0) ** (-0.28)
                 * (6.895 * mat_fy / 355.0) ** (-0.43)
             )
-            lamda = (
+            lambda_var = (
                 495.0
                 * (sec_d / sec_tw) ** (-1.34)
                 * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
@@ -472,9 +472,9 @@ class MaterialGenerator:
             -m_minus * moment_modifier,
             (1.0 + beta_minus),
             residual_minus,
-            lamda,
-            lamda,
-            lamda,
+            lambda_var,
+            lambda_var,
+            lambda_var,
             1.00,
             1.00,
             1.00,

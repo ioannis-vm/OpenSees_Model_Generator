@@ -117,7 +117,7 @@ def beam_placement_lookup(  # noqa: C901
     respect to the other existing objects in the model.
 
     Returns:
-      A node and offest to connect to, either existing or newly
+      A node and offset to connect to, either existing or newly
       created.
 
     Raises:
@@ -346,7 +346,7 @@ class TrussBarGenerator:
             it will be substituted with i and j.
 
             Returns:
-              A newly created node, considering the specified offest.
+              A newly created node, considering the specified offset.
             """
             # if there is an offset at the x-end, create an internal node
             # and add a rigidlink element to the component assembly
@@ -580,7 +580,7 @@ class BeamColumnGenerator:
         n_y: int | None = None,
     ) -> None:
         """
-        Add beamcolumn elemens in series.
+        Add beamcolumn elements in series.
 
         Raises:
           TypeError: If an unsupported element type is provided.
