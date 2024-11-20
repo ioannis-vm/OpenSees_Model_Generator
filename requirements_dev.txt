@@ -1,8 +1,0 @@
-pytest
-pytest-cov
-mypy
-flake8
-xdoctest
-coverage
-flake8-rst
-flake8-rst-docstrings
