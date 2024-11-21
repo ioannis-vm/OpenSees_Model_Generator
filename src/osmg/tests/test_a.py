@@ -156,7 +156,3 @@ def test_a() -> None:
 
     # deformed_shape(anl, anl.n_steps_success, 0.00, True)
     # res_b = anl.retrieve_release_force_defo(zelm, testcase.name)
-
-
-if __name__ == '__main__':
-    pass
