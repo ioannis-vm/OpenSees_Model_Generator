@@ -18,7 +18,7 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import common
-from osmg.creators.section_gen import SectionGenerator
+from osmg.creators.section import SectionGenerator
 from osmg.elements.section import ElasticSection
 from osmg.elements.uniaxial_material import Elastic, Steel02
 from osmg.physical_material import PhysicalMaterial
@@ -63,9 +63,9 @@ def load_default_elastic(model: Model, sec_name: str) -> None:
 
     """
     # instantiate a section generator object for the model
-    sgen = SectionGenerator(model)
+    section_creator = SectionCreator(model)
     # generate a default elastic section and add it to the model
-    sgen.generate_generic_elastic(
+    section_creator.generate_generic_elastic(
         name=sec_name, e_times_a=1.00, e_times_i=1.00, g_times_j=1.00
     )
 

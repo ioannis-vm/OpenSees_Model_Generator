@@ -1,4 +1,4 @@
-"""BRB element generator."""
+"""BRB element creator."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
-from osmg.creators.component_gen import TrussBarGenerator
+from osmg.creators.component import TrussBarCreator
 from osmg.creators.mesh_shapes import rect_mesh
 from osmg.model import Model
 from osmg.elements.uniaxial_material import Fatigue, Steel4
@@ -28,11 +28,11 @@ nparr = npt.NDArray[np.float64]
 @dataclass(repr=False)
 class BRBGenSettings:
     """
-    Default values used by BRBGenerator objects.
+    Default values used by BRBCreator objects.
 
-    This object holds default values that are used by BRBGenerator
+    This object holds default values that are used by BRBCreator
     objects, to better organize those values and improve the usability
-    of the BRBGenerator objects by allowing their methods to have
+    of the BRBCreator objects by allowing their methods to have
     fewer arguments.
 
     """
@@ -60,11 +60,11 @@ class BRBGenSettings:
 
 
 @dataclass(repr=False)
-class BRBGenerator:
+class BRBCreator:
     """
     Simplify the definition of BRB elements.
 
-    Uses the lower-level `gen` classes to simplify the definition of
+    Uses the lower-level creator classes to simplify the definition of
     BRB elements simulated using a corotational truss opensees element
     and the Steel4 material wrapped under a Fatigue material, as done
     in [1] and [2].
@@ -139,7 +139,7 @@ class BRBGenerator:
             called.
 
         """
-        trg = TrussBarGenerator(self.model)
+        trg = TrussBarCreator(self.model)
 
         uid = self.model.uid_generator.new('uniaxial material')
         mat = Steel4(

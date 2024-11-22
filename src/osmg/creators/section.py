@@ -1,4 +1,4 @@
-"""Objects that generate sections."""
+"""objects that create sections."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -32,7 +32,7 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
-class SectionGenerator:
+class SectionCreator:
     """
     Used to populate the section repository of a model.
 
@@ -68,11 +68,11 @@ class SectionGenerator:
                 specified properties.
 
         Example:
-            >>> from osmg.creators.section_gen import SectionGenerator
+            >>> from osmg.creators.section import SectionCreator
             >>> from osmg.model import Model
             >>> model = Model('test_model')
-            >>> sec_gen = SectionGenerator(model)
-            >>> sec = sec_gen.generate_generic_elastic(
+            >>> sec_creator = SectionCreator(model)
+            >>> sec = sec_creator.generate_generic_elastic(
             ...     name="My Elastic Section",
             ...     e_times_a=100.00, e_times_i=1000.00, g_times_j=500.00)
             >>> sec.name
@@ -162,14 +162,14 @@ class SectionGenerator:
             and the values are the sections themselves.
 
         Example:
-            >>> from osmg.creators.section_gen import SectionGenerator
+            >>> from osmg.creators.section import SectionCreator
             >>> from osmg.model import Model
             >>> from osmg.defaults import load_default_steel
             >>> from osmg.elements.section import ElasticSection
             >>> model = Model('test_model')
             >>> load_default_steel(model)
-            >>> sec_gen = SectionGenerator(model)
-            >>> sec_gen.load_aisc_from_database(
+            >>> sec_creator = SectionCreator(model)
+            >>> sec_creator.load_aisc_from_database(
             ...     'W', ['W14X90'], 'default steel', 'default steel',
             ...     ElasticSection, store_in_model=True, return_section=True)
             {'W14X90': ElasticSection object

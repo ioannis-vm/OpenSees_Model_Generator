@@ -20,7 +20,7 @@ from typing import Self
 from osmg.graphics.visibility import NodeVisibility
 
 if TYPE_CHECKING:
-    from osmg.creators.uid_gen import UIDGenerator
+    from osmg.creators.uid import UIDGenerator
 
 @dataclass
 @total_ordering

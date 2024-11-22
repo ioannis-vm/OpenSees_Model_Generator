@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
 
 @dataclass(repr=False)
-class NodeGenerator:
+class NodeCreator:
     """
-    NodeGenerator objects introduce node objects to a model.
+    NodeCreator objects introduce node objects to a model.
 
     Attributes:
     ----------
@@ -49,11 +49,11 @@ class NodeGenerator:
 
         Example:
           >>> from osmg.model import Model
-          >>> from osmg.creators.node_gen import NodeGenerator
+          >>> from osmg.creators.node import NodeCreator
           >>> model = Model('test_model')
           >>> model.add_level(0, 0.00)
-          >>> generator = NodeGenerator(model)
-          >>> generator.add_node_lvl(2.00, 3.00, 0)
+          >>> creator = NodeCreator(model)
+          >>> creator.add_node_lvl(2.00, 3.00, 0)
           Node object
             uid: 0
             coords: [2.0, 3.0, 0.0]
@@ -91,11 +91,11 @@ class NodeGenerator:
 
         Example:
             >>> from osmg.model import Model
-            >>> from osmg.creators.node_gen import NodeGenerator
+            >>> from osmg.creators.node import NodeCreator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)
-            >>> generator = NodeGenerator(model)
-            >>> generator.add_node_lvl_xyz(2.00, 3.00, 4.00, 0)
+            >>> creator = NodeCreator(model)
+            >>> creator.add_node_lvl_xyz(2.00, 3.00, 4.00, 0)
             Node object
               uid: 0
               coords: [2.0, 3.0, 4.0]
@@ -122,14 +122,14 @@ class NodeGenerator:
 
         Example:
             >>> from osmg.model import Model
-            >>> from osmg.creators.node_gen import NodeGenerator
+            >>> from osmg.creators.node import NodeCreator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)
             >>> model.add_level(1, 1.00)
             >>> model.add_level(2, 2.00)
             >>> model.levels.set_active([1, 2])
-            >>> generator = NodeGenerator(model)
-            >>> generator.add_node_active(2.00, 3.00)
+            >>> creator = NodeCreator(model)
+            >>> creator.add_node_active(2.00, 3.00)
             >>> model.levels[0].nodes.__srepr__()
             '[Collection of 0 items]'
             >>> model.levels[1].nodes.__srepr__()

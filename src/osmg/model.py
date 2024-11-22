@@ -23,7 +23,7 @@ from shapely.geometry import Point  # type: ignore
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
 from osmg import osmg_collections
-from osmg.creators.uid_gen import UIDGenerator
+from osmg.creators.uid import UIDGenerator
 from osmg.level import Level
 
 if TYPE_CHECKING:
@@ -94,7 +94,7 @@ class Model:
     It contains levels, elastic sections, fiber sections,
     physical materials, and various collections of objects such as
     nodes, elements, and component assemblies that exist inside each level.
-    Those objects are populated by generator objects. See `osmg.creators`.
+    Those objects are populated by creator objects. See `osmg.creators`.
 
     Attributes:
     ----------

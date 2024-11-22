@@ -1,4 +1,4 @@
-"""Objects that generate materials."""
+"""objects that create materials."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -33,8 +33,8 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
-class MaterialGenerator:
-    """Base class for uniaxial material generators."""
+class MaterialCreator:
+    """Base class for uniaxial material creators."""
 
     model: Model
 
@@ -44,7 +44,7 @@ class MaterialGenerator:
 
 
 @dataclass(repr=False)
-class ElasticMaterialGenerator(MaterialGenerator):
+class ElasticMaterialCreator(MaterialCreator):
     """Generates an Elastic uniaxial material."""
 
     stiffness: float
@@ -64,7 +64,7 @@ class ElasticMaterialGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelHSSRectBraceMaxStrainRangeMaterialGenerator(MaterialGenerator):
+class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
     """
     Max strain range material.
 
@@ -132,7 +132,7 @@ class SteelHSSRectBraceMaxStrainRangeMaterialGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelHSSCircBraceFatigueMaterialGenerator(MaterialGenerator):
+class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
     """
     Circular HSS brace fatigue material.
 
@@ -202,7 +202,7 @@ class SteelHSSCircBraceFatigueMaterialGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelWIMKMaterialGenerator(MaterialGenerator):
+class SteelWIMKMaterialCreator(MaterialCreator):
     """
     Steel W-shape IMK material.
 
@@ -507,7 +507,7 @@ class SteelWIMKMaterialGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelGravityShearTabGenerator(MaterialGenerator):
+class SteelGravityShearTabCreator(MaterialCreator):
     """
     Gravity shear tab connection hinge.
 
@@ -651,7 +651,7 @@ class SteelGravityShearTabGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelWColumnPanelZoneGenerator(MaterialGenerator):
+class SteelWColumnPanelZoneCreator(MaterialCreator):
     """
     Panel zone hinge (parallelogram model).
 
@@ -720,7 +720,7 @@ class SteelWColumnPanelZoneGenerator(MaterialGenerator):
 
 
 @dataclass(repr=False)
-class SteelWColumnPanelZoneUpdatedGenerator(MaterialGenerator):
+class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
     """
     Define updated panel zone hinge (parallelogram model).
 
@@ -931,7 +931,7 @@ class SteelWColumnPanelZoneUpdatedGenerator(MaterialGenerator):
         )
 
 
-class SteelBraceGussetGenerator(MaterialGenerator):
+class SteelBraceGussetCreator(MaterialCreator):
     """
     Steel brace gusset plate hinge.
 

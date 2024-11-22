@@ -11,7 +11,7 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import pytest
-from osmg.creators.uid_gen import UIDGenerator
+from osmg.creators.uid import UIDGenerator
 from osmg.elements.node import Node
 
 

@@ -1,1 +1,1 @@
-"""Steel component generator objects."""
+"""Steel component creator objects."""

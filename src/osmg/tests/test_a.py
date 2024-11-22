@@ -5,11 +5,11 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import defaults
-from osmg.creators.component_gen import BeamColumnGenerator
+from osmg.creators.component import BeamColumnCreator
 from osmg.creators.query import ElmQuery
-from osmg.creators.section_gen import SectionGenerator
+from osmg.creators.section import SectionCreator
 
-# from osmg.creators.zerolength_gen import gravity_shear_tab
+# from osmg.creators.zerolength import gravity_shear_tab
 from osmg.graphics.postprocessing_3d import show_basic_forces, show_deformed_shape
 from osmg.graphics.preprocessing_3d import show
 from osmg.load_case import LoadCase
@@ -32,8 +32,8 @@ def test_a() -> None:
     """
     mdl = Model('test_model')
 
-    mcg = BeamColumnGenerator(mdl, 'elastic')
-    secg = SectionGenerator(mdl)
+    mcg = BeamColumnCreator(mdl, 'elastic')
+    secg = SectionCreator(mdl)
     query = ElmQuery(mdl)
 
     mdl.add_level(0, 0.00)

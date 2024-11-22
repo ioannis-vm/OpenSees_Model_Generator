@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Migrated to Ruff for code formatting and checking.
 - Stopped using pickle to store objects to disk. Using JSON going forward, which is human-readable and safer.
 - Some function/method arguments were forced to become keyword arguments to avoid the boolean trap.
+- Certain terms were updated because they were inaccurate.
+  - Most "generator" objects were renamed to "Creator" to avoid confusion with the meaning of "generator" in Python.
 
 ### Removed
 

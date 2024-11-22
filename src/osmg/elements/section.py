@@ -75,7 +75,7 @@ class ElasticSection(Section):
       snap_points: Dictionary containing coordinates of `snap_points`
         used by component-generating methods to position components
         relative to existing ones. See
-        :func:`~osmg.creators.component_gen.beam_placement_lookup` for example.
+        :func:`~osmg.creators.component.beam_placement_lookup` for example.
       properties: Dictionary containing section properties.
 
     """

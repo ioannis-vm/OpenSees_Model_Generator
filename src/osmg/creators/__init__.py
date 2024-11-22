@@ -1,1 +1,1 @@
-"""Component generator objects."""
+"""Component creator objects."""

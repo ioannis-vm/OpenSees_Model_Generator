@@ -1,4 +1,4 @@
-"""Objects that generate ZeroLength elements."""
+"""objects that create ZeroLength elements."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from osmg.elements.element import ZeroLength
 
 if TYPE_CHECKING:
     from osmg.component_assemblies import ComponentAssembly
-    from osmg.creators.material_gen import MaterialGenerator
+    from osmg.creators.material import MaterialGenerator
     from osmg.model import Model
     from osmg.node import Node
     from osmg.elements.uniaxial_material import UniaxialMaterial
@@ -32,32 +32,32 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass
-class ZeroLengthGenerator:
+class ZeroLengthCreator:
     """
-    Base class for zero-length generators.
+    Base class for zero-length creators.
 
-    Handles direction-material assignments using MaterialGenerator
+    Handles direction-material assignments using MaterialCreator
     objects.
     """
 
     model: Model
-    material_generators: dict[int, MaterialGenerator]
+    material_creators: dict[int, MaterialCreator]
 
     def generate(self) -> tuple[list[int], list[UniaxialMaterial]]:
         """
         Generate directions and materials.
 
         Generate directions and materials using the specified material
-        generators.
+        creators.
 
         Returns:
             dirs (list[int]): List of DOF directions.
             mats (list[UniaxialMaterial]): Corresponding uniaxial materials.
         """
-        dirs = list(self.material_generators.keys())
+        dirs = list(self.material_creators.keys())
         mats = [
-            generator.generate(self.model)
-            for generator in self.material_generators.values()
+            creator.generate(self.model)
+            for creator in self.material_creators.values()
         ]
         return dirs, mats
 
@@ -78,7 +78,7 @@ class ZeroLengthGenerator:
         dirs, mats = self.generate()
         return ZeroLength(
             assembly,
-            self.model.uid_generator.new('element'),
+            self.model.uid_creator.new('element'),
             [node_i, node_j],
             mats,
             dirs,

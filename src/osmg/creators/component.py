@@ -1,4 +1,4 @@
-"""Objects that generate component assemblies for a model."""
+"""objects that create component assemblies for a model."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -23,13 +23,13 @@ import numpy.typing as npt
 
 from osmg import common
 from osmg.component_assemblies import ComponentAssembly
-from osmg.creators.material_gen import (
-    ElasticMaterialGenerator,
-    SteelWColumnPanelZoneUpdatedGenerator,
+from osmg.creators.material import (
+    ElasticMaterialCreator,
+    SteelWColumnPanelZoneUpdatedCreator,
 )
-from osmg.creators.node_gen import NodeGenerator
+from osmg.creators.node import NodeCreator
 from osmg.creators.query import ElmQuery
-from osmg.creators.zerolength_gen import ZeroLengthGenerator
+from osmg.creators.zerolength import ZeroLengthCreator
 from osmg.elements.element import (
     DispBeamColumn,
     ElasticBeamColumn,
@@ -106,7 +106,7 @@ def beam_placement_lookup(  # noqa: C901
     x_coord: nparr,
     y_coord: nparr,
     query: ElmQuery,
-    ndg: NodeGenerator,
+    ndg: NodeCreator,
     lvls: CollectionActive,
     key: str,
     *,
@@ -237,9 +237,9 @@ def look_for_panel_zone(node: Node, lvl: Level, query: ElmQuery) -> Node:
 
 
 @dataclass(repr=False)
-class TrussBarGenerator:
+class TrussBarCreator:
     """
-    TrussBar generator object.
+    TrussBar creator object.
 
     Introduces bar elements to a model.
     Bar elements are linear elements that can only carry axial load.
@@ -279,7 +279,7 @@ class TrussBarGenerator:
           The added component.
         """
         query = ElmQuery(self.model)
-        ndg = NodeGenerator(self.model)
+        ndg = NodeCreator(self.model)
         lvls = self.model.levels
 
         lvl_i = lvls[lvl_key_i]
@@ -440,7 +440,7 @@ class TrussBarGenerator:
 class HingeConfig:
     """Configuration for `generate_hinged_component_assembly`."""
 
-    zerolength_generator: ZeroLengthGenerator
+    zerolength_creator: ZeroLengthCreator
     distance: float
     n_sub: int
     element_type: Literal['elastic', 'disp']
@@ -474,7 +474,7 @@ class InitialDeformationConfig:
 
 
 @dataclass(repr=False)
-class BeamColumnGenerator:
+class BeamColumnCreator:
     """Introduces beamcolumn elements to a model."""
 
     model: Model = field(repr=False)
@@ -573,7 +573,7 @@ class BeamColumnGenerator:
         node_j: Node,
         x_axis: nparr,
         y_axis: nparr,
-        zerolength_gen: Callable,  # type: ignore
+        zerolength_creator: Callable,  # type: ignore
         zerolength_gen_args: dict[str, object],
     ) -> TwoNodeLink:
         """
@@ -582,7 +582,7 @@ class BeamColumnGenerator:
         Returns:
           The added element.
         """
-        dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
+        dirs, mats = zerolength_creator(model=self.model, **zerolength_creator_args)
         return TwoNodeLink(
             assembly,
             self.model.uid_generator.new('element'),
@@ -914,7 +914,7 @@ class BeamColumnGenerator:
           The defined component assemblies.
 
         """
-        ndg = NodeGenerator(self.model)
+        ndg = NodeCreator(self.model)
         query = ElmQuery(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
@@ -995,7 +995,7 @@ class BeamColumnGenerator:
           The defined element.
         """
         query = ElmQuery(self.model)
-        ndg = NodeGenerator(self.model)
+        ndg = NodeCreator(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
         defined_component_assemblies: dict[int, ComponentAssembly] = {}
@@ -1102,7 +1102,7 @@ class BeamColumnGenerator:
           The defined component assemblies.
         """
         query = ElmQuery(self.model)
-        ndg = NodeGenerator(self.model)
+        ndg = NodeCreator(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
         defined_component_assemblies: dict[int, ComponentAssembly] = {}
@@ -1195,7 +1195,7 @@ class BeamColumnGenerator:
         Returns:
           The defined panel zones.
         """
-        ndg = NodeGenerator(self.model)
+        ndg = NodeCreator(self.model)
         query = ElmQuery(self.model)
         lvls = self.model.levels
         assert lvls.active, 'No active levels.'
@@ -1454,15 +1454,15 @@ class BeamColumnGenerator:
             elm_interior.visibility.hidden_at_line_plots = True
 
             # define zerolength elements
-            zerolen_top_f = ZeroLengthGenerator(
+            zerolen_top_f = ZeroLengthCreator(
                 model=self.model,
-                material_generators={
-                    1: ElasticMaterialGenerator(self.model, common.STIFF),
-                    2: ElasticMaterialGenerator(self.model, common.STIFF),
-                    3: ElasticMaterialGenerator(self.model, common.STIFF),
-                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
-                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
-                    6: SteelWColumnPanelZoneUpdatedGenerator(
+                material_creators={
+                    1: ElasticMaterialCreator(self.model, common.STIFF),
+                    2: ElasticMaterialCreator(self.model, common.STIFF),
+                    3: ElasticMaterialCreator(self.model, common.STIFF),
+                    4: ElasticMaterialCreator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialCreator(self.model, common.STIFF_ROT),
+                    6: SteelWColumnPanelZoneUpdatedCreator(
                         section=section,
                         physical_material=physical_material,
                         pz_length=beam_depth,
@@ -1475,34 +1475,34 @@ class BeamColumnGenerator:
                     ),
                 },
             ).define_element()
-            zerolen_top_b = ZeroLengthGenerator(
+            zerolen_top_b = ZeroLengthCreator(
                 model=self.model,
-                material_generators={
-                    1: ElasticMaterialGenerator(self.model, common.STIFF),
-                    2: ElasticMaterialGenerator(self.model, common.STIFF),
-                    3: ElasticMaterialGenerator(self.model, common.STIFF),
-                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
-                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                material_creators={
+                    1: ElasticMaterialCreator(self.model, common.STIFF),
+                    2: ElasticMaterialCreator(self.model, common.STIFF),
+                    3: ElasticMaterialCreator(self.model, common.STIFF),
+                    4: ElasticMaterialCreator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialCreator(self.model, common.STIFF_ROT),
                 },
             ).define_element()
-            zerolen_bottom_f = ZeroLengthGenerator(
+            zerolen_bottom_f = ZeroLengthCreator(
                 model=self.model,
-                material_generators={
-                    1: ElasticMaterialGenerator(self.model, common.STIFF),
-                    2: ElasticMaterialGenerator(self.model, common.STIFF),
-                    3: ElasticMaterialGenerator(self.model, common.STIFF),
-                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
-                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                material_creators={
+                    1: ElasticMaterialCreator(self.model, common.STIFF),
+                    2: ElasticMaterialCreator(self.model, common.STIFF),
+                    3: ElasticMaterialCreator(self.model, common.STIFF),
+                    4: ElasticMaterialCreator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialCreator(self.model, common.STIFF_ROT),
                 },
             ).define_element()
-            zerolen_bottom_b = ZeroLengthGenerator(
+            zerolen_bottom_b = ZeroLengthCreator(
                 model=self.model,
-                material_generators={
-                    1: ElasticMaterialGenerator(self.model, common.STIFF),
-                    2: ElasticMaterialGenerator(self.model, common.STIFF),
-                    3: ElasticMaterialGenerator(self.model, common.STIFF),
-                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
-                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                material_creators={
+                    1: ElasticMaterialCreator(self.model, common.STIFF),
+                    2: ElasticMaterialCreator(self.model, common.STIFF),
+                    3: ElasticMaterialCreator(self.model, common.STIFF),
+                    4: ElasticMaterialCreator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialCreator(self.model, common.STIFF_ROT),
                 },
             ).define_element()
 
