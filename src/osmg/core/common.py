@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 from pprint import pprint
-from typing import Any, Hashable, Optional, OrderedDict
+from typing import Any, Hashable, OrderedDict
 
 # very big, very small numbers used for
 # comparing floats and hashing
