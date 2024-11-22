@@ -22,16 +22,16 @@ import numpy.typing as npt
 from shapely.geometry import Point  # type: ignore
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
-from osmg import obj_collections
-from osmg.gen.uid_gen import UIDGenerator
+from osmg import osmg_collections
+from osmg.creators.uid_gen import UIDGenerator
 from osmg.level import Level
 
 if TYPE_CHECKING:
-    from osmg.component_assembly import ComponentAssembly
-    from osmg.ops import element
-    from osmg.ops.node import Node
-    from osmg.ops.section import ElasticSection, FiberSection
-    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.component_assemblies import ComponentAssembly
+    from osmg.elements import element
+    from osmg.elements.node import Node
+    from osmg.elements.section import ElasticSection, FiberSection
+    from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
@@ -61,18 +61,12 @@ class Settings:
     """
     General customization of a model.
 
-        imperial_units:
-            True for imperial:
-                in, lb, lb/(in/s2)
-            False for SI:
-                m, N, kg
         ndm, ndf: Number of dimensions and degrees of freedom.
           Currently only ndm=3, ndf=6 is supported. This might be
           extended in the future if needed.
 
     """
 
-    imperial_units: bool = field(default=True)  # false for SI
     ndm: int = field(default=3)  # that's all we support
     ndf: int = field(default=6)  # that's all we support
 
@@ -85,7 +79,6 @@ class Settings:
         """
         res = ''
         res += '~~~ Model Settings ~~~\n'
-        res += f'  Imperial units: {self.imperial_units}\n'
         res += f'  ndm           : {self.ndm}\n'
         res += f'  ndf           : {self.ndf}\n'
         return res
@@ -101,7 +94,7 @@ class Model:
     It contains levels, elastic sections, fiber sections,
     physical materials, and various collections of objects such as
     nodes, elements, and component assemblies that exist inside each level.
-    Those objects are populated by generator objects. See `osmg.gen`.
+    Those objects are populated by generator objects. See `osmg.creators`.
 
     Attributes:
     ----------
@@ -123,27 +116,13 @@ class Model:
     """
 
     name: str
-    levels: obj_collections.CollectionActive[int, Level] = field(init=False)
-    elastic_sections: obj_collections.Collection[int, ElasticSection] = field(
-        init=False
-    )
-    fiber_sections: obj_collections.Collection[int, FiberSection] = field(init=False)
-    uniaxial_materials: obj_collections.Collection[int, UniaxialMaterial] = field(
-        init=False
-    )
-    physical_materials: obj_collections.Collection[int, PhysicalMaterial] = field(
-        init=False
-    )
+    levels: osmg_collections.Collection[int, Level] = field(init=False)
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     settings: Settings = field(default_factory=Settings)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self.levels = obj_collections.CollectionActive(self)
-        self.elastic_sections = obj_collections.Collection(self)
-        self.fiber_sections = obj_collections.Collection(self)
-        self.uniaxial_materials = obj_collections.Collection(self)
-        self.physical_materials = obj_collections.Collection(self)
+        self.levels = osmg_collections.Collection(self)
 
     def __repr__(self) -> str:
         """
@@ -155,11 +134,6 @@ class Model:
         res = ''
         res += '~~~ Model Object ~~~\n'
         res += f'ID: {id(self)}\n'
-        res += f'levels: {self.levels.__srepr__()}\n'
-        res += f'elastic_sections: {self.elastic_sections.__srepr__()}\n'
-        res += f'fiber_sections: {self.fiber_sections.__srepr__()}\n'
-        res += f'uniaxial_materials: {self.uniaxial_materials.__srepr__()}\n'
-        res += f'physical_materials: {self.physical_materials.__srepr__()}\n'
         return res
 
     def component_connectivity(
@@ -407,7 +381,6 @@ class Model:
         """
         res = Model(name)
         # copy the settings attributes
-        res.settings.imperial_units = self.settings.imperial_units
         res.settings.ndf = self.settings.ndf
         res.settings.ndm = self.settings.ndm
         # make a copy of the levels

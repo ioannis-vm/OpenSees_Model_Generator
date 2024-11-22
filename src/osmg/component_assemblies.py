@@ -23,10 +23,10 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from osmg import obj_collections
+from osmg import osmg_collections
 
 if TYPE_CHECKING:
-    from osmg.ops import element
+    from osmg.elements import element
 
 nparr = npt.NDArray[np.float64]
 
@@ -60,19 +60,19 @@ class ComponentAssembly:
     """
 
     uid: int
-    parent_collection: obj_collections.Collection[int, ComponentAssembly]
+    parent_collection: osmg_collections.Collection[int, ComponentAssembly]
     component_purpose: str
-    external_nodes: obj_collections.NodeCollection = field(init=False)
-    internal_nodes: obj_collections.NodeCollection = field(init=False)
-    elements: obj_collections.CollectionWithConnectivity[int, element.Element] = (
+    external_nodes: osmg_collections.NodeCollection = field(init=False)
+    internal_nodes: osmg_collections.NodeCollection = field(init=False)
+    elements: osmg_collections.CollectionWithConnectivity[int, element.Element] = (
         field(init=False)
     )
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self.external_nodes = obj_collections.NodeCollection(self)
-        self.internal_nodes = obj_collections.NodeCollection(self)
-        self.elements = obj_collections.CollectionWithConnectivity(self)
+        self.external_nodes = osmg_collections.NodeCollection(self)
+        self.internal_nodes = osmg_collections.NodeCollection(self)
+        self.elements = osmg_collections.CollectionWithConnectivity(self)
 
     def __repr__(self) -> str:
         """
@@ -92,7 +92,7 @@ class ComponentAssembly:
 
     def dict_of_elements(
         self,
-    ) -> dict[int, obj_collections.CollectionWithConnectivity]:
+    ) -> dict[int, osmg_collections.CollectionWithConnectivity]:
         """
         Get dictionary of elements.
 
@@ -105,7 +105,7 @@ class ComponentAssembly:
             res[elm.uid] = elm
         return res
 
-    def list_of_elements(self) -> list[obj_collections.CollectionWithConnectivity]:
+    def list_of_elements(self) -> list[osmg_collections.CollectionWithConnectivity]:
         """
         Get a list of all element objects in the model.
 
@@ -116,7 +116,7 @@ class ComponentAssembly:
 
     def element_connectivity(
         self,
-    ) -> dict[tuple[int, ...], obj_collections.CollectionWithConnectivity]:
+    ) -> dict[tuple[int, ...], osmg_collections.CollectionWithConnectivity]:
         """
         Element connectivity.
 

@@ -27,14 +27,14 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import common
-from osmg.line import Line
-from osmg.ops import element
+from osmg.geometry.line import Line
+from osmg.elements import element
 
 if TYPE_CHECKING:
-    from osmg.component_assembly import ComponentAssembly
+    from osmg.component_assemblies import ComponentAssembly
     from osmg.load_case import LoadCase
     from osmg.model import Model
-    from osmg.ops.node import Node
+    from osmg.elements.node import Node
 
 
 nparr = npt.NDArray[np.float64]

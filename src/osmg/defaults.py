@@ -18,9 +18,9 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import common
-from osmg.gen.section_gen import SectionGenerator
-from osmg.ops.section import ElasticSection
-from osmg.ops.uniaxial_material import Elastic, Steel02
+from osmg.creators.section_gen import SectionGenerator
+from osmg.elements.section import ElasticSection
+from osmg.elements.uniaxial_material import Elastic, Steel02
 from osmg.physical_material import PhysicalMaterial
 
 if TYPE_CHECKING:

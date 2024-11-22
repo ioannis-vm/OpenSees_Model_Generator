@@ -24,8 +24,8 @@ from osmg.solver import Analysis, ModalResponseSpectrumAnalysis
 
 if TYPE_CHECKING:
     from osmg.model import Model
-    from osmg.ops.element import DispBeamColumn, ElasticBeamColumn, TrussBar
-    from osmg.ops.node import Node
+    from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, TrussBar
+    from osmg.elements.node import Node
 
 nparr = npt.NDArray[np.float64]
 

@@ -16,29 +16,35 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Callable, Optional, Type, Union
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, Union
 
 import numpy as np
 import numpy.typing as npt
 
 from osmg import common
-from osmg.component_assembly import ComponentAssembly
-from osmg.gen import zerolength_gen
-from osmg.gen.node_gen import NodeGenerator
-from osmg.gen.query import ElmQuery
-from osmg.ops.element import (
+from osmg.component_assemblies import ComponentAssembly
+from osmg.creators.material_gen import (
+    ElasticMaterialGenerator,
+    SteelWColumnPanelZoneUpdatedGenerator,
+)
+from osmg.creators.node_gen import NodeGenerator
+from osmg.creators.query import ElmQuery
+from osmg.creators.zerolength_gen import ZeroLengthGenerator
+from osmg.elements.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     GeomTransf,
     Lobatto,
+    ModifiedStiffnessParameterConfig,
     TrussBar,
     TwoNodeLink,
     ZeroLength,
 )
-from osmg.ops.node import Node
-from osmg.ops.section import ElasticSection, FiberSection
+from osmg.elements.node import Node
+from osmg.elements.section import ElasticSection, FiberSection
+from osmg.elements.uniaxial_material import Elastic
 from osmg.preprocessing.split_component import split_component
-from osmg.transformations import (
+from osmg.geometry.transformations import (
     local_axes_from_points_and_angle,
     transformation_matrix,
 )
@@ -47,8 +53,8 @@ if TYPE_CHECKING:
     from osmg.level import Level
     from osmg.mesh import Mesh
     from osmg.model import Model
-    from osmg.obj_collections import CollectionActive
-    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.osmg_collections import CollectionActive
+    from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 
 
@@ -357,7 +363,14 @@ class TrussBarGenerator:
                 )
                 component.internal_nodes.add(int_node_x)
                 n_x = int_node_x
-                dirs, mats = zerolength_gen.fix_all(self.model)
+                dirs = [1, 2, 3, 4, 5, 6]
+                mats = [
+                    Elastic(
+                        self.model.uid_generator.new('uniaxial material'),
+                        'Fixed',
+                        e_mod=common.STIFF,
+                    )
+                ] * 6
                 # flip the nodes if the element is about to be defined
                 # upside down
                 if (
@@ -424,10 +437,59 @@ class TrussBarGenerator:
 
 
 @dataclass(repr=False)
+class HingeConfig:
+    """Configuration for `generate_hinged_component_assembly`."""
+
+    zerolength_generator: ZeroLengthGenerator
+    distance: float
+    n_sub: int
+    element_type: Literal['elastic', 'disp']
+    transf_type: Literal['Elastic', 'Corotational', 'PDelta']
+
+
+@dataclass(repr=False)
+class PanelZoneConfig:
+    """Configuration object for panel zones."""
+
+    doubler_plate_thickness: float
+    axial_load_ratio: float
+    slab_depth: float
+    location: Literal['interior', 'exterior_first', 'exterior_last']
+    moment_modifier: float
+    consider_composite: bool
+
+
+@dataclass(repr=False)
+class InitialDeformationConfig:
+    """
+    Initial deformation configuration.
+
+    Configuration object for initial deformations of beamcolumn
+    elements defined in series.
+    """
+
+    camber_2: float
+    camber_3: float
+    method: Literal['sine', 'parabola']
+
+
+@dataclass(repr=False)
 class BeamColumnGenerator:
     """Introduces beamcolumn elements to a model."""
 
     model: Model = field(repr=False)
+    element_type: Literal['elastic', 'disp']
+
+    def __post_init__(self) -> None:
+        """
+        Code executed after initializing an object.
+
+        Raises:
+          ValueError: If an invalid element type is provided.
+        """
+        if self.element_type not in {'elastic', 'disp'}:
+            msg = 'Invalid element type: {element_type.__name__}'
+            raise ValueError(msg)
 
     def define_beamcolumn(
         self,
@@ -438,10 +500,8 @@ class BeamColumnGenerator:
         offset_j: nparr,
         transf_type: str,
         section: ElasticSection | FiberSection,
-        element_type: type[ElasticBeamColumn | DispBeamColumn],
         angle: float = 0.00,
-        n_x: float | None = None,
-        n_y: float | None = None,
+        modified_stiffness_config: ModifiedStiffnessParameterConfig | None = None,
     ) -> ElasticBeamColumn | DispBeamColumn:
         """
         Define a beamcolumn element.
@@ -458,7 +518,7 @@ class BeamColumnGenerator:
         p_i = np.array(node_i.coords) + offset_i
         p_j = np.array(node_j.coords) + offset_j
         axes = local_axes_from_points_and_angle(p_i, p_j, angle)  # type: ignore
-        if element_type.__name__ == 'ElasticBeamColumn':
+        if self.element_type == 'elastic':
             assert isinstance(section, ElasticSection)
             transf = GeomTransf(
                 transf_type,
@@ -473,14 +533,12 @@ class BeamColumnGenerator:
                 nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
-                n_x=n_x,
-                n_y=n_y,
+                modified_stiffness_config=modified_stiffness_config,
             )
             res: ElasticBeamColumn | DispBeamColumn = elm_el
-        elif element_type.__name__ == 'DispBeamColumn':
+        elif self.element_type == 'disp':
             assert isinstance(section, FiberSection)
-            assert n_x is None
-            assert n_y is None
+            assert modified_stiffness_config is None
             # TODO(JVM): add elastic section support
             transf = GeomTransf(
                 transf_type,
@@ -507,33 +565,6 @@ class BeamColumnGenerator:
             msg = 'Invalid element type: {element_type.__name__}'
             raise ValueError(msg)
         return res
-
-    def define_zerolength(
-        self,
-        assembly: ComponentAssembly,
-        node_i: Node,
-        node_j: Node,
-        x_axis: nparr,
-        y_axis: nparr,
-        zerolength_gen: Callable,  # type: ignore
-        zerolength_gen_args: dict[str, object],
-    ) -> ZeroLength:
-        """
-        Define a zerolength element.
-
-        Returns:
-          The added element.
-        """
-        dirs, mats = zerolength_gen(model=self.model, **zerolength_gen_args)
-        return ZeroLength(
-            assembly,
-            self.model.uid_generator.new('element'),
-            [node_i, node_j],
-            mats,
-            dirs,
-            x_axis,
-            y_axis,
-        )
 
     def define_two_node_link(
         self,
@@ -574,18 +605,11 @@ class BeamColumnGenerator:
         section: ElasticSection | FiberSection,
         element_type: type[ElasticBeamColumn, DispBeamColumn],
         angle: float,
-        camber_2: float,
-        camber_3: float,
-        n_x: int | None = None,
-        n_y: int | None = None,
+        initial_deformation_config: InitialDeformationConfig,
+        modified_stiffness_config: ModifiedStiffnessParameterConfig | None = None,
     ) -> None:
-        """
-        Add beamcolumn elements in series.
-
-        Raises:
-          TypeError: If an unsupported element type is provided.
-        """
-        if (n_x is not None) or (n_y is not None):
+        """Add beamcolumn elements in series."""
+        if modified_stiffness_config is not None:
             assert n_sub == 1
 
         if n_sub > 1:
@@ -594,24 +618,28 @@ class BeamColumnGenerator:
             clear_len = np.linalg.norm(p_j - p_i)
             internal_pt_coords = np.linspace(tuple(p_i), tuple(p_j), num=n_sub + 1)
 
-            # initial deformation
-            t_vals = np.linspace(0.00, 1.00, num=n_sub + 1)
-            # quadratic initial imperfection
-            # offset_vals = 4.00 * (-t_vals**2 + t_vals)
-            # sinusoidal initial imperfection
-            offset_vals = np.sin(np.pi * t_vals)
-            offset_2 = offset_vals * camber_2 * clear_len
-            offset_3 = offset_vals * camber_3 * clear_len
-            camber_offset: nparr = np.column_stack(
-                (np.zeros(n_sub + 1), offset_2, offset_3)
-            )
-            x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
-                p_i, p_j, angle
-            )
-            t_glob_to_loc = transformation_matrix(x_axis, y_axis, z_axis)
-            t_loc_to_glob = t_glob_to_loc.T
-            camber_offset_global = (t_loc_to_glob @ camber_offset.T).T
-            internal_pt_coords += camber_offset_global
+            if initial_deformation_config:
+                t_vals = np.linspace(0.00, 1.00, num=n_sub + 1)
+                if initial_deformation_config.method == 'parabola':
+                    offset_vals = 4.00 * (-(t_vals**2) + t_vals)
+                elif initial_deformation_config.method == 'sine':
+                    offset_vals = np.sin(np.pi * t_vals)
+                offset_2 = (
+                    offset_vals * initial_deformation_config.camber_2 * clear_len
+                )
+                offset_3 = (
+                    offset_vals * initial_deformation_config.camber_3 * clear_len
+                )
+                camber_offset: nparr = np.column_stack(
+                    (np.zeros(n_sub + 1), offset_2, offset_3)
+                )
+                x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
+                    p_i, p_j, angle
+                )
+                t_glob_to_loc = transformation_matrix(x_axis, y_axis, z_axis)
+                t_loc_to_glob = t_glob_to_loc.T
+                camber_offset_global = (t_loc_to_glob @ camber_offset.T).T
+                internal_pt_coords += camber_offset_global
 
             intnodes = []
             for i in range(1, len(internal_pt_coords) - 1):
@@ -634,12 +662,6 @@ class BeamColumnGenerator:
             else:
                 n_j = intnodes[i]
                 o_j = np.zeros(3)
-            if element_type.__name__ not in {
-                'ElasticBeamColumn',
-                'DispBeamColumn',
-            }:
-                msg = f'Unsupported element type: {element_type.__name__}'
-                raise TypeError(msg)
             element = self.define_beamcolumn(
                 assembly=component,
                 node_i=n_i,
@@ -650,8 +672,7 @@ class BeamColumnGenerator:
                 section=section,
                 element_type=element_type,
                 angle=angle,
-                n_x=n_x,
-                n_y=n_y,
+                modified_stiffness_config=modified_stiffness_config,
             )
             component.elements.add(element)
 
@@ -668,15 +689,12 @@ class BeamColumnGenerator:
         element_type: type[ElasticBeamColumn, DispBeamColumn],
         transf_type: str,
         angle: float,
-        camber_2: float,
-        camber_3: float,
-        n_x: int | None = None,
-        n_y: int | None = None,
+        initial_deformation_config: InitialDeformationConfig,
     ) -> ComponentAssembly:
         """
         Plain component assembly.
 
-        Generates a plain component assembly, with line elements in
+        Generates a plain component assembly with line elements in
         series.
 
         Returns:
@@ -703,25 +721,22 @@ class BeamColumnGenerator:
         component.external_nodes.add(node_j)
 
         self.add_beamcolumn_elements_in_series(
-            component,
-            node_i,
-            node_j,
-            eo_i,
-            eo_j,
-            n_sub,
-            transf_type,
-            section,
-            element_type,
-            angle,
-            camber_2,
-            camber_3,
-            n_x,
-            n_y,
+            component=component,
+            node_i=node_i,
+            node_j=node_j,
+            eo_i=eo_i,
+            eo_j=eo_j,
+            n_sub=n_sub,
+            transf_type=transf_type,
+            section=section,
+            element_type=element_type,
+            angle=angle,
+            initial_deformation_config=initial_deformation_config,
         )
 
         return component
 
-    def generate_hinged_component_assembly(  # noqa: PLR0913, PLR0917
+    def generate_hinged_component_assembly(
         self,
         component_purpose: str,
         lvl: Level,
@@ -734,14 +749,10 @@ class BeamColumnGenerator:
         element_type: type[ElasticBeamColumn, DispBeamColumn],
         transf_type: str,
         angle: float,
-        camber_2: float,
-        camber_3: float,
-        n_x: int,
-        n_y: int,
-        zerolength_gen_i: Callable,
-        zerolength_gen_args_i: dict[str, object],
-        zerolength_gen_j: Callable,
-        zerolength_gen_args_j: dict[str, object],
+        initial_deformation_config: InitialDeformationConfig,
+        modified_stiffness_config: ModifiedStiffnessParameterConfig | None,
+        zerolength_gen_i: HingeConfig,
+        zerolength_gen_j: HingeConfig,
     ) -> ComponentAssembly:
         """
         Component assembly with hinges at the ends.
@@ -753,10 +764,6 @@ class BeamColumnGenerator:
 
         Returns:
           The defined component.
-
-        Raises:
-          ValueError: If an invalid element_type_i is provided.
-          ValueError: If an invalid element_type_j is provided.
         """
         uids = [node.uid for node in (node_i, node_j)]
         uids.sort()
@@ -780,13 +787,11 @@ class BeamColumnGenerator:
         axes = local_axes_from_points_and_angle(p_i, p_j, angle)
         x_axis, y_axis, _ = axes
         clear_length = np.linalg.norm(p_j - p_i)
-        zerolength_gen_args_i.update({'element_length': clear_length})
-        zerolength_gen_args_j.update({'element_length': clear_length})
 
         # we can have hinges at both ends, or just one of the two ends.
         # ...or even no hinges!
         if zerolength_gen_i:
-            hinge_location_i = p_i + x_axis * zerolength_gen_args_i['distance']
+            hinge_location_i = p_i + x_axis * zerolength_gen_i.distance
             nh_i_out = Node(
                 self.model.uid_generator.new('node'), [*hinge_location_i]
             )
@@ -794,49 +799,29 @@ class BeamColumnGenerator:
             nh_i_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_i_out)
             component.internal_nodes.add(nh_i_in)
-            element_type_i = zerolength_gen_args_i.get('element_type', element_type)
-            if element_type_i.__name__ in {
-                'ElasticBeamColumn',
-                'DispBeamColumn',
-            }:
-                section_i = zerolength_gen_args_i.get('section', section)
-                transf_type_i = zerolength_gen_args_i.get('transf_type', transf_type)
-                self.add_beamcolumn_elements_in_series(
-                    component,
-                    node_i,
-                    nh_i_out,
-                    eo_i,
-                    np.zeros(3),
-                    zerolength_gen_args_i['n_sub'],
-                    transf_type_i,
-                    section_i,
-                    element_type_i,
-                    angle,
-                    0.00,
-                    0.00,
-                )
-            elif element_type_i.__name__ == 'TwoNodeLink':
-                elm = self.define_two_node_link(
-                    component,
-                    node_i,
-                    nh_i_out,
-                    x_axis,
-                    y_axis,
-                    zerolength_gen.fix_all,
-                    {},
-                )
-                component.elements.add(elm)
-            else:
-                msg = f'Invalid element_type_i: {element_type_i}'
-                raise ValueError(msg)
-            zerolen_elm = self.define_zerolength(
+            element_type_i = zerolength_gen_i.element_type
+            section_i = self.line_element_config.section
+            transf_type_i = zerolength_gen_i.transf_type
+            self.add_beamcolumn_elements_in_series(
+                component,
+                node_i,
+                nh_i_out,
+                eo_i,
+                np.zeros(3),
+                zerolength_gen_i.n_sub,
+                transf_type_i,
+                section_i,
+                element_type_i,
+                angle,
+                0.00,
+                0.00,
+            )
+            zerolen_elm = zerolength_gen_i.define_element(
                 component,
                 nh_i_out,
                 nh_i_in,
                 x_axis,
                 y_axis,
-                zerolength_gen_i,
-                zerolength_gen_args_i,
             )
             component.elements.add(zerolen_elm)
             conn_node_i = nh_i_in
@@ -846,7 +831,7 @@ class BeamColumnGenerator:
             conn_eo_i = eo_i
         if zerolength_gen_j:
             hinge_location_j = p_i + x_axis * (
-                clear_length - zerolength_gen_args_j['distance']
+                clear_length - zerolength_gen_j.distance
             )
             nh_j_out = Node(
                 self.model.uid_generator.new('node'), [*hinge_location_j]
@@ -855,49 +840,29 @@ class BeamColumnGenerator:
             nh_j_in.visibility.connected_to_zerolength = True
             component.internal_nodes.add(nh_j_out)
             component.internal_nodes.add(nh_j_in)
-            element_type_j = zerolength_gen_args_j.get('element_type', element_type)
-            if element_type_j.__name__ in {
-                'ElasticBeamColumn',
-                'DispBeamColumn',
-            }:
-                section_j = zerolength_gen_args_j.get('section', section)
-                transf_type_j = zerolength_gen_args_j.get('transf_type', transf_type)
-                self.add_beamcolumn_elements_in_series(
-                    component,
-                    nh_j_out,
-                    node_j,
-                    np.zeros(3),
-                    eo_j,
-                    zerolength_gen_args_j['n_sub'],
-                    transf_type_j,
-                    section_j,
-                    element_type_j,
-                    angle,
-                    0.00,
-                    0.00,
-                )
-            elif element_type_j.__name__ == 'TwoNodeLink':
-                elm = self.define_two_node_link(
-                    component,
-                    nh_j_out,
-                    node_j,
-                    x_axis,
-                    y_axis,
-                    zerolength_gen.fix_all,
-                    {},
-                )
-                component.elements.add(elm)
-            else:
-                msg = f'Invalid element_type_j: {element_type_j}'
-                raise ValueError(msg)
-            zerolen_elm = self.define_zerolength(
+            element_type_j = zerolength_gen_j.element_type
+            section_j = zerolength_gen_j.section
+            transf_type_j = zerolength_gen_j.transf_type
+            self.add_beamcolumn_elements_in_series(
+                component,
+                nh_j_out,
+                node_j,
+                np.zeros(3),
+                eo_j,
+                zerolength_gen_j.n_sub,
+                transf_type_j,
+                section_j,
+                element_type_j,
+                angle,
+                0.00,
+                0.00,
+            )
+            zerolen_elm = zerolength_gen_j.define_element(
                 component,
                 nh_j_out,
                 nh_j_in,
                 -x_axis,
                 y_axis,
-                zerolength_gen_j,
-                zerolength_gen_args_j,
             )
             component.elements.add(zerolen_elm)
             conn_node_j = nh_j_in
@@ -917,10 +882,8 @@ class BeamColumnGenerator:
             section,
             element_type,
             angle,
-            camber_2,
-            camber_3,
-            n_x,
-            n_y,
+            initial_deformation_config=initial_deformation_config,
+            modified_stiffness_config=modified_stiffness_config,
         )
         return component
 
@@ -936,8 +899,7 @@ class BeamColumnGenerator:
         element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
-        camber_2: float = 0.00,
-        camber_3: float = 0.00,
+        initial_deformation_config: InitialDeformationConfig | None = None,
         method: str = 'generate_plain_component_assembly',
     ) -> dict[int, ComponentAssembly]:
         """
@@ -995,8 +957,7 @@ class BeamColumnGenerator:
                 'element_type': element_type,
                 'transf_type': transf_type,
                 'angle': angle,
-                'camber_2': camber_2,
-                'camber_3': camber_3,
+                'initial_deformation_config': initial_deformation_config,
             }
 
             assert hasattr(self, method), f'Method not available: {method}'
@@ -1020,8 +981,7 @@ class BeamColumnGenerator:
         element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
-        camber_2: float = 0.00,
-        camber_3: float = 0.00,
+        initial_deformation_config: InitialDeformationConfig | None = None,
         split_existing_i: ComponentAssembly | None = None,
         split_existing_j: ComponentAssembly | None = None,
         h_offset_i: float = 0.00,
@@ -1106,8 +1066,7 @@ class BeamColumnGenerator:
                 'element_type': element_type,
                 'transf_type': transf_type,
                 'angle': angle,
-                'camber_2': camber_2,
-                'camber_3': camber_3,
+                'initial_deformation_config': initial_deformation_config,
             }
 
             assert hasattr(self, method), f'Method not available: {method}'
@@ -1131,8 +1090,7 @@ class BeamColumnGenerator:
         element_type: type[ElasticBeamColumn | DispBeamColumn],
         placement: str = 'centroid',
         angle: float = 0.00,
-        camber_2: float = 0.00,
-        camber_3: float = 0.00,
+        initial_deformation_config: InitialDeformationConfig | None = None,
         split_existing_i: ComponentAssembly | None = None,
         split_existing_j: ComponentAssembly | None = None,
         method: str = 'generate_plain_component_assembly',
@@ -1209,8 +1167,7 @@ class BeamColumnGenerator:
                 'element_type': element_type,
                 'transf_type': transf_type,
                 'angle': angle,
-                'camber_2': camber_2,
-                'camber_3': camber_3,
+                'initial_deformation_config': initial_deformation_config,
             }
 
             assert hasattr(self, method), f'Method not available: {method}'
@@ -1227,8 +1184,7 @@ class BeamColumnGenerator:
         angle: float,
         column_depth: float,
         beam_depth: float,
-        zerolength_method: str,
-        zerolength_args: dict[str, object],
+        panel_zone_config: PanelZoneConfig,
     ) -> dict[int, ComponentAssembly]:
         """
         Add a panel zone.
@@ -1497,54 +1453,58 @@ class BeamColumnGenerator:
             elm_interior.visibility.skip_opensees_definition = True
             elm_interior.visibility.hidden_at_line_plots = True
 
-            assert hasattr(
-                zerolength_gen, zerolength_method
-            ), f'Method not available: {zerolength_method}'
-            mthd = getattr(zerolength_gen, zerolength_method)
-
             # define zerolength elements
-            zerolength_gen_args = {
-                'section': section,
-                'physical_material': physical_material,
-                'pz_length': beam_depth,
-            }
-            zerolength_gen_args.update(zerolength_args)
-            zerolen_top_f = self.define_zerolength(
-                component,
-                top_h_f,
-                top_v_f,
-                x_axis,
-                y_axis,
-                mthd,
-                zerolength_gen_args,
-            )
-            zerolen_top_b = self.define_zerolength(
-                component,
-                top_h_b,
-                top_v_b,
-                x_axis,
-                y_axis,
-                zerolength_gen.release_6,
-                {},
-            )
-            zerolen_bottom_f = self.define_zerolength(
-                component,
-                bottom_h_f,
-                bottom_v_f,
-                x_axis,
-                y_axis,
-                zerolength_gen.release_6,
-                {},
-            )
-            zerolen_bottom_b = self.define_zerolength(
-                component,
-                bottom_h_b,
-                bottom_v_b,
-                x_axis,
-                y_axis,
-                zerolength_gen.release_6,
-                {},
-            )
+            zerolen_top_f = ZeroLengthGenerator(
+                model=self.model,
+                material_generators={
+                    1: ElasticMaterialGenerator(self.model, common.STIFF),
+                    2: ElasticMaterialGenerator(self.model, common.STIFF),
+                    3: ElasticMaterialGenerator(self.model, common.STIFF),
+                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                    6: SteelWColumnPanelZoneUpdatedGenerator(
+                        section=section,
+                        physical_material=physical_material,
+                        pz_length=beam_depth,
+                        pz_doubler_plate_thickness=panel_zone_config.doubler_plate_thickness,
+                        axial_load_ratio=panel_zone_config.axial_load_ratio,
+                        slab_depth=panel_zone_config.slab_depth,
+                        location=panel_zone_config.location,
+                        consider_composite=panel_zone_config.consider_composite,
+                        moment_modifier=panel_zone_config.moment_modifier,
+                    ),
+                },
+            ).define_element()
+            zerolen_top_b = ZeroLengthGenerator(
+                model=self.model,
+                material_generators={
+                    1: ElasticMaterialGenerator(self.model, common.STIFF),
+                    2: ElasticMaterialGenerator(self.model, common.STIFF),
+                    3: ElasticMaterialGenerator(self.model, common.STIFF),
+                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                },
+            ).define_element()
+            zerolen_bottom_f = ZeroLengthGenerator(
+                model=self.model,
+                material_generators={
+                    1: ElasticMaterialGenerator(self.model, common.STIFF),
+                    2: ElasticMaterialGenerator(self.model, common.STIFF),
+                    3: ElasticMaterialGenerator(self.model, common.STIFF),
+                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                },
+            ).define_element()
+            zerolen_bottom_b = ZeroLengthGenerator(
+                model=self.model,
+                material_generators={
+                    1: ElasticMaterialGenerator(self.model, common.STIFF),
+                    2: ElasticMaterialGenerator(self.model, common.STIFF),
+                    3: ElasticMaterialGenerator(self.model, common.STIFF),
+                    4: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                    5: ElasticMaterialGenerator(self.model, common.STIFF_ROT),
+                },
+            ).define_element()
 
             # fill component assembly
             component.external_nodes.add(top_node)

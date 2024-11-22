@@ -28,13 +28,13 @@ import numpy.typing as npt
 from tqdm import tqdm
 
 from osmg import common, mesh
-from osmg.ops.element import (
+from osmg.elements.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     TwoNodeLink,
     ZeroLength,
 )
-from osmg.ops.node import Node
+from osmg.elements.node import Node
 
 if TYPE_CHECKING:
     from osmg.level import Level

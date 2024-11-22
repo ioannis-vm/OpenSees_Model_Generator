@@ -20,13 +20,13 @@ from typing import TYPE_CHECKING, Type
 import numpy as np
 import numpy.typing as npt
 
-from osmg.gen import mesh_shapes
-from osmg.gen.mesh_shapes import rect_mesh
-from osmg.ops.section import ElasticSection, FiberSection, SectionComponent
+from osmg.creators import mesh_shapes
+from osmg.creators.mesh_shapes import rect_mesh
+from osmg.elements.section import ElasticSection, FiberSection, SectionComponent
 
 if TYPE_CHECKING:
     from osmg.model import Model
-    from osmg.ops.section import Section
+    from osmg.elements.section import Section
 
 nparr = npt.NDArray[np.float64]
 
@@ -68,7 +68,7 @@ class SectionGenerator:
                 specified properties.
 
         Example:
-            >>> from osmg.gen.section_gen import SectionGenerator
+            >>> from osmg.creators.section_gen import SectionGenerator
             >>> from osmg.model import Model
             >>> model = Model('test_model')
             >>> sec_gen = SectionGenerator(model)
@@ -162,10 +162,10 @@ class SectionGenerator:
             and the values are the sections themselves.
 
         Example:
-            >>> from osmg.gen.section_gen import SectionGenerator
+            >>> from osmg.creators.section_gen import SectionGenerator
             >>> from osmg.model import Model
             >>> from osmg.defaults import load_default_steel
-            >>> from osmg.ops.section import ElasticSection
+            >>> from osmg.elements.section import ElasticSection
             >>> model = Model('test_model')
             >>> load_default_steel(model)
             >>> sec_gen = SectionGenerator(model)
@@ -196,7 +196,7 @@ class SectionGenerator:
         phs_mat = self.model.physical_materials.retrieve_by_attr(
             'name', physical_material
         )
-        filename = '../sections.json'
+        filename = '../data/sections.json'
         contents = pkgutil.get_data(__name__, filename)
         assert isinstance(contents, bytes)
         section_dictionary = json.loads(contents)

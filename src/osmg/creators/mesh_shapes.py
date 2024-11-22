@@ -15,7 +15,7 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from osmg.mesh import (
+from osmg.geometry.mesh import (
     Edge,
     Mesh,
     Vertex,

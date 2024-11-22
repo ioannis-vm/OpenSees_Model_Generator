@@ -24,9 +24,9 @@ import plotly.graph_objects as go  # type: ignore
 import plotly.io as pio
 
 from osmg.graphics import graphics_common, graphics_common_3d
-from osmg.ops import element
-from osmg.ops import node as node_module
-from osmg.transformations import local_axes_from_points_and_angle
+from osmg.elements import element
+from osmg.elements import node as node_module
+from osmg.geometry.transformations import local_axes_from_points_and_angle
 
 if TYPE_CHECKING:
     from osmg.load_case import LoadCase

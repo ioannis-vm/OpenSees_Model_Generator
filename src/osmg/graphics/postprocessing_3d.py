@@ -23,12 +23,12 @@ from osmg import transformations
 from osmg.common import ALPHA, TINY
 from osmg.graphics import graphics_common, graphics_common_3d
 from osmg.graphics.preprocessing_3d import add_data__global_axes
-from osmg.ops import element
+from osmg.elements import element
 from osmg.postprocessing.basic_forces import basic_forces
 
 if TYPE_CHECKING:
     from osmg.model import Model
-    from osmg.ops.node import Node
+    from osmg.elements.node import Node
     from osmg.solver import Analysis
 
 

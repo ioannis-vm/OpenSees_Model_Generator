@@ -1,4 +1,4 @@
-"""Defines :obj:`~osmg.ops.section.Section` objects."""
+"""Defines :obj:`~osmg.elements.section.Section` objects."""
 
 #
 #   _|_|      _|_|_|  _|      _|    _|_|_|
@@ -19,12 +19,12 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import common, mesh
-from osmg.mesh import Mesh, polygon_area
+from osmg.geometry.mesh import Mesh, polygon_area
 
 if TYPE_CHECKING:
     from shapely.geometry import Polygon as shapely_Polygon
 
-    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
@@ -75,7 +75,7 @@ class ElasticSection(Section):
       snap_points: Dictionary containing coordinates of `snap_points`
         used by component-generating methods to position components
         relative to existing ones. See
-        :func:`~osmg.gen.component_gen.beam_placement_lookup` for example.
+        :func:`~osmg.creators.component_gen.beam_placement_lookup` for example.
       properties: Dictionary containing section properties.
 
     """

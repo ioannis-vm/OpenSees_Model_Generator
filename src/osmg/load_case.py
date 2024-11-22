@@ -21,14 +21,14 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from osmg import obj_collections, transformations
-from osmg.ops import element
+from osmg import osmg_collections, transformations
+from osmg.elements import element
 from osmg.preprocessing.rigid_diaphragm import RDAnalyzer
 from osmg.preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 
 if TYPE_CHECKING:
     from osmg.model import Model
-    from osmg.ops.node import Node
+    from osmg.elements.node import Node
 
 nparr = npt.NDArray[np.float64]
 
@@ -189,12 +189,12 @@ class LoadCase:
 
     name: str
     parent_model: Model
-    node_loads: obj_collections.Collection[int, PointLoadMass] = field(init=False)
-    node_mass: obj_collections.Collection[int, PointLoadMass] = field(init=False)
-    line_element_udl: obj_collections.Collection[int, LineElementUDL] = field(
+    node_loads: osmg_collections.Collection[int, PointLoadMass] = field(init=False)
+    node_mass: osmg_collections.Collection[int, PointLoadMass] = field(init=False)
+    line_element_udl: osmg_collections.Collection[int, LineElementUDL] = field(
         init=False
     )
-    tributary_area_analysis: obj_collections.Collection[
+    tributary_area_analysis: osmg_collections.Collection[
         int, TributaryAreaAnaysis
     ] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
@@ -202,10 +202,10 @@ class LoadCase:
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self.node_loads = obj_collections.Collection(self)
-        self.node_mass = obj_collections.Collection(self)
-        self.line_element_udl = obj_collections.Collection(self)
-        self.tributary_area_analysis = obj_collections.Collection(self)
+        self.node_loads = osmg_collections.Collection(self)
+        self.node_mass = osmg_collections.Collection(self)
+        self.line_element_udl = osmg_collections.Collection(self)
+        self.tributary_area_analysis = osmg_collections.Collection(self)
         # initialize loads and mass for each node and element
         for node in self.parent_model.list_of_all_nodes():
             self.node_loads[node.uid] = PointLoadMass()

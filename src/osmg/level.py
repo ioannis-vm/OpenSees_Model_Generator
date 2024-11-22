@@ -15,11 +15,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from osmg.obj_collections import Collection, NodeCollection
+from osmg.osmg_collections import Collection, NodeCollection
 
 if TYPE_CHECKING:
-    from osmg.component_assembly import ComponentAssembly
-    from osmg.model import Model
+    from osmg.component_assemblies import ComponentAssembly
 
 
 @dataclass
@@ -37,24 +36,8 @@ class Level:
         elevation (float)
         nodes (NodeCollection)
         components (Collection)
-
-    Example:
-        >>> from osmg.model import Model
-        >>> model = Model(name='example_model')
-        >>> level = Level(parent_model=model, uid=1, elevation=0.0)
-        >>> level.parent_model.name
-        'example_model'
-        >>> level.uid
-        1
-        >>> level.elevation
-        0.0
-        >>> type(level.nodes)
-        <class 'osmg.obj_collections.NodeCollection'>
-        >>> type(level.components)
-        <class 'osmg.obj_collections.Collection'>
     """
 
-    parent_model: Model = field(repr=False)
     uid: int
     elevation: float
     nodes: NodeCollection = field(init=False, repr=False)
@@ -70,15 +53,25 @@ class Level:
         Get string representation.
 
         Returns:
-          The string representation of the object.
+            str: The string representation of the object.
         """
-        res = ''
-        res += 'Level object\n'
-        res += f'parent_model: {self.parent_model.name}\n'
-        res += f'uid: {self.uid}\n'
-        res += f'elevation: {self.elevation}\n'
-        res += 'Nodes: \n'
-        res += self.nodes.__srepr__() + '\n'
-        res += 'Components: \n'
-        res += self.components.__srepr__() + '\n'
+        node_count = len(self.nodes)  # Assuming NodeCollection implements __len__
+        component_count = len(
+            self.components
+        )  # Assuming Collection implements __len__
+
+        res = (
+            f'Level Object\n'
+            f'  UID: {self.uid}\n'
+            f'  Elevation: {self.elevation} units\n'
+            f'  Number of Nodes: {node_count}\n'
+            f'  Number of Components: {component_count}\n'
+        )
+
+        # Include a preview of nodes and components if necessary
+        if node_count > 0:
+            res += f"  Nodes: {self.nodes[:5]}{'...' if node_count > 5 else ''}\n"
+        if component_count > 0:
+            res += f"  Components: {self.components[:5]}{'...' if component_count > 5 else ''}\n"
+
         return res

@@ -21,11 +21,11 @@ import numpy.typing as npt
 from osmg.graphics.visibility import ElementVisibility
 
 if TYPE_CHECKING:
-    from osmg.component_assembly import ComponentAssembly
+    from osmg.component_assemblies import ComponentAssembly
     from osmg.mesh import Mesh
-    from osmg.ops.node import Node
-    from osmg.ops.section import ElasticSection, FiberSection
-    from osmg.ops.uniaxial_material import UniaxialMaterial
+    from osmg.elements.node import Node
+    from osmg.elements.section import ElasticSection, FiberSection
+    from osmg.elements.uniaxial_material import UniaxialMaterial
 
 
 nparr = npt.NDArray[np.float64]
@@ -276,40 +276,64 @@ class GeomTransf:
 
 
 @dataclass(repr=False)
+class ModifiedStiffnessParameterConfig:
+    """Configuration parameters for ModifiedElasticBeam elements."""
+
+    n_x: float | None
+    n_y: float | None
+
+
+@dataclass(repr=False)
 class ElasticBeamColumn(Element):
     """
     OpenSees Elastic Beam Column Element.
 
     https://openseespydoc.readthedocs.io/en/latest/src/elasticBeamColumn.html
-
     """
 
     section: ElasticSection
     geomtransf: GeomTransf
-    n_x: float | None = field(default=None)
-    n_y: float | None = field(default=None)
+    modified_stiffness_config: ModifiedStiffnessParameterConfig | None = field(
+        default=None
+    )
+
+    @staticmethod
+    def _calculate_stiffness(n: float) -> tuple[float, float, float]:
+        """
+        Calculate stiffness parameters based on the given n value.
+
+        Args:
+            n: The stiffness parameter (n_x or n_y).
+
+        Returns:
+            A tuple containing (k11, k33, k44).
+        """
+        k44 = 6.0 * (1.0 + n) / (2.0 + 3.0 * n)
+        k11 = (1.0 + 2.0 * n) * k44 / (1.0 + n)
+        k33 = k11
+        return k11, k33, k44
 
     def ops_args(self) -> list[object]:
         """
         Obtain the OpenSees arguments.
 
         Returns:
-          The OpenSees arguments.
+            The OpenSees arguments.
         """
-        if self.n_x is not None:
-            n_x = self.n_x
-            k44_x = 6.0 * (1.0 + n_x) / (2.0 + 3.0 * n_x)
-            k11_x = (1.0 + 2.0 * n_x) * k44_x / (1.0 + n_x)
-            k33_x = k11_x
+        mod_params = self.modified_stiffness_params
+        if mod_params:
+            stiffness_x = (
+                self._calculate_stiffness(mod_params.n_x)
+                if mod_params.n_x is not None
+                else None
+            )
+            stiffness_y = (
+                self._calculate_stiffness(mod_params.n_y)
+                if mod_params.n_y is not None
+                else None
+            )
 
-        if self.n_y is not None:
-            n_y = self.n_y
-            k44_y = 6.0 * (1.0 + n_y) / (2.0 + 3.0 * n_y)
-            k11_y = (1.0 + 2.0 * n_y) * k44_y / (1.0 + n_y)
-            k33_y = k11_y
-
-        if self.n_x is not None and self.n_y is None:
-            return [
+            args = [
                 'ModElasticBeam3d',
                 self.uid,
                 self.nodes[0].uid,
@@ -320,57 +344,19 @@ class ElasticBeamColumn(Element):
                 self.section.j_mod,
                 self.section.i_y,
                 self.section.i_x,
-                4.00,
-                4.00,
-                2.00,
-                k11_x,
-                k33_x,
-                k44_x,
-                self.geomtransf.uid,
             ]
 
-        if self.n_y is not None and self.n_x is None:
-            return [
-                'ModElasticBeam3d',
-                self.uid,
-                self.nodes[0].uid,
-                self.nodes[1].uid,
-                self.section.area,
-                self.section.e_mod,
-                self.section.g_mod,
-                self.section.j_mod,
-                self.section.i_y,
-                self.section.i_x,
-                k11_y,
-                k33_y,
-                k44_y,
-                4.00,
-                4.00,
-                2.00,
-                self.geomtransf.uid,
-            ]
+            # Append stiffness parameters based on availability
+            if stiffness_x and not stiffness_y:
+                args.extend([4.00, 4.00, 2.00, *stiffness_x, self.geomtransf.uid])
+            elif stiffness_y and not stiffness_x:
+                args.extend([*stiffness_y, 4.00, 4.00, 2.00, self.geomtransf.uid])
+            elif stiffness_x and stiffness_y:
+                args.extend([*stiffness_y, *stiffness_x, self.geomtransf.uid])
 
-        if self.n_x is not None and self.n_y is not None:
-            return [
-                'ModElasticBeam3d',
-                self.uid,
-                self.nodes[0].uid,
-                self.nodes[1].uid,
-                self.section.area,
-                self.section.e_mod,
-                self.section.g_mod,
-                self.section.j_mod,
-                self.section.i_y,
-                self.section.i_x,
-                k11_y,
-                k33_y,
-                k44_y,
-                k11_x,
-                k33_x,
-                k44_x,
-                self.geomtransf.uid,
-            ]
+            return args
 
+        # Default elastic beam column configuration if no modified stiffness
         return [
             'elasticBeamColumn',
             self.uid,

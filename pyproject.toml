@@ -45,6 +45,3 @@ quote-style = "single"
 [tool.codespell]
 ignore-words = ["ignore_words.txt"]
 skip = ["*.html", "./htmlcov/*", "./docs/build/*"]
-
-[tool.pytest.ini_options]
-addopts = '--ignore=experimental/'

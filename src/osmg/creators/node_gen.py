@@ -15,7 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from osmg.ops.node import Node
+from osmg.elements.node import Node
 
 if TYPE_CHECKING:
     from osmg.model import Model
@@ -49,7 +49,7 @@ class NodeGenerator:
 
         Example:
           >>> from osmg.model import Model
-          >>> from osmg.gen.node_gen import NodeGenerator
+          >>> from osmg.creators.node_gen import NodeGenerator
           >>> model = Model('test_model')
           >>> model.add_level(0, 0.00)
           >>> generator = NodeGenerator(model)
@@ -91,7 +91,7 @@ class NodeGenerator:
 
         Example:
             >>> from osmg.model import Model
-            >>> from osmg.gen.node_gen import NodeGenerator
+            >>> from osmg.creators.node_gen import NodeGenerator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)
             >>> generator = NodeGenerator(model)
@@ -122,7 +122,7 @@ class NodeGenerator:
 
         Example:
             >>> from osmg.model import Model
-            >>> from osmg.gen.node_gen import NodeGenerator
+            >>> from osmg.creators.node_gen import NodeGenerator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)
             >>> model.add_level(1, 1.00)

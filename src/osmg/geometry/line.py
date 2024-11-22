@@ -192,7 +192,11 @@ class Line:
             msg = 'Line has zero length.'
             raise ValueError(msg)
         r_b = point - self.start
-        cross = np.linalg.norm(np.cross(r_a, r_b))
+
+        r_a_3d = np.append(r_a, 0)
+        r_b_3d = np.append(r_b, 0)
+        cross = np.linalg.norm(np.cross(r_a_3d, r_b_3d))
+
         dot_normalized = np.dot(r_a, r_b) / norm2  # type: ignore
         if cross < common.EPSILON:
             res = bool(0.00 <= dot_normalized <= 1.00)

@@ -20,7 +20,7 @@ import numpy as np
 from osmg import common
 from osmg.load_case import LoadCase
 from osmg.model import Model
-from osmg.ops import element
+from osmg.elements import element
 
 
 def self_weight(mdl: Model, lcase: LoadCase, factor: float = 1.00) -> None:

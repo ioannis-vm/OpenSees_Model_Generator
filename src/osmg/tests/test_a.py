@@ -5,16 +5,17 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg import defaults
-from osmg.gen.component_gen import BeamColumnGenerator
-from osmg.gen.query import ElmQuery
-from osmg.gen.section_gen import SectionGenerator
-from osmg.gen.zerolength_gen import gravity_shear_tab
+from osmg.creators.component_gen import BeamColumnGenerator
+from osmg.creators.query import ElmQuery
+from osmg.creators.section_gen import SectionGenerator
+
+# from osmg.creators.zerolength_gen import gravity_shear_tab
 from osmg.graphics.postprocessing_3d import show_basic_forces, show_deformed_shape
 from osmg.graphics.preprocessing_3d import show
 from osmg.load_case import LoadCase
 from osmg.model import Model
-from osmg.ops.element import ElasticBeamColumn
-from osmg.ops.section import ElasticSection
+from osmg.elements.element import ElasticBeamColumn
+from osmg.elements.section import ElasticSection
 from osmg.preprocessing.self_weight_mass import self_mass, self_weight
 from osmg.solver import PushoverAnalysis
 
@@ -30,9 +31,8 @@ def test_a() -> None:
 
     """
     mdl = Model('test_model')
-    mdl.settings.imperial_units = True
 
-    mcg = BeamColumnGenerator(mdl)
+    mcg = BeamColumnGenerator(mdl, 'elastic')
     secg = SectionGenerator(mdl)
     query = ElmQuery(mdl)
 

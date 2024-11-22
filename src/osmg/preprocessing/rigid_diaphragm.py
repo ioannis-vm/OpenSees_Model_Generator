@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from osmg import common, load_case
-from osmg.ops.node import Node
+from osmg.elements.node import Node
 
 if TYPE_CHECKING:
     from osmg.level import Level
