@@ -17,14 +17,14 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
+from osmg.core import common
 from osmg.geometry.line import Line
 from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection, FiberSection
 
 if TYPE_CHECKING:
-    from osmg.component_assemblies import ComponentAssembly
+    from osmg.core.component_assemblies import ComponentAssembly
 
 nparr = npt.NDArray[np.float64]
 

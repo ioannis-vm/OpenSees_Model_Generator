@@ -21,8 +21,8 @@ from typing import TYPE_CHECKING, Callable, Literal, Optional, Type, Union
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
-from osmg.component_assemblies import ComponentAssembly
+from osmg.core import common
+from osmg.core.component_assemblies import ComponentAssembly
 from osmg.creators.material import (
     ElasticMaterialCreator,
     SteelWColumnPanelZoneUpdatedCreator,
@@ -50,10 +50,10 @@ from osmg.geometry.transformations import (
 )
 
 if TYPE_CHECKING:
-    from osmg.level import Level
+    from osmg.core.level import Level
     from osmg.mesh import Mesh
-    from osmg.model import Model
-    from osmg.osmg_collections import CollectionActive
+    from osmg.core.model import Model
+    from osmg.core.osmg_collections import CollectionActive
     from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 

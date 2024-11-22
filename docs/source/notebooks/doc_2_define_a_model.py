@@ -169,7 +169,7 @@ Loads, mass, and diaphragm constraints are load_case-specific.
 
 # %%
 # imports
-from osmg.load_case import LoadCase
+from osmg.core.load_case import LoadCase
 from osmg.preprocessing.self_weight_mass import self_mass, self_weight
 
 # %%

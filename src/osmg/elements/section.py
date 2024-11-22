@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any, Optional
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common, mesh
+from osmg.core import common, mesh
 from osmg.geometry.mesh import Mesh, polygon_area
 
 if TYPE_CHECKING:

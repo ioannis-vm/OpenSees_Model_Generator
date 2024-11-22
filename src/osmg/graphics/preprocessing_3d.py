@@ -29,8 +29,8 @@ from osmg.elements import node as node_module
 from osmg.geometry.transformations import local_axes_from_points_and_angle
 
 if TYPE_CHECKING:
-    from osmg.load_case import LoadCase
-    from osmg.model import Model
+    from osmg.core.load_case import LoadCase
+    from osmg.core.model import Model
 
 nparr = npt.NDArray[np.float64]
 

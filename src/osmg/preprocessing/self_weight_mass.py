@@ -17,9 +17,9 @@ using a given model.
 
 import numpy as np
 
-from osmg import common
-from osmg.load_case import LoadCase
-from osmg.model import Model
+from osmg.core import common
+from osmg.core.load_case import LoadCase
+from osmg.core.model import Model
 from osmg.elements import element
 
 

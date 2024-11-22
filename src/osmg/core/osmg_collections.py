@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, TypeVar
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
+from osmg.core import common
 from osmg.elements import element, node
 
 if TYPE_CHECKING:

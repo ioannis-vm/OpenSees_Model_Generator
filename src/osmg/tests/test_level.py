@@ -12,9 +12,9 @@
 
 import pytest
 from unittest.mock import MagicMock
-from osmg.osmg_collections import NodeCollection, Collection
-from osmg.level import Level
-from osmg.component_assemblies import ComponentAssembly
+from osmg.core.osmg_collections import NodeCollection, Collection
+from osmg.core.level import Level
+from osmg.core.component_assemblies import ComponentAssembly
 
 
 class TestLevel:

@@ -27,7 +27,7 @@ from osmg.preprocessing.rigid_diaphragm import RDAnalyzer
 from osmg.preprocessing.tributary_area_analysis import TributaryAreaAnaysis
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
     from osmg.elements.node import Node
 
 nparr = npt.NDArray[np.float64]
@@ -51,7 +51,7 @@ class PointLoadMass:
         Add some quantity to the existing quantity.
 
         Example:
-            >>> from osmg.load_case import PointLoadMass
+            >>> from osmg.core.load_case import PointLoadMass
             >>> load = np.array([1., 2., 3., 4., 5., 6.])
             >>> point_load = PointLoadMass()
             >>> point_load.add(load)

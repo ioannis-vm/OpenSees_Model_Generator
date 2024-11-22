@@ -20,10 +20,10 @@ import numpy.typing as npt
 import pandas as pd
 
 from osmg.postprocessing.basic_forces import basic_forces
-from osmg.solver import Analysis, ModalResponseSpectrumAnalysis
+from osmg.analysis.solver import Analysis, ModalResponseSpectrumAnalysis
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
     from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, TrussBar
     from osmg.elements.node import Node
 

@@ -38,15 +38,15 @@ from scipy import integrate
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 
-from osmg import common, transformations
+from osmg.core import common, transformations
 from osmg.creators.query import LoadCaseQuery
 from osmg.graphics import general_2d
-from osmg.osmg_collections import Collection
+from osmg.core.osmg_collections import Collection
 from osmg.elements import element, uniaxial_material
 
 if TYPE_CHECKING:
-    from osmg.load_case import LoadCase
-    from osmg.model import Model
+    from osmg.core.load_case import LoadCase
+    from osmg.core.model import Model
     from osmg.elements.element import Element, ZeroLengthElement
     from osmg.elements.node import Node
     from osmg.elements.uniaxial_material import UniaxialMaterial

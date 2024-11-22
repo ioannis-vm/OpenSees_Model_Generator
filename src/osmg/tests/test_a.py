@@ -12,12 +12,12 @@ from osmg.creators.section import SectionCreator
 # from osmg.creators.zerolength import gravity_shear_tab
 from osmg.graphics.postprocessing_3d import show_basic_forces, show_deformed_shape
 from osmg.graphics.preprocessing_3d import show
-from osmg.load_case import LoadCase
-from osmg.model import Model
+from osmg.core.load_case import LoadCase
+from osmg.core.model import Model
 from osmg.elements.element import ElasticBeamColumn
 from osmg.elements.section import ElasticSection
 from osmg.preprocessing.self_weight_mass import self_mass, self_weight
-from osmg.solver import PushoverAnalysis
+from osmg.analysis.solver import PushoverAnalysis
 
 nparr = npt.NDArray[np.float64]
 

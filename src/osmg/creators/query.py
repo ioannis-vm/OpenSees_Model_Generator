@@ -26,14 +26,14 @@ from typing import TYPE_CHECKING, Optional, Union
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
+from osmg.core import common
 from osmg.geometry.line import Line
 from osmg.elements import element
 
 if TYPE_CHECKING:
-    from osmg.component_assemblies import ComponentAssembly
-    from osmg.load_case import LoadCase
-    from osmg.model import Model
+    from osmg.core.component_assemblies import ComponentAssembly
+    from osmg.core.load_case import LoadCase
+    from osmg.core.model import Model
     from osmg.elements.node import Node
 
 

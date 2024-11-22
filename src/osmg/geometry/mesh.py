@@ -22,7 +22,7 @@ from descartes.patch import PolygonPatch  # type: ignore
 from matplotlib.patches import Polygon
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
-from osmg import common
+from osmg.core import common
 
 nparr = npt.NDArray[np.float64]
 

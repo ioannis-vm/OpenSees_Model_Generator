@@ -15,7 +15,7 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
-from osmg.model import Model
+from osmg.core.model import Model
 from osmg.elements.section import ElasticSection, FiberSection
 from osmg.elements.uniaxial_material import (
     Elastic,

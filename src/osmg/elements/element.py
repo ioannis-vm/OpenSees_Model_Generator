@@ -21,7 +21,7 @@ import numpy.typing as npt
 from osmg.graphics.visibility import ElementVisibility
 
 if TYPE_CHECKING:
-    from osmg.component_assemblies import ComponentAssembly
+    from osmg.core.component_assemblies import ComponentAssembly
     from osmg.mesh import Mesh
     from osmg.elements.node import Node
     from osmg.elements.section import ElasticSection, FiberSection

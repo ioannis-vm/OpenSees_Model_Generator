@@ -20,16 +20,16 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 
 from osmg import transformations
-from osmg.common import ALPHA, TINY
+from osmg.core.common import ALPHA, TINY
 from osmg.graphics import graphics_common, graphics_common_3d
 from osmg.graphics.preprocessing_3d import add_data__global_axes
 from osmg.elements import element
 from osmg.postprocessing.basic_forces import basic_forces
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
     from osmg.elements.node import Node
-    from osmg.solver import Analysis
+    from osmg.analysis.solver import Analysis
 
 
 nparr = npt.NDArray[np.float64]

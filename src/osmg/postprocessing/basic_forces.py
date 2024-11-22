@@ -24,10 +24,10 @@ import numpy.typing as npt
 import pandas as pd
 
 from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, TrussBar
-from osmg.solver import ModalResponseSpectrumAnalysis
+from osmg.analysis.solver import ModalResponseSpectrumAnalysis
 
 if TYPE_CHECKING:
-    from osmg.solver import Analysis
+    from osmg.analysis.solver import Analysis
 
 
 nparr = npt.NDArray[np.float64]

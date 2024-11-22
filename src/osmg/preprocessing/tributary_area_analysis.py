@@ -27,7 +27,7 @@ import numpy as np
 import numpy.typing as npt
 from tqdm import tqdm
 
-from osmg import common, mesh
+from osmg.core import common, mesh
 from osmg.elements.element import (
     DispBeamColumn,
     ElasticBeamColumn,
@@ -37,8 +37,8 @@ from osmg.elements.element import (
 from osmg.elements.node import Node
 
 if TYPE_CHECKING:
-    from osmg.level import Level
-    from osmg.load_case import LoadCase
+    from osmg.core.level import Level
+    from osmg.core.load_case import LoadCase
     from osmg.mesh import Edge, Halfedge, Vertex
 
 # pylint: disable=no-member

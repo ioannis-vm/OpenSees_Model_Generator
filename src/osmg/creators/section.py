@@ -25,7 +25,7 @@ from osmg.creators.mesh_shapes import rect_mesh
 from osmg.elements.section import ElasticSection, FiberSection, SectionComponent
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
     from osmg.elements.section import Section
 
 nparr = npt.NDArray[np.float64]
@@ -69,7 +69,7 @@ class SectionCreator:
 
         Example:
             >>> from osmg.creators.section import SectionCreator
-            >>> from osmg.model import Model
+            >>> from osmg.core.model import Model
             >>> model = Model('test_model')
             >>> sec_creator = SectionCreator(model)
             >>> sec = sec_creator.generate_generic_elastic(
@@ -163,7 +163,7 @@ class SectionCreator:
 
         Example:
             >>> from osmg.creators.section import SectionCreator
-            >>> from osmg.model import Model
+            >>> from osmg.core.model import Model
             >>> from osmg.defaults import load_default_steel
             >>> from osmg.elements.section import ElasticSection
             >>> model = Model('test_model')

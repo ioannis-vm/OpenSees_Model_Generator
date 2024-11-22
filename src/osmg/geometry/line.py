@@ -18,7 +18,7 @@ from typing import Optional
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
+from osmg.core import common
 
 # pylint: disable=no-else-return
 

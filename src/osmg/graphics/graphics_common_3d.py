@@ -21,7 +21,7 @@ import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
 
 # pio.renderers.default = 'browser'
 

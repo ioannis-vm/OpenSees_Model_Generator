@@ -17,14 +17,14 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from osmg import common
+from osmg.core import common
 from osmg.creators.section import SectionGenerator
 from osmg.elements.section import ElasticSection
 from osmg.elements.uniaxial_material import Elastic, Steel02
 from osmg.physical_material import PhysicalMaterial
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
 
 nparr = npt.NDArray[np.float64]
 

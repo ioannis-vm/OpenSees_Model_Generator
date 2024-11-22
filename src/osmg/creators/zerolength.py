@@ -11,9 +11,9 @@ import numpy.typing as npt
 from osmg.elements.element import ZeroLength
 
 if TYPE_CHECKING:
-    from osmg.component_assemblies import ComponentAssembly
+    from osmg.core.component_assemblies import ComponentAssembly
     from osmg.creators.material import MaterialGenerator
-    from osmg.model import Model
+    from osmg.core.model import Model
     from osmg.node import Node
     from osmg.elements.uniaxial_material import UniaxialMaterial
 

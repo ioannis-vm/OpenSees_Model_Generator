@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 from osmg.elements.node import Node
 
 if TYPE_CHECKING:
-    from osmg.model import Model
+    from osmg.core.model import Model
 
 
 @dataclass(repr=False)
@@ -48,7 +48,7 @@ class NodeCreator:
           The node object that was added.
 
         Example:
-          >>> from osmg.model import Model
+          >>> from osmg.core.model import Model
           >>> from osmg.creators.node import NodeCreator
           >>> model = Model('test_model')
           >>> model.add_level(0, 0.00)
@@ -90,7 +90,7 @@ class NodeCreator:
             The node object that was added.
 
         Example:
-            >>> from osmg.model import Model
+            >>> from osmg.core.model import Model
             >>> from osmg.creators.node import NodeCreator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)
@@ -121,7 +121,7 @@ class NodeCreator:
             y_loc: y coordinate of the node[/s].
 
         Example:
-            >>> from osmg.model import Model
+            >>> from osmg.core.model import Model
             >>> from osmg.creators.node import NodeCreator
             >>> model = Model('test_model')
             >>> model.add_level(0, 0.00)

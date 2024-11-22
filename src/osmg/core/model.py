@@ -24,10 +24,10 @@ from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
 from osmg import osmg_collections
 from osmg.creators.uid import UIDGenerator
-from osmg.level import Level
+from osmg.core.level import Level
 
 if TYPE_CHECKING:
-    from osmg.component_assemblies import ComponentAssembly
+    from osmg.core.component_assemblies import ComponentAssembly
     from osmg.elements import element
     from osmg.elements.node import Node
     from osmg.elements.section import ElasticSection, FiberSection
@@ -171,7 +171,7 @@ class Model:
             elevation: Elevation of the level.
 
         Example:
-            >>> from osmg.model import Model
+            >>> from osmg.core.model import Model
             >>> model = Model('test_model')
             >>> model.add_level(1, 0.0)
             >>> model.levels.__srepr__()
