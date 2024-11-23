@@ -19,16 +19,6 @@ if TYPE_CHECKING:
 
 nparr = npt.NDArray[np.float64]
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 
 @dataclass
 class ZeroLengthCreator:

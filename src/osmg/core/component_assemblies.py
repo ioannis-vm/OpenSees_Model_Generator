@@ -5,16 +5,6 @@ Collections of objects which, as a group, represent some part of a
 structure.
 """
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

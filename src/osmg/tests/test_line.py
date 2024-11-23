@@ -1,15 +1,5 @@
 """Unit tests for the Line class."""
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 import numpy as np
 import pytest
 

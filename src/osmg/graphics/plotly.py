@@ -1,15 +1,5 @@
 """Create plotly graphics."""
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field

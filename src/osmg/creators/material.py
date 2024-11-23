@@ -1,15 +1,5 @@
 """objects that create materials."""
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 from dataclasses import dataclass
 
 import numpy as np

@@ -4,16 +4,6 @@ UID Object.
 Parent class for all objects that have a unique identifier (UID).
 """
 
-#
-#   _|_|      _|_|_|  _|      _|    _|_|_|
-# _|    _|  _|        _|_|  _|_|  _|
-# _|    _|    _|_|    _|  _|  _|  _|  _|_|
-# _|    _|        _|  _|      _|  _|    _|
-#   _|_|    _|_|_|    _|      _|    _|_|_|
-#
-#
-# https://github.com/ioannis-vm/OpenSees_Model_Generator
-
 from dataclasses import dataclass
 
 from osmg.creators.uid import UIDGenerator
