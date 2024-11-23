@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from itertools import count
-from typing import Any, Optional, Self
+from typing import Any
 
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
@@ -63,7 +63,7 @@ class Vertex:
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
 
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check for equality based on the uid of the vertex.
 
@@ -88,7 +88,8 @@ class Vertex:
             True
 
         """
-        return self.uid == other.uid
+        assert isinstance(other, Vertex)
+        return bool(self.uid == other.uid)
 
     def __hash__(self) -> int:
         """
@@ -278,11 +279,15 @@ class Edge:
         # location of this edge
         vec_ra: nparr = np.array(self.v_i.coordinates)
         # direction of this edge
-        vec_da: nparr = np.array(self.v_j.coordinates) - np.array(self.v_i.coordinates)
+        vec_da: nparr = np.array(self.v_j.coordinates) - np.array(
+            self.v_i.coordinates
+        )
         # location of other edge
         vec_rb: nparr = np.array(other.v_i.coordinates)
         # direction of other edge
-        vec_db: nparr = np.array(other.v_j.coordinates) - np.array(other.v_i.coordinates)
+        vec_db: nparr = np.array(other.v_j.coordinates) - np.array(
+            other.v_i.coordinates
+        )
         # verify that the edges have nonzero length
         assert not np.isclose(vec_da @ vec_da, 0.00)
         assert not np.isclose(vec_db @ vec_db, 0.00)
@@ -394,7 +399,7 @@ class Halfedge:
         self.vertex = vertex
         self.edge = edge
         self.uid: int = next(self._ids)
-        self.nxt = None
+        self.nxt: Halfedge | None = None
 
     def __repr__(self) -> str:
         """
@@ -414,14 +419,15 @@ class Halfedge:
             out = f'(H{self.uid}'
         return out
 
-    def __lt__(self, other: Self) -> bool:
+    def __lt__(self, other: object) -> bool:
         """
         Comparison function used for sorting. Compares the halfedge ids.
 
         Returns:
           Whether the other object is less than the current.
         """
-        return self.uid < other.uid
+        assert isinstance(other, Halfedge)
+        return bool(self.uid < other.uid)
 
     def direction(self) -> float:
         """
@@ -450,7 +456,7 @@ class Halfedge:
         ) - np.array(self.vertex.coordinates)
         norm = np.linalg.norm(drct)
         drct /= norm
-        return np.arctan2(drct[1], drct[0])
+        return float(np.arctan2(drct[1], drct[0]))
 
 
 class Mesh:
@@ -476,7 +482,7 @@ class Mesh:
         num = len(self.halfedges)
         return f'Mesh object containing {num} halfedges.'
 
-    def geometric_properties(self) -> dict[str, float]:
+    def geometric_properties(self) -> dict[str, object]:
         """
         Calculate the geometric properties of the mesh.
 
@@ -531,7 +537,10 @@ def polygon_area(coordinates: nparr) -> float:
     x_coordinates = coordinates[:, 0]
     y_coordinates = coordinates[:, 1]
     return float(
-        np.sum(x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
+        np.sum(
+            x_coordinates * np.roll(y_coordinates, -1)
+            - np.roll(x_coordinates, -1) * y_coordinates
+        )
         / 2.00
     )
 
@@ -564,13 +573,19 @@ def polygon_centroid(coordinates: nparr) -> nparr:
     x_cent = (
         np.sum(
             (x_coordinates + np.roll(x_coordinates, -1))
-            * (x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
+            * (
+                x_coordinates * np.roll(y_coordinates, -1)
+                - np.roll(x_coordinates, -1) * y_coordinates
+            )
         )
     ) / (6.0 * area)
     y_cent = (
         np.sum(
             (y_coordinates + np.roll(y_coordinates, -1))
-            * (x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
+            * (
+                x_coordinates * np.roll(y_coordinates, -1)
+                - np.roll(x_coordinates, -1) * y_coordinates
+            )
         )
     ) / (6.0 * area)
     return np.array((x_cent, y_cent))
@@ -617,7 +632,10 @@ def polygon_inertia(coordinates: nparr) -> dict[str, float]:
     x_coordinates = coordinates[:, 0]
     y_coordinates = coordinates[:, 1]
     area = polygon_area(coordinates)
-    alpha = x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates
+    alpha = (
+        x_coordinates * np.roll(y_coordinates, -1)
+        - np.roll(x_coordinates, -1) * y_coordinates
+    )
     # planar moment of inertia wrt horizontal axis
     ixx = (
         np.sum(
@@ -663,7 +681,7 @@ def polygon_inertia(coordinates: nparr) -> dict[str, float]:
     return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
-def geometric_properties(coordinates: nparr) -> dict[str, float]:
+def geometric_properties(coordinates: nparr) -> dict[str, object]:
     """
     Aggregate the results of the previous functions.
 
@@ -765,7 +783,7 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
         ...     assert h.nxt.vertex == h.edge.other_vertex(h.vertex)
 
     """
-    all_halfedges = []
+    all_halfedges: list[Halfedge] = []
     for edge in edges:
         v_i = edge.v_i
         v_j = edge.v_j
@@ -846,9 +864,7 @@ def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
 
     """
 
-    def is_in_some_loop(
-        halfedge: list[Halfedge], loops: list[list[Halfedge]]
-    ) -> bool:
+    def is_in_some_loop(halfedge: Halfedge, loops: list[list[Halfedge]]) -> bool:
         return any(halfedge in loop for loop in loops)
 
     loops: list[list[Halfedge]] = []
@@ -858,9 +874,11 @@ def obtain_closed_loops(halfedges: list[Halfedge]) -> list[list[Halfedge]]:
                 continue
         loop = [halfedge]
         nxt = halfedge.nxt
+        assert nxt
         while nxt != halfedge:
             loop.append(nxt)
             nxt = nxt.nxt
+            assert nxt
         loops.append(loop)
     return loops
 
@@ -893,7 +911,8 @@ def orient_loops(
     external_loops = []
     trivial_loops = []
     loop_areas = [
-        polygon_area(np.array([h.vertex.coordinates for h in loop])) for loop in loops
+        polygon_area(np.array([h.vertex.coordinates for h in loop]))
+        for loop in loops
     ]
     for i, area in enumerate(loop_areas):
         if area > common.EPSILON:
@@ -929,9 +948,11 @@ def subdivide_polygon(
         pieces: shapely_Polygon objects that represent single fibers.
 
     """
-    outside_polygon = shapely_Polygon([h.vertex.coordinates for h in outside.halfedges])
+    outside_polygon = shapely_Polygon(
+        [h.vertex.coordinates for h in outside.halfedges]
+    )
     hole_polygons = []
-    for hole in holes.values():
+    for hole in holes:
         hole_polygons.append(  # noqa: PERF401
             shapely_Polygon([h.vertex.coordinates for h in hole.halfedges])
         )
@@ -1158,7 +1179,9 @@ def plot_edges(edges: list[Edge]) -> None:
     fig.show()
 
 
-def sanity_checks(external: list[Halfedge], trivial: list[Halfedge]) -> None:
+def sanity_checks(
+    external: list[list[Halfedge]], trivial: list[list[Halfedge]]
+) -> None:
     """Perform some checks to make sure assumptions are not violated."""
     #   We expect no trivial loops
     if trivial:

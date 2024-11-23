@@ -32,8 +32,6 @@ if TYPE_CHECKING:
 
 nparr = npt.NDArray[np.float64]
 
-# pylint: disable=no-else-return
-
 
 def basic_forces(
     anl: Analysis,

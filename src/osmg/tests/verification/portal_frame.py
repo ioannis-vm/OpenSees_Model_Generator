@@ -9,9 +9,10 @@ import numpy as np
 
 from osmg.core.model import Model2D
 from osmg.creators.component import BeamColumnCreator
+from osmg.creators.section import AISC_Database_Section_Creator
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection
-from osmg.graphics.plotly import Figure3DConfiguration, Figure3D
+from osmg.graphics.plotly import Figure3D, Figure3DConfiguration
 
 # Instantiate model object
 frame = Model2D('Frame model')
@@ -36,7 +37,7 @@ for position in (('A', 'Base'), ('B', 'Base'), ('A', 'Level 1'), ('B', 'Level 1'
     )
 
 # Find the node at 'A'-'Base'
-found_node = frame.nodes.search_by_coordinates(
+found_node = frame.nodes.search_by_coordinates_or_raise(
     (
         grids.get_grid_location('A'),
         grids.get_level_elevation('Base'),
@@ -44,7 +45,7 @@ found_node = frame.nodes.search_by_coordinates(
 )
 
 # Define a common section
-section = ElasticSection(
+simple_section = ElasticSection(
     frame.uid_generator,
     'Test Section',
     e_mod=1e3,
@@ -55,46 +56,54 @@ section = ElasticSection(
     j_mod=1.00,
     sec_w=0.00,
 )
+# Define an AISC W section
+section_creator = AISC_Database_Section_Creator(frame.uid_generator)
+standard_section = section_creator.load_elastic_section('W14X38', 1.00, 1.00)
 # Add members
 bcg = BeamColumnCreator(frame, 'elastic')
-for placement in (
-    ('A', 'Level 1', 'A', 'Base'),
-    ('B', 'Level 1', 'B', 'Base'),
-    ('A', 'Level 1', 'B', 'Level 1'),
+for placement_data in (
+    ('A', 'Level 1', 'A', 'Base', simple_section),
+    ('B', 'Level 1', 'B', 'Base', simple_section),
+    ('A', 'Level 1', 'B', 'Level 1', standard_section),
 ):
     bcg.generate_plain_component_assembly(
         tags={'column'},
-        node_i=frame.nodes.search_by_coordinates(
+        node_i=frame.nodes.search_by_coordinates_or_raise(
             (
-                grids.get_grid_location(placement[0]),
-                grids.get_level_elevation(placement[1]),
+                grids.get_grid_location(placement_data[0]),
+                grids.get_level_elevation(placement_data[1]),
             )
         ),
-        node_j=frame.nodes.search_by_coordinates(
+        node_j=frame.nodes.search_by_coordinates_or_raise(
             (
-                grids.get_grid_location(placement[2]),
-                grids.get_level_elevation(placement[3]),
+                grids.get_grid_location(placement_data[2]),
+                grids.get_level_elevation(placement_data[3]),
             )
         ),
         n_sub=3,
         eo_i=np.array((0.00, 0.0)),
         eo_j=np.array((0.00, 0.0)),
-        section=section,
-        transf_type='Elastic',
+        section=placement_data[4],
+        transf_type='Linear',
     )
 
 
-# Remove all code that is currently not used, lint and unit test what
-# we have now.
-#   We'll use git to recover the old code and add it back as needed.
+# Load case registry -> stores load cases.
+# Will have separate place for dead, live, seismic, other.
+# We'll have "analysis types": static, response spectrum, transient.
+# Each load case will run the analysis and store the results.
+# Each load case will need to have configuration on what results to keep track of.
+# It should define supports. Use support configuration objects, which will also support elastic supports and be dimension-agnostic.
+# It should still be possible to define a very simple load case and run an analysis manually
+# load case registry -> should be able to run all analyses with one method.
+# and then be able to get basic forces and node displacements considering case combinations.
+#   Add another load case and a combination.
+#   Write convenience code to retrieve basic force data for
+#   **assembiles**, including combinations.
 
 # Add a load case, Add supports, update plotting.
 # Run a linear elastic analysis.
 # Plot results.
-
-# Add another load case and a combination.
-# Write convenience code to retrieve basic force data for
-# **assembiles**, including combinations.
 
 # Plot combined basic forces.
 
@@ -105,6 +114,6 @@ for placement in (
 # Improve design code.
 
 fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
-fig.add_nodes(frame.nodes.values(), 'primary')
-fig.add_components(frame.components.values())
+fig.add_nodes(list(frame.nodes.values()), 'primary')
+fig.add_components(list(frame.components.values()))
 fig.show()

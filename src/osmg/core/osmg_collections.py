@@ -19,16 +19,14 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core import common
-from osmg.elements import element, node
+from osmg.elements import node
 
 if TYPE_CHECKING:
     from osmg.elements.node import Node
 
 nparr = npt.NDArray[np.float64]
 
-# pylint: disable=invalid-name
 TV = TypeVar('TV')
-# pylint: enable=invalid-name
 
 
 @dataclass(repr=False)
@@ -48,6 +46,7 @@ class Collection(dict[int, TV]):
           ValueError: If the object does not have a uid attribute.
           ValueError: If the object already exists.
         """
+        assert hasattr(obj, 'uid')
         if obj.uid in self:
             msg = f'uid {obj.uid} already exists'
             raise ValueError(msg)
@@ -105,7 +104,7 @@ class Collection(dict[int, TV]):
 
 
 @dataclass(repr=False)
-class NamedCollection(Collection[int, TV], Generic[TV]):
+class NamedCollection(Collection[TV], Generic[TV]):
     """
     A collection that allows assigning and retrieving objects by name.
 
@@ -138,23 +137,18 @@ class NamedCollection(Collection[int, TV], Generic[TV]):
         """
         Retrieve an object by its name.
 
-        Parameters
-        ----------
-        name : str
-            The name of the object to retrieve.
+        Params:
+          name: The name of the object to retrieve.
 
         Returns:
-        -------
-        TV
             The object associated with the given name.
 
         Raises:
-        ------
-        KeyError
-            If no object is found with the given name.
+          KeyError: If no object is found with the given name.
         """
         if name not in self.named_contents:
-            raise KeyError(f"No object found with the name '{name}'.")
+            msg = f"No object found with the name '{name}'."
+            raise KeyError(msg)
         return self.named_contents[name]
 
     def __repr__(self) -> str:
@@ -175,10 +169,10 @@ class NamedCollection(Collection[int, TV], Generic[TV]):
 
 
 @dataclass(repr=False)
-class CollectionWithConnectivity(Collection[int, TV]):
+class CollectionWithConnectivity(Collection[TV]):
     """Collection of elements for which connectivity matters."""
 
-    def add(self, obj: object) -> None:
+    def add(self, obj: TV) -> None:
         """
         Add an element to the collection.
 
@@ -200,20 +194,16 @@ class NodeCollection(NamedCollection[node.Node]):
     """
 
     def search_by_coordinates(
-        self, coordinates: tuple[float, ...], radius=common.EPSILON
+        self, coordinates: tuple[float, ...], radius: float = common.EPSILON
     ) -> Node | None:
         """
         Obtain the node that occupies a given point if it exists.
 
-        Parameters
-        ----------
-        coordinates : tuple[float, ...]
-            The coordinates to search at.
+        Params:
+          coordinates: The coordinates to search at.
 
         Returns:
-        -------
-        Node | None
-            The node at the given coordinates, or None if no node is found.
+          Node: The node at the given coordinates, or None if no node is found.
         """
         candidate_pt: nparr = np.array(coordinates)
         for other_node in self.values():
@@ -221,3 +211,26 @@ class NodeCollection(NamedCollection[node.Node]):
             if np.linalg.norm(candidate_pt - other_pt) < radius:
                 return other_node
         return None
+
+    def search_by_coordinates_or_raise(
+        self, coordinates: tuple[float, ...], radius: float = common.EPSILON
+    ) -> Node:
+        """
+        Obtain the node that occupies a given point if it exists.
+
+        Raise an error if it does not exist.
+
+        Params:
+          coordinates: The coordinates to search at.
+
+        Returns:
+          The node at the given coordinates, or None if no node is found.
+
+        Raises:
+          ValueError: If a node is not found.
+        """
+        node = self.search_by_coordinates(coordinates=coordinates, radius=radius)
+        if node is None:
+            msg = f'No node found at given coordinates: {coordinates}.'
+            raise ValueError(msg)
+        return node

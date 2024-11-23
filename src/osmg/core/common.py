@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 from pprint import pprint
-from typing import Any, Hashable, OrderedDict
+from typing import Hashable, OrderedDict, TypeVar
 
 # very big, very small numbers used for
 # comparing floats and hashing
@@ -71,9 +71,11 @@ def print_dir(obj: object) -> None:
     pprint(dir(obj))  # noqa: T203
 
 
-def previous_element(
-    dct: OrderedDict[Hashable, Any], key: Hashable
-) -> Hashable | None:
+K = TypeVar('K', bound=Hashable)  # Represents the key type (must be Hashable)
+V = TypeVar('V')  # Represents the value type
+
+
+def previous_element(dct: OrderedDict[K, V], key: K) -> V | None:
     """
     Get the previous element.
 
@@ -90,17 +92,6 @@ def previous_element(
     Returns:
         The value of the element that comes before the given key in
         the dictionary, or None if there is no such element.
-
-    Example:
-        >>> dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
-        >>> previous_element(dct, 2)  # Returns 'a'
-        'a'
-        >>> previous_element(dct, 3)  # Returns 'b'
-        'b'
-        >>> previous_element(dct, 1)  # Returns None
-
-        >>> previous_element(dct, 4)  # Returns None
-
     """
     if key in dct:
         key_list = list(dct.keys())

@@ -14,14 +14,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from functools import total_ordering
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 from osmg.core.uid_object import UIDObject
 from osmg.graphics.visibility import NodeVisibility
-
-if TYPE_CHECKING:
-    from osmg.creators.uid import UIDGenerator
-    from osmg.elements.node import Node
 
 
 @total_ordering

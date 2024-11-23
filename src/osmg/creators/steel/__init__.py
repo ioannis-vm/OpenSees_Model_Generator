@@ -1,1 +1,0 @@
-"""Steel component creator objects."""

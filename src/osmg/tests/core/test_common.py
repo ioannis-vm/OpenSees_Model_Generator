@@ -2,7 +2,7 @@
 
 from collections import OrderedDict
 
-from pytest import CaptureFixture
+import pytest
 
 from osmg.core.common import (
     ALPHA,
@@ -17,7 +17,8 @@ from osmg.core.common import (
 class TestConstants:
     """Tests for constants defined in the module."""
 
-    def test_constants_values(self):
+    @staticmethod
+    def test_constants_values() -> None:
         """
         Test the values of constants.
 
@@ -30,7 +31,8 @@ class TestConstants:
 class TestMethodsFunction:
     """Tests for the `methods` function."""
 
-    def test_methods_extraction(self):
+    @staticmethod
+    def test_methods_extraction() -> None:
         """
         Test that `methods` correctly extracts callable methods.
 
@@ -38,10 +40,10 @@ class TestMethodsFunction:
         """
 
         class TestClass:
-            def method_1(self):
+            def method_1(self) -> None:
                 pass
 
-            def method_2(self):
+            def method_2(self) -> None:
                 pass
 
         obj = TestClass()
@@ -53,7 +55,8 @@ class TestMethodsFunction:
 class TestPrintFunctions:
     """Tests for `print_methods` and `print_dir` functions."""
 
-    def test_print_methods(self, capsys: CaptureFixture[str]) -> None:
+    @staticmethod
+    def test_print_methods(capsys: pytest.CaptureFixture[str]) -> None:
         """
         Test `print_methods` for correct output.
 
@@ -61,10 +64,10 @@ class TestPrintFunctions:
         """
 
         class TestClass:
-            def method_1(self):
+            def method_1(self) -> None:
                 pass
 
-            def method_2(self):
+            def method_2(self) -> None:
                 pass
 
         obj = TestClass()
@@ -72,7 +75,8 @@ class TestPrintFunctions:
         captured = capsys.readouterr()
         assert "['method_1', 'method_2']" in captured.out, 'Output did not match'
 
-    def test_print_dir(self, capsys: CaptureFixture[str]) -> None:
+    @staticmethod
+    def test_print_dir(capsys: pytest.CaptureFixture[str]) -> None:
         """
         Test `print_dir` for correct output.
 
@@ -80,7 +84,7 @@ class TestPrintFunctions:
         """
 
         class TestClass:
-            def method_1(self):
+            def method_1(self) -> None:
                 pass
 
         obj = TestClass()

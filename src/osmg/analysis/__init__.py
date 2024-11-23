@@ -1,0 +1,1 @@
+"""Structural analysis-related objects."""

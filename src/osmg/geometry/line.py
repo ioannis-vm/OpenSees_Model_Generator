@@ -13,14 +13,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 import numpy as np
 import numpy.typing as npt
 
 from osmg.core import common
-
-# pylint: disable=no-else-return
 
 nparr = npt.NDArray[np.float64]
 
@@ -57,7 +54,7 @@ class Line:
         res += f'  end: {self.end}\n'
         return res
 
-    def length(self) -> nparr:
+    def length(self) -> float:
         """
         Obtain the length of the line.
 
@@ -70,7 +67,7 @@ class Line:
         Returns:
           The string representation of the object.
         """
-        return np.linalg.norm(self.end - self.start)
+        return float(np.linalg.norm(self.end - self.start))
 
     def direction(self) -> nparr:
         """
@@ -90,7 +87,7 @@ class Line:
         """
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: Line) -> nparr:
+    def intersect(self, other: Line) -> nparr | None:
         """
         Intersection point.
 
@@ -270,7 +267,7 @@ class Line:
         """
         r_a = self.end - self.start
         r_b = point - self.start
-        proj_point = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
+        proj_point: nparr = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
         if self.intersects_pt(proj_point):
             return proj_point
         return None

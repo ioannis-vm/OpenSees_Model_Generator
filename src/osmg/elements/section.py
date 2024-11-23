@@ -26,7 +26,6 @@ from osmg.geometry.mesh import Mesh, polygon_area
 if TYPE_CHECKING:
     from shapely.geometry import Polygon as shapely_Polygon
 
-    from osmg.creators.uid import UIDGenerator
     from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 
@@ -57,7 +56,6 @@ class Section(UIDObject):
     """
 
     name: str
-    uid_generator: UIDGenerator
 
 
 @dataclass
@@ -94,7 +92,7 @@ class ElasticSection(Section):
     snap_points: dict[str, nparr] | None = field(default=None, repr=False)
     properties: dict[str, Any] | None = field(default=None, repr=False)
 
-    def weight_per_length(self) -> list[object]:
+    def weight_per_length(self) -> float:
         """
         Weight per unit length.
 
@@ -157,7 +155,7 @@ class SectionComponent:
     """
 
     outside_shape: Mesh
-    holes: dict[str, Mesh]
+    holes: list[Mesh]
     ops_material: UniaxialMaterial
     physical_material: PhysicalMaterial
     parent_section: FiberSection | None = field(default=None)
@@ -221,20 +219,6 @@ class SectionComponent:
 
         return pieces
 
-    def copy_alter_material(self, mat: UniaxialMaterial) -> SectionComponent:
-        """
-        Shallow copy of a material.
-
-        Make a shallow copy of a section component and replace the old
-        material with the given one.
-
-        Returns:
-          The shallow copy of the material.
-        """
-        return SectionComponent(
-            self.outside_shape, self.holes, mat, self.physical_material
-        )
-
 
 @dataclass(repr=False)
 class FiberSection(Section):
@@ -291,7 +275,7 @@ class FiberSection(Section):
             self.j_mod * self.section_parts['main'].physical_material.g_mod,
         ]
 
-    def weight_per_length(self) -> list[object]:
+    def weight_per_length(self) -> float:
         """
         Weight per unit length.
 
@@ -313,39 +297,10 @@ class FiberSection(Section):
             area = polygon_area(coordinates)
             for hole in part.holes:
                 hole_coordinates: nparr = np.array(
-                    [h.vertex.coordinates for h in part.holes[hole].halfedges]
+                    [h.vertex.coordinates for h in hole.halfedges]
                 )
                 area -= polygon_area(hole_coordinates)
             density = part.physical_material.density
             # TODO(JVM): units
             res += area * density * common.G_CONST_IMPERIAL
         return res * mult
-
-    def copy_alter_material(
-        self, mat: UniaxialMaterial, new_uid: int
-    ) -> FiberSection:
-        """
-        Shallow copy.
-
-        Returns a shallow copy of the section object in which all
-        opensees_material objects have been replaced with the given
-        material. Required for the modling of steel braced frames.
-
-        Returns:
-          The shallow copy of the section object.
-        """
-        new_section_parts = {}
-        for key, val in self.section_parts.items():
-            new_part = val.copy_alter_material(mat)
-            new_section_parts[key] = new_part
-        return FiberSection(
-            f'auto_{self.name}',
-            new_uid,
-            self.outside_shape,
-            new_section_parts,
-            self.j_mod,
-            self.snap_points,
-            self.properties,
-            self.n_x,
-            self.n_y,
-        )

@@ -58,7 +58,8 @@ class BaseGridSystem(Generic[T]):
             ValueError: If the specified level does not exist.
         """
         if level_name not in self.levels:
-            raise ValueError(f"Level '{level_name}' does not exist.")
+            msg = f"Level '{level_name}' does not exist."
+            raise ValueError(msg)
         return self.levels[level_name]
 
 
@@ -100,9 +101,8 @@ class GridSystem(BaseGridSystem[Line]):
         grid_2 = self.grids.get(grid_name_2)
 
         if grid_1 is None or grid_2 is None:
-            raise ValueError(
-                f"Grids '{grid_name_1}' and '{grid_name_2}' must exist."
-            )
+            msg = f"Grids '{grid_name_1}' and '{grid_name_2}' must exist."
+            raise ValueError(msg)
 
         return grid_1.intersect(grid_2)
 
@@ -138,5 +138,6 @@ class GridSystem2D(BaseGridSystem[float]):
             ValueError: If the specified grid does not exist.
         """
         if grid_name not in self.grids:
-            raise ValueError(f"Grid '{grid_name}' does not exist.")
+            msg = f"Grid '{grid_name}' does not exist."
+            raise ValueError(msg)
         return self.grids[grid_name]

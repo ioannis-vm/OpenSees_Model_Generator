@@ -11,23 +11,22 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
-
-from collections import defaultdict
 
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
-from osmg.elements.element import ElasticBeamColumn, DispBeamColumn
+from osmg.elements.element import DispBeamColumn, ElasticBeamColumn
 
 if TYPE_CHECKING:
-    from osmg.elements.node import Node
     from osmg.core.component_assemblies import ComponentAssembly
     from osmg.elements.element import Element
+    from osmg.elements.node import Node
 
 
-def _default_camera():
+def _default_camera() -> dict[str, object]:
     return {
         'up': {'x': 0, 'y': 0, 'z': 1},
         'center': {'x': 0, 'y': 0, 'z': 0},
@@ -41,7 +40,7 @@ class Figure3DConfiguration:
     """Configuration for 3D figures."""
 
     camera: dict[str, object] = field(default_factory=_default_camera)
-    num_space_dimensions: Literal[2] | Literal[3] = field(default=3)
+    num_space_dimensions: Literal[2, 3] = field(default=3)
 
 
 @dataclass(repr=False)
@@ -51,7 +50,7 @@ class Figure3D:
     configuration: Figure3DConfiguration
     data: list[dict[str, object]] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization."""
         self.layout = go.Layout(
             scene={
@@ -80,7 +79,7 @@ class Figure3D:
         self,
         nodes: list[Node],
         designation: Literal['primary', 'parent', 'internal'],
-    ):
+    ) -> None:
         """Draw nodes."""
         expanded_designation = {
             'primary': 'Primary Nodes',
@@ -126,51 +125,56 @@ class Figure3D:
             # TODO (JVM): replace template fields with actual info.
             self.data.append(data)
         for node in nodes:
-            if node.uid in data['defined']:
+            if node.uid in data['defined']:  # type: ignore
                 continue
-            if self.configuration.num_space_dimensions == 3:
-                data['x'].append(node.coordinates[0])
-                data['y'].append(node.coordinates[1])
-                data['z'].append(node.coordinates[2])
-            elif self.configuration.num_space_dimensions == 2:
-                data['x'].append(node.coordinates[0])
-                data['y'].append(0.00)
-                data['z'].append(node.coordinates[1])
+            three_dimensional = 3
+            two_dimensional = 2
+            if self.configuration.num_space_dimensions == three_dimensional:
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(node.coordinates[1])  # type: ignore
+                data['z'].append(node.coordinates[2])  # type: ignore
             else:
-                msg = 'Can only work in 2D or 3D.'
-                raise ValueError(msg)
-            data['customdata'].append([node.uid, 'field2', 'field3'])
-            data['text'].append('field_text')
+                assert self.configuration.num_space_dimensions == two_dimensional
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(0.00)  # type: ignore
+                data['z'].append(node.coordinates[1])  # type: ignore
+            data['customdata'].append([node.uid, 'field2', 'field3'])  # type: ignore
+            data['text'].append('field_text')  # type: ignore
         # Update defined objects.
-        data['defined'] = data['defined'].union(set([x.uid for x in nodes]))
+        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
-    def add_components(self, components: list[ComponentAssembly]):
+    def add_components(self, components: list[ComponentAssembly]) -> None:
+        """Add components to the figure."""
         for component in components:
-            internal_nodes = component.internal_nodes.values()
+            internal_nodes = list(component.internal_nodes.values())
             self.add_nodes(internal_nodes, 'internal')
-            elements = component.elements.values()
+            elements = list(component.elements.values())
             self.add_elements(elements)
 
-    def add_elements(self, elements: list[Element]):
+    def add_elements(self, elements: list[Element]) -> None:
+        """Add elements to the figure."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         disp_beamcolumn_elements: list[DispBeamColumn] = []
-        unknown_types = set()
+        unknown_types: set[str] = set()
         for element in elements:
             if isinstance(element, ElasticBeamColumn):
                 elastic_beamcolumn_elements.append(element)
             elif isinstance(element, DispBeamColumn):
                 disp_beamcolumn_elements.append(element)
-            else:
-                if element.__class__.__name__ not in unknown_types:
-                    unknown_types = unknown_types.union({element.__class__.__name__})
+            elif element.__class__.__name__ not in unknown_types:
+                unknown_types = unknown_types.union({element.__class__.__name__})
         if unknown_types:
-            print(f'WARNING: Skipped the following unknown element types: {unknown_types}.')
+            print(  # noqa: T201
+                f'WARNING: Skipped the following unknown element types: {unknown_types}.'
+            )
+            # TODO(JVM): implement warning
         self.add_beamcolumn_elements(elastic_beamcolumn_elements)
         self.add_beamcolumn_element_offsets(elastic_beamcolumn_elements)
 
     def add_beamcolumn_element_offsets(
-        self, elements: ElasticBeamColumn | DispBeamColumn
-    ):
+        self, elements: list[ElasticBeamColumn] | list[DispBeamColumn]
+    ) -> None:
+        """Add beamcolumn elements to the figure."""
         data = self.find_data_by_name('Rigid Offsets')
         if not data:
             # Initialize
@@ -193,7 +197,7 @@ class Figure3D:
         for element in elements:
             if (
                 element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']
+                or element.uid in data['defined']  # type: ignore
             ):
                 continue
             p_i = np.array(element.nodes[0].coordinates)
@@ -205,14 +209,16 @@ class Figure3D:
                 np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
             )
 
-            if self.configuration.num_space_dimensions == 3:
+            three_dimensional = 3
+            two_dimensional = 2
+            if self.configuration.num_space_dimensions == three_dimensional:
                 x_list.extend((p_i[0], p_io[0], None))
                 y_list.extend((p_i[1], p_io[1], None))
                 z_list.extend((p_i[2], p_io[2], None))
                 x_list.extend((p_j[0], p_jo[0], None))
                 y_list.extend((p_j[1], p_jo[1], None))
                 z_list.extend((p_j[2], p_jo[2], None))
-            if self.configuration.num_space_dimensions == 2:
+            if self.configuration.num_space_dimensions == two_dimensional:
                 x_list.extend((p_i[0], p_io[0], None))
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_i[1], p_io[1], None))
@@ -220,13 +226,16 @@ class Figure3D:
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_j[1], p_jo[1], None))
 
-        data['x'].extend(x_list)
-        data['y'].extend(y_list)
-        data['z'].extend(z_list)
+        data['x'].extend(x_list)  # type: ignore
+        data['y'].extend(y_list)  # type: ignore
+        data['z'].extend(z_list)  # type: ignore
 
-        data['defined'] = data['defined'].union(set([x.uid for x in elements]))
+        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
-    def add_beamcolumn_elements(self, elements: ElasticBeamColumn | DispBeamColumn):
+    def add_beamcolumn_elements(
+        self, elements: list[ElasticBeamColumn] | list[DispBeamColumn]
+    ) -> None:
+        """Add beamcolumn elements to the figure."""
         data = self.find_data_by_name('Beamcolumn Elements')
         if not data:
             # Initialize
@@ -252,12 +261,12 @@ class Figure3D:
         x_list: list[float | None] = []
         y_list: list[float | None] = []
         z_list: list[float | None] = []
-        customdata_list = []
-        section_names = []
+        customdata_list = []  # type: ignore
+        section_names = []  # type: ignore
         for element in elements:
             if (
                 element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']
+                or element.uid in data['defined']  # type: ignore
             ):
                 continue
             p_i = (
@@ -268,11 +277,14 @@ class Figure3D:
             )
             section_name = element.section.name
             section_names.extend([section_name] * 3)
-            if self.configuration.num_space_dimensions == 3:
+            three_dimensional = 3
+            two_dimensional = 2
+            if self.configuration.num_space_dimensions == three_dimensional:
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((p_i[1], p_j[1], None))
                 z_list.extend((p_i[2], p_j[2], None))
             else:
+                assert self.configuration.num_space_dimensions == two_dimensional
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_i[1], p_j[1], None))
@@ -291,15 +303,15 @@ class Figure3D:
                 )
             )
 
-        data['x'].extend(x_list)
-        data['y'].extend(y_list)
-        data['z'].extend(z_list)
-        data['customdata'].extend(customdata_list)
-        data['text'].extend(section_names)
+        data['x'].extend(x_list)  # type: ignore
+        data['y'].extend(y_list)  # type: ignore
+        data['z'].extend(z_list)  # type: ignore
+        data['customdata'].extend(customdata_list)  # type: ignore
+        data['text'].extend(section_names)  # type: ignore
 
-        data['defined'] = data['defined'].union(set([x.uid for x in elements]))
+        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
-    def show(self):
+    def show(self) -> None:
         """Display the figure."""
         # Remove `defined` entry from `data`
         for data in self.data:

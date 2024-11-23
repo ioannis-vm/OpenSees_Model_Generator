@@ -66,7 +66,7 @@ def w_mesh(
     sec_h: float,
     sec_tw: float,
     sec_tf: float,
-    target_area: float | None = None,
+    target_area: float,
 ) -> Mesh:
     """
     W-section mesh.

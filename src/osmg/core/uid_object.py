@@ -1,7 +1,7 @@
 """
 UID Object.
 
-Parent class for all objects that ahve a unique identifier (UID).
+Parent class for all objects that have a unique identifier (UID).
 """
 
 #

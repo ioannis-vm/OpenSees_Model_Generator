@@ -62,8 +62,8 @@ class ComponentAssembly(UIDObject):
     internal_nodes: osmg_collections.NodeCollection = field(
         default_factory=osmg_collections.NodeCollection
     )
-    elements: osmg_collections.CollectionWithConnectivity[int, element.Element] = (
-        field(default_factory=osmg_collections.CollectionWithConnectivity)
+    elements: osmg_collections.CollectionWithConnectivity[element.Element] = field(
+        default_factory=osmg_collections.CollectionWithConnectivity
     )
 
     def __repr__(self) -> str:

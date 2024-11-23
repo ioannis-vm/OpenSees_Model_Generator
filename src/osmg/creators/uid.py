@@ -29,6 +29,9 @@ class UIDGenerator:
 
         Returns:
             A unique identifier for an object of the given type.
+
+        Raises:
+          ValueError: If an unknown object class is specified.
         """
         object_type = thing.__class__.__name__
         valid_types = {

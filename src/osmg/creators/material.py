@@ -209,6 +209,8 @@ class SteelWIMKMaterialCreator(MaterialCreator):
     """
     Steel W-shape IMK material.
 
+    Assumes force unit is lb and length unit is inch.
+
     Lignos, D. G., & Krawinkler, H. (2011). Deterioration modeling of
     steel components in support of collapse prediction of steel moment
     frames under earthquake loading. Journal of Structural
@@ -244,9 +246,6 @@ class SteelWIMKMaterialCreator(MaterialCreator):
         # gather necessary data and check interpolation range
         assert self.section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(self.section, ElasticSection)
-        assert (
-            self.model.settings.imperial_units
-        ), 'Error: Only imperial units supported.'
         assert self.section.properties
         # Yield stress
         mat_fy = self.f_y / 1.0e3
@@ -514,6 +513,8 @@ class SteelGravityShearTabCreator(MaterialCreator):
     """
     Gravity shear tab connection hinge.
 
+    Assumes force unit is lb and length unit is inch.
+
     Elkady, A., & Lignos, D. G. (2015). Effect of gravity framing on
     the overstrength and collapse capacity of steel frame buildings
     with perimeter special moment frames. Earthquake Engineering &
@@ -534,9 +535,6 @@ class SteelGravityShearTabCreator(MaterialCreator):
         """
         assert self.section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(self.section, ElasticSection)
-        assert (
-            self.model.settings.imperial_units
-        ), 'Error: Only imperial units supported.'
         assert self.section.properties
 
         # Yield stress
@@ -658,6 +656,8 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
     """
     Panel zone hinge (parallelogram model).
 
+    Assumes force unit is lb and length unit is inch.
+
     Gupta, A., & Krawinkler, H. (1999). Seismic demands for the
     performance evaluation of steel moment resisting frame
     structures. Rep. No. 132.
@@ -680,9 +680,6 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
         """
         assert self.section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(self.section, ElasticSection)
-        assert (
-            self.model.settings.imperial_units
-        ), 'Error: Only imperial units supported.'
         assert self.section.properties
         f_y = self.f_y
         hardening = self.pz_hardening
@@ -728,6 +725,8 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
     """
     Define updated panel zone hinge (parallelogram model).
 
+    Assumes force unit is lb and length unit is inch.
+
     Skiadopoulos, A., Elkady, A. and D. G. Lignos (2020). "Proposed
     Panel Zone Model for Seismic Design of Steel Moment-Resisting
     Frames." ASCE Journal of Structural Engineering. DOI:
@@ -759,9 +758,6 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
         """
         assert self.section.name[0] == 'W', 'Error: Only W sections can be used.'
         assert isinstance(self.section, ElasticSection)
-        assert (
-            self.model.settings.imperial_units
-        ), 'Error: Only imperial units supported.'
         assert self.section.properties
         f_y = self.f_y
         e_mod = self.e_mod

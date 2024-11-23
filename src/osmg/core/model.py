@@ -10,12 +10,10 @@
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-# pylint: disable=W1512
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -51,27 +49,33 @@ class Model:
     )
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
-        """Obtain the axis-aligned bouding box of the building."""
+        """
+        Obtain the axis-aligned bounding box of the building.
+
+        Returns:
+          Bounding box.
+        """
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
-        for node in self.list_of_primary_nodes():
-            point: nparr = np.array(node.coords)
+        for node in list(self.nodes.values()):
+            point: nparr = np.array(node.coordinates)
             p_min = np.minimum(p_min, point)
             p_max = np.maximum(p_max, point)
         p_min -= np.full(3, padding)
         p_max += np.full(3, padding)
-        # type hints gone mad  >.<   ...
-        return p_min, p_max  # type:ignore
+        return p_min, p_max
 
     def reference_length(self) -> float:
         """
         Obtain the largest bounding box dimension.
 
         (used in graphics)
+
+        Returns:
+          The largest dimension.
         """
         p_min, p_max = self.bounding_box(padding=0.00)
-        ref_len = np.max(p_max - p_min)
-        return ref_len
+        return float(np.max(p_max - p_min))
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""

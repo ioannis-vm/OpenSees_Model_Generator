@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Optional, Union, Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -22,7 +22,6 @@ from osmg.core.uid_object import UIDObject
 from osmg.graphics.visibility import ElementVisibility
 
 if TYPE_CHECKING:
-    from osmg.core.component_assemblies import ComponentAssembly
     from osmg.elements.node import Node
     from osmg.elements.section import ElasticSection, FiberSection
     from osmg.elements.uniaxial_material import UniaxialMaterial
@@ -219,7 +218,7 @@ class TrussBar(Element):
         """
         p_i = np.array(self.nodes[0].coordinates)
         p_j = np.array(self.nodes[1].coordinates)
-        return np.linalg.norm(p_i - p_j)
+        return float(np.linalg.norm(p_i - p_j))
 
     def __repr__(self) -> str:
         """
@@ -251,7 +250,7 @@ class GeomTransf(UIDObject):
 
     """
 
-    transf_type: Literal['Linear'] | Literal['Corotational'] | Literal['PDelta']
+    transf_type: Literal['Linear', 'Corotational', 'PDelta']
     offset_i: nparr
     offset_j: nparr
     x_axis: nparr
@@ -265,7 +264,7 @@ class GeomTransf(UIDObject):
         Returns:
           The OpenSees arguments.
         """
-        if y_axis is not None:
+        if self.y_axis is not None:
             return [
                 self.transf_type,
                 self.uid,
@@ -274,8 +273,7 @@ class GeomTransf(UIDObject):
                 *self.offset_i,
                 *self.offset_j,
             ]
-        return
-        [
+        return [
             self.transf_type,
             self.uid,
             '-jntOffset',
@@ -299,7 +297,7 @@ class BeamColumnElement(Element):
     section: ElasticSection
     geomtransf: GeomTransf
 
-    def clear_length(self) -> list[object]:
+    def clear_length(self) -> float:
         """
         Clear length.
 
@@ -311,7 +309,7 @@ class BeamColumnElement(Element):
         """
         p_i = np.array(self.nodes[0].coordinates) + self.geomtransf.offset_i
         p_j = np.array(self.nodes[1].coordinates) + self.geomtransf.offset_j
-        return np.linalg.norm(p_i - p_j)
+        return float(np.linalg.norm(p_i - p_j))
 
 
 @dataclass(repr=False)
@@ -349,7 +347,7 @@ class ElasticBeamColumn(BeamColumnElement):
         Returns:
             The OpenSees arguments.
         """
-        mod_params = self.modified_stiffness_params
+        mod_params = self.modified_stiffness_config
         if mod_params:
             stiffness_x = (
                 self._calculate_stiffness(mod_params.n_x)

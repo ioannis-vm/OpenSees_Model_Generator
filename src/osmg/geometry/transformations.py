@@ -142,7 +142,7 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
 
 def local_axes_from_points_and_angle(
     point_i: nparr, point_j: nparr, ang: float
-) -> tuple[nparr, ...]:
+) -> tuple[nparr, nparr, nparr] | tuple[nparr, None, nparr]:
     """
     Calculate local axes from two points and a rotation angle.
 
@@ -185,21 +185,23 @@ def local_axes_from_points_and_angle(
             (array([1., 0.]), None, array([ 0., -1.]))
     """
     if point_i.shape != point_j.shape:
-        raise ValueError('Start and end points must have the same dimension.')
+        msg = 'Start and end points must have the same dimension.'
+        raise ValueError(msg)
 
     # Determine 2D or 3D
     dim = point_i.shape[0]
-    if dim == 2:
-        return _local_axes_2d(point_i, point_j, ang)
-    elif dim == 3:
+    two_dimensional = 2
+    three_dimensional = 3
+    if dim == two_dimensional:
+        assert ang == 0.00, 'Angle should be 0.00 in 2D cases.'
+        return _local_axes_2d(point_i, point_j)
+    if dim == three_dimensional:
         return _local_axes_3d(point_i, point_j, ang)
-    else:
-        raise ValueError('Only 2D or 3D coordinates are supported.')
+    msg = 'Only 2D or 3D coordinates are supported.'
+    raise ValueError(msg)
 
 
-def _local_axes_2d(
-    point_i: nparr, point_j: nparr, ang: float
-) -> tuple[nparr, None, nparr]:
+def _local_axes_2d(point_i: nparr, point_j: nparr) -> tuple[nparr, None, nparr]:
     """
     Compute local axes for a 2D linear element.
 
@@ -283,7 +285,8 @@ def _local_axes_3d(
         # Non-vertical case
         diff = np.abs(np.linalg.norm(x_axis - np.array([0.0, 0.0, 1.0])))
         if diff < common.EPSILON:
-            raise ValueError('Vertical element defined upside down.')
+            msg = 'Vertical element defined upside down.'
+            raise ValueError(msg)
 
         up_direction = np.array([0.0, 0.0, 1.0])
         # Orthogonalize y-axis with respect to x-axis
