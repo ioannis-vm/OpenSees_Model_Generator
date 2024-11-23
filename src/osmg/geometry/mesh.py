@@ -37,7 +37,7 @@ class Vertex:
 
     Attributes:
     ----------
-        coords: Coordinates of the vertex.
+        coordinates: Coordinates of the vertex.
         edges: List of edges connected to the vertex.
         halfedges: List of halfedges leaving from the vertex.
         uid: Unique identifier of the vertex.
@@ -50,15 +50,15 @@ class Vertex:
 
     _ids = count(0)
 
-    def __init__(self, coords: tuple[float, float]) -> None:
+    def __init__(self, coordinates: tuple[float, float]) -> None:
         """
         Initialize a new instance of the `Vertex` class.
 
         Arguments:
-            coords: Coordinates of the vertex.
+            coordinates: Coordinates of the vertex.
 
         """
-        self.coords = coords
+        self.coordinates = coordinates
         self.edges: list[Edge] = []
         self.halfedges: list[Halfedge] = []
         self.uid: int = next(self._ids)
@@ -118,7 +118,7 @@ class Vertex:
             String representation of the vertex.
 
         """
-        return f'(V{self.uid} @ {self.coords}) '
+        return f'(V{self.uid} @ {self.coordinates}) '
 
 
 class Edge:
@@ -209,9 +209,9 @@ class Edge:
             >>> v2 = Vertex((1, 0))
             >>> v3 = Vertex((2, 0))
             >>> e = Edge(v2, v3)
-            >>> e.other_vertex(v2).coords
+            >>> e.other_vertex(v2).coordinates
             (2, 0)
-            >>> e.other_vertex(v3).coords
+            >>> e.other_vertex(v3).coordinates
             (1, 0)
             >>> e.other_vertex(v1)
             Traceback (most recent call last):
@@ -276,13 +276,13 @@ class Edge:
 
         """
         # location of this edge
-        vec_ra: nparr = np.array(self.v_i.coords)
+        vec_ra: nparr = np.array(self.v_i.coordinates)
         # direction of this edge
-        vec_da: nparr = np.array(self.v_j.coords) - np.array(self.v_i.coords)
+        vec_da: nparr = np.array(self.v_j.coordinates) - np.array(self.v_i.coordinates)
         # location of other edge
-        vec_rb: nparr = np.array(other.v_i.coords)
+        vec_rb: nparr = np.array(other.v_i.coordinates)
         # direction of other edge
-        vec_db: nparr = np.array(other.v_j.coords) - np.array(other.v_i.coords)
+        vec_db: nparr = np.array(other.v_j.coordinates) - np.array(other.v_i.coordinates)
         # verify that the edges have nonzero length
         assert not np.isclose(vec_da @ vec_da, 0.00)
         assert not np.isclose(vec_db @ vec_db, 0.00)
@@ -446,8 +446,8 @@ class Halfedge:
           The angular direction.
         """
         drct: nparr = np.array(
-            self.edge.other_vertex(self.vertex).coords
-        ) - np.array(self.vertex.coords)
+            self.edge.other_vertex(self.vertex).coordinates
+        ) - np.array(self.vertex.coordinates)
         norm = np.linalg.norm(drct)
         drct /= norm
         return np.arctan2(drct[1], drct[0])
@@ -483,8 +483,8 @@ class Mesh:
         Returns:
           The geometric properties.
         """
-        coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
-        return geometric_properties(coords)
+        coordinates: nparr = np.array([h.vertex.coordinates for h in self.halfedges])
+        return geometric_properties(coordinates)
 
     def bounding_box(self) -> nparr:
         """
@@ -493,11 +493,11 @@ class Mesh:
         Returns:
           The bounding box.
         """
-        coords: nparr = np.array([h.vertex.coords for h in self.halfedges])
-        xmin = min(coords[:, 0])
-        xmax = max(coords[:, 0])
-        ymin = min(coords[:, 1])
-        ymax = max(coords[:, 1])
+        coordinates: nparr = np.array([h.vertex.coordinates for h in self.halfedges])
+        xmin = min(coordinates[:, 0])
+        xmax = max(coordinates[:, 0])
+        ymin = min(coordinates[:, 1])
+        ymax = max(coordinates[:, 1])
         return np.array([[xmin, ymin], [xmax, ymax]])
 
 
@@ -506,12 +506,12 @@ class Mesh:
 ############################################
 
 
-def polygon_area(coords: nparr) -> float:
+def polygon_area(coordinates: nparr) -> float:
     """
     Calculate the area of a polygon.
 
     Arguments:
-        coords: A matrix whose columns represent
+        coordinates: A matrix whose columns represent
                 the coordinates and the rows
                 represent the points of the polygon.
                 The first point should not be repeated
@@ -523,25 +523,25 @@ def polygon_area(coords: nparr) -> float:
         area: The area of the polygon.
 
     Example:
-        >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
-        >>> polygon_area(coords)
+        >>> coordinates = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
+        >>> polygon_area(coordinates)
         1.0
 
     """
-    x_coords = coords[:, 0]
-    y_coords = coords[:, 1]
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
     return float(
-        np.sum(x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
+        np.sum(x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
         / 2.00
     )
 
 
-def polygon_centroid(coords: nparr) -> nparr:
+def polygon_centroid(coordinates: nparr) -> nparr:
     """
     Calculate the centroid of a polygon.
 
     Arguments:
-        coords: A matrix whose columns represent
+        coordinates: A matrix whose columns represent
                 the coordinates and the rows
                 represent the points of the polygon.
                 The first point should not be repeated
@@ -553,35 +553,35 @@ def polygon_centroid(coords: nparr) -> nparr:
         centroid: The centroid of the polygon.
 
     Example:
-        >>> coords = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
-        >>> polygon_centroid(coords)
+        >>> coordinates = np.array([[0, 0], [1, 0], [1, 1], [0, 1]])
+        >>> polygon_centroid(coordinates)
         array([0.5, 0.5])
 
     """
-    x_coords = coords[:, 0]
-    y_coords = coords[:, 1]
-    area = polygon_area(coords)
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
+    area = polygon_area(coordinates)
     x_cent = (
         np.sum(
-            (x_coords + np.roll(x_coords, -1))
-            * (x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
+            (x_coordinates + np.roll(x_coordinates, -1))
+            * (x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
         )
     ) / (6.0 * area)
     y_cent = (
         np.sum(
-            (y_coords + np.roll(y_coords, -1))
-            * (x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords)
+            (y_coordinates + np.roll(y_coordinates, -1))
+            * (x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates)
         )
     ) / (6.0 * area)
     return np.array((x_cent, y_cent))
 
 
-def polygon_inertia(coords: nparr) -> dict[str, float]:
+def polygon_inertia(coordinates: nparr) -> dict[str, float]:
     """
     Calculate the moments of inertia of a polygon.
 
     Arguments:
-        coords: A matrix whose columns represent
+        coordinates: A matrix whose columns represent
                 the coordinates and the rows
                 represent the points of the polygon.
                 The first point should not be repeated
@@ -600,8 +600,8 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
         'ir_mass': (float) - Mass moment of inertia
 
     Example:
-        >>> coords = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])
-        >>> res = polygon_inertia(coords)
+        >>> coordinates = np.array([[-2, -1], [-2, 1], [1, 1], [1, -1]])
+        >>> res = polygon_inertia(coordinates)
         >>> res['ixx'] == -2.0
         True
         >>> res['iyy'] == -6.0
@@ -614,17 +614,17 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
         True
 
     """
-    x_coords = coords[:, 0]
-    y_coords = coords[:, 1]
-    area = polygon_area(coords)
-    alpha = x_coords * np.roll(y_coords, -1) - np.roll(x_coords, -1) * y_coords
+    x_coordinates = coordinates[:, 0]
+    y_coordinates = coordinates[:, 1]
+    area = polygon_area(coordinates)
+    alpha = x_coordinates * np.roll(y_coordinates, -1) - np.roll(x_coordinates, -1) * y_coordinates
     # planar moment of inertia wrt horizontal axis
     ixx = (
         np.sum(
             (
-                y_coords**2
-                + y_coords * np.roll(y_coords, -1)
-                + np.roll(y_coords, -1) ** 2
+                y_coordinates**2
+                + y_coordinates * np.roll(y_coordinates, -1)
+                + np.roll(y_coordinates, -1) ** 2
             )
             * alpha
         )
@@ -634,9 +634,9 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
     iyy = (
         np.sum(
             (
-                x_coords**2
-                + x_coords * np.roll(x_coords, -1)
-                + np.roll(x_coords, -1) ** 2
+                x_coordinates**2
+                + x_coordinates * np.roll(x_coordinates, -1)
+                + np.roll(x_coordinates, -1) ** 2
             )
             * alpha
         )
@@ -646,10 +646,10 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
     ixy = (
         np.sum(
             (
-                x_coords * np.roll(y_coords, -1)
-                + 2.0 * x_coords * y_coords
-                + 2.0 * np.roll(x_coords, -1) * np.roll(y_coords, -1)
-                + np.roll(x_coords, -1) * y_coords
+                x_coordinates * np.roll(y_coordinates, -1)
+                + 2.0 * x_coordinates * y_coordinates
+                + 2.0 * np.roll(x_coordinates, -1) * np.roll(y_coordinates, -1)
+                + np.roll(x_coordinates, -1) * y_coordinates
             )
             * alpha
         )
@@ -663,7 +663,7 @@ def polygon_inertia(coords: nparr) -> dict[str, float]:
     return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
-def geometric_properties(coords: nparr) -> dict[str, float]:
+def geometric_properties(coordinates: nparr) -> dict[str, float]:
     """
     Aggregate the results of the previous functions.
 
@@ -671,11 +671,11 @@ def geometric_properties(coords: nparr) -> dict[str, float]:
       The aggregated results.
     """
     # repeat the first row at the end to close the shape
-    coords = np.vstack((coords, coords[0, :]))
-    area = polygon_area(coords)
-    centroid = polygon_centroid(coords)
-    coords_centered = coords - centroid
-    inertia = polygon_inertia(coords_centered)
+    coordinates = np.vstack((coordinates, coordinates[0, :]))
+    area = polygon_area(coordinates)
+    centroid = polygon_centroid(coordinates)
+    coordinates_centered = coordinates - centroid
+    inertia = polygon_inertia(coordinates_centered)
 
     return {'area': area, 'centroid': centroid, 'inertia': inertia}
 
@@ -807,20 +807,20 @@ def define_halfedges(edges: list[Edge]) -> list[Halfedge]:
     # ax = fig.add_subplot(111)
     # ax.set_aspect('equal')
     # for edge in edges:
-    #     p1 = edge.v_i.coords
-    #     p2 = edge.v_j.coords
-    #     coords = np.row_stack((p1, p2))
-    #     ax.plot(coords[:, 0], coords[:, 1])
+    #     p1 = edge.v_i.coordinates
+    #     p2 = edge.v_j.coordinates
+    #     coordinates = np.row_stack((p1, p2))
+    #     ax.plot(coordinates[:, 0], coordinates[:, 1])
     # for h in halfedges:
     #     if h.nxt:
     #         h_nxt = h.nxt
     #         e = h.edge
     #         if h_nxt.edge:
     #             e_nxt = h_nxt.edge
-    #             p1 = (np.array(e.v_i.coords)
-    #                   + np.array(e.v_j.coords))/2.
-    #             p2 = (np.array(e_nxt.v_i.coords)
-    #                   + np.array(e_nxt.v_j.coords))/2.
+    #             p1 = (np.array(e.v_i.coordinates)
+    #                   + np.array(e.v_j.coordinates))/2.
+    #             p2 = (np.array(e_nxt.v_i.coordinates)
+    #                   + np.array(e_nxt.v_j.coordinates))/2.
     #             dx = p2 - p1
     #             ax.arrow(*p1, *dx)
     # plt.show()
@@ -893,7 +893,7 @@ def orient_loops(
     external_loops = []
     trivial_loops = []
     loop_areas = [
-        polygon_area(np.array([h.vertex.coords for h in loop])) for loop in loops
+        polygon_area(np.array([h.vertex.coordinates for h in loop])) for loop in loops
     ]
     for i, area in enumerate(loop_areas):
         if area > common.EPSILON:
@@ -929,11 +929,11 @@ def subdivide_polygon(
         pieces: shapely_Polygon objects that represent single fibers.
 
     """
-    outside_polygon = shapely_Polygon([h.vertex.coords for h in outside.halfedges])
+    outside_polygon = shapely_Polygon([h.vertex.coordinates for h in outside.halfedges])
     hole_polygons = []
     for hole in holes.values():
         hole_polygons.append(  # noqa: PERF401
-            shapely_Polygon([h.vertex.coords for h in hole.halfedges])
+            shapely_Polygon([h.vertex.coordinates for h in hole.halfedges])
         )
     remaining_polygon = outside_polygon
     for hole_polygon in hole_polygons:
@@ -1095,7 +1095,7 @@ def subdivide_hss_circ(
         _, ax = plt.subplots()
         ax.set_aspect('equal')
         for piece in pieces:
-            patch = Polygon(piece.exterior.coords, alpha=0.5, zorder=2)
+            patch = Polygon(piece.exterior.coordinates, alpha=0.5, zorder=2)
             ax.add_patch(patch)
         for piece in pieces:
             ax.scatter(piece.centroid.x, piece.centroid.y)
@@ -1137,13 +1137,13 @@ def print_halfedge_results(halfedges: list[Halfedge]) -> None:
 def plot_loop(halfedge_loop: list[Halfedge]) -> None:
     """Plot the vertices/edges of a list of halfedges."""
     num = len(halfedge_loop)
-    coords = np.full((num + 1, 2), 0.00)
+    coordinates = np.full((num + 1, 2), 0.00)
     for i, halfedge in enumerate(halfedge_loop):
-        coords[i, :] = halfedge.vertex.coords
-    coords[-1, :] = coords[0, :]
+        coordinates[i, :] = halfedge.vertex.coordinates
+    coordinates[-1, :] = coordinates[0, :]
     fig = plt.figure()
-    plt.plot(coords[:, 0], coords[:, 1])
-    plt.scatter(coords[:, 0], coords[:, 1])
+    plt.plot(coordinates[:, 0], coordinates[:, 1])
+    plt.scatter(coordinates[:, 0], coordinates[:, 1])
     fig.show()
 
 
@@ -1151,10 +1151,10 @@ def plot_edges(edges: list[Edge]) -> None:
     """Plot the given edges."""
     fig = plt.figure()
     for edge in edges:
-        coords = np.full((2, 2), 0.00)
-        coords[0, :] = edge.v_i.coords
-        coords[1, :] = edge.v_j.coords
-        plt.plot(coords[:, 0], coords[:, 1])
+        coordinates = np.full((2, 2), 0.00)
+        coordinates[0, :] = edge.v_i.coordinates
+        coordinates[1, :] = edge.v_j.coordinates
+        plt.plot(coordinates[:, 0], coordinates[:, 1])
     fig.show()
 
 
@@ -1165,7 +1165,7 @@ def sanity_checks(external: list[Halfedge], trivial: list[Halfedge]) -> None:
         print('Warning: Found trivial loop')  # noqa: T201
         for trv in trivial:
             for halfedge in trv:
-                print(halfedge.vertex.coords)  # noqa: T201
+                print(halfedge.vertex.coordinates)  # noqa: T201
             plot_loop(trv)
     #   We expect a single external loop
     if len(external) > 1:
@@ -1173,7 +1173,7 @@ def sanity_checks(external: list[Halfedge], trivial: list[Halfedge]) -> None:
         for i, ext in enumerate(external):
             print(i + 1)  # noqa: T201
             for halfedge in ext:
-                print(halfedge.vertex.coords)  # noqa: T201
+                print(halfedge.vertex.coordinates)  # noqa: T201
             plot_loop(ext)
 
 

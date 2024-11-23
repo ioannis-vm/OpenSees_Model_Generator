@@ -23,8 +23,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, TrussBar
 from osmg.analysis.solver import ModalResponseSpectrumAnalysis
+from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, TrussBar
 
 if TYPE_CHECKING:
     from osmg.analysis.solver import Analysis
@@ -72,11 +72,11 @@ def basic_forces(
             w_x, w_y, w_z = (0.00, 0.00, 0.00)
 
     if isinstance(elm, (ElasticBeamColumn, DispBeamColumn)):
-        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
     else:
-        p_i = np.array(elm.nodes[0].coords)
-        p_j = np.array(elm.nodes[1].coords)
+        p_i = np.array(elm.nodes[0].coordinates)
+        p_j = np.array(elm.nodes[1].coordinates)
 
     n_i, qy_i, qz_i = forces[0:3]
     t_i, my_i, mz_i = forces[3:6]

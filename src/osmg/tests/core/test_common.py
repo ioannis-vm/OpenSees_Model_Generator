@@ -1,14 +1,16 @@
 """Unit tests for common definitions."""
 
-from pytest import CaptureFixture
 from collections import OrderedDict
+
+from pytest import CaptureFixture
+
 from osmg.core.common import (
-    EPSILON,
     ALPHA,
+    EPSILON,
     methods,
-    print_methods,
-    print_dir,
     previous_element,
+    print_dir,
+    print_methods,
 )
 
 

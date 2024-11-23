@@ -13,25 +13,28 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import numpy.typing as npt
 
-from osmg.core import common, mesh
+from osmg.core import common
+from osmg.core.uid_object import UIDObject
+from osmg.geometry import mesh
 from osmg.geometry.mesh import Mesh, polygon_area
 
 if TYPE_CHECKING:
     from shapely.geometry import Polygon as shapely_Polygon
 
+    from osmg.creators.uid import UIDGenerator
     from osmg.elements.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 
 
-@dataclass
-class Section:
+@dataclass()
+class Section(UIDObject):
     """
     Section object.
 
@@ -54,7 +57,7 @@ class Section:
     """
 
     name: str
-    uid: int
+    uid_generator: UIDGenerator
 
 
 @dataclass
@@ -304,15 +307,15 @@ class FiberSection(Section):
             mult = 1.00
         res = 0.00
         for part in self.section_parts.values():
-            coords: nparr = np.array(
-                [h.vertex.coords for h in part.outside_shape.halfedges]
+            coordinates: nparr = np.array(
+                [h.vertex.coordinates for h in part.outside_shape.halfedges]
             )
-            area = polygon_area(coords)
+            area = polygon_area(coordinates)
             for hole in part.holes:
-                hole_coords: nparr = np.array(
-                    [h.vertex.coords for h in part.holes[hole].halfedges]
+                hole_coordinates: nparr = np.array(
+                    [h.vertex.coordinates for h in part.holes[hole].halfedges]
                 )
-                area -= polygon_area(hole_coords)
+                area -= polygon_area(hole_coordinates)
             density = part.physical_material.density
             # TODO(JVM): units
             res += area * density * common.G_CONST_IMPERIAL

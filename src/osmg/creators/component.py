@@ -43,18 +43,18 @@ from osmg.elements.element import (
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection, FiberSection
 from osmg.elements.uniaxial_material import Elastic
-from osmg.preprocessing.split_component import split_component
 from osmg.geometry.transformations import (
     local_axes_from_points_and_angle,
     transformation_matrix,
 )
+from osmg.preprocessing.split_component import split_component
 
 if TYPE_CHECKING:
     from osmg.core.level import Level
-    from osmg.mesh import Mesh
     from osmg.core.model import Model
     from osmg.core.osmg_collections import CollectionActive
     from osmg.elements.uniaxial_material import UniaxialMaterial
+    from osmg.mesh import Mesh
     from osmg.physical_material import PhysicalMaterial
 
 
@@ -154,7 +154,11 @@ def beam_placement_lookup(  # noqa: C901
                 }:
                     result_node = component.external_nodes.named_contents[snap]
                     e_o += np.array(
-                        (0.00, 0.00, node.coords[2] - result_node.coords[2])
+                        (
+                            0.00,
+                            0.00,
+                            node.coordinates[2] - result_node.coordinates[2],
+                        )
                     )
                     node = result_node
                     return node, e_o
@@ -259,7 +263,7 @@ class TrussBarCreator:
         lvl_key_j: int,
         offset_j: nparr,
         snap_j: str,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         area: float,
         mat: UniaxialMaterial,
         outside_shape: Mesh,
@@ -321,10 +325,10 @@ class TrussBarCreator:
         # offset, to move the ends of the brace back where we want
         # them to be. The effect of this is that the rigid offsets
         # (twonodelinks) will connect to that other node.
-        i_diff = np.array((xi_coord, yi_coord)) - np.array(node_i.coords[0:2])
+        i_diff = np.array((xi_coord, yi_coord)) - np.array(node_i.coordinates[0:2])
         if np.linalg.norm(i_diff) > common.EPSILON:
             eo_i[0:2] += i_diff
-        j_diff = np.array((xj_coord, yj_coord)) - np.array(node_j.coords[0:2])
+        j_diff = np.array((xj_coord, yj_coord)) - np.array(node_j.coordinates[0:2])
         if np.linalg.norm(j_diff) > common.EPSILON:
             eo_j[0:2] += j_diff
 
@@ -359,7 +363,7 @@ class TrussBarCreator:
             if np.linalg.norm(eo_x) > common.EPSILON:
                 int_node_x = Node(
                     self.model.uid_generator.new('node'),
-                    [*(np.array(node_x.coords) + eo_x)],
+                    [*(np.array(node_x.coordinates) + eo_x)],
                 )
                 component.internal_nodes.add(int_node_x)
                 n_x = int_node_x
@@ -375,14 +379,14 @@ class TrussBarCreator:
                 # upside down
                 if (
                     np.allclose(
-                        np.array(node_x.coords[0:2]),
-                        np.array(int_node_x.coords[0:2]),
+                        np.array(node_x.coordinates[0:2]),
+                        np.array(int_node_x.coordinates[0:2]),
                     )
-                    and int_node_x.coords[2] > node_x.coords[2]
+                    and int_node_x.coordinates[2] > node_x.coordinates[2]
                 ):
                     x_axis, y_axis, _ = local_axes_from_points_and_angle(
-                        np.array(int_node_x.coords),
-                        np.array(node_x.coords),
+                        np.array(int_node_x.coordinates),
+                        np.array(node_x.coordinates),
                         0.00,
                     )
                     elm_link = TwoNodeLink(
@@ -396,8 +400,8 @@ class TrussBarCreator:
                     )
                 else:
                     x_axis, y_axis, _ = local_axes_from_points_and_angle(
-                        np.array(node_x.coords),
-                        np.array(int_node_x.coords),
+                        np.array(node_x.coordinates),
+                        np.array(int_node_x.coordinates),
                         0.00,
                     )
                     elm_link = TwoNodeLink(
@@ -498,7 +502,7 @@ class BeamColumnCreator:
         node_j: Node,
         offset_i: nparr,
         offset_j: nparr,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         section: ElasticSection | FiberSection,
         angle: float = 0.00,
         modified_stiffness_config: ModifiedStiffnessParameterConfig | None = None,
@@ -515,21 +519,22 @@ class BeamColumnCreator:
         Raises:
           ValueError: If an invalid element type is provided.
         """
-        p_i = np.array(node_i.coords) + offset_i
-        p_j = np.array(node_j.coords) + offset_j
+        p_i = np.array(node_i.coordinates) + offset_i
+        p_j = np.array(node_j.coordinates) + offset_j
         axes = local_axes_from_points_and_angle(p_i, p_j, angle)  # type: ignore
         if self.element_type == 'elastic':
             assert isinstance(section, ElasticSection)
             transf = GeomTransf(
-                transf_type,
-                self.model.uid_generator.new('transformation'),
-                offset_i,
-                offset_j,
-                *axes,
+                uid_generator=self.model.uid_generator,
+                transf_type=transf_type,
+                offset_i=offset_i,
+                offset_j=offset_j,
+                x_axis=axes[0],
+                y_axis=axes[1],
+                z_axis=axes[2],
             )
             elm_el = ElasticBeamColumn(
-                parent_component=assembly,
-                uid=self.model.uid_generator.new('element'),
+                uid_generator=self.model.uid_generator,
                 nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
@@ -548,13 +553,13 @@ class BeamColumnCreator:
                 *axes,
             )
             beam_integration = Lobatto(
-                uid=self.model.uid_generator.new('beam integration'),
+                uid_generator=self.model.uid_generator,
                 parent_section=section,
                 n_p=2,
             )
             elm_disp = DispBeamColumn(
+                uid_generator=self.model.uid_generator,
                 parent_component=assembly,
-                uid=self.model.uid_generator.new('element'),
                 nodes=[node_i, node_j],
                 section=section,
                 geomtransf=transf,
@@ -601,22 +606,25 @@ class BeamColumnCreator:
         eo_i: nparr,
         eo_j: nparr,
         n_sub: int,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         section: ElasticSection | FiberSection,
-        element_type: type[ElasticBeamColumn, DispBeamColumn],
         angle: float,
-        initial_deformation_config: InitialDeformationConfig,
+        initial_deformation_config: InitialDeformationConfig | None = None,
         modified_stiffness_config: ModifiedStiffnessParameterConfig | None = None,
     ) -> None:
         """Add beamcolumn elements in series."""
         if modified_stiffness_config is not None:
             assert n_sub == 1
 
+        num_dimensions = len(node_i.coordinates)
+
         if n_sub > 1:
-            p_i = np.array(node_i.coords) + eo_i
-            p_j = np.array(node_j.coords) + eo_j
+            p_i = np.array(node_i.coordinates) + eo_i
+            p_j = np.array(node_j.coordinates) + eo_j
             clear_len = np.linalg.norm(p_j - p_i)
-            internal_pt_coords = np.linspace(tuple(p_i), tuple(p_j), num=n_sub + 1)
+            internal_pt_coordinates = np.linspace(
+                tuple(p_i), tuple(p_j), num=n_sub + 1
+            )
 
             if initial_deformation_config:
                 t_vals = np.linspace(0.00, 1.00, num=n_sub + 1)
@@ -639,13 +647,13 @@ class BeamColumnCreator:
                 t_glob_to_loc = transformation_matrix(x_axis, y_axis, z_axis)
                 t_loc_to_glob = t_glob_to_loc.T
                 camber_offset_global = (t_loc_to_glob @ camber_offset.T).T
-                internal_pt_coords += camber_offset_global
+                internal_pt_coordinates += camber_offset_global
 
             intnodes = []
-            for i in range(1, len(internal_pt_coords) - 1):
+            for i in range(1, len(internal_pt_coordinates) - 1):
                 intnode = Node(
-                    self.model.uid_generator.new('node'),
-                    [*internal_pt_coords[i]],
+                    self.model.uid_generator,
+                    [*internal_pt_coordinates[i]],
                 )
                 component.internal_nodes.add(intnode)
                 intnodes.append(intnode)
@@ -655,13 +663,13 @@ class BeamColumnCreator:
                 o_i = eo_i
             else:
                 n_i = intnodes[i - 1]
-                o_i = np.zeros(3)
+                o_i = np.zeros(num_dimensions)
             if i == n_sub - 1:
                 n_j = node_j
                 o_j = eo_j
             else:
                 n_j = intnodes[i]
-                o_j = np.zeros(3)
+                o_j = np.zeros(num_dimensions)
             element = self.define_beamcolumn(
                 assembly=component,
                 node_i=n_i,
@@ -670,7 +678,6 @@ class BeamColumnCreator:
                 offset_j=o_j,
                 transf_type=transf_type,
                 section=section,
-                element_type=element_type,
                 angle=angle,
                 modified_stiffness_config=modified_stiffness_config,
             )
@@ -678,18 +685,16 @@ class BeamColumnCreator:
 
     def generate_plain_component_assembly(
         self,
-        component_purpose: str,
-        lvl: Level,
+        tags: set[str],
         node_i: Node,
         node_j: Node,
         n_sub: int,
         eo_i: nparr,
         eo_j: nparr,
         section: ElasticSection | FiberSection,
-        element_type: type[ElasticBeamColumn, DispBeamColumn],
-        transf_type: str,
-        angle: float,
-        initial_deformation_config: InitialDeformationConfig,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
+        angle: float = 0.00,
+        initial_deformation_config: InitialDeformationConfig | None = None,
     ) -> ComponentAssembly:
         """
         Plain component assembly.
@@ -700,23 +705,17 @@ class BeamColumnCreator:
         Returns:
           The created component assembly.
         """
-        assert isinstance(node_i, Node)
-        assert isinstance(node_j, Node)
+        # TODO(JVM): restore this check
+        # uids = [node.uid for node in (node_i, node_j)]
+        # uids.sort()
+        # uids_tuple = (*uids,)
+        # assert uids_tuple not in self.model.component_connectivity()
 
-        uids = [node.uid for node in (node_i, node_j)]
-        uids.sort()
-        uids_tuple = (*uids,)
-        assert uids_tuple not in self.model.component_connectivity()
+        # instantiate a component assembly and add it to the model.
+        component = ComponentAssembly(self.model.uid_generator, tags=tags)
+        self.model.components.add(component)
 
-        # instantiate a component assembly
-        component = ComponentAssembly(
-            uid=self.model.uid_generator.new('component'),
-            parent_collection=lvl.components,
-            component_purpose=component_purpose,
-        )
-        # add it to the level
-        lvl.components.add(component)
-        # fill component assembly
+        # populate the component assembly
         component.external_nodes.add(node_i)
         component.external_nodes.add(node_j)
 
@@ -729,7 +728,6 @@ class BeamColumnCreator:
             n_sub=n_sub,
             transf_type=transf_type,
             section=section,
-            element_type=element_type,
             angle=angle,
             initial_deformation_config=initial_deformation_config,
         )
@@ -746,8 +744,7 @@ class BeamColumnCreator:
         eo_i: nparr,
         eo_j: nparr,
         section: ElasticSection | FiberSection,
-        element_type: type[ElasticBeamColumn, DispBeamColumn],
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         angle: float,
         initial_deformation_config: InitialDeformationConfig,
         modified_stiffness_config: ModifiedStiffnessParameterConfig | None,
@@ -782,8 +779,8 @@ class BeamColumnCreator:
         # add it to the level
         lvl.components.add(component)
 
-        p_i = np.array(node_i.coords) + eo_i
-        p_j = np.array(node_j.coords) + eo_j
+        p_i = np.array(node_i.coordinates) + eo_i
+        p_j = np.array(node_j.coordinates) + eo_j
         axes = local_axes_from_points_and_angle(p_i, p_j, angle)
         x_axis, y_axis, _ = axes
         clear_length = np.linalg.norm(p_j - p_i)
@@ -893,7 +890,7 @@ class BeamColumnCreator:
         y_coord: float,
         offset_i: nparr,
         offset_j: nparr,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         n_sub: int,
         section: ElasticSection | FiberSection,
         element_type: type[ElasticBeamColumn | DispBeamColumn],
@@ -935,8 +932,8 @@ class BeamColumnCreator:
             # check for a panel zone
             top_node = look_for_panel_zone(top_node, lvl, query)
 
-            p_i = np.array(top_node.coords) + offset_i
-            p_j = np.array(bottom_node.coords) + offset_j
+            p_i = np.array(top_node.coordinates) + offset_i
+            p_j = np.array(bottom_node.coordinates) + offset_j
             sec_offset_global = retrieve_snap_pt_global_offset(
                 placement, section, p_i, p_j, angle
             )
@@ -975,7 +972,7 @@ class BeamColumnCreator:
         offset_j: nparr,
         snap_i: str,
         snap_j: str,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         n_sub: int,
         section: ElasticSection,
         element_type: type[ElasticBeamColumn | DispBeamColumn],
@@ -1084,7 +1081,7 @@ class BeamColumnCreator:
         offset_j: nparr,
         snap_i: str,
         snap_j: str,
-        transf_type: str,
+        transf_type: Literal['Elastic', 'Corotational', 'PDelta'],
         n_sub: int,
         section: ElasticSection,
         element_type: type[ElasticBeamColumn | DispBeamColumn],
@@ -1218,8 +1215,10 @@ class BeamColumnCreator:
             # add it to the level
             lvl.components.add(component)
 
-            p_i: nparr = np.array(top_node.coords)
-            p_j = np.array(top_node.coords) + np.array((0.00, 0.00, -beam_depth))
+            p_i: nparr = np.array(top_node.coordinates)
+            p_j = np.array(top_node.coordinates) + np.array(
+                (0.00, 0.00, -beam_depth)
+            )
             x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
                 p_i, p_j, angle
             )  # type: ignore

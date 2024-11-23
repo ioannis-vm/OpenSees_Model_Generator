@@ -21,15 +21,15 @@ import plotly.graph_objects as go  # type: ignore
 
 from osmg import transformations
 from osmg.core.common import ALPHA, TINY
+from osmg.elements import element
 from osmg.graphics import graphics_common, graphics_common_3d
 from osmg.graphics.preprocessing_3d import add_data__global_axes
-from osmg.elements import element
 from osmg.postprocessing.basic_forces import basic_forces
 
 if TYPE_CHECKING:
+    from osmg.analysis.solver import Analysis
     from osmg.core.model import Model
     from osmg.elements.node import Node
-    from osmg.analysis.solver import Analysis
 
 
 nparr = npt.NDArray[np.float64]
@@ -104,8 +104,8 @@ def interp_3d_deformation(
 
     # discrete sample location parameter
     t_vec = np.linspace(0.00, 1.00, num=num_points)
-    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+    p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+    p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
     len_clr = np.linalg.norm(p_i - p_j)
 
     # shape function matrices
@@ -184,11 +184,11 @@ def interp_3d_points(
       The interpolated points.
     """
     if not isinstance(elm, element.TrussBar):
-        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
     else:
-        p_i = np.array(elm.nodes[0].coords)
-        p_j = np.array(elm.nodes[1].coords)
+        p_i = np.array(elm.nodes[0].coordinates)
+        p_j = np.array(elm.nodes[1].coordinates)
     element_point_samples: nparr = np.column_stack(
         (
             np.linspace(p_i[0], p_j[0], num=num_points),
@@ -257,8 +257,8 @@ def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
                 y_vec,
                 z_vec,
             ) = transformations.local_axes_from_points_and_angle(
-                np.array(elm.nodes[0].coords),
-                np.array(elm.nodes[1].coords),
+                np.array(elm.nodes[0].coordinates),
+                np.array(elm.nodes[1].coordinates),
                 0.00,
             )
             outside_shape = elm.outside_shape
@@ -300,10 +300,10 @@ def add_data__extruded_line_elms_deformed_mesh(  # noqa: C901
             loop = outside_shape.halfedges
             for halfedge in loop:
                 assert halfedge.nxt is not None
-                z_a = halfedge.vertex.coords[0]
-                y_a = halfedge.vertex.coords[1]
-                z_b = halfedge.nxt.vertex.coords[0]
-                y_b = halfedge.nxt.vertex.coords[1]
+                z_a = halfedge.vertex.coordinates[0]
+                y_a = halfedge.vertex.coordinates[1]
+                z_b = halfedge.nxt.vertex.coordinates[0]
+                y_b = halfedge.nxt.vertex.coordinates[1]
                 defo_ia_global = (
                     z_a * z_vec
                     + y_a * y_vec
@@ -503,8 +503,8 @@ def add_data__line_elm_offsets_deformed(
         if np.array_equal(elm.geomtransf.offset_i, np.zeros(3)):
             if np.array_equal(elm.geomtransf.offset_j, np.zeros(3)):
                 continue
-        p_i: nparr = np.array(elm.nodes[0].coords)
-        p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+        p_i: nparr = np.array(elm.nodes[0].coordinates)
+        p_io: nparr = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
         offset_i = elm.geomtransf.offset_i
         u_i: nparr = np.array(
             analysis.results[case_name].node_displacements[elm.nodes[0].uid][step][
@@ -518,8 +518,8 @@ def add_data__line_elm_offsets_deformed(
         )
         u_io: nparr = transformations.offset_transformation(offset_i, u_i, r_i)
 
-        p_j: nparr = np.array(elm.nodes[1].coords)
-        p_jo: nparr = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_j: nparr = np.array(elm.nodes[1].coordinates)
+        p_jo: nparr = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         offset_j = elm.geomtransf.offset_j
         u_j: nparr = np.array(
             analysis.results[case_name].node_displacements[elm.nodes[1].uid][step][
@@ -568,11 +568,11 @@ def add_data__frames_undeformed(
 
     for elm in list_of_line_elems:
         if isinstance(elm, element.TrussBar):
-            p_i = np.array(elm.nodes[0].coords)
-            p_j = np.array(elm.nodes[1].coords)
+            p_i = np.array(elm.nodes[0].coordinates)
+            p_j = np.array(elm.nodes[1].coordinates)
         else:
-            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+            p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
 
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
@@ -604,7 +604,7 @@ def add_data__nodes_deformed(
     location_data = np.full((len(list_of_nodes), 3), 0.00)
     displacement_data = np.full((len(list_of_nodes), 6), 0.00)
     for i, node in enumerate(list_of_nodes):
-        location_data[i, :] = node.coords
+        location_data[i, :] = node.coordinates
         displacement_data[i, :] = analysis.results[case_name].node_displacements[
             node.uid
         ][step]
@@ -1151,13 +1151,13 @@ def show_basic_forces(  # noqa: C901, PLR0914, PLR0915
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
-            i_pos = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+            i_pos = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+            p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         else:
-            p_i = np.array(elm.nodes[0].coords)
-            p_j = np.array(elm.nodes[1].coords)
-            i_pos = np.array(elm.nodes[0].coords)
+            p_i = np.array(elm.nodes[0].coordinates)
+            p_j = np.array(elm.nodes[1].coordinates)
+            i_pos = np.array(elm.nodes[0].coordinates)
             (
                 x_vec,
                 y_vec,
@@ -1687,13 +1687,13 @@ def show_basic_forces_combo(  # noqa: C901, PLR0914, PLR0915
             x_vec = elm.geomtransf.x_axis
             y_vec = elm.geomtransf.y_axis
             z_vec = elm.geomtransf.z_axis
-            i_pos = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-            p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-            p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+            i_pos = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+            p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+            p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         else:
-            p_i = np.array(elm.nodes[0].coords)
-            p_j = np.array(elm.nodes[1].coords)
-            i_pos = np.array(elm.nodes[0].coords)
+            p_i = np.array(elm.nodes[0].coordinates)
+            p_j = np.array(elm.nodes[1].coordinates)
+            i_pos = np.array(elm.nodes[0].coordinates)
             (
                 x_vec,
                 y_vec,

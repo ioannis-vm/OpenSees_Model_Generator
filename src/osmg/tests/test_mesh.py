@@ -1,8 +1,9 @@
 """Unit tests for Vertex, Edge, and Halfedge classes."""
 
-import pytest
 import numpy as np
-from osmg.geometry.mesh import Vertex, Edge, Halfedge
+import pytest
+
+from osmg.geometry.mesh import Edge, Halfedge, Vertex
 
 
 class TestVertex:
@@ -11,7 +12,7 @@ class TestVertex:
     def test_vertex_initialization(self):
         """Test that a Vertex initializes correctly."""
         v = Vertex((0.0, 0.0))
-        assert v.coords == (0.0, 0.0)
+        assert v.coordinates == (0.0, 0.0)
         assert v.edges == []
         assert v.halfedges == []
         assert isinstance(v.uid, int)

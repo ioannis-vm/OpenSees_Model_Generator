@@ -12,19 +12,21 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from functools import total_ordering
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
+from osmg.core.uid_object import UIDObject
 from osmg.graphics.visibility import NodeVisibility
 
 if TYPE_CHECKING:
     from osmg.creators.uid import UIDGenerator
+    from osmg.elements.node import Node
 
-@dataclass
+
 @total_ordering
-class Node:
+@dataclass()
+class Node(UIDObject):
     """
     OpenSees node.
 
@@ -33,24 +35,18 @@ class Node:
     Attributes:
     ----------
         uid_generator: Unique ID generator object.
-        coords: List of node coordinates.
+        coordinates: List of node coordinates.
         uid: Unique ID of the node, assigned using the generator object.
         restraint: List of boolean values identifying whether the
           corresponding DOF is restrained.
-
     """
 
-    coords: list[float]
-    uid_generator: UIDGenerator
-    uid: list[bool] = field(init=False)
-    restraint: list[bool] = field(init=False)
+    coordinates: tuple[float, ...]
     visibility: NodeVisibility = field(default_factory=NodeVisibility)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self.restraint = [False] * 6
         self.uid = self.uid_generator.new(self)
-        
 
     def __le__(self, other: Self) -> bool:
         """
@@ -71,6 +67,5 @@ class Node:
         res = ''
         res += 'Node object\n'
         res += f'  uid: {self.uid}\n'
-        res += f'  coords: {self.coords}\n'
-        res += f'  restraint: {self.restraint}\n'
+        res += f'  coordinates: {self.coordinates}\n'
         return res

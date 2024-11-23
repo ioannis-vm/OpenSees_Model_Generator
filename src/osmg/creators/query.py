@@ -27,8 +27,8 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core import common
-from osmg.geometry.line import Line
 from osmg.elements import element
+from osmg.geometry.line import Line
 
 if TYPE_CHECKING:
     from osmg.core.component_assemblies import ComponentAssembly
@@ -113,7 +113,7 @@ class ElmQuery:
             for comp in level.components.values():
                 nodes.update(comp.internal_nodes)
         for other_node in nodes.values():
-            other_pt: nparr = np.array(other_node.coords[:ndims])
+            other_pt: nparr = np.array(other_node.coordinates[:ndims])
             if np.linalg.norm(candidate_pt - other_pt) < common.EPSILON:
                 res = other_node
                 break
@@ -225,11 +225,11 @@ class ElmQuery:
 
             for elm in line_elems:
                 if isinstance(elm, element.TrussBar):
-                    p_i = np.array(elm.nodes[0].coords)
-                    p_j = np.array(elm.nodes[1].coords)
+                    p_i = np.array(elm.nodes[0].coordinates)
+                    p_j = np.array(elm.nodes[1].coordinates)
                 else:
-                    p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-                    p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+                    p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+                    p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
                 if np.linalg.norm(p_i[0:2] - p_j[0:2]) < common.EPSILON:
                     if (
                         np.linalg.norm(np.array((x_loc, y_loc)) - p_i[0:2])

@@ -39,10 +39,10 @@ from scipy.interpolate import interp1d
 from tqdm import tqdm
 
 from osmg.core import common, transformations
-from osmg.creators.query import LoadCaseQuery
-from osmg.graphics import general_2d
 from osmg.core.osmg_collections import Collection
+from osmg.creators.query import LoadCaseQuery
 from osmg.elements import element, uniaxial_material
+from osmg.graphics import general_2d
 
 if TYPE_CHECKING:
     from osmg.core.load_case import LoadCase
@@ -330,7 +330,7 @@ class Analysis:
                 msg = f'Node already defined: {uid}'
                 raise KeyError(msg)
             defined_nodes[uid] = node
-            ops.node(node.uid, *node.coords)
+            ops.node(node.uid, *node.coordinates)
 
         # restraints
         for node in primary_nodes.values():
@@ -467,22 +467,11 @@ class Analysis:
         # node constraints #
         # ~~~~~~~~~~~~~~~~ #
 
-        if self.load_cases[case_name].equaldof is None:
-            for uid in parent_nodes:
-                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
-                nodes = lvl.nodes.values()
-                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-                ops.rigidDiaphragm(3, uid, *[x.uid for x in good_nodes])
-        else:
-            dof = self.load_cases[case_name].equaldof
-            for uid in parent_nodes:
-                lvl = self.mdl.levels[parent_node_to_lvl[uid]]
-                nodes = lvl.nodes.values()
-                good_nodes = [n for n in nodes if n.coords[2] == lvl.elevation]
-                for node in good_nodes:
-                    if node.uid == uid:
-                        continue
-                    ops.equalDOF(uid, node.uid, dof)
+        for uid in parent_nodes:
+            lvl = self.mdl.levels[parent_node_to_lvl[uid]]
+            nodes = lvl.nodes.values()
+            good_nodes = [n for n in nodes if n.coordinates[2] == lvl.elevation]
+            ops.rigidDiaphragm(3, uid, *[x.uid for x in good_nodes])
 
         # ~~~~~~~~~~~~~~~~~ #
         # node spring field #
@@ -508,7 +497,7 @@ class Analysis:
                 # define a conjugate node that is fixed.
                 node_uid = uidgen.new('node')
                 elm_uid = uidgen.new('element')
-                ops.node(node_uid, *node.coords)
+                ops.node(node_uid, *node.coordinates)
                 ops.fix(node_uid, 1, 1, 1, 1, 1, 1)
                 # connect the nodes to the fixed node using the soft
                 # spring.
@@ -634,8 +623,8 @@ class Analysis:
                     y_vec,
                     z_vec,
                 ) = transformations.local_axes_from_points_and_angle(
-                    np.array(elm.nodes[0].coords),
-                    np.array(elm.nodes[1].coords),
+                    np.array(elm.nodes[0].coordinates),
+                    np.array(elm.nodes[1].coordinates),
                     0.00,
                 )
             transf_global2local: nparr = np.vstack((x_vec, y_vec, z_vec))
@@ -711,9 +700,9 @@ class Analysis:
         for node in lvl.nodes.values():
             if True in node.restraint:
                 uid = node.uid
-                x_coord = node.coords[0]
-                y_coord = node.coords[1]
-                z_coord = node.coords[2]
+                x_coord = node.coordinates[0]
+                y_coord = node.coordinates[1]
+                z_coord = node.coordinates[2]
                 local_reaction = np.array(
                     self.results[case_name].node_reactions[uid][step]
                 )
@@ -863,8 +852,8 @@ class ModalAnalysis(Analysis):
                         y_vec,
                         z_vec,
                     ) = transformations.local_axes_from_points_and_angle(
-                        np.array(elm.nodes[0].coords),
-                        np.array(elm.nodes[1].coords),
+                        np.array(elm.nodes[0].coordinates),
+                        np.array(elm.nodes[1].coordinates),
                         0.00,
                     )
                 else:
@@ -2175,7 +2164,7 @@ class THAnalysis(GravityPlusAnalysis):
                                                 n_steps_success
                                             ][0:2]
                                         )
-                                        / pnode.coords[2]
+                                        / pnode.coordinates[2]
                                     )
                                 )
                             else:
@@ -2198,8 +2187,8 @@ class THAnalysis(GravityPlusAnalysis):
                                             )
                                         )
                                         / (
-                                            pnode.coords[2]
-                                            - pnodes[lvl_idx - 1].coords[2]
+                                            pnode.coordinates[2]
+                                            - pnodes[lvl_idx - 1].coordinates[2]
                                         )
                                     )
                                 )

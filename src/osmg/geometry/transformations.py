@@ -142,76 +142,159 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
 
 def local_axes_from_points_and_angle(
     point_i: nparr, point_j: nparr, ang: float
-) -> tuple[nparr, nparr, nparr]:
+) -> tuple[nparr, ...]:
     """
-    Local axes from two points and an orientation angle.
+    Calculate local axes from two points and a rotation angle.
 
-    Given a start point, and end point, and an angle,
-    obtain the local coordinate system of a linear element.
+    This function computes the local coordinate system for a linear element
+    defined by a start and end point, optionally applying a rotation angle
+    around the local x-axis. It supports both 2D and 3D coordinate systems.
+    In 2D, the y-axis is omitted, and the local coordinate system is defined
+    in the XZ plane, with the Y axis assumed to point out of the screen. In 3D,
+    the full local coordinate system is calculated.
 
-    Arguments:
-        point_i: Start point
-        point_j: End point
-        ang: Parameter that controls the rotation of the section
-          around the x-axis. Counterclockwise rotation is
-          posotive. 0.00 corresponds to vertical elements whose local
-          z axis coincides with the local x axis, and horizontal
-          elements whose local z axis is horizontal.
+    Args:
+        point_i (nparr): The start point of the element.
+        point_j (nparr): The end point of the element.
+        ang (float): Rotation angle in radians around the local x-axis.
 
     Returns:
-    -------
-        Local coordinate system
-        vectors. The first element is the local x axis, the second
-        element is the local y axis, and the third element is the
-        local z axis.
+        tuple[nparr, nparr | None, nparr]: A tuple containing:
+            - The local x-axis (nparr).
+            - The local y-axis (nparr) or None (in 2D).
+            - The local z-axis (nparr).
 
     Raises:
-    ------
-        ValueError: If the start point and end point define a vertical element
-            that is defined upside down (i.e., with the start point at a lower
-            height than the end point).
-
-    Note:
-        For vertical elements, the local x axis will be the vector connecting
-        the start and end points, and the local z axis will be perpendicular
-        to the local x axis and lying on the plane defined by the global xy
-        plane and the local x axis. For horizontal elements, the local z axis
-        will be parallel to the global z axis.
+        ValueError: If the input points do not have the same dimension.
+        ValueError: If a vertical element in 3D is defined upside down.
+        ValueError: If the coordinates are not 2D or 3D.
 
     Example:
-        >>> point_i = np.array([0, 0, 0])
-        >>> point_j = np.array([1, 0, 0])
-        >>> ang = 0
-        >>> local_axes_from_points_and_angle(point_i, point_j, ang)
-        (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))
+        For 3D:
+            >>> point_i = np.array([0, 0, 0])
+            >>> point_j = np.array([1, 0, 0])
+            >>> ang = 0
+            >>> local_axes_from_points_and_angle(point_i, point_j, ang)
+            (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))
 
+        For 2D:
+            >>> point_i = np.array([0, 0])
+            >>> point_j = np.array([1, 0])
+            >>> ang = 0
+            >>> local_axes_from_points_and_angle(point_i, point_j, ang)
+            (array([1., 0.]), None, array([ 0., -1.]))
+    """
+    if point_i.shape != point_j.shape:
+        raise ValueError('Start and end points must have the same dimension.')
+
+    # Determine 2D or 3D
+    dim = point_i.shape[0]
+    if dim == 2:
+        return _local_axes_2d(point_i, point_j, ang)
+    elif dim == 3:
+        return _local_axes_3d(point_i, point_j, ang)
+    else:
+        raise ValueError('Only 2D or 3D coordinates are supported.')
+
+
+def _local_axes_2d(
+    point_i: nparr, point_j: nparr, ang: float
+) -> tuple[nparr, None, nparr]:
+    """
+    Compute local axes for a 2D linear element.
+
+    In the 2D case, the local coordinate system is defined in the XZ plane,
+    with the Y axis pointing out of the screen. This function calculates the
+    local x-axis based on the direction of the line and derives the z-axis
+    by rotating the x-axis 90 degrees counterclockwise.
+
+    Args:
+        point_i (nparr): The start point of the element.
+        point_j (nparr): The end point of the element.
+        ang (float): Rotation angle (not used in the 2D case).
+
+    Returns:
+        tuple[nparr, None, nparr]: A tuple containing:
+            - The local x-axis (nparr).
+            - None for the y-axis (2D case).
+            - The local z-axis (nparr).
+
+    Example:
+        >>> point_i = np.array([0, 0])
+        >>> point_j = np.array([1, 0])
+        >>> _local_axes_2d(point_i, point_j, 0)
+        (array([1., 0.]), None, array([ 0., -1.]))
     """
     # x-axis
     x_axis = point_j - point_i
     x_axis /= np.linalg.norm(x_axis)
-    # y and z axes
-    diff = np.abs(np.linalg.norm(x_axis - np.array([0.00, 0.00, -1.00])))
+
+    # z-axis: Rotate x-axis by 90 degrees
+    z_axis = np.array([-x_axis[1], x_axis[0]])
+    z_axis /= np.linalg.norm(z_axis)
+
+    # No y-axis in 2D
+    return x_axis, None, z_axis
+
+
+def _local_axes_3d(
+    point_i: nparr, point_j: nparr, ang: float
+) -> tuple[nparr, nparr, nparr]:
+    """
+    Compute local axes for a 3D linear element.
+
+    In the 3D case, the local coordinate system consists of the x-axis,
+    y-axis, and z-axis. The function accounts for special cases such as
+    vertical elements and applies the specified rotation angle around
+    the x-axis.
+
+    Args:
+        point_i (nparr): The start point of the element.
+        point_j (nparr): The end point of the element.
+        ang (float): Rotation angle in radians around the local x-axis.
+
+    Returns:
+        tuple[nparr, nparr, nparr]: A tuple containing:
+            - The local x-axis (nparr).
+            - The local y-axis (nparr).
+            - The local z-axis (nparr).
+
+    Raises:
+        ValueError: If the element is vertical and defined upside down.
+
+    Example:
+        >>> point_i = np.array([0, 0, 0])
+        >>> point_j = np.array([1, 0, 0])
+        >>> ang = np.pi / 4
+        >>> _local_axes_3d(point_i, point_j, ang)
+        (array([1., 0., 0.]), array([0., 0., 1.]), array([ 0., -1.,  0.]))
+    """
+    # x-axis
+    x_axis = point_j - point_i
+    x_axis /= np.linalg.norm(x_axis)
+
+    # Check if the element is vertical
+    diff = np.abs(np.linalg.norm(x_axis - np.array([0.0, 0.0, -1.0])))
     if diff < common.EPSILON:
-        # vertical case
-        z_axis: nparr = np.array([np.cos(ang), np.sin(ang), 0.0])
-        y_axis: nparr = np.cross(z_axis, x_axis)
+        # Vertical case
+        z_axis = np.array([np.cos(ang), np.sin(ang), 0.0])
+        y_axis = np.cross(z_axis, x_axis)
     else:
-        # not vertical case.
-        # check if the element is upside down
-        diff = np.abs(np.linalg.norm(x_axis - np.array([0.00, 0.00, 1.00])))
+        # Non-vertical case
+        diff = np.abs(np.linalg.norm(x_axis - np.array([0.0, 0.0, 1.0])))
         if diff < common.EPSILON:
-            msg = 'Vertical element defined upside down'
-            raise ValueError(msg)
-        up_direction: nparr = np.array([0.0, 0.0, 1.0])
-        # orthogonalize with respect to x-axis
+            raise ValueError('Vertical element defined upside down.')
+
+        up_direction = np.array([0.0, 0.0, 1.0])
+        # Orthogonalize y-axis with respect to x-axis
         y_axis = up_direction - np.dot(up_direction, x_axis) * x_axis
-        # ..and normalize
         y_axis /= np.linalg.norm(y_axis)
         y_axis = np.dot(rotation_matrix_3d(x_axis, ang), y_axis)
+
         # z-axis
         z_axis = np.cross(x_axis, y_axis)
 
-    return x_axis, y_axis, z_axis  # type: ignore
+    return x_axis, y_axis, z_axis
 
 
 def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:

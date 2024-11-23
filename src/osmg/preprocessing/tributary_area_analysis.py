@@ -187,9 +187,9 @@ class TributaryAreaAnaysis:
             back_nd = panel_zone.external_nodes.named_contents['middle_back']
             front_nd = panel_zone.external_nodes.named_contents['middle_front']
             main_nd = panel_zone.external_nodes.named_contents['top_node']
-            back_offset: nparr = np.array(main_nd.coords) - np.array(back_nd.coords)
-            front_offset: nparr = np.array(main_nd.coords) - np.array(
-                front_nd.coords
+            back_offset: nparr = np.array(main_nd.coordinates) - np.array(back_nd.coordinates)
+            front_offset: nparr = np.array(main_nd.coordinates) - np.array(
+                front_nd.coordinates
             )
             pz_node[back_nd.uid] = {
                 'substitute_node': main_nd,
@@ -238,13 +238,13 @@ class TributaryAreaAnaysis:
                     eo_j = eo_j.copy() + sub_data['additional_offset']
 
                 if n_i.uid not in vertex_map:
-                    vrt_i = mesh.Vertex((n_i.coords[0], n_i.coords[1]))
+                    vrt_i = mesh.Vertex((n_i.coordinates[0], n_i.coordinates[1]))
                     vertex_map[n_i.uid] = vrt_i
                     vertices[vrt_i.uid] = vrt_i
                 else:
                     vrt_i = vertex_map[n_i.uid]
                 if n_j.uid not in vertex_map:
-                    vrt_j = mesh.Vertex((n_j.coords[0], n_j.coords[1]))
+                    vrt_j = mesh.Vertex((n_j.coordinates[0], n_j.coordinates[1]))
                     vertex_map[n_j.uid] = vrt_j
                     vertices[vrt_j.uid] = vrt_j
                 else:
@@ -252,7 +252,7 @@ class TributaryAreaAnaysis:
 
                 if np.linalg.norm(eo_i) >= common.EPSILON:
                     # there is a rigid offset and/or panel zone
-                    point = np.array(vrt_i.coords) + eo_i
+                    point = np.array(vrt_i.coordinates) + eo_i
                     vrt_oi = mesh.Vertex((point[0], point[1]))
                     vertices[vrt_oi.uid] = vrt_oi
                     edg_oi = mesh.Edge(vrt_i, vrt_oi)
@@ -263,7 +263,7 @@ class TributaryAreaAnaysis:
                     connecting_vertex_i = vrt_i
                 if np.linalg.norm(eo_j) >= common.EPSILON:
                     # there is a rigid offset and/or panel zone
-                    point = np.array(vrt_j.coords) + eo_j
+                    point = np.array(vrt_j.coordinates) + eo_j
                     vrt_oj = mesh.Vertex((point[0], point[1]))
                     vertices[vrt_oj.uid] = vrt_oj
                     edg_oj = mesh.Edge(vrt_j, vrt_oj)
@@ -283,8 +283,8 @@ class TributaryAreaAnaysis:
         # enames = []
         # for i, edge_key in enumerate(edges):
         #     edge = edges[edge_key]
-        #     edf.loc[i*3+0, 'x':'y'] = edge.v_i.coords
-        #     edf.loc[i*3+1, 'x':'y'] = edge.v_j.coords
+        #     edf.loc[i*3+0, 'x':'y'] = edge.v_i.coordinates
+        #     edf.loc[i*3+1, 'x':'y'] = edge.v_j.coordinates
         #     edf.loc[i*3+2, 'x':'y'] = (None, None)
         #     enames.extend((f'E{edge.uid} to V{edge.v_i.uid}',
         #                    f'E{edge.uid} to V{edge.v_j.uid}', None))
@@ -293,7 +293,7 @@ class TributaryAreaAnaysis:
         # vnames = []
         # for i, vertex_key in enumerate(vertices):
         #     vertex = vertices[vertex_key]
-        #     vdf.loc[i, 'x':'y'] = vertex.coords
+        #     vdf.loc[i, 'x':'y'] = vertex.coordinates
         #     vnames.append(vertex.uid)
         # edf = edf + np.random.normal(0.00, 0.10, edf.shape)
         # import plotly.express as px
@@ -322,10 +322,10 @@ class TributaryAreaAnaysis:
                         msg += 'indicates the presence of '
                         msg += 'overlapping elements.\n'
                         msg += 'Check the model at the following locations:\n'
-                        msg += f'{considered_edge.v_i.coords}'
-                        msg += f'{considered_edge.v_j.coords}'
-                        msg += f'{other_edge.v_i.coords}'
-                        msg += f'{other_edge.v_j.coords}'
+                        msg += f'{considered_edge.v_i.coordinates}'
+                        msg += f'{considered_edge.v_j.coordinates}'
+                        msg += f'{other_edge.v_i.coordinates}'
+                        msg += f'{other_edge.v_j.coordinates}'
                         raise ValueError(msg)
 
         halfedges = mesh.define_halfedges(list(edges.values()))
@@ -335,7 +335,7 @@ class TributaryAreaAnaysis:
         mesh.sanity_checks(external, trivial)
 
         for internal_loop in internal:  # noqa: PLR1702
-            poly = sg.Polygon([h.vertex.coords for h in internal_loop])
+            poly = sg.Polygon([h.vertex.coordinates for h in internal_loop])
             skel = sg.skeleton.create_interior_straight_skeleton(poly)
             # TODO(JVM): what we need to get rid of this is to end up with a list
             # of halfedges defining the subloops.
@@ -383,8 +383,8 @@ class TributaryAreaAnaysis:
                 loop_edges = [h.edge for h in internal_loop]
                 for halfedge in subloop:
                     for edge in loop_edges:
-                        v_i = sg.Point2(*edge.v_i.coords)
-                        v_j = sg.Point2(*edge.v_j.coords)
+                        v_i = sg.Point2(*edge.v_i.coordinates)
+                        v_j = sg.Point2(*edge.v_j.coordinates)
                         pt_1 = halfedge.vertex.point
                         pt_2 = halfedge.next.vertex.point
                         if (pt_1 == v_i and pt_2 == v_j) or (
@@ -424,8 +424,8 @@ class TributaryAreaAnaysis:
         # y_vals = []
         # colors = []
         # for edge in edges.values():
-        #     x_vals.extend([edge.v_i.coords[0], edge.v_j.coords[0], None])
-        #     y_vals.extend([edge.v_i.coords[1], edge.v_j.coords[1], None])
+        #     x_vals.extend([edge.v_i.coordinates[0], edge.v_j.coordinates[0], None])
+        #     y_vals.extend([edge.v_i.coordinates[1], edge.v_j.coordinates[1], None])
         #     colors.extend(['black', 'black', None])
 
         # fig1 = go.Figure(go.Scatter(x=x_vals, y=y_vals,

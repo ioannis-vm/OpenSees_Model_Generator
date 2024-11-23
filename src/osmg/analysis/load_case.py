@@ -83,7 +83,7 @@ class LineElementUDL:
     """Line element uniformly distributed load object."""
 
     parent_load_case: LoadCase
-    parent_line_element: element.ElasticBeamColumn | element.DispBeamColumn
+    parent_line_element: element.BeamColumnElement
     val: nparr = field(default_factory=lambda: np.zeros(shape=3))
 
     def __repr__(self) -> str:
@@ -198,7 +198,6 @@ class LoadCase:
         int, TributaryAreaAnaysis
     ] = field(init=False)
     parent_nodes: dict[int, Node] = field(default_factory=dict)
-    equaldof: int | None = field(default=None)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -273,7 +272,7 @@ class LoadCase:
             num_diaphragms += 1
             lvl = mdl.levels[uid]
             constrained_nodes = [
-                n for n in lvl.nodes.values() if n.coords[2] == lvl.elevation
+                n for n in lvl.nodes.values() if n.coordinates[2] == lvl.elevation
             ]
             for constrained_node in constrained_nodes:
                 free_dofs.loc[constrained_node.uid, :] = (0, 0, 1, 1, 1, 0)

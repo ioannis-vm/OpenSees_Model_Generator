@@ -23,10 +23,10 @@ import numpy.typing as npt
 import plotly.graph_objects as go  # type: ignore
 import plotly.io as pio
 
-from osmg.graphics import graphics_common, graphics_common_3d
 from osmg.elements import element
 from osmg.elements import node as node_module
 from osmg.geometry.transformations import local_axes_from_points_and_angle
+from osmg.graphics import graphics_common, graphics_common_3d
 
 if TYPE_CHECKING:
     from osmg.core.load_case import LoadCase
@@ -52,9 +52,9 @@ def add_data__nodes(
     # I need to improve this code, avoid code repetition
     # TODO(JVM): merge this method with the other methods that plot nodes.
     list_of_nodes = mdl.list_of_primary_nodes()
-    x_list = [node.coords[0] for node in list_of_nodes]
-    y_list = [node.coords[1] for node in list_of_nodes]
-    z_list = [node.coords[2] for node in list_of_nodes]
+    x_list = [node.coordinates[0] for node in list_of_nodes]
+    y_list = [node.coordinates[1] for node in list_of_nodes]
+    z_list = [node.coordinates[2] for node in list_of_nodes]
     customdata_lst = []
     restraints = [node.restraint for node in list_of_nodes]
     restraint_symbols = []
@@ -165,9 +165,9 @@ def add_data__parent_nodes(
 
     """
     list_of_nodes = load_case.parent_nodes.values()
-    x_list = [node.coords[0] for node in list_of_nodes]
-    y_list = [node.coords[1] for node in list_of_nodes]
-    z_list = [node.coords[2] for node in list_of_nodes]
+    x_list = [node.coordinates[0] for node in list_of_nodes]
+    y_list = [node.coordinates[1] for node in list_of_nodes]
+    z_list = [node.coordinates[2] for node in list_of_nodes]
     customdata_list = []
     restraints = [node.restraint for node in list_of_nodes]
     for node in list_of_nodes:
@@ -233,9 +233,9 @@ def add_data__internal_nodes(
 
     """
     list_of_nodes = mdl.list_of_internal_nodes()
-    x_list = [node.coords[0] for node in list_of_nodes]
-    y_list = [node.coords[1] for node in list_of_nodes]
-    z_list = [node.coords[2] for node in list_of_nodes]
+    x_list = [node.coordinates[0] for node in list_of_nodes]
+    y_list = [node.coordinates[1] for node in list_of_nodes]
+    z_list = [node.coordinates[2] for node in list_of_nodes]
     customdata = []
     restraints = [node.restraint for node in list_of_nodes]
     restraint_symbols = []
@@ -343,9 +343,9 @@ def add_data__release_nodes(
       load_case: the load_case to be visualized
 
     """
-    x_list = [node.coords[0] for node in list_of_nodes]
-    y_list = [node.coords[1] for node in list_of_nodes]
-    z_list = [node.coords[2] for node in list_of_nodes]
+    x_list = [node.coordinates[0] for node in list_of_nodes]
+    y_list = [node.coordinates[1] for node in list_of_nodes]
+    z_list = [node.coordinates[2] for node in list_of_nodes]
     data_dict.append(
         {
             'type': 'scatter3d',
@@ -412,8 +412,8 @@ def add_data__frames(
     for elm in line_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
-        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         section_name = elm.section.name
         section_names.extend([section_name] * 3)
         x_list.extend((p_i[0], p_j[0], None))
@@ -521,8 +521,8 @@ def add_data__bars(
     for elm in line_elems:
         if elm.visibility.hidden_at_line_plots:
             continue
-        p_i = np.array(elm.nodes[0].coords)
-        p_j = np.array(elm.nodes[1].coords)
+        p_i = np.array(elm.nodes[0].coordinates)
+        p_j = np.array(elm.nodes[1].coordinates)
         section_area = elm.area
 
         section_areas.extend([section_area] * 3)
@@ -618,8 +618,8 @@ def add_data__twonodelinks(data_dict: list[dict[str, object]], mdl: Model) -> No
     z_list: list[float | None] = []
     customdata_list: list[tuple[Any, ...]] = []
     for elm in link_elems:
-        p_i: nparr = np.array(elm.nodes[0].coords)
-        p_j: nparr = np.array(elm.nodes[1].coords)
+        p_i: nparr = np.array(elm.nodes[0].coordinates)
+        p_j: nparr = np.array(elm.nodes[1].coordinates)
         x_list.extend((p_i[0], p_j[0], None))
         y_list.extend((p_i[1], p_j[1], None))
         z_list.extend((p_i[2], p_j[2], None))
@@ -675,10 +675,10 @@ def add_data__frame_offsets(data_dict: list[dict[str, object]], mdl: Model) -> N
 
     for elm in beamcolumn_elems:
         assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
-        p_i: nparr = np.array(elm.nodes[0].coords)
-        p_io: nparr = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j: nparr = np.array(elm.nodes[1].coords)
-        p_jo: nparr = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_i: nparr = np.array(elm.nodes[0].coordinates)
+        p_io: nparr = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        p_j: nparr = np.array(elm.nodes[1].coordinates)
+        p_jo: nparr = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
 
         x_list.extend((p_i[0], p_io[0], None))
         y_list.extend((p_i[1], p_io[1], None))
@@ -732,7 +732,7 @@ def add_data__frame_axes(
         y_vec = elm.geomtransf.y_axis
         z_vec = elm.geomtransf.z_axis
         l_clear = elm.clear_length()
-        i_pos = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
+        i_pos = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
         mid_pos = i_pos + x_vec * l_clear / 2.00
         x_list.extend((mid_pos[0], mid_pos[0] + x_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + x_vec[1] * scaling, None))
@@ -786,7 +786,7 @@ def add_data__zerolength_axes(
         x_vec: nparr = elm.vecx
         y_vec: nparr = elm.vecyp
         z_vec: nparr = np.cross(x_vec, y_vec)
-        mid_pos = np.array(elm.nodes[0].coords)
+        mid_pos = np.array(elm.nodes[0].coordinates)
         x_list.extend((mid_pos[0], mid_pos[0] + x_vec[0] * scaling, None))
         y_list.extend((mid_pos[1], mid_pos[1] + x_vec[1] * scaling, None))
         z_list.extend((mid_pos[2], mid_pos[2] + x_vec[2] * scaling, None))
@@ -894,9 +894,9 @@ def add_data__diaphragm_lines(
         level = mdl.levels[lvl_uid]
         level_primary_nodes = level.nodes.values()
         for node in level_primary_nodes:
-            if node.coords[2] == level.elevation:
-                x_list.extend((node.coords[0], pnode.coords[0], None))
-                y_list.extend((node.coords[1], pnode.coords[1], None))
+            if node.coordinates[2] == level.elevation:
+                x_list.extend((node.coordinates[0], pnode.coordinates[0], None))
+                y_list.extend((node.coordinates[1], pnode.coordinates[1], None))
                 z_list.extend((level.elevation, level.elevation, None))
 
     data_dict.append(
@@ -989,8 +989,8 @@ def add_data__extruded_frames_mesh(
         assert isinstance(elm, (element.ElasticBeamColumn, element.DispBeamColumn))
         if elm.visibility.hidden_when_extruded:
             continue
-        side_a = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        side_b = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        side_a = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        side_b = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         y_vec = elm.geomtransf.y_axis
         z_vec = elm.geomtransf.z_axis
         if not elm.section.outside_shape:
@@ -1000,23 +1000,23 @@ def add_data__extruded_frames_mesh(
             assert halfedge.nxt is not None
             assert halfedge.nxt.vertex is not None
             loc0 = (
-                halfedge.vertex.coords[0] * z_vec
-                + halfedge.vertex.coords[1] * y_vec
+                halfedge.vertex.coordinates[0] * z_vec
+                + halfedge.vertex.coordinates[1] * y_vec
                 + side_a
             )
             loc1 = (
-                halfedge.vertex.coords[0] * z_vec
-                + halfedge.vertex.coords[1] * y_vec
+                halfedge.vertex.coordinates[0] * z_vec
+                + halfedge.vertex.coordinates[1] * y_vec
                 + side_b
             )
             loc2 = (
-                halfedge.nxt.vertex.coords[0] * z_vec
-                + halfedge.nxt.vertex.coords[1] * y_vec
+                halfedge.nxt.vertex.coordinates[0] * z_vec
+                + halfedge.nxt.vertex.coordinates[1] * y_vec
                 + side_b
             )
             loc3 = (
-                halfedge.nxt.vertex.coords[0] * z_vec
-                + halfedge.nxt.vertex.coords[1] * y_vec
+                halfedge.nxt.vertex.coordinates[0] * z_vec
+                + halfedge.nxt.vertex.coordinates[1] * y_vec
                 + side_a
             )
             x_list.extend((loc0[0], loc1[0], loc2[0], loc3[0]))
@@ -1070,8 +1070,8 @@ def add_data__extruded_bars_mesh(
         if not elm.outside_shape:
             continue
 
-        side_a = np.array(elm.nodes[0].coords)
-        side_b = np.array(elm.nodes[1].coords)
+        side_a = np.array(elm.nodes[0].coordinates)
+        side_b = np.array(elm.nodes[1].coordinates)
         x_vec, y_vec, z_vec = local_axes_from_points_and_angle(side_a, side_b, 0.00)
 
         # cut out the two ends for a nicer visual effect
@@ -1084,23 +1084,23 @@ def add_data__extruded_bars_mesh(
         for halfedge in loop:
             assert halfedge.nxt
             loc0 = (
-                halfedge.vertex.coords[0] * z_vec
-                + halfedge.vertex.coords[1] * y_vec
+                halfedge.vertex.coordinates[0] * z_vec
+                + halfedge.vertex.coordinates[1] * y_vec
                 + side_a
             )
             loc1 = (
-                halfedge.vertex.coords[0] * z_vec
-                + halfedge.vertex.coords[1] * y_vec
+                halfedge.vertex.coordinates[0] * z_vec
+                + halfedge.vertex.coordinates[1] * y_vec
                 + side_b
             )
             loc2 = (
-                halfedge.nxt.vertex.coords[0] * z_vec
-                + halfedge.nxt.vertex.coords[1] * y_vec
+                halfedge.nxt.vertex.coordinates[0] * z_vec
+                + halfedge.nxt.vertex.coordinates[1] * y_vec
                 + side_b
             )
             loc3 = (
-                halfedge.nxt.vertex.coords[0] * z_vec
-                + halfedge.nxt.vertex.coords[1] * y_vec
+                halfedge.nxt.vertex.coordinates[0] * z_vec
+                + halfedge.nxt.vertex.coordinates[1] * y_vec
                 + side_a
             )
             x_list.extend((loc0[0], loc1[0], loc2[0], loc3[0]))

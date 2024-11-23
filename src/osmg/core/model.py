@@ -15,338 +15,43 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Type
+from typing import Literal, TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
-from shapely.geometry import Point  # type: ignore
-from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
-from osmg import osmg_collections
+from osmg.core.gridsystem import GridSystem, GridSystem2D
+from osmg.core.osmg_collections import CollectionWithConnectivity, NodeCollection
 from osmg.creators.uid import UIDGenerator
-from osmg.core.level import Level
-
-if TYPE_CHECKING:
-    from osmg.core.component_assemblies import ComponentAssembly
-    from osmg.elements import element
-    from osmg.elements.node import Node
-    from osmg.elements.section import ElasticSection, FiberSection
-    from osmg.elements.uniaxial_material import UniaxialMaterial
-    from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 
-
-def transfer_component(other: Model, component: ComponentAssembly) -> None:
-    """
-    Transfer a component between models.
-
-    Transfers a single component assembly from one model to
-    another, assuming the other model was generated with the
-    :func:`~Model.initialize_empty_copy` method.
-
-    """
-    # note: we don't copy the component assemblies and their contents.
-    # we just add the same objects to the other model.
-    level = component.parent_collection.parent
-    other_level = other.levels.retrieve_by_attr('uid', level.uid)
-    for node in component.external_nodes.values():
-        if node.uid not in other_level.nodes:
-            other_level.nodes.add(node)
-    other_level.components.add(component)
-
-
-@dataclass
-class Settings:
-    """
-    General customization of a model.
-
-        ndm, ndf: Number of dimensions and degrees of freedom.
-          Currently only ndm=3, ndf=6 is supported. This might be
-          extended in the future if needed.
-
-    """
-
-    ndm: int = field(default=3)  # that's all we support
-    ndf: int = field(default=6)  # that's all we support
-
-    def __repr__(self) -> str:
-        """
-        Get string representation.
-
-        Returns:
-          The string representation of the object.
-        """
-        res = ''
-        res += '~~~ Model Settings ~~~\n'
-        res += f'  ndm           : {self.ndm}\n'
-        res += f'  ndf           : {self.ndf}\n'
-        return res
+if TYPE_CHECKING:
+    from osmg.core.component_assemblies import ComponentAssembly
 
 
 @dataclass(repr=False)
 class Model:
     """
-    Model object.
+    Base Model object.
 
-    A model object is a representation of a structural model in
-    OpenSees. It is the primary object of osmg.
-    It contains levels, elastic sections, fiber sections,
-    physical materials, and various collections of objects such as
-    nodes, elements, and component assemblies that exist inside each level.
-    Those objects are populated by creator objects. See `osmg.creators`.
+    A general representation of a structural model.
 
     Attributes:
-    ----------
-        name: Name of the model.
-        levels:
-            Collection of levels in the model.
-        elastic_sections:
-            Collection of elastic sections in the model.
-        fiber_sections:
-            Collection of fiber sections in the model.
-        uniaxial_materials:
-            Collection of uniaxial materials in the model.
-        physical_materials:
-            Collection of physical materials in the model.
-        uid_generator:
-            Object for generating unique IDs for objects in the model.
-        settings: Settings for the model.
-
+        name (str): Name of the model.
+        grid_system (GridSystem): Grid system of the model.
+        uid_generator (UIDGenerator): Object for generating unique IDs.
     """
 
     name: str
-    levels: osmg_collections.Collection[int, Level] = field(init=False)
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
-    settings: Settings = field(default_factory=Settings)
-
-    def __post_init__(self) -> None:
-        """Post-initialization."""
-        self.levels = osmg_collections.Collection(self)
-
-    def __repr__(self) -> str:
-        """
-        Get string representation.
-
-        Returns:
-          The string representation of the object.
-        """
-        res = ''
-        res += '~~~ Model Object ~~~\n'
-        res += f'ID: {id(self)}\n'
-        return res
-
-    def component_connectivity(
-        self,
-    ) -> dict[tuple[int, ...], ComponentAssembly]:
-        """
-        Obtain the connectivity of all component assemblies.
-
-        Component assemblies are collections of lower-level components
-        that are connected to primary nodes. Each component assembly
-        can be represented by a tuple of node uids of its connected
-        nodes in ascending order. This method returns a dictionary
-        having these tuples as keys, and the associated components as
-        values.
-
-        Returns:
-          The connectivity data.
-        """
-        res = {}
-        components = self.list_of_components()
-        for component in components:
-            uids = [node.uid for node in component.external_nodes.values()]
-            uids.sort()
-            uids_tuple = (*uids,)
-            assert uids_tuple not in res, 'Error! Duplicate component found.'
-            res[uids_tuple] = component
-        return res
-
-    def add_level(self, uid: int, elevation: float) -> None:
-        """
-        Add a level to the model.
-
-        Arguments:
-            uid: Unique ID for the level.
-            elevation: Elevation of the level.
-
-        Example:
-            >>> from osmg.core.model import Model
-            >>> model = Model('test_model')
-            >>> model.add_level(1, 0.0)
-            >>> model.levels.__srepr__()
-            '[Collection of 1 items]'
-
-        """
-        lvl = Level(self, uid=uid, elevation=elevation)
-        self.levels.add(lvl)
-
-    def dict_of_primary_nodes(self) -> dict[int, Node]:
-        """
-        Obtain a dictionary of all the primary nodes in the model.
-
-        The keys are the uids of the nodes.
-
-        Returns:
-          The dictionary.
-        """
-        dict_of_nodes: dict[int, Node] = {}
-        for lvl in self.levels.values():
-            dict_of_nodes.update(lvl.nodes)
-        return dict_of_nodes
-
-    def list_of_primary_nodes(self) -> list[Node]:
-        """
-        Obtain a list of all the primary nodes in the model.
-
-        Returns:
-          The list.
-        """
-        list_of_nodes = []
-        for lvl in self.levels.values():
-            for node in lvl.nodes.values():
-                list_of_nodes.append(node)  # noqa: PERF402
-        return list_of_nodes
-
-    def dict_of_internal_nodes(self) -> dict[int, Node]:
-        """
-        Obtain a dictionary of all the internal nodes in the model.
-
-        The keys are the uids of the nodes.
-
-        Returns:
-          The dictionary.
-        """
-        dict_of_nodes: dict[int, Node] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                dict_of_nodes.update(component.internal_nodes)
-        return dict_of_nodes
-
-    def list_of_internal_nodes(self) -> list[Node]:
-        """
-        Obtain a list of all the internal nodes in the model.
-
-        Returns:
-          The list.
-        """
-        list_of_nodes = []
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                for inode in component.internal_nodes.values():
-                    list_of_nodes.append(inode)  # noqa: PERF402
-        return list_of_nodes
-
-    def dict_of_all_nodes(self) -> dict[int, Node]:
-        """
-        Obtain a dictionary of all the nodes in the model.
-
-        The keys are the uids of the nodes.
-
-        Returns:
-          The dictionary.
-        """
-        dict_of_nodes: dict[int, Node] = {}
-        dict_of_nodes.update(self.dict_of_primary_nodes())
-        dict_of_nodes.update(self.dict_of_internal_nodes())
-        return dict_of_nodes
-
-    def list_of_all_nodes(self) -> list[Node]:
-        """
-        Obtain a list of all the nodes in the model.
-
-        Returns:
-          The list.
-        """
-        list_of_nodes = []
-        list_of_nodes.extend(self.list_of_primary_nodes())
-        list_of_nodes.extend(self.list_of_internal_nodes())
-        return list_of_nodes
-
-    def dict_of_components(self) -> dict[int, ComponentAssembly]:
-        """
-        Obtain a dict of all the component assemblies in the model.
-
-        The keys are the uids of the component assemblies.
-
-        Returns:
-          The dictionary.
-        """
-        comps: dict[int, ComponentAssembly] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                comps[component.uid] = component
-        return comps
-
-    def list_of_components(self) -> list[ComponentAssembly]:
-        """
-        List of all the component assembiles in the model.
-
-        Returns:
-          The list.
-        """
-        return list(self.dict_of_components().values())
-
-    def dict_of_elements(self) -> dict[int, element.Element]:
-        """
-        Obtain a dictionary of all element objects in the model.
-
-        The keys are the uids of the objects.
-
-        Returns:
-          The dictionary.
-        """
-        elems: dict[int, element.Element] = {}
-        for lvl in self.levels.values():
-            for component in lvl.components.values():
-                elems.update(component.elements)  # type: ignore
-        return elems
-
-    def list_of_elements(self) -> list[element.Element]:
-        """
-        Obtain a list of all element objects in the model.
-
-        Returns:
-          The list.
-        """
-        return list(self.dict_of_elements().values())
-
-    def dict_of_specific_element(
-        self, element_class: type[element.Element]
-    ) -> dict[int, element.Element]:
-        """
-        Element objects of a particular element class.
-
-        The keys are the uids of the objects.
-
-        Returns:
-          The dictionary.
-        """
-        all_elements = self.dict_of_elements()
-        res: dict[int, element.Element] = {}
-        for uid, elm in all_elements.items():
-            if isinstance(elm, element_class):
-                res[uid] = elm  # noqa: PERF403
-        return res
-
-    def list_of_specific_element(
-        self, element_class: type[element.Element]
-    ) -> list[element.Element]:
-        """
-        Element objects in the model of a particular element class.
-
-        Returns:
-          The list.
-        """
-        return list(self.dict_of_specific_element(element_class).values())
+    nodes: NodeCollection = field(default_factory=NodeCollection)
+    components: CollectionWithConnectivity[ComponentAssembly] = field(
+        default_factory=CollectionWithConnectivity
+    )
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
-        """
-        Obtain the axis-aligned bounding box of the building.
-
-        Returns:
-          The bounding box.
-        """
+        """Obtain the axis-aligned bouding box of the building."""
         p_min = np.full(3, np.inf)
         p_max = np.full(3, -np.inf)
         for node in self.list_of_primary_nodes():
@@ -360,59 +65,54 @@ class Model:
 
     def reference_length(self) -> float:
         """
-        Largest dimension of the bounding box of the building.
+        Obtain the largest bounding box dimension.
 
         (used in graphics)
-
-        Returns:
-          The largest dimension.
         """
         p_min, p_max = self.bounding_box(padding=0.00)
-        return np.max(p_max - p_min)
+        ref_len = np.max(p_max - p_min)
+        return ref_len
 
-    def initialize_empty_copy(self, name: str) -> Model:
-        """
-        Initialize a shallow empty copy of the model.
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        return f'~~~ Model Object: {self.name} ~~~'
 
-        Used to create subset models.
 
-        Returns:
-          The empty copy of the model.
-        """
-        res = Model(name)
-        # copy the settings attributes
-        res.settings.ndf = self.settings.ndf
-        res.settings.ndm = self.settings.ndm
-        # make a copy of the levels
-        for lvlkey, lvl in self.levels.items():
-            res.add_level(lvlkey, lvl.elevation)
-        # giv access to the materials and sections
-        res.elastic_sections = self.elastic_sections
-        res.fiber_sections = self.fiber_sections
-        res.physical_materials = self.physical_materials
-        res.uniaxial_materials = self.uniaxial_materials
-        return res
+@dataclass(repr=False)
+class Model2D(Model):
+    """
+    2D Model object.
 
-    def transfer_by_polygon_selection(self, other: Model, coords: nparr) -> None:
-        """
-        Transfer components using a polygon selection.
+    A 2D model representation.
 
-        Uses :func:`~transfer_component` to transfer all components of which
-        the projection to the XY plane falls inside the specified
-        polygon.
+    Attributes:
+        name (str): Name of the model.
+        grid_system (GridSystem2D): Grid system for the 2D model.
+    """
 
-        """
-        all_components = self.list_of_components()
-        selected_components = []
-        shape = shapely_Polygon(coords)
-        for component in all_components:
-            accept = True
-            nodes = component.external_nodes.values()
-            for node in nodes:
-                if not shape.contains(Point(node.coords[0:2])):
-                    accept = False
-                    break
-            if accept:
-                selected_components.append(component)
-        for component in selected_components:
-            transfer_component(other, component)
+    ndf: Literal[2, 3] = field(default=3)
+    grid_system: GridSystem2D = field(default_factory=GridSystem2D)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        return f'~~~ 2D Model Object: {self.name} ~~~'
+
+
+@dataclass(repr=False)
+class Model3D(Model):
+    """
+    3D Model object.
+
+    A 3D model representation.
+
+    Attributes:
+        name (str): Name of the model.
+        grid_system (GridSystem): Grid system for the 3D model.
+    """
+
+    ndf: Literal[3, 6] = field(default=6)
+    grid_system: GridSystem = field(default_factory=GridSystem)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        return f'~~~ 3D Model Object: {self.name} ~~~'

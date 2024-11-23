@@ -18,10 +18,15 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core import common
-from osmg.geometry.line import Line
-from osmg.elements.element import DispBeamColumn, ElasticBeamColumn, GeomTransf, Lobatto
+from osmg.elements.element import (
+    DispBeamColumn,
+    ElasticBeamColumn,
+    GeomTransf,
+    Lobatto,
+)
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection, FiberSection
+from osmg.geometry.line import Line
 
 if TYPE_CHECKING:
     from osmg.core.component_assemblies import ComponentAssembly
@@ -61,16 +66,16 @@ def split_component(
     )
     distances = np.zeros(len(elms))
     for i, elm in enumerate(elms):
-        p_i = np.array(elm.nodes[0].coords) + elm.geomtransf.offset_i
-        p_j = np.array(elm.nodes[1].coords) + elm.geomtransf.offset_j
+        p_i = np.array(elm.nodes[0].coordinates) + elm.geomtransf.offset_i
+        p_j = np.array(elm.nodes[1].coordinates) + elm.geomtransf.offset_j
         line = Line('', p_i, p_j)
         dist = line.point_distance(point)
         distances[i] = dist
     np.nan_to_num(distances, copy=False, nan=np.inf)
     i_min = np.argmin(distances)
     closest_elm = elms[i_min]
-    p_i = np.array(closest_elm.nodes[0].coords) + closest_elm.geomtransf.offset_i
-    p_j = np.array(closest_elm.nodes[1].coords) + closest_elm.geomtransf.offset_j
+    p_i = np.array(closest_elm.nodes[0].coordinates) + closest_elm.geomtransf.offset_i
+    p_j = np.array(closest_elm.nodes[1].coordinates) + closest_elm.geomtransf.offset_j
     line = Line('', p_i, p_j)
     split_point = line.project(point)
     assert split_point is not None  # check if it exists
@@ -78,9 +83,9 @@ def split_component(
     # first check if a node already exists there
     inodes = component.internal_nodes.values()
     for inode in inodes:
-        if np.linalg.norm(np.array(inode.coords) - split_point) < common.EPSILON:
+        if np.linalg.norm(np.array(inode.coordinates) - split_point) < common.EPSILON:
             avail_node = inode
-            offset = point - np.array(avail_node.coords)
+            offset = point - np.array(avail_node.coordinates)
             return avail_node, offset
 
     # otherwise:
@@ -183,5 +188,5 @@ def split_component(
         component.elements.add(elm_j)
 
     # calculate offset and return
-    offset = point - np.array(middle_node.coords)
+    offset = point - np.array(middle_node.coordinates)
     return middle_node, offset

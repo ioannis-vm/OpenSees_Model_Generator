@@ -12,7 +12,8 @@
 
 from dataclasses import dataclass
 from itertools import count
-from osmg.elements.node import Node
+
+# from osmg.elements.node import Node
 
 
 @dataclass
@@ -29,8 +30,15 @@ class UIDGenerator:
         Returns:
             A unique identifier for an object of the given type.
         """
-        object_type = thing.__class__
-        valid_types = {Node: 'node'}
+        object_type = thing.__class__.__name__
+        valid_types = {
+            'Node': 'NODE',
+            'ElasticSection': 'SECTION',
+            'ComponentAssembly': 'COMPONENT',
+            'GeomTransf': 'TRANSFORMATION',
+            'ElasticBeamColumn': 'BEAMCOLUMN',
+            '_TestChild': 'TESTING',
+        }
 
         if object_type not in valid_types:
             msg = f'Unknown object class: {object_type}'

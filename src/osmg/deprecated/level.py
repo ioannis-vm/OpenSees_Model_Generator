@@ -15,10 +15,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from osmg.core.osmg_collections import Collection, NodeCollection
+from osmg.osmg_collections import Collection, NodeCollection
 
 if TYPE_CHECKING:
-    from osmg.core.component_assemblies import ComponentAssembly
+    from osmg.component_assemblies import ComponentAssembly
 
 
 @dataclass

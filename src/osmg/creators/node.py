@@ -56,7 +56,7 @@ class NodeCreator:
           >>> creator.add_node_lvl(2.00, 3.00, 0)
           Node object
             uid: 0
-            coords: [2.0, 3.0, 0.0]
+            coordinates: [2.0, 3.0, 0.0]
             restraint: [False, False, False, False, False, False]
           <BLANKLINE>
 
@@ -65,7 +65,7 @@ class NodeCreator:
         level = lvls[lvl]
         node = Node(
             uid=self.model.uid_generator.new('node'),
-            coords=[x_loc, y_loc, level.elevation],
+            coordinates=[x_loc, y_loc, level.elevation],
         )
         level.nodes.add(node)
         return node
@@ -98,7 +98,7 @@ class NodeCreator:
             >>> creator.add_node_lvl_xyz(2.00, 3.00, 4.00, 0)
             Node object
               uid: 0
-              coords: [2.0, 3.0, 4.0]
+              coordinates: [2.0, 3.0, 4.0]
               restraint: [False, False, False, False, False, False]
             <BLANKLINE>
 
@@ -107,7 +107,7 @@ class NodeCreator:
         level = lvls[lvl]
         node = Node(
             uid=self.model.uid_generator.new('node'),
-            coords=[x_loc, y_loc, z_loc],
+            coordinates=[x_loc, y_loc, z_loc],
         )
         level.nodes.add(node)
         return node

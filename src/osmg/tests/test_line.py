@@ -10,8 +10,9 @@
 #
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
-import pytest
 import numpy as np
+import pytest
+
 from osmg.geometry.line import Line
 
 

@@ -11,6 +11,7 @@
 # https://github.com/ioannis-vm/OpenSees_Model_Generator
 
 import pytest
+
 from osmg.creators.uid import UIDGenerator
 from osmg.elements.node import Node
 
@@ -24,9 +25,9 @@ class TestUIDGenerator:
 
     def test_generate_unique_ids(self):
         """Test that unique IDs are generated."""
-        node1 = Node([0.0, 0.0], self.generator)
-        node2 = Node([0.0, 0.0], self.generator)
-        node3 = Node([0.0, 0.0], self.generator)
+        node1 = Node(self.generator, [0.0, 0.0])
+        node2 = Node(self.generator, [0.0, 0.0])
+        node3 = Node(self.generator, [0.0, 0.0])
         assert node1.uid == 0
         assert node2.uid == 1
         assert node3.uid == 2

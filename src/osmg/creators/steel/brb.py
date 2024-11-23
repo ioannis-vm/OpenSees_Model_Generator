@@ -15,9 +15,9 @@ from dataclasses import dataclass, field
 import numpy as np
 import numpy.typing as npt
 
+from osmg.core.model import Model
 from osmg.creators.component import TrussBarCreator
 from osmg.creators.mesh_shapes import rect_mesh
-from osmg.core.model import Model
 from osmg.elements.uniaxial_material import Fatigue, Steel4
 
 # pylint: disable=invalid-name

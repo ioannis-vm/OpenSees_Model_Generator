@@ -12,10 +12,10 @@ from osmg.elements.element import ZeroLength
 
 if TYPE_CHECKING:
     from osmg.core.component_assemblies import ComponentAssembly
-    from osmg.creators.material import MaterialGenerator
     from osmg.core.model import Model
-    from osmg.node import Node
+    from osmg.creators.material import MaterialGenerator
     from osmg.elements.uniaxial_material import UniaxialMaterial
+    from osmg.node import Node
 
 
 nparr = npt.NDArray[np.float64]

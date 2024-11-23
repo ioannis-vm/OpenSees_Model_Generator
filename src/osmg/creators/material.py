@@ -27,7 +27,6 @@ from osmg.elements.uniaxial_material import (
     Steel02,
     UniaxialMaterial,
 )
-from osmg.physical_material import PhysicalMaterial
 
 nparr = npt.NDArray[np.float64]
 
@@ -76,7 +75,9 @@ class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
     """
 
     section: FiberSection
-    physical_material: PhysicalMaterial
+    e_mod: float
+    g_mod: float
+    f_y: float
     brace_length: float
     node_i_uid: int
     node_j_uid: int
@@ -98,9 +99,9 @@ class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
         sec_t = self.section.properties['tdes']
         var_lc = self.brace_length
         sec_r = min(self.section.properties['rx'], self.section.properties['ry'])
-        mat_e = self.physical_material.e_mod
-        mat_g = self.physical_material.g_mod
-        mat_fy = self.physical_material.f_y
+        mat_e = self.e_mod
+        mat_g = self.g_mod
+        mat_fy = self.f_y
         var_msr = (
             (0.554)
             * (sec_b / sec_t) ** (-0.75)
@@ -145,7 +146,9 @@ class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
     """
 
     section: FiberSection
-    physical_material: PhysicalMaterial
+    e_mod: float
+    g_mod: float
+    f_y: float
     brace_length: float
 
     def generate(self) -> Fatigue:
@@ -165,9 +168,9 @@ class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
         sec_t = self.section.properties['tdes']
         var_lc = self.brace_length
         sec_r = min(self.section.properties['rx'], self.section.properties['ry'])
-        mat_e = self.physical_material.e_mod
-        mat_g = self.physical_material.g_mod
-        mat_fy = self.physical_material.f_y
+        mat_e = self.e_mod
+        mat_g = self.g_mod
+        mat_fy = self.f_y
         var_e0 = (
             (0.748)
             * (var_lc / sec_r) ** (-0.399)
@@ -220,7 +223,7 @@ class SteelWIMKMaterialCreator(MaterialCreator):
     """
 
     section: ElasticSection
-    physical_material: PhysicalMaterial
+    f_y: float
     element_length: float
     lboverl: float
     loverh: float
@@ -246,7 +249,7 @@ class SteelWIMKMaterialCreator(MaterialCreator):
         ), 'Error: Only imperial units supported.'
         assert self.section.properties
         # Yield stress
-        mat_fy = self.physical_material.f_y / 1.0e3
+        mat_fy = self.f_y / 1.0e3
         # Moment of inertia - strong axis - original section
         if self.direction == 'strong':
             sec_i = self.section.properties['Ix']
@@ -518,7 +521,7 @@ class SteelGravityShearTabCreator(MaterialCreator):
     """
 
     section: ElasticSection
-    physical_material: PhysicalMaterial
+    f_y: float
     consider_composite: bool
     moment_modifier: float = 1.00
 
@@ -538,7 +541,7 @@ class SteelGravityShearTabCreator(MaterialCreator):
 
         # Yield stress
         assert isinstance(self.moment_modifier, float)
-        mat_fy = self.physical_material.f_y / 1.0e3
+        mat_fy = self.f_y / 1.0e3
         # Plastic modulus (unreduced)
         sec_zx = self.section.properties['Zx']
         # Plastic moment of the section
@@ -661,7 +664,8 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
     """
 
     section: ElasticSection
-    physical_material: PhysicalMaterial
+    f_y: float
+    g_mod: float
     pz_length: float
     pz_doubler_plate_thickness: float
     pz_hardening: float
@@ -680,14 +684,14 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
             self.model.settings.imperial_units
         ), 'Error: Only imperial units supported.'
         assert self.section.properties
-        f_y = self.physical_material.f_y
+        f_y = self.f_y
         hardening = self.pz_hardening
         d_c = self.section.properties['d']
         bfc = self.section.properties['bf']
         t_p = self.section.properties['tw'] + self.pz_doubler_plate_thickness
         t_f = self.section.properties['tf']
         v_y = 0.55 * f_y * d_c * t_p
-        g_mod = self.physical_material.g_mod
+        g_mod = self.g_mod
         k_e = 0.95 * g_mod * t_p * d_c
         k_p = 0.95 * g_mod * bfc * t_f**2 / self.pz_length
         gamma_1 = v_y / k_e
@@ -732,7 +736,9 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
     """
 
     section: ElasticSection
-    physical_material: PhysicalMaterial
+    e_mod: float
+    g_mod: float
+    f_y: float
     pz_length: float
     pz_doubler_plate_thickness: float
     axial_load_ratio: float
@@ -757,9 +763,9 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
             self.model.settings.imperial_units
         ), 'Error: Only imperial units supported.'
         assert self.section.properties
-        f_y = self.physical_material.f_y
-        e_mod = self.physical_material.e_mod
-        g_mod = self.physical_material.g_mod
+        f_y = self.f_y
+        e_mod = self.e_mod
+        g_mod = self.g_mod
         tw_Col = self.section.properties['tw']  # noqa: N806
         tdp = self.pz_doubler_plate_thickness
         d_Col = self.section.properties['d']  # noqa: N806
@@ -941,7 +947,6 @@ class SteelBraceGussetCreator(MaterialCreator):
 
     Arguments:
       model: Model object.
-      physical_mat: physical material object.
       d_brace: brace section height.
       l_c: brace-to-gusset connection length.
       t_p: gusset plate thickness.
@@ -951,7 +956,9 @@ class SteelBraceGussetCreator(MaterialCreator):
     """
 
     model: Model
-    physical_mat: PhysicalMaterial
+    e_mod: float
+    g_mod: float
+    f_y: float
     d_brace: float
     l_c: float
     t_p: float
@@ -967,9 +974,9 @@ class SteelBraceGussetCreator(MaterialCreator):
         var_w = self.d_brace + 2.00 * self.l_c * np.tan(30.00 / 180.00 * np.pi)
         var_i = var_w * self.t_p**3 / 12.00
         var_z = var_w * self.t_p**2 / 6.00
-        f_y = self.physical_mat.f_y
-        var_e = self.physical_mat.e_mod
-        var_g = self.physical_mat.g_mod
+        f_y = self.f_y
+        var_e = self.e_mod
+        var_g = self.g_mod
         var_my = var_z * f_y
         var_k_rot = var_e * var_i / self.l_b
         var_b = 0.01

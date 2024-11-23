@@ -23,7 +23,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from osmg import osmg_collections
+from osmg.core import osmg_collections
+from osmg.core.uid_object import UIDObject
 
 if TYPE_CHECKING:
     from osmg.elements import element
@@ -32,47 +33,38 @@ nparr = npt.NDArray[np.float64]
 
 
 @dataclass
-class ComponentAssembly:
+class ComponentAssembly(UIDObject):
     """
     Component assembly object.
 
     A component assembly represents some part of a structure and holds
-    various lower-level elements such as nodes and beamcolumn
+    various lower-level elements such as nodes and beam-column
     elements.
 
     Attributes:
-    ----------
-      uid: Unique identifier of the component assembly
-      parent_collection: The collection of
-        elements to which the component assembly belongs.
-      component_purpose: The functionality of the component assembly
-      external_nodes: the external nodes to which the
-        component assembly is connected.
-        these nodes should exist as part of a level.
-      internal_nodes: internal nodes that are
-        required for the connectivity of the elements of the component
-        assembly.
-        these nodes only exist as part of the component assembly.
-      elements:
-        Collection containing the elements that are part of the
-        component assembly.
-
+        uid: Unique identifier of the component assembly.
+        tags: List of tags, used to filter component assemblies if
+            needed.
+        external_nodes: The external nodes to which the component
+            assembly is connected.
+        internal_nodes: Internal nodes that are required for the
+            connectivity of the elements within the component
+            assembly. These nodes only exist as part of the component
+            assembly.
+        elements: Collection containing the elements that are part of
+            the component assembly.
     """
 
-    uid: int
-    parent_collection: osmg_collections.Collection[int, ComponentAssembly]
-    component_purpose: str
-    external_nodes: osmg_collections.NodeCollection = field(init=False)
-    internal_nodes: osmg_collections.NodeCollection = field(init=False)
-    elements: osmg_collections.CollectionWithConnectivity[int, element.Element] = (
-        field(init=False)
+    tags: set[str]
+    external_nodes: osmg_collections.NodeCollection = field(
+        default_factory=osmg_collections.NodeCollection
     )
-
-    def __post_init__(self) -> None:
-        """Post-initialization."""
-        self.external_nodes = osmg_collections.NodeCollection(self)
-        self.internal_nodes = osmg_collections.NodeCollection(self)
-        self.elements = osmg_collections.CollectionWithConnectivity(self)
+    internal_nodes: osmg_collections.NodeCollection = field(
+        default_factory=osmg_collections.NodeCollection
+    )
+    elements: osmg_collections.CollectionWithConnectivity[int, element.Element] = (
+        field(default_factory=osmg_collections.CollectionWithConnectivity)
+    )
 
     def __repr__(self) -> str:
         """
@@ -84,39 +76,14 @@ class ComponentAssembly:
         res = ''
         res += 'Component assembly object\n'
         res += f'uid: {self.uid}\n'
-        res += f'component_purpose: {self.component_purpose}\n'
         res += 'External Nodes\n'
         for node in self.external_nodes.values():
-            res += f'  {node.uid}, {node.coords}'
+            res += f'  {node.uid}, {node.coordinates}'
         return res
-
-    def dict_of_elements(
-        self,
-    ) -> dict[int, osmg_collections.CollectionWithConnectivity]:
-        """
-        Get dictionary of elements.
-
-        Returns:
-          A dictionary of all element objects in the model. The keys
-          are the uids of the objects.
-        """
-        res = {}
-        for elm in self.elements.values():
-            res[elm.uid] = elm
-        return res
-
-    def list_of_elements(self) -> list[osmg_collections.CollectionWithConnectivity]:
-        """
-        Get a list of all element objects in the model.
-
-        Returns:
-          The list of all element objects in the model.
-        """
-        return list(self.dict_of_elements().values())
 
     def element_connectivity(
         self,
-    ) -> dict[tuple[int, ...], osmg_collections.CollectionWithConnectivity]:
+    ) -> dict[tuple[int, ...], element.Element]:
         """
         Element connectivity.
 
@@ -128,7 +95,7 @@ class ComponentAssembly:
           as keys, and the associated components as values.
         """
         res = {}
-        elms = self.list_of_elements()
+        elms = self.elements.values()
         for elm in elms:
             uids = [x.uid for x in elm.nodes]
             uids.sort()

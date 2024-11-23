@@ -57,17 +57,17 @@ class RDAnalyzer:
 
         # determine center of mass
         masses = []
-        coords = []
+        coordinates = []
         for node in nodes:
             mass = loadcase.node_mass[node.uid].val[0]
             masses.append(mass)
-            coords.append(node.coords[0:2])
+            coordinates.append(node.coordinates[0:2])
         total_mass = sum(masses)
         if np.abs(total_mass) <= common.EPSILON:
             msg = "Can't generate parent node without defined mass."
             raise ValueError(msg)
-        coords_np = np.array(coords) * np.column_stack((masses, masses))
-        center = np.sum(coords_np / total_mass, axis=0)
+        coordinates_np = np.array(coordinates) * np.column_stack((masses, masses))
+        center = np.sum(coordinates_np / total_mass, axis=0)
         parent_node = Node(
             lvl.parent_model.uid_generator.new('node'),
             [*center, lvl.elevation],
@@ -88,8 +88,8 @@ class RDAnalyzer:
                 loadcase.node_mass[node.uid].val = np.zeros(6)
                 dist2 = (
                     np.linalg.norm(
-                        np.array(node.coords[0:2])
-                        - np.array(parent_node.coords[0:2])
+                        np.array(node.coordinates[0:2])
+                        - np.array(parent_node.coordinates[0:2])
                     )
                     ** 2
                 )
