@@ -9,6 +9,7 @@ import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
 from osmg.elements.element import DispBeamColumn, ElasticBeamColumn
+from osmg.analysis.supports import FixedSupport, ElasticSupport
 
 if TYPE_CHECKING:
     from osmg.core.component_assemblies import ComponentAssembly
@@ -49,7 +50,7 @@ class Figure3D:
                 'zaxis_visible': False,
                 'bgcolor': 'white',
                 'camera': self.configuration.camera,
-                'aspectratio': {'x': 0.25, 'y': 0.25, 'z': 0.25},
+                'aspectmode': 'data',
             }
         )
 
@@ -300,6 +301,243 @@ class Figure3D:
         data['text'].extend(section_names)  # type: ignore
 
         data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
+
+    def add_supports(
+        self,
+        nodes: dict[int, Node],
+        supports: dict[int, FixedSupport | ElasticSupport],
+        symbol_height: float,
+    ):
+        """Show supports."""
+
+        # Verify dimensionality consistency
+        support_iterator = iter(supports)
+        uid = next(support_iterator)
+        support = supports[uid]
+        num_dofs = len(support.dof_restraints)
+        # sanity check
+        # continue iterating and ansure the dimensions are correct
+        for uid in support_iterator:
+            support = supports[uid]
+            assert num_dofs == len(support.dof_restraints)
+
+        # Verify dimensionality consistency
+        node_iterator = iter(nodes)
+        uid = next(node_iterator)
+        node = nodes[uid]
+        num_dimensions = len(node.coordinates)
+        # sanity check
+        # continue iterating and ansure the dimensions are correct
+        for uid in node_iterator:
+            node = nodes[uid]
+            assert num_dimensions == len(node.coordinates)
+
+        three_dimensional = 3
+        two_dimensional = 2
+        if num_dimensions == three_dimensional:
+            directions = {0: '-x', 1: '-y', 2: '-z', 0: 'x', 1: 'y', 2: 'z'}
+        else:
+            assert num_dimensions == two_dimensional
+            directions = {0: '-x', 1: '-z', 2: 'y'}
+
+        data = self.find_data_by_name('Supports')
+        if not data:
+            # Initialize
+            data = {
+                'name': 'Supports',
+                'type': 'mesh3d',
+                'x': [],
+                'y': [],
+                'z': [],
+                'i': [],
+                'j': [],
+                'k': [],
+                'color': '#00f0ff',
+                'hoverinfo': 'skip',
+                'defined': set(),
+            }
+            # TODO (JVM): replace template fields with actual info.
+            self.data.append(data)
+
+        index_offset = 0
+        for uid, support in supports.items():
+            node = nodes[uid]
+            if uid in data['defined']:  # type: ignore
+                continue
+            if self.configuration.num_space_dimensions == three_dimensional:
+                for i in range(num_dofs):
+                    if support.dof_restraints[i]:
+                        tip_coordinates = node.coordinates
+                        (
+                            vertices_x,
+                            vertices_y,
+                            vertices_z,
+                            faces_i,
+                            faces_j,
+                            faces_k,
+                        ) = self._generate_pyramid_mesh(
+                            tip_coordinates, symbol_height, directions[i], index_offset
+                        )
+                        index_offset += 5
+                        data['x'].extend(vertices_x)  # type: ignore
+                        data['y'].extend(vertices_y)  # type: ignore
+                        data['z'].extend(vertices_z)  # type: ignore
+                        data['i'].extend(faces_i)
+                        data['j'].extend(faces_j)
+                        data['k'].extend(faces_k)
+            else:
+                assert self.configuration.num_space_dimensions == two_dimensional
+                for i in range(num_dofs):
+                    if support.dof_restraints[i]:
+                        tip_coordinates = (
+                            node.coordinates[0],
+                            0.00,
+                            node.coordinates[1],
+                        )
+                        (
+                            vertices_x,
+                            vertices_y,
+                            vertices_z,
+                            faces_i,
+                            faces_j,
+                            faces_k,
+                        ) = self._generate_pyramid_mesh(
+                            tip_coordinates, symbol_height, directions[i], index_offset
+                        )
+                        index_offset += 5
+                        data['x'].extend(vertices_x)  # type: ignore
+                        data['y'].extend(vertices_y)  # type: ignore
+                        data['z'].extend(vertices_z)  # type: ignore
+                        data['i'].extend(faces_i)
+                        data['j'].extend(faces_j)
+                        data['k'].extend(faces_k)
+        # Update defined objects.
+        data['defined'] = data['defined'].union(supports.keys())  # type: ignore
+
+    def _generate_pyramid_mesh(
+        self,
+        tip_coordinates: tuple[float, float, float],
+        height: float,
+        direction: Literal['x', 'y', 'z'],
+        index_offset: int,
+    ) -> tuple[
+        list[float], list[float], list[float], list[int], list[int], list[int]
+    ]:
+        """
+        Define data for a scaled and translated pyramid mesh.
+
+        Arguments:
+          data_dict: List of dictionaries to append the mesh data.
+          height: The height of the pyramid (scales its size proportionally).
+          tip_coordinates: The (x, y, z) coordinates of the pyramid's tip.
+        """
+        # Tip coordinates
+        tip_x, tip_y, tip_z = tip_coordinates
+
+        # Base dimensions relative to the tip
+        base_size = height / 2
+
+        if direction in ['x', '-x']:
+            offset = height if direction == 'x' else -height
+            vertices_x = [
+                tip_x,
+                tip_x + offset,
+                tip_x + offset,
+                tip_x + offset,
+                tip_x + offset,
+            ]
+            vertices_y = [
+                tip_y,
+                tip_y + base_size,
+                tip_y - base_size,
+                tip_y - base_size,
+                tip_y + base_size,
+            ]
+            vertices_z = [
+                tip_z,
+                tip_z - base_size,
+                tip_z - base_size,
+                tip_z + base_size,
+                tip_z + base_size,
+            ]
+        elif direction in ['y', '-y']:
+            offset = height if direction == 'y' else -height
+            vertices_x = [
+                tip_x,
+                tip_x - base_size,
+                tip_x + base_size,
+                tip_x + base_size,
+                tip_x - base_size,
+            ]
+            vertices_y = [
+                tip_y,
+                tip_y + offset,
+                tip_y + offset,
+                tip_y + offset,
+                tip_y + offset,
+            ]
+            vertices_z = [
+                tip_z,
+                tip_z - base_size,
+                tip_z - base_size,
+                tip_z + base_size,
+                tip_z + base_size,
+            ]
+        elif direction in ['z', '-z']:
+            offset = height if direction == 'z' else -height
+            vertices_x = [
+                tip_x,
+                tip_x - base_size,
+                tip_x + base_size,
+                tip_x + base_size,
+                tip_x - base_size,
+            ]
+            vertices_y = [
+                tip_y,
+                tip_y - base_size,
+                tip_y - base_size,
+                tip_y + base_size,
+                tip_y + base_size,
+            ]
+            vertices_z = [
+                tip_z,
+                tip_z + offset,
+                tip_z + offset,
+                tip_z + offset,
+                tip_z + offset,
+            ]
+        else:
+            raise ValueError(
+                "Invalid direction. Choose 'x', '-x', 'y', '-y', 'z', or '-z'."
+            )
+
+        # Define faces using vertex indices
+        i_o = index_offset
+        faces_i = [
+            0 + i_o,
+            0 + i_o,
+            0 + i_o,
+            0 + i_o,
+        ]  # Start vertex index for each triangle
+        faces_j = [
+            1 + i_o,
+            2 + i_o,
+            3 + i_o,
+            4 + i_o,
+        ]  # Middle vertex index for each triangle
+        faces_k = [
+            2 + i_o,
+            3 + i_o,
+            4 + i_o,
+            1 + i_o,
+        ]  # End vertex index for each triangle
+
+        # Add the base face
+        faces_i.extend([1 + i_o, 2 + i_o])
+        faces_j.extend([2 + i_o, 3 + i_o])
+        faces_k.extend([4 + i_o, 4 + i_o])
+
+        return vertices_x, vertices_y, vertices_z, faces_i, faces_j, faces_k
 
     def show(self) -> None:
         """Display the figure."""

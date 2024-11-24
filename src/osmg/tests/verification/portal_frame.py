@@ -12,7 +12,10 @@ from osmg.creators.component import BeamColumnCreator
 from osmg.creators.section import AISC_Database_Section_Creator
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection
+from osmg.analysis.load_case import LoadCaseRegistry, OtherLoadCase
+from osmg.analysis.supports import FixedSupport
 from osmg.graphics.plotly import Figure3D, Figure3DConfiguration
+
 
 # Instantiate model object
 frame = Model2D('Frame model')
@@ -93,7 +96,7 @@ for placement_data in (
 # We'll have "analysis types": static, response spectrum, transient.
 # Each load case will run the analysis and store the results.
 # Each load case will need to have configuration on what results to keep track of.
-# It should define supports. Use support configuration objects, which will also support elastic supports and be dimension-agnostic.
+
 # It should still be possible to define a very simple load case and run an analysis manually
 # load case registry -> should be able to run all analyses with one method.
 # and then be able to get basic forces and node displacements considering case combinations.
@@ -113,7 +116,19 @@ for placement_data in (
 
 # Improve design code.
 
+# Define a load case
+my_load_case = OtherLoadCase()
+
+# Add supports
+my_fixed_support = FixedSupport((True, True, True))
+my_load_case.add_supports_at_level(frame, my_fixed_support, 'Base')
+
+# Add a UDL
+
+
 fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary')
 fig.add_components(list(frame.components.values()))
+fig.add_supports(frame.nodes, my_load_case.fixed_supports, 12.00)
 fig.show()
+
