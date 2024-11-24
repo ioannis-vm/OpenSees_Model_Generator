@@ -7,7 +7,7 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.load_case import OtherLoadCase
+from osmg.analysis.load_case import UDL, LoadCaseRegistry, PointLoad
 from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
 from osmg.creators.component import BeamColumnCreator
@@ -115,16 +115,46 @@ for placement_data in (
 
 # Improve design code.
 
-# Define a load case
-my_load_case = OtherLoadCase()
+# Create the load case registry
+load_case_registry = LoadCaseRegistry()
 
-# Add supports
-my_fixed_support = FixedSupport((True, True, True))
-my_load_case.add_supports_at_level(frame, my_fixed_support, 'Base')
+# Add supports at level 'Base' for all load cases 'A', 'B', and 'C'
+fixed_support = FixedSupport((True, True, True))
+for tag in ('A', 'B', 'C'):
+    # Note: the load cases of type `other` with the given tags are
+    # automatically instantiated before the supports are added.
+    load_case_registry.other[tag].add_supports_at_level(frame, fixed_support, 'Base')
 
-# Add a UDL
+
+# Locate the nodes at 'A'-'Level 1' and 'B'-'Level 1'
+node_a_level1 = frame.nodes.search_by_coordinates_or_raise(
+    (grids.get_grid_location('A'), grids.get_level_elevation('Level 1'))
+)
+node_b_level1 = frame.nodes.search_by_coordinates_or_raise(
+    (grids.get_grid_location('B'), grids.get_level_elevation('Level 1'))
+)
+
+# Search for the top beam (component assembly connected to these nodes)
+top_beam = frame.components.search_by_nodes_or_raise([node_a_level1, node_b_level1])
+
+# Add UDLs to the top beam in load cases 'A' and 'B'
+load_case_registry.other['A'].load_registry.element_udl[top_beam.uid] = UDL(
+    value=(0.0, 0.0, -10.00)  # lb/in
+)
+load_case_registry.other['B'].load_registry.element_udl[top_beam.uid] = UDL(
+    value=(0.0, 0.0, +10.00)  # lb/in
+)
+
+# Add a concentrated point load at 'A'-'Level 1' in load case 'C'
+load_case_registry.other['C'].load_registry.nodal_loads[node_a_level1.uid] = (
+    PointLoad(
+        value=(10.00, 0.00, 0.00)  # lb
+    )
+)
+
+
 fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary')
 fig.add_components(list(frame.components.values()))
-fig.add_supports(frame.nodes, my_load_case.fixed_supports, 12.00)
+fig.add_supports(frame.nodes, load_case_registry.other['A'].fixed_supports, 12.00)
 fig.show()

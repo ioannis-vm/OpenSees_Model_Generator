@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 class ConcentratedValue:
     """Concentrated value, such as a point load or mass."""
 
-    value: tuple[float]
+    value: tuple[float, ...]
 
 
 @dataclass(repr=False)
@@ -33,9 +34,14 @@ class PointMass(ConcentratedValue):
 
 @dataclass(repr=False)
 class UDL:
-    """Beamcolumn element UDL."""
+    """
+    Beamcolumn element UDL.
 
-    value: tuple[float]
+    Uniformly distributed load expressed in the global coordinate
+    system of the structure.
+    """
+
+    value: tuple[float, ...]
 
 
 @dataclass(repr=False)
@@ -125,9 +131,22 @@ class OtherLoadCase(LoadCase):
 
 @dataclass(repr=False)
 class LoadCaseRegistry:
-    """Load case registry."""
+    """
+    Load case registry with automatic instantiation.
 
-    dead: dict[str, DeadLoadCase]
-    live: dict[str, LiveLoadCase]
-    seismic: dict[str, SeismicLoadCase]
-    other: dict[str, OtherLoadCase]
+    Automatically creates an empty load case for each attribute when a
+    string key is accessed.
+    """
+
+    dead: defaultdict[str, DeadLoadCase] = field(
+        default_factory=lambda: defaultdict(DeadLoadCase)
+    )
+    live: defaultdict[str, LiveLoadCase] = field(
+        default_factory=lambda: defaultdict(LiveLoadCase)
+    )
+    seismic: defaultdict[str, SeismicLoadCase] = field(
+        default_factory=lambda: defaultdict(SeismicLoadCase)
+    )
+    other: defaultdict[str, OtherLoadCase] = field(
+        default_factory=lambda: defaultdict(OtherLoadCase)
+    )

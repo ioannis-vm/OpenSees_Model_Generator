@@ -276,8 +276,6 @@ class BeamColumnCreator:
 
         # instantiate a component assembly and add it to the model.
         component = ComponentAssembly(self.model.uid_generator, tags=tags)
-        self.model.components.add(component)
-
         # populate the component assembly
         component.external_nodes.add(node_i)
         component.external_nodes.add(node_j)
@@ -295,4 +293,7 @@ class BeamColumnCreator:
             initial_deformation_config=initial_deformation_config,
         )
 
+        # Add in the end! It needs to have external nodes before
+        # adding to the collection.
+        self.model.components.add(component)
         return component

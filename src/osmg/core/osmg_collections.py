@@ -350,6 +350,47 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
 
         self.connectivity_map[sorted_uids] = obj.uid
 
+    def search_by_nodes(self, nodes: list[Node]) -> ComponentAssembly | None:
+        """
+        Search and return a component assembly connected to the given nodes.
+
+        Arguments:
+          nodes: List of Node objects to check for connectivity.
+
+        Returns:
+          The connected ComponentAssembly if found, else None.
+        """
+        # Extract sorted uids from the given nodes
+        node_uids = tuple(sorted(node.uid for node in nodes))
+
+        # Check if the connectivity map contains the sorted uids
+        if node_uids in self.connectivity_map:
+            assembly_uid = self.connectivity_map[node_uids]
+            return self[assembly_uid]
+
+        return None
+
+    def search_by_nodes_or_raise(self, nodes: list[Node]) -> ComponentAssembly:
+        """
+        Search and return a component assembly connected to the given nodes.
+
+        Raise an error if not found.
+
+        Arguments:
+          nodes: List of Node objects to check for connectivity.
+
+        Returns:
+          The connected ComponentAssembly.
+
+        Raises:
+          ValueError: If not found
+        """
+        component = self.search_by_nodes(nodes)
+        if component is None:
+            msg = 'Component not found.'
+            raise ValueError(msg)
+        return component
+
     def __repr__(self) -> str:
         """
         Get string representation.
