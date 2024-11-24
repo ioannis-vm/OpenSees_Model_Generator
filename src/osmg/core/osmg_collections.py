@@ -9,9 +9,9 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core import common
-from osmg.elements.node import Node
-from osmg.elements.element import Element
 from osmg.core.uid_object import UIDObject
+from osmg.elements.element import Element
+from osmg.elements.node import Node
 
 # if TYPE_CHECKING:
 #     from osmg.elements.node import Node
@@ -299,13 +299,67 @@ class ComponentAssembly(UIDObject):
 
 @dataclass(repr=False)
 class ComponentAssemblyCollection(Collection[ComponentAssembly]):
-    """Collection of component assemblies."""
+    """
+    Collection of component assemblies with connectivity tracking.
+
+    Attributes:
+    ----------
+    connectivity_map : dict[tuple[int, ...], int]
+        A dictionary where the keys are sorted tuples of external node uids,
+        and the values are the uids of the corresponding component assemblies.
+    """
+
+    connectivity_map: dict[tuple[int, ...], int] = field(default_factory=dict)
 
     def add(self, obj: ComponentAssembly) -> None:
         """
-        Add a component to the collection.
+        Add a component to the collection and update connectivity information.
 
         Arguments:
-          obj: Object to be added.
+          obj: ComponentAssembly to be added.
+
+        Raises:
+          ValueError: If the object is missing required attributes or
+                      if connectivity information conflicts.
         """
         super().add(obj)
+
+        # Ensure external nodes have unique IDs
+        if not obj.external_nodes:
+            msg = (
+                'ComponentAssembly must have external nodes to update connectivity.'
+            )
+            raise ValueError(msg)
+
+        # Extract external node uids
+        external_uids = [node.uid for node in obj.external_nodes.values()]
+        if not external_uids:
+            msg = 'External nodes must have valid unique IDs.'
+            raise ValueError(msg)
+
+        # Create a sorted tuple of external node uids
+        sorted_uids = tuple(sorted(external_uids))
+
+        # Update connectivity map
+        if sorted_uids in self.connectivity_map:
+            msg = (
+                f'Connectivity information for nodes {sorted_uids} '
+                f'already exists for ComponentAssembly {self.connectivity_map[sorted_uids]}.'
+            )
+            raise ValueError(msg)
+
+        self.connectivity_map[sorted_uids] = obj.uid
+
+    def __repr__(self) -> str:
+        """
+        Get string representation.
+
+        Returns:
+          The string representation of the object.
+        """
+        res = ''
+        res += 'ComponentAssemblyCollection Object\n'
+        res += f'ID: {id(self)}\n'
+        res += f'Number of assemblies: {len(self)}\n'
+        res += f'Connectivity map: {self.connectivity_map}\n'
+        return res

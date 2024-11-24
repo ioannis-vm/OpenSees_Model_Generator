@@ -7,15 +7,14 @@ Force units: lb
 
 import numpy as np
 
+from osmg.analysis.load_case import OtherLoadCase
+from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
 from osmg.creators.component import BeamColumnCreator
 from osmg.creators.section import AISC_Database_Section_Creator
 from osmg.elements.node import Node
 from osmg.elements.section import ElasticSection
-from osmg.analysis.load_case import LoadCaseRegistry, OtherLoadCase
-from osmg.analysis.supports import FixedSupport
 from osmg.graphics.plotly import Figure3D, Figure3DConfiguration
-
 
 # Instantiate model object
 frame = Model2D('Frame model')
@@ -124,10 +123,8 @@ my_fixed_support = FixedSupport((True, True, True))
 my_load_case.add_supports_at_level(frame, my_fixed_support, 'Base')
 
 # Add a UDL
-
 fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary')
 fig.add_components(list(frame.components.values()))
 fig.add_supports(frame.nodes, my_load_case.fixed_supports, 12.00)
 fig.show()
-

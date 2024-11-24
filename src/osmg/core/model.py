@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -13,9 +13,6 @@ from osmg.core.osmg_collections import ComponentAssemblyCollection, NodeCollecti
 from osmg.creators.uid import UIDGenerator
 
 nparr = npt.NDArray[np.float64]
-
-if TYPE_CHECKING:
-    from osmg.core.osmg_collections import ComponentAssembly
 
 
 @dataclass(repr=False)

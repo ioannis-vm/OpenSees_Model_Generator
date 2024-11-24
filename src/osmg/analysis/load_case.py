@@ -1,46 +1,41 @@
 """Load cases."""
 
 from __future__ import annotations
-from dataclasses import dataclass, field
 
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON
-from osmg.analysis.supports import FixedSupport
-from osmg.analysis.supports import ElasticSupport
 
 if TYPE_CHECKING:
-    from osmg.core.model import Model3D, Model2D
+    from osmg.core.model import Model2D, Model3D
 
 
 @dataclass(repr=False)
 class ConcentratedValue:
     """Concentrated value, such as a point load or mass."""
 
-    value: tuple(float)
+    value: tuple[float]
 
 
 @dataclass(repr=False)
 class PointLoad(ConcentratedValue):
     """Point load."""
 
-    pass
-
 
 @dataclass(repr=False)
 class PointMass(ConcentratedValue):
     """Point load."""
-
-    pass
 
 
 @dataclass(repr=False)
 class UDL:
     """Beamcolumn element UDL."""
 
-    value: tuple(float)
+    value: tuple[float]
 
 
 @dataclass(repr=False)
@@ -61,7 +56,10 @@ class LoadCase:
     load_registry: LoadRegistry = field(default_factory=LoadRegistry)
 
     def add_supports_at_level(
-        self, model: Model2D | Model3D, support, level_tag
+        self,
+        model: Model2D | Model3D,
+        support: ElasticSupport | FixedSupport,
+        level_tag: str,
     ) -> None:
         """
         Add the given support at the specified level.
@@ -70,7 +68,7 @@ class LoadCase:
         the specified level's elevation and assigns the specified
         support to them.
 
-        Assumes that the last coordinate of the nodes correponds to
+        Assumes that the last coordinate of the nodes corresponds to
         elevation.
 
         Raises:
@@ -94,49 +92,35 @@ class LoadCase:
 class DeadLoadCase(LoadCase):
     """Dead load case."""
 
-    pass
-
 
 @dataclass(repr=False)
 class LiveLoadCase(LoadCase):
     """Live load case."""
-
-    pass
 
 
 @dataclass(repr=False)
 class SeismicLoadCase(LoadCase):
     """Seismic load case base class."""
 
-    pass
-
 
 @dataclass(repr=False)
 class SeismicELFLoadCase(SeismicLoadCase):
     """Seismic ELF load case."""
-
-    pass
 
 
 @dataclass(repr=False)
 class SeismicRSLoadCase(SeismicLoadCase):
     """Seismic RS load case."""
 
-    pass
-
 
 @dataclass(repr=False)
 class SeismicTransientLoadCase(SeismicLoadCase):
     """Seismic transient load case."""
 
-    pass
-
 
 @dataclass(repr=False)
 class OtherLoadCase(LoadCase):
     """Other load case."""
-
-    pass
 
 
 @dataclass(repr=False)

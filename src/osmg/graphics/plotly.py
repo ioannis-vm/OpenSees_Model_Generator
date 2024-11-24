@@ -9,9 +9,9 @@ import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
 from osmg.elements.element import DispBeamColumn, ElasticBeamColumn
-from osmg.analysis.supports import FixedSupport, ElasticSupport
 
 if TYPE_CHECKING:
+    from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.elements.element import Element
     from osmg.elements.node import Node
@@ -302,14 +302,13 @@ class Figure3D:
 
         data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
-    def add_supports(
+    def add_supports(  # noqa: C901  kalamari
         self,
         nodes: dict[int, Node],
-        supports: dict[int, FixedSupport | ElasticSupport],
+        supports: dict[int, FixedSupport] | dict[int, ElasticSupport],
         symbol_height: float,
-    ):
+    ) -> None:
         """Show supports."""
-
         # Verify dimensionality consistency
         support_iterator = iter(supports)
         uid = next(support_iterator)
@@ -335,7 +334,14 @@ class Figure3D:
         three_dimensional = 3
         two_dimensional = 2
         if num_dimensions == three_dimensional:
-            directions = {0: '-x', 1: '-y', 2: '-z', 0: 'x', 1: 'y', 2: 'z'}
+            directions: dict[int, Literal['x', 'y', 'z', '-x', '-y', '-z']] = {
+                0: '-x',
+                1: '-y',
+                2: '-z',
+                3: 'x',
+                4: 'y',
+                5: 'z',
+            }
         else:
             assert num_dimensions == two_dimensional
             directions = {0: '-x', 1: '-z', 2: 'y'}
@@ -367,7 +373,11 @@ class Figure3D:
             if self.configuration.num_space_dimensions == three_dimensional:
                 for i in range(num_dofs):
                     if support.dof_restraints[i]:
-                        tip_coordinates = node.coordinates
+                        tip_coordinates = (
+                            node.coordinates[0],
+                            node.coordinates[1],
+                            node.coordinates[2],
+                        )
                         (
                             vertices_x,
                             vertices_y,
@@ -376,15 +386,18 @@ class Figure3D:
                             faces_j,
                             faces_k,
                         ) = self._generate_pyramid_mesh(
-                            tip_coordinates, symbol_height, directions[i], index_offset
+                            tip_coordinates,
+                            symbol_height,
+                            directions[i],
+                            index_offset,
                         )
                         index_offset += 5
                         data['x'].extend(vertices_x)  # type: ignore
                         data['y'].extend(vertices_y)  # type: ignore
                         data['z'].extend(vertices_z)  # type: ignore
-                        data['i'].extend(faces_i)
-                        data['j'].extend(faces_j)
-                        data['k'].extend(faces_k)
+                        data['i'].extend(faces_i)  # type: ignore
+                        data['j'].extend(faces_j)  # type: ignore
+                        data['k'].extend(faces_k)  # type: ignore
             else:
                 assert self.configuration.num_space_dimensions == two_dimensional
                 for i in range(num_dofs):
@@ -402,23 +415,26 @@ class Figure3D:
                             faces_j,
                             faces_k,
                         ) = self._generate_pyramid_mesh(
-                            tip_coordinates, symbol_height, directions[i], index_offset
+                            tip_coordinates,
+                            symbol_height,
+                            directions[i],
+                            index_offset,
                         )
                         index_offset += 5
                         data['x'].extend(vertices_x)  # type: ignore
                         data['y'].extend(vertices_y)  # type: ignore
                         data['z'].extend(vertices_z)  # type: ignore
-                        data['i'].extend(faces_i)
-                        data['j'].extend(faces_j)
-                        data['k'].extend(faces_k)
+                        data['i'].extend(faces_i)  # type: ignore
+                        data['j'].extend(faces_j)  # type: ignore
+                        data['k'].extend(faces_k)  # type: ignore
         # Update defined objects.
         data['defined'] = data['defined'].union(supports.keys())  # type: ignore
 
+    @staticmethod
     def _generate_pyramid_mesh(
-        self,
         tip_coordinates: tuple[float, float, float],
         height: float,
-        direction: Literal['x', 'y', 'z'],
+        direction: Literal['x', 'y', 'z', '-x', '-y', '-z'],
         index_offset: int,
     ) -> tuple[
         list[float], list[float], list[float], list[int], list[int], list[int]
@@ -427,9 +443,18 @@ class Figure3D:
         Define data for a scaled and translated pyramid mesh.
 
         Arguments:
-          data_dict: List of dictionaries to append the mesh data.
+          tip_coordinates: Coordinates of the tip of the pyramid.
           height: The height of the pyramid (scales its size proportionally).
-          tip_coordinates: The (x, y, z) coordinates of the pyramid's tip.
+          direction: The global axis direction to which the pyramid
+            will extend from tip to base.
+          index_offset: Offset the index of the vertices in the data
+            dictionary to define additional pyramids.
+
+        Returns:
+          The coordinates and sequence of vertices in 3D space.
+
+        Raises:
+          ValueError: If an invalid direction is specified
         """
         # Tip coordinates
         tip_x, tip_y, tip_z = tip_coordinates
@@ -437,7 +462,7 @@ class Figure3D:
         # Base dimensions relative to the tip
         base_size = height / 2
 
-        if direction in ['x', '-x']:
+        if direction in {'x', '-x'}:
             offset = height if direction == 'x' else -height
             vertices_x = [
                 tip_x,
@@ -460,7 +485,7 @@ class Figure3D:
                 tip_z + base_size,
                 tip_z + base_size,
             ]
-        elif direction in ['y', '-y']:
+        elif direction in {'y', '-y'}:
             offset = height if direction == 'y' else -height
             vertices_x = [
                 tip_x,
@@ -483,7 +508,7 @@ class Figure3D:
                 tip_z + base_size,
                 tip_z + base_size,
             ]
-        elif direction in ['z', '-z']:
+        elif direction in {'z', '-z'}:
             offset = height if direction == 'z' else -height
             vertices_x = [
                 tip_x,
@@ -507,9 +532,8 @@ class Figure3D:
                 tip_z + offset,
             ]
         else:
-            raise ValueError(
-                "Invalid direction. Choose 'x', '-x', 'y', '-y', 'z', or '-z'."
-            )
+            msg = "Invalid direction. Choose 'x', '-x', 'y', '-y', 'z', or '-z'."
+            raise ValueError(msg)
 
         # Define faces using vertex indices
         i_o = index_offset
