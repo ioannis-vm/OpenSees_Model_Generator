@@ -90,8 +90,9 @@ for placement_data in (
     )
 
 
-# Load case registry -> stores load cases.
-# Will have separate place for dead, live, seismic, other.
+# [X] Load case registry -> stores load cases.
+# [X] Will have separate place for dead, live, seismic, other.
+
 # We'll have "analysis types": static, response spectrum, transient.
 # Each load case will run the analysis and store the results.
 # Each load case will need to have configuration on what results to keep track of.
@@ -139,16 +140,16 @@ top_beam = frame.components.search_by_nodes_or_raise([node_a_level1, node_b_leve
 
 # Add UDLs to the top beam in load cases 'A' and 'B'
 load_case_registry.other['A'].load_registry.element_udl[top_beam.uid] = UDL(
-    value=(0.0, 0.0, -10.00)  # lb/in
+    (0.0, 0.0, -10.00)  # lb/in
 )
 load_case_registry.other['B'].load_registry.element_udl[top_beam.uid] = UDL(
-    value=(0.0, 0.0, +10.00)  # lb/in
+    (0.0, 0.0, +10.00)  # lb/in
 )
 
 # Add a concentrated point load at 'A'-'Level 1' in load case 'C'
 load_case_registry.other['C'].load_registry.nodal_loads[node_a_level1.uid] = (
     PointLoad(
-        value=(10.00, 0.00, 0.00)  # lb
+        (10.00, 0.00, 0.00)  # lb
     )
 )
 

@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 
 
 @dataclass(repr=False)
-class ConcentratedValue:
+class ConcentratedValue(tuple[float, ...]):
     """Concentrated value, such as a point load or mass."""
 
-    value: tuple[float, ...]
+    __slots__ = ()
 
 
 @dataclass(repr=False)
@@ -29,11 +29,11 @@ class PointLoad(ConcentratedValue):
 
 @dataclass(repr=False)
 class PointMass(ConcentratedValue):
-    """Point load."""
+    """Point mass."""
 
 
 @dataclass(repr=False)
-class UDL:
+class UDL(tuple[float, ...]):
     """
     Beamcolumn element UDL.
 
@@ -41,7 +41,7 @@ class UDL:
     system of the structure.
     """
 
-    value: tuple[float, ...]
+    __slots__ = ()
 
 
 @dataclass(repr=False)
@@ -49,7 +49,6 @@ class LoadRegistry:
     """Load registry."""
 
     nodal_loads: dict[int, PointLoad] = field(default_factory=dict)
-    nodal_mass: dict[int, PointMass] = field(default_factory=dict)
     element_udl: dict[int, UDL] = field(default_factory=dict)
 
 
@@ -105,6 +104,13 @@ class LiveLoadCase(LoadCase):
 
 
 @dataclass(repr=False)
+class ModalLoadCase(LoadCase):
+    """Modal load case."""
+
+    mass_registry: dict[int, PointMass] = field(default_factory=dict)
+
+
+@dataclass(repr=False)
 class SeismicLoadCase(LoadCase):
     """Seismic load case base class."""
 
@@ -118,10 +124,16 @@ class SeismicELFLoadCase(SeismicLoadCase):
 class SeismicRSLoadCase(SeismicLoadCase):
     """Seismic RS load case."""
 
+    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
+    mass_registry: dict[int, PointMass] = field(default_factory=dict)
+
 
 @dataclass(repr=False)
 class SeismicTransientLoadCase(SeismicLoadCase):
     """Seismic transient load case."""
+
+    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
+    mass_registry: dict[int, PointMass] = field(default_factory=dict)
 
 
 @dataclass(repr=False)
@@ -144,8 +156,17 @@ class LoadCaseRegistry:
     live: defaultdict[str, LiveLoadCase] = field(
         default_factory=lambda: defaultdict(LiveLoadCase)
     )
-    seismic: defaultdict[str, SeismicLoadCase] = field(
-        default_factory=lambda: defaultdict(SeismicLoadCase)
+    modal: defaultdict[str, ModalLoadCase] = field(
+        default_factory=lambda: defaultdict(ModalLoadCase)
+    )
+    seismic_elf: defaultdict[str, SeismicELFLoadCase] = field(
+        default_factory=lambda: defaultdict(SeismicELFLoadCase)
+    )
+    seismic_rs: defaultdict[str, SeismicRSLoadCase] = field(
+        default_factory=lambda: defaultdict(SeismicRSLoadCase)
+    )
+    seismic_transient: defaultdict[str, SeismicTransientLoadCase] = field(
+        default_factory=lambda: defaultdict(SeismicTransientLoadCase)
     )
     other: defaultdict[str, OtherLoadCase] = field(
         default_factory=lambda: defaultdict(OtherLoadCase)
