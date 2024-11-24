@@ -125,7 +125,6 @@ my_load_case.add_supports_at_level(frame, my_fixed_support, 'Base')
 
 # Add a UDL
 
-
 fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary')
 fig.add_components(list(frame.components.values()))

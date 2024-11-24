@@ -9,13 +9,13 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core.gridsystem import GridSystem, GridSystem2D
-from osmg.core.osmg_collections import CollectionWithConnectivity, NodeCollection
+from osmg.core.osmg_collections import ComponentAssemblyCollection, NodeCollection
 from osmg.creators.uid import UIDGenerator
 
 nparr = npt.NDArray[np.float64]
 
 if TYPE_CHECKING:
-    from osmg.core.component_assemblies import ComponentAssembly
+    from osmg.core.osmg_collections import ComponentAssembly
 
 
 @dataclass(repr=False)
@@ -34,8 +34,8 @@ class Model:
     name: str
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     nodes: NodeCollection = field(default_factory=NodeCollection)
-    components: CollectionWithConnectivity[ComponentAssembly] = field(
-        default_factory=CollectionWithConnectivity
+    components: ComponentAssemblyCollection = field(
+        default_factory=ComponentAssemblyCollection
     )
 
     def bounding_box(self, padding: float) -> tuple[nparr, nparr]:

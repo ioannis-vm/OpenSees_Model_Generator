@@ -12,7 +12,7 @@ from osmg.elements.element import DispBeamColumn, ElasticBeamColumn
 from osmg.analysis.supports import FixedSupport, ElasticSupport
 
 if TYPE_CHECKING:
-    from osmg.core.component_assemblies import ComponentAssembly
+    from osmg.core.osmg_collections import ComponentAssembly
     from osmg.elements.element import Element
     from osmg.elements.node import Node
 

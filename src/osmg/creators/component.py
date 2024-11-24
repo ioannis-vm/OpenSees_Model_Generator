@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import numpy.typing as npt
 
-from osmg.core.component_assemblies import ComponentAssembly
+from osmg.core.osmg_collections import ComponentAssembly
 from osmg.elements.element import (
     DispBeamColumn,
     ElasticBeamColumn,
