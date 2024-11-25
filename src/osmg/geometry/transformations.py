@@ -130,6 +130,26 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
     return tr_global_to_local
 
 
+def transformation_matrix_2d(vec_x: nparr, vec_y: nparr) -> nparr:
+    """
+    Obtain a transformation matrix in 2D.
+
+    Returns a transformation matrix that transforms points from
+    the coordinate system in which the x and y axes are expressed,
+    to the local coordinate system defined by them.
+
+    Arguments:
+        vec_x: Local x axis expressed in the global system
+        vec_y: (similar)
+
+    Returns:
+    -------
+        global to local transformation matrix.
+    """
+    tr_global_to_local: nparr = np.vstack((vec_x, vec_y))
+    return tr_global_to_local
+
+
 def local_axes_from_points_and_angle(
     point_i: nparr, point_j: nparr, ang: float
 ) -> tuple[nparr, nparr, nparr] | tuple[nparr, None, nparr]:

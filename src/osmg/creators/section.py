@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from pydantic import BaseModel
 
-from osmg.elements.section import ElasticSection
 from osmg.geometry.mesh_shapes import w_mesh
+from osmg.model_objects.section import ElasticSection
 
 if TYPE_CHECKING:
     from osmg.creators.uid import UIDGenerator

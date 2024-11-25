@@ -3,7 +3,7 @@
 import pytest
 
 from osmg.creators.uid import UIDGenerator
-from osmg.elements.node import Node
+from osmg.model_objects.node import Node
 
 
 class TestUIDGenerator:

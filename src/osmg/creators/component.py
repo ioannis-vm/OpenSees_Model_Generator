@@ -8,19 +8,19 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import numpy.typing as npt
 
-from osmg.core.osmg_collections import ComponentAssembly
-from osmg.elements.element import (
+from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.geometry.transformations import (
+    local_axes_from_points_and_angle,
+    transformation_matrix,
+)
+from osmg.model_objects.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     GeomTransf,
     ModifiedStiffnessParameterConfig,
 )
-from osmg.elements.node import Node
-from osmg.elements.section import ElasticSection, FiberSection
-from osmg.geometry.transformations import (
-    local_axes_from_points_and_angle,
-    transformation_matrix,
-)
+from osmg.model_objects.node import Node
+from osmg.model_objects.section import ElasticSection, FiberSection
 
 if TYPE_CHECKING:
     from osmg.core.model import Model
@@ -163,7 +163,7 @@ class BeamColumnCreator:
 
     def add_beamcolumn_elements_in_series(
         self,
-        component: ComponentAssembly,
+        component: BeamColumnAssembly,
         node_i: Node,
         node_j: Node,
         eo_i: nparr,
@@ -258,7 +258,7 @@ class BeamColumnCreator:
         transf_type: Literal['Linear', 'Corotational', 'PDelta'],
         angle: float = 0.00,
         initial_deformation_config: InitialDeformationConfig | None = None,
-    ) -> ComponentAssembly:
+    ) -> BeamColumnAssembly:
         """
         Plain component assembly.
 
@@ -275,7 +275,7 @@ class BeamColumnCreator:
         # assert uids_tuple not in self.model.component_connectivity()
 
         # instantiate a component assembly and add it to the model.
-        component = ComponentAssembly(self.model.uid_generator, tags=tags)
+        component = BeamColumnAssembly(self.model.uid_generator, tags=tags)
         # populate the component assembly
         component.external_nodes.add(node_i)
         component.external_nodes.add(node_j)

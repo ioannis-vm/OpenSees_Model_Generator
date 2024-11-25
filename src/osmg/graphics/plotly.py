@@ -8,20 +8,20 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
-from osmg.elements.element import DispBeamColumn, ElasticBeamColumn
+from osmg.model_objects.element import DispBeamColumn, ElasticBeamColumn
 
 if TYPE_CHECKING:
     from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
-    from osmg.elements.element import Element
-    from osmg.elements.node import Node
+    from osmg.model_objects.element import Element
+    from osmg.model_objects.node import Node
 
 
 def _default_camera() -> dict[str, object]:
     return {
         'up': {'x': 0, 'y': 0, 'z': 1},
         'center': {'x': 0, 'y': 0, 'z': 0},
-        'eye': {'x': 0.7, 'y': 1.00, 'z': 0.30},
+        'eye': {'x': 0.00, 'y': -10.00, 'z': 0.00},
         'projection': {'type': 'perspective'},
     }
 
@@ -313,12 +313,12 @@ class Figure3D:
         support_iterator = iter(supports)
         uid = next(support_iterator)
         support = supports[uid]
-        num_dofs = len(support.dof_restraints)
+        num_dofs = len(support)
         # sanity check
         # continue iterating and ansure the dimensions are correct
         for uid in support_iterator:
             support = supports[uid]
-            assert num_dofs == len(support.dof_restraints)
+            assert num_dofs == len(support)
 
         # Verify dimensionality consistency
         node_iterator = iter(nodes)
@@ -361,6 +361,7 @@ class Figure3D:
                 'color': '#00f0ff',
                 'hoverinfo': 'skip',
                 'defined': set(),
+                'showlegend': True,
             }
             # TODO (JVM): replace template fields with actual info.
             self.data.append(data)
@@ -372,7 +373,7 @@ class Figure3D:
                 continue
             if self.configuration.num_space_dimensions == three_dimensional:
                 for i in range(num_dofs):
-                    if support.dof_restraints[i]:
+                    if support[i]:
                         tip_coordinates = (
                             node.coordinates[0],
                             node.coordinates[1],
@@ -401,7 +402,7 @@ class Figure3D:
             else:
                 assert self.configuration.num_space_dimensions == two_dimensional
                 for i in range(num_dofs):
-                    if support.dof_restraints[i]:
+                    if support[i]:
                         tip_coordinates = (
                             node.coordinates[0],
                             0.00,

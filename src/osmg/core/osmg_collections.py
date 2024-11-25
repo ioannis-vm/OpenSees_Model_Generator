@@ -8,20 +8,22 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 import numpy as np
 import numpy.typing as npt
 
+from osmg.analysis.common import UDL
 from osmg.core import common
 from osmg.core.uid_object import UIDObject
-from osmg.elements.element import Element
-from osmg.elements.node import Node
-
-# if TYPE_CHECKING:
-#     from osmg.elements.node import Node
+from osmg.geometry.transformations import (
+    transformation_matrix,
+    transformation_matrix_2d,
+)
+from osmg.model_objects.element import BeamColumnElement, Element
+from osmg.model_objects.node import Node
 
 nparr = npt.NDArray[np.float64]
 
 TV = TypeVar('TV')
 
 if TYPE_CHECKING:
-    from osmg.elements import element
+    from osmg.model_objects import element
 
 
 @dataclass(repr=False)
@@ -295,6 +297,52 @@ class ComponentAssembly(UIDObject):
             uids_tuple = (*uids,)
             res[uids_tuple] = elm
         return res
+
+
+@dataclass
+class BeamColumnAssembly(ComponentAssembly):
+    """
+    Beamcolumn assembly object.
+
+    A beamcolumn assembly is a collection meant to represent beams and
+    columns. It is modeled with beamcolumn elements connected in
+    series, with optional zerolength elements at certain
+    locations. All beamcolumn elements in the collection need to be
+    colinear, since parts of osmg rely on this assumption.
+    """
+
+    def calculate_element_udl(self, udl: UDL) -> dict[int, UDL]:
+        """
+        Distribute the given UDL to the beamcolumn elements.
+
+        Given a UDL, determine the elements meant to take the load and
+        return what is necessary to define the load in OpenSees: The
+        tags of the elements and the load expressed in the local
+        coordinate system of each element.
+
+        Returns:
+          Dictionary mapping the UID of the beamcolumn elements with
+          UDL values expressed in the members' local coordinate
+          system.
+        """
+        local_udls: dict[int, UDL] = {}
+        for beamcolumn_element in self.elements.values():
+            if not isinstance(beamcolumn_element, BeamColumnElement):
+                continue
+            if beamcolumn_element.geomtransf.y_axis is None:
+                transformation_mat = transformation_matrix_2d(
+                    beamcolumn_element.geomtransf.x_axis,
+                    beamcolumn_element.geomtransf.z_axis,
+                )
+            else:
+                transformation_mat = transformation_matrix(
+                    beamcolumn_element.geomtransf.x_axis,
+                    beamcolumn_element.geomtransf.y_axis,
+                    beamcolumn_element.geomtransf.z_axis,
+                )
+            udl_local = UDL(transformation_mat @ np.array(udl))
+            local_udls[beamcolumn_element.uid] = udl_local
+        return local_udls
 
 
 @dataclass(repr=False)

@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 
-
-@dataclass(repr=False)
-class FixedSupport:
+class FixedSupport(tuple[bool, ...]):
     """Fixed support."""
 
-    dof_restraints: tuple[bool, ...]
+    __slots__: list[str] = []
 
 
-@dataclass(repr=False)
-class ElasticSupport:
+class ElasticSupport(tuple[float, ...]):
     """Flexible support."""
 
-    dof_restraints: tuple[float, ...]
+    __slots__: list[str] = []

@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from osmg.elements.element import ZeroLength
+from osmg.model_objects.element import ZeroLength
 
 if TYPE_CHECKING:
     from osmg.creators.material import MaterialCreator
     from osmg.creators.uid import UIDGenerator
-    from osmg.elements.uniaxial_material import UniaxialMaterial
+    from osmg.model_objects.uniaxial_material import UniaxialMaterial
     from osmg.node import Node
 
 

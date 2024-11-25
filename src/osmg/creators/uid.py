@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from itertools import count
 
-# from osmg.elements.node import Node
+# from osmg.model_objects.node import Node
 
 
 @dataclass
@@ -28,8 +28,12 @@ class UIDGenerator:
             'Node': 'NODE',
             'ElasticSection': 'SECTION',
             'ComponentAssembly': 'COMPONENT',
+            'BeamColumnAssembly': 'COMPONENT',
             'GeomTransf': 'TRANSFORMATION',
             'ElasticBeamColumn': 'BEAMCOLUMN',
+            'NodeRecorder': 'RECORDER',
+            'DriftRecorder': 'RECORDER',
+            'ElementRecorder': 'RECORDER',
             '_TestChild': 'TESTING',
         }
 

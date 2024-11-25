@@ -7,14 +7,14 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.load_case import UDL, LoadCaseRegistry, PointLoad
+from osmg.analysis.common import UDL, PointLoad
+from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
 from osmg.creators.component import BeamColumnCreator
 from osmg.creators.section import AISC_Database_Section_Creator
-from osmg.elements.node import Node
-from osmg.elements.section import ElasticSection
-from osmg.graphics.plotly import Figure3D, Figure3DConfiguration
+from osmg.model_objects.node import Node
+from osmg.model_objects.section import ElasticSection
 
 # Instantiate model object
 frame = Model2D('Frame model')
@@ -93,19 +93,29 @@ for placement_data in (
 # [X] Load case registry -> stores load cases.
 # [X] Will have separate place for dead, live, seismic, other.
 
-# We'll have "analysis types": static, response spectrum, transient.
+# [X] We'll have "analysis types": static, response spectrum, transient.
+
+# On results... Need to figure out a clean way to set them up, like recorders.
 # Each load case will run the analysis and store the results.
 # Each load case will need to have configuration on what results to keep track of.
 
-# It should still be possible to define a very simple load case and run an analysis manually
-# load case registry -> should be able to run all analyses with one method.
-# and then be able to get basic forces and node displacements considering case combinations.
-#   Add another load case and a combination.
-#   Write convenience code to retrieve basic force data for
-#   **assembiles**, including combinations.
 
-# Add a load case, Add supports, update plotting.
-# Run a linear elastic analysis.
+# It should still be possible to define a very simple load casea and run an analysis manually
+#   Let's consider doing this with the loads defined in the `other` category.
+# [X] load case registry -> should be able to run all analyses with one method.
+#   and then be able to get basic forces and node displacements considering case combinations.
+
+# Once a prototype is written,
+#     Add another load case and a combination.
+#     Write convenience code to retrieve basic force data for
+#     **assembiles**, including combinations.
+
+# [X] Add a load case,
+# [X] Add supports,
+# [X] update plotting.
+
+# ~~~ I am here ~~~
+# [X] Run a linear elastic analysis.
 # Plot results.
 
 # Plot combined basic forces.
@@ -116,15 +126,17 @@ for placement_data in (
 
 # Improve design code.
 
+# Continue working on study.
+
 # Create the load case registry
-load_case_registry = LoadCaseRegistry()
+load_case_registry = LoadCaseRegistry(frame)
 
 # Add supports at level 'Base' for all load cases 'A', 'B', and 'C'
 fixed_support = FixedSupport((True, True, True))
 for tag in ('A', 'B', 'C'):
     # Note: the load cases of type `other` with the given tags are
     # automatically instantiated before the supports are added.
-    load_case_registry.other[tag].add_supports_at_level(frame, fixed_support, 'Base')
+    load_case_registry.dead[tag].add_supports_at_level(frame, fixed_support, 'Base')
 
 
 # Locate the nodes at 'A'-'Level 1' and 'B'-'Level 1'
@@ -139,23 +151,47 @@ node_b_level1 = frame.nodes.search_by_coordinates_or_raise(
 top_beam = frame.components.search_by_nodes_or_raise([node_a_level1, node_b_level1])
 
 # Add UDLs to the top beam in load cases 'A' and 'B'
-load_case_registry.other['A'].load_registry.element_udl[top_beam.uid] = UDL(
-    (0.0, 0.0, -10.00)  # lb/in
-)
-load_case_registry.other['B'].load_registry.element_udl[top_beam.uid] = UDL(
-    (0.0, 0.0, +10.00)  # lb/in
-)
+load_case_registry.dead['A'].load_registry.element_udl[top_beam.uid] = UDL(
+    (0.0, -10.00)
+)  # lb/in
+
+load_case_registry.dead['B'].load_registry.element_udl[top_beam.uid] = UDL(
+    (0.0, +10.00)
+)  # lb/in
 
 # Add a concentrated point load at 'A'-'Level 1' in load case 'C'
-load_case_registry.other['C'].load_registry.nodal_loads[node_a_level1.uid] = (
+load_case_registry.dead['C'].load_registry.nodal_loads[node_a_level1.uid] = (
     PointLoad(
-        (10.00, 0.00, 0.00)  # lb
+        (10.00, 0.00, 0.00, 0.00)  # lb
     )
 )
 
+load_case_registry.run()
 
-fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
-fig.add_nodes(list(frame.nodes.values()), 'primary')
-fig.add_components(list(frame.components.values()))
-fig.add_supports(frame.nodes, load_case_registry.other['A'].fixed_supports, 12.00)
-fig.show()
+# fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
+# fig.add_nodes(list(frame.nodes.values()), 'primary')
+# fig.add_components(list(frame.components.values()))
+# fig.add_supports(frame.nodes, load_case_registry.dead['A'].fixed_supports, 12.00)
+# fig.show()
+
+# load_case_registry.dead['A'].analysis.settings.result_directory = '/tmp/check2'
+# load_case_registry.dead['A'].analysis.define_model_in_opensees(frame, load_case_registry.dead['A'])
+# load_case_registry.dead['A'].analysis.define_loads_in_opensees(frame, load_case_registry.dead['A'])
+
+
+# import matplotlib.pyplot as plt
+# import opsvis as opsv
+# opsv.plot_model()
+# plt.show()
+
+# import openseespy.opensees as ops
+# import openseespy.opensees as ops
+# ops.constraints('Transformation')
+# ops.numberer('RCM')
+# ops.system('BandGeneral')
+# ops.test('NormDispIncr', 1.0e-6, 6, 2)
+# ops.algorithm('Linear')
+# ops.integrator('LoadControl', 1)
+# ops.analysis('Static')
+# ops.analyze(1)
+print(load_case_registry.result_setup.directory)  # noqa: T201

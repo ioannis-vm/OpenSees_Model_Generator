@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -11,6 +11,9 @@ import numpy.typing as npt
 from osmg.core.gridsystem import GridSystem, GridSystem2D
 from osmg.core.osmg_collections import ComponentAssemblyCollection, NodeCollection
 from osmg.creators.uid import UIDGenerator
+
+if TYPE_CHECKING:
+    from osmg.model_objects.node import Node
 
 nparr = npt.NDArray[np.float64]
 
@@ -63,6 +66,26 @@ class Model:
         """
         p_min, p_max = self.bounding_box(padding=0.00)
         return float(np.max(p_max - p_min))
+
+    def get_all_nodes(self) -> dict[int, Node]:
+        """
+        Get all nodes in the model.
+
+        Returns:
+          A dictionary with the nodes. Keys are their UIDs.
+        """
+        # primary nodes
+        primary_nodes = self.nodes
+        # internal nodes (of component assemblies)
+        internal_nodes: dict[int, Node] = {}
+        components = self.components.values()
+        for component in components:
+            internal_nodes.update(component.internal_nodes)
+
+        all_nodes: dict[int, Node] = {}
+        all_nodes.update(primary_nodes)
+        all_nodes.update(internal_nodes)
+        return all_nodes
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""

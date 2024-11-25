@@ -2,8 +2,8 @@
 
 from unittest.mock import MagicMock
 
-from osmg.elements.node import Node
 from osmg.graphics.visibility import NodeVisibility
+from osmg.model_objects.node import Node
 
 
 class TestNode:

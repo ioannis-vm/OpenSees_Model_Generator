@@ -2,46 +2,21 @@
 
 from __future__ import annotations
 
+import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
+from osmg.analysis.solver import Analysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON
 
 if TYPE_CHECKING:
+    from osmg.analysis.common import UDL, PointLoad, PointMass
     from osmg.core.model import Model2D, Model3D
-
-
-@dataclass(repr=False)
-class ConcentratedValue(tuple[float, ...]):
-    """Concentrated value, such as a point load or mass."""
-
-    __slots__ = ()
-
-
-@dataclass(repr=False)
-class PointLoad(ConcentratedValue):
-    """Point load."""
-
-
-@dataclass(repr=False)
-class PointMass(ConcentratedValue):
-    """Point mass."""
-
-
-@dataclass(repr=False)
-class UDL(tuple[float, ...]):
-    """
-    Beamcolumn element UDL.
-
-    Uniformly distributed load expressed in the global coordinate
-    system of the structure.
-    """
-
-    __slots__ = ()
 
 
 @dataclass(repr=False)
@@ -59,6 +34,7 @@ class LoadCase:
     fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
     load_registry: LoadRegistry = field(default_factory=LoadRegistry)
+    analysis: Analysis = field(default_factory=Analysis)
 
     def add_supports_at_level(
         self,
@@ -94,20 +70,29 @@ class LoadCase:
 
 
 @dataclass(repr=False)
+class HasMass:
+    """Parent class for load cases that have a mass registry."""
+
+    mass_registry: dict[int, PointMass] = field(default_factory=dict)
+
+
+@dataclass(repr=False)
 class DeadLoadCase(LoadCase):
     """Dead load case."""
+
+    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
 
 @dataclass(repr=False)
 class LiveLoadCase(LoadCase):
     """Live load case."""
 
+    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
+
 
 @dataclass(repr=False)
 class ModalLoadCase(LoadCase):
     """Modal load case."""
-
-    mass_registry: dict[int, PointMass] = field(default_factory=dict)
 
 
 @dataclass(repr=False)
@@ -119,37 +104,54 @@ class SeismicLoadCase(LoadCase):
 class SeismicELFLoadCase(SeismicLoadCase):
     """Seismic ELF load case."""
 
+    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
+
 
 @dataclass(repr=False)
-class SeismicRSLoadCase(SeismicLoadCase):
+class SeismicRSLoadCase(SeismicLoadCase, HasMass):
     """Seismic RS load case."""
 
-    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
-    mass_registry: dict[int, PointMass] = field(default_factory=dict)
-
 
 @dataclass(repr=False)
-class SeismicTransientLoadCase(SeismicLoadCase):
+class SeismicTransientLoadCase(SeismicLoadCase, HasMass):
     """Seismic transient load case."""
 
-    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
-    mass_registry: dict[int, PointMass] = field(default_factory=dict)
+
+@dataclass(repr=False)
+class OtherLoadCase(LoadCase, HasMass):
+    """Other load case."""
 
 
 @dataclass(repr=False)
-class OtherLoadCase(LoadCase):
-    """Other load case."""
+class AnalysisResultSetup:
+    """
+    Analysis result setup.
+
+    Configures the analysis result storage setup.
+    """
+
+    directory: str | None = field(default=None)
 
 
 @dataclass(repr=False)
 class LoadCaseRegistry:
     """
-    Load case registry with automatic instantiation.
+    Load case registry.
 
-    Automatically creates an empty load case for each attribute when a
-    string key is accessed.
+    A load case registry is an organized collection of load cases.
+    Load cases are categorized based on the nature of the loads, such
+    as `dead`, `live`, or `seismic_elf`. Each type of loading
+    necessitates a specific type of analysis needed to estimate the
+    structural response, with most being static. Custom analyses which
+    don't need to conform to load type classification can use the
+    `other` load case.
+
+    The load case registry can be used to orchestrate all analyses,
+    retrieve, and post-process results.
     """
 
+    model: Model2D | Model3D
+    result_setup: AnalysisResultSetup = field(default_factory=AnalysisResultSetup)
     dead: defaultdict[str, DeadLoadCase] = field(
         default_factory=lambda: defaultdict(DeadLoadCase)
     )
@@ -171,3 +173,44 @@ class LoadCaseRegistry:
     other: defaultdict[str, OtherLoadCase] = field(
         default_factory=lambda: defaultdict(OtherLoadCase)
     )
+
+    def run(self) -> None:
+        """
+        Run all analyses.
+
+        This function organizes analyses by load case type and assigns
+        a results directory for each load case. If no results directory
+        is specified, a temporary directory is created.
+        """
+        # Determine the base directory for results
+        base_dir = (
+            Path(self.result_setup.directory)
+            if self.result_setup.directory
+            else Path(tempfile.mkdtemp())
+        )
+        base_dir.mkdir(parents=True, exist_ok=True)
+        self.result_setup.directory = str(base_dir.resolve())
+
+        # Iterate over each category of load cases
+        cases_list: list[tuple[str, defaultdict[str, LoadCase]]] = [
+            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
+            ('live', cast(defaultdict[str, LoadCase], self.live)),
+            ('modal', cast(defaultdict[str, LoadCase], self.modal)),
+            ('seismic_elf', cast(defaultdict[str, LoadCase], self.seismic_elf)),
+            ('seismic_rs', cast(defaultdict[str, LoadCase], self.seismic_rs)),
+            (
+                'seismic_transient',
+                cast(defaultdict[str, LoadCase], self.seismic_transient),
+            ),
+            ('other', cast(defaultdict[str, LoadCase], self.other)),
+        ]
+        for case_type, cases in cases_list:
+            for key, load_case in cases.items():
+                # Create a subdirectory for each load case
+                case_dir = base_dir / f'{case_type}_{key}'
+                case_dir.mkdir(parents=True, exist_ok=True)
+
+                # Update the result directory of the analysis
+                load_case.analysis.settings.result_directory = str(case_dir)
+                # Define the model
+                load_case.analysis.define_model_in_opensees(self.model, load_case)

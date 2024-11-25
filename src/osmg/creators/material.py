@@ -6,8 +6,8 @@ import numpy as np
 import numpy.typing as npt
 
 from osmg.core.model import Model
-from osmg.elements.section import ElasticSection, FiberSection
-from osmg.elements.uniaxial_material import (
+from osmg.model_objects.section import ElasticSection, FiberSection
+from osmg.model_objects.uniaxial_material import (
     Elastic,
     Fatigue,
     Hysteretic,
