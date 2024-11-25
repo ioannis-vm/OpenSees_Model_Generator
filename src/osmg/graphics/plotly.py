@@ -9,6 +9,9 @@ import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
 from osmg.model_objects.element import DispBeamColumn, ElasticBeamColumn
+from osmg.analysis.common import UDL, PointLoad
+from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.model_objects.element import BeamColumnElement
 
 if TYPE_CHECKING:
     from osmg.analysis.supports import ElasticSupport, FixedSupport
@@ -306,7 +309,7 @@ class Figure3D:
         self,
         nodes: dict[int, Node],
         supports: dict[int, FixedSupport] | dict[int, ElasticSupport],
-        symbol_height: float,
+        symbol_size: float,
     ) -> None:
         """Show supports."""
         # Verify dimensionality consistency
@@ -417,7 +420,7 @@ class Figure3D:
                             faces_k,
                         ) = self._generate_pyramid_mesh(
                             tip_coordinates,
-                            symbol_height,
+                            symbol_size,
                             directions[i],
                             index_offset,
                         )
@@ -430,6 +433,55 @@ class Figure3D:
                         data['k'].extend(faces_k)  # type: ignore
         # Update defined objects.
         data['defined'] = data['defined'].union(supports.keys())  # type: ignore
+
+    def add_udl(
+        self,
+        udl: dict[int, UDL],
+        components: list[ComponentAssembly],
+        force_to_length_factor: float,
+        offset: float,
+    ) -> None:
+        """Show uniformly distributed load applied on the components."""
+        two_dimensional = 2
+        three_dimensional = 3
+        for component_uid, global_udl in udl.items():
+            component = components[component_uid]
+            assert isinstance(component, BeamColumnAssembly)
+            for element in component.elements.values():
+                if not isinstance(element, BeamColumnElement):
+                    continue
+                start_vec = np.array(element.nodes[0].coordinates)
+                end_vec = np.array(element.nodes[1].coordinates)
+                udl_vec = np.array(global_udl)
+
+                assert len(start_vec) == len(end_vec) == len(udl_vec)
+
+                if len(start_vec) == two_dimensional:
+                    # Add 0.00 to the Y axis (second element)
+                    start_vec = np.insert(start_vec, 1, 0.00)
+                    end_vec = np.insert(end_vec, 1, 0.00)
+                    udl_vec = np.insert(udl_vec, 1, 0.00)
+
+                else:
+                    assert len(start_vec) == three_dimensional
+
+                udl_vec = -udl_vec  # Reverse direction
+                udl_vec_normalized = udl_vec / np.linalg.norm(udl_vec)
+                start_vertex = start_vec + udl_vec_normalized * offset
+                end_vertex = end_vec + udl_vec_normalized * offset
+                start_vertex_top = start_vertex + udl_vec * force_to_length_factor
+                end_vertex_top = end_vertex + udl_vec * force_to_length_factor
+
+                self._generate_filled_quadrilateral(
+                    (
+                        tuple(start_vertex),
+                        tuple(end_vertex),
+                        tuple(end_vertex_top),
+                        tuple(start_vertex_top),
+                    ),
+                    name='Uniformly Distributed Loads',
+                    value=str(global_udl),
+                )
 
     @staticmethod
     def _generate_pyramid_mesh(
@@ -564,6 +616,65 @@ class Figure3D:
 
         return vertices_x, vertices_y, vertices_z, faces_i, faces_j, faces_k
 
+    def _generate_filled_quadrilateral(
+        self,
+        four_points: tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ],
+        name: str,
+        value: float | str,
+    ) -> None:
+        """
+        Generate and add a filled quadrilateral to the figure.
+
+        Arguments:
+            four_points: A tuple of four vertices defining the quadrilateral.
+                         Each vertex is a tuple (x, y, z).
+            name: Name of the quadrilateral to retrieve or store in the figure data.
+            value: A value to display in the hover box.
+        """
+        data = self.find_data_by_name(name)
+        if not data:
+            # Initialize the mesh3d data structure
+            data = {
+                'name': name,
+                'type': 'mesh3d',
+                'x': [],
+                'y': [],
+                'z': [],
+                'i': [],
+                'j': [],
+                'k': [],
+                'text': [],  # For custom hover information
+                'hovertemplate': ('Value: %{text}<br>' '<extra></extra>'),
+                'color': '#7ac4b7',
+                'opacity': 0.5,
+                'showlegend': True,
+                'defined': [],
+            }
+            self.data.append(data)
+
+        # Extract the vertices
+        (x1, y1, z1), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4) = four_points
+
+        # Add vertices
+        data['x'].extend([x1, x2, x3, x4])
+        data['y'].extend([y1, y2, y3, y4])
+        data['z'].extend([z1, z2, z3, z4])
+
+        # Add hover text for each vertex
+        data['text'].extend([value] * 4)
+
+        # Define two triangular faces of the quadrilateral
+        # Faces are defined by indices of vertices in the mesh
+        index_offset = len(data['x']) - 4  # Offset for the newly added vertices
+        data['i'].extend([index_offset, index_offset])
+        data['j'].extend([index_offset + 1, index_offset + 2])
+        data['k'].extend([index_offset + 2, index_offset + 3])
+
     def show(self) -> None:
         """Display the figure."""
         # Remove `defined` entry from `data`
@@ -571,3 +682,85 @@ class Figure3D:
             data.pop('defined')
         fig = go.Figure({'data': self.data, 'layout': self.layout})
         fig.show()
+
+
+import plotly.graph_objects as go
+
+# Define the vertices of the arrow
+
+tl = 1.0  # total_halh_length
+hl = 0.40  # head_half_length
+hhw = 0.25 / 2.00  # head_half_width
+bhw = 0.05 / 2.00  # base_half_width
+
+vertices = (
+    (0.0, 0.0, 0.0),
+    (-hhw, -hhw, -hl),
+    (+hhw, -hhw, -hl),
+    (+hhw, +hhw, -hl),
+    (-hhw, +hhw, -hl),
+    (-bhw, -bhw, -hl),
+    (+bhw, -bhw, -hl),
+    (+bhw, +bhw, -hl),
+    (-bhw, +bhw, -hl),
+    (-bhw, -bhw, -tl),
+    (+bhw, -bhw, -tl),
+    (+bhw, +bhw, -tl),
+    (-bhw, +bhw, -tl),
+)
+vertices = np.array(vertices)
+
+# rotate 3d
+from osmg.geometry.transformations import rotation_matrix_3d
+mat = rotation_matrix_3d(np.array((1.00, 0.00, 0.00)), 30.00/180.0*np.pi)
+vertices = (mat @ vertices.T).T
+
+x, y, z = zip(*vertices)
+
+# Define the faces of the arrow
+faces = (
+    # top part
+    (0, 1, 2),
+    (0, 2, 3),
+    (0, 3, 4),
+    (0, 4, 1),
+    # base
+    (5, 9, 10),
+    (5, 10, 6),
+    (6, 10, 11),
+    (6, 11, 7),
+    (7, 11, 12),
+    (7, 12, 8),
+    (8, 12, 9),
+    (8, 9, 5),
+)
+# SOS: Subtract 1
+
+i, j, k = zip(*faces)
+
+# Create a 3D mesh
+mesh = go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k, opacity=0.5, color='lightblue')
+
+# Setup the layout of the scene
+layout = go.Layout(
+    scene=dict(
+        xaxis=dict(
+            nticks=4,
+            range=[-1, 2],
+        ),
+        yaxis=dict(
+            nticks=4,
+            range=[-1, 2],
+        ),
+        zaxis=dict(
+            nticks=4,
+            range=[-1, 2],
+        ),
+    )
+)
+
+# Create a figure and add the mesh
+fig = go.Figure(data=[mesh], layout=layout)
+
+# Show the plot
+fig.show()

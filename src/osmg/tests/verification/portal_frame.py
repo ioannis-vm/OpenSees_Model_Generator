@@ -15,6 +15,7 @@ from osmg.creators.component import BeamColumnCreator
 from osmg.creators.section import AISC_Database_Section_Creator
 from osmg.model_objects.node import Node
 from osmg.model_objects.section import ElasticSection
+from osmg.graphics.plotly import Figure3D, Figure3DConfiguration
 
 # Instantiate model object
 frame = Model2D('Frame model')
@@ -168,11 +169,19 @@ load_case_registry.dead['C'].load_registry.nodal_loads[node_a_level1.uid] = (
 
 load_case_registry.run()
 
-# fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
-# fig.add_nodes(list(frame.nodes.values()), 'primary')
-# fig.add_components(list(frame.components.values()))
-# fig.add_supports(frame.nodes, load_case_registry.dead['A'].fixed_supports, 12.00)
-# fig.show()
+fig = Figure3D(Figure3DConfiguration(num_space_dimensions=2))
+fig.add_nodes(list(frame.nodes.values()), 'primary')
+fig.add_components(list(frame.components.values()))
+fig.add_supports(
+    frame.nodes, load_case_registry.dead['A'].fixed_supports, symbol_size=12.00
+)
+fig.add_udl(
+    load_case_registry.dead['A'].load_registry.element_udl,
+    list(frame.components.values()),
+    force_to_length_factor=5.00,
+    offset=12.00
+)
+fig.show()
 
 # load_case_registry.dead['A'].analysis.settings.result_directory = '/tmp/check2'
 # load_case_registry.dead['A'].analysis.define_model_in_opensees(frame, load_case_registry.dead['A'])
@@ -194,4 +203,4 @@ load_case_registry.run()
 # ops.integrator('LoadControl', 1)
 # ops.analysis('Static')
 # ops.analyze(1)
-print(load_case_registry.result_setup.directory)  # noqa: T201
+# print(load_case_registry.result_setup.directory)  # noqa: T201
