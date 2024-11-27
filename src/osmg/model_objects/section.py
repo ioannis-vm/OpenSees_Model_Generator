@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.core import common
 from osmg.core.uid_object import UIDObject
@@ -16,10 +15,9 @@ from osmg.geometry.mesh import Mesh, polygon_area
 if TYPE_CHECKING:
     from shapely.geometry import Polygon as shapely_Polygon
 
+    from osmg.core.common import numpy_array
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
     from osmg.physical_material import PhysicalMaterial
-
-nparr = npt.NDArray[np.float64]
 
 
 @dataclass()
@@ -79,7 +77,7 @@ class ElasticSection(Section):
     j_mod: float
     sec_w: float
     outside_shape: Mesh | None = field(default=None, repr=False)
-    snap_points: dict[str, nparr] | None = field(default=None, repr=False)
+    snap_points: dict[str, numpy_array] | None = field(default=None, repr=False)
     properties: dict[str, Any] | None = field(default=None, repr=False)
 
     def weight_per_length(self) -> float:
@@ -223,7 +221,7 @@ class FiberSection(Section):
     outside_shape: Mesh
     section_parts: dict[str, SectionComponent]
     j_mod: float
-    snap_points: dict[str, nparr]
+    snap_points: dict[str, numpy_array]
     properties: dict[str, Any]
     n_x: int
     n_y: int
@@ -281,12 +279,12 @@ class FiberSection(Section):
             mult = 1.00
         res = 0.00
         for part in self.section_parts.values():
-            coordinates: nparr = np.array(
+            coordinates: numpy_array = np.array(
                 [h.vertex.coordinates for h in part.outside_shape.halfedges]
             )
             area = polygon_area(coordinates)
             for hole in part.holes:
-                hole_coordinates: nparr = np.array(
+                hole_coordinates: numpy_array = np.array(
                     [h.vertex.coordinates for h in hole.halfedges]
                 )
                 area -= polygon_area(hole_coordinates)

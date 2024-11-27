@@ -6,19 +6,16 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.core.uid_object import UIDObject
 from osmg.graphics.visibility import ElementVisibility
 
 if TYPE_CHECKING:
+    from osmg.core.common import numpy_array
     from osmg.mesh import Mesh
     from osmg.model_objects.node import Node
     from osmg.model_objects.section import ElasticSection, FiberSection
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
-
-
-nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
@@ -56,8 +53,8 @@ class ZeroLength(Element):
 
     mats: list[UniaxialMaterial]
     dirs: list[int]
-    vecx: nparr
-    vecyp: nparr
+    vecx: numpy_array
+    vecyp: numpy_array
 
     def ops_args(self) -> list[object]:
         """
@@ -110,8 +107,8 @@ class TwoNodeLink(Element):
 
     mats: list[UniaxialMaterial]
     dirs: list[int]
-    vecx: nparr
-    vecyp: nparr
+    vecx: numpy_array
+    vecyp: numpy_array
 
     def ops_args(self) -> list[object]:
         """
@@ -241,11 +238,11 @@ class GeomTransf(UIDObject):
     """
 
     transf_type: Literal['Linear', 'Corotational', 'PDelta']
-    offset_i: nparr
-    offset_j: nparr
-    x_axis: nparr
-    y_axis: nparr | None
-    z_axis: nparr
+    offset_i: numpy_array
+    offset_j: numpy_array
+    x_axis: numpy_array
+    y_axis: numpy_array | None
+    z_axis: numpy_array
 
     def ops_args(self) -> list[object]:
         """

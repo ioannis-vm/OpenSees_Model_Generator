@@ -9,7 +9,7 @@ import numpy.typing as npt
 
 from osmg.core import common
 
-nparr = npt.NDArray[np.float64]
+numpy_array = npt.NDArray[np.float64]
 
 
 @dataclass
@@ -28,8 +28,8 @@ class Line:
     """
 
     tag: str
-    start: nparr = field(repr=False)
-    end: nparr = field(repr=False)
+    start: numpy_array = field(repr=False)
+    end: numpy_array = field(repr=False)
 
     def __repr__(self) -> str:
         """
@@ -59,7 +59,7 @@ class Line:
         """
         return float(np.linalg.norm(self.end - self.start))
 
-    def direction(self) -> nparr:
+    def direction(self) -> numpy_array:
         """
         Line direction.
 
@@ -77,7 +77,7 @@ class Line:
         """
         return (self.end - self.start) / self.length()
 
-    def intersect(self, other: Line) -> nparr | None:
+    def intersect(self, other: Line) -> numpy_array | None:
         """
         Intersection point.
 
@@ -101,7 +101,9 @@ class Line:
         """
         ra_dir = self.direction()
         rb_dir = other.direction()
-        mat: nparr = np.array([[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]])
+        mat: numpy_array = np.array(
+            [[ra_dir[0], -rb_dir[0]], [ra_dir[1], -rb_dir[1]]]
+        )
         if np.abs(np.linalg.det(mat)) <= common.EPSILON:
             # The lines are parallel
             # in this case, we check if they have
@@ -123,7 +125,7 @@ class Line:
         ra_ori = self.start
         rb_ori = other.start
         # System left-hand-side
-        bvec: nparr = np.array(
+        bvec: numpy_array = np.array(
             [
                 [rb_ori[0] - ra_ori[0]],
                 [rb_ori[1] - ra_ori[1]],
@@ -145,7 +147,7 @@ class Line:
         point = ra_ori + ra_dir * uvvec[0]
         return np.array([point[0], point[1]])
 
-    def intersects_pt(self, point: nparr) -> bool:
+    def intersects_pt(self, point: numpy_array) -> bool:
         """
         Check whether the given point pt lies on the line.
 
@@ -191,7 +193,7 @@ class Line:
             res = False
         return res
 
-    def point_distance(self, point: nparr) -> float | None:
+    def point_distance(self, point: numpy_array) -> float | None:
         """
         Minimum distance.
 
@@ -231,7 +233,7 @@ class Line:
             res = None
         return res
 
-    def project(self, point: nparr) -> nparr | None:
+    def project(self, point: numpy_array) -> numpy_array | None:
         """
         Projection.
 
@@ -257,7 +259,7 @@ class Line:
         """
         r_a = self.end - self.start
         r_b = point - self.start
-        proj_point: nparr = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
+        proj_point: numpy_array = (r_b @ r_a) / (r_a @ r_a) * r_a + self.start
         if self.intersects_pt(proj_point):
             return proj_point
         return None

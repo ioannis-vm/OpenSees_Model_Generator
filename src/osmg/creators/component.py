@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.core.osmg_collections import BeamColumnAssembly
 from osmg.geometry.transformations import (
@@ -23,11 +22,9 @@ from osmg.model_objects.node import Node
 from osmg.model_objects.section import ElasticSection, FiberSection
 
 if TYPE_CHECKING:
+    from osmg.core.common import numpy_array
     from osmg.core.model import Model
     from osmg.creators.zerolength import ZeroLengthCreator
-
-
-nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)
@@ -89,8 +86,8 @@ class BeamColumnCreator:
         self,
         node_i: Node,
         node_j: Node,
-        offset_i: nparr,
-        offset_j: nparr,
+        offset_i: numpy_array,
+        offset_j: numpy_array,
         transf_type: Literal['Linear', 'Corotational', 'PDelta'],
         section: ElasticSection | FiberSection,
         angle: float = 0.00,
@@ -166,8 +163,8 @@ class BeamColumnCreator:
         component: BeamColumnAssembly,
         node_i: Node,
         node_j: Node,
-        eo_i: nparr,
-        eo_j: nparr,
+        eo_i: numpy_array,
+        eo_j: numpy_array,
         n_sub: int,
         transf_type: Literal['Linear', 'Corotational', 'PDelta'],
         section: ElasticSection | FiberSection,
@@ -201,7 +198,7 @@ class BeamColumnCreator:
                 offset_3 = (
                     offset_vals * initial_deformation_config.camber_3 * clear_len
                 )
-                camber_offset: nparr = np.column_stack(
+                camber_offset: numpy_array = np.column_stack(
                     (np.zeros(n_sub + 1), offset_2, offset_3)
                 )
                 x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
@@ -252,8 +249,8 @@ class BeamColumnCreator:
         node_i: Node,
         node_j: Node,
         n_sub: int,
-        eo_i: nparr,
-        eo_j: nparr,
+        eo_i: numpy_array,
+        eo_j: numpy_array,
         section: ElasticSection | FiberSection,
         transf_type: Literal['Linear', 'Corotational', 'PDelta'],
         angle: float = 0.00,

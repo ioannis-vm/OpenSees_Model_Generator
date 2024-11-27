@@ -15,7 +15,7 @@ from osmg.geometry.mesh import (
     sanity_checks,
 )
 
-nparr = npt.NDArray[np.float64]
+numpy_array = npt.NDArray[np.float64]
 
 
 def generate(edges: list[Edge]) -> Mesh:
@@ -235,7 +235,7 @@ def circ_mesh(dim_d: float) -> Mesh:
     return generate(edges)
 
 
-def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
+def generic_snap_points(mesh: Mesh) -> dict[str, numpy_array]:
     """
     Generate generic snap points for a section object.
 
@@ -244,7 +244,7 @@ def generic_snap_points(mesh: Mesh) -> dict[str, nparr]:
     """
     bbox = mesh.bounding_box()
     z_min, y_min, z_max, y_max = bbox.flatten()
-    snap_points: dict[str, nparr] = {}
+    snap_points: dict[str, numpy_array] = {}
     snap_points['centroid'] = -np.array([0.0, 0.0])
     snap_points['top_center'] = -np.array([0.0, y_max])
     snap_points['top_left'] = -np.array([z_min, y_max])

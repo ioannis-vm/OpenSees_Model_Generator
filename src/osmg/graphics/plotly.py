@@ -8,7 +8,13 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
+from osmg.core.common import THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.geometry.transformations import (
+    offset_transformation_2d,
+    offset_transformation_3d,
+    transformation_matrix,
+)
 from osmg.graphics.objects import positioned_arrow
 from osmg.model_objects.element import (
     BeamColumnElement,
@@ -18,7 +24,7 @@ from osmg.model_objects.element import (
 
 if TYPE_CHECKING:
     from osmg.analysis.common import UDL, PointLoad
-    from osmg.analysis.recorders import NodeRecorder
+    from osmg.analysis.recorders import ElementRecorder, NodeRecorder
     from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.element import Element
@@ -44,7 +50,7 @@ class Figure3DConfiguration:
 
 @dataclass
 class DeformationConfiguration:
-    """Configuration for 3D figures."""
+    """Configuration for plotting deformed shapes."""
 
     reference_length: float
     ndf: int
@@ -90,12 +96,24 @@ class DeformationConfiguration:
                 (max_deformation[3], max_deformation[4], max_deformation[5])
             )
         else:
-            msg = 'Invalid model NDF: {model.ndf}.'
+            msg = 'Unsupported model NDF: {model.ndf}.'
             raise ValueError(msg)
         # 10% of reference length, or at most an approx. 30 degree rotation angle.
         self.amplification_factor = min(
-            self.reference_length / max_displacement * 0.10, max_rotation / 0.50
+            self.reference_length / max_displacement * 0.10, 0.50 / max_rotation
         )
+
+
+@dataclass
+class BasicForceConfiguration:
+    """Configuration for plotting basic forces."""
+
+    reference_length: float
+    ndf: int
+    recorder: ElementRecorder
+    step: int
+    force_to_length_factor: float
+    moment_to_length_factor: float
 
 
 @dataclass(repr=False)
@@ -136,14 +154,14 @@ class Figure3D:
         designation: Literal['primary', 'parent', 'internal'],
         deformation_configuration: DeformationConfiguration | None = None,
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
         """Draw nodes."""
         if deformation_configuration is None:
-            self._add_nodes_undeformed(nodes, designation, as_overlay=as_overlay)
+            self._add_nodes_undeformed(nodes, designation, overlay=overlay)
         else:
             self._add_nodes_deformed(
-                nodes, designation, deformation_configuration, as_overlay=as_overlay
+                nodes, designation, deformation_configuration, overlay=overlay
             )
 
     def add_components(
@@ -151,7 +169,7 @@ class Figure3D:
         components: list[ComponentAssembly],
         deformation_configuration: DeformationConfiguration | None = None,
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
         """Add components to the figure."""
         for component in components:
@@ -160,19 +178,17 @@ class Figure3D:
                 internal_nodes,
                 'internal',
                 deformation_configuration,
-                as_overlay=as_overlay,
+                overlay=overlay,
             )
             elements = list(component.elements.values())
-            self.add_elements(
-                elements, deformation_configuration, as_overlay=as_overlay
-            )
+            self.add_elements(elements, deformation_configuration, overlay=overlay)
 
     def add_elements(
         self,
         elements: list[Element],
         deformation_configuration: DeformationConfiguration | None = None,
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
         """Add elements to the figure."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
@@ -190,93 +206,467 @@ class Figure3D:
                 f'WARNING: Skipped the following unknown element types: {unknown_types}.'
             )
             # TODO(JVM): implement warning
+        self.add_beamcolumn_elements(
+            elastic_beamcolumn_elements,
+            deformation_configuration,
+            overlay=overlay,
+        )
+        self.add_beamcolumn_element_offsets(
+            elastic_beamcolumn_elements,
+            deformation_configuration,
+            overlay=overlay,
+        )
+        self.add_beamcolumn_elements(
+            disp_beamcolumn_elements,
+            deformation_configuration,
+            overlay=overlay,
+        )
+        self.add_beamcolumn_element_offsets(
+            disp_beamcolumn_elements,
+            deformation_configuration,
+            overlay=overlay,
+        )
+
+    def add_beamcolumn_elements(
+        self,
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        deformation_configuration: DeformationConfiguration | None = None,
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """Add beamcolumn elements to the figure."""
         if deformation_configuration is None:
-            self.add_beamcolumn_elements(
-                elastic_beamcolumn_elements,
-                as_overlay=as_overlay,
-            )
-            self.add_beamcolumn_element_offsets(
-                elastic_beamcolumn_elements,
-                as_overlay=as_overlay,
+            self._add_beamcolumn_elements_undeformed(elements, overlay=overlay)
+        else:
+            self._add_beamcolumn_elements_deformed(
+                elements, deformation_configuration, overlay=overlay
             )
 
     def add_beamcolumn_element_offsets(
         self,
         elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        deformation_configuration: DeformationConfiguration | None = None,
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
-        """Add beamcolumn elements to the figure."""
-        if as_overlay:
-            opacity = 0.5
+        """Add beamcolumn element offsets to the figure."""
+        if deformation_configuration is None:
+            self._add_beamcolumn_element_offsets_undeformed(
+                elements, overlay=overlay
+            )
         else:
-            opacity = 1.0
-        data = self.find_data_by_name('Rigid Offsets')
+            self._add_beamcolumn_element_offsets_deformed(
+                elements, deformation_configuration, overlay=overlay
+            )
+
+    def add_supports(  # noqa: C901
+        self,
+        nodes: dict[int, Node],
+        supports: dict[int, FixedSupport] | dict[int, ElasticSupport],
+        symbol_size: float,
+    ) -> None:
+        """Show supports."""
+        # Verify dimensionality consistency
+        assert supports != {}, 'Supports are empty'
+        support_iterator = iter(supports)
+        uid = next(support_iterator)
+        support = supports[uid]
+        num_dofs = len(support)
+        # sanity check
+        # continue iterating and ansure the dimensions are correct
+        for uid in support_iterator:
+            support = supports[uid]
+            assert num_dofs == len(support)
+
+        # Verify dimensionality consistency
+        node_iterator = iter(nodes)
+        uid = next(node_iterator)
+        node = nodes[uid]
+        num_dimensions = len(node.coordinates)
+        # sanity check
+        # continue iterating and ansure the dimensions are correct
+        for uid in node_iterator:
+            node = nodes[uid]
+            assert num_dimensions == len(node.coordinates)
+
+        if num_dimensions == THREE_DIMENSIONAL:
+            directions: dict[int, Literal['x', 'y', 'z', '-x', '-y', '-z']] = {
+                0: '-x',
+                1: '-y',
+                2: '-z',
+                3: 'x',
+                4: 'y',
+                5: 'z',
+            }
+        else:
+            assert num_dimensions == TWO_DIMENSIONAL
+            directions = {0: '-x', 1: '-z', 2: 'y'}
+
+        data = self.find_data_by_name('Supports')
         if not data:
             # Initialize
             data = {
-                'name': 'Rigid Offsets',
-                'type': 'scatter3d',
-                'mode': 'lines',
+                'name': 'Supports',
+                'type': 'mesh3d',
                 'x': [],
                 'y': [],
                 'z': [],
-                'opacity': opacity,
+                'i': [],
+                'j': [],
+                'k': [],
+                'color': '#00f0ff',
                 'hoverinfo': 'skip',
-                'line': {'width': 8, 'color': '#a83256'},
+                'defined': set(),
+                'showlegend': True,
+            }
+            # TODO (JVM): replace template fields with actual info.
+            self.data.append(data)
+
+        index_offset = 0
+        for uid, support in supports.items():
+            node = nodes[uid]
+            if uid in data['defined']:  # type: ignore
+                continue
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                for i in range(num_dofs):
+                    if support[i]:
+                        tip_coordinates = (
+                            node.coordinates[0],
+                            node.coordinates[1],
+                            node.coordinates[2],
+                        )
+                        (
+                            vertices_x,
+                            vertices_y,
+                            vertices_z,
+                            faces_i,
+                            faces_j,
+                            faces_k,
+                        ) = self._generate_pyramid_mesh(
+                            tip_coordinates,
+                            symbol_size,
+                            directions[i],
+                            index_offset,
+                        )
+                        index_offset += 5
+                        data['x'].extend(vertices_x)  # type: ignore
+                        data['y'].extend(vertices_y)  # type: ignore
+                        data['z'].extend(vertices_z)  # type: ignore
+                        data['i'].extend(faces_i)  # type: ignore
+                        data['j'].extend(faces_j)  # type: ignore
+                        data['k'].extend(faces_k)  # type: ignore
+            else:
+                assert self.configuration.ndm == TWO_DIMENSIONAL
+                for i in range(num_dofs):
+                    if support[i]:
+                        tip_coordinates = (
+                            node.coordinates[0],
+                            0.00,
+                            node.coordinates[1],
+                        )
+                        (
+                            vertices_x,
+                            vertices_y,
+                            vertices_z,
+                            faces_i,
+                            faces_j,
+                            faces_k,
+                        ) = self._generate_pyramid_mesh(
+                            tip_coordinates,
+                            symbol_size,
+                            directions[i],
+                            index_offset,
+                        )
+                        index_offset += 5
+                        data['x'].extend(vertices_x)  # type: ignore
+                        data['y'].extend(vertices_y)  # type: ignore
+                        data['z'].extend(vertices_z)  # type: ignore
+                        data['i'].extend(faces_i)  # type: ignore
+                        data['j'].extend(faces_j)  # type: ignore
+                        data['k'].extend(faces_k)  # type: ignore
+        # Update defined objects.
+        data['defined'] = data['defined'].union(supports.keys())  # type: ignore
+
+    def add_udl(
+        self,
+        udl: dict[int, UDL],
+        components: dict[int, ComponentAssembly],
+        force_to_length_factor: float,
+        offset: float,
+    ) -> None:
+        """Show uniformly distributed load applied on the components."""
+        for component_uid, global_udl in udl.items():
+            component = components[component_uid]
+            assert isinstance(component, BeamColumnAssembly)
+            for element in component.elements.values():
+                if not isinstance(element, BeamColumnElement):
+                    continue
+                start_vec = np.array(element.nodes[0].coordinates)
+                end_vec = np.array(element.nodes[1].coordinates)
+                udl_vec = np.array(global_udl)
+
+                assert len(start_vec) == len(end_vec) == len(udl_vec)
+
+                if len(start_vec) == TWO_DIMENSIONAL:
+                    # Add 0.00 to the Y axis (second element)
+                    start_vec = np.insert(start_vec, 1, 0.00)
+                    end_vec = np.insert(end_vec, 1, 0.00)
+                    udl_vec = np.insert(udl_vec, 1, 0.00)
+
+                else:
+                    assert len(start_vec) == THREE_DIMENSIONAL
+
+                udl_vec = -udl_vec  # Reverse direction
+                udl_vec_normalized = udl_vec / np.linalg.norm(udl_vec)
+                start_vertex = start_vec + udl_vec_normalized * offset
+                end_vertex = end_vec + udl_vec_normalized * offset
+                start_vertex_top = start_vertex + udl_vec * force_to_length_factor
+                end_vertex_top = end_vertex + udl_vec * force_to_length_factor
+
+                self._generate_filled_quadrilateral(
+                    (
+                        tuple(start_vertex),
+                        tuple(end_vertex),
+                        tuple(end_vertex_top),
+                        tuple(start_vertex_top),
+                    ),
+                    name='Uniformly Distributed Loads',
+                    value=str(global_udl),
+                )
+
+    def add_loads(
+        self,
+        load: dict[int, PointLoad],
+        nodes: dict[int, Node],
+        force_to_length_factor: float,
+        offset: float,
+        head_length: float,
+        head_width: float,
+        base_width: float,
+    ) -> None:
+        """
+        Show point loads applied on nodes.
+
+        Moments are ignored.
+        """
+        for node_uid, point_load in load.items():
+            node = nodes[node_uid]
+            start_vec = np.array(node.coordinates)
+            load_vec = np.array(point_load[0 : len(start_vec)])
+            load_magnitude = np.linalg.norm(load_vec)
+            load_direction = load_vec / load_magnitude
+            end_vec = start_vec - load_vec * force_to_length_factor
+            start_vec -= load_direction * offset
+            end_vec -= load_direction * offset
+
+            assert len(start_vec) == len(end_vec)
+
+            if len(start_vec) == TWO_DIMENSIONAL:
+                # Add 0.00 to the Y axis (second element)
+                start_vec = np.insert(start_vec, 1, 0.00)
+                end_vec = np.insert(end_vec, 1, 0.00)
+            else:
+                assert len(start_vec) == THREE_DIMENSIONAL
+
+            self._generate_arrow(
+                tuple(start_vec),
+                tuple(end_vec),
+                head_length,
+                head_width,
+                base_width,
+                name='Nodal Loads',
+                value=str(point_load),
+            )
+
+    def _add_nodes_undeformed(
+        self,
+        nodes: list[Node],
+        designation: Literal['primary', 'parent', 'internal'],
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """Draw nodes."""
+        expanded_designation = {
+            'primary': 'Primary Nodes',
+            'parent': 'Parent Nodes',
+            'internal': 'Internal Nodes',
+        }
+        marker = {
+            'primary': ('circle', 3, '#7ac4b7'),
+            'parent': ('circle-open', 15, '#7ac4b7'),
+            'internal': ('x', 2, '#a832a8'),
+        }
+        if overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name(expanded_designation[designation])
+        if not data:
+            # Initialize
+            data = {
+                'name': expanded_designation[designation],
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': [],
+                'y': [],
+                'z': [],
+                'customdata': [],
+                'text': [],
+                'hovertemplate': (
+                    'Node ID: %{customdata[0]:d}<br>'
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    '<extra></extra>'
+                ),
+                'marker': {
+                    'symbol': marker[designation][0],
+                    'color': marker[designation][2],
+                    'size': marker[designation][1],
+                    'opacity': opacity,
+                    'line': {
+                        'color': marker[designation][2],
+                        'width': 4,
+                    },
+                },
                 'defined': set(),
             }
             self.data.append(data)
-
-        x_list: list[float | None] = []
-        y_list: list[float | None] = []
-        z_list: list[float | None] = []
-        for element in elements:
-            if (
-                element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']  # type: ignore
-            ):
+        for node in nodes:
+            if node.uid in data['defined']:  # type: ignore
                 continue
-            p_i = np.array(element.nodes[0].coordinates)
-            p_io = (
-                np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
-            )
-            p_j = np.array(element.nodes[1].coordinates)
-            p_jo = (
-                np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
-            )
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(node.coordinates[1])  # type: ignore
+                data['z'].append(node.coordinates[2])  # type: ignore
+                data['customdata'].append([node.uid, None])  # type: ignore
+            else:
+                assert self.configuration.ndm == TWO_DIMENSIONAL
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(0.00)  # type: ignore
+                data['z'].append(node.coordinates[1])  # type: ignore
+                data['customdata'].append([node.uid, None])  # type: ignore
+        # Update defined objects.
+        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
-            three_dimensional = 3
-            two_dimensional = 2
-            if self.configuration.ndm == three_dimensional:
-                x_list.extend((p_i[0], p_io[0], None))
-                y_list.extend((p_i[1], p_io[1], None))
-                z_list.extend((p_i[2], p_io[2], None))
-                x_list.extend((p_j[0], p_jo[0], None))
-                y_list.extend((p_j[1], p_jo[1], None))
-                z_list.extend((p_j[2], p_jo[2], None))
-            if self.configuration.ndm == two_dimensional:
-                x_list.extend((p_i[0], p_io[0], None))
-                y_list.extend((0.0, 0.0, None))
-                z_list.extend((p_i[1], p_io[1], None))
-                x_list.extend((p_j[0], p_jo[0], None))
-                y_list.extend((0.0, 0.0, None))
-                z_list.extend((p_j[1], p_jo[1], None))
+    def _add_nodes_deformed(
+        self,
+        nodes: list[Node],
+        designation: Literal['primary', 'parent', 'internal'],
+        deformation_configuration: DeformationConfiguration,
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """
+        Draw nodes in their displaced location.
 
-        data['x'].extend(x_list)  # type: ignore
-        data['y'].extend(y_list)  # type: ignore
-        data['z'].extend(z_list)  # type: ignore
+        Raises:
+          ValueError: If displacement data is unavailable for some node.
+        """
+        expanded_designation = {
+            'primary': 'Primary Nodes (Deformed)',
+            'parent': 'Parent Nodes (Deformed)',
+            'internal': 'Internal Nodes (Deformed)',
+        }
+        marker = {
+            'primary': ('circle', 3, '#7ac4b7'),
+            'parent': ('circle-open', 15, '#7ac4b7'),
+            'internal': ('x', 2, '#a832a8'),
+        }
+        if overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name(expanded_designation[designation])
+        if not data:
+            # Initialize
+            data = {
+                'name': expanded_designation[designation],
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': [],
+                'y': [],
+                'z': [],
+                'customdata': [],
+                'text': [],
+                'hovertemplate': (
+                    'Node ID: %{customdata[0]:d}<br>'
+                    'Deformations: %{customdata[1]}<br>'
+                    '<extra></extra>'
+                ),
+                'marker': {
+                    'symbol': marker[designation][0],
+                    'color': marker[designation][2],
+                    'size': marker[designation][1],
+                    'opacity': opacity,
+                    'line': {
+                        'color': marker[designation][2],
+                        'width': 4,
+                    },
+                },
+                'defined': set(),
+            }
+            self.data.append(data)
+        for node in nodes:
+            if node.uid in data['defined']:  # type: ignore
+                continue
+            if node.uid not in deformation_configuration.recorder.get_data().columns:
+                msg = 'Results not available for node: {node.uid}.'
+                raise ValueError(msg)
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                deformations = deformation_configuration.recorder.get_data()
+                node_deformations = deformations.iloc[
+                    deformation_configuration.step, :
+                ].loc[node.uid]
+                data['x'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[0]
+                    * deformation_configuration.amplification_factor
+                )
+                data['y'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[1]
+                    * deformation_configuration.amplification_factor
+                )
+                data['z'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[2]
+                    * deformation_configuration.amplification_factor
+                )
+                data['customdata'].append(  # type: ignore
+                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+                )
+            else:
+                assert self.configuration.ndm == TWO_DIMENSIONAL
+                deformations = deformation_configuration.recorder.get_data()
+                node_deformations = (
+                    deformations.iloc[deformation_configuration.step, :]
+                    .loc[node.uid]
+                    .to_numpy()
+                )
+                data['x'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[0]
+                    * deformation_configuration.amplification_factor
+                )
+                data['y'].append(0.00)  # type: ignore
+                data['z'].append(  # type: ignore
+                    node.coordinates[1]
+                    + node_deformations[1]
+                    * deformation_configuration.amplification_factor
+                )
+                data['customdata'].append(  # type: ignore
+                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+                )
+        # Update defined objects.
+        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
-        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
-
-    def add_beamcolumn_elements(
+    def _add_beamcolumn_elements_undeformed(
         self,
         elements: list[ElasticBeamColumn] | list[DispBeamColumn],
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
         """Add beamcolumn elements to the figure."""
-        if as_overlay:
+        if overlay:
             opacity = 0.5
         else:
             opacity = 1.0
@@ -322,14 +712,12 @@ class Figure3D:
             )
             section_name = element.section.name
             section_names.extend([section_name] * 3)
-            three_dimensional = 3
-            two_dimensional = 2
-            if self.configuration.ndm == three_dimensional:
+            if self.configuration.ndm == THREE_DIMENSIONAL:
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((p_i[1], p_j[1], None))
                 z_list.extend((p_i[2], p_j[2], None))
             else:
-                assert self.configuration.ndm == two_dimensional
+                assert self.configuration.ndm == TWO_DIMENSIONAL
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_i[1], p_j[1], None))
@@ -356,415 +744,575 @@ class Figure3D:
 
         data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
-    def add_supports(  # noqa: C901  kalamari
+    def _add_beamcolumn_elements_deformed(
         self,
-        nodes: dict[int, Node],
-        supports: dict[int, FixedSupport] | dict[int, ElasticSupport],
-        symbol_size: float,
-    ) -> None:
-        """Show supports."""
-        # Verify dimensionality consistency
-        assert supports != {}, 'Supports are empty'
-        support_iterator = iter(supports)
-        uid = next(support_iterator)
-        support = supports[uid]
-        num_dofs = len(support)
-        # sanity check
-        # continue iterating and ansure the dimensions are correct
-        for uid in support_iterator:
-            support = supports[uid]
-            assert num_dofs == len(support)
-
-        # Verify dimensionality consistency
-        node_iterator = iter(nodes)
-        uid = next(node_iterator)
-        node = nodes[uid]
-        num_dimensions = len(node.coordinates)
-        # sanity check
-        # continue iterating and ansure the dimensions are correct
-        for uid in node_iterator:
-            node = nodes[uid]
-            assert num_dimensions == len(node.coordinates)
-
-        three_dimensional = 3
-        two_dimensional = 2
-        if num_dimensions == three_dimensional:
-            directions: dict[int, Literal['x', 'y', 'z', '-x', '-y', '-z']] = {
-                0: '-x',
-                1: '-y',
-                2: '-z',
-                3: 'x',
-                4: 'y',
-                5: 'z',
-            }
-        else:
-            assert num_dimensions == two_dimensional
-            directions = {0: '-x', 1: '-z', 2: 'y'}
-
-        data = self.find_data_by_name('Supports')
-        if not data:
-            # Initialize
-            data = {
-                'name': 'Supports',
-                'type': 'mesh3d',
-                'x': [],
-                'y': [],
-                'z': [],
-                'i': [],
-                'j': [],
-                'k': [],
-                'color': '#00f0ff',
-                'hoverinfo': 'skip',
-                'defined': set(),
-                'showlegend': True,
-            }
-            # TODO (JVM): replace template fields with actual info.
-            self.data.append(data)
-
-        index_offset = 0
-        for uid, support in supports.items():
-            node = nodes[uid]
-            if uid in data['defined']:  # type: ignore
-                continue
-            if self.configuration.ndm == three_dimensional:
-                for i in range(num_dofs):
-                    if support[i]:
-                        tip_coordinates = (
-                            node.coordinates[0],
-                            node.coordinates[1],
-                            node.coordinates[2],
-                        )
-                        (
-                            vertices_x,
-                            vertices_y,
-                            vertices_z,
-                            faces_i,
-                            faces_j,
-                            faces_k,
-                        ) = self._generate_pyramid_mesh(
-                            tip_coordinates,
-                            symbol_size,
-                            directions[i],
-                            index_offset,
-                        )
-                        index_offset += 5
-                        data['x'].extend(vertices_x)  # type: ignore
-                        data['y'].extend(vertices_y)  # type: ignore
-                        data['z'].extend(vertices_z)  # type: ignore
-                        data['i'].extend(faces_i)  # type: ignore
-                        data['j'].extend(faces_j)  # type: ignore
-                        data['k'].extend(faces_k)  # type: ignore
-            else:
-                assert self.configuration.ndm == two_dimensional
-                for i in range(num_dofs):
-                    if support[i]:
-                        tip_coordinates = (
-                            node.coordinates[0],
-                            0.00,
-                            node.coordinates[1],
-                        )
-                        (
-                            vertices_x,
-                            vertices_y,
-                            vertices_z,
-                            faces_i,
-                            faces_j,
-                            faces_k,
-                        ) = self._generate_pyramid_mesh(
-                            tip_coordinates,
-                            symbol_size,
-                            directions[i],
-                            index_offset,
-                        )
-                        index_offset += 5
-                        data['x'].extend(vertices_x)  # type: ignore
-                        data['y'].extend(vertices_y)  # type: ignore
-                        data['z'].extend(vertices_z)  # type: ignore
-                        data['i'].extend(faces_i)  # type: ignore
-                        data['j'].extend(faces_j)  # type: ignore
-                        data['k'].extend(faces_k)  # type: ignore
-        # Update defined objects.
-        data['defined'] = data['defined'].union(supports.keys())  # type: ignore
-
-    def add_udl(
-        self,
-        udl: dict[int, UDL],
-        components: dict[int, ComponentAssembly],
-        force_to_length_factor: float,
-        offset: float,
-    ) -> None:
-        """Show uniformly distributed load applied on the components."""
-        two_dimensional = 2
-        three_dimensional = 3
-        for component_uid, global_udl in udl.items():
-            component = components[component_uid]
-            assert isinstance(component, BeamColumnAssembly)
-            for element in component.elements.values():
-                if not isinstance(element, BeamColumnElement):
-                    continue
-                start_vec = np.array(element.nodes[0].coordinates)
-                end_vec = np.array(element.nodes[1].coordinates)
-                udl_vec = np.array(global_udl)
-
-                assert len(start_vec) == len(end_vec) == len(udl_vec)
-
-                if len(start_vec) == two_dimensional:
-                    # Add 0.00 to the Y axis (second element)
-                    start_vec = np.insert(start_vec, 1, 0.00)
-                    end_vec = np.insert(end_vec, 1, 0.00)
-                    udl_vec = np.insert(udl_vec, 1, 0.00)
-
-                else:
-                    assert len(start_vec) == three_dimensional
-
-                udl_vec = -udl_vec  # Reverse direction
-                udl_vec_normalized = udl_vec / np.linalg.norm(udl_vec)
-                start_vertex = start_vec + udl_vec_normalized * offset
-                end_vertex = end_vec + udl_vec_normalized * offset
-                start_vertex_top = start_vertex + udl_vec * force_to_length_factor
-                end_vertex_top = end_vertex + udl_vec * force_to_length_factor
-
-                self._generate_filled_quadrilateral(
-                    (
-                        tuple(start_vertex),
-                        tuple(end_vertex),
-                        tuple(end_vertex_top),
-                        tuple(start_vertex_top),
-                    ),
-                    name='Uniformly Distributed Loads',
-                    value=str(global_udl),
-                )
-
-    def add_loads(
-        self,
-        load: dict[int, PointLoad],
-        nodes: dict[int, Node],
-        force_to_length_factor: float,
-        offset: float,
-        head_length: float,
-        head_width: float,
-        base_width: float,
-    ) -> None:
-        """
-        Show point loads applied on nodes.
-
-        Moments are ignored.
-        """
-        two_dimensional = 2
-        three_dimensional = 3
-        for node_uid, point_load in load.items():
-            node = nodes[node_uid]
-            start_vec = np.array(node.coordinates)
-            load_vec = np.array(point_load[0 : len(start_vec)])
-            load_magnitude = np.linalg.norm(load_vec)
-            load_direction = load_vec / load_magnitude
-            end_vec = start_vec - load_vec * force_to_length_factor
-            start_vec -= load_direction * offset
-            end_vec -= load_direction * offset
-
-            assert len(start_vec) == len(end_vec)
-
-            if len(start_vec) == two_dimensional:
-                # Add 0.00 to the Y axis (second element)
-                start_vec = np.insert(start_vec, 1, 0.00)
-                end_vec = np.insert(end_vec, 1, 0.00)
-            else:
-                assert len(start_vec) == three_dimensional
-
-            self._generate_arrow(
-                tuple(start_vec),
-                tuple(end_vec),
-                head_length,
-                head_width,
-                base_width,
-                name='Nodal Loads',
-                value=str(point_load),
-            )
-
-    def _add_nodes_undeformed(
-        self,
-        nodes: list[Node],
-        designation: Literal['primary', 'parent', 'internal'],
-        *,
-        as_overlay: bool = False,
-    ) -> None:
-        """Draw nodes."""
-        expanded_designation = {
-            'primary': 'Primary Nodes',
-            'parent': 'Parent Nodes',
-            'internal': 'Internal Nodes',
-        }
-        marker = {
-            'primary': ('circle', 3, '#7ac4b7'),
-            'parent': ('circle-open', 15, '#7ac4b7'),
-            'internal': ('x', 2, '#a832a8'),
-        }
-        if as_overlay:
-            opacity = 0.5
-        else:
-            opacity = 1.0
-        data = self.find_data_by_name(expanded_designation[designation])
-        if not data:
-            # Initialize
-            data = {
-                'name': expanded_designation[designation],
-                'type': 'scatter3d',
-                'mode': 'markers',
-                'x': [],
-                'y': [],
-                'z': [],
-                'customdata': [],
-                'text': [],
-                'hovertemplate': (
-                    'Node ID: %{customdata[0]:d}<br>'
-                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    '<extra></extra>'
-                ),
-                'marker': {
-                    'symbol': marker[designation][0],
-                    'color': marker[designation][2],
-                    'size': marker[designation][1],
-                    'opacity': opacity,
-                    'line': {
-                        'color': marker[designation][2],
-                        'width': 4,
-                    },
-                },
-                'defined': set(),
-            }
-            self.data.append(data)
-        for node in nodes:
-            if node.uid in data['defined']:  # type: ignore
-                continue
-            three_dimensional = 3
-            two_dimensional = 2
-            if self.configuration.ndm == three_dimensional:
-                data['x'].append(node.coordinates[0])  # type: ignore
-                data['y'].append(node.coordinates[1])  # type: ignore
-                data['z'].append(node.coordinates[2])  # type: ignore
-                data['customdata'].append([node.uid, None])  # type: ignore
-            else:
-                assert self.configuration.ndm == two_dimensional
-                data['x'].append(node.coordinates[0])  # type: ignore
-                data['y'].append(0.00)  # type: ignore
-                data['z'].append(node.coordinates[1])  # type: ignore
-                data['customdata'].append([node.uid, None])  # type: ignore
-        # Update defined objects.
-        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
-
-    def _add_nodes_deformed(
-        self,
-        nodes: list[Node],
-        designation: Literal['primary', 'parent', 'internal'],
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
         deformation_configuration: DeformationConfiguration,
         *,
-        as_overlay: bool = False,
+        overlay: bool = False,
     ) -> None:
         """
-        Draw nodes in their displaced location.
+        Add deformed beamcolumn elements.
 
         Raises:
           ValueError: If displacement data is unavailable for some node.
         """
-        expanded_designation = {
-            'primary': 'Primary Nodes (Deformed)',
-            'parent': 'Parent Nodes (Deformed)',
-            'internal': 'Internal Nodes (Deformed)',
-        }
-        marker = {
-            'primary': ('circle', 3, '#7ac4b7'),
-            'parent': ('circle-open', 15, '#7ac4b7'),
-            'internal': ('x', 2, '#a832a8'),
-        }
-        if as_overlay:
+        if overlay:
             opacity = 0.5
         else:
             opacity = 1.0
-        data = self.find_data_by_name(expanded_designation[designation])
+        data = self.find_data_by_name('Beamcolumn Elements (Deformed)')
         if not data:
             # Initialize
             data = {
-                'name': expanded_designation[designation],
+                'name': 'Beamcolumn Elements (Deformed)',
                 'type': 'scatter3d',
-                'mode': 'markers',
+                'mode': 'lines',
                 'x': [],
                 'y': [],
                 'z': [],
-                'customdata': [],
-                'text': [],
-                'hovertemplate': (
-                    'Node ID: %{customdata[0]:d}<br>'
-                    'Deformations: %{customdata[1]}<br>'
-                    '<extra></extra>'
-                ),
-                'marker': {
-                    'symbol': marker[designation][0],
-                    'color': marker[designation][2],
-                    'size': marker[designation][1],
-                    'opacity': opacity,
-                    'line': {
-                        'color': marker[designation][2],
-                        'width': 4,
-                    },
-                },
+                'opacity': opacity,
+                'hoverinfo': 'skip',
+                'line': {'width': 5, 'color': '#0f24db'},
                 'defined': set(),
             }
             self.data.append(data)
-        for node in nodes:
-            if node.uid in data['defined']:  # type: ignore
+
+        x_list: list[float | None] = []
+        y_list: list[float | None] = []
+        z_list: list[float | None] = []
+        num_points = 10
+        node_deformations = deformation_configuration.recorder.get_data()
+        amplification_factor = deformation_configuration.amplification_factor
+        assert amplification_factor is not None
+        step = deformation_configuration.step
+        for element in elements:
+            if (
+                element.visibility.hidden_at_line_plots
+                or element.uid in data['defined']  # type: ignore
+            ):
                 continue
-            if node.uid not in deformation_configuration.recorder.get_data().columns:
-                msg = 'Results not available for node: {node.uid}.'
-                raise ValueError(msg)
-            three_dimensional = 3
-            two_dimensional = 2
-            if self.configuration.ndm == three_dimensional:
-                deformations = deformation_configuration.recorder.get_data()
-                node_deformations = deformations.iloc[
-                    deformation_configuration.step, :
-                ].loc[node.uid]
-                data['x'].append(  # type: ignore
-                    node.coordinates[0]
-                    + node_deformations[0]
-                    * deformation_configuration.amplification_factor
+
+            node_i = element.nodes[0].uid
+            node_j = element.nodes[1].uid
+            for node in (node_i, node_j):
+                if node not in node_deformations.columns:
+                    msg = 'Results not available for node: {node.uid}.'
+                    raise ValueError(msg)
+
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                u_i = node_deformations.iloc[step][node_i].to_numpy()[0:3]
+                r_i = node_deformations.iloc[step][node_i].to_numpy()[3:6]
+                u_j = node_deformations.iloc[step][node_j].to_numpy()[0:3]
+                r_j = node_deformations.iloc[step][node_j].to_numpy()[3:6]
+                offset_i = element.geomtransf.offset_i
+                offset_j = element.geomtransf.offset_j
+                u_i_o = offset_transformation_3d(offset_i, u_i, r_i)
+                u_j_o = offset_transformation_3d(offset_j, u_j, r_j)
+                d_global, _ = self._interpolate_deformation_3d(
+                    element, u_i_o, r_i, u_j_o, r_j, num_points
                 )
-                data['y'].append(  # type: ignore
-                    node.coordinates[0]
-                    + node_deformations[1]
-                    * deformation_configuration.amplification_factor
+                interpolation_points = self._interpolate_points(
+                    element, d_global, num_points, amplification_factor
                 )
-                data['z'].append(  # type: ignore
-                    node.coordinates[0]
-                    + node_deformations[2]
-                    * deformation_configuration.amplification_factor
+            elif self.configuration.ndm == TWO_DIMENSIONAL:
+                u_i = node_deformations.iloc[step][node_i].to_numpy()[0:2]
+                r_i = node_deformations.iloc[step][node_i].to_numpy()[2]
+                u_j = node_deformations.iloc[step][node_j].to_numpy()[0:2]
+                r_j = node_deformations.iloc[step][node_j].to_numpy()[2]
+                offset_i = element.geomtransf.offset_i
+                offset_j = element.geomtransf.offset_j
+                u_i_o = offset_transformation_2d(offset_i, u_i, r_i)
+                u_j_o = offset_transformation_2d(offset_j, u_j, r_j)
+                d_global, _ = self._interpolate_deformation_2d(
+                    element, u_i_o, r_i, u_j_o, r_j, num_points
                 )
-                data['customdata'].append(  # type: ignore
-                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+                interpolation_points = self._interpolate_points(
+                    element, d_global, num_points, amplification_factor
+                )
+                interpolation_points = np.insert(
+                    interpolation_points, 1, 0.00, axis=1
                 )
             else:
-                assert self.configuration.ndm == two_dimensional
-                deformations = deformation_configuration.recorder.get_data()
-                node_deformations = (
-                    deformations.iloc[deformation_configuration.step, :]
-                    .loc[node.uid]
-                    .to_numpy()
+                msg = 'Unsupported NDM: {self.configuration.ndm}.'
+                raise ValueError(msg)
+
+            for i in range(len(interpolation_points) - 1):
+                x_list.extend(
+                    (
+                        interpolation_points[i, 0],
+                        interpolation_points[i + 1, 0],
+                        None,
+                    )
                 )
-                data['x'].append(  # type: ignore
-                    node.coordinates[0]
-                    + node_deformations[0]
-                    * deformation_configuration.amplification_factor
+                y_list.extend(
+                    (
+                        interpolation_points[i, 1],
+                        interpolation_points[i + 1, 1],
+                        None,
+                    )
                 )
-                data['y'].append(0.00)  # type: ignore
-                data['z'].append(  # type: ignore
-                    node.coordinates[1]
-                    + node_deformations[1]
-                    * deformation_configuration.amplification_factor
+                z_list.extend(
+                    (
+                        interpolation_points[i, 2],
+                        interpolation_points[i + 1, 2],
+                        None,
+                    )
                 )
-                data['customdata'].append(  # type: ignore
-                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+
+        data['x'].extend(x_list)  # type: ignore
+        data['y'].extend(y_list)  # type: ignore
+        data['z'].extend(z_list)  # type: ignore
+
+        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
+
+    def _add_beamcolumn_element_offsets_undeformed(
+        self,
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """Add undeformed beamcolumn element offsets."""
+        if overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name('Rigid Offsets')
+        if not data:
+            # Initialize
+            data = {
+                'name': 'Rigid Offsets',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': [],
+                'y': [],
+                'z': [],
+                'opacity': opacity,
+                'hoverinfo': 'skip',
+                'line': {'width': 8, 'color': '#a83256'},
+                'defined': set(),
+            }
+            self.data.append(data)
+
+        x_list: list[float | None] = []
+        y_list: list[float | None] = []
+        z_list: list[float | None] = []
+        for element in elements:
+            if (
+                element.visibility.hidden_at_line_plots
+                or element.uid in data['defined']  # type: ignore
+            ):
+                continue
+            p_i = np.array(element.nodes[0].coordinates)
+            p_io = (
+                np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+            )
+            p_j = np.array(element.nodes[1].coordinates)
+            p_jo = (
+                np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
+            )
+
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                x_list.extend((p_i[0], p_io[0], None))
+                y_list.extend((p_i[1], p_io[1], None))
+                z_list.extend((p_i[2], p_io[2], None))
+                x_list.extend((p_j[0], p_jo[0], None))
+                y_list.extend((p_j[1], p_jo[1], None))
+                z_list.extend((p_j[2], p_jo[2], None))
+            if self.configuration.ndm == TWO_DIMENSIONAL:
+                x_list.extend((p_i[0], p_io[0], None))
+                y_list.extend((0.0, 0.0, None))
+                z_list.extend((p_i[1], p_io[1], None))
+                x_list.extend((p_j[0], p_jo[0], None))
+                y_list.extend((0.0, 0.0, None))
+                z_list.extend((p_j[1], p_jo[1], None))
+
+        data['x'].extend(x_list)  # type: ignore
+        data['y'].extend(y_list)  # type: ignore
+        data['z'].extend(z_list)  # type: ignore
+
+        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
+
+    def _add_beamcolumn_element_offsets_deformed(
+        self,
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        deformation_configuration: DeformationConfiguration,
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """
+        Add deformed beamcolumn element offsets.
+
+        Raises:
+          ValueError: If displacement data is unavailable for some node.
+        """
+        if overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name('Rigid Offsets (Deformed)')
+        if not data:
+            # Initialize
+            data = {
+                'name': 'Rigid Offsets (Deformed)',
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': [],
+                'y': [],
+                'z': [],
+                'opacity': opacity,
+                'hoverinfo': 'skip',
+                'line': {'width': 8, 'color': '#a83256'},
+                'defined': set(),
+            }
+            self.data.append(data)
+
+        x_list: list[float | None] = []
+        y_list: list[float | None] = []
+        z_list: list[float | None] = []
+
+        node_deformations = deformation_configuration.recorder.get_data()
+        amplification_factor = deformation_configuration.amplification_factor
+        assert amplification_factor is not None
+        step = deformation_configuration.step
+        for element in elements:
+            if (
+                element.visibility.hidden_at_line_plots
+                or element.uid in data['defined']  # type: ignore
+            ):
+                continue
+
+            p_i = np.array(element.nodes[0].coordinates)
+            p_io = (
+                np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+            )
+            p_j = np.array(element.nodes[1].coordinates)
+            p_jo = (
+                np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
+            )
+
+            node_i = element.nodes[0].uid
+            node_j = element.nodes[1].uid
+            for node in (node_i, node_j):
+                if node not in node_deformations.columns:
+                    msg = 'Results not available for node: {node.uid}.'
+                    raise ValueError(msg)
+
+            if self.configuration.ndm == THREE_DIMENSIONAL:
+                u_i = node_deformations.iloc[step][node_i].to_numpy()[0:3]
+                r_i = node_deformations.iloc[step][node_i].to_numpy()[3:6]
+                u_j = node_deformations.iloc[step][node_j].to_numpy()[0:3]
+                r_j = node_deformations.iloc[step][node_j].to_numpy()[3:6]
+                offset_i = element.geomtransf.offset_i
+                offset_j = element.geomtransf.offset_j
+                u_i_o = offset_transformation_3d(offset_i, u_i, r_i)
+                u_j_o = offset_transformation_3d(offset_j, u_j, r_j)
+            elif self.configuration.ndm == TWO_DIMENSIONAL:
+                u_i = node_deformations.iloc[step][node_i].to_numpy()[0:2]
+                r_i = node_deformations.iloc[step][node_i].to_numpy()[2]
+                u_j = node_deformations.iloc[step][node_j].to_numpy()[0:2]
+                r_j = node_deformations.iloc[step][node_j].to_numpy()[2]
+                offset_i = element.geomtransf.offset_i
+                offset_j = element.geomtransf.offset_j
+                u_i_o = offset_transformation_2d(offset_i, u_i, r_i)
+                u_j_o = offset_transformation_2d(offset_j, u_j, r_j)
+
+                u_i = np.insert(u_i, 1, 0.00)
+                u_j = np.insert(u_j, 1, 0.00)
+                u_i_o = np.insert(u_i_o, 1, 0.00)
+                u_j_o = np.insert(u_j_o, 1, 0.00)
+                p_i = np.insert(p_i, 1, 0.00)
+                p_io = np.insert(p_io, 1, 0.00)
+                p_j = np.insert(p_j, 1, 0.00)
+                p_jo = np.insert(p_jo, 1, 0.00)
+
+            else:
+                msg = 'Unsupported NDM: {self.configuration.ndm}.'
+                raise ValueError(msg)
+
+            x_list.extend(
+                (
+                    p_i[0] + u_i[0] * amplification_factor,
+                    p_io[0] + u_i_o[0] * amplification_factor,
+                    None,
+                    p_j[0] + u_j[0] * amplification_factor,
+                    p_jo[0] + u_j_o[0] * amplification_factor,
+                    None,
                 )
-        # Update defined objects.
-        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
+            )
+            y_list.extend(
+                (
+                    p_i[1] + u_i[1] * amplification_factor,
+                    p_io[1] + u_i_o[1] * amplification_factor,
+                    None,
+                    p_j[1] + u_j[1] * amplification_factor,
+                    p_jo[1] + u_j_o[1] * amplification_factor,
+                    None,
+                )
+            )
+            z_list.extend(
+                (
+                    p_i[2] + u_i[2] * amplification_factor,
+                    p_io[2] + u_i_o[2] * amplification_factor,
+                    None,
+                    p_j[2] + u_j[2] * amplification_factor,
+                    p_jo[2] + u_j_o[2] * amplification_factor,
+                    None,
+                )
+            )
+
+        data['x'].extend(x_list)  # type: ignore
+        data['y'].extend(y_list)  # type: ignore
+        data['z'].extend(z_list)  # type: ignore
+
+        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
+
+    @staticmethod
+    def _interpolate_deformation_2d(
+        element: BeamColumnElement,
+        u_i: numpy_array,
+        r_i: numpy_array,
+        u_j: numpy_array,
+        r_j: numpy_array,
+        num_points: int,
+    ) -> tuple[numpy_array, numpy_array]:
+        """
+        Interpolate deformation in 2D.
+
+        Given the deformations of the ends of a beamcolumn element,
+        use its shape functions to obtain intermediate points.
+        Assumes sections remain orthogonal to the deformed centroidal
+        axis and ignores applied loads. The primary intent of this
+        method is to estimate the deformation for visualization
+        purposes.
+
+        Args:
+          element: A line element
+          u_i: 2 displacements at end i, global system
+          r_i: rotation at end i
+          u_j: 2 displacements at end j, global system
+          r_j: rotation at end j
+          num_points: Number of interpolation points
+
+        Returns:
+          Displacements (global system) and rotations. The rotations
+            are needed for plotting the deformed shape with extruded
+            frame elements.
+
+        """
+        x_vec: numpy_array = element.geomtransf.x_axis
+        y_vec = element.geomtransf.y_axis
+        assert y_vec is None
+        z_vec: numpy_array = element.geomtransf.z_axis
+
+        # global -> local transformation matrix
+        transf_global2local = np.vstack((x_vec, z_vec))
+        transf_local2global = transf_global2local.T
+
+        u_i_global = u_i
+        u_j_global = u_j
+        r_i_global = r_i
+        r_j_global = r_j
+
+        u_i_local = transf_global2local @ u_i_global
+        u_j_local = transf_global2local @ u_j_global
+        r_i_local = r_i_global
+        r_j_local = r_j_global
+
+        # discrete sample location parameter
+        t_vec = np.linspace(0.00, 1.00, num=num_points)
+        p_i = np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+        p_j = np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
+        len_clr = np.linalg.norm(p_i - p_j)
+
+        # shape function matrices
+        nx_mat = np.column_stack((1.0 - t_vec, t_vec))
+        nyz_mat = np.column_stack(
+            (
+                1.0 - 3.0 * t_vec**2 + 2.0 * t_vec**3,
+                (t_vec - 2.0 * t_vec**2 + t_vec**3) * len_clr,
+                3.0 * t_vec**2 - 2.0 * t_vec**3,
+                (-(t_vec**2) + t_vec**3) * len_clr,
+            )
+        )
+        nyz_derivative_mat = np.column_stack(
+            (
+                -6.0 * t_vec + 6.0 * t_vec**2,
+                (1 - 4.0 * t_vec + 3.0 * t_vec**2) * len_clr,
+                6.0 * t_vec - 6.0 * t_vec**2,
+                (-2.0 * t_vec + 3.0 * t_vec**2) * len_clr,
+            )
+        )
+
+        # axial deformation
+        d_x_local = nx_mat @ np.array([u_i_local[0], u_j_local[0]])
+
+        # bending deformation along the local xy plane
+        d_y_local = nyz_mat @ np.array(
+            [u_i_local[1], r_i_local, u_j_local[1], r_j_local]
+        )
+
+        # bending rotation around the local z axis
+        r_z_local = (
+            nyz_derivative_mat
+            @ np.array([u_i_local[1], r_i_local, u_j_local[1], r_j_local])
+            / len_clr
+        )
+
+        # all deformations
+        d_local = np.column_stack((d_x_local, d_y_local))
+
+        # all rotations
+        r_local = r_z_local
+
+        d_global = (transf_local2global @ d_local.T).T
+
+        return d_global, r_local
+
+    @staticmethod
+    def _interpolate_deformation_3d(
+        element: BeamColumnElement,
+        u_i: numpy_array,
+        r_i: numpy_array,
+        u_j: numpy_array,
+        r_j: numpy_array,
+        num_points: int,
+    ) -> tuple[numpy_array, numpy_array]:
+        """
+        Interpolate deformation in 3D.
+
+        Given the deformations of the ends of a beamcolumn element,
+        use its shape functions to obtain intermediate points.
+        Assumes sections remain orthogonal to the deformed centroidal
+        axis and ignores applied loads. The primary intent of this
+        method is to estimate the deformation for visualization
+        purposes.
+
+        Args:
+          element: A line element
+          u_i: 3 displacements at end i, global system
+          r_i: 3 rotations at end i, global system
+          u_j: 3 displacements at end j, global system
+          r_j: 3 rotations at end j, global system
+          num_points: Number of interpolation points
+
+        Returns:
+          Displacements (global system) and rotations (local system). The
+            rotations are needed for plotting the deformed shape with
+            extruded frame elements.
+
+        """
+        x_vec = element.geomtransf.x_axis
+        y_vec = element.geomtransf.y_axis
+        assert y_vec is not None
+        z_vec = np.cross(x_vec, y_vec)
+
+        # global -> local transformation matrix
+        transf_global2local = transformation_matrix(x_vec, y_vec, z_vec)
+        transf_local2global = transf_global2local.T
+
+        u_i_global = u_i
+        r_i_global = r_i
+        u_j_global = u_j
+        r_j_global = r_j
+
+        u_i_local = transf_global2local @ u_i_global
+        r_i_local = transf_global2local @ r_i_global
+        u_j_local = transf_global2local @ u_j_global
+        r_j_local = transf_global2local @ r_j_global
+
+        # discrete sample location parameter
+        t_vec = np.linspace(0.00, 1.00, num=num_points)
+        p_i = np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+        p_j = np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
+        len_clr = np.linalg.norm(p_i - p_j)
+
+        # shape function matrices
+        nx_mat = np.column_stack((1.0 - t_vec, t_vec))
+        nyz_mat = np.column_stack(
+            (
+                1.0 - 3.0 * t_vec**2 + 2.0 * t_vec**3,
+                (t_vec - 2.0 * t_vec**2 + t_vec**3) * len_clr,
+                3.0 * t_vec**2 - 2.0 * t_vec**3,
+                (-(t_vec**2) + t_vec**3) * len_clr,
+            )
+        )
+        nyz_derivative_mat = np.column_stack(
+            (
+                -6.0 * t_vec + 6.0 * t_vec**2,
+                (1 - 4.0 * t_vec + 3.0 * t_vec**2) * len_clr,
+                6.0 * t_vec - 6.0 * t_vec**2,
+                (-2.0 * t_vec + 3.0 * t_vec**2) * len_clr,
+            )
+        )
+
+        # axial deformation
+        d_x_local = nx_mat @ np.array([u_i_local[0], u_j_local[0]])
+
+        # bending deformation along the local xy plane
+        d_y_local = nyz_mat @ np.array(
+            [u_i_local[1], r_i_local[2], u_j_local[1], r_j_local[2]]
+        )
+
+        # bending deformation along the local xz plane
+        d_z_local = nyz_mat @ np.array(
+            [u_i_local[2], -r_i_local[1], u_j_local[2], -r_j_local[1]]
+        )
+
+        # torsional deformation
+        r_x_local = nx_mat @ np.array([r_i_local[0], r_j_local[0]])
+
+        # bending rotation around the local z axis
+        r_z_local = (
+            nyz_derivative_mat
+            @ np.array([u_i_local[1], r_i_local[2], u_j_local[1], r_j_local[2]])
+            / len_clr
+        )
+
+        # bending rotation around the local y axis
+        r_y_local = (
+            nyz_derivative_mat
+            @ np.array([-u_i_local[2], r_i_local[1], -u_j_local[2], r_j_local[1]])
+            / len_clr
+        )
+
+        # all deformations
+        d_local = np.column_stack((d_x_local, d_y_local, d_z_local))
+
+        # all rotations
+        r_local = np.column_stack((r_x_local, r_y_local, r_z_local))
+
+        d_global = (transf_local2global @ d_local.T).T
+
+        return d_global, r_local
+
+    @staticmethod
+    def _interpolate_points(
+        element: BeamColumnElement,
+        d_global: numpy_array,
+        num_points: int,
+        scaling: float,
+    ) -> numpy_array:
+        """
+        Interpolate intermediate points.
+
+        Calculates intermediate points based on end locations and
+        deformations.
+
+        Returns:
+          The interpolated points.
+        """
+        p_i = np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+        p_j = np.array(element.nodes[1].coordinates) + element.geomtransf.offset_j
+
+        assert len(p_j) == len(p_i)
+
+        columns = [
+            np.linspace(p_i[i], p_j[i], num=num_points) for i in range(len(p_i))
+        ]
+        element_point_samples: numpy_array = np.column_stack(columns)
+
+        return element_point_samples + d_global * scaling
 
     @staticmethod
     def _generate_pyramid_mesh(

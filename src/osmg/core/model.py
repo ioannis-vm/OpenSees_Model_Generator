@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-import numpy.typing as npt
 
+from osmg.core.common import NDM
 from osmg.core.gridsystem import GridSystem, GridSystem2D
 from osmg.core.osmg_collections import ComponentAssemblyCollection, NodeCollection
 from osmg.creators.uid import UIDGenerator
@@ -15,22 +15,7 @@ from osmg.creators.uid import UIDGenerator
 if TYPE_CHECKING:
     from osmg.model_objects.node import Node
 
-nparr = npt.NDArray[np.float64]
-
-NDM: dict[str, int] = {
-    '1D1DOF': 1,
-    '2D Truss': 2,
-    '2D Frame': 2,
-    '3D Truss': 3,
-    '3D Frame': 3,
-}
-NDF: dict[str, int] = {
-    '1D1DOF': 1,
-    '2D Truss': 2,
-    '2D Frame': 3,
-    '3D Truss': 3,
-    '3D Frame': 6,
-}
+from osmg.core.common import numpy_array
 
 
 @dataclass(repr=False)
@@ -54,7 +39,7 @@ class Model:
         default_factory=ComponentAssemblyCollection
     )
 
-    def bounding_box(self, padding: float) -> tuple[nparr, nparr]:
+    def bounding_box(self, padding: float) -> tuple[numpy_array, numpy_array]:
         """
         Obtain the axis-aligned bounding box of the building.
 
@@ -65,7 +50,7 @@ class Model:
         p_min = np.full(num_dimensions, np.inf)
         p_max = np.full(num_dimensions, -np.inf)
         for node in list(self.nodes.values()):
-            point: nparr = np.array(node.coordinates)
+            point: numpy_array = np.array(node.coordinates)
             p_min = np.minimum(p_min, point)
             p_max = np.maximum(p_max, point)
         p_min -= np.full(num_dimensions, padding)

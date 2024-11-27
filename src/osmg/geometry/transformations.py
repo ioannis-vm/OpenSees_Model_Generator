@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.core import common
+from osmg.core.common import THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 
-nparr = npt.NDArray[np.float64]
 
-
-def rotation_matrix_2d(ang: float) -> nparr:
+def rotation_matrix_2d(ang: float) -> numpy_array:
     """
     Obtain a 2D transformation matrix.
 
@@ -38,7 +36,7 @@ def rotation_matrix_2d(ang: float) -> nparr:
     return np.array([[np.cos(ang), -np.sin(ang)], [np.sin(ang), np.cos(ang)]])
 
 
-def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
+def rotation_matrix_3d(axis: numpy_array, theta: float) -> numpy_array:
     """
     3D rotation matrix.
 
@@ -85,7 +83,9 @@ def rotation_matrix_3d(axis: nparr, theta: float) -> nparr:
     )
 
 
-def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
+def transformation_matrix(
+    vec_x: numpy_array, vec_y: numpy_array, vec_z: numpy_array
+) -> numpy_array:
     """
     Obtain a transformation matrix.
 
@@ -126,11 +126,11 @@ def transformation_matrix(vec_x: nparr, vec_y: nparr, vec_z: nparr) -> nparr:
         >>> assert np.allclose(res, expected_result)
 
     """
-    tr_global_to_local: nparr = np.vstack((vec_x, vec_y, vec_z))
+    tr_global_to_local: numpy_array = np.vstack((vec_x, vec_y, vec_z))
     return tr_global_to_local
 
 
-def transformation_matrix_2d(vec_x: nparr, vec_y: nparr) -> nparr:
+def transformation_matrix_2d(vec_x: numpy_array, vec_y: numpy_array) -> numpy_array:
     """
     Obtain a transformation matrix in 2D.
 
@@ -146,13 +146,16 @@ def transformation_matrix_2d(vec_x: nparr, vec_y: nparr) -> nparr:
     -------
         global to local transformation matrix.
     """
-    tr_global_to_local: nparr = np.vstack((vec_x, vec_y))
+    tr_global_to_local: numpy_array = np.vstack((vec_x, vec_y))
     return tr_global_to_local
 
 
 def local_axes_from_points_and_angle(
-    point_i: nparr, point_j: nparr, ang: float
-) -> tuple[nparr, nparr, nparr] | tuple[nparr, None, nparr]:
+    point_i: numpy_array, point_j: numpy_array, ang: float
+) -> (
+    tuple[numpy_array, numpy_array, numpy_array]
+    | tuple[numpy_array, None, numpy_array]
+):
     """
     Calculate local axes from two points and a rotation angle.
 
@@ -164,15 +167,15 @@ def local_axes_from_points_and_angle(
     the full local coordinate system is calculated.
 
     Args:
-        point_i (nparr): The start point of the element.
-        point_j (nparr): The end point of the element.
+        point_i (numpy_array): The start point of the element.
+        point_j (numpy_array): The end point of the element.
         ang (float): Rotation angle in radians around the local x-axis.
 
     Returns:
-        tuple[nparr, nparr | None, nparr]: A tuple containing:
-            - The local x-axis (nparr).
-            - The local y-axis (nparr) or None (in 2D).
-            - The local z-axis (nparr).
+        tuple[numpy_array, numpy_array | None, numpy_array]: A tuple containing:
+            - The local x-axis (numpy_array).
+            - The local y-axis (numpy_array) or None (in 2D).
+            - The local z-axis (numpy_array).
 
     Raises:
         ValueError: If the input points do not have the same dimension.
@@ -200,18 +203,18 @@ def local_axes_from_points_and_angle(
 
     # Determine 2D or 3D
     dim = point_i.shape[0]
-    two_dimensional = 2
-    three_dimensional = 3
-    if dim == two_dimensional:
+    if dim == TWO_DIMENSIONAL:
         assert ang == 0.00, 'Angle should be 0.00 in 2D cases.'
         return _local_axes_2d(point_i, point_j)
-    if dim == three_dimensional:
+    if dim == THREE_DIMENSIONAL:
         return _local_axes_3d(point_i, point_j, ang)
     msg = 'Only 2D or 3D coordinates are supported.'
     raise ValueError(msg)
 
 
-def _local_axes_2d(point_i: nparr, point_j: nparr) -> tuple[nparr, None, nparr]:
+def _local_axes_2d(
+    point_i: numpy_array, point_j: numpy_array
+) -> tuple[numpy_array, None, numpy_array]:
     """
     Compute local axes for a 2D linear element.
 
@@ -221,15 +224,15 @@ def _local_axes_2d(point_i: nparr, point_j: nparr) -> tuple[nparr, None, nparr]:
     by rotating the x-axis 90 degrees counterclockwise.
 
     Args:
-        point_i (nparr): The start point of the element.
-        point_j (nparr): The end point of the element.
+        point_i (numpy_array): The start point of the element.
+        point_j (numpy_array): The end point of the element.
         ang (float): Rotation angle (not used in the 2D case).
 
     Returns:
-        tuple[nparr, None, nparr]: A tuple containing:
-            - The local x-axis (nparr).
+        tuple[numpy_array, None, numpy_array]: A tuple containing:
+            - The local x-axis (numpy_array).
             - None for the y-axis (2D case).
-            - The local z-axis (nparr).
+            - The local z-axis (numpy_array).
 
     Example:
         >>> point_i = np.array([0, 0])
@@ -250,8 +253,8 @@ def _local_axes_2d(point_i: nparr, point_j: nparr) -> tuple[nparr, None, nparr]:
 
 
 def _local_axes_3d(
-    point_i: nparr, point_j: nparr, ang: float
-) -> tuple[nparr, nparr, nparr]:
+    point_i: numpy_array, point_j: numpy_array, ang: float
+) -> tuple[numpy_array, numpy_array, numpy_array]:
     """
     Compute local axes for a 3D linear element.
 
@@ -261,15 +264,15 @@ def _local_axes_3d(
     the x-axis.
 
     Args:
-        point_i (nparr): The start point of the element.
-        point_j (nparr): The end point of the element.
+        point_i (numpy_array): The start point of the element.
+        point_j (numpy_array): The end point of the element.
         ang (float): Rotation angle in radians around the local x-axis.
 
     Returns:
-        tuple[nparr, nparr, nparr]: A tuple containing:
-            - The local x-axis (nparr).
-            - The local y-axis (nparr).
-            - The local z-axis (nparr).
+        tuple[numpy_array, numpy_array, numpy_array]: A tuple containing:
+            - The local x-axis (numpy_array).
+            - The local y-axis (numpy_array).
+            - The local z-axis (numpy_array).
 
     Raises:
         ValueError: If the element is vertical and defined upside down.
@@ -310,7 +313,48 @@ def _local_axes_3d(
     return x_axis, y_axis, z_axis
 
 
-def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
+def offset_transformation_2d(
+    offset: numpy_array, u_vec: numpy_array, r_angle: float
+) -> numpy_array:
+    """
+    Offset transformation.
+
+    Calculate the displacement at the end of a rigid offset by
+    specifying the displacement and rotation of the other end.
+
+    A rigid offset connects two nodes and transmits forces between
+    them, but does not allow any relative displacement or rotation
+    between the nodes.
+
+    Args:
+        offset:
+          Vector pointing from the node of the rigid offset where the
+          displacement is known to the node where we want to obtain
+          the displacement. The vector should be given in the global
+          coordinate system.
+        u_vec:
+          Displacement of the node where the displacement is known,
+          given in the global coordinate system.
+        r_angle:
+          Rotation of the node where the displacement is known, given
+          as a vector of the form [rx, ry, rz] representing the
+          rotation around the x, y, and z axes, respectively.
+
+    Returns:
+    -------
+        Displacement at the other end of the rigid offset,
+        given in the global coordinate system.
+
+    """
+    result: numpy_array = u_vec + np.array(
+        (-np.sin(r_angle) * offset[0], +np.cos(r_angle) * offset[1])
+    )
+    return result
+
+
+def offset_transformation_3d(
+    offset: numpy_array, u_vec: numpy_array, r_vec: numpy_array
+) -> numpy_array:
     """
     Offset transformation.
 
@@ -351,7 +395,7 @@ def offset_transformation(offset: nparr, u_vec: nparr, r_vec: nparr) -> nparr:
         array([ 0.01  , -0.0199,  0.0053])
 
     """
-    t_rigid: nparr = np.array(
+    t_rigid: numpy_array = np.array(
         [
             [0.00, +offset[2], -offset[1]],
             [-offset[2], 0.00, +offset[0]],

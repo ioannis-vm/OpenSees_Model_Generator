@@ -11,10 +11,10 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 
-nparr = npt.NDArray[np.float64]
+numpy_array = npt.NDArray[np.float64]
 
 
-def import_PEER(filename: str) -> nparr:  # noqa: N802
+def import_PEER(filename: str) -> numpy_array:  # noqa: N802
     """
     Import a PEER ground motion.
 
@@ -68,7 +68,9 @@ def import_PEER(filename: str) -> nparr:  # noqa: N802
     return np.column_stack((t, a_g))
 
 
-def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> nparr:  # noqa: N803
+def response_spectrum(
+    th: numpy_array, dt: float, zeta: float, num_points: int = 200
+) -> numpy_array:
     """
     Calculate a  response spectrum.
 
@@ -81,7 +83,7 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
       The response spectrum.
     """
     T = np.logspace(  # noqa: N806
-        -2, 1, n_Pts - 1
+        -2, 1, num_points - 1
     )  # -1 because we also include PGA @ T=0s
     # we may have to upsample the ground motion time history
     # to ensure convergence of the central difference method
@@ -119,23 +121,27 @@ def response_spectrum(th: nparr, dt: float, zeta: float, n_Pts: int = 200) -> np
     return np.column_stack((Ts, sas))
 
 
-def code_spectrum(T_vals: nparr, Ss: float, S1: float, Tl: float = 8.00) -> nparr:  # noqa: N803
+def code_spectrum(
+    t_array: numpy_array, s_s: float, s_1: float, t_long: float = 8.00
+) -> numpy_array:
     """
     Generate a simplified ASCE code response spectrum.
 
     Returns:
       The response spectrum.
     """
-    num_vals = len(T_vals)
+    num_vals = len(t_array)
     code_sa = np.full(num_vals, 0.00)
-    T_short = S1 / Ss  # noqa: N806
+    T_short = s_1 / s_s  # noqa: N806
     T_zero = 0.20 * T_short  # noqa: N806
-    code_sa[T_vals <= T_short] = Ss
-    code_sa[T_vals >= Tl] = S1 * Tl / T_vals[T_vals >= Tl] ** 2
-    sel = np.logical_and(T_vals > T_short, T_vals < Tl)
-    code_sa[sel] = S1 / T_vals[sel]
-    code_sa[T_vals < T_zero] = Ss * (0.40 + 0.60 * T_vals[T_vals < T_zero] / T_zero)
-    return np.column_stack((T_vals, code_sa))
+    code_sa[t_array <= T_short] = s_s
+    code_sa[t_array >= t_long] = s_1 * t_long / t_array[t_array >= t_long] ** 2
+    sel = np.logical_and(t_array > T_short, t_array < t_long)
+    code_sa[sel] = s_1 / t_array[sel]
+    code_sa[t_array < T_zero] = s_s * (
+        0.40 + 0.60 * t_array[t_array < T_zero] / T_zero
+    )
+    return np.column_stack((t_array, code_sa))
 
 
 if __name__ == '__main__':

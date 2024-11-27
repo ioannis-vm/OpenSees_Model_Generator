@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Generic, TypeVar
-
-import numpy as np
-import numpy.typing as npt
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from osmg.geometry.line import Line
 
-nparr = npt.NDArray[np.float64]
+if TYPE_CHECKING:
+    from osmg.core.common import numpy_array
+
 T = TypeVar('T')
 
 
@@ -62,7 +61,7 @@ class GridSystem(BaseGridSystem[Line]):
         levels: A dictionary of level elevations.
     """
 
-    def add_grid(self, name: str, start: nparr, end: nparr) -> None:
+    def add_grid(self, name: str, start: numpy_array, end: numpy_array) -> None:
         """Add a grid to the dictionary.
 
         Args:
@@ -74,7 +73,7 @@ class GridSystem(BaseGridSystem[Line]):
 
     def get_intersection_coordinates(
         self, grid_name_1: str, grid_name_2: str
-    ) -> nparr | None:
+    ) -> numpy_array | None:
         """Find the intersection of two grids.
 
         Args:

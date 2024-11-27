@@ -5,7 +5,7 @@ import pytest
 
 from osmg.geometry.transformations import (
     local_axes_from_points_and_angle,
-    offset_transformation,
+    offset_transformation_3d,
     rotation_matrix_2d,
     rotation_matrix_3d,
     transformation_matrix,
@@ -120,6 +120,6 @@ class TestOffsetTransformation:
         offset = np.array([1.0, 0.0, 0.0])
         u_vec = np.array([0.01, -0.02, 0.005])
         r_vec = np.array([0.0002, -0.0003, 0.0001])
-        result = offset_transformation(offset, u_vec, r_vec)
+        result = offset_transformation_3d(offset, u_vec, r_vec)
         expected = np.array([0.01, -0.0199, 0.0053])
         assert np.allclose(result, expected)  # type: ignore

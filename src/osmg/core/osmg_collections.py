@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.analysis.common import UDL
 from osmg.core import common
@@ -18,11 +17,10 @@ from osmg.geometry.transformations import (
 from osmg.model_objects.element import BeamColumnElement, Element
 from osmg.model_objects.node import Node
 
-nparr = npt.NDArray[np.float64]
-
 TV = TypeVar('TV')
 
 if TYPE_CHECKING:
+    from osmg.core.common import numpy_array
     from osmg.model_objects import element
 
 
@@ -202,9 +200,9 @@ class NodeCollection(NamedCollection[Node]):
         Returns:
           Node: The node at the given coordinates, or None if no node is found.
         """
-        candidate_pt: nparr = np.array(coordinates)
+        candidate_pt: numpy_array = np.array(coordinates)
         for other_node in self.values():
-            other_pt: nparr = np.array(other_node.coordinates)
+            other_pt: numpy_array = np.array(other_node.coordinates)
             if np.linalg.norm(candidate_pt - other_pt) < radius:
                 return other_node
         return None

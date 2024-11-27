@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 from itertools import count
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
-import numpy.typing as npt
 from descartes.patch import PolygonPatch  # type: ignore
 from matplotlib.patches import Polygon
 from shapely.geometry import Polygon as shapely_Polygon  # type: ignore
 
 from osmg.core import common
 
-nparr = npt.NDArray[np.float64]
+if TYPE_CHECKING:
+    from osmg.core.common import numpy_array
 
 
 class Vertex:
@@ -267,22 +267,22 @@ class Edge:
 
         """
         # location of this edge
-        vec_ra: nparr = np.array(self.v_i.coordinates)
+        vec_ra: numpy_array = np.array(self.v_i.coordinates)
         # direction of this edge
-        vec_da: nparr = np.array(self.v_j.coordinates) - np.array(
+        vec_da: numpy_array = np.array(self.v_j.coordinates) - np.array(
             self.v_i.coordinates
         )
         # location of other edge
-        vec_rb: nparr = np.array(other.v_i.coordinates)
+        vec_rb: numpy_array = np.array(other.v_i.coordinates)
         # direction of other edge
-        vec_db: nparr = np.array(other.v_j.coordinates) - np.array(
+        vec_db: numpy_array = np.array(other.v_j.coordinates) - np.array(
             other.v_i.coordinates
         )
         # verify that the edges have nonzero length
         assert not np.isclose(vec_da @ vec_da, 0.00)
         assert not np.isclose(vec_db @ vec_db, 0.00)
 
-        mat_a: nparr = np.column_stack((vec_da, -vec_db))
+        mat_a: numpy_array = np.column_stack((vec_da, -vec_db))
         mat_b = vec_rb - vec_ra
         determinant = np.linalg.det(mat_a)
 
@@ -441,7 +441,7 @@ class Halfedge:
         Returns:
           The angular direction.
         """
-        drct: nparr = np.array(
+        drct: numpy_array = np.array(
             self.edge.other_vertex(self.vertex).coordinates
         ) - np.array(self.vertex.coordinates)
         norm = np.linalg.norm(drct)
@@ -479,17 +479,21 @@ class Mesh:
         Returns:
           The geometric properties.
         """
-        coordinates: nparr = np.array([h.vertex.coordinates for h in self.halfedges])
+        coordinates: numpy_array = np.array(
+            [h.vertex.coordinates for h in self.halfedges]
+        )
         return geometric_properties(coordinates)
 
-    def bounding_box(self) -> nparr:
+    def bounding_box(self) -> numpy_array:
         """
         Obtain a bounding box of the mesh.
 
         Returns:
           The bounding box.
         """
-        coordinates: nparr = np.array([h.vertex.coordinates for h in self.halfedges])
+        coordinates: numpy_array = np.array(
+            [h.vertex.coordinates for h in self.halfedges]
+        )
         xmin = min(coordinates[:, 0])
         xmax = max(coordinates[:, 0])
         ymin = min(coordinates[:, 1])
@@ -502,7 +506,7 @@ class Mesh:
 ############################################
 
 
-def polygon_area(coordinates: nparr) -> float:
+def polygon_area(coordinates: numpy_array) -> float:
     """
     Calculate the area of a polygon.
 
@@ -535,7 +539,7 @@ def polygon_area(coordinates: nparr) -> float:
     )
 
 
-def polygon_centroid(coordinates: nparr) -> nparr:
+def polygon_centroid(coordinates: numpy_array) -> numpy_array:
     """
     Calculate the centroid of a polygon.
 
@@ -581,7 +585,7 @@ def polygon_centroid(coordinates: nparr) -> nparr:
     return np.array((x_cent, y_cent))
 
 
-def polygon_inertia(coordinates: nparr) -> dict[str, float]:
+def polygon_inertia(coordinates: numpy_array) -> dict[str, float]:
     """
     Calculate the moments of inertia of a polygon.
 
@@ -671,7 +675,7 @@ def polygon_inertia(coordinates: nparr) -> dict[str, float]:
     return {'ixx': ixx, 'iyy': iyy, 'ixy': ixy, 'ir': i_r, 'ir_mass': ir_mass}
 
 
-def geometric_properties(coordinates: nparr) -> dict[str, object]:
+def geometric_properties(coordinates: numpy_array) -> dict[str, object]:
     """
     Aggregate the results of the previous functions.
 

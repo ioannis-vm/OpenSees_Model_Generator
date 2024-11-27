@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 
 import numpy as np
-import numpy.typing as npt
 
 from osmg.core.model import Model
 from osmg.model_objects.section import ElasticSection, FiberSection
@@ -17,8 +16,6 @@ from osmg.model_objects.uniaxial_material import (
     Steel02,
     UniaxialMaterial,
 )
-
-nparr = npt.NDArray[np.float64]
 
 
 @dataclass(repr=False)

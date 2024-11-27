@@ -9,10 +9,19 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Check formatting with ruff
-echo "Checking formatting with 'ruff format --diff'."
+# # Check formatting with ruff
+# echo "Checking formatting with 'ruff format --diff'."
+# echo
+# ruff format --diff
+# if [ $? -ne 0 ]; then
+#     echo "ruff format failed."
+#     exit 1
+# fi
+
+# Format code
+echo "Formatting with 'ruff format'."
 echo
-ruff format --diff
+ruff format
 if [ $? -ne 0 ]; then
     echo "ruff format failed."
     exit 1

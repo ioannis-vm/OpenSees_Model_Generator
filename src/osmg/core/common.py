@@ -6,6 +6,9 @@ import re
 from pprint import pprint
 from typing import Hashable, OrderedDict, TypeVar
 
+import numpy as np
+import numpy.typing as npt
+
 # very big, very small numbers used for
 # comparing floats and hashing
 EPSILON = 1.00e-6
@@ -19,6 +22,26 @@ G_CONST_SI = 9.81  # m/s**2
 STIFF_ROT = 1.0e15
 STIFF = 1.0e10
 TINY = 1.0e-12
+
+NDM: dict[str, int] = {
+    '1D1DOF': 1,
+    '2D Truss': 2,
+    '2D Frame': 2,
+    '3D Truss': 3,
+    '3D Frame': 3,
+}
+NDF: dict[str, int] = {
+    '1D1DOF': 1,
+    '2D Truss': 2,
+    '2D Frame': 3,
+    '3D Truss': 3,
+    '3D Frame': 6,
+}
+
+TWO_DIMENSIONAL = 2
+THREE_DIMENSIONAL = 3
+
+numpy_array = npt.NDArray[np.float64]
 
 
 def methods(obj: object) -> list[str]:

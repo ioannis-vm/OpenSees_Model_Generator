@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
-from osmg.core.model import NDF, NDM, Model
+from osmg.core.common import NDF, NDM
 from osmg.core.osmg_collections import BeamColumnAssembly
 from osmg.model_objects.element import ElasticBeamColumn
 
@@ -23,6 +23,7 @@ except (ImportError, ModuleNotFoundError):
 if TYPE_CHECKING:
     from osmg.analysis.load_case import LoadCase
     from osmg.analysis.recorders import Recorder
+    from osmg.core.model import Model
 
 
 @dataclass()

@@ -20,7 +20,7 @@ method.
 #     from osmg.analysis.solver import Analysis
 
 
-# nparr = npt.NDArray[np.float64]
+# ]nparr = npt.NDArray[np.float64]
 
 
 # def basic_forces(
