@@ -7,7 +7,7 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.common import UDL
+from osmg.analysis.common import UDL, PointLoad
 from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.recorders import NodeRecorder
 from osmg.analysis.supports import FixedSupport
@@ -169,12 +169,17 @@ for beam in added_beams:
 #     (0.0, +10.00)
 # )  # lb/in
 
-# # Add a concentrated point load at 'A'-'Level 1' in load case 'C'
-# load_case_registry.dead['C'].load_registry.nodal_loads[node_a_level1.uid] = (
-#     PointLoad(
-#         (0.0, 10.00, 0.00)  # lb
-#     )
-# )
+# Add a concentrated point load at 'A'-'Level 1' in load case 'D'
+load_case_registry.dead['D'].load_registry.nodal_loads[
+    frame.nodes.search_by_coordinates_or_raise(
+        (
+            grids.get_grid_location('A'),
+            grids.get_level_elevation('1'),
+        )
+    ).uid
+] = PointLoad(
+    (50000.0, 0.00, 0.00)  # lb
+)
 
 # Add an extra recorder
 load_case_registry.dead['D'].analysis.recorders['node_envelope'] = NodeRecorder(
@@ -218,12 +223,10 @@ deformation_configuration = DeformationConfiguration(
     step=0,
     amplification_factor=None,  # Figure it out.
 )
-
-
 fig = Figure3D(Figure3DConfiguration(ndm=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
-fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
 fig.add_components(list(frame.components.values()), overlay=True)
+fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
 fig.add_components(list(frame.components.values()), deformation_configuration)
 fig.add_supports(
     frame.nodes, load_case_registry.dead['D'].fixed_supports, symbol_size=12.00
@@ -231,17 +234,17 @@ fig.add_supports(
 fig.add_udl(
     load_case_registry.dead['D'].load_registry.element_udl,
     frame.components,
-    force_to_length_factor=5.00,
+    force_to_length_factor=2.0,
     offset=0.00,
 )
 fig.add_loads(
     load_case_registry.dead['D'].load_registry.nodal_loads,
     frame.nodes,
-    force_to_length_factor=5.00,
+    force_to_length_factor=0.0072,
     offset=0.0,
-    head_length=12.0,
-    head_width=12.0,
-    base_width=3.0,
+    head_length=24.0,
+    head_width=24.0,
+    base_width=5.0,
 )
 # fig.add_basic_forces(frame.components)
 fig.show()

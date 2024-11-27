@@ -317,7 +317,6 @@ class Figure3D:
                 'k': [],
                 'color': '#00f0ff',
                 'hoverinfo': 'skip',
-                'defined': set(),
                 'showlegend': True,
             }
             # TODO (JVM): replace template fields with actual info.
@@ -326,8 +325,6 @@ class Figure3D:
         index_offset = 0
         for uid, support in supports.items():
             node = nodes[uid]
-            if uid in data['defined']:  # type: ignore
-                continue
             if self.configuration.ndm == THREE_DIMENSIONAL:
                 for i in range(num_dofs):
                     if support[i]:
@@ -385,8 +382,6 @@ class Figure3D:
                         data['i'].extend(faces_i)  # type: ignore
                         data['j'].extend(faces_j)  # type: ignore
                         data['k'].extend(faces_k)  # type: ignore
-        # Update defined objects.
-        data['defined'] = data['defined'].union(supports.keys())  # type: ignore
 
     def add_udl(
         self,
@@ -528,12 +523,9 @@ class Figure3D:
                         'width': 4,
                     },
                 },
-                'defined': set(),
             }
             self.data.append(data)
         for node in nodes:
-            if node.uid in data['defined']:  # type: ignore
-                continue
             if self.configuration.ndm == THREE_DIMENSIONAL:
                 data['x'].append(node.coordinates[0])  # type: ignore
                 data['y'].append(node.coordinates[1])  # type: ignore
@@ -545,8 +537,6 @@ class Figure3D:
                 data['y'].append(0.00)  # type: ignore
                 data['z'].append(node.coordinates[1])  # type: ignore
                 data['customdata'].append([node.uid, None])  # type: ignore
-        # Update defined objects.
-        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
     def _add_nodes_deformed(
         self,
@@ -603,14 +593,11 @@ class Figure3D:
                         'width': 4,
                     },
                 },
-                'defined': set(),
             }
             self.data.append(data)
 
         all_node_deformations = deformation_configuration.node_deformations
         for node in nodes:
-            if node.uid in data['defined']:  # type: ignore
-                continue
             if node.uid not in all_node_deformations.columns:
                 msg = 'Results not available for node: {node.uid}.'
                 raise ValueError(msg)
@@ -657,8 +644,6 @@ class Figure3D:
                 data['customdata'].append(  # type: ignore
                     [node.uid, [f'{v:.2f}' for v in node_deformations]]
                 )
-        # Update defined objects.
-        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
     def _add_beamcolumn_elements_undeformed(
         self,
@@ -690,7 +675,6 @@ class Figure3D:
                     'Node @ this end: %{customdata[1]:d}</extra>'
                 ),
                 'line': {'width': 5, 'color': '#0f24db'},
-                'defined': set(),
             }
             self.data.append(data)
 
@@ -700,10 +684,7 @@ class Figure3D:
         customdata_list = []  # type: ignore
         section_names = []  # type: ignore
         for element in elements:
-            if (
-                element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']  # type: ignore
-            ):
+            if element.visibility.hidden_at_line_plots:
                 continue
             p_i = (
                 np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
@@ -743,8 +724,6 @@ class Figure3D:
         data['customdata'].extend(customdata_list)  # type: ignore
         data['text'].extend(section_names)  # type: ignore
 
-        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
-
     def _add_beamcolumn_elements_deformed(
         self,
         elements: list[ElasticBeamColumn] | list[DispBeamColumn],
@@ -775,7 +754,6 @@ class Figure3D:
                 'opacity': opacity,
                 'hoverinfo': 'skip',
                 'line': {'width': 5, 'color': '#0f24db'},
-                'defined': set(),
             }
             self.data.append(data)
 
@@ -788,10 +766,7 @@ class Figure3D:
         assert amplification_factor is not None
         step = deformation_configuration.step
         for element in elements:
-            if (
-                element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']  # type: ignore
-            ):
+            if element.visibility.hidden_at_line_plots:
                 continue
 
             node_i = element.nodes[0].uid
@@ -865,8 +840,6 @@ class Figure3D:
         data['y'].extend(y_list)  # type: ignore
         data['z'].extend(z_list)  # type: ignore
 
-        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
-
     def _add_beamcolumn_element_offsets_undeformed(
         self,
         elements: list[ElasticBeamColumn] | list[DispBeamColumn],
@@ -891,7 +864,6 @@ class Figure3D:
                 'opacity': opacity,
                 'hoverinfo': 'skip',
                 'line': {'width': 8, 'color': '#a83256'},
-                'defined': set(),
             }
             self.data.append(data)
 
@@ -899,10 +871,7 @@ class Figure3D:
         y_list: list[float | None] = []
         z_list: list[float | None] = []
         for element in elements:
-            if (
-                element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']  # type: ignore
-            ):
+            if element.visibility.hidden_at_line_plots:
                 continue
             p_i = np.array(element.nodes[0].coordinates)
             p_io = (
@@ -931,8 +900,6 @@ class Figure3D:
         data['x'].extend(x_list)  # type: ignore
         data['y'].extend(y_list)  # type: ignore
         data['z'].extend(z_list)  # type: ignore
-
-        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
     def _add_beamcolumn_element_offsets_deformed(
         self,
@@ -964,7 +931,6 @@ class Figure3D:
                 'opacity': opacity,
                 'hoverinfo': 'skip',
                 'line': {'width': 8, 'color': '#a83256'},
-                'defined': set(),
             }
             self.data.append(data)
 
@@ -977,10 +943,7 @@ class Figure3D:
         assert amplification_factor is not None
         step = deformation_configuration.step
         for element in elements:
-            if (
-                element.visibility.hidden_at_line_plots
-                or element.uid in data['defined']  # type: ignore
-            ):
+            if element.visibility.hidden_at_line_plots:
                 continue
 
             p_i = np.array(element.nodes[0].coordinates)
@@ -1065,8 +1028,6 @@ class Figure3D:
         data['x'].extend(x_list)  # type: ignore
         data['y'].extend(y_list)  # type: ignore
         data['z'].extend(z_list)  # type: ignore
-
-        data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
     @staticmethod
     def _interpolate_deformation_2d(
@@ -1485,7 +1446,6 @@ class Figure3D:
                 'color': '#7ac4b7',
                 'opacity': 0.5,
                 'showlegend': True,
-                'defined': [],
             }
             self.data.append(data)
 
@@ -1543,7 +1503,6 @@ class Figure3D:
                 'color': '#7ac4b7',
                 'opacity': 0.5,
                 'showlegend': True,
-                'defined': [],
             }
             self.data.append(data)
 
@@ -1566,8 +1525,5 @@ class Figure3D:
 
     def show(self) -> None:
         """Display the figure."""
-        # Remove `defined` entry from `data`
-        for data in self.data:
-            data.pop('defined')
         fig = go.Figure({'data': self.data, 'layout': self.layout})
         fig.show()
