@@ -268,6 +268,7 @@ class BeamColumnCreator:
         Returns:
           The created component assembly.
         """
+        assert node_i.uid != node_j.uid, 'Nodes need to be different.'
         # TODO(JVM): restore this check
         # uids = [node.uid for node in (node_i, node_j)]
         # uids.sort()

@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
+import pandas as pd
+
 from osmg.core.uid_object import UIDObject
 
 
@@ -12,10 +14,20 @@ from osmg.core.uid_object import UIDObject
 class Recorder(UIDObject):
     """Recorder base class."""
 
+    file_name: str
     # TODO(JVM): figure out binary format.
+
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        self._data = None
 
     def ops_args(self) -> list[object]:  # noqa: PLR6301
         """Obtain the OpenSees arguments."""
+        msg = 'Child classes should implement this.'
+        raise NotImplementedError(msg)
+
+    def get_data(self) -> pd.DataFrame:  # noqa: PLR6301
+        """Retrieve the data."""
         msg = 'Child classes should implement this.'
         raise NotImplementedError(msg)
 
@@ -36,7 +48,6 @@ class NodeRecorder(Recorder):
     response_type: Literal[
         'disp', 'vel', 'accel', 'incrDisp', 'eigen', 'reaction', 'rayleighForces'
     ]
-    file_name: str
     number_of_significant_digits: int
     output_time: bool
     delta_t: float | None = field(default=None)
@@ -74,6 +85,25 @@ class NodeRecorder(Recorder):
         if self.response_type == 'eigen':
             output.append(self.mode_number)
         return output
+
+    def get_data(self) -> pd.DataFrame:
+        """
+        Retrieve the data.
+
+        Returns:
+          The data.
+        """
+        if self._data is None:
+            data = pd.read_csv(
+                self.file_name, sep=' ', index_col=0, header=None, engine='pyarrow'
+            )
+            header_data = [(node, dof) for node in self.nodes for dof in self.dofs]
+            data.columns = pd.MultiIndex.from_tuples(
+                header_data, names=('node', 'dof')
+            )
+            data.index.name = 'time'
+            self._data = data
+        return self._data
 
 
 @dataclass
@@ -164,3 +194,30 @@ class ElementRecorder(Recorder):
         output.extend(['-ele', *self.elements])
         output.extend([*self.element_arguments])
         return output
+
+    def get_data(self) -> pd.DataFrame:
+        """
+        Retrieve the data.
+
+        Returns:
+          The data.
+        """
+        if self._data is None:
+            data = pd.read_csv(
+                self.file_name, sep=' ', index_col=0, header=None, engine='pyarrow'
+            )
+            # get number of dofs
+            num_dof = int(data.shape[1] / len(self.elements) / 2.0)
+            # construct header
+            header_data = [
+                (element, end, dof)
+                for element in self.elements
+                for end in ('i', 'j')
+                for dof in range(1, num_dof + 1)
+            ]
+            data.columns = pd.MultiIndex.from_tuples(
+                header_data, names=('element', 'end', 'dof')
+            )
+            data.index.name = 'time'
+            self._data = data
+        return self._data

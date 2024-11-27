@@ -1,4 +1,4 @@
-"""Core plotting objects"""
+"""Core plotting objects."""
 
 from __future__ import annotations
 
@@ -19,7 +19,10 @@ def arrow(
     head_length: float = 0.45,
     head_width: float = 0.30,
     base_width: float = 0.05,
-) -> tuple[tuple[float, float, float], tuple[tuple[int, int, int]]]:
+) -> tuple[
+    tuple[tuple[float, float, float], ...],
+    tuple[tuple[int, int, int], ...],
+]:
     """
     Define the vertices and edges of an arrow.
 
@@ -75,14 +78,25 @@ def positioned_arrow(
     head_length: float = 0.45,
     head_width: float = 0.30,
     base_width: float = 0.05,
-) -> tuple[tuple[float, float, float], tuple[tuple[int, int, int]]]:
-    # Check for the case where no transformation is required.
+) -> tuple[
+    tuple[tuple[float, float, float], ...],
+    tuple[tuple[int, int, int], ...],
+]:
+    """
+    Define vertices and faces for a positioned arrow.
 
+    Returns:
+      Vertices and faces.
+
+    Raises:
+      ValueError: If the start and end locations are coinciding.
+    """
     start_vec = np.array(start_location)
     end_vec = np.array(end_location)
 
-    arrow_length = np.linalg.norm(end_vec - start_vec)
+    arrow_length = float(np.linalg.norm(end_vec - start_vec))
 
+    # Check for the case where no rotation is required.
     if (
         fabs(start_location[0] - end_location[0]) < EPSILON
         and fabs(start_location[1] - end_location[1]) < EPSILON
@@ -98,12 +112,15 @@ def positioned_arrow(
             vertices, faces = arrow(
                 arrow_length, head_length, head_width, base_width
             )
+        # translation
+        vertices = tuple(np.array(vertices) + start_vec)
     else:
         vertices, faces = arrow(arrow_length, head_length, head_width, base_width)
         # Rotation and translation required.
         x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
             end_vec, start_vec, ang=0.00
         )
+        assert y_axis is not None
         orient_to_x_axis = np.array(
             ((0.0, 0.0, 1.0), (0.0, 1.0, 0.0), (-1.0, 0.0, 0.0))
         )
@@ -116,7 +133,8 @@ def positioned_arrow(
     return vertices, faces
 
 
-def main():
+def main() -> None:
+    """Use for testing."""
     # Define the vertices of the arrow
 
     vertices, faces = positioned_arrow(
@@ -135,20 +153,20 @@ def main():
 
     # Setup the layout of the scene
     layout = go.Layout(
-        scene=dict(
-            xaxis=dict(
-                nticks=4,
-                range=[-1, 2],
-            ),
-            yaxis=dict(
-                nticks=4,
-                range=[-1, 2],
-            ),
-            zaxis=dict(
-                nticks=4,
-                range=[-1, 2],
-            ),
-        )
+        scene={
+            'xaxis': {
+                'nticks': 4,
+                'range': [-1, 2],
+            },
+            'yaxis': {
+                'nticks': 4,
+                'range': [-1, 2],
+            },
+            'zaxis': {
+                'nticks': 4,
+                'range': [-1, 2],
+            },
+        }
     )
 
     # Create a figure and add the mesh
@@ -160,5 +178,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-main()

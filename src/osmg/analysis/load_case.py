@@ -16,7 +16,7 @@ from osmg.core.common import EPSILON
 
 if TYPE_CHECKING:
     from osmg.analysis.common import UDL, PointLoad, PointMass
-    from osmg.core.model import Model2D, Model3D
+    from osmg.core.model import Model, Model2D, Model3D
 
 
 @dataclass(repr=False)
@@ -150,7 +150,7 @@ class LoadCaseRegistry:
     retrieve, and post-process results.
     """
 
-    model: Model2D | Model3D
+    model: Model
     result_setup: AnalysisResultSetup = field(default_factory=AnalysisResultSetup)
     dead: defaultdict[str, DeadLoadCase] = field(
         default_factory=lambda: defaultdict(DeadLoadCase)
@@ -210,7 +210,5 @@ class LoadCaseRegistry:
                 case_dir = base_dir / f'{case_type}_{key}'
                 case_dir.mkdir(parents=True, exist_ok=True)
 
-                # Update the result directory of the analysis
                 load_case.analysis.settings.result_directory = str(case_dir)
-                # Define the model
-                load_case.analysis.define_model_in_opensees(self.model, load_case)
+                load_case.analysis.run(self.model, load_case)

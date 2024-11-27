@@ -17,6 +17,21 @@ if TYPE_CHECKING:
 
 nparr = npt.NDArray[np.float64]
 
+NDM: dict[str, int] = {
+    '1D1DOF': 1,
+    '2D Truss': 2,
+    '2D Frame': 2,
+    '3D Truss': 3,
+    '3D Frame': 3,
+}
+NDF: dict[str, int] = {
+    '1D1DOF': 1,
+    '2D Truss': 2,
+    '2D Frame': 3,
+    '3D Truss': 3,
+    '3D Frame': 6,
+}
+
 
 @dataclass(repr=False)
 class Model:
@@ -32,6 +47,7 @@ class Model:
     """
 
     name: str
+    dimensionality: Literal['1D', '2D Truss', '2D Frame', '3D Truss', '3D Frame']
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     nodes: NodeCollection = field(default_factory=NodeCollection)
     components: ComponentAssemblyCollection = field(
@@ -45,14 +61,15 @@ class Model:
         Returns:
           Bounding box.
         """
-        p_min = np.full(3, np.inf)
-        p_max = np.full(3, -np.inf)
+        num_dimensions = NDM[self.dimensionality]
+        p_min = np.full(num_dimensions, np.inf)
+        p_max = np.full(num_dimensions, -np.inf)
         for node in list(self.nodes.values()):
             point: nparr = np.array(node.coordinates)
             p_min = np.minimum(p_min, point)
             p_max = np.maximum(p_max, point)
-        p_min -= np.full(3, padding)
-        p_max += np.full(3, padding)
+        p_min -= np.full(num_dimensions, padding)
+        p_max += np.full(num_dimensions, padding)
         return p_min, p_max
 
     def reference_length(self) -> float:
@@ -104,8 +121,19 @@ class Model2D(Model):
         grid_system (GridSystem2D): Grid system for the 2D model.
     """
 
-    ndf: Literal[2, 3] = field(default=3)
+    dimensionality: Literal['2D Truss', '2D Frame']
     grid_system: GridSystem2D = field(default_factory=GridSystem2D)
+
+    def __post_init__(self) -> None:
+        """
+        Post-initialization.
+
+        Raises:
+          ValueError: If the `dimensionality` assignment is invalid.
+        """
+        if self.dimensionality not in {'2D Truss', '2D Frame'}:
+            msg = f'Dimensionality `{self.dimensionality}` is not compatible with a `Model2D` object.'
+            raise ValueError(msg)
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""
@@ -124,8 +152,19 @@ class Model3D(Model):
         grid_system (GridSystem): Grid system for the 3D model.
     """
 
-    ndf: Literal[3, 6] = field(default=6)
+    dimensionality: Literal['3D Truss', '3D Frame']
     grid_system: GridSystem = field(default_factory=GridSystem)
+
+    def __post_init__(self) -> None:
+        """
+        Post-initialization.
+
+        Raises:
+          ValueError: If the `dimensionality` assignment is invalid.
+        """
+        if self.dimensionality not in {'3D Truss', '3D Frame'}:
+            msg = f'Dimensionality `{self.dimensionality}` is not compatible with a `Model3D` object.'
+            raise ValueError(msg)
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""

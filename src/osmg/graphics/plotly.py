@@ -8,12 +8,17 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
-from osmg.model_objects.element import DispBeamColumn, ElasticBeamColumn
-from osmg.analysis.common import UDL, PointLoad
 from osmg.core.osmg_collections import BeamColumnAssembly
-from osmg.model_objects.element import BeamColumnElement
+from osmg.graphics.objects import positioned_arrow
+from osmg.model_objects.element import (
+    BeamColumnElement,
+    DispBeamColumn,
+    ElasticBeamColumn,
+)
 
 if TYPE_CHECKING:
+    from osmg.analysis.common import UDL, PointLoad
+    from osmg.analysis.recorders import NodeRecorder
     from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.element import Element
@@ -29,12 +34,68 @@ def _default_camera() -> dict[str, object]:
     }
 
 
-@dataclass(repr=False)
+@dataclass
 class Figure3DConfiguration:
     """Configuration for 3D figures."""
 
     camera: dict[str, object] = field(default_factory=_default_camera)
-    num_space_dimensions: Literal[2, 3] = field(default=3)
+    ndm: Literal[2, 3] = field(default=3)
+
+
+@dataclass
+class DeformationConfiguration:
+    """Configuration for 3D figures."""
+
+    reference_length: float
+    ndf: int
+    recorder: NodeRecorder
+    step: int
+    amplification_factor: float | None = field(default=None)
+
+    def __post_init__(self) -> None:
+        """
+        Post-initialization.
+
+        Calculates an amplification factor if not specified.
+
+        Raises:
+          ValueError: If the requested step does not exist.
+          ValueError: If the model's `NDF` is unsupported.
+        """
+        # Determine amplification factor
+        if self.amplification_factor is not None:
+            return
+        node_deformations = self.recorder.get_data()
+        if node_deformations.shape[0] < self.step:
+            msg = (
+                f'The requested step ({self.step}) does not exist. '
+                f'The last step is ({node_deformations.shape[0] - 1})'
+            )
+            raise ValueError(msg)
+        case_2d = 3
+        case_3d = 6
+        max_deformation = {}
+        for i_dof in range(self.ndf):
+            max_deformation[i_dof] = (
+                node_deformations.iloc[self.step, i_dof :: self.ndf].abs().max()
+            )
+        if self.ndf == case_2d:
+            max_displacement = np.max((max_deformation[0], max_deformation[1]))
+            max_rotation = max_deformation[2]
+        elif self.ndf == case_3d:
+            max_displacement = np.max(
+                (max_deformation[0], max_deformation[1], max_deformation[2])
+            )
+            max_rotation = np.max(
+                (max_deformation[3], max_deformation[4], max_deformation[5])
+            )
+        else:
+            msg = 'Invalid model NDF: {model.ndf}.'
+            raise ValueError(msg)
+        # 10% of reference length, or at most an approx. 30 degree rotation angle.
+        self.amplification_factor = min(
+            self.reference_length / max_displacement * 0.10, max_rotation / 0.50
+        )
 
 
 @dataclass(repr=False)
@@ -73,79 +134,46 @@ class Figure3D:
         self,
         nodes: list[Node],
         designation: Literal['primary', 'parent', 'internal'],
+        deformation_configuration: DeformationConfiguration | None = None,
+        *,
+        as_overlay: bool = False,
     ) -> None:
         """Draw nodes."""
-        expanded_designation = {
-            'primary': 'Primary Nodes',
-            'parent': 'Parent Nodes',
-            'internal': 'Internal Nodes',
-        }
-        marker = {
-            'primary': ('circle', 3, '#7ac4b7'),
-            'parent': ('circle-open', 15, '#7ac4b7'),
-            'internal': ('x', 2, '#a832a8'),
-        }
-        data = self.find_data_by_name(expanded_designation[designation])
-        if not data:
-            # Initialize
-            data = {
-                'name': expanded_designation[designation],
-                'type': 'scatter3d',
-                'mode': 'markers',
-                'x': [],
-                'y': [],
-                'z': [],
-                'customdata': [],
-                'text': [],
-                'hovertemplate': (
-                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
-                    'Text field: %{text}<br>'
-                    'Node ID: %{customdata[0]:d}<br>'
-                    'Custom Field 1: %{customdata[1]}<br>'
-                    'Custom Field 2: %{customdata[2]}<br>'
-                    '<extra></extra>'
-                ),
-                'marker': {
-                    'symbol': marker[designation][0],
-                    'color': marker[designation][2],
-                    'size': marker[designation][1],
-                    'line': {
-                        'color': marker[designation][2],
-                        'width': 4,
-                    },
-                },
-                'defined': set(),
-            }
-            # TODO (JVM): replace template fields with actual info.
-            self.data.append(data)
-        for node in nodes:
-            if node.uid in data['defined']:  # type: ignore
-                continue
-            three_dimensional = 3
-            two_dimensional = 2
-            if self.configuration.num_space_dimensions == three_dimensional:
-                data['x'].append(node.coordinates[0])  # type: ignore
-                data['y'].append(node.coordinates[1])  # type: ignore
-                data['z'].append(node.coordinates[2])  # type: ignore
-            else:
-                assert self.configuration.num_space_dimensions == two_dimensional
-                data['x'].append(node.coordinates[0])  # type: ignore
-                data['y'].append(0.00)  # type: ignore
-                data['z'].append(node.coordinates[1])  # type: ignore
-            data['customdata'].append([node.uid, 'field2', 'field3'])  # type: ignore
-            data['text'].append('field_text')  # type: ignore
-        # Update defined objects.
-        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
+        if deformation_configuration is None:
+            self._add_nodes_undeformed(nodes, designation, as_overlay=as_overlay)
+        else:
+            self._add_nodes_deformed(
+                nodes, designation, deformation_configuration, as_overlay=as_overlay
+            )
 
-    def add_components(self, components: list[ComponentAssembly]) -> None:
+    def add_components(
+        self,
+        components: list[ComponentAssembly],
+        deformation_configuration: DeformationConfiguration | None = None,
+        *,
+        as_overlay: bool = False,
+    ) -> None:
         """Add components to the figure."""
         for component in components:
             internal_nodes = list(component.internal_nodes.values())
-            self.add_nodes(internal_nodes, 'internal')
+            self.add_nodes(
+                internal_nodes,
+                'internal',
+                deformation_configuration,
+                as_overlay=as_overlay,
+            )
             elements = list(component.elements.values())
-            self.add_elements(elements)
+            self.add_elements(
+                elements, deformation_configuration, as_overlay=as_overlay
+            )
 
-    def add_elements(self, elements: list[Element]) -> None:
+    def add_elements(
+        self,
+        elements: list[Element],
+        deformation_configuration: DeformationConfiguration | None = None,
+        *,
+        as_overlay: bool = False,
+    ) -> None:
         """Add elements to the figure."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         disp_beamcolumn_elements: list[DispBeamColumn] = []
@@ -162,13 +190,27 @@ class Figure3D:
                 f'WARNING: Skipped the following unknown element types: {unknown_types}.'
             )
             # TODO(JVM): implement warning
-        self.add_beamcolumn_elements(elastic_beamcolumn_elements)
-        self.add_beamcolumn_element_offsets(elastic_beamcolumn_elements)
+        if deformation_configuration is None:
+            self.add_beamcolumn_elements(
+                elastic_beamcolumn_elements,
+                as_overlay=as_overlay,
+            )
+            self.add_beamcolumn_element_offsets(
+                elastic_beamcolumn_elements,
+                as_overlay=as_overlay,
+            )
 
     def add_beamcolumn_element_offsets(
-        self, elements: list[ElasticBeamColumn] | list[DispBeamColumn]
+        self,
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        *,
+        as_overlay: bool = False,
     ) -> None:
         """Add beamcolumn elements to the figure."""
+        if as_overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
         data = self.find_data_by_name('Rigid Offsets')
         if not data:
             # Initialize
@@ -179,6 +221,7 @@ class Figure3D:
                 'x': [],
                 'y': [],
                 'z': [],
+                'opacity': opacity,
                 'hoverinfo': 'skip',
                 'line': {'width': 8, 'color': '#a83256'},
                 'defined': set(),
@@ -205,14 +248,14 @@ class Figure3D:
 
             three_dimensional = 3
             two_dimensional = 2
-            if self.configuration.num_space_dimensions == three_dimensional:
+            if self.configuration.ndm == three_dimensional:
                 x_list.extend((p_i[0], p_io[0], None))
                 y_list.extend((p_i[1], p_io[1], None))
                 z_list.extend((p_i[2], p_io[2], None))
                 x_list.extend((p_j[0], p_jo[0], None))
                 y_list.extend((p_j[1], p_jo[1], None))
                 z_list.extend((p_j[2], p_jo[2], None))
-            if self.configuration.num_space_dimensions == two_dimensional:
+            if self.configuration.ndm == two_dimensional:
                 x_list.extend((p_i[0], p_io[0], None))
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_i[1], p_io[1], None))
@@ -227,9 +270,16 @@ class Figure3D:
         data['defined'] = data['defined'].union(x.uid for x in elements)  # type: ignore
 
     def add_beamcolumn_elements(
-        self, elements: list[ElasticBeamColumn] | list[DispBeamColumn]
+        self,
+        elements: list[ElasticBeamColumn] | list[DispBeamColumn],
+        *,
+        as_overlay: bool = False,
     ) -> None:
         """Add beamcolumn elements to the figure."""
+        if as_overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
         data = self.find_data_by_name('Beamcolumn Elements')
         if not data:
             # Initialize
@@ -242,6 +292,7 @@ class Figure3D:
                 'z': [],
                 'text': [],
                 'customdata': [],
+                'opacity': opacity,
                 'hovertemplate': (
                     'Section: %{text}<br>'
                     '<extra>Element: %{customdata[0]:d}<br>'
@@ -273,12 +324,12 @@ class Figure3D:
             section_names.extend([section_name] * 3)
             three_dimensional = 3
             two_dimensional = 2
-            if self.configuration.num_space_dimensions == three_dimensional:
+            if self.configuration.ndm == three_dimensional:
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((p_i[1], p_j[1], None))
                 z_list.extend((p_i[2], p_j[2], None))
             else:
-                assert self.configuration.num_space_dimensions == two_dimensional
+                assert self.configuration.ndm == two_dimensional
                 x_list.extend((p_i[0], p_j[0], None))
                 y_list.extend((0.0, 0.0, None))
                 z_list.extend((p_i[1], p_j[1], None))
@@ -313,6 +364,7 @@ class Figure3D:
     ) -> None:
         """Show supports."""
         # Verify dimensionality consistency
+        assert supports != {}, 'Supports are empty'
         support_iterator = iter(supports)
         uid = next(support_iterator)
         support = supports[uid]
@@ -374,7 +426,7 @@ class Figure3D:
             node = nodes[uid]
             if uid in data['defined']:  # type: ignore
                 continue
-            if self.configuration.num_space_dimensions == three_dimensional:
+            if self.configuration.ndm == three_dimensional:
                 for i in range(num_dofs):
                     if support[i]:
                         tip_coordinates = (
@@ -391,7 +443,7 @@ class Figure3D:
                             faces_k,
                         ) = self._generate_pyramid_mesh(
                             tip_coordinates,
-                            symbol_height,
+                            symbol_size,
                             directions[i],
                             index_offset,
                         )
@@ -403,7 +455,7 @@ class Figure3D:
                         data['j'].extend(faces_j)  # type: ignore
                         data['k'].extend(faces_k)  # type: ignore
             else:
-                assert self.configuration.num_space_dimensions == two_dimensional
+                assert self.configuration.ndm == two_dimensional
                 for i in range(num_dofs):
                     if support[i]:
                         tip_coordinates = (
@@ -437,7 +489,7 @@ class Figure3D:
     def add_udl(
         self,
         udl: dict[int, UDL],
-        components: list[ComponentAssembly],
+        components: dict[int, ComponentAssembly],
         force_to_length_factor: float,
         offset: float,
     ) -> None:
@@ -482,6 +534,237 @@ class Figure3D:
                     name='Uniformly Distributed Loads',
                     value=str(global_udl),
                 )
+
+    def add_loads(
+        self,
+        load: dict[int, PointLoad],
+        nodes: dict[int, Node],
+        force_to_length_factor: float,
+        offset: float,
+        head_length: float,
+        head_width: float,
+        base_width: float,
+    ) -> None:
+        """
+        Show point loads applied on nodes.
+
+        Moments are ignored.
+        """
+        two_dimensional = 2
+        three_dimensional = 3
+        for node_uid, point_load in load.items():
+            node = nodes[node_uid]
+            start_vec = np.array(node.coordinates)
+            load_vec = np.array(point_load[0 : len(start_vec)])
+            load_magnitude = np.linalg.norm(load_vec)
+            load_direction = load_vec / load_magnitude
+            end_vec = start_vec - load_vec * force_to_length_factor
+            start_vec -= load_direction * offset
+            end_vec -= load_direction * offset
+
+            assert len(start_vec) == len(end_vec)
+
+            if len(start_vec) == two_dimensional:
+                # Add 0.00 to the Y axis (second element)
+                start_vec = np.insert(start_vec, 1, 0.00)
+                end_vec = np.insert(end_vec, 1, 0.00)
+            else:
+                assert len(start_vec) == three_dimensional
+
+            self._generate_arrow(
+                tuple(start_vec),
+                tuple(end_vec),
+                head_length,
+                head_width,
+                base_width,
+                name='Nodal Loads',
+                value=str(point_load),
+            )
+
+    def _add_nodes_undeformed(
+        self,
+        nodes: list[Node],
+        designation: Literal['primary', 'parent', 'internal'],
+        *,
+        as_overlay: bool = False,
+    ) -> None:
+        """Draw nodes."""
+        expanded_designation = {
+            'primary': 'Primary Nodes',
+            'parent': 'Parent Nodes',
+            'internal': 'Internal Nodes',
+        }
+        marker = {
+            'primary': ('circle', 3, '#7ac4b7'),
+            'parent': ('circle-open', 15, '#7ac4b7'),
+            'internal': ('x', 2, '#a832a8'),
+        }
+        if as_overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name(expanded_designation[designation])
+        if not data:
+            # Initialize
+            data = {
+                'name': expanded_designation[designation],
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': [],
+                'y': [],
+                'z': [],
+                'customdata': [],
+                'text': [],
+                'hovertemplate': (
+                    'Node ID: %{customdata[0]:d}<br>'
+                    'Coordinates: (%{x:.2f}, %{y:.2f}, %{z:.2f})<br>'
+                    '<extra></extra>'
+                ),
+                'marker': {
+                    'symbol': marker[designation][0],
+                    'color': marker[designation][2],
+                    'size': marker[designation][1],
+                    'opacity': opacity,
+                    'line': {
+                        'color': marker[designation][2],
+                        'width': 4,
+                    },
+                },
+                'defined': set(),
+            }
+            self.data.append(data)
+        for node in nodes:
+            if node.uid in data['defined']:  # type: ignore
+                continue
+            three_dimensional = 3
+            two_dimensional = 2
+            if self.configuration.ndm == three_dimensional:
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(node.coordinates[1])  # type: ignore
+                data['z'].append(node.coordinates[2])  # type: ignore
+                data['customdata'].append([node.uid, None])  # type: ignore
+            else:
+                assert self.configuration.ndm == two_dimensional
+                data['x'].append(node.coordinates[0])  # type: ignore
+                data['y'].append(0.00)  # type: ignore
+                data['z'].append(node.coordinates[1])  # type: ignore
+                data['customdata'].append([node.uid, None])  # type: ignore
+        # Update defined objects.
+        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
+
+    def _add_nodes_deformed(
+        self,
+        nodes: list[Node],
+        designation: Literal['primary', 'parent', 'internal'],
+        deformation_configuration: DeformationConfiguration,
+        *,
+        as_overlay: bool = False,
+    ) -> None:
+        """
+        Draw nodes in their displaced location.
+
+        Raises:
+          ValueError: If displacement data is unavailable for some node.
+        """
+        expanded_designation = {
+            'primary': 'Primary Nodes (Deformed)',
+            'parent': 'Parent Nodes (Deformed)',
+            'internal': 'Internal Nodes (Deformed)',
+        }
+        marker = {
+            'primary': ('circle', 3, '#7ac4b7'),
+            'parent': ('circle-open', 15, '#7ac4b7'),
+            'internal': ('x', 2, '#a832a8'),
+        }
+        if as_overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+        data = self.find_data_by_name(expanded_designation[designation])
+        if not data:
+            # Initialize
+            data = {
+                'name': expanded_designation[designation],
+                'type': 'scatter3d',
+                'mode': 'markers',
+                'x': [],
+                'y': [],
+                'z': [],
+                'customdata': [],
+                'text': [],
+                'hovertemplate': (
+                    'Node ID: %{customdata[0]:d}<br>'
+                    'Deformations: %{customdata[1]}<br>'
+                    '<extra></extra>'
+                ),
+                'marker': {
+                    'symbol': marker[designation][0],
+                    'color': marker[designation][2],
+                    'size': marker[designation][1],
+                    'opacity': opacity,
+                    'line': {
+                        'color': marker[designation][2],
+                        'width': 4,
+                    },
+                },
+                'defined': set(),
+            }
+            self.data.append(data)
+        for node in nodes:
+            if node.uid in data['defined']:  # type: ignore
+                continue
+            if node.uid not in deformation_configuration.recorder.get_data().columns:
+                msg = 'Results not available for node: {node.uid}.'
+                raise ValueError(msg)
+            three_dimensional = 3
+            two_dimensional = 2
+            if self.configuration.ndm == three_dimensional:
+                deformations = deformation_configuration.recorder.get_data()
+                node_deformations = deformations.iloc[
+                    deformation_configuration.step, :
+                ].loc[node.uid]
+                data['x'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[0]
+                    * deformation_configuration.amplification_factor
+                )
+                data['y'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[1]
+                    * deformation_configuration.amplification_factor
+                )
+                data['z'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[2]
+                    * deformation_configuration.amplification_factor
+                )
+                data['customdata'].append(  # type: ignore
+                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+                )
+            else:
+                assert self.configuration.ndm == two_dimensional
+                deformations = deformation_configuration.recorder.get_data()
+                node_deformations = (
+                    deformations.iloc[deformation_configuration.step, :]
+                    .loc[node.uid]
+                    .to_numpy()
+                )
+                data['x'].append(  # type: ignore
+                    node.coordinates[0]
+                    + node_deformations[0]
+                    * deformation_configuration.amplification_factor
+                )
+                data['y'].append(0.00)  # type: ignore
+                data['z'].append(  # type: ignore
+                    node.coordinates[1]
+                    + node_deformations[1]
+                    * deformation_configuration.amplification_factor
+                )
+                data['customdata'].append(  # type: ignore
+                    [node.uid, [f'{v:.2f}' for v in node_deformations]]
+                )
+        # Update defined objects.
+        data['defined'] = data['defined'].union(x.uid for x in nodes)  # type: ignore
 
     @staticmethod
     def _generate_pyramid_mesh(
@@ -625,7 +908,7 @@ class Figure3D:
             tuple[float, float, float],
         ],
         name: str,
-        value: float | str,
+        value: str,
     ) -> None:
         """
         Generate and add a filled quadrilateral to the figure.
@@ -661,19 +944,76 @@ class Figure3D:
         (x1, y1, z1), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4) = four_points
 
         # Add vertices
-        data['x'].extend([x1, x2, x3, x4])
-        data['y'].extend([y1, y2, y3, y4])
-        data['z'].extend([z1, z2, z3, z4])
+        data['x'].extend([x1, x2, x3, x4])  # type: ignore
+        data['y'].extend([y1, y2, y3, y4])  # type: ignore
+        data['z'].extend([z1, z2, z3, z4])  # type: ignore
 
         # Add hover text for each vertex
-        data['text'].extend([value] * 4)
+        data['text'].extend([value] * 4)  # type: ignore
 
         # Define two triangular faces of the quadrilateral
         # Faces are defined by indices of vertices in the mesh
-        index_offset = len(data['x']) - 4  # Offset for the newly added vertices
-        data['i'].extend([index_offset, index_offset])
-        data['j'].extend([index_offset + 1, index_offset + 2])
-        data['k'].extend([index_offset + 2, index_offset + 3])
+        index_offset = len(data['x']) - 4  # type: ignore
+        data['i'].extend([index_offset, index_offset])  # type: ignore
+        data['j'].extend([index_offset + 1, index_offset + 2])  # type: ignore
+        data['k'].extend([index_offset + 2, index_offset + 3])  # type: ignore
+
+    def _generate_arrow(
+        self,
+        start_location: tuple[float, float, float],
+        end_location: tuple[float, float, float],
+        head_length: float,
+        head_width: float,
+        base_width: float,
+        name: str,
+        value: str,
+    ) -> None:
+        vertices, faces = positioned_arrow(
+            start_location,
+            end_location,
+            head_length,
+            head_width,
+            base_width,
+        )
+        x, y, z = zip(*vertices)
+
+        data = self.find_data_by_name(name)
+        if not data:
+            # Initialize the mesh3d data structure
+            data = {
+                'name': name,
+                'type': 'mesh3d',
+                'x': [],
+                'y': [],
+                'z': [],
+                'i': [],
+                'j': [],
+                'k': [],
+                'text': [],  # For custom hover information
+                'hovertemplate': ('Value: %{text}<br>' '<extra></extra>'),
+                'color': '#7ac4b7',
+                'opacity': 0.5,
+                'showlegend': True,
+                'defined': [],
+            }
+            self.data.append(data)
+
+        # Add vertices
+        data['x'].extend(x)  # type: ignore
+        data['y'].extend(y)  # type: ignore
+        data['z'].extend(z)  # type: ignore
+
+        # Add hover text for each vertex
+        data['text'].extend([value] * 13)  # type: ignore
+
+        # Define two triangular faces of the quadrilateral
+        # Faces are defined by indices of vertices in the mesh
+        index_offset = len(data['x']) - 13  # type: ignore
+        faces = tuple(np.array(faces) + index_offset)
+        i, j, k = zip(*faces)
+        data['i'].extend(i)  # type: ignore
+        data['j'].extend(j)  # type: ignore
+        data['k'].extend(k)  # type: ignore
 
     def show(self) -> None:
         """Display the figure."""
@@ -682,85 +1022,3 @@ class Figure3D:
             data.pop('defined')
         fig = go.Figure({'data': self.data, 'layout': self.layout})
         fig.show()
-
-
-import plotly.graph_objects as go
-
-# Define the vertices of the arrow
-
-tl = 1.0  # total_halh_length
-hl = 0.40  # head_half_length
-hhw = 0.25 / 2.00  # head_half_width
-bhw = 0.05 / 2.00  # base_half_width
-
-vertices = (
-    (0.0, 0.0, 0.0),
-    (-hhw, -hhw, -hl),
-    (+hhw, -hhw, -hl),
-    (+hhw, +hhw, -hl),
-    (-hhw, +hhw, -hl),
-    (-bhw, -bhw, -hl),
-    (+bhw, -bhw, -hl),
-    (+bhw, +bhw, -hl),
-    (-bhw, +bhw, -hl),
-    (-bhw, -bhw, -tl),
-    (+bhw, -bhw, -tl),
-    (+bhw, +bhw, -tl),
-    (-bhw, +bhw, -tl),
-)
-vertices = np.array(vertices)
-
-# rotate 3d
-from osmg.geometry.transformations import rotation_matrix_3d
-mat = rotation_matrix_3d(np.array((1.00, 0.00, 0.00)), 30.00/180.0*np.pi)
-vertices = (mat @ vertices.T).T
-
-x, y, z = zip(*vertices)
-
-# Define the faces of the arrow
-faces = (
-    # top part
-    (0, 1, 2),
-    (0, 2, 3),
-    (0, 3, 4),
-    (0, 4, 1),
-    # base
-    (5, 9, 10),
-    (5, 10, 6),
-    (6, 10, 11),
-    (6, 11, 7),
-    (7, 11, 12),
-    (7, 12, 8),
-    (8, 12, 9),
-    (8, 9, 5),
-)
-# SOS: Subtract 1
-
-i, j, k = zip(*faces)
-
-# Create a 3D mesh
-mesh = go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k, opacity=0.5, color='lightblue')
-
-# Setup the layout of the scene
-layout = go.Layout(
-    scene=dict(
-        xaxis=dict(
-            nticks=4,
-            range=[-1, 2],
-        ),
-        yaxis=dict(
-            nticks=4,
-            range=[-1, 2],
-        ),
-        zaxis=dict(
-            nticks=4,
-            range=[-1, 2],
-        ),
-    )
-)
-
-# Create a figure and add the mesh
-fig = go.Figure(data=[mesh], layout=layout)
-
-# Show the plot
-fig.show()
