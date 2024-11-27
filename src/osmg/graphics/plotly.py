@@ -419,7 +419,7 @@ class Figure3D:
                 start_vertex_top = start_vertex + udl_vec * force_to_length_factor
                 end_vertex_top = end_vertex + udl_vec * force_to_length_factor
 
-                self._generate_filled_quadrilateral(
+                self._generate_quadrilateral_mesh(
                     (
                         tuple(start_vertex),
                         tuple(end_vertex),
@@ -427,7 +427,14 @@ class Figure3D:
                         tuple(start_vertex_top),
                     ),
                     name='Uniformly Distributed Loads',
-                    value=str(global_udl),
+                    value=(
+                        str(global_udl),
+                        str(global_udl),
+                        str(global_udl),
+                        str(global_udl),
+                    ),
+                    color='#7ac4b7',
+                    opacity=0.5,
                 )
 
     def add_loads(
@@ -1409,64 +1416,6 @@ class Figure3D:
 
         return vertices_x, vertices_y, vertices_z, faces_i, faces_j, faces_k
 
-    def _generate_filled_quadrilateral(
-        self,
-        four_points: tuple[
-            tuple[float, float, float],
-            tuple[float, float, float],
-            tuple[float, float, float],
-            tuple[float, float, float],
-        ],
-        name: str,
-        value: str,
-    ) -> None:
-        """
-        Generate and add a filled quadrilateral to the figure.
-
-        Arguments:
-            four_points: A tuple of four vertices defining the quadrilateral.
-                         Each vertex is a tuple (x, y, z).
-            name: Name of the quadrilateral to retrieve or store in the figure data.
-            value: A value to display in the hover box.
-        """
-        data = self.find_data_by_name(name)
-        if not data:
-            # Initialize the mesh3d data structure
-            data = {
-                'name': name,
-                'type': 'mesh3d',
-                'x': [],
-                'y': [],
-                'z': [],
-                'i': [],
-                'j': [],
-                'k': [],
-                'text': [],  # For custom hover information
-                'hovertemplate': ('Value: %{text}<br>' '<extra></extra>'),
-                'color': '#7ac4b7',
-                'opacity': 0.5,
-                'showlegend': True,
-            }
-            self.data.append(data)
-
-        # Extract the vertices
-        (x1, y1, z1), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4) = four_points
-
-        # Add vertices
-        data['x'].extend([x1, x2, x3, x4])  # type: ignore
-        data['y'].extend([y1, y2, y3, y4])  # type: ignore
-        data['z'].extend([z1, z2, z3, z4])  # type: ignore
-
-        # Add hover text for each vertex
-        data['text'].extend([value] * 4)  # type: ignore
-
-        # Define two triangular faces of the quadrilateral
-        # Faces are defined by indices of vertices in the mesh
-        index_offset = len(data['x']) - 4  # type: ignore
-        data['i'].extend([index_offset, index_offset])  # type: ignore
-        data['j'].extend([index_offset + 1, index_offset + 2])  # type: ignore
-        data['k'].extend([index_offset + 2, index_offset + 3])  # type: ignore
-
     def _generate_arrow(
         self,
         start_location: tuple[float, float, float],
@@ -1522,6 +1471,70 @@ class Figure3D:
         data['i'].extend(i)  # type: ignore
         data['j'].extend(j)  # type: ignore
         data['k'].extend(k)  # type: ignore
+
+    def _generate_quadrilateral_mesh(
+        self,
+        four_points: tuple[
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+            tuple[float, float, float],
+        ],
+        name: str,
+        value: tuple[str, str, str, str],
+        color: str,
+        opacity: float,
+    ) -> None:
+        """
+        Generate and add a filled quadrilateral to the figure.
+
+        Arguments:
+            four_points: A tuple of four vertices defining the quadrilateral.
+                         Each vertex is a tuple (x, y, z).
+            name: Name of the quadrilateral to retrieve or store in the figure data.
+            value: A value to display in the hover box.
+        """
+        data = self.find_data_by_name(name)
+        if not data:
+            # Initialize the mesh3d data structure
+            data = {
+                'name': name,
+                'type': 'mesh3d',
+                'x': [],
+                'y': [],
+                'z': [],
+                'i': [],
+                'j': [],
+                'k': [],
+                'text': [],  # For custom hover information
+                'hovertemplate': 'Value: %{text}<br><extra></extra>',
+                'color': color,
+                'opacity': opacity,
+                'showlegend': True,
+            }
+            self.data.append(data)
+
+        # Extract the vertices
+        (x1, y1, z1), (x2, y2, z2), (x3, y3, z3), (x4, y4, z4) = four_points
+
+        # Add vertices
+        data['x'].extend([x1, x2, x3, x4])  # type: ignore
+        data['y'].extend([y1, y2, y3, y4])  # type: ignore
+        data['z'].extend([z1, z2, z3, z4])  # type: ignore
+
+        # Add hover text for each vertex
+        data['text'].extend([value] * 4)  # type: ignore
+
+        # Define two triangular faces of the quadrilateral
+        # Faces are defined by indices of vertices in the mesh
+        index_offset = len(data['x']) - 4  # type: ignore
+        data['i'].extend([index_offset, index_offset])  # type: ignore
+        data['j'].extend([index_offset + 1, index_offset + 2])  # type: ignore
+        data['k'].extend([index_offset + 2, index_offset + 3])  # type: ignore
+
+    @classmethod
+    def _generate_qadrilateral_mesh_array(self):
+        pass
 
     def show(self) -> None:
         """Display the figure."""
