@@ -23,8 +23,10 @@ from osmg.model_objects.element import (
 )
 
 if TYPE_CHECKING:
+    import pandas as pd
+
     from osmg.analysis.common import UDL, PointLoad
-    from osmg.analysis.recorders import ElementRecorder, NodeRecorder
+    from osmg.analysis.recorders import ElementRecorder
     from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.element import Element
@@ -54,7 +56,7 @@ class DeformationConfiguration:
 
     reference_length: float
     ndf: int
-    recorder: NodeRecorder
+    node_deformations: pd.DataFrame
     step: int
     amplification_factor: float | None = field(default=None)
 
@@ -71,11 +73,10 @@ class DeformationConfiguration:
         # Determine amplification factor
         if self.amplification_factor is not None:
             return
-        node_deformations = self.recorder.get_data()
-        if node_deformations.shape[0] < self.step:
+        if self.node_deformations.shape[0] < self.step:
             msg = (
                 f'The requested step ({self.step}) does not exist. '
-                f'The last step is ({node_deformations.shape[0] - 1})'
+                f'The last step is ({self.node_deformations.shape[0] - 1})'
             )
             raise ValueError(msg)
         case_2d = 3
@@ -83,7 +84,7 @@ class DeformationConfiguration:
         max_deformation = {}
         for i_dof in range(self.ndf):
             max_deformation[i_dof] = (
-                node_deformations.iloc[self.step, i_dof :: self.ndf].abs().max()
+                self.node_deformations.iloc[self.step, i_dof :: self.ndf].abs().max()
             )
         if self.ndf == case_2d:
             max_displacement = np.max((max_deformation[0], max_deformation[1]))
@@ -605,15 +606,16 @@ class Figure3D:
                 'defined': set(),
             }
             self.data.append(data)
+
+        all_node_deformations = deformation_configuration.node_deformations
         for node in nodes:
             if node.uid in data['defined']:  # type: ignore
                 continue
-            if node.uid not in deformation_configuration.recorder.get_data().columns:
+            if node.uid not in all_node_deformations.columns:
                 msg = 'Results not available for node: {node.uid}.'
                 raise ValueError(msg)
             if self.configuration.ndm == THREE_DIMENSIONAL:
-                deformations = deformation_configuration.recorder.get_data()
-                node_deformations = deformations.iloc[
+                node_deformations = all_node_deformations.iloc[
                     deformation_configuration.step, :
                 ].loc[node.uid]
                 data['x'].append(  # type: ignore
@@ -636,9 +638,8 @@ class Figure3D:
                 )
             else:
                 assert self.configuration.ndm == TWO_DIMENSIONAL
-                deformations = deformation_configuration.recorder.get_data()
                 node_deformations = (
-                    deformations.iloc[deformation_configuration.step, :]
+                    all_node_deformations.iloc[deformation_configuration.step, :]
                     .loc[node.uid]
                     .to_numpy()
                 )
@@ -782,7 +783,7 @@ class Figure3D:
         y_list: list[float | None] = []
         z_list: list[float | None] = []
         num_points = 10
-        node_deformations = deformation_configuration.recorder.get_data()
+        node_deformations = deformation_configuration.node_deformations
         amplification_factor = deformation_configuration.amplification_factor
         assert amplification_factor is not None
         step = deformation_configuration.step
@@ -971,7 +972,7 @@ class Figure3D:
         y_list: list[float | None] = []
         z_list: list[float | None] = []
 
-        node_deformations = deformation_configuration.recorder.get_data()
+        node_deformations = deformation_configuration.node_deformations
         amplification_factor = deformation_configuration.amplification_factor
         assert amplification_factor is not None
         step = deformation_configuration.step

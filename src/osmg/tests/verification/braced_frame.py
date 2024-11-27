@@ -138,8 +138,8 @@ for level in ('1', '2', '3', '4'):
                 )
             ),
             n_sub=1,
-            eo_i=np.array((12.00, 12.0)),
-            eo_j=np.array((12.00, 12.0)),
+            eo_i=np.array((0.00, 0.0)),
+            eo_j=np.array((0.00, 0.0)),
             section=column_section,
             transf_type='Linear',
         )
@@ -214,7 +214,7 @@ assert isinstance(recorder, NodeRecorder)
 deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    recorder=recorder,
+    node_deformations=recorder.get_data(),
     step=0,
     amplification_factor=None,  # Figure it out.
 )
