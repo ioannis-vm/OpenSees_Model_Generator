@@ -15,6 +15,7 @@ from osmg.core.model import Model2D
 from osmg.creators.component import BeamColumnCreator
 from osmg.creators.section import AISC_Database_Section_Creator
 from osmg.graphics.plotly import (
+    BasicForceConfiguration,
     DeformationConfiguration,
     Figure3D,
     Figure3DConfiguration,
@@ -214,14 +215,30 @@ forces = (
 )
 
 
-recorder = load_case_registry.dead['D'].analysis.recorders['default_node']
-assert isinstance(recorder, NodeRecorder)
+data = (
+    load_case_registry.dead['D']
+    .analysis.recorders['default_beamcolumn_basic_forces']
+    .get_data()
+)
+
 deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    node_deformations=recorder.get_data(),
+    node_deformations=load_case_registry.dead['D']
+    .analysis.recorders['default_node']
+    .get_data(),
     step=0,
     amplification_factor=None,  # Figure it out.
+)
+basic_force_configuration = BasicForceConfiguration(
+    reference_length=frame.reference_length(),
+    ndf=3,
+    basic_forces=load_case_registry.dead['D']
+    .analysis.recorders['default_beamcolumn_basic_forces']
+    .get_data(),
+    step=0,
+    force_to_length_factor=0.0072,
+    moment_to_length_factor=2.564e-05,
 )
 fig = Figure3D(Figure3DConfiguration(ndm=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
@@ -246,7 +263,10 @@ fig.add_loads(
     head_width=24.0,
     base_width=5.0,
 )
-# fig.add_basic_forces(frame.components)
+fig.add_basic_forces(
+    components=list(frame.components.values()),
+    basic_force_configuration=basic_force_configuration,
+)
 fig.show()
 
 """

@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     import pandas as pd
 
     from osmg.analysis.common import UDL, PointLoad
-    from osmg.analysis.recorders import ElementRecorder
     from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.element import Element
@@ -111,7 +110,7 @@ class BasicForceConfiguration:
 
     reference_length: float
     ndf: int
-    recorder: ElementRecorder
+    basic_forces: pd.DataFrame
     step: int
     force_to_length_factor: float
     moment_to_length_factor: float
@@ -480,6 +479,26 @@ class Figure3D:
                 name='Nodal Loads',
                 value=str(point_load),
             )
+
+    @staticmethod
+    def add_basic_forces(
+        components: list[ComponentAssembly],
+        basic_force_configuration: BasicForceConfiguration,  # noqa: ARG004
+    ) -> None:
+        """Add basic forces on linear elements."""
+        for component in components:
+            elements = list(component.elements.values())
+            elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
+            disp_beamcolumn_elements: list[DispBeamColumn] = []
+            for element in elements:
+                if element.visibility.skip_opensees_definition:
+                    continue
+                if isinstance(element, ElasticBeamColumn):
+                    elastic_beamcolumn_elements.append(element)
+                elif isinstance(element, DispBeamColumn):
+                    disp_beamcolumn_elements.append(element)
+        for element in elastic_beamcolumn_elements + disp_beamcolumn_elements:  # noqa: B007
+            pass
 
     def _add_nodes_undeformed(
         self,
@@ -1492,7 +1511,9 @@ class Figure3D:
             four_points: A tuple of four vertices defining the quadrilateral.
                          Each vertex is a tuple (x, y, z).
             name: Name of the quadrilateral to retrieve or store in the figure data.
-            value: A value to display in the hover box.
+            value: Values to display in the hoverbox at each of the four corners.
+            color: Desired mesh color.
+            opacity: Desired mesh opacity.
         """
         data = self.find_data_by_name(name)
         if not data:
@@ -1532,8 +1553,15 @@ class Figure3D:
         data['j'].extend([index_offset + 1, index_offset + 2])  # type: ignore
         data['k'].extend([index_offset + 2, index_offset + 3])  # type: ignore
 
-    @classmethod
-    def _generate_qadrilateral_mesh_array(self):
+    @staticmethod
+    def _generate_qadrilateral_mesh_array(
+        x_locations: list[tuple[float, float, float]],
+        y_locations: list[tuple[float, float, float]],
+        name: str,
+        values: list[tuple[str, str, str, str]],
+        color: str,
+        opacity: float,
+    ) -> None:
         pass
 
     def show(self) -> None:
