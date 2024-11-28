@@ -224,7 +224,7 @@ data = (
 deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    node_deformations=load_case_registry.dead['D']
+    data=load_case_registry.dead['D']
     .analysis.recorders['default_node']
     .get_data(),
     step=0,
@@ -233,7 +233,7 @@ deformation_configuration = DeformationConfiguration(
 basic_force_configuration = BasicForceConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    basic_forces=load_case_registry.dead['D']
+    data=load_case_registry.dead['D']
     .analysis.recorders['default_beamcolumn_basic_forces']
     .get_data(),
     step=0,

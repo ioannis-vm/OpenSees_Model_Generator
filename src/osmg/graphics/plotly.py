@@ -50,13 +50,19 @@ class Figure3DConfiguration:
 
 
 @dataclass
-class DeformationConfiguration:
-    """Configuration for plotting deformed shapes."""
+class PlotConfiguration:
+    """Base plot configuration class."""
 
     reference_length: float
     ndf: int
-    node_deformations: pd.DataFrame
+    data: pd.DataFrame
     step: int
+
+
+@dataclass
+class DeformationConfiguration(PlotConfiguration):
+    """Configuration for plotting deformed shapes."""
+
     amplification_factor: float | None = field(default=None)
 
     def __post_init__(self) -> None:
@@ -72,10 +78,10 @@ class DeformationConfiguration:
         # Determine amplification factor
         if self.amplification_factor is not None:
             return
-        if self.node_deformations.shape[0] < self.step:
+        if self.data.shape[0] < self.step:
             msg = (
                 f'The requested step ({self.step}) does not exist. '
-                f'The last step is ({self.node_deformations.shape[0] - 1})'
+                f'The last step is ({self.data.shape[0] - 1})'
             )
             raise ValueError(msg)
         case_2d = 3
@@ -83,7 +89,7 @@ class DeformationConfiguration:
         max_deformation = {}
         for i_dof in range(self.ndf):
             max_deformation[i_dof] = (
-                self.node_deformations.iloc[self.step, i_dof :: self.ndf].abs().max()
+                self.data.iloc[self.step, i_dof :: self.ndf].abs().max()
             )
         if self.ndf == case_2d:
             max_displacement = np.max((max_deformation[0], max_deformation[1]))
@@ -105,13 +111,9 @@ class DeformationConfiguration:
 
 
 @dataclass
-class BasicForceConfiguration:
+class BasicForceConfiguration(PlotConfiguration):
     """Configuration for plotting basic forces."""
 
-    reference_length: float
-    ndf: int
-    basic_forces: pd.DataFrame
-    step: int
     force_to_length_factor: float
     moment_to_length_factor: float
 
@@ -480,10 +482,10 @@ class Figure3D:
                 value=str(point_load),
             )
 
-    @staticmethod
     def add_basic_forces(
+        self,
         components: list[ComponentAssembly],
-        basic_force_configuration: BasicForceConfiguration,  # noqa: ARG004
+        basic_force_configuration: BasicForceConfiguration,  # noqa: ARG002
     ) -> None:
         """Add basic forces on linear elements."""
         for component in components:
@@ -499,6 +501,24 @@ class Figure3D:
                     disp_beamcolumn_elements.append(element)
         for element in elastic_beamcolumn_elements + disp_beamcolumn_elements:  # noqa: B007
             pass
+        # work in progress
+        self._generate_quadrilateral_mesh(
+            (
+                (0.0, 0.0, 0.0),
+                (100.00, 0.00, 0.00),
+                (100.00, 0.00, 100.00),
+                (0.00, 0.00, 100.00),
+            ),
+            name='Work in progress',
+            value=(
+                'value_1',
+                'value_2',
+                'value_3',
+                'value_4',
+            ),
+            color='#444444',
+            opacity=0.20,
+        )
 
     def _add_nodes_undeformed(
         self,
@@ -622,7 +642,7 @@ class Figure3D:
             }
             self.data.append(data)
 
-        all_node_deformations = deformation_configuration.node_deformations
+        all_node_deformations = deformation_configuration.data
         for node in nodes:
             if node.uid not in all_node_deformations.columns:
                 msg = 'Results not available for node: {node.uid}.'
@@ -787,7 +807,7 @@ class Figure3D:
         y_list: list[float | None] = []
         z_list: list[float | None] = []
         num_points = 10
-        node_deformations = deformation_configuration.node_deformations
+        node_deformations = deformation_configuration.data
         amplification_factor = deformation_configuration.amplification_factor
         assert amplification_factor is not None
         step = deformation_configuration.step
@@ -964,7 +984,7 @@ class Figure3D:
         y_list: list[float | None] = []
         z_list: list[float | None] = []
 
-        node_deformations = deformation_configuration.node_deformations
+        node_deformations = deformation_configuration.data
         amplification_factor = deformation_configuration.amplification_factor
         assert amplification_factor is not None
         step = deformation_configuration.step
@@ -1544,7 +1564,7 @@ class Figure3D:
         data['z'].extend([z1, z2, z3, z4])  # type: ignore
 
         # Add hover text for each vertex
-        data['text'].extend([value] * 4)  # type: ignore
+        data['text'].extend(value)  # type: ignore
 
         # Define two triangular faces of the quadrilateral
         # Faces are defined by indices of vertices in the mesh
