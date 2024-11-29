@@ -7,7 +7,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,133 @@ from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 if TYPE_CHECKING:
     from osmg.analysis.common import UDL, PointLoad, PointMass
     from osmg.core.model import Model, Model2D, Model3D
+
+
+def ensure_minmax_level_exists_or_add(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a 'min/max' column level if it doesn't exist.
+
+    Assigns everything to 'max', and duplicates columns for 'min'.
+
+    Args:
+        data: Input DataFrame with MultiIndex columns.
+
+    Returns:
+        Updated DataFrame with 'min/max' as the outermost column
+        level.
+    """
+    columns = data.columns
+
+    if 'min/max' not in columns.names:
+        new_columns = pd.MultiIndex.from_tuples(
+            [(*col, minmax) for col in columns for minmax in ('max', 'min')],
+            names=[*list(columns.names), 'min/max'],
+        )
+        # Repeat the data for 'max' and 'min'
+        repeated_data = pd.concat([data, data], axis=1)
+        repeated_data.columns = new_columns
+        return repeated_data
+
+    return data
+
+
+def combine_single(
+    df1: pd.DataFrame, df2: pd.DataFrame, action: Literal['add', 'envelope']
+) -> pd.DataFrame:
+    """
+    Combine two DataFrames based on the specified action.
+
+    Args:
+        df1: First DataFrame.
+        df2: Second DataFrame.
+        action: Action to perform:
+            - 'add': Element-wise addition of the DataFrames.
+            - 'envelope': Take the largest of the maxes and the
+              smallest of the mins.
+
+    Returns:
+        Combined DataFrame based on the action.
+
+    Raises:
+      ValueError: If an unknown action is specified.
+    """
+    # Validate column compatibility
+    if action == 'add':
+        if not np.all(
+            df1.columns.names == df2.columns.names
+        ) or not df1.columns.equals(df2.columns):
+            msg = 'Cannot align DataFrames with different columns'
+            raise ValueError(msg)
+
+        combined = df1 + df2
+
+    elif action == 'envelope':
+        df1 = ensure_minmax_level_exists_or_add(df1)
+        df2 = ensure_minmax_level_exists_or_add(df2)
+        if not np.all(
+            df1.columns.names == df2.columns.names
+        ) or not df1.columns.equals(df2.columns):
+            msg = 'Cannot align DataFrames with different columns'
+            raise ValueError(msg)
+        max_df = pd.DataFrame(
+            np.maximum(
+                df1.xs('max', level='min/max', axis=1),
+                df2.xs('max', level='min/max', axis=1),
+            ),
+            index=df1.index,
+            columns=df1.xs('max', level='min/max', axis=1).columns,
+        )
+        min_df = pd.DataFrame(
+            np.minimum(
+                df1.xs('min', level='min/max', axis=1),
+                df2.xs('min', level='min/max', axis=1),
+            ),
+            index=df1.index,
+            columns=df1.xs('min', level='min/max', axis=1).columns,
+        )
+        combined = pd.concat([max_df, min_df], axis=1)
+        combined.columns = pd.MultiIndex.from_product(
+            [max_df.columns.levels[0], max_df.columns.levels[1], ['max', 'min']],
+            names=[*max_df.columns.names, 'min/max'],
+        )
+
+    else:
+        msg = 'Action must be one of `add` or `envelope`.'
+        raise ValueError(msg)
+
+    return combined
+
+
+def combine(
+    dfs: list[pd.DataFrame], action: Literal['add', 'envelope']
+) -> pd.DataFrame:
+    """
+    Combine multiple DataFrames sequentially based on the specified action.
+
+    Args:
+        dfs: List of DataFrames to combine.
+        action: Action to perform:
+            - 'add': Element-wise addition of the DataFrames.
+            - 'envelope': Take the largest of the maxes and the
+              smallest of the mins.
+
+    Returns:
+        Combined DataFrame based on the action.
+
+    Raises:
+        ValueError: If less than two DataFrames are provided.
+    """
+    min_df_count = 2
+    if len(dfs) < min_df_count:
+        msg = 'At least two DataFrames are required to combine.'
+        raise ValueError(msg)
+
+    # Combine DataFrames sequentially
+    combined_df = dfs[0]
+    for df in dfs[1:]:
+        combined_df = combine_single(combined_df, df, action)
+
+    return combined_df
 
 
 @dataclass(repr=False)
@@ -441,6 +568,7 @@ class LoadCaseRegistry:
 
     The load case registry can be used to orchestrate all analyses,
     retrieve, and post-process results.
+
     """
 
     model: Model
@@ -467,6 +595,27 @@ class LoadCaseRegistry:
         default_factory=lambda: defaultdict(OtherLoadCase)
     )
 
+    def get_cases_list(self) -> list[tuple[str, defaultdict[str, LoadCase]]]:
+        """
+        Get a list of load case types.
+
+        Returns:
+          List of load case types
+        """
+        # Iterate over each category of load cases
+        return [
+            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
+            ('live', cast(defaultdict[str, LoadCase], self.live)),
+            ('modal', cast(defaultdict[str, LoadCase], self.modal)),
+            ('seismic_elf', cast(defaultdict[str, LoadCase], self.seismic_elf)),
+            ('seismic_rs', cast(defaultdict[str, LoadCase], self.seismic_rs)),
+            (
+                'seismic_transient',
+                cast(defaultdict[str, LoadCase], self.seismic_transient),
+            ),
+            ('other', cast(defaultdict[str, LoadCase], self.other)),
+        ]
+
     def run(self) -> None:
         """
         Run all analyses.
@@ -484,19 +633,7 @@ class LoadCaseRegistry:
         base_dir.mkdir(parents=True, exist_ok=True)
         self.result_setup.directory = str(base_dir.resolve())
 
-        # Iterate over each category of load cases
-        cases_list: list[tuple[str, defaultdict[str, LoadCase]]] = [
-            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
-            ('live', cast(defaultdict[str, LoadCase], self.live)),
-            ('modal', cast(defaultdict[str, LoadCase], self.modal)),
-            ('seismic_elf', cast(defaultdict[str, LoadCase], self.seismic_elf)),
-            ('seismic_rs', cast(defaultdict[str, LoadCase], self.seismic_rs)),
-            (
-                'seismic_transient',
-                cast(defaultdict[str, LoadCase], self.seismic_transient),
-            ),
-            ('other', cast(defaultdict[str, LoadCase], self.other)),
-        ]
+        cases_list = self.get_cases_list()
         for case_type, cases in cases_list:
             for key, load_case in cases.items():
                 # Create a subdirectory for each load case
@@ -505,3 +642,34 @@ class LoadCaseRegistry:
 
                 load_case.analysis.settings.result_directory = str(case_dir)
                 load_case.analysis.run(self.model, load_case)
+
+    def combine_recorder(self, recorder_name: str) -> pd.DataFrame:
+        """
+        Combine results of a recorder across cases.
+
+        Returns:
+          Combined results.
+
+        Raises:
+          ValueError: If the specified recorder does not exist in some
+            load case.
+        """
+        cases_list = self.get_cases_list()
+        all_data: dict[str, dict[str, pd.DataFrame]] = defaultdict(dict)
+        case_type_data = {}
+        for case_type, cases in cases_list:
+            for key, load_case in cases.items():
+                if recorder_name not in load_case.analysis.recorders:
+                    msg = (
+                        f'Recorder `{recorder_name}` not '
+                        f'found in `{case_type}` `{key}`.'
+                    )
+                    raise ValueError(msg)
+                all_data[case_type][key] = load_case.analysis.recorders[
+                    recorder_name
+                ].get_data()
+        # we have all data here.
+        for case_type, dataframes in all_data.items():
+            case_type_data[case_type] = combine(list(dataframes.values()), 'add')
+        # Hard-coded factors for now.
+        return case_type_data['dead']
