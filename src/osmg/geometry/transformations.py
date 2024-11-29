@@ -346,9 +346,7 @@ def offset_transformation_2d(
         given in the global coordinate system.
 
     """
-    result: numpy_array = u_vec + np.array(
-        (-np.sin(r_angle) * offset[0], +np.cos(r_angle) * offset[1])
-    )
+    result: numpy_array = u_vec + np.array((-offset[1], offset[0])) * r_angle
     return result
 
 

@@ -5,14 +5,17 @@ from __future__ import annotations
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
+from itertools import product
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
+import pandas as pd
 
+from osmg.analysis.recorders import ElementRecorder
 from osmg.analysis.solver import Analysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
-from osmg.core.common import EPSILON
+from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 
 if TYPE_CHECKING:
     from osmg.analysis.common import UDL, PointLoad, PointMass
@@ -67,6 +70,296 @@ class LoadCase:
                 else:
                     msg = f'Unsupported object type: {type(support)}'
                     raise TypeError(msg)
+
+    def calculate_basic_forces(  # noqa: C901
+        self,
+        recorder_name: str,
+        element_lengths: dict[int, float],
+        *,
+        ndm: int,
+        num_stations: int = 12,
+    ) -> tuple[
+        pd.DataFrame,  # Axial forces
+        pd.DataFrame,  # Shear forces (Y)
+        pd.DataFrame,  # Shear forces (Z)
+        pd.DataFrame,  # Torsion
+        pd.DataFrame,  # Bending moments (Y)
+        pd.DataFrame,  # Bending moments (Z)
+    ]:
+        """
+        Calculate basic forces at intermediate locations.
+
+        This function calculates axial forces, shear forces (in Y and
+        Z directions), torsion, and bending moments (in Y and Z
+        directions) at multiple stations along each element based on
+        the provided recorder data and element lengths.  The results
+        are computed for either 2D or 3D elements and returned as a
+        tuple of Pandas DataFrames.
+
+        Returns:
+            Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
+            pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+                A tuple containing six DataFrames in the following
+                order:
+                - Axial forces (`axial_df`)
+                - Shear forces in the Y direction (`shear_y_df`)
+                - Shear forces in the Z direction (`shear_z_df`) or
+                  zeros for 2D
+                - Torsion (`torsion_df`) or zeros for 2D
+                - Bending moments in the Y direction (`moment_y_df`)
+                  or zeros for 2D
+                - Bending moments in the Z direction (`moment_z_df`)
+                Each DataFrame is multi-indexed by 'element' and
+                'station', with forces computed at evenly spaced
+                stations along each element.
+
+        Raises:
+            ValueError: If the specified recorder is not found.
+            TypeError: If the specified recorder is not an Element
+              recorder.
+            ValueError: If `ndf` (number of degrees of freedom) is not
+              2 or 3.
+            ValueError: If the recorder data do not have required
+              column levels 'dof' or 'station'.
+            ValueError: If element length information is missing for
+              any element.
+        """
+        recorder = self.analysis.recorders.get(recorder_name)
+        if recorder is None:
+            msg = f'Specified recorder not available: {recorder_name}.'
+            raise ValueError(msg)
+        if not isinstance(recorder, ElementRecorder):
+            msg = f'The specified recorder (`{recorder_name}`) is not an Element recorder.'
+            raise TypeError(msg)
+
+        udls = self.load_registry.element_udl
+        data = recorder.get_data()
+
+        required_levels = {'dof', 'station'}
+        if not required_levels.issubset(data.columns.names):
+            msg = f'Data must have levels: {required_levels}'
+            raise ValueError(msg)
+
+        ndf = data.columns.get_level_values('dof').max()
+        if ndf not in {3, 6}:
+            msg = 'Must be either 2D or 3D Frame.'
+            raise ValueError(msg)
+        dof_data = {
+            dof: data.xs(dof, level='dof', axis=1)
+            for dof in data.columns.get_level_values('dof').unique()
+        }
+        dof_data_i = {
+            dof: df.xs(0.0, level='station', axis=1) for dof, df in dof_data.items()
+        }
+
+        # dof_data_j = {
+        #     dof: df.xs(1.0, level='station', axis=1) for dof, df in dof_data.items()
+        # }
+
+        missing_elements = [e for e in recorder.elements if e not in element_lengths]
+        if missing_elements:
+            msg = f'Missing lengths for elements: {missing_elements}'
+            raise ValueError(msg)
+
+        locations = np.array(
+            [
+                np.linspace(0.00, element_lengths[element], num=num_stations)
+                for element in range(len(recorder.elements))
+            ]
+        )
+        locations_expanded = locations[np.newaxis, :, :]
+
+        columns = pd.MultiIndex.from_tuples(
+            [  # noqa: C416
+                (element, loc)
+                for element, loc in product(
+                    recorder.elements,
+                    [
+                        float(f'{v:.2f}')
+                        for v in np.linspace(0.00, 1.00, num=num_stations)
+                    ],
+                )
+            ],
+            names=['element', 'station'],
+        )
+
+        # ~~~ Local X axis axial force ~~~
+
+        data_i_axial = dof_data_i[1].to_numpy()[:, :, np.newaxis]
+        # data_j_axial = dof_data_j[1]
+        w_data_axial = np.array(
+            [
+                udls[element_uid][0] if udls.get(element_uid) is not None else 0.00
+                for element_uid in recorder.elements
+            ]
+        )[np.newaxis, :, np.newaxis]
+
+        result_axial = -(data_i_axial + w_data_axial * locations_expanded)
+        result_axial_flattened = result_axial.reshape(result_axial.shape[0], -1)
+        axial_df = pd.DataFrame(
+            result_axial_flattened, index=dof_data_i[1].index, columns=columns
+        )
+
+        # # check: results at station '1.00' should be equal to `data_j`.
+        # pd.testing.assert_frame_equal(
+        #     axial_df.xs(1.0, level='station', axis=1),
+        #     data_j_axial,
+        #     check_exact=False,
+        #     atol=1e-6,
+        # )
+
+        # ~~~ Local Y axis shear force ~~~
+
+        data_i_shear_y = dof_data_i[2].to_numpy()[:, :, np.newaxis]
+        # data_j_shear_y = dof_data_j[2]
+        w_data_shear_y = np.array(
+            [
+                udls[element_uid][1] if udls.get(element_uid) is not None else 0.00
+                for element_uid in recorder.elements
+            ]
+        )[np.newaxis, :, np.newaxis]
+
+        result_shear_y = data_i_shear_y + w_data_shear_y * locations_expanded
+        result_shear_y_flattened = result_shear_y.reshape(
+            result_shear_y.shape[0], -1
+        )
+        shear_y_df = pd.DataFrame(
+            result_shear_y_flattened, index=dof_data_i[1].index, columns=columns
+        )
+
+        # # check: results at station '1.00' should be equal to `data_j`.
+        # pd.testing.assert_frame_equal(
+        #     shear_y_df.xs(1.0, level='station', axis=1),
+        #     - data_j_shear_y,
+        #     check_exact=False,
+        #     atol=1e-6,
+        # )
+
+        # ~~~ Local Z axis shear force ~~~
+
+        # In 2D this is zero.
+        if ndm == TWO_DIMENSIONAL:
+            shear_z_df = pd.DataFrame(
+                0.00, index=axial_df.index, columns=shear_y_df.columns
+            )
+        elif ndm == THREE_DIMENSIONAL:
+            data_i_shear_z = dof_data_i[3].to_numpy()[:, :, np.newaxis]
+            # data_j_shear_z = dof_data_j[3]
+            w_data_shear_z = np.array(
+                [
+                    udls[element_uid][2]
+                    if udls.get(element_uid) is not None
+                    else 0.00
+                    for element_uid in recorder.elements
+                ]
+            )[np.newaxis, :, np.newaxis]
+
+            result_shear_z = data_i_shear_z + w_data_shear_z * locations_expanded
+            result_shear_z_flattened = result_shear_z.reshape(
+                result_shear_z.shape[0], -1
+            )
+            shear_z_df = pd.DataFrame(
+                result_shear_z_flattened, index=dof_data_i[1].index, columns=columns
+            )
+
+            # # check: results at station '1.00' should be equal to `data_j`.
+            # pd.testing.assert_frame_equal(
+            #     shear_z_df.xs(1.0, level='station', axis=1),
+            #     data_j_shear_z,
+            #     check_exact=False,
+            #     atol=1e-6,
+            # )
+
+        # ~~~ Local X axis torsional moment ~~~
+
+        # In 2D this is zero.
+        if ndm == TWO_DIMENSIONAL:
+            torsion_df = pd.DataFrame(
+                0.00, index=axial_df.index, columns=shear_y_df.columns
+            )
+        elif ndm == THREE_DIMENSIONAL:
+            data_i_torsion = dof_data_i[4].to_numpy()[:, :, np.newaxis]
+            # data_j_torsion = dof_data_j[4]
+
+            result_torsion = -data_i_torsion * np.ones_like(locations_expanded)
+            result_torsion_flattened = result_torsion.reshape(
+                result_torsion.shape[0], -1
+            )
+            torsion_df = pd.DataFrame(
+                result_torsion_flattened, index=dof_data_i[1].index, columns=columns
+            )
+
+            # # check: results at station '1.00' should be equal to `data_j`.
+            # pd.testing.assert_frame_equal(
+            #     torsion_df.xs(1.0, level='station', axis=1),
+            #     data_j_torsion,
+            #     check_exact=False,
+            #     atol=1e-6,
+            # )
+
+        # ~~~ Local Y axis bending moment (typically the weak axis) ~~~
+        if ndm == TWO_DIMENSIONAL:
+            moment_y_df = pd.DataFrame(
+                0.00, index=axial_df.index, columns=shear_y_df.columns
+            )
+        elif ndm == THREE_DIMENSIONAL:
+            data_i_moment_y = dof_data_i[5].to_numpy()[:, :, np.newaxis]
+            # data_j_moment_y = dof_data_j[5]
+
+            # Already obtained: {w_data_shear_z, data_i_shear_z, data_j_shear_z}
+
+            result_moment_y = (
+                locations_expanded**2 * 0.50 * w_data_shear_z
+                + locations_expanded * data_i_shear_z
+                + data_i_moment_y
+            )
+            result_moment_y_flattened = result_moment_y.reshape(
+                result_moment_y.shape[0], -1
+            )
+            moment_y_df = pd.DataFrame(
+                result_moment_y_flattened, index=dof_data_i[1].index, columns=columns
+            )
+
+            # # check: results at station '1.00' should be equal to `data_j`.
+            # pd.testing.assert_frame_equal(
+            #     moment_y_df.xs(1.0, level='station', axis=1),
+            #     data_j_moment_y,
+            #     check_exact=False,
+            #     atol=1e-6,
+            # )
+
+        # ~~~ Local Z axis bending moment (typically the strong axis) ~~~
+        if ndm == TWO_DIMENSIONAL:
+            data_i_moment_z = dof_data_i[3].to_numpy()[:, :, np.newaxis]
+            # data_j_moment_z = dof_data_j[3]
+
+        elif ndm == THREE_DIMENSIONAL:
+            data_i_moment_z = dof_data_i[6].to_numpy()[:, :, np.newaxis]
+            # data_j_moment_z = dof_data_j[6]
+
+        # Already obtained: {w_data_shear_y, data_i_shear_y, data_j_shear_y}
+
+        result_moment_z = (
+            locations_expanded**2 * 0.50 * w_data_shear_y
+            + locations_expanded * data_i_shear_y
+            - data_i_moment_z
+        )
+        result_moment_z_flattened = result_moment_z.reshape(
+            result_moment_z.shape[0], -1
+        )
+        moment_z_df = pd.DataFrame(
+            result_moment_z_flattened, index=dof_data_i[1].index, columns=columns
+        )
+
+        # # check: results at station '1.00' should be equal to `data_j`.
+        # pd.testing.assert_frame_equal(
+        #     moment_z_df.xs(1.0, level='station', axis=1),
+        #     data_j_moment_z,
+        #     check_exact=False,
+        #     atol=1e-6,
+        # )
+
+        return axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df
 
 
 @dataclass(repr=False)

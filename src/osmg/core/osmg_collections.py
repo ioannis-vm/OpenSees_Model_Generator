@@ -437,6 +437,22 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
             raise ValueError(msg)
         return component
 
+    def get_line_element_lengths(self) -> dict[int, float]:
+        """
+        Get the clear length of line elements.
+
+        Returns:
+          Dictionary mapping element UIDs with the clear length of the
+          element.
+        """
+        output: dict[int, float] = {}
+        for component in self.values():
+            for uid, element in component.elements.items():
+                if not isinstance(element, BeamColumnElement):
+                    continue
+                output[uid] = element.clear_length()
+        return output
+
     def __repr__(self) -> str:
         """
         Get string representation.

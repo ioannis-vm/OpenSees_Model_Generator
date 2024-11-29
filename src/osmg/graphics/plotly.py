@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
 
-from osmg.core.common import THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
+from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 from osmg.core.osmg_collections import BeamColumnAssembly
 from osmg.geometry.transformations import (
     offset_transformation_2d,
@@ -105,9 +105,20 @@ class DeformationConfiguration(PlotConfiguration):
             msg = 'Unsupported model NDF: {model.ndf}.'
             raise ValueError(msg)
         # 10% of reference length, or at most an approx. 30 degree rotation angle.
-        self.amplification_factor = min(
-            self.reference_length / max_displacement * 0.10, 0.50 / max_rotation
-        )
+        if np.abs(max_displacement + max_rotation) < EPSILON:
+            print('No deformations.')  # noqa: T201
+            # TODO(JVM): change to a warning
+            self.amplification_factor = 1.0
+        elif np.abs(max_rotation) < EPSILON:
+            self.amplification_factor = (
+                self.reference_length / max_displacement * 0.10
+            )
+        elif np.abs(max_displacement) < EPSILON:
+            self.amplification_factor = 0.50 / max_rotation
+        else:
+            self.amplification_factor = min(
+                self.reference_length / max_displacement * 0.10, 0.50 / max_rotation
+            )
 
 
 @dataclass
@@ -482,16 +493,16 @@ class Figure3D:
                 value=str(point_load),
             )
 
-    def add_basic_forces(
+    def add_basic_forces(  # noqa: C901
         self,
         components: list[ComponentAssembly],
-        basic_force_configuration: BasicForceConfiguration,  # noqa: ARG002
+        basic_force_configuration: BasicForceConfiguration,
     ) -> None:
         """Add basic forces on linear elements."""
+        elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
+        disp_beamcolumn_elements: list[DispBeamColumn] = []
         for component in components:
             elements = list(component.elements.values())
-            elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
-            disp_beamcolumn_elements: list[DispBeamColumn] = []
             for element in elements:
                 if element.visibility.skip_opensees_definition:
                     continue
@@ -499,26 +510,98 @@ class Figure3D:
                     elastic_beamcolumn_elements.append(element)
                 elif isinstance(element, DispBeamColumn):
                     disp_beamcolumn_elements.append(element)
-        for element in elastic_beamcolumn_elements + disp_beamcolumn_elements:  # noqa: B007
-            pass
-        # work in progress
-        self._generate_quadrilateral_mesh(
-            (
-                (0.0, 0.0, 0.0),
-                (100.00, 0.00, 0.00),
-                (100.00, 0.00, 100.00),
-                (0.00, 0.00, 100.00),
-            ),
-            name='Work in progress',
-            value=(
-                'value_1',
-                'value_2',
-                'value_3',
-                'value_4',
-            ),
-            color='#444444',
-            opacity=0.20,
+
+        axial, shear_y, shear_z, torsion, moment_y, moment_z = (
+            basic_force_configuration.data
         )
+        axial = axial.iloc[basic_force_configuration.step, :]
+        shear_y = shear_y.iloc[basic_force_configuration.step, :]
+        shear_z = shear_z.iloc[basic_force_configuration.step, :]
+        torsion = torsion.iloc[basic_force_configuration.step, :]
+        moment_y = moment_y.iloc[basic_force_configuration.step, :]
+        moment_z = moment_z.iloc[basic_force_configuration.step, :]
+        force_factor = basic_force_configuration.force_to_length_factor
+        moment_factor = basic_force_configuration.moment_to_length_factor
+        for element in elastic_beamcolumn_elements + disp_beamcolumn_elements:
+            element_length = element.clear_length()
+            stations = (
+                axial[element.uid].index.get_level_values('station').to_numpy()
+            )
+            axial_values = axial[element.uid].to_numpy() * force_factor
+            torsion_values = torsion[element.uid].to_numpy() * moment_factor
+            shear_y_values = shear_y[element.uid].to_numpy() * force_factor
+            shear_z_values = shear_z[element.uid].to_numpy() * force_factor
+            moment_y_values = moment_y[element.uid].to_numpy() * moment_factor
+            moment_z_values = moment_z[element.uid].to_numpy() * moment_factor
+            x_values = element_length * stations
+
+            # Define vertices positioned at the local axis origin.
+            x_axis = element.geomtransf.x_axis
+            y_axis = element.geomtransf.y_axis
+            z_axis = element.geomtransf.z_axis
+            start_point = (
+                np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
+            )
+
+            if y_axis is None:  # 2D case
+                x_axis = np.insert(x_axis, 1, 0.00)
+                y_axis = np.insert(z_axis, 1, 0.00)
+                z_axis = np.cross(x_axis, y_axis)
+                start_point = np.insert(start_point, 1, 0.00)
+
+            tm = np.column_stack((x_axis, y_axis, z_axis))  # transformation matrix
+
+            # axial_global = (tm @ axial_local.T).T + start_point
+            # torsion_global = (tm @ torsion_local.T).T + start_point
+            # shear_y_global = (tm @ shear_y_local.T).T + start_point
+            # shear_z_global = (tm @ shear_z_local.T).T + start_point
+            # moment_y_global = (tm @ moment_y_local.T).T + start_point
+            # moment_z_global = (tm @ moment_z_local.T).T + start_point
+
+            # Add axial load
+
+            for description, values_local, plot_direction, color, factor in (
+                ('N', axial_values, 'local_2', '#c47b04', force_factor),
+                ('T', torsion_values, 'local_2', '#38a89d', moment_factor),
+                ('Vy', shear_y_values, 'local_2', '#148231', force_factor),
+                ('Vz', shear_z_values, 'local_3', '#148231', force_factor),
+                ('My', -moment_y_values, 'local_3', '#3f1e8a', moment_factor),  # *
+                ('Mz', -moment_z_values, 'local_2', '#3f1e8a', moment_factor),  # *
+            ):
+                # * We flip the signs for the moments by convention.
+                for i in range(len(stations) - 1):
+                    if plot_direction == 'local_2':
+                        local_vertices = np.array(
+                            (
+                                (x_values[i], 0.00, 0.00),
+                                (x_values[i + 1], 0.00, 0.00),
+                                (x_values[i + 1], values_local[i + 1], 0.00),
+                                (x_values[i], values_local[i], 0.00),
+                            )
+                        )
+                    elif plot_direction == 'local_3':
+                        local_vertices = np.array(
+                            (
+                                (x_values[i], 0.00, 0.00),
+                                (x_values[i + 1], 0.00, 0.00),
+                                (x_values[i + 1], 0.00, values_local[i + 1]),
+                                (x_values[i], 0.00, values_local[i]),
+                            )
+                        )
+                    global_vertices = (tm @ local_vertices.T).T + start_point
+                    self._generate_quadrilateral_mesh(
+                        tuple(tuple(row) for row in global_vertices),  # type: ignore
+                        name=description,
+                        value=(
+                            '',
+                            '',
+                            f'{values_local[i + 1] / factor:.2f}',
+                            f'{values_local[i] / factor:.2f}',
+                        ),
+                        color=color,
+                        opacity=0.80,
+                        start_hidden=True,
+                    )
 
     def _add_nodes_undeformed(
         self,
@@ -648,21 +731,23 @@ class Figure3D:
                 msg = 'Results not available for node: {node.uid}.'
                 raise ValueError(msg)
             if self.configuration.ndm == THREE_DIMENSIONAL:
-                node_deformations = all_node_deformations.iloc[
-                    deformation_configuration.step, :
-                ].loc[node.uid]
+                node_deformations = (
+                    all_node_deformations.iloc[deformation_configuration.step, :]
+                    .loc[node.uid]
+                    .to_numpy()
+                )
                 data['x'].append(  # type: ignore
                     node.coordinates[0]
                     + node_deformations[0]
                     * deformation_configuration.amplification_factor
                 )
                 data['y'].append(  # type: ignore
-                    node.coordinates[0]
+                    node.coordinates[1]
                     + node_deformations[1]
                     * deformation_configuration.amplification_factor
                 )
                 data['z'].append(  # type: ignore
-                    node.coordinates[0]
+                    node.coordinates[2]
                     + node_deformations[2]
                     * deformation_configuration.amplification_factor
                 )
@@ -1522,7 +1607,9 @@ class Figure3D:
         name: str,
         value: tuple[str, str, str, str],
         color: str,
+        *,
         opacity: float,
+        start_hidden: bool = False,
     ) -> None:
         """
         Generate and add a filled quadrilateral to the figure.
@@ -1534,6 +1621,8 @@ class Figure3D:
             value: Values to display in the hoverbox at each of the four corners.
             color: Desired mesh color.
             opacity: Desired mesh opacity.
+            start_hidden: Have it hidden when the plot is shown, to
+              activate through the legend if desired.
         """
         data = self.find_data_by_name(name)
         if not data:
@@ -1553,6 +1642,8 @@ class Figure3D:
                 'opacity': opacity,
                 'showlegend': True,
             }
+            if start_hidden:
+                data['visible'] = 'legendonly'
             self.data.append(data)
 
         # Extract the vertices
@@ -1572,17 +1663,6 @@ class Figure3D:
         data['i'].extend([index_offset, index_offset])  # type: ignore
         data['j'].extend([index_offset + 1, index_offset + 2])  # type: ignore
         data['k'].extend([index_offset + 2, index_offset + 3])  # type: ignore
-
-    @staticmethod
-    def _generate_qadrilateral_mesh_array(
-        x_locations: list[tuple[float, float, float]],
-        y_locations: list[tuple[float, float, float]],
-        name: str,
-        values: list[tuple[str, str, str, str]],
-        color: str,
-        opacity: float,
-    ) -> None:
-        pass
 
     def show(self) -> None:
         """Display the figure."""

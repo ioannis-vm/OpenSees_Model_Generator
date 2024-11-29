@@ -95,8 +95,13 @@ class NodeRecorder(Recorder):
         """
         if self._data is None:
             data = pd.read_csv(
-                self.file_name, sep=' ', index_col=0, header=None, engine='pyarrow'
+                self.file_name,
+                sep=' ',
+                index_col=0,
+                header=None,
+                engine='pyarrow',
             )
+            data = data.astype(float)
             header_data = [(node, dof) for node in self.nodes for dof in self.dofs]
             data.columns = pd.MultiIndex.from_tuples(
                 header_data, names=('node', 'dof')
@@ -204,19 +209,24 @@ class ElementRecorder(Recorder):
         """
         if self._data is None:
             data = pd.read_csv(
-                self.file_name, sep=' ', index_col=0, header=None, engine='pyarrow'
+                self.file_name,
+                sep=' ',
+                index_col=0,
+                header=None,
+                engine='pyarrow',
             )
+            data = data.astype(float)
             # get number of dofs
             num_dof = int(data.shape[1] / len(self.elements) / 2.0)
             # construct header
             header_data = [
-                (element, end, dof)
+                (element, station, dof)
                 for element in self.elements
-                for end in ('i', 'j')
+                for station in (0.00, 1.00)
                 for dof in range(1, num_dof + 1)
             ]
             data.columns = pd.MultiIndex.from_tuples(
-                header_data, names=('element', 'end', 'dof')
+                header_data, names=('element', 'station', 'dof')
             )
             data.index.name = 'time'
             self._data = data

@@ -7,7 +7,7 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.common import UDL, PointLoad
+from osmg.analysis.common import UDL
 from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.recorders import NodeRecorder
 from osmg.analysis.supports import FixedSupport
@@ -139,8 +139,8 @@ for level in ('1', '2', '3', '4'):
                 )
             ),
             n_sub=1,
-            eo_i=np.array((0.00, 0.0)),
-            eo_j=np.array((0.00, 0.0)),
+            eo_i=np.array((12.00, -12.0)),
+            eo_j=np.array((-12.00, -12.0)),
             section=column_section,
             transf_type='Linear',
         )
@@ -170,17 +170,17 @@ for beam in added_beams:
 #     (0.0, +10.00)
 # )  # lb/in
 
-# Add a concentrated point load at 'A'-'Level 1' in load case 'D'
-load_case_registry.dead['D'].load_registry.nodal_loads[
-    frame.nodes.search_by_coordinates_or_raise(
-        (
-            grids.get_grid_location('A'),
-            grids.get_level_elevation('1'),
-        )
-    ).uid
-] = PointLoad(
-    (50000.0, 0.00, 0.00)  # lb
-)
+# # Add a concentrated point load at 'A'-'Level 1' in load case 'D'
+# load_case_registry.dead['D'].load_registry.nodal_loads[
+#     frame.nodes.search_by_coordinates_or_raise(
+#         (
+#             grids.get_grid_location('A'),
+#             grids.get_level_elevation('1'),
+#         )
+#     ).uid
+# ] = PointLoad(
+#     (50000.0, 0.00, 0.00)  # lb
+# )
 
 # Add an extra recorder
 load_case_registry.dead['D'].analysis.recorders['node_envelope'] = NodeRecorder(
@@ -201,6 +201,8 @@ load_case_registry.dead['D'].analysis.recorders['node_envelope'] = NodeRecorder(
     number_of_significant_digits=6,
 )
 
+
+load_case_registry.dead['D'].analysis.settings.num_steps = 10
 # Run analysis
 load_case_registry.run()
 
@@ -221,48 +223,52 @@ data = (
     .get_data()
 )
 
+
 deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    data=load_case_registry.dead['D']
-    .analysis.recorders['default_node']
-    .get_data(),
+    data=load_case_registry.dead['D'].analysis.recorders['default_node'].get_data(),
     step=0,
     amplification_factor=None,  # Figure it out.
 )
 basic_force_configuration = BasicForceConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    data=load_case_registry.dead['D']
-    .analysis.recorders['default_beamcolumn_basic_forces']
-    .get_data(),
-    step=0,
-    force_to_length_factor=0.0072,
-    moment_to_length_factor=2.564e-05,
+    data=load_case_registry.dead['D'].calculate_basic_forces(
+        'default_beamcolumn_basic_forces',
+        frame.components.get_line_element_lengths(),
+        ndm=2,
+        num_stations=12,
+    ),
+    step=-1,
+    force_to_length_factor=1.0e-02,
+    moment_to_length_factor=1.0e-03,
 )
 fig = Figure3D(Figure3DConfiguration(ndm=2))
-fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
-fig.add_components(list(frame.components.values()), overlay=True)
-fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
-fig.add_components(list(frame.components.values()), deformation_configuration)
-fig.add_supports(
-    frame.nodes, load_case_registry.dead['D'].fixed_supports, symbol_size=12.00
-)
-fig.add_udl(
-    load_case_registry.dead['D'].load_registry.element_udl,
-    frame.components,
-    force_to_length_factor=2.0,
-    offset=0.00,
-)
-fig.add_loads(
-    load_case_registry.dead['D'].load_registry.nodal_loads,
-    frame.nodes,
-    force_to_length_factor=0.0072,
-    offset=0.0,
-    head_length=24.0,
-    head_width=24.0,
-    base_width=5.0,
-)
+# # fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
+# # fig.add_components(list(frame.components.values()), overlay=True)
+fig.add_nodes(list(frame.nodes.values()), 'primary')
+fig.add_components(list(frame.components.values()))
+# # fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
+# # fig.add_components(list(frame.components.values()), deformation_configuration)
+# fig.add_supports(
+#     frame.nodes, load_case_registry.dead['D'].fixed_supports, symbol_size=12.00
+# )
+# fig.add_udl(
+#     load_case_registry.dead['D'].load_registry.element_udl,
+#     frame.components,
+#     force_to_length_factor=2.0,
+#     offset=0.00,
+# )
+# # fig.add_loads(
+# #     load_case_registry.dead['D'].load_registry.nodal_loads,
+# #     frame.nodes,
+# #     force_to_length_factor=0.0072,
+# #     offset=0.0,
+# #     head_length=24.0,
+# #     head_width=24.0,
+# #     base_width=5.0,
+# # )
 fig.add_basic_forces(
     components=list(frame.components.values()),
     basic_force_configuration=basic_force_configuration,
@@ -282,11 +288,25 @@ TODO
 # Remaining tasks
 - [X] Finalize default recorders
 - [X] Code to read back results from OpenSees: use recorder objects
-  - [ ] Also try envelope recorders, drift recorder <<<<<<<<<<<<<<<
+  - [ ] Also try envelope recorders, drift recorder
         (needs work. will come back later.)
 - [ ] Plotting of displacements and basic forces
   - [ ] See if local system works correctly with offsets.
-- [ ] Load Case Combinations
+  - The load case should prepare basic force data for the linear
+    elements in a pandas dataframe, including a level called "station"
+    with float values representing x/L, ranging from 0 to 1. The
+    number of such "stations" should be specified as an argument in
+    the method that prepares that data. By being a load case method,
+    it will have access to the applied loads, needed to calculate the
+    basic forces at intermediate locations. A method of the load case
+    registry will create combined dataframes with the same format and
+    an additional level ('min', 'max'). These two dataframe formats
+    will be passed to the method that plots the basic forces (and
+    subsequently the method that performs design checks.)  to the
+    method that plots the basic forces.
+
+Next steps:
+- [ ] Load Case Combinations <-- taken care of
 - [ ] Ability to utilize the "release" flag for elastic beamcolumn elements (?).
 - [ ] Add back hinged component assembly
 - [ ] Add back modal, pushover, time-history analysis.
