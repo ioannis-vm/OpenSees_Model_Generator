@@ -7,7 +7,7 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.common import UDL, PointLoad
+from osmg.analysis.common import UDL, PointLoad, PointMass
 from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
@@ -81,10 +81,10 @@ g_modulus = 11500000.00  # lb/in2
 # Define an AISC W section
 section_creator = AISC_Database_Section_Creator(frame.uid_generator)
 column_section = section_creator.load_elastic_section(
-    section_label='W14X120', e_modulus=1.00, g_modulus=1.00
+    section_label='W14X120', e_modulus=e_modulus, g_modulus=g_modulus
 )
 beam_section = section_creator.load_elastic_section(
-    section_label='W18X119', e_modulus=1.00, g_modulus=1.00
+    section_label='W18X119', e_modulus=e_modulus, g_modulus=g_modulus
 )
 
 # Add columns
@@ -140,7 +140,7 @@ for level in ('1', '2', '3', '4'):
             n_sub=1,
             eo_i=np.array((12.00, -12.0)),
             eo_j=np.array((-12.00, -12.0)),
-            section=column_section,
+            section=beam_section,
             transf_type='Linear',
         )
         added_beams.append(beam)
@@ -153,6 +153,7 @@ load_case_registry = LoadCaseRegistry(frame)
 fixed_support = FixedSupport((True, True, True))
 load_case_registry.dead['dead_1'].add_supports_at_level(frame, fixed_support, '0')
 load_case_registry.dead['dead_2'].add_supports_at_level(frame, fixed_support, '0')
+load_case_registry.modal['modal'].add_supports_at_level(frame, fixed_support, '0')
 
 # Example of how to retrieve a primary node:
 # Locate the nodes at 'A'-'Level 1' and 'B'-'Level 1'
@@ -177,6 +178,17 @@ load_case_registry.dead['dead_2'].load_registry.nodal_loads[
 ] = PointLoad(
     (2000.0, 0.00, 0.00)  # lb
 )
+
+# `modal`: Add mass at a single node.
+load_case_registry.modal['modal'].mass_registry[
+    frame.nodes.search_by_coordinates_or_raise(
+        (
+            grids.get_grid_location('A'),
+            grids.get_level_elevation('1'),
+        )
+    ).uid
+] = PointMass((+3.0e3 / 386.22, +3.0e3 / 386.22, +3.0e3 / 386.22))
+load_case_registry.modal['modal'].analysis.settings.num_modes = 3
 
 # # Example: Add an extra recorder
 # load_case_registry.dead['dead_1'].analysis.recorders['node_envelope'] = NodeRecorder(
@@ -210,6 +222,11 @@ result_dir = load_case_registry.dead['dead_2'].analysis.settings.result_director
 print(f'Result directory `dead_2`: {result_dir}')  # noqa: T201
 
 
+load_case_registry.modal['modal'].analysis.recorders['default_node'].get_data()
+load_case_registry.modal['modal'].analysis.recorders[
+    'default_beamcolumn_basic_forces'
+].get_data()
+
 # combinations happen here.
 combined_displacements = load_case_registry.combine_recorder('default_node')
 
@@ -226,54 +243,53 @@ combined_displacements = load_case_registry.combine_recorder('default_node')
 #     .get_data()
 # )
 
-
 deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    data=load_case_registry.dead['dead_2']
+    data=load_case_registry.modal['modal']
     .analysis.recorders['default_node']
     .get_data(),
-    step=0,
+    step=2,
     amplification_factor=None,  # Figure it out.
 )
 basic_force_configuration = BasicForceConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
-    data=load_case_registry.dead['dead_2'].calculate_basic_forces(
+    data=load_case_registry.modal['modal'].calculate_basic_forces(
         'default_beamcolumn_basic_forces',
         frame.components.get_line_element_lengths(),
         ndm=2,
         num_stations=12,
     ),
-    step=-1,
-    force_to_length_factor=1.0e-02,
-    moment_to_length_factor=1.0e-03,
+    step=2,
+    force_to_length_factor=1.0e-04,
+    moment_to_length_factor=1.0e-07,
 )
 fig = Figure3D(Figure3DConfiguration(ndm=2))
 # # fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
 # # fig.add_components(list(frame.components.values()), overlay=True)
-# fig.add_nodes(list(frame.nodes.values()), 'primary')
-# fig.add_components(list(frame.components.values()))
+fig.add_nodes(list(frame.nodes.values()), 'primary')
+fig.add_components(list(frame.components.values()))
 fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
 fig.add_components(list(frame.components.values()), deformation_configuration)
-# fig.add_supports(
-#     frame.nodes, load_case_registry.dead['dead_2'].fixed_supports, symbol_size=12.00
-# )
+fig.add_supports(
+    frame.nodes, load_case_registry.dead['dead_2'].fixed_supports, symbol_size=12.00
+)
 # fig.add_udl(
 #     load_case_registry.dead['dead_2'].load_registry.element_udl,
 #     frame.components,
 #     force_to_length_factor=2.0,
 #     offset=0.00,
 # )
-# # fig.add_loads(
-# #     load_case_registry.dead['dead_2'].load_registry.nodal_loads,
-# #     frame.nodes,
-# #     force_to_length_factor=0.0072,
-# #     offset=0.0,
-# #     head_length=24.0,
-# #     head_width=24.0,
-# #     base_width=5.0,
-# # )
+# fig.add_loads(
+#     load_case_registry.dead['dead_2'].load_registry.nodal_loads,
+#     frame.nodes,
+#     force_to_length_factor=0.0072,
+#     offset=0.0,
+#     head_length=24.0,
+#     head_width=24.0,
+#     base_width=5.0,
+# )
 fig.add_basic_forces(
     components=list(frame.components.values()),
     basic_force_configuration=basic_force_configuration,
@@ -298,10 +314,18 @@ TODO
 
 Next steps:
 - [X] Load Case Combinations
-- [ ] Add back modal, pushover, time-history analysis.
-  - [ ] for modal, see if I can get basic forces by imposing displacements.
+- [ ] Add back analysis types
+  - [X] modal (see if I can get basic forces by imposing
+      displacements. (Yes!))
+  - [ ] modal response spectrum, 2D and 3D, SRSS and CQC for
+        combinations.
+  - [ ] pushover *
+  - [ ] time-history *
+    (*) consider placing these outside of the loadcase registry, as we
+        will rarely use them for doing load combinations.
 - [ ] Add back hinged component assembly.
-  - [ ] create a simple truss component assembly
+- [ ] create a simple truss component assembly (Linear, Corotational),
+      ensure existing recorders work.
 - [ ] Work on code for steel design checks.
 
 """

@@ -31,6 +31,10 @@ class Recorder(UIDObject):
         msg = 'Child classes should implement this.'
         raise NotImplementedError(msg)
 
+    def set_data(self, data: pd.DataFrame) -> None:
+        """Overwrite the data."""
+        self._data = data
+
 
 @dataclass
 class NodeRecorder(Recorder):
@@ -39,6 +43,9 @@ class NodeRecorder(Recorder):
 
     The Node recorder type records the response of a number of nodes
     at every converged step.
+
+    Note: I haven't been able to get the `eigen` type working.
+
     https://opensees.berkeley.edu/wiki/index.php?title=Node_Recorder
     """
 
@@ -46,13 +53,12 @@ class NodeRecorder(Recorder):
     nodes: tuple[int, ...]
     dofs: tuple[int, ...]
     response_type: Literal[
-        'disp', 'vel', 'accel', 'incrDisp', 'eigen', 'reaction', 'rayleighForces'
+        'disp', 'vel', 'accel', 'incrDisp', 'reaction', 'rayleighForces'
     ]
     number_of_significant_digits: int
     output_time: bool
     delta_t: float | None = field(default=None)
     time_series_tag: int | None = field(default=None)
-    mode_number: int | None = field(default=None)
 
     def ops_args(self) -> list[object]:
         """
@@ -82,8 +88,6 @@ class NodeRecorder(Recorder):
         output.extend(['-node', *self.nodes])
         output.extend(['-dof', *self.dofs])
         output.append(self.response_type)
-        if self.response_type == 'eigen':
-            output.append(self.mode_number)
         return output
 
     def get_data(self) -> pd.DataFrame:
@@ -93,6 +97,8 @@ class NodeRecorder(Recorder):
         Returns:
           The data.
         """
+        if self.recorder_type == 'EnvelopeNode':
+            raise NotImplementedError
         if self._data is None:
             data = pd.read_csv(
                 self.file_name,
@@ -207,6 +213,8 @@ class ElementRecorder(Recorder):
         Returns:
           The data.
         """
+        if self.recorder_type == 'EnvelopeElement':
+            raise NotImplementedError
         if self._data is None:
             data = pd.read_csv(
                 self.file_name,

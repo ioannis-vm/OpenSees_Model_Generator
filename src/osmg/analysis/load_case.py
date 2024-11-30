@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from osmg.analysis.recorders import ElementRecorder
-from osmg.analysis.solver import Analysis, StaticAnalysis
+from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 
@@ -163,7 +163,6 @@ class LoadCase:
 
     fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
-    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
     analysis: Analysis = field(default_factory=Analysis)
 
     def add_supports_at_level(
@@ -259,7 +258,11 @@ class LoadCase:
             msg = f'The specified recorder (`{recorder_name}`) is not an Element recorder.'
             raise TypeError(msg)
 
-        udls = self.load_registry.element_udl
+        if isinstance(self, HasLoads):
+            udls = self.load_registry.element_udl
+        else:
+            udls = {}
+
         data = recorder.get_data()
 
         required_levels = {'dof', 'station'}
@@ -497,48 +500,57 @@ class HasMass:
 
 
 @dataclass(repr=False)
-class DeadLoadCase(LoadCase):
+class HasLoads:
+    """Parent class for load cases that have a load registry."""
+
+    load_registry: LoadRegistry = field(default_factory=LoadRegistry)
+
+
+@dataclass(repr=False)
+class DeadLoadCase(LoadCase, HasLoads):
     """Dead load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
 
 @dataclass(repr=False)
-class LiveLoadCase(LoadCase):
+class LiveLoadCase(LoadCase, HasLoads):
     """Live load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
 
 @dataclass(repr=False)
-class ModalLoadCase(LoadCase):
+class ModalLoadCase(LoadCase, HasMass):
     """Modal load case."""
+
+    analysis: ModalAnalysis = field(default_factory=ModalAnalysis)
 
 
 @dataclass(repr=False)
-class SeismicLoadCase(LoadCase):
+class SeismicLoadCase(LoadCase, HasLoads):
     """Seismic load case base class."""
 
 
 @dataclass(repr=False)
-class SeismicELFLoadCase(SeismicLoadCase):
+class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
     """Seismic ELF load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
 
 @dataclass(repr=False)
-class SeismicRSLoadCase(SeismicLoadCase, HasMass):
+class SeismicRSLoadCase(SeismicLoadCase, HasLoads, HasMass):
     """Seismic RS load case."""
 
 
 @dataclass(repr=False)
-class SeismicTransientLoadCase(SeismicLoadCase, HasMass):
+class SeismicTransientLoadCase(SeismicLoadCase, HasLoads, HasMass):
     """Seismic transient load case."""
 
 
 @dataclass(repr=False)
-class OtherLoadCase(LoadCase, HasMass):
+class OtherLoadCase(LoadCase, HasLoads, HasMass):
     """Other load case."""
 
 
@@ -654,7 +666,11 @@ class LoadCaseRegistry:
           ValueError: If the specified recorder does not exist in some
             load case.
         """
-        cases_list = self.get_cases_list()
+        # TODO(JVM): in progress.
+        cases_list = [
+            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
+            ('live', cast(defaultdict[str, LoadCase], self.live)),
+        ]
         all_data: dict[str, dict[str, pd.DataFrame]] = defaultdict(dict)
         case_type_data = {}
         for case_type, cases in cases_list:

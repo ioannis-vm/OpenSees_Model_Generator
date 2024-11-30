@@ -10,6 +10,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
+import numpy as np
+import pandas as pd
+
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
 from osmg.core.common import NDF, NDM
 from osmg.core.osmg_collections import BeamColumnAssembly
@@ -21,7 +24,7 @@ except (ImportError, ModuleNotFoundError):
     import openseespy.opensees as ops
 
 if TYPE_CHECKING:
-    from osmg.analysis.load_case import LoadCase
+    from osmg.analysis.load_case import LoadCase, ModalLoadCase
     from osmg.analysis.recorders import Recorder
     from osmg.core.model import Model
 
@@ -189,12 +192,6 @@ class Analysis:
             if True in fix:
                 ops.fix(uid, *[int(x) for x in fix])
 
-    # @staticmethod
-    # def opensees_define_node_mass(load_case: LoadCase) -> None:
-    #     """Define node mass."""
-    #     for uid, point_mass in load_case.mass_registry:
-    #         ops.mass(uid, *point_mass)
-
     def define_model_in_opensees(self, model: Model, load_case: LoadCase) -> None:
         """Define the model in OpenSees."""
         self.opensees_instantiate(model)
@@ -226,11 +223,11 @@ class Analysis:
         ops.pattern('Plain', pattern_tag, time_series_tag)
 
         # Point load on nodes
-        for node_uid, point_load in load_case.load_registry.nodal_loads.items():
+        for node_uid, point_load in load_case.load_registry.nodal_loads.items():  # type: ignore
             ops.load(node_uid, *(v * amplification_factor for v in point_load))
 
         # UDL on components
-        for component_uid, global_udl in load_case.load_registry.element_udl.items():
+        for component_uid, global_udl in load_case.load_registry.element_udl.items():  # type: ignore
             component = model.components[component_uid]
             assert isinstance(component, BeamColumnAssembly)
             local_udls = component.calculate_element_udl(global_udl)
@@ -257,6 +254,14 @@ class Analysis:
                 else:
                     msg = f'Invalid model dimensionality: `{model.dimensionality}`.'
                     raise TypeError(msg)
+
+    @staticmethod
+    def define_mass_in_opensees(
+        load_case: LoadCase, amplification_factor: float = 1.00
+    ) -> None:
+        """Define mass in OpenSees."""
+        for node_uid, point_mass in load_case.mass_registry.items():  # type: ignore
+            ops.mass(node_uid, *(v * amplification_factor for v in point_mass))
 
     def define_default_recorders(self, model: Model) -> None:
         """
@@ -332,7 +337,7 @@ class StaticAnalysis(Analysis):
         """Run the analysis."""
         self.initialize_logger()
 
-        self.log('Running a Static Analysis.')
+        self.log('Running a static analysis.')
 
         self.log('Defining model in OpenSees.')
         self.define_model_in_opensees(model, load_case)
@@ -350,6 +355,171 @@ class StaticAnalysis(Analysis):
 
         self.log('Analyzing.')
         ops.analyze(self.settings.num_steps)
-        ops.wipe()
 
+        ops.wipe()
+        self.log('Analysis finished.')
+
+
+@dataclass()
+class ModalAnalysisSettings(AnalysisSettings):
+    """Modal analysis settings."""
+
+    num_modes: int = field(default=1)
+
+
+@dataclass(repr=False)
+class ModalAnalysis(Analysis):
+    """Modal analysis."""
+
+    settings: ModalAnalysisSettings = field(default_factory=ModalAnalysisSettings)
+
+    def run(self, model: Model, load_case: ModalLoadCase) -> None:  # noqa: C901  # type: ignore
+        """
+        Run the modal analysis.
+
+        Raises:
+          ValueError: If a solver known to not work with `eigen` is
+           specified.
+        """
+        self.initialize_logger()
+        self.log('Running a modal analysis.')
+
+        ndf = NDF[model.dimensionality]
+
+        if self.settings.disable_default_recorders is True:
+            self.settings.disable_default_recorders = False
+            msg = (
+                'Default recorders are required for '
+                'modal analysis and were force-enabled.'
+            )
+            self.log(msg)
+            print(msg)  # noqa: T201
+            # TODO(JVM): turn into a warning.
+
+        self.log('Defining model in OpenSees.')
+        self.define_model_in_opensees(model, load_case)
+        self.log('Defining mass in OpenSees.')
+        self.define_mass_in_opensees(load_case)
+
+        self.log('Setting up analysis.')
+        if self.settings.system.lower() in {'sparsesym', 'sparsespd'}:
+            msg = (
+                f'{self.settings.solver} is unable '
+                'to run a modal analysis. Use UmfPack.'
+            )
+            self.log(msg)
+            raise ValueError(msg)
+
+        ops.system(self.settings.system)
+        ops.numberer(self.settings.numberer)
+        ops.constraints(*self.settings.constraints)
+
+        self.log('Analyzing.')
+        # lambda_values = np.array(ops.eigen(self.settings.num_modes))
+        # TODO(JVM): remove solver assignment
+        lambda_values = np.array(
+            ops.eigen('-fullGenLapack', self.settings.num_modes)
+        )
+
+        self.log('Calculating periods.')
+        omega_values = np.sqrt(lambda_values)
+        periods = 2.0 * np.pi / omega_values
+        self.log(f'Periods: {periods}')
+
+        self.log('Retrieving node eigenvectors.')
+
+        node_recorder = self.recorders['default_node']
+
+        assert isinstance(node_recorder, NodeRecorder)
+        nodes = node_recorder.nodes
+        data = {}
+        for mode in range(1, self.settings.num_modes + 1):
+            for node in nodes:
+                disp = ops.nodeEigenvector(node, mode)
+                data[node, mode] = disp
+        eigenvectors = pd.DataFrame(
+            data.values(),
+            index=pd.MultiIndex.from_tuples(data.keys(), names=['node', 'mode']),
+            columns=range(1, ndf + 1),
+        )
+        eigenvectors.columns.name = 'dof'
+        eigenvectors = eigenvectors.unstack(level='node')  # noqa: PD010
+        eigenvectors.columns = eigenvectors.columns.reorder_levels(['node', 'dof'])
+        node_order = eigenvectors.columns.get_level_values('node').unique()
+        eigenvectors = eigenvectors.loc[:, node_order]
+        self.log('Retrieved node eigenvectors.')
+
+        basic_force_data = {}
+
+        self.log('Obtaining basic forces for each mode.')
+        # Recover basic forces
+        for mode in range(1, self.settings.num_modes + 1):
+            self.log('   Wiping OpenSees domain.')
+            ops.wipe()
+            self.log(f'  Working on mode {mode}.')
+            self.log('  Defining model in OpenSees.')
+            self.define_model_in_opensees(model, load_case)
+            mode_eigenvectors = eigenvectors.loc[mode, :].copy()
+            # ignore the node-dof pairs with a fixed constraint.
+            to_drop = []
+            for uid, support in load_case.fixed_supports.items():
+                for i, dof in enumerate(support):
+                    if dof:
+                        to_drop.append((uid, i + 1))
+            mode_eigenvectors = mode_eigenvectors.drop(to_drop)
+            if (
+                bool((mode_eigenvectors.isna() | np.isinf(mode_eigenvectors)).any())
+                is True
+            ):
+                self.log(
+                    f'  NaNs or infs present in displacement data, skipping mode {mode}.'
+                )
+                continue
+
+            self.log('  Setting up Sp constraints.')
+            ops.timeSeries('Constant', 1)
+            ops.pattern('Plain', 1, 1)
+
+            for key, displacement in mode_eigenvectors.items():
+                node, dof = key
+                ops.sp(node, dof, displacement)
+
+            self.log('  Setting up analysis.')
+            ops.integrator('LoadControl', 0.0)
+            ops.constraints('Transformation')
+            ops.algorithm('Linear')
+            ops.numberer(self.settings.numberer)
+            ops.system(self.settings.system)
+            ops.analysis('Static')
+
+            self.log('  Analyzing.')
+            ops.analyze(1)
+            # The recorders should have captured the results here.
+            self.log('  Retrieving data from recorder output.')
+            # TODO(JVM): read basic_force_data from the recorder, add
+            # in the dict.
+
+            # Verifying displacements are correct.
+            for some_node in mode_eigenvectors.index.get_level_values(
+                'node'
+            ).unique():
+                assert np.allclose(
+                    np.array(ops.nodeDisp(some_node)),
+                    mode_eigenvectors[some_node].to_numpy(),
+                )
+
+            basic_force_data[mode] = self.recorders[
+                'default_beamcolumn_basic_forces'
+            ].get_data()
+            basic_force_data[mode].index.name = 'mode'
+            basic_force_data[mode].index = [mode]
+
+        self.log('Obtained basic forces for each mode.')
+        self.log('Wiping OpenSees domain for the last time.')
+        ops.wipe()
+        self.log('Storing data.')
+        self.recorders['default_node'].set_data(eigenvectors)
+        self.recorders['default_beamcolumn_basic_forces'].set_data(
+            pd.concat(basic_force_data.values(), axis=0)
+        )
         self.log('Analysis finished.')
