@@ -14,7 +14,7 @@ from osmg.geometry.transformations import (
     transformation_matrix,
     transformation_matrix_2d,
 )
-from osmg.model_objects.element import BeamColumnElement, Element
+from osmg.model_objects.element import Bar, BeamColumnElement, Element
 from osmg.model_objects.node import Node
 
 TV = TypeVar('TV')
@@ -298,6 +298,11 @@ class ComponentAssembly(UIDObject):
 
 
 @dataclass
+class BarAssembly(ComponentAssembly):
+    """Component assembly for bar elements."""
+
+
+@dataclass
 class BeamColumnAssembly(ComponentAssembly):
     """
     Beamcolumn assembly object.
@@ -448,7 +453,7 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
         output: dict[int, float] = {}
         for component in self.values():
             for uid, element in component.elements.items():
-                if not isinstance(element, BeamColumnElement):
+                if not isinstance(element, (BeamColumnElement, Bar)):
                     continue
                 output[uid] = element.clear_length()
         return output

@@ -294,7 +294,7 @@ class LoadCase:
         locations = np.array(
             [
                 np.linspace(0.00, element_lengths[element], num=num_stations)
-                for element in range(len(recorder.elements))
+                for element in recorder.elements
             ]
         )
         locations_expanded = locations[np.newaxis, :, :]

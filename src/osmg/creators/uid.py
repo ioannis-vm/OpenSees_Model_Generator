@@ -29,12 +29,16 @@ class UIDGenerator:
             'ElasticSection': 'SECTION',
             'ComponentAssembly': 'COMPONENT',
             'BeamColumnAssembly': 'COMPONENT',
+            'BarAssembly': 'COMPONENT',
             'GeomTransf': 'TRANSFORMATION',
-            'ElasticBeamColumn': 'BEAMCOLUMN',
+            'ElasticBeamColumn': 'ELEMENT',
+            'Bar': 'ELEMENT',
+            'TwoNodeLink': 'ELEMENT',
             'NodeRecorder': 'RECORDER',
             'DriftRecorder': 'RECORDER',
             'ElementRecorder': 'RECORDER',
             '_TestChild': 'TESTING',
+            'Elastic': 'MATERIAL',
         }
 
         if object_type not in valid_types:

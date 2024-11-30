@@ -51,8 +51,8 @@ class ZeroLength(Element):
 
     """
 
-    mats: list[UniaxialMaterial]
-    dirs: list[int]
+    materials: list[UniaxialMaterial]
+    directions: list[int]
     vecx: numpy_array
     vecyp: numpy_array
 
@@ -68,9 +68,9 @@ class ZeroLength(Element):
             self.uid,
             *[n.uid for n in self.nodes],
             '-mat',
-            *[m.uid for m in self.mats],
+            *[m.uid for m in self.materials],
             '-dir',
-            *self.dirs,
+            *self.directions,
             '-doRayleigh',
             1,
             '-orient',
@@ -89,7 +89,7 @@ class ZeroLength(Element):
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
         res += 'Materials:'
-        for mat, direction in zip(self.mats, self.dirs):
+        for mat, direction in zip(self.materials, self.directions):
             res += f'  {direction}: {mat.name}\n'
         res += f'vecx: {self.vecx}\n'
         res += f'vecyp: {self.vecyp}\n'
@@ -105,10 +105,9 @@ class TwoNodeLink(Element):
 
     """
 
-    mats: list[UniaxialMaterial]
-    dirs: list[int]
-    vecx: numpy_array
-    vecyp: numpy_array
+    materials: list[UniaxialMaterial]
+    directions: list[int]
+    vecyp: numpy_array | None = None
 
     def ops_args(self) -> list[object]:
         """
@@ -117,17 +116,23 @@ class TwoNodeLink(Element):
         Returns:
           The OpenSees arguments.
         """
-        return [
+        args = [
             'twoNodeLink',
             self.uid,
             *[n.uid for n in self.nodes],
             '-mat',
-            *[m.uid for m in self.mats],
+            *[m.uid for m in self.materials],
             '-dir',
-            *self.dirs,
-            '-orient',
-            *self.vecyp,
+            *self.directions,
         ]
+        if self.vecyp:
+            args.extend(
+                [
+                    '-orient',
+                    *self.vecyp,
+                ]
+            )
+        return args
 
     def __repr__(self) -> str:
         """
@@ -140,15 +145,15 @@ class TwoNodeLink(Element):
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
         res += 'Materials:'
-        for mat, direction in zip(self.mats, self.dirs):
+        for mat, direction in zip(self.materials, self.directions):
             res += f'  {direction}: {mat.name}\n'
-        res += f'vecx: {self.vecx}\n'
-        res += f'vecyp: {self.vecyp}\n'
+        if self.vecyp:
+            res += f'vecyp: {self.vecyp}\n'
         return res
 
 
 @dataclass(repr=False)
-class TrussBar(Element):
+class Bar(Element):
     """
     Truss and Corotational Truss.
 
@@ -158,11 +163,20 @@ class TrussBar(Element):
     OpenSees Corotational Truss Element
     https://openseespydoc.readthedocs.io/en/latest/src/corotTruss.html
 
+    Params:
+      transf_type: Linear or Corotational, determines what type of truss to use.
+      area: Cross-sectional area.
+      mat: Uniaxial material (for stress-strain relationship).
+      outside_shape: Mesh defining the cross-section shape, used only for plots.
+      weight_per_length: Weight per unit length, used when assigning self-weight.
+      rho: Mass per unit length.
+      cFlag: 0: lumped mass, 1: consistent mass.
+      rFlag: 0: No Rayleigh damping, 1: Include Rayleigh damping.
     """
 
-    transf_type: str
+    transf_type: Literal['Linear', 'Corotational']
     area: float
-    mat: UniaxialMaterial
+    material: UniaxialMaterial
     outside_shape: Mesh | None = field(default=None)
     weight_per_length: float = field(default=0.00)
     rho: float = field(default=0.00)
@@ -184,7 +198,7 @@ class TrussBar(Element):
             self.nodes[0].uid,
             self.nodes[1].uid,
             self.area,
-            self.mat.uid,
+            self.material.uid,
             '-rho',
             self.rho,
             '-cMass',

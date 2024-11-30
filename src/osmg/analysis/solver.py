@@ -16,7 +16,12 @@ import pandas as pd
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
 from osmg.core.common import NDF, NDM
 from osmg.core.osmg_collections import BeamColumnAssembly
-from osmg.model_objects.element import ElasticBeamColumn
+from osmg.model_objects.element import (
+    Bar,
+    DispBeamColumn,
+    ElasticBeamColumn,
+    TwoNodeLink,
+)
 
 try:
     import opensees.openseespy as ops
@@ -24,9 +29,10 @@ except (ImportError, ModuleNotFoundError):
     import openseespy.opensees as ops
 
 if TYPE_CHECKING:
-    from osmg.analysis.load_case import LoadCase, ModalLoadCase
+    from osmg.analysis.load_case import LoadCase
     from osmg.analysis.recorders import Recorder
     from osmg.core.model import Model
+    from osmg.model_objects.uniaxial_material import UniaxialMaterial
 
 
 @dataclass()
@@ -58,6 +64,7 @@ class Analysis:
     settings: AnalysisSettings = field(default_factory=AnalysisSettings)
     _logger: logging.Logger = field(init=False)
     recorders: dict[str, Recorder] = field(default_factory=dict)
+    _defined_materials: list[int] = field(default_factory=list)
 
     def initialize_logger(self) -> None:
         """
@@ -124,6 +131,7 @@ class Analysis:
     @staticmethod
     def opensees_instantiate(model: Model) -> None:
         """Instantiate the model in OpenSees."""
+        ops.wipe()
         ops.model(
             'basic',
             '-ndm',
@@ -132,15 +140,70 @@ class Analysis:
             NDF[model.dimensionality],
         )
 
+    def opensees_define_material(self, material: UniaxialMaterial) -> None:
+        """Recursively define materials with predecessors."""
+        if material.uid not in self._defined_materials:
+            while (
+                hasattr(material, 'predecessor')
+                and material.predecessor.uid not in self._defined_materials
+            ):
+                self.opensees_define_material(material.predecessor)
+            ops.uniaxialMaterial(*material.ops_args())
+            self._defined_materials.append(material.uid)
+
     @staticmethod
     def opensees_define_nodes(model: Model) -> None:
         """Define the nodes of the model in OpenSees."""
         for uid, node in model.get_all_nodes().items():
             ops.node(uid, *node.coordinates)
 
+    def opensees_define_elements(
+        self,
+        model: Model,
+    ) -> None:
+        """Define elements."""
+        elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
+        bar_elements: list[Bar] = []
+        two_node_link_elements: list[TwoNodeLink] = []
+        unsupported_element_types: list[str] = []
+
+        # Note: Materials are defined on an as-needed basis.  We keep
+        # track of defined materials in `self._defined_materials` to
+        # avoid trying to define the same material twice. After
+        # elements are defined, we clear that list, to start with an
+        # empty list in subsequent model definitions.
+
+        components = model.components.values()
+        for component in components:
+            elements = component.elements
+            for element in elements.values():
+                if isinstance(element, ElasticBeamColumn):
+                    elastic_beamcolumn_elements.append(element)
+                elif isinstance(element, Bar):
+                    bar_elements.append(element)
+                elif isinstance(element, TwoNodeLink):
+                    two_node_link_elements.append(element)
+                else:
+                    unsupported_element_types.append(element.__class__.__name__)
+
+        if unsupported_element_types:
+            print(  # noqa: T201
+                f'WARNING: Unsupported element types found: {set(unsupported_element_types)}'
+            )
+
+        self.opensees_define_elastic_beamcolumn_elements(
+            model, elastic_beamcolumn_elements
+        )
+        self.opensees_define_bar_elements(bar_elements)
+        self.opensees_define_two_node_link_elements(two_node_link_elements)
+
+        # clear defined materials
+        self._defined_materials = []
+
     @staticmethod
     def opensees_define_elastic_beamcolumn_elements(
         model: Model,
+        elements: list[ElasticBeamColumn],
     ) -> None:
         """
         Define elastic beamcolumn elements.
@@ -148,22 +211,32 @@ class Analysis:
         Raises:
           TypeError: If the model type is invalid.
         """
-        components = model.components.values()
-        for component in components:
-            elements = component.elements
-            for element in elements.values():
-                if isinstance(element, ElasticBeamColumn):
-                    # Define it here
-                    if element.visibility.skip_opensees_definition:
-                        continue
-                    ops.geomTransf(*element.geomtransf.ops_args())
-                    if model.dimensionality == '2D Frame':
-                        ops.element(*element.ops_args_2d())
-                    elif model.dimensionality == '3D Frame':
-                        ops.element(*element.ops_args())
-                    else:
-                        msg = f'Invalid model dimensionality: `{model.dimensionality}`.'
-                        raise TypeError(msg)
+        for element in elements:
+            if element.visibility.skip_opensees_definition:
+                continue
+            ops.geomTransf(*element.geomtransf.ops_args())
+            if model.dimensionality == '2D Frame':
+                ops.element(*element.ops_args_2d())
+            elif model.dimensionality == '3D Frame':
+                ops.element(*element.ops_args())
+            else:
+                msg = f'Invalid model dimensionality: `{model.dimensionality}`.'
+                raise TypeError(msg)
+
+    def opensees_define_bar_elements(self, elements: list[Bar]) -> None:
+        """Define bar elements."""
+        for element in elements:
+            self.opensees_define_material(element.material)
+            ops.element(*element.ops_args())
+
+    def opensees_define_two_node_link_elements(
+        self, elements: list[TwoNodeLink]
+    ) -> None:
+        """Define TwoNodeLink elements."""
+        for element in elements:
+            for material in element.materials:
+                self.opensees_define_material(material)
+            ops.element(*element.ops_args())
 
     def opensees_define_node_restraints(
         self, model: Model, load_case: LoadCase
@@ -192,18 +265,18 @@ class Analysis:
             if True in fix:
                 ops.fix(uid, *[int(x) for x in fix])
 
-    def define_model_in_opensees(self, model: Model, load_case: LoadCase) -> None:
+    def opensees_define_model(self, model: Model, load_case: LoadCase) -> None:
         """Define the model in OpenSees."""
         self.opensees_instantiate(model)
         self.opensees_define_nodes(model)
-        self.opensees_define_elastic_beamcolumn_elements(model)
+        self.opensees_define_elements(model)
         self.opensees_define_node_restraints(model, load_case)
         if not self.settings.disable_default_recorders:
             self.define_default_recorders(model)
         self.opensees_define_recorders()
 
     @staticmethod
-    def define_loads_in_opensees(
+    def opensees_define_loads(
         model: Model,
         load_case: LoadCase,
         amplification_factor: float = 1.00,
@@ -256,7 +329,7 @@ class Analysis:
                     raise TypeError(msg)
 
     @staticmethod
-    def define_mass_in_opensees(
+    def opensees_define_mass(
         load_case: LoadCase, amplification_factor: float = 1.00
     ) -> None:
         """Define mass in OpenSees."""
@@ -289,27 +362,34 @@ class Analysis:
         )
         self.recorders['default_node'] = node_recorder
 
-        elastic_beamcolumn_elements = []
+        applicable_elements = []
         components = model.components.values()
         for component in components:
             elements = component.elements
             for element in elements.values():
-                if isinstance(element, ElasticBeamColumn):
-                    # Define it here
+                if isinstance(element, (ElasticBeamColumn, DispBeamColumn, Bar)):
                     if element.visibility.skip_opensees_definition:
                         continue
-                    elastic_beamcolumn_elements.append(element.uid)
+                    if (
+                        isinstance(element, Bar)
+                        and element.transf_type == 'Corotational'
+                    ):
+                        # Crurently `localForce` is not a valid
+                        # recorder argument for corotational truss
+                        # elements.
+                        continue
+                    applicable_elements.append(element.uid)
 
         element_force_recorder = ElementRecorder(
             uid_generator=model.uid_generator,
             file_name='basic_forces',
             recorder_type='Element',
-            elements=tuple(elastic_beamcolumn_elements),
+            elements=tuple(applicable_elements),
             element_arguments=('localForce',),
             number_of_significant_digits=6,
             output_time=True,
         )
-        self.recorders['default_beamcolumn_basic_forces'] = element_force_recorder
+        self.recorders['default_basic_force'] = element_force_recorder
 
     def opensees_define_recorders(self) -> None:
         """Define recorders in OpenSees."""
@@ -340,9 +420,9 @@ class StaticAnalysis(Analysis):
         self.log('Running a static analysis.')
 
         self.log('Defining model in OpenSees.')
-        self.define_model_in_opensees(model, load_case)
+        self.opensees_define_model(model, load_case)
         self.log('Defining loads in OpenSees.')
-        self.define_loads_in_opensees(model, load_case)
+        self.opensees_define_loads(model, load_case)
 
         self.log('Setting up analysis.')
         ops.system(self.settings.system)
@@ -354,7 +434,8 @@ class StaticAnalysis(Analysis):
         ops.analysis('Static')
 
         self.log('Analyzing.')
-        ops.analyze(self.settings.num_steps)
+        out = ops.analyze(self.settings.num_steps)
+        assert out == 0, 'Analysis failed.'
 
         ops.wipe()
         self.log('Analysis finished.')
@@ -373,7 +454,7 @@ class ModalAnalysis(Analysis):
 
     settings: ModalAnalysisSettings = field(default_factory=ModalAnalysisSettings)
 
-    def run(self, model: Model, load_case: ModalLoadCase) -> None:  # noqa: C901  # type: ignore
+    def run(self, model: Model, load_case: LoadCase) -> None:  # noqa: C901  # type: ignore
         """
         Run the modal analysis.
 
@@ -397,9 +478,9 @@ class ModalAnalysis(Analysis):
             # TODO(JVM): turn into a warning.
 
         self.log('Defining model in OpenSees.')
-        self.define_model_in_opensees(model, load_case)
+        self.opensees_define_model(model, load_case)
         self.log('Defining mass in OpenSees.')
-        self.define_mass_in_opensees(load_case)
+        self.opensees_define_mass(load_case)
 
         self.log('Setting up analysis.')
         if self.settings.system.lower() in {'sparsesym', 'sparsespd'}:
@@ -458,7 +539,7 @@ class ModalAnalysis(Analysis):
             ops.wipe()
             self.log(f'  Working on mode {mode}.')
             self.log('  Defining model in OpenSees.')
-            self.define_model_in_opensees(model, load_case)
+            self.opensees_define_model(model, load_case)
             mode_eigenvectors = eigenvectors.loc[mode, :].copy()
             # ignore the node-dof pairs with a fixed constraint.
             to_drop = []
@@ -493,7 +574,8 @@ class ModalAnalysis(Analysis):
             ops.analysis('Static')
 
             self.log('  Analyzing.')
-            ops.analyze(1)
+            out = ops.analyze(1)
+            assert out == 0, 'Analysis failed.'
             # The recorders should have captured the results here.
             self.log('  Retrieving data from recorder output.')
             # TODO(JVM): read basic_force_data from the recorder, add
@@ -508,9 +590,7 @@ class ModalAnalysis(Analysis):
                     mode_eigenvectors[some_node].to_numpy(),
                 )
 
-            basic_force_data[mode] = self.recorders[
-                'default_beamcolumn_basic_forces'
-            ].get_data()
+            basic_force_data[mode] = self.recorders['default_basic_force'].get_data()
             basic_force_data[mode].index.name = 'mode'
             basic_force_data[mode].index = [mode]
 
@@ -519,7 +599,7 @@ class ModalAnalysis(Analysis):
         ops.wipe()
         self.log('Storing data.')
         self.recorders['default_node'].set_data(eigenvectors)
-        self.recorders['default_beamcolumn_basic_forces'].set_data(
+        self.recorders['default_basic_force'].set_data(
             pd.concat(basic_force_data.values(), axis=0)
         )
         self.log('Analysis finished.')

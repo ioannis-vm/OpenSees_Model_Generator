@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from osmg.core.uid_object import UIDObject
+
 
 @dataclass
-class UniaxialMaterial:
+class UniaxialMaterial(UIDObject):
     """
     OpenSees uniaxialMaterial.
 
@@ -14,8 +16,12 @@ class UniaxialMaterial:
 
     """
 
-    uid: int
     name: str
+
+    def ops_args(self) -> list[object]:  # noqa: PLR6301
+        """Obtain the OpenSees arguments."""
+        msg = 'Subclasses should implement this.'
+        raise NotImplementedError(msg)
 
 
 @dataclass

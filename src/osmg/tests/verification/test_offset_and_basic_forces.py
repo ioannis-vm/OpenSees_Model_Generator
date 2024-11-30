@@ -67,7 +67,7 @@ def no_offset_2d() -> None:
 
     axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df = (
         load_case_registry.dead['test'].calculate_basic_forces(
-            'default_beamcolumn_basic_forces',
+            'default_basic_force',
             column_model.components.get_line_element_lengths(),
             ndm=2,
             num_stations=12,
@@ -128,7 +128,7 @@ def offset_2d() -> None:
 
     axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df = (
         load_case_registry.dead['test'].calculate_basic_forces(
-            'default_beamcolumn_basic_forces',
+            'default_basic_force',
             column_model.components.get_line_element_lengths(),
             ndm=2,
             num_stations=12,
@@ -193,7 +193,7 @@ def no_offset_3d() -> None:
     load_case_registry.run()
     axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df = (
         load_case_registry.dead['test'].calculate_basic_forces(
-            'default_beamcolumn_basic_forces',
+            'default_basic_force',
             column_model.components.get_line_element_lengths(),
             ndm=3,
             num_stations=12,
@@ -259,7 +259,7 @@ def offset_3d() -> None:
     load_case_registry.run()
     axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df = (
         load_case_registry.dead['test'].calculate_basic_forces(
-            'default_beamcolumn_basic_forces',
+            'default_basic_force',
             column_model.components.get_line_element_lengths(),
             ndm=3,
             num_stations=12,
@@ -295,6 +295,7 @@ def plot(model: Model2D | Model3D, load_case_registry: LoadCaseRegistry) -> None
     deformation_configuration = DeformationConfiguration(
         reference_length=model.reference_length(),
         ndf=ndf,
+        ndm=ndm,
         data=load_case_registry.dead['test']
         .analysis.recorders['default_node']
         .get_data(),
@@ -304,8 +305,9 @@ def plot(model: Model2D | Model3D, load_case_registry: LoadCaseRegistry) -> None
     basic_force_configuration = BasicForceConfiguration(
         reference_length=model.reference_length(),
         ndf=ndf,
+        ndm=ndm,
         data=load_case_registry.dead['test'].calculate_basic_forces(
-            'default_beamcolumn_basic_forces',
+            'default_basic_force',
             model.components.get_line_element_lengths(),
             ndm=ndm,
             num_stations=12,

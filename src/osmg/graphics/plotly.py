@@ -11,15 +11,18 @@ import plotly.graph_objects as go  # type: ignore
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 from osmg.core.osmg_collections import BeamColumnAssembly
 from osmg.geometry.transformations import (
+    local_axes_from_points_and_angle,
     offset_transformation_2d,
     offset_transformation_3d,
     transformation_matrix,
 )
 from osmg.graphics.objects import positioned_arrow
 from osmg.model_objects.element import (
+    Bar,
     BeamColumnElement,
     DispBeamColumn,
     ElasticBeamColumn,
+    TwoNodeLink,
 )
 
 if TYPE_CHECKING:
@@ -33,6 +36,12 @@ if TYPE_CHECKING:
 
 
 def _default_camera() -> dict[str, object]:
+    """
+    Return the default camera configuration for 3D plots.
+
+    Returns:
+        A dictionary defining the default camera settings.
+    """
     return {
         'up': {'x': 0, 'y': 0, 'z': 1},
         'center': {'x': 0, 'y': 0, 'z': 0},
@@ -54,6 +63,7 @@ class PlotConfiguration:
     """Base plot configuration class."""
 
     reference_length: float
+    ndm: int
     ndf: int
     data: pd.DataFrame
     step: int
@@ -206,12 +216,18 @@ class Figure3D:
         """Add elements to the figure."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         disp_beamcolumn_elements: list[DispBeamColumn] = []
+        bar_elements: list[Bar] = []
+        two_node_link_elements: list[TwoNodeLink] = []
         unknown_types: set[str] = set()
         for element in elements:
             if isinstance(element, ElasticBeamColumn):
                 elastic_beamcolumn_elements.append(element)
             elif isinstance(element, DispBeamColumn):
                 disp_beamcolumn_elements.append(element)
+            elif isinstance(element, Bar):
+                bar_elements.append(element)
+            elif isinstance(element, TwoNodeLink):
+                two_node_link_elements.append(element)
             elif element.__class__.__name__ not in unknown_types:
                 unknown_types = unknown_types.union({element.__class__.__name__})
         if unknown_types:
@@ -239,6 +255,108 @@ class Figure3D:
             deformation_configuration,
             overlay=overlay,
         )
+        self.add_bar_elements(
+            bar_elements,
+            deformation_configuration,
+            overlay=overlay,
+        )
+        # self.add_two_node_link_elements(
+        #     two_node_link_elements,
+        #     deformation_configuration,
+        #     overlay=overlay,
+        # )
+
+    def add_bar_elements(
+        self,
+        elements: list[Bar],
+        deformation_configuration: DeformationConfiguration | None = None,
+        *,
+        overlay: bool = False,
+    ) -> None:
+        """
+        Add bar elements to the 3D figure.
+
+        Args:
+            elements: A list of bar elements to be added to the figure.
+            deformation_configuration: Configuration for deformed shape plotting.
+                If None, the undeformed geometry is plotted.
+            overlay: If True, reduce the opacity of the plotted elements.
+        """
+        if overlay:
+            opacity = 0.5
+        else:
+            opacity = 1.0
+
+        if not elements:
+            return
+
+        coordinates_i: list[tuple[float, ...]] = []
+        coordinates_j: list[tuple[float, ...]] = []
+        for element in elements:
+            coordinates_i.append(element.nodes[0].coordinates)
+            coordinates_j.append(element.nodes[1].coordinates)
+        coordinates_i_array = np.array(coordinates_i)
+        coordinates_j_array = np.array(coordinates_j)
+        if deformation_configuration is not None:
+            displacements_i: list[tuple[float, ...]] = []
+            displacements_j: list[tuple[float, ...]] = []
+            for element in elements:
+                displacements_i.append(
+                    deformation_configuration.data.iloc[
+                        deformation_configuration.step
+                    ][element.nodes[0].uid]
+                )
+                displacements_j.append(
+                    deformation_configuration.data.iloc[
+                        deformation_configuration.step
+                    ][element.nodes[1].uid]
+                )
+            displacements_i_array = np.array(displacements_i)[
+                :, 0 : deformation_configuration.ndm
+            ]
+            displacements_j_array = np.array(displacements_j)[
+                :, 0 : deformation_configuration.ndm
+            ]
+            coordinates_i_array += (
+                displacements_i_array
+                * deformation_configuration.amplification_factor
+            )
+            coordinates_j_array += (
+                displacements_j_array
+                * deformation_configuration.amplification_factor
+            )
+
+        # Cast to 3D for plotting.
+        if coordinates_i_array.shape[1] == TWO_DIMENSIONAL:
+            coordinates_i_array = np.insert(coordinates_i_array, 1, 0.00, axis=1)
+            coordinates_j_array = np.insert(coordinates_j_array, 1, 0.00, axis=1)
+
+        if deformation_configuration is not None:
+            name = 'Bar Elements (Deformed)'
+        else:
+            name = 'Bar Elements'
+        data = self.find_data_by_name(name)
+        if not data:
+            # Initialize
+            data = {
+                'name': name,
+                'type': 'scatter3d',
+                'mode': 'lines',
+                'x': [],
+                'y': [],
+                'z': [],
+                'opacity': opacity,
+                'hoverinfo': 'skip',
+                'line': {'width': 5, 'color': '#0f24db'},
+            }
+            self.data.append(data)
+
+        for coordinates_i, coordinates_j in zip(
+            coordinates_i_array, coordinates_j_array
+        ):
+            data['x'].extend((coordinates_i[0], coordinates_j[0], None))  # type: ignore
+            data['y'].extend((coordinates_i[1], coordinates_j[1], None))  # type: ignore
+            data['z'].extend((coordinates_i[2], coordinates_j[2], None))  # type: ignore
 
     def add_beamcolumn_elements(
         self,
@@ -501,6 +619,7 @@ class Figure3D:
         """Add basic forces on linear elements."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         disp_beamcolumn_elements: list[DispBeamColumn] = []
+        bar_elements: list[Bar] = []
         for component in components:
             elements = list(component.elements.values())
             for element in elements:
@@ -510,6 +629,14 @@ class Figure3D:
                     elastic_beamcolumn_elements.append(element)
                 elif isinstance(element, DispBeamColumn):
                     disp_beamcolumn_elements.append(element)
+                elif isinstance(element, Bar):
+                    if element.transf_type != 'Corotational':
+                        # Crurently `localForce` is not a valid
+                        # recorder argument for corotational truss
+                        # elements, so we don't capture their basic
+                        # forces. A dedicated recorder with
+                        # `axialForce` can be used instead if needed.
+                        bar_elements.append(element)
 
         axial, shear_y, shear_z, torsion, moment_y, moment_z = (
             basic_force_configuration.data
@@ -522,7 +649,9 @@ class Figure3D:
         moment_z = moment_z.iloc[basic_force_configuration.step, :]
         force_factor = basic_force_configuration.force_to_length_factor
         moment_factor = basic_force_configuration.moment_to_length_factor
-        for element in elastic_beamcolumn_elements + disp_beamcolumn_elements:
+        for element in (
+            elastic_beamcolumn_elements + disp_beamcolumn_elements + bar_elements
+        ):
             element_length = element.clear_length()
             stations = (
                 axial[element.uid].index.get_level_values('station').to_numpy()
@@ -536,12 +665,19 @@ class Figure3D:
             x_values = element_length * stations
 
             # Define vertices positioned at the local axis origin.
-            x_axis = element.geomtransf.x_axis
-            y_axis = element.geomtransf.y_axis
-            z_axis = element.geomtransf.z_axis
-            start_point = (
-                np.array(element.nodes[0].coordinates) + element.geomtransf.offset_i
-            )
+            start_point = np.array(element.nodes[0].coordinates)
+
+            if isinstance(element, Bar):
+                x_axis, y_axis, z_axis = local_axes_from_points_and_angle(
+                    np.array(element.nodes[0].coordinates),
+                    np.array(element.nodes[1].coordinates),
+                    ang=0.00,
+                )
+            else:
+                x_axis = element.geomtransf.x_axis
+                y_axis = element.geomtransf.y_axis
+                z_axis = element.geomtransf.z_axis
+                start_point += element.geomtransf.offset_i
 
             if y_axis is None:  # 2D case
                 x_axis = np.insert(x_axis, 1, 0.00)
@@ -550,13 +686,6 @@ class Figure3D:
                 start_point = np.insert(start_point, 1, 0.00)
 
             tm = np.column_stack((x_axis, y_axis, z_axis))  # transformation matrix
-
-            # axial_global = (tm @ axial_local.T).T + start_point
-            # torsion_global = (tm @ torsion_local.T).T + start_point
-            # shear_y_global = (tm @ shear_y_local.T).T + start_point
-            # shear_z_global = (tm @ shear_z_local.T).T + start_point
-            # moment_y_global = (tm @ moment_y_local.T).T + start_point
-            # moment_z_global = (tm @ moment_z_local.T).T + start_point
 
             # Add axial load
 

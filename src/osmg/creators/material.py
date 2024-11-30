@@ -43,7 +43,7 @@ class ElasticMaterialCreator(MaterialCreator):
           The material.
         """
         return Elastic(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'Elastic',
             self.stiffness,
         )
@@ -97,7 +97,7 @@ class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
         )
 
         steel02_mat = Steel02(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_steel02_brace_mat',
             mat_fy,
             mat_e,
@@ -109,7 +109,7 @@ class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
         )
 
         return MaxStrainRange(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_maxstrainrange_brace_mat',
             steel02_mat,
             var_msr,
@@ -167,7 +167,7 @@ class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
         var_m = -0.300
 
         steel02_mat = Steel02(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_steel02_brace_mat',
             mat_fy,
             mat_e,
@@ -183,7 +183,7 @@ class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
         )
 
         return Fatigue(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_fatigue_brace_mat',
             steel02_mat,
             var_e0,
@@ -469,7 +469,7 @@ class SteelWIMKMaterialCreator(MaterialCreator):
 
         # new model
         return IMKBilin(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_IMK',
             stiffness * self.moment_modifier,
             theta_p_plus,
@@ -594,7 +594,7 @@ class SteelGravityShearTabCreator(MaterialCreator):
             dmgtype = 'energy'
 
         return Pinching4(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_gravity_shear_tab',
             m1_p,
             th_1_p,
@@ -691,7 +691,7 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
         )
 
         return Hysteretic(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_steel_W_PZ',
             (m1y, gamma_1),
             (m2y, gamma_2),
@@ -914,7 +914,7 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
             raise ValueError(msg)
 
         return Hysteretic(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_steel_W_pz_updated',
             *args,
         )
@@ -964,7 +964,7 @@ class SteelBraceGussetCreator(MaterialCreator):
         var_k_rot = var_e * var_i / self.l_b
         var_b = 0.01
         return Steel02(
-            self.model.uid_generator.new('uniaxial material'),
+            self.model.uid_generator,
             'auto_steel_gusset',
             var_my,
             var_k_rot,

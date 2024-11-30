@@ -35,12 +35,14 @@ class ZeroLengthCreator:
         creators.
 
         Returns:
-            dirs (list[int]): List of DOF directions.
-            mats (list[UniaxialMaterial]): Corresponding uniaxial materials.
+            directions (list[int]): List of DOF directions.
+            materials (list[UniaxialMaterial]): Corresponding uniaxial materials.
         """
-        dirs = list(self.material_creators.keys())
-        mats = [creator.generate() for creator in self.material_creators.values()]
-        return dirs, mats
+        directions = list(self.material_creators.keys())
+        materials = [
+            creator.generate() for creator in self.material_creators.values()
+        ]
+        return directions, materials
 
     def define_element(
         self,
@@ -55,12 +57,12 @@ class ZeroLengthCreator:
         Returns:
           The added element.
         """
-        dirs, mats = self.generate()
+        directions, materials = self.generate()
         return ZeroLength(
             uid_generator=self.uid_generator,
             nodes=[node_i, node_j],
-            mats=mats,
-            dirs=dirs,
+            materials=materials,
+            directions=directions,
             vecx=x_axis,
             vecyp=y_axis,
         )

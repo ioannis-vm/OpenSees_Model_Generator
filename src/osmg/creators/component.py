@@ -7,16 +7,21 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.core.common import EPSILON, STIFF, STIFF_ROT
+from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
+from osmg.creators.material import ElasticMaterialCreator
+from osmg.creators.zerolength import ZeroLengthCreator
 from osmg.geometry.transformations import (
     local_axes_from_points_and_angle,
     transformation_matrix,
 )
 from osmg.model_objects.element import (
+    Bar,
     DispBeamColumn,
     ElasticBeamColumn,
     GeomTransf,
     ModifiedStiffnessParameterConfig,
+    TwoNodeLink,
 )
 from osmg.model_objects.node import Node
 from osmg.model_objects.section import ElasticSection, FiberSection
@@ -24,7 +29,172 @@ from osmg.model_objects.section import ElasticSection, FiberSection
 if TYPE_CHECKING:
     from osmg.core.common import numpy_array
     from osmg.core.model import Model
-    from osmg.creators.zerolength import ZeroLengthCreator
+    from osmg.creators.material import MaterialCreator
+    from osmg.geometry.mesh import Mesh
+    from osmg.model_objects.uniaxial_material import UniaxialMaterial
+
+
+@dataclass(repr=False)
+class BarGenerator:
+    """
+    Bar generator object.
+
+    Introduces bar elements to a model.
+    Bar elements are linear elements that can only carry axial load.
+    """
+
+    model: Model = field(repr=False)
+
+    def add(
+        self,
+        tags: set[str],
+        node_i: Node,
+        node_j: Node,
+        eo_i: numpy_array,
+        eo_j: numpy_array,
+        transf_type: Literal['Linear', 'Corotational'],
+        area: float,
+        material: UniaxialMaterial,
+        outside_shape: Mesh | None = None,
+        weight_per_length: float = 0.00,
+    ) -> BarAssembly:
+        """
+        Add a bar element.
+
+        If offsets are required, they are implemented through the
+        addition of RigidLink elements.
+
+        Returns:
+          The added component.
+        """
+        assert node_i.uid != node_j.uid, 'Nodes need to be different.'
+        # TODO(JVM): check connectivity to avoid placing another
+        # element on the same pair of nodes (or warn).
+
+        # instantiate a component assembly
+        component = BarAssembly(
+            uid_generator=self.model.uid_generator,
+            tags=tags,
+        )
+        component.external_nodes.add(node_i)
+        component.external_nodes.add(node_j)
+
+        n_i = self._prepare_connection(node_i, eo_i, component)
+        n_j = self._prepare_connection(node_j, eo_j, component)
+
+        component.elements.add(
+            Bar(
+                uid_generator=self.model.uid_generator,
+                nodes=[n_i, n_j],
+                transf_type=transf_type,
+                area=area,
+                material=material,
+                outside_shape=outside_shape,
+                weight_per_length=weight_per_length,
+            )
+        )
+
+        # Adding the component in the end. (It needs to have external
+        # nodes before adding to the collection).
+        self.model.components.add(component)
+        return component
+
+    def _prepare_connection(
+        self, node_x: Node, eo_x: numpy_array, component: BarAssembly
+    ) -> Node:
+        """
+        Add auxiliary elements to account for offsets.
+
+        For each end of the bar element, creates a rigid link if an
+        offset exists, and returns the node to which the bar element
+        should connect to. This function is called twice, once for the
+        i-end and once for the j-end.  For purposes of clarity, the
+        index x will be used here, meaning either i or j.
+
+        Returns:
+          A newly created node, considering the specified offset.
+
+        Raises:
+          ValueError: If the model's dimensionality parameter is not
+          supported.
+        """
+        # if there is an offset at the x-end, create an internal node
+        # and add a rigidlink element to the component assembly
+
+        if np.linalg.norm(eo_x) < EPSILON:
+            # No action needed.
+            return node_x
+
+        # '2D Truss', '2D Frame', '3D Truss', '3D Frame'
+        material_creators: dict[int, MaterialCreator]
+        if self.model.dimensionality == '2D Truss':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+            }
+        elif self.model.dimensionality == '2D Frame':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF_ROT),
+            }
+        elif self.model.dimensionality == '3D Truss':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF),
+            }
+        elif self.model.dimensionality == '3D Frame':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF),
+                4: ElasticMaterialCreator(self.model, STIFF_ROT),
+                5: ElasticMaterialCreator(self.model, STIFF_ROT),
+                6: ElasticMaterialCreator(self.model, STIFF_ROT),
+            }
+        else:
+            msg = 'Invalid model dimensionality setting: {model.dimensionality}'
+            raise ValueError(msg)
+
+        n_x = Node(
+            uid_generator=self.model.uid_generator,
+            coordinates=tuple(x1 + x2 for x1, x2 in zip(node_x.coordinates, eo_x)),
+        )
+        component.internal_nodes.add(n_x)
+
+        directions, materials = ZeroLengthCreator(
+            uid_generator=self.model.uid_generator,
+            material_creators=material_creators,
+        ).generate()
+
+        # flip the nodes if the element is about to be defined
+        # upside down
+        if (
+            np.allclose(
+                np.array(node_x.coordinates[0:2]),
+                np.array(n_x.coordinates[0:2]),
+            )
+            and n_x.coordinates[2] > node_x.coordinates[2]
+        ):
+            first_node = n_x
+            second_node = node_x
+        else:
+            first_node = node_x
+            second_node = n_x
+
+        # Note: We don't orient the TwoNodeLink with `vecx`,
+        # `vecy`, since it's simply rigid. This also avoids having
+        # to separate cases for 2D/3D.
+        component.elements.add(
+            TwoNodeLink(
+                uid_generator=self.model.uid_generator,
+                nodes=[first_node, second_node],
+                materials=materials,
+                directions=directions,
+            )
+        )
+        return n_x
 
 
 @dataclass(repr=False)
@@ -272,7 +442,7 @@ class BeamColumnCreator:
         # uids_tuple = (*uids,)
         # assert uids_tuple not in self.model.component_connectivity()
 
-        # instantiate a component assembly and add it to the model.
+        # instantiate a component assembly
         component = BeamColumnAssembly(self.model.uid_generator, tags=tags)
         # populate the component assembly
         component.external_nodes.add(node_i)
@@ -291,7 +461,14 @@ class BeamColumnCreator:
             initial_deformation_config=initial_deformation_config,
         )
 
-        # Add in the end! It needs to have external nodes before
-        # adding to the collection.
+        # Adding the component in the end. (It needs to have external
+        # nodes before adding to the collection).
         self.model.components.add(component)
         return component
+
+
+@dataclass(repr=False)
+class TrussCreator:
+    """Introduces truss elements to a model."""
+
+    model: Model = field(repr=False)

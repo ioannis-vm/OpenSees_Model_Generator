@@ -32,7 +32,7 @@ class Model:
     """
 
     name: str
-    dimensionality: Literal['1D', '2D Truss', '2D Frame', '3D Truss', '3D Frame']
+    dimensionality: Literal['2D Truss', '2D Frame', '3D Truss', '3D Frame']
     uid_generator: UIDGenerator = field(default_factory=UIDGenerator)
     nodes: NodeCollection = field(default_factory=NodeCollection)
     components: ComponentAssemblyCollection = field(
