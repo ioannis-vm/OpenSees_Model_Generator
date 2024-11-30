@@ -265,12 +265,35 @@ class Analysis:
             if True in fix:
                 ops.fix(uid, *[int(x) for x in fix])
 
+    @staticmethod
+    def opensees_define_node_constraints(model: Model, load_case: LoadCase) -> None:
+        """
+        Define node constraints.
+
+        Raises:
+          ValueError: If the model dimensionality is not supported.
+        """
+        if not load_case.rigid_diaphragm:
+            return
+
+        for parent_node_uid, children_node_uids in load_case.rigid_diaphragm.items():
+            if model.dimensionality in {'3D Frame', '3D Truss'}:
+                ops.rigidDiaphragm(3, parent_node_uid, *children_node_uids)
+            elif model.dimensionality in {'2D Frame', '2D Truss'}:
+                for child_node_uid in children_node_uids:
+                    ops.equalDOF(parent_node_uid, child_node_uid, 1)
+            else:
+                msg = 'Unsupported model dimensionality: {model.dimensionality}'
+                raise ValueError(msg)
+
     def opensees_define_model(self, model: Model, load_case: LoadCase) -> None:
         """Define the model in OpenSees."""
         self.opensees_instantiate(model)
         self.opensees_define_nodes(model)
         self.opensees_define_elements(model)
         self.opensees_define_node_restraints(model, load_case)
+        self.opensees_define_node_constraints(model, load_case)
+        self.opensees_define_node_constraints(model, load_case)
         if not self.settings.disable_default_recorders:
             self.define_default_recorders(model)
         self.opensees_define_recorders()
@@ -585,10 +608,12 @@ class ModalAnalysis(Analysis):
             for some_node in mode_eigenvectors.index.get_level_values(
                 'node'
             ).unique():
-                assert np.allclose(
-                    np.array(ops.nodeDisp(some_node)),
-                    mode_eigenvectors[some_node].to_numpy(),
-                )
+                for check_dof in range(1, ndf + 1):
+                    if (node, check_dof) in mode_eigenvectors:
+                        assert np.allclose(
+                            np.array(ops.nodeDisp(some_node))[check_dof - 1],
+                            mode_eigenvectors[some_node, check_dof],
+                        )
 
             basic_force_data[mode] = self.recorders['default_basic_force'].get_data()
             basic_force_data[mode].index.name = 'mode'

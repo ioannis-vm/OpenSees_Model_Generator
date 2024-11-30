@@ -7,7 +7,7 @@ Force units: lb
 
 import numpy as np
 
-from osmg.analysis.common import UDL
+from osmg.analysis.common import PointMass
 from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
@@ -39,12 +39,11 @@ grids.add_grid('C', 25.00 * 2.0 * 12.00)
 grids.add_grid('D', 25.00 * 3.0 * 12.00)
 grids.add_grid('E', 25.00 * 4.0 * 12.00)
 grids.add_grid('F', 25.00 * 5.0 * 12.00)
+grids.add_grid('LC', 25.00 * 6.0 * 12.00)
 
 # Add primary nodes
-# for level in ('0', '1', '2', '3', '4'):
-#     for grid in ('A', 'B', 'C', 'D', 'E', 'F'):
-for level in ('0', '1'):
-    for grid in ('A', 'B'):
+for level in ('0', '1', '2', '3', '4'):
+    for grid in ('A', 'B', 'C', 'D', 'E', 'F', 'LC'):
         if (grid == 'A' and level == '4') or (grid == 'F' and level == '4'):
             continue
         frame.nodes.add(
@@ -92,14 +91,10 @@ beam_section = section_creator.load_elastic_section(
 
 # Add columns
 bcg = BeamColumnCreator(frame, 'elastic')
-# added_columns = []
-# for level in ('1', '2', '3', '4'):
-#     previous_level = str(int(level) - 1)
 added_columns = []
-for level in ('1',):
+for level in ('1', '2', '3', '4'):
     previous_level = str(int(level) - 1)
-    # for grid in ('A', 'B', 'C', 'D', 'E', 'F'):
-    for grid in ('A', 'B'):
+    for grid in ('A', 'B', 'C', 'D', 'E', 'F'):
         if level == '4' and (grid in {'A', 'F'}):
             continue
         col = bcg.generate_plain_component_assembly(
@@ -126,10 +121,8 @@ for level in ('1',):
 
 # Add beams
 added_beams = []
-# for level in ('1', '2', '3', '4'):
-#     for grid_i, grid_j in zip(('A', 'B', 'C', 'D', 'E'), ('B', 'C', 'D', 'E', 'F')):
-for level in ('1',):
-    for grid_i, grid_j in zip(('A',), ('B',)):
+for level in ('1', '2', '3', '4'):
+    for grid_i, grid_j in zip(('A', 'B', 'C', 'D', 'E'), ('B', 'C', 'D', 'E', 'F')):
         if level == '4' and (grid_i == 'A' or grid_j == 'F'):
             continue
         beam = bcg.generate_plain_component_assembly(
@@ -180,26 +173,71 @@ brg.add(
 )
 
 
+# Add leaning column
+leaning_column_area = 1e4  # in2
+for level in ('1', '2', '3', '4'):
+    previous_level = str(int(level) - 1)
+    brg.add(
+        tags=set('Truss'),
+        node_i=frame.nodes.search_by_coordinates_or_raise(
+            (
+                grids.get_grid_location('LC'),
+                grids.get_level_elevation(level),
+            )
+        ),
+        node_j=frame.nodes.search_by_coordinates_or_raise(
+            (
+                grids.get_grid_location('LC'),
+                grids.get_level_elevation(previous_level),
+            )
+        ),
+        eo_i=np.array((0.00, 0.00)),
+        eo_j=np.array((0.00, 0.00)),
+        transf_type='Linear',
+        area=leaning_column_area,
+        material=ElasticMaterialCreator(frame, stiffness=e_modulus).generate(),
+        outside_shape=None,
+        weight_per_length=0.00,
+    )
+
+fig = Figure3D(Figure3DConfiguration(ndm=2))
+fig.add_nodes(list(frame.nodes.values()), 'primary')
+fig.add_components(list(frame.components.values()))
+fig.show()
+
+
 # Create a load case registry
 load_case_registry = LoadCaseRegistry(frame)
 
 # Create a load case and add fixed supports
 fixed_support = FixedSupport((True, True, True))
-load_case_registry.dead['dead_1'].add_supports_at_level(frame, fixed_support, '0')
+
+# load_case_registry.dead['dead_1'].add_supports_at_level(frame, fixed_support, '0')
 # load_case_registry.dead['dead_2'].add_supports_at_level(frame, fixed_support, '0')
-# load_case_registry.modal['modal'].add_supports_at_level(frame, fixed_support, '0')
+load_case_registry.modal['modal'].add_supports_at_level(frame, fixed_support, '0')
 
-# Example of how to retrieve a primary node:
-# Locate the nodes at 'A'-'Level 1' and 'B'-'Level 1'
-frame.nodes.search_by_coordinates_or_raise(
-    (grids.get_grid_location('A'), grids.get_level_elevation('0'))
-)
+# Add rigid diaphragm
+for level in ('1', '2', '3', '4'):
+    parent_node = frame.nodes.search_by_coordinates_or_raise(
+        (
+            grids.get_grid_location('LC'),
+            grids.get_level_elevation(level),
+        )
+    )
+    load_case_registry.modal['modal'].define_rigid_diaphragm(frame, parent_node)
 
-# `dead_1`: Add UDLs to the beams
-for beam in added_beams:
-    load_case_registry.dead['dead_1'].load_registry.element_udl[beam.uid] = UDL(
-        (0.0, -10.00)
-    )  # lb/in
+
+# # Example of how to retrieve a primary node:
+# # Locate the nodes at 'A'-'Level 1' and 'B'-'Level 1'
+# frame.nodes.search_by_coordinates_or_raise(
+#     (grids.get_grid_location('A'), grids.get_level_elevation('0'))
+# )
+
+# # `dead_1`: Add UDLs to the beams
+# for beam in added_beams:
+#     load_case_registry.dead['dead_1'].load_registry.element_udl[beam.uid] = UDL(
+#         (0.0, -10.00)
+#     )  # lb/in
 
 # # `dead_2`: Add a concentrated point load at 'A'-'Level 1'
 # load_case_registry.dead['dead_2'].load_registry.nodal_loads[
@@ -213,16 +251,16 @@ for beam in added_beams:
 #     (2000.0, 0.00, 0.00)  # lb
 # )
 
-# # `modal`: Add mass at a single node.
-# load_case_registry.modal['modal'].mass_registry[
-#     frame.nodes.search_by_coordinates_or_raise(
-#         (
-#             grids.get_grid_location('A'),
-#             grids.get_level_elevation('1'),
-#         )
-#     ).uid
-# ] = PointMass((+3.0e3 / 386.22, +3.0e3 / 386.22, +3.0e3 / 386.22))
-# load_case_registry.modal['modal'].analysis.settings.num_modes = 3
+# `modal`: Add mass at a single node.
+load_case_registry.modal['modal'].mass_registry[
+    frame.nodes.search_by_coordinates_or_raise(
+        (
+            grids.get_grid_location('A'),
+            grids.get_level_elevation('1'),
+        )
+    ).uid
+] = PointMass((+3.0e3 / 386.22, +3.0e3 / 386.22, +3.0e3 / 386.22))
+load_case_registry.modal['modal'].analysis.settings.num_modes = 3
 
 # # Example: Add an extra recorder
 # load_case_registry.dead['dead_1'].analysis.recorders['node_envelope'] = NodeRecorder(
@@ -250,8 +288,8 @@ for beam in added_beams:
 # Run analysis
 load_case_registry.run()
 
-result_dir = load_case_registry.dead['dead_1'].analysis.settings.result_directory
-print(f'Result directory `dead_1`: {result_dir}')  # noqa: T201
+# result_dir = load_case_registry.dead['dead_1'].analysis.settings.result_directory
+# print(f'Result directory `dead_1`: {result_dir}')
 # result_dir = load_case_registry.dead['dead_2'].analysis.settings.result_directory
 # print(f'Result directory `dead_2`: {result_dir}')
 
@@ -281,7 +319,7 @@ deformation_configuration = DeformationConfiguration(
     reference_length=frame.reference_length(),
     ndf=3,
     ndm=2,
-    data=load_case_registry.dead['dead_1']
+    data=load_case_registry.modal['modal']
     .analysis.recorders['default_node']
     .get_data(),
     step=0,
@@ -291,15 +329,15 @@ basic_force_configuration = BasicForceConfiguration(
     reference_length=frame.reference_length(),
     ndm=2,
     ndf=3,
-    data=load_case_registry.dead['dead_1'].calculate_basic_forces(
+    data=load_case_registry.modal['modal'].calculate_basic_forces(
         'default_basic_force',
         frame.components.get_line_element_lengths(),
         ndm=2,
         num_stations=12,
     ),
     step=0,
-    force_to_length_factor=1.0e-2,
-    moment_to_length_factor=1.0e-3,
+    force_to_length_factor=1.0e-4,
+    moment_to_length_factor=1.0e-5,
 )
 fig = Figure3D(Figure3DConfiguration(ndm=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
@@ -309,7 +347,7 @@ fig.add_components(list(frame.components.values()), overlay=True)
 fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
 fig.add_components(list(frame.components.values()), deformation_configuration)
 fig.add_supports(
-    frame.nodes, load_case_registry.dead['dead_1'].fixed_supports, symbol_size=12.00
+    frame.nodes, load_case_registry.modal['modal'].fixed_supports, symbol_size=12.00
 )
 # fig.add_udl(
 #     load_case_registry.dead['dead_2'].load_registry.element_udl,
@@ -350,6 +388,7 @@ TODO
 
 Next steps:
 - [X] Load Case Combinations
+- [ ] Add back rigid diaphragm.
 - [ ] Add back analysis types
   - [X] modal (see if I can get basic forces by imposing
       displacements. (Yes!))

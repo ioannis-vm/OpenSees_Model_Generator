@@ -20,6 +20,7 @@ from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 if TYPE_CHECKING:
     from osmg.analysis.common import UDL, PointLoad, PointMass
     from osmg.core.model import Model, Model2D, Model3D
+    from osmg.model_objects.node import Node
 
 
 def ensure_minmax_level_exists_or_add(data: pd.DataFrame) -> pd.DataFrame:
@@ -164,6 +165,7 @@ class LoadCase:
     fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
     analysis: Analysis = field(default_factory=Analysis)
+    rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
 
     def add_supports_at_level(
         self,
@@ -196,6 +198,40 @@ class LoadCase:
                 else:
                     msg = f'Unsupported object type: {type(support)}'
                     raise TypeError(msg)
+
+    def define_rigid_diaphragm(
+        self,
+        model: Model2D | Model3D,
+        primary_node: Node,
+    ) -> None:
+        """
+        Define a rigid diaphragm using a specified parent node.
+
+        Raises:
+          ValueError: If the model dimensionality is not supported.
+        """
+        elevation = primary_node.coordinates[-1]
+        self.rigid_diaphragm[primary_node.uid] = tuple(
+            node.uid
+            for node in model.nodes.values()
+            if np.abs(node.coordinates[-1] - elevation) < EPSILON
+            and node.uid != primary_node.uid
+        )
+        if model.dimensionality == '3D Frame':
+            self.fixed_supports[primary_node.uid] = FixedSupport(
+                (False, False, True, True, True, False)
+            )
+        elif model.dimensionality == '3D Truss':
+            self.fixed_supports[primary_node.uid] = FixedSupport(
+                (False, False, True)
+            )
+        elif model.dimensionality == '2D Frame':
+            self.fixed_supports[primary_node.uid] = FixedSupport((False, True, True))
+        elif model.dimensionality == '2D Truss':
+            self.fixed_supports[primary_node.uid] = FixedSupport((False, True))
+        else:
+            msg = 'Unsupported model dimensionality: {model.dimensionality}'
+            raise ValueError(msg)
 
     def calculate_basic_forces(  # noqa: C901
         self,
