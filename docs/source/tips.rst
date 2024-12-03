@@ -65,6 +65,9 @@ lines at the intended location:
    import pdb
    pdb.set_trace()
 
+   # or, alternatively:
+   breakpoint()
+
 .. note::
 
    Pro tip: These two lines can be added under an if block,
