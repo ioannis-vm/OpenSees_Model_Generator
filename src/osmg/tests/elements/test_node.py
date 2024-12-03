@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock
 
-from osmg.graphics.visibility import NodeVisibility
 from osmg.model_objects.node import Node
 
 
@@ -22,7 +21,6 @@ class TestNode:
 
         assert node.coordinates == (0.0, 0.0, 0.0)
         assert node.uid == 0
-        assert isinstance(node.visibility, NodeVisibility)
         self.mock_uid_generator.new.assert_called_once_with(node)
 
     def test_node_uid_generation(self) -> None:
@@ -63,10 +61,3 @@ class TestNode:
 
         expected_repr = 'Node object\n  uid: 0\n  coordinates: (1.0, 1.0, 1.0)\n'
         assert repr(node) == expected_repr
-
-    def test_node_default_visibility(self) -> None:
-        """Test that the default NodeVisibility object is assigned."""
-        node = Node(
-            coordinates=(0.0, 0.0, 0.0), uid_generator=self.mock_uid_generator
-        )
-        assert isinstance(node.visibility, NodeVisibility)

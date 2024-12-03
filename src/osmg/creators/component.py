@@ -35,15 +35,66 @@ if TYPE_CHECKING:
 
 
 @dataclass(repr=False)
-class BarGenerator:
+class BaseGenerator:
+    """Base class for component generators."""
+
+    model: Model = field(repr=False)
+
+    def define_zerolength_fixed_material_creators(
+        self,
+    ) -> dict[int, MaterialCreator]:
+        """
+        Define material creators for rigid links.
+
+        Returns:
+          Material creator for a rigid uniaxial material for each DOF.
+
+        Raises:
+          ValueError: If the model's dimensionality setting is
+          not recognized.
+        """
+        # '2D Truss', '2D Frame', '3D Truss', '3D Frame'
+        material_creators: dict[int, MaterialCreator]
+        if self.model.dimensionality == '2D Truss':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+            }
+        elif self.model.dimensionality == '2D Frame':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF_ROT),
+            }
+        elif self.model.dimensionality == '3D Truss':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF),
+            }
+        elif self.model.dimensionality == '3D Frame':
+            material_creators = {
+                1: ElasticMaterialCreator(self.model, STIFF),
+                2: ElasticMaterialCreator(self.model, STIFF),
+                3: ElasticMaterialCreator(self.model, STIFF),
+                4: ElasticMaterialCreator(self.model, STIFF_ROT),
+                5: ElasticMaterialCreator(self.model, STIFF_ROT),
+                6: ElasticMaterialCreator(self.model, STIFF_ROT),
+            }
+        else:
+            msg = 'Invalid model dimensionality setting: {model.dimensionality}'
+            raise ValueError(msg)
+        return material_creators
+
+
+@dataclass(repr=False)
+class BarGenerator(BaseGenerator):
     """
     Bar generator object.
 
     Introduces bar elements to a model.
     Bar elements are linear elements that can only carry axial load.
     """
-
-    model: Model = field(repr=False)
 
     def add(
         self,
@@ -113,10 +164,6 @@ class BarGenerator:
 
         Returns:
           A newly created node, considering the specified offset.
-
-        Raises:
-          ValueError: If the model's dimensionality parameter is not
-          supported.
         """
         # if there is an offset at the x-end, create an internal node
         # and add a rigidlink element to the component assembly
@@ -126,43 +173,13 @@ class BarGenerator:
             return node_x
 
         # '2D Truss', '2D Frame', '3D Truss', '3D Frame'
-        material_creators: dict[int, MaterialCreator]
-        if self.model.dimensionality == '2D Truss':
-            material_creators = {
-                1: ElasticMaterialCreator(self.model, STIFF),
-                2: ElasticMaterialCreator(self.model, STIFF),
-            }
-        elif self.model.dimensionality == '2D Frame':
-            material_creators = {
-                1: ElasticMaterialCreator(self.model, STIFF),
-                2: ElasticMaterialCreator(self.model, STIFF),
-                3: ElasticMaterialCreator(self.model, STIFF_ROT),
-            }
-        elif self.model.dimensionality == '3D Truss':
-            material_creators = {
-                1: ElasticMaterialCreator(self.model, STIFF),
-                2: ElasticMaterialCreator(self.model, STIFF),
-                3: ElasticMaterialCreator(self.model, STIFF),
-            }
-        elif self.model.dimensionality == '3D Frame':
-            material_creators = {
-                1: ElasticMaterialCreator(self.model, STIFF),
-                2: ElasticMaterialCreator(self.model, STIFF),
-                3: ElasticMaterialCreator(self.model, STIFF),
-                4: ElasticMaterialCreator(self.model, STIFF_ROT),
-                5: ElasticMaterialCreator(self.model, STIFF_ROT),
-                6: ElasticMaterialCreator(self.model, STIFF_ROT),
-            }
-        else:
-            msg = 'Invalid model dimensionality setting: {model.dimensionality}'
-            raise ValueError(msg)
-
         n_x = Node(
             uid_generator=self.model.uid_generator,
             coordinates=tuple(x1 + x2 for x1, x2 in zip(node_x.coordinates, eo_x)),
         )
         component.internal_nodes.add(n_x)
 
+        material_creators = self.define_zerolength_fixed_material_creators()
         directions, materials = ZeroLengthCreator(
             uid_generator=self.model.uid_generator,
             material_creators=material_creators,
@@ -199,13 +216,38 @@ class BarGenerator:
 
 @dataclass(repr=False)
 class HingeConfig:
-    """Configuration for `generate_hinged_component_assembly`."""
+    """
+    Configuration for `generate_hinged_component_assembly`.
+
+    Only ZeroLength elements at the ends of the beamcolumn sequence.
+    """
 
     zerolength_creator: ZeroLengthCreator
+
+
+@dataclass(repr=False)
+class HingeConfigWithBeamColumnElement(HingeConfig):
+    """
+    Configuration for `generate_hinged_component_assembly`.
+
+    Two additional beamcolumn sequences, one before the first and one
+    after the second ZeroLength element.
+    """
+
     distance: float
     n_sub: int
-    element_type: Literal['elastic', 'disp']
-    transf_type: Literal['Linear', 'Corotational', 'PDelta']
+
+
+@dataclass(repr=False)
+class HingeConfigWithLink(HingeConfig):
+    """
+    Configuration for `generate_hinged_component_assembly`.
+
+    Two rigid links, one before the first and one after the second
+    ZeroLength element.
+    """
+
+    distance: float
 
 
 @dataclass(repr=False)
@@ -235,10 +277,9 @@ class InitialDeformationConfig:
 
 
 @dataclass(repr=False)
-class BeamColumnCreator:
+class BeamColumnCreator(BaseGenerator):
     """Introduces beamcolumn elements to a model."""
 
-    model: Model = field(repr=False)
     element_type: Literal['elastic', 'disp']
 
     def __post_init__(self) -> None:
@@ -436,12 +477,6 @@ class BeamColumnCreator:
           The created component assembly.
         """
         assert node_i.uid != node_j.uid, 'Nodes need to be different.'
-        # TODO(JVM): restore this check
-        # uids = [node.uid for node in (node_i, node_j)]
-        # uids.sort()
-        # uids_tuple = (*uids,)
-        # assert uids_tuple not in self.model.component_connectivity()
-
         # instantiate a component assembly
         component = BeamColumnAssembly(self.model.uid_generator, tags=tags)
         # populate the component assembly
@@ -464,6 +499,199 @@ class BeamColumnCreator:
         # Adding the component in the end. (It needs to have external
         # nodes before adding to the collection).
         self.model.components.add(component)
+        return component
+
+    def generate_hinged_component_assembly(
+        self,
+        tags: set[str],
+        node_i: Node,
+        node_j: Node,
+        n_sub: int,
+        eo_i: numpy_array,
+        eo_j: numpy_array,
+        section: ElasticSection | FiberSection,
+        transf_type: Literal['Linear', 'Corotational', 'PDelta'],
+        angle: float,
+        initial_deformation_config: InitialDeformationConfig | None = None,
+        modified_stiffness_config: ModifiedStiffnessParameterConfig | None = None,
+        hinge_config_i: HingeConfig
+        | HingeConfigWithBeamColumnElement
+        | HingeConfigWithLink
+        | None = None,
+        hinge_config_j: HingeConfig
+        | HingeConfigWithBeamColumnElement
+        | HingeConfigWithLink
+        | None = None,
+    ) -> BeamColumnAssembly:
+        """
+        Component assembly with hinges at the ends.
+
+        Generates a component assembly that is comprised of beam-column
+        elements connected in series with nonlinear springs attached
+        at the ends.
+
+        Returns:
+            The defined component.
+        """
+        assert node_i.uid != node_j.uid, 'Nodes need to be different.'
+
+        # Instantiate the component assembly
+        component = BeamColumnAssembly(self.model.uid_generator, tags=tags)
+        component.external_nodes.add(node_i)
+        component.external_nodes.add(node_j)
+
+        p_i = np.array(node_i.coordinates) + eo_i
+        p_j = np.array(node_j.coordinates) + eo_j
+        x_axis, y_axis, _ = local_axes_from_points_and_angle(p_i, p_j, angle)
+
+        def process_hinge_config(
+            node: Node,
+            offset: numpy_array,
+            hinge_config: HingeConfig
+            | HingeConfigWithBeamColumnElement
+            | HingeConfigWithLink
+            | None,
+            *,
+            is_end: bool,
+        ) -> tuple[Node, numpy_array]:
+            """
+            Process hinge configuration for a given node.
+
+            This method handles the hinge configuration by creating
+            nodes, assigning offsets, and adding elements to the
+            component assembly based on the type of hinge
+            configuration provided.
+
+            Args:
+                node: The node at which the hinge is to be
+                  applied.
+                offset: The offset for the node's location.
+                hinge_config: The hinge configuration for the
+                  node. Can be one of the supported hinge types or
+                  `None` if no hinge is applied.
+                is_end: Whether the node is at the end of the
+                  beam-column assembly.
+
+            Returns:
+                tuple
+                - The connection node after processing the hinge configuration.
+                - The offset to be applied to the connection node.
+
+            Raises:
+                ValueError: If an offset is specified with
+                  `HingeConfig` (not possible).
+                TypeError: If the provided `hinge_config` is of an unsupported type.
+            """
+            if hinge_config is None:
+                return node, offset
+
+            location = p_i if not is_end else p_j
+            direction = x_axis if not is_end else -x_axis
+
+            if isinstance(hinge_config, HingeConfig):
+                if np.linalg.norm(offset) > EPSILON:
+                    msg = "Can't have offset with `HingeConfig`. Use `HingeConfigWithElement`."
+                    raise ValueError(msg)
+                hinge_location = location
+                nh_out = node
+                nh_in = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                component.internal_nodes.add(nh_in)
+            elif isinstance(hinge_config, HingeConfigWithBeamColumnElement):
+                hinge_location = location + direction * hinge_config.distance
+                nh_out = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                nh_in = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                component.internal_nodes.add(nh_out)
+                component.internal_nodes.add(nh_in)
+
+                self.add_beamcolumn_elements_in_series(
+                    component=component,
+                    node_i=node,
+                    node_j=nh_out,
+                    eo_i=offset,
+                    eo_j=np.zeros(3),
+                    n_sub=hinge_config.n_sub,
+                    transf_type=transf_type,
+                    section=section,
+                    element_type=self.element_type,
+                    angle=angle,
+                    deformation_factor=0.00,
+                    force_to_length_factor=0.00,
+                )
+                return nh_in, np.zeros(3)
+            elif isinstance(hinge_config, HingeConfigWithLink):
+                hinge_location = location + direction * hinge_config.distance
+                nh_out = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                nh_in = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                component.internal_nodes.add(nh_out)
+                component.internal_nodes.add(nh_in)
+
+                material_creators = self.define_zerolength_fixed_material_creators()
+                directions, materials = ZeroLengthCreator(
+                    uid_generator=self.model.uid_generator,
+                    material_creators=material_creators,
+                ).generate()
+
+                component.elements.add(
+                    TwoNodeLink(
+                        uid_generator=self.model.uid_generator,
+                        nodes=[node, nh_out],
+                        materials=materials,
+                        directions=directions,
+                    )
+                )
+                return nh_out, np.zeros(3)
+            else:
+                msg = f'Invalid hinge_config type: {type(hinge_config)}'
+                raise TypeError(msg)
+
+            component.elements.add(
+                hinge_config.zerolength_creator.define_element(
+                    node_i=nh_out,
+                    node_j=nh_in,
+                    x_axis=direction,
+                    y_axis=y_axis,
+                )
+            )
+            return node, offset
+
+        # Process hinge configurations for node_i and node_j
+        conn_node_i, conn_eo_i = process_hinge_config(
+            node_i, eo_i, hinge_config_i, is_end=False
+        )
+        conn_node_j, conn_eo_j = process_hinge_config(
+            node_j, eo_j, hinge_config_j, is_end=True
+        )
+
+        # Add the final beam-column elements
+        self.add_beamcolumn_elements_in_series(
+            component=component,
+            node_i=conn_node_i,
+            node_j=conn_node_j,
+            eo_i=conn_eo_i,
+            eo_j=conn_eo_j,
+            n_sub=n_sub,
+            transf_type=transf_type,
+            section=section,
+            angle=angle,
+            initial_deformation_config=initial_deformation_config,
+            modified_stiffness_config=modified_stiffness_config,
+        )
+
         return component
 
 

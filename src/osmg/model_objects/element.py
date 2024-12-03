@@ -53,8 +53,8 @@ class ZeroLength(Element):
 
     materials: list[UniaxialMaterial]
     directions: list[int]
-    vecx: numpy_array
-    vecyp: numpy_array
+    vecx: numpy_array | None
+    vecyp: numpy_array | None
 
     def ops_args(self) -> list[object]:
         """
@@ -63,7 +63,7 @@ class ZeroLength(Element):
         Returns:
           The OpenSees arguments.
         """
-        return [
+        output = [
             'zeroLength',
             self.uid,
             *[n.uid for n in self.nodes],
@@ -73,10 +73,19 @@ class ZeroLength(Element):
             *self.directions,
             '-doRayleigh',
             1,
-            '-orient',
-            *self.vecx,
-            *self.vecyp,
         ]
+        if self.vecx is not None or self.vecyp is not None:
+            assert self.vecx is not None
+            assert self.vecyp is not None
+            output.extend(
+                [
+                    '-orient',
+                    *self.vecx,
+                    *self.vecyp,
+                ]
+            )
+
+        return output
 
     def __repr__(self) -> str:
         """

@@ -14,13 +14,13 @@ class TestBaseGridSystem:
         """Test adding and retrieving a level."""
         grid_system = BaseGridSystem[str]()
         grid_system.add_level('Ground Floor', 0.0)
-        assert grid_system.get_level_elevation('Ground Floor') == 0.0
+        assert grid_system.get_level('Ground Floor').elevation() == 0.0  # type: ignore
 
     def test_retrieve_nonexistent_level(self) -> None:
         """Test retrieving a nonexistent level raises ValueError."""
         grid_system = BaseGridSystem[str]()
         with pytest.raises(ValueError, match="Level 'Basement' does not exist."):
-            grid_system.get_level_elevation('Basement')
+            grid_system.get_level('Basement').elevation()  # type: ignore
 
 
 class TestGridSystem:
@@ -74,10 +74,10 @@ class TestGridSystem2D:
         """Test adding and retrieving a level."""
         grid_system = GridSystem2D()
         grid_system.add_level('Ground Floor', 0.0)
-        assert grid_system.get_level_elevation('Ground Floor') == 0.0
+        assert grid_system.get_level('Ground Floor').elevation() == 0.0  # type: ignore
 
     def test_retrieve_nonexistent_level(self) -> None:
         """Test retrieving a nonexistent level raises ValueError."""
         grid_system = GridSystem2D()
         with pytest.raises(ValueError, match="Level 'Roof' does not exist."):
-            grid_system.get_level_elevation('Roof')
+            grid_system.get_level('Roof').elevation()  # type: ignore

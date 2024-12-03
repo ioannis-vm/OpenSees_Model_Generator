@@ -16,14 +16,3 @@ class ElementVisibility:
     hidden_at_line_plots: bool = field(default=False)
     skip_opensees_definition: bool = field(default=False)
     hidden_basic_forces: bool = field(default=False)
-
-
-@dataclass
-class NodeVisibility:
-    """
-    Node visibility object.
-
-    Controls whether a node is displayed in the plots
-    """
-
-    connected_to_zerolength: bool = field(default=False)

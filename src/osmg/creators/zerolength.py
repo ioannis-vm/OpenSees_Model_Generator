@@ -49,7 +49,7 @@ class ZeroLengthCreator:
         node_i: Node,
         node_j: Node,
         x_axis: numpy_array,
-        y_axis: numpy_array,
+        y_axis: numpy_array | None,
     ) -> ZeroLength:
         """
         Define a zerolength element.

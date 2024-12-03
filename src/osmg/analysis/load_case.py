@@ -188,7 +188,7 @@ class LoadCase:
             type.
         """
         nodes = list(model.nodes.values())
-        level_elevation = model.grid_system.get_level_elevation(level_tag)
+        level_elevation = model.grid_system.get_level(level_tag).elevation()
         for node in nodes:
             if np.abs(node.coordinates[-1] - level_elevation) < EPSILON:
                 if isinstance(support, FixedSupport):

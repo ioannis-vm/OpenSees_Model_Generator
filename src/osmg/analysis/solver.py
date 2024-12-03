@@ -476,6 +476,7 @@ class ModalAnalysis(Analysis):
     """Modal analysis."""
 
     settings: ModalAnalysisSettings = field(default_factory=ModalAnalysisSettings)
+    periods: list[float] = field(default_factory=list)
 
     def run(self, model: Model, load_case: LoadCase) -> None:  # noqa: C901  # type: ignore
         """
@@ -519,15 +520,12 @@ class ModalAnalysis(Analysis):
         ops.constraints(*self.settings.constraints)
 
         self.log('Analyzing.')
-        # lambda_values = np.array(ops.eigen(self.settings.num_modes))
-        # TODO(JVM): remove solver assignment
-        lambda_values = np.array(
-            ops.eigen('-fullGenLapack', self.settings.num_modes)
-        )
+        lambda_values = np.array(ops.eigen(self.settings.num_modes))
 
         self.log('Calculating periods.')
         omega_values = np.sqrt(lambda_values)
         periods = 2.0 * np.pi / omega_values
+        self.periods = periods
         self.log(f'Periods: {periods}')
 
         self.log('Retrieving node eigenvectors.')

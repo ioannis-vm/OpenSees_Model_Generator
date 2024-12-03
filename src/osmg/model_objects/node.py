@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from functools import total_ordering
 from typing import Self
 
 from osmg.core.uid_object import UIDObject
-from osmg.graphics.visibility import NodeVisibility
 
 
 @total_ordering
@@ -28,7 +27,6 @@ class Node(UIDObject):
     """
 
     coordinates: tuple[float, ...]
-    visibility: NodeVisibility = field(default_factory=NodeVisibility)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
