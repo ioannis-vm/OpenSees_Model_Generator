@@ -35,8 +35,8 @@ if TYPE_CHECKING:
 
 
 @dataclass(repr=False)
-class BaseGenerator:
-    """Base class for component generators."""
+class BaseCreator:
+    """Base class for component creators."""
 
     model: Model = field(repr=False)
 
@@ -88,9 +88,9 @@ class BaseGenerator:
 
 
 @dataclass(repr=False)
-class BarGenerator(BaseGenerator):
+class BarCreator(BaseCreator):
     """
-    Bar generator object.
+    Bar creator object.
 
     Introduces bar elements to a model.
     Bar elements are linear elements that can only carry axial load.
@@ -277,7 +277,7 @@ class InitialDeformationConfig:
 
 
 @dataclass(repr=False)
-class BeamColumnCreator(BaseGenerator):
+class BeamColumnCreator(BaseCreator):
     """Introduces beamcolumn elements to a model."""
 
     element_type: Literal['elastic', 'disp']
@@ -693,10 +693,3 @@ class BeamColumnCreator(BaseGenerator):
         )
 
         return component
-
-
-@dataclass(repr=False)
-class TrussCreator:
-    """Introduces truss elements to a model."""
-
-    model: Model = field(repr=False)
