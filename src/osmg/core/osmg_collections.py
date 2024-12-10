@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, Literal
 
 import numpy as np
 
@@ -22,6 +22,7 @@ TV = TypeVar('TV')
 if TYPE_CHECKING:
     from osmg.core.common import numpy_array
     from osmg.model_objects import element
+    from osmg.model_objects.section import Section
 
 
 @dataclass(repr=False)
@@ -347,6 +348,27 @@ class BeamColumnAssembly(ComponentAssembly):
             local_udls[beamcolumn_element.uid] = udl_local
         return local_udls
 
+    def update_section(self, section: Section) -> None:
+        """Update the section of all internal elements."""
+        for element in self.elements.values():
+            if isinstance(element, BeamColumnElement):
+                element.section = section
+
+    def __hash__(self) -> int:
+        """Return the hash of the object based on its UID."""
+        return hash(self.uid)
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality based on the UID.
+
+        Returns:
+          True if it is equal, False otherwise.
+        """
+        if not isinstance(other, UIDObject):
+            return False
+        return self.uid == other.uid
+
 
 @dataclass(repr=False)
 class ComponentAssemblyCollection(Collection[ComponentAssembly]):
@@ -356,8 +378,9 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
     Attributes:
     ----------
     connectivity_map : dict[tuple[int, ...], int]
-        A dictionary where the keys are sorted tuples of external node uids,
-        and the values are the uids of the corresponding component assemblies.
+        A dictionary where the keys are sorted tuples of external node
+        uids, and the values are the uids of the corresponding
+        component assemblies.
     """
 
     connectivity_map: dict[tuple[int, ...], int] = field(default_factory=dict)
@@ -441,6 +464,170 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
             msg = 'Component not found.'
             raise ValueError(msg)
         return component
+
+    def search_by_axis_aligned_bounding_box(
+        self,
+        bounding_box: tuple[tuple[float, float], ...],
+        *,
+        offset: float = 1e-5,
+        exclusive: bool = True,
+    ) -> list[ComponentAssembly]:
+        """
+        Search by axis-aligned bounding box.
+
+        Search and return all component assemblies connected to nodes
+        within the specified bounding box.
+
+        Arguments:
+          bounding_box: A tuple defining the bounding box in the form:
+                        ((xmin, xmax), (ymin, ymax), optionally (zmin,
+                        zmax)).
+          offset: Expand the boudning box to combat numerical
+                  precision issues.
+          exclusive: Whether to return only components connecting
+                     exclusively to the selected nodes (default:
+                     True).
+
+        Returns:
+          A list of ComponentAssemblies connected to the selected
+          nodes.
+        """
+        selected_uids = self._filter_nodes_by_bounding_box(bounding_box, offset)
+        return self._find_assemblies_by_uids(selected_uids, exclusive=exclusive)
+
+    def search_by_axis_projection(
+        self,
+        point: tuple[float, float, float],
+        axes: Literal['xy', 'xz', 'yz'],
+        *,
+        offset: float = 1e-5,
+        exclusive: bool = True,
+    ) -> list[ComponentAssembly]:
+        """
+        Search by infinite axis-aligned bounding box.
+
+        Search and return all component assemblies connected to nodes
+        within an infinite bounding box projected in the specified
+        axes.
+
+        Arguments:
+          point: A tuple defining the coordinates of the point.
+          axes: Axes of the bounding box projection ('xy', 'xz', or
+               'yz').
+          offset: Small offset to add to the bounding box (default:
+                  1e-5).
+          exclusive: Whether to return only components connecting
+                     exclusively to the selected nodes (default:
+                     True).
+
+        Returns:
+          A list of ComponentAssemblies connected to the selected
+          nodes.
+
+        Raises:
+          ValueError: If the axes argument is invalid.
+        """
+        axes_indices = {'xy': (0, 1), 'xz': (0, 2), 'yz': (1, 2)}
+
+        if axes not in axes_indices:
+            msg = 'Invalid axes value. Must be one of `xy`, `xz`, or `yz`.'
+            raise ValueError(msg)
+
+        selected_indices = axes_indices[axes]
+        bounding_box = [
+            (-np.inf, np.inf)
+            if i not in selected_indices
+            else (point[i] - offset, point[i] + offset)
+            for i in range(len(point))
+        ]
+
+        selected_uids = self._filter_nodes_by_bounding_box(
+            tuple(bounding_box), offset
+        )
+        return self._find_assemblies_by_uids(selected_uids, exclusive=exclusive)
+
+    def _filter_nodes_by_bounding_box(
+        self, bounding_box: tuple[tuple[float, float], ...], offset: float
+    ) -> set[int]:
+        """
+        Filter nodes by a bounding box.
+
+        Arguments:
+          bounding_box: A tuple defining the bounding box.
+          offset: Expand the boudning box to combat numerical
+                  precision issues.
+
+        Returns:
+          A set of UIDs for nodes within the bounding box.
+
+        Raises:
+          ValueError: If the dimensionality of the bounding box is
+          invalid.
+        """
+        all_nodes = self._get_all_nodes()
+        if not all_nodes:
+            return set()
+        some_node = all_nodes[0]
+        ndf = len(some_node.coordinates)
+
+        if len(bounding_box) != ndf:
+            msg = (
+                f'Invalid bounding box dimensionality '
+                f'({len(bounding_box)}), should be {ndf}.'
+            )
+            raise ValueError(msg)
+
+        return {
+            node.uid
+            for node in all_nodes
+            if all(
+                bounds[0] - offset <= node.coordinates[i] <= bounds[1] + offset
+                for i, bounds in enumerate(bounding_box)
+            )
+        }
+
+    def _find_assemblies_by_uids(
+        self,
+        selected_uids: set[int],
+        *,
+        exclusive: bool,
+    ) -> list[ComponentAssembly]:
+        """
+        Find component assemblies by UIDs.
+
+        Arguments:
+          selected_uids: A set of node UIDs to match.
+          exclusive: Whether to return only components connecting
+                     exclusively to the selected nodes.
+
+        Returns:
+          A list of ComponentAssemblies connected to the selected
+          nodes.
+        """
+        assemblies = []
+        for uids, assembly_uid in self.connectivity_map.items():
+            uids_set = set(uids)
+            if uids_set.issubset(selected_uids) and exclusive:
+                # Include only if the assembly connects exclusively to
+                # these nodes
+                assemblies.append(self[assembly_uid])
+            if uids_set.intersection(selected_uids) and not exclusive:
+                # Include if the assembly connects to these nodes (and
+                # possibly others)
+                assemblies.append(self[assembly_uid])
+        return assemblies
+
+    def _get_all_nodes(self) -> list[Node]:
+        """
+        Retrieve all nodes in the collection.
+
+        Returns:
+          A list of all Node objects in the collection.
+        """
+        all_nodes = []
+        for assembly in self.values():
+            all_nodes.extend(assembly.external_nodes.values())
+        return all_nodes
 
     def get_line_element_lengths(self) -> dict[int, float]:
         """
