@@ -17,4 +17,24 @@ class UIDObject:
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self.uid = self.uid_generator.new(self)
+        self._uid = self.uid_generator.new(self)
+
+    @property
+    def uid(self) -> int:
+        """Get the UID."""
+        return self._uid
+
+    def __hash__(self) -> int:
+        """Return the hash of the object based on its UID."""
+        return hash(self.uid)
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality based on the UID.
+
+        Returns:
+          True if it is equal, False otherwise.
+        """
+        if not isinstance(other, UIDObject):
+            return False
+        return self.uid == other.uid
