@@ -12,13 +12,16 @@ from typing import TYPE_CHECKING, Literal, cast
 import numpy as np
 import pandas as pd
 
+from osmg.analysis.common import UDL, PointMass
 from osmg.analysis.recorders import ElementRecorder
 from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
+from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.model_objects.element import BeamColumnElement
 
 if TYPE_CHECKING:
-    from osmg.analysis.common import UDL, PointLoad, PointMass
+    from osmg.analysis.common import PointLoad
     from osmg.core.model import Model, Model2D, Model3D
     from osmg.model_objects.node import Node
 
@@ -663,6 +666,91 @@ class LoadCaseRegistry:
             ),
             ('other', cast(defaultdict[str, LoadCase], self.other)),
         ]
+
+    def self_weight(self, case_name: str, scaling_factor: float = 1.0) -> None:
+        """
+        Define self weight.
+
+        Define self weight based on the properties of the sections of
+        BeamColumn elements.
+
+        Params:
+          case_name: Name of the load case to be created.
+          scaling_factor: Self-weight scaling factor to use.
+        """
+        # get all beamcolumn elements
+        elements = [
+            element
+            for component in self.model.components.values()
+            if isinstance(component, BeamColumnAssembly)
+            for element in component.elements.values()
+            if isinstance(element, BeamColumnElement)
+        ]
+        for element in elements:
+            weight_per_length = element.section.sec_w * scaling_factor
+            udl = UDL((0.00, 0.00, -weight_per_length))
+            self.dead[case_name].load_registry.element_udl[element.uid] = udl
+
+    def self_mass(
+        self,
+        target_load_case: HasMass,
+        source_load_cases: list[tuple[HasLoads, float]],
+        g_constant: float,
+    ) -> None:
+        """
+        Define self mass.
+
+        Define self weight based on the properties of the sections of
+        BeamColumn elements.
+
+        Params:
+          target_load_case: Load case to assign mass to.
+          source_load_cases: Load cases to consider when calculating
+                             self-mass. The float in the tuple acts as
+                             a scaling coefficient.
+          g_constant: Factor to convert loads to mass.
+        """
+        # get all beamcolumn elements
+        elements = {
+            element.uid: element
+            for component in self.model.components.values()
+            if isinstance(component, BeamColumnAssembly)
+            for element in component.elements.values()
+            if isinstance(element, BeamColumnElement)
+        }
+        for source_load_case, factor in source_load_cases:
+            # Convert UDL to mass
+            for uid, udl in source_load_case.load_registry.element_udl.items():
+                element = elements[uid]
+                length = element.clear_length()
+                weight = np.abs(udl[-1] * length)
+                mass = weight * factor / g_constant / 2.0
+                # TODO(JVM): separate cases for other ndm/ndf
+                # configurations.
+                point_mass = PointMass((mass, mass, mass, 0.00, 0.00, 0.00))
+                for node in element.nodes:
+                    if node.uid not in target_load_case.mass_registry:
+                        target_load_case.mass_registry[node.uid] = point_mass
+                    else:
+                        existing_mass = target_load_case.mass_registry[node.uid]
+                        target_load_case.mass_registry[node.uid] = PointMass(
+                            (*(e + p for e, p in zip(existing_mass, point_mass)),)
+                        )
+
+            # Convert point loads to mass
+            for (
+                uid,
+                point_load,
+            ) in source_load_case.load_registry.nodal_loads.items():
+                mass = np.abs(point_load[-1] * factor / g_constant)
+                point_mass = PointMass((mass, mass, mass, 0.00, 0.00, 0.00))
+                if uid not in target_load_case.mass_registry:
+                    target_load_case.mass_registry[uid] = point_mass
+                else:
+                    existing_mass = target_load_case.mass_registry[uid]
+                    target_load_case.mass_registry[uid] = PointMass(
+                        (*(e + p for e, p in zip(existing_mass, point_mass)),)
+                    )
 
     def run(self) -> None:
         """
