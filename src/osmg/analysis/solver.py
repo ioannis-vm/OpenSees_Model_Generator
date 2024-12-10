@@ -555,9 +555,9 @@ class ModalAnalysis(Analysis):
 
         self.log('Obtaining basic forces for each mode.')
         # Recover basic forces
+        self.log('   Wiping OpenSees domain.')
+        ops.wipe()
         for mode in range(1, self.settings.num_modes + 1):
-            self.log('   Wiping OpenSees domain.')
-            ops.wipe()
             self.log(f'  Working on mode {mode}.')
             self.log('  Defining model in OpenSees.')
             self.opensees_define_model(model, load_case)
@@ -612,6 +612,11 @@ class ModalAnalysis(Analysis):
                             np.array(ops.nodeDisp(some_node))[check_dof - 1],
                             mode_eigenvectors[some_node, check_dof],
                         )
+
+            self.log('   Wiping OpenSees domain.')
+            # Doing this before reading the basic force recorder data
+            # ensures the recorder's buffer will have been flushed.
+            ops.wipe()
 
             basic_force_data[mode] = self.recorders['default_basic_force'].get_data()
             basic_force_data[mode].index.name = 'mode'
