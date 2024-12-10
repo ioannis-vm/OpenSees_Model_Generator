@@ -2,12 +2,12 @@
 Braced frame design model.
 
 Length units: in
-Force units: lb
+Force units: kip
 """
 
 import numpy as np
 
-from osmg.analysis.common import UDL, PointMass
+from osmg.analysis.common import UDL, PointLoad, PointMass
 from osmg.analysis.load_case import LoadCaseRegistry
 from osmg.analysis.supports import FixedSupport
 from osmg.core.model import Model2D
@@ -249,17 +249,17 @@ for level in ('1', '2', '3', '4'):
 for beam in added_beams:
     lc_dead.load_registry.element_udl[beam.uid] = UDL((0.0, -1.67e-3))  # kip/in
 
-# # `dead_2`: Add a concentrated point load at 'A'-'Level 1'
-# load_case_registry.dead['dead_2'].load_registry.nodal_loads[
-#     frame.nodes.search_by_coordinates_or_raise(
-#         (
-#             grids.get_grid('A').data(),
-#             grids.get_level('1').elevation(),
-#         )
-#     ).uid
-# ] = PointLoad(
-#     (2000.0, 0.00, 0.00)  # lb
-# )
+# `lc_dead`: Add a concentrated point load at 'B'-'Level 4'
+lc_dead.load_registry.nodal_loads[
+    frame.nodes.search_by_coordinates_or_raise(
+        (
+            grids.get_grid('B').data(),
+            grids.get_level('4').elevation(),
+        )
+    ).uid
+] = PointLoad(
+    (2000.0, 0.00, 0.00)  # lb
+)
 
 # `modal`: Add mass on the leaning column.
 for level in ('1', '2', '3', '4'):
@@ -334,7 +334,8 @@ deformation_configuration = DeformationConfiguration(
     ndm=2,
     data=lc_dead.analysis.recorders['default_node'].get_data(),
     step=step,
-    amplification_factor=None,  # Figure it out.
+    # amplification_factor=None,  # Figure it out.
+    amplification_factor=10.00 / 3.06618,  # Figure it out.
 )
 basic_force_configuration = BasicForceConfiguration(
     reference_length=frame.reference_length(),
@@ -347,8 +348,8 @@ basic_force_configuration = BasicForceConfiguration(
         num_stations=12,
     ),
     step=step,
-    force_to_length_factor=20.0,
-    moment_to_length_factor=3.0,
+    force_to_length_factor=12 * 12 / 1883.89,
+    moment_to_length_factor=12 * 12 / 10000.0,
 )
 fig = Figure3D(Figure3DConfiguration(ndm=2))
 fig.add_nodes(list(frame.nodes.values()), 'primary', overlay=True)
