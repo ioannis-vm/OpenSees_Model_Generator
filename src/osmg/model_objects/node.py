@@ -28,10 +28,6 @@ class Node(UIDObject):
 
     coordinates: tuple[float, ...]
 
-    def __post_init__(self) -> None:
-        """Post-initialization."""
-        self.uid = self.uid_generator.new(self)
-
     def __le__(self, other: Self) -> bool:
         """
         Less or equal determination rule.
