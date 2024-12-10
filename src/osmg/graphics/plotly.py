@@ -46,7 +46,8 @@ def _default_camera() -> dict[str, object]:
         'up': {'x': 0, 'y': 0, 'z': 1},
         'center': {'x': 0, 'y': 0, 'z': 0},
         'eye': {'x': 0.00, 'y': -10.00, 'z': 0.00},
-        'projection': {'type': 'perspective'},
+        # 'projection': {'type': 'perspective'},
+        'projection': {'type': 'orthographic'},
     }
 
 
