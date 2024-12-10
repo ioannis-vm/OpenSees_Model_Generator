@@ -20,6 +20,8 @@ from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 from osmg.core.osmg_collections import BeamColumnAssembly
 from osmg.model_objects.element import BeamColumnElement
 
+from tqdm import tqdm
+
 if TYPE_CHECKING:
     from osmg.analysis.common import PointLoad
     from osmg.core.model import Model, Model2D, Model3D
@@ -770,14 +772,28 @@ class LoadCaseRegistry:
         self.result_setup.directory = str(base_dir.resolve())
 
         cases_list = self.get_cases_list()
+        num_cases = 0
+        for _, cases in cases_list:
+            num_cases += len(cases)
+        progress_bar = tqdm(
+            total=num_cases,
+            ncols=80,
+            desc='Processing cases',
+            unit='case',
+            leave=False,
+        )
         for case_type, cases in cases_list:
             for key, load_case in cases.items():
+                progress_bar.set_description(f'Processing {case_type}: {key}')
                 # Create a subdirectory for each load case
                 case_dir = base_dir / f'{case_type}_{key}'
                 case_dir.mkdir(parents=True, exist_ok=True)
 
                 load_case.analysis.settings.result_directory = str(case_dir)
                 load_case.analysis.run(self.model, load_case)
+
+                progress_bar.update(1)
+        progress_bar.close()
 
     def combine_recorder(self, recorder_name: str) -> pd.DataFrame:
         """

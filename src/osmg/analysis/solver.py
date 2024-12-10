@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
 from osmg.core.common import NDF, NDM
@@ -557,6 +558,14 @@ class ModalAnalysis(Analysis):
         # Recover basic forces
         self.log('   Wiping OpenSees domain.')
         ops.wipe()
+        progress_bar = tqdm(
+            range(1, self.settings.num_modes + 1),
+            ncols=80,
+            desc='Processing modes',
+            unit='mode',
+            position=0,
+            leave=False,
+        )
         for mode in range(1, self.settings.num_modes + 1):
             self.log(f'  Working on mode {mode}.')
             self.log('  Defining model in OpenSees.')
@@ -621,6 +630,10 @@ class ModalAnalysis(Analysis):
             basic_force_data[mode] = self.recorders['default_basic_force'].get_data()
             basic_force_data[mode].index.name = 'mode'
             basic_force_data[mode].index = [mode]
+
+            progress_bar.update(1)
+
+        progress_bar.close()
 
         self.log('Obtained basic forces for each mode.')
         self.log('Wiping OpenSees domain for the last time.')
