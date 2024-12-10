@@ -315,6 +315,31 @@ class BeamColumnAssembly(ComponentAssembly):
     colinear, since parts of osmg rely on this assumption.
     """
 
+    def clear_length(self) -> float:
+        """
+        Get the clear length of the component assembly.
+
+        Returns:
+          The clear length.
+        """
+        beamcolumn_elements = [
+            element
+            for element in self.elements.values()
+            if isinstance(element, BeamColumnElement)
+        ]
+        first_element = beamcolumn_elements[0]
+        last_element = beamcolumn_elements[-1]
+
+        p_i = (
+            np.array(first_element.nodes[0].coordinates)
+            + first_element.geomtransf.offset_i
+        )
+        p_j = (
+            np.array(last_element.nodes[1].coordinates)
+            + last_element.geomtransf.offset_j
+        )
+        return float(np.linalg.norm(p_i - p_j))
+
     def calculate_element_udl(self, udl: UDL) -> dict[int, UDL]:
         """
         Distribute the given UDL to the beamcolumn elements.
@@ -347,6 +372,32 @@ class BeamColumnAssembly(ComponentAssembly):
             udl_local = UDL(transformation_mat @ np.array(udl))
             local_udls[beamcolumn_element.uid] = udl_local
         return local_udls
+
+    def get_section(self) -> Section:
+        """
+        Retrieve the section used by beamcolumn elements.
+
+        Raises:
+          ValueError: If not all beamcolumn elements share the same
+            section.
+          ValueError: If there are no beamcolumn elements in the
+            component.
+
+        Returns:
+          The common section.
+        """
+        sections = [
+            element.section
+            for element in self.elements.values()
+            if isinstance(element, BeamColumnElement)
+        ]
+        if not sections:
+            msg = 'No elements.'
+            raise ValueError(msg)
+        if len({section.name for section in sections}) > 1:
+            msg = 'Multiple sections found.'
+            raise ValueError(msg)
+        return sections[0]
 
     def update_section(self, section: Section) -> None:
         """Update the section of all internal elements."""
@@ -628,22 +679,6 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
         for assembly in self.values():
             all_nodes.extend(assembly.external_nodes.values())
         return all_nodes
-
-    def get_line_element_lengths(self) -> dict[int, float]:
-        """
-        Get the clear length of line elements.
-
-        Returns:
-          Dictionary mapping element UIDs with the clear length of the
-          element.
-        """
-        output: dict[int, float] = {}
-        for component in self.values():
-            for uid, element in component.elements.items():
-                if not isinstance(element, (BeamColumnElement, Bar)):
-                    continue
-                output[uid] = element.clear_length()
-        return output
 
     def __repr__(self) -> str:
         """

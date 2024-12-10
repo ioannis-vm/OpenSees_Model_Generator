@@ -22,6 +22,7 @@ from osmg.model_objects.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     TwoNodeLink,
+    ZeroLength,
 )
 
 try:
@@ -49,6 +50,7 @@ class AnalysisSettings:
     constraints: tuple[str] = ('Transformation',)
     numberer: Literal['RCM'] = 'RCM'
     system: Literal['Umfpack'] = 'Umfpack'
+    ignore_by_tag: set[str] = field(default_factory=set)
 
 
 @dataclass()
@@ -152,10 +154,9 @@ class Analysis:
             ops.uniaxialMaterial(*material.ops_args())
             self._defined_materials.append(material.uid)
 
-    @staticmethod
-    def opensees_define_nodes(model: Model) -> None:
+    def opensees_define_nodes(self, model: Model) -> None:
         """Define the nodes of the model in OpenSees."""
-        for uid, node in model.get_all_nodes().items():
+        for uid, node in model.get_all_nodes(self.settings.ignore_by_tag).items():
             ops.node(uid, *node.coordinates)
 
     def opensees_define_elements(
@@ -166,6 +167,7 @@ class Analysis:
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         bar_elements: list[Bar] = []
         two_node_link_elements: list[TwoNodeLink] = []
+        zerolength_elements: list[ZeroLength] = []
         unsupported_element_types: list[str] = []
 
         # Note: Materials are defined on an as-needed basis.  We keep
@@ -176,6 +178,8 @@ class Analysis:
 
         components = model.components.values()
         for component in components:
+            if component.tags & self.settings.ignore_by_tag:
+                continue
             elements = component.elements
             for element in elements.values():
                 if isinstance(element, ElasticBeamColumn):
@@ -184,6 +188,8 @@ class Analysis:
                     bar_elements.append(element)
                 elif isinstance(element, TwoNodeLink):
                     two_node_link_elements.append(element)
+                elif isinstance(element, ZeroLength):
+                    zerolength_elements.append(element)
                 else:
                     unsupported_element_types.append(element.__class__.__name__)
 
@@ -197,6 +203,7 @@ class Analysis:
         )
         self.opensees_define_bar_elements(bar_elements)
         self.opensees_define_two_node_link_elements(two_node_link_elements)
+        self.opensees_define_zerolength_elements(zerolength_elements)
 
         # clear defined materials
         self._defined_materials = []
@@ -234,6 +241,15 @@ class Analysis:
         self, elements: list[TwoNodeLink]
     ) -> None:
         """Define TwoNodeLink elements."""
+        for element in elements:
+            for material in element.materials:
+                self.opensees_define_material(material)
+            ops.element(*element.ops_args())
+
+    def opensees_define_zerolength_elements(
+        self, elements: list[ZeroLength]
+    ) -> None:
+        """Define Zerolength elements."""
         for element in elements:
             for material in element.materials:
                 self.opensees_define_material(material)
@@ -299,8 +315,8 @@ class Analysis:
             self.define_default_recorders(model)
         self.opensees_define_recorders()
 
-    @staticmethod
     def opensees_define_loads(
+        self,
         model: Model,
         load_case: LoadCase,
         amplification_factor: float = 1.00,
@@ -326,6 +342,8 @@ class Analysis:
         # UDL on components
         for component_uid, global_udl in load_case.load_registry.element_udl.items():  # type: ignore
             component = model.components[component_uid]
+            if component.tags & self.settings.ignore_by_tag:
+                continue
             assert isinstance(component, BeamColumnAssembly)
             local_udls = component.calculate_element_udl(global_udl)
             for beamcolumn_element_uid, local_udl in local_udls.items():
@@ -389,6 +407,8 @@ class Analysis:
         applicable_elements = []
         components = model.components.values()
         for component in components:
+            if component.tags & self.settings.ignore_by_tag:
+                continue
             elements = component.elements
             for element in elements.values():
                 if isinstance(element, (ElasticBeamColumn, DispBeamColumn, Bar)):
@@ -612,15 +632,9 @@ class ModalAnalysis(Analysis):
             # in the dict.
 
             # Verifying displacements are correct.
-            for some_node in mode_eigenvectors.index.get_level_values(
-                'node'
-            ).unique():
-                for check_dof in range(1, ndf + 1):
-                    if (node, check_dof) in mode_eigenvectors:
-                        assert np.allclose(
-                            np.array(ops.nodeDisp(some_node))[check_dof - 1],
-                            mode_eigenvectors[some_node, check_dof],
-                        )
+            for key, value in mode_eigenvectors.items():
+                node_uid, dof = key
+                assert np.allclose(ops.nodeDisp(node_uid, dof), value)
 
             self.log('   Wiping OpenSees domain.')
             # Doing this before reading the basic force recorder data

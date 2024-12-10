@@ -69,9 +69,14 @@ class Model:
         p_min, p_max = self.bounding_box(padding=0.00)
         return float(np.max(p_max - p_min))
 
-    def get_all_nodes(self) -> dict[int, Node]:
+    def get_all_nodes(
+        self, ignore_by_tag: set[str] | None = None
+    ) -> dict[int, Node]:
         """
         Get all nodes in the model.
+
+        Params:
+          ignore_by_tag: Set of tags of components to ignore.
 
         Returns:
           A dictionary with the nodes. Keys are their UIDs.
@@ -82,6 +87,8 @@ class Model:
         internal_nodes: dict[int, Node] = {}
         components = self.components.values()
         for component in components:
+            if ignore_by_tag and component.tags & ignore_by_tag:
+                continue
             internal_nodes.update(component.internal_nodes)
 
         all_nodes: dict[int, Node] = {}

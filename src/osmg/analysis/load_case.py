@@ -18,7 +18,7 @@ from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 from osmg.core.osmg_collections import BeamColumnAssembly
-from osmg.model_objects.element import BeamColumnElement
+from osmg.model_objects.element import BeamColumnElement, Bar
 
 from tqdm import tqdm
 
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from osmg.analysis.common import PointLoad
     from osmg.core.model import Model, Model2D, Model3D
     from osmg.model_objects.node import Node
+    from osmg.core.osmg_collections import ComponentAssembly
 
 
 def ensure_minmax_level_exists_or_add(data: pd.DataFrame) -> pd.DataFrame:
@@ -241,7 +242,7 @@ class LoadCase:
     def calculate_basic_forces(  # noqa: C901
         self,
         recorder_name: str,
-        element_lengths: dict[int, float],
+        components: dict[int, ComponentAssembly],
         *,
         ndm: int,
         num_stations: int = 12,
@@ -300,9 +301,25 @@ class LoadCase:
             raise TypeError(msg)
 
         if isinstance(self, HasLoads):
-            udls = self.load_registry.element_udl
+            udls_global = self.load_registry.element_udl
         else:
-            udls = {}
+            udls_global = {}
+
+        udls_local = {}
+        elements = {}
+        for component_uid, component in components.items():
+            if not isinstance(component, BeamColumnAssembly):
+                continue
+            for element in component.elements.values():
+                if isinstance(element, (BeamColumnElement, Bar)):
+                    elements[element.uid] = element
+            elements.update(component.elements)
+            component_global_udl = udls_global.get(component_uid)
+            if component_global_udl:
+                component_local_udls = component.calculate_element_udl(
+                    component_global_udl
+                )
+                udls_local.update(component_local_udls)
 
         data = recorder.get_data()
 
@@ -327,10 +344,16 @@ class LoadCase:
         #     dof: df.xs(1.0, level='station', axis=1) for dof, df in dof_data.items()
         # }
 
-        missing_elements = [e for e in recorder.elements if e not in element_lengths]
+        missing_elements = [e for e in recorder.elements if e not in elements]
         if missing_elements:
-            msg = f'Missing lengths for elements: {missing_elements}'
+            msg = f'Missing elements: {missing_elements}'
             raise ValueError(msg)
+
+        element_lengths: dict[int, float] = {
+            element.uid: element.clear_length()
+            for element in elements.values()
+            if isinstance(element, BeamColumnElement)
+        }
 
         locations = np.array(
             [
@@ -360,7 +383,9 @@ class LoadCase:
         # data_j_axial = dof_data_j[1]
         w_data_axial = np.array(
             [
-                udls[element_uid][0] if udls.get(element_uid) is not None else 0.00
+                udls_local[element_uid][0]
+                if udls_local.get(element_uid) is not None
+                else 0.00
                 for element_uid in recorder.elements
             ]
         )[np.newaxis, :, np.newaxis]
@@ -385,7 +410,9 @@ class LoadCase:
         # data_j_shear_y = dof_data_j[2]
         w_data_shear_y = np.array(
             [
-                udls[element_uid][1] if udls.get(element_uid) is not None else 0.00
+                udls_local[element_uid][1]
+                if udls_local.get(element_uid) is not None
+                else 0.00
                 for element_uid in recorder.elements
             ]
         )[np.newaxis, :, np.newaxis]
@@ -418,8 +445,8 @@ class LoadCase:
             # data_j_shear_z = dof_data_j[3]
             w_data_shear_z = np.array(
                 [
-                    udls[element_uid][2]
-                    if udls.get(element_uid) is not None
+                    udls_local[element_uid][2]
+                    if udls_local.get(element_uid) is not None
                     else 0.00
                     for element_uid in recorder.elements
                 ]
@@ -680,18 +707,16 @@ class LoadCaseRegistry:
           case_name: Name of the load case to be created.
           scaling_factor: Self-weight scaling factor to use.
         """
-        # get all beamcolumn elements
-        elements = [
-            element
+        # get all beamcolumn assemblies
+        components = [
+            component
             for component in self.model.components.values()
             if isinstance(component, BeamColumnAssembly)
-            for element in component.elements.values()
-            if isinstance(element, BeamColumnElement)
         ]
-        for element in elements:
-            weight_per_length = element.section.sec_w * scaling_factor
+        for component in components:
+            weight_per_length = component.get_section().sec_w * scaling_factor
             udl = UDL((0.00, 0.00, -weight_per_length))
-            self.dead[case_name].load_registry.element_udl[element.uid] = udl
+            self.dead[case_name].load_registry.element_udl[component.uid] = udl
 
     def self_mass(
         self,
@@ -712,30 +737,29 @@ class LoadCaseRegistry:
                              a scaling coefficient.
           g_constant: Factor to convert loads to mass.
         """
-        # get all beamcolumn elements
-        elements = {
-            element.uid: element
+        # get all BeamColumn assemblies
+        components = {
+            component.uid: component
             for component in self.model.components.values()
             if isinstance(component, BeamColumnAssembly)
-            for element in component.elements.values()
-            if isinstance(element, BeamColumnElement)
         }
         for source_load_case, factor in source_load_cases:
             # Convert UDL to mass
             for uid, udl in source_load_case.load_registry.element_udl.items():
-                element = elements[uid]
-                length = element.clear_length()
+                component = components[uid]
+                length = component.clear_length()
                 weight = np.abs(udl[-1] * length)
-                mass = weight * factor / g_constant / 2.0
+                num_nodes = len(component.internal_nodes)
+                mass = weight * factor / g_constant / num_nodes
                 # TODO(JVM): separate cases for other ndm/ndf
                 # configurations.
                 point_mass = PointMass((mass, mass, mass, 0.00, 0.00, 0.00))
-                for node in element.nodes:
-                    if node.uid not in target_load_case.mass_registry:
-                        target_load_case.mass_registry[node.uid] = point_mass
+                for node_uid in component.internal_nodes:
+                    if node_uid not in target_load_case.mass_registry:
+                        target_load_case.mass_registry[node_uid] = point_mass
                     else:
-                        existing_mass = target_load_case.mass_registry[node.uid]
-                        target_load_case.mass_registry[node.uid] = PointMass(
+                        existing_mass = target_load_case.mass_registry[node_uid]
+                        target_load_case.mass_registry[node_uid] = PointMass(
                             (*(e + p for e, p in zip(existing_mass, point_mass)),)
                         )
 

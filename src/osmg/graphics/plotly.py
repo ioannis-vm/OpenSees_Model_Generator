@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
+import random
 
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 from osmg.core.osmg_collections import BeamColumnAssembly
@@ -179,10 +180,13 @@ class Figure3D:
         deformation_configuration: DeformationConfiguration | None = None,
         *,
         overlay: bool = False,
+        random_length: float = 0.00,
     ) -> None:
         """Draw nodes."""
         if deformation_configuration is None:
-            self._add_nodes_undeformed(nodes, designation, overlay=overlay)
+            self._add_nodes_undeformed(
+                nodes, designation, overlay=overlay, random_length=random_length
+            )
         else:
             self._add_nodes_deformed(
                 nodes, designation, deformation_configuration, overlay=overlay
@@ -194,6 +198,7 @@ class Figure3D:
         deformation_configuration: DeformationConfiguration | None = None,
         *,
         overlay: bool = False,
+        random_length: float = 0.00
     ) -> None:
         """Add components to the figure."""
         for component in components:
@@ -203,6 +208,7 @@ class Figure3D:
                 'internal',
                 deformation_configuration,
                 overlay=overlay,
+               random_length=random_length,
             )
             elements = list(component.elements.values())
             self.add_elements(elements, deformation_configuration, overlay=overlay)
@@ -650,9 +656,13 @@ class Figure3D:
         moment_z = moment_z.iloc[basic_force_configuration.step, :]
         force_factor = basic_force_configuration.force_to_length_factor
         moment_factor = basic_force_configuration.moment_to_length_factor
+        ignored_uids = []
         for element in (
             elastic_beamcolumn_elements + disp_beamcolumn_elements + bar_elements
         ):
+            if element.uid not in axial:
+                ignored_uids.append(element.uid)
+                continue
             element_length = element.clear_length()
             stations = (
                 axial[element.uid].index.get_level_values('station').to_numpy()
@@ -732,6 +742,10 @@ class Figure3D:
                         opacity=0.80,
                         start_hidden=True,
                     )
+        if ignored_uids:
+            print(  # noqa: T201
+                f'Ignored the following elements with missing data: {set(ignored_uids)}'
+            )
 
     def _add_nodes_undeformed(
         self,
@@ -739,6 +753,7 @@ class Figure3D:
         designation: Literal['primary', 'parent', 'internal'],
         *,
         overlay: bool = False,
+        random_length: float = 0.00,
     ) -> None:
         """Draw nodes."""
         expanded_designation = {
@@ -786,15 +801,25 @@ class Figure3D:
             self.data.append(data)
         for node in nodes:
             if self.configuration.ndm == THREE_DIMENSIONAL:
-                data['x'].append(node.coordinates[0])  # type: ignore
-                data['y'].append(node.coordinates[1])  # type: ignore
-                data['z'].append(node.coordinates[2])  # type: ignore
+                data['x'].append(
+                    node.coordinates[0] + random.uniform(-random_length/2.0, random_length/2.0)
+                )  # type: ignore
+                data['y'].append(
+                    node.coordinates[1] + random.uniform(-random_length/2.0, random_length/2.0)
+                )  # type: ignore
+                data['z'].append(
+                    node.coordinates[2] + random.uniform(-random_length/2.0, random_length/2.0)
+                )  # type: ignore
                 data['customdata'].append([node.uid, None])  # type: ignore
             else:
                 assert self.configuration.ndm == TWO_DIMENSIONAL
-                data['x'].append(node.coordinates[0])  # type: ignore
+                data['x'].append(
+                    node.coordinates[0] + random.uniform(-random_length/2.0, random_length/2.0)
+                )  # type: ignore
                 data['y'].append(0.00)  # type: ignore
-                data['z'].append(node.coordinates[1])  # type: ignore
+                data['z'].append(
+                    node.coordinates[1] + random.uniform(-random_length/2.0, random_length/2.0)
+                )  # type: ignore
                 data['customdata'].append([node.uid, None])  # type: ignore
 
     def _add_nodes_deformed(

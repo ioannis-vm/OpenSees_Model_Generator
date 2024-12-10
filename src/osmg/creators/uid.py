@@ -32,6 +32,7 @@ class UIDGenerator:
             'BarAssembly': 'COMPONENT',
             'GeomTransf': 'TRANSFORMATION',
             'ElasticBeamColumn': 'ELEMENT',
+            'ZeroLength': 'ELEMENT',
             'Bar': 'ELEMENT',
             'TwoNodeLink': 'ELEMENT',
             'NodeRecorder': 'RECORDER',

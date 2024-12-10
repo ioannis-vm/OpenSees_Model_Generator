@@ -667,7 +667,7 @@ class BeamColumnCreator(BaseCreator):
                     y_axis=y_axis,
                 )
             )
-            return node, offset
+            return nh_in, offset
 
         # Process hinge configurations for node_i and node_j
         conn_node_i, conn_eo_i = process_hinge_config(
@@ -692,4 +692,7 @@ class BeamColumnCreator(BaseCreator):
             modified_stiffness_config=modified_stiffness_config,
         )
 
+        # Adding the component in the end. (It needs to have external
+        # nodes before adding to the collection).
+        self.model.components.add(component)
         return component
