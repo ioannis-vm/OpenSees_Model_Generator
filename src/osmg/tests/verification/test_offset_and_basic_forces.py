@@ -328,7 +328,7 @@ def plot(model: Model2D | Model3D, load_case_registry: LoadCaseRegistry) -> None
         symbol_size=12.00 / 120.0,
     )
     fig.add_udl(
-        load_case_registry.dead['test'].load_registry.element_udl,
+        load_case_registry.dead['test'].load_registry.component_udl,
         model.components,
         force_to_length_factor=0.10,
         offset=0.00,

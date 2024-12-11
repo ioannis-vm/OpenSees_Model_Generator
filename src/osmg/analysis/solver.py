@@ -340,7 +340,10 @@ class Analysis:
             ops.load(node_uid, *(v * amplification_factor for v in point_load))
 
         # UDL on components
-        for component_uid, global_udl in load_case.load_registry.element_udl.items():  # type: ignore
+        for (
+            component_uid,
+            global_udl,
+        ) in load_case.load_registry.component_udl.items():  # type: ignore
             component = model.components[component_uid]
             if component.tags & self.settings.ignore_by_tag:
                 continue

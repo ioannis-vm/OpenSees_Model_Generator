@@ -247,7 +247,7 @@ for level in ('1', '2', '3', '4'):
 
 # `lc_dead`: Add UDLs to the beams
 for beam in added_beams:
-    lc_dead.load_registry.element_udl[beam.uid] = UDL((0.0, -1.67e-3))  # kip/in
+    lc_dead.load_registry.component_udl[beam.uid] = UDL((0.0, -1.67e-3))  # kip/in
 
 # `lc_dead`: Add a concentrated point load at 'B'-'Level 4'
 lc_dead.load_registry.nodal_loads[
@@ -360,7 +360,7 @@ fig.add_nodes(list(frame.nodes.values()), 'primary', deformation_configuration)
 fig.add_components(list(frame.components.values()), deformation_configuration)
 fig.add_supports(frame.nodes, lc_modal.fixed_supports, symbol_size=12.00)
 # fig.add_udl(
-#     load_case_registry.dead['dead_2'].load_registry.element_udl,
+#     load_case_registry.dead['dead_2'].load_registry.component_udl,
 #     frame.components,
 #     force_to_length_factor=2.0,
 #     offset=0.00,

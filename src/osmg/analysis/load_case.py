@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
+import scipy as sp
 import pandas as pd
 
 from osmg.analysis.common import UDL, PointMass
@@ -17,13 +18,13 @@ from osmg.analysis.recorders import ElementRecorder
 from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
-from osmg.core.osmg_collections import BeamColumnAssembly
+from osmg.core.osmg_collections import BeamColumnAssembly, BarAssembly
 from osmg.model_objects.element import BeamColumnElement, Bar
+from osmg.analysis.common import PointLoad
 
 from tqdm import tqdm
 
 if TYPE_CHECKING:
-    from osmg.analysis.common import PointLoad
     from osmg.core.model import Model, Model2D, Model3D
     from osmg.model_objects.node import Node
     from osmg.core.osmg_collections import ComponentAssembly
@@ -161,7 +162,7 @@ class LoadRegistry:
     """Load registry."""
 
     nodal_loads: dict[int, PointLoad] = field(default_factory=dict)
-    element_udl: dict[int, UDL] = field(default_factory=dict)
+    component_udl: dict[int, UDL] = field(default_factory=dict)
 
 
 @dataclass(repr=False)
@@ -301,7 +302,7 @@ class LoadCase:
             raise TypeError(msg)
 
         if isinstance(self, HasLoads):
-            udls_global = self.load_registry.element_udl
+            udls_global = self.load_registry.component_udl
         else:
             udls_global = {}
 
@@ -309,6 +310,8 @@ class LoadCase:
         elements = {}
         for component_uid, component in components.items():
             if not isinstance(component, BeamColumnAssembly):
+                if isinstance(component, BarAssembly):
+                    elements.update(component.elements)
                 continue
             for element in component.elements.values():
                 if isinstance(element, (BeamColumnElement, Bar)):
@@ -352,7 +355,7 @@ class LoadCase:
         element_lengths: dict[int, float] = {
             element.uid: element.clear_length()
             for element in elements.values()
-            if isinstance(element, BeamColumnElement)
+            if isinstance(element, (BeamColumnElement, Bar))
         }
 
         locations = np.array(
@@ -605,6 +608,116 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
     """Seismic ELF load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
+    _seismic_weight: dict[int, float] = field(default_factory=dict)
+    _design_spectrum: pd.DataFrame | None = field(default=None)
+
+    def define_design_spectrum_from_csv(self, filepath: str) -> None:
+        """Load a design spectrum from a CSV file."""
+        self._design_spectrum = pd.read_csv(filepath, index_col=0, header=0)
+
+    def interpolate_spectrum(self, period: float) -> float:
+        """
+        Obtain Sa for a given T.
+
+        Interpolates the design spectrum to obtain the spectral
+        acceleration (Sa) for a given period.
+
+        Args:
+            period (float): The period T for which to calculate the
+            spectral acceleration.
+
+        Returns:
+            float: The interpolated spectral acceleration (Sa) at the
+            given period T.
+        """
+        periods = self._design_spectrum.index.to_numpy()
+        spectral_accelerations = self._design_spectrum['Sa(g)'].to_numpy()
+
+        return float(np.interp(period, periods, spectral_accelerations))
+
+    def extract_seismic_weight(
+        self, modal_load_case: ModalLoadCase, g_constant: float
+    ) -> None:
+        """Extract seismic weight from a modal load case."""
+        mass_registry = modal_load_case.mass_registry
+        for node_uid, point_mass in mass_registry.items():
+            mass_value = point_mass[0]
+            self._seismic_weight[node_uid] = mass_value * g_constant
+
+    def define_loads(
+        self,
+        all_nodes: dict[int, Node],
+        response_modification_factor: float,
+        importance_factor: float,
+        first_mode_period: float,
+        sd1: float,
+        structural_height: float,
+        approximate_period_parameters: tuple[float, float],
+        direction: tuple[float, ...],
+        base_elevation: float = 0.00,
+        length_to_feet_factor: float = 1.00,
+    ) -> None:
+        """
+        Calculate and distribute equivalent lateral forces.
+
+        Params:
+            all_nodes: Dictionary containing all nodes in the model.
+            response_modification_factor: $R$, Table 12.2-1.
+            overstrength_factor: $Omega_0$, Table 12.2-1.
+            deflection_amplification_factor: $C_d$, Table 12.2-1.
+            importance_factor: $I_e$, Table 1.5-2.
+            approximate_period_parameters: $C_t$ and $x$ from Table 12.8-2.
+            first_mode_period: From modal analysis.
+            sd1: From site-specific hazard.
+            structural_height: Height in ft.
+            direction: Vector (as tuple) defining the direction of
+              loading. It should be a normal vector.
+            base_elevation: Elevation of the base level. Nodes below
+              don't get loaded.
+            length_to_feet_factor: What to multiply to convert length
+              unit used by model to feet.
+        """
+        c_t, x_param = approximate_period_parameters
+        # Equation 12.8-8
+        approximate_period = c_t * structural_height**x_param
+
+        cu_ifun = sp.interpolate.interp1d(
+            np.array((0.4, 0.3, 0.2, 0.15, 0.1)),
+            np.array((1.4, 1.4, 1.5, 1.6, 1.7)),
+            kind='linear',
+            fill_value='extrapolate',
+        )
+        cu_value = float(cu_ifun(sd1))
+        max_period = cu_value * approximate_period
+        controling_period = np.minimum(first_mode_period, max_period)
+        s_a = self.interpolate_spectrum(controling_period)
+        c_s = s_a / (response_modification_factor / importance_factor)
+        weight = np.sum([x for x in self._seismic_weight.values()])
+        v_b = c_s * weight
+        exponent_ifun = sp.interpolate.interp1d(
+            np.array((0.5, 2.5)),
+            np.array((1.0, 2.0)),
+            kind='linear',
+            fill_value='extrapolate',
+        )
+        exponent_value = float(exponent_ifun(controling_period))
+        nodal_cvx_value: dict[int, float] = {}
+        for node_uid, weight_value in self._seismic_weight.items():
+            node_elevation = all_nodes[node_uid].coordinates[-1] - base_elevation
+            if node_elevation < 0.00:
+                continue
+            nodal_cvx_value[node_uid] = (
+                weight_value
+                * (node_elevation * length_to_feet_factor) ** exponent_value
+            )
+        total_cvx = np.sum([x for x in nodal_cvx_value.values()])
+        for key in nodal_cvx_value:
+            nodal_cvx_value[key] *= v_b / total_cvx
+        # Now nodal_cvx hold the absolute nodal forces.
+        for node_uid, nodal_force in nodal_cvx_value.items():
+            self.load_registry.nodal_loads[node_uid] = PointLoad(
+                v * nodal_force for v in direction
+            )
 
 
 @dataclass(repr=False)
@@ -716,7 +829,7 @@ class LoadCaseRegistry:
         for component in components:
             weight_per_length = component.get_section().sec_w * scaling_factor
             udl = UDL((0.00, 0.00, -weight_per_length))
-            self.dead[case_name].load_registry.element_udl[component.uid] = udl
+            self.dead[case_name].load_registry.component_udl[component.uid] = udl
 
     def self_mass(
         self,
@@ -745,11 +858,12 @@ class LoadCaseRegistry:
         }
         for source_load_case, factor in source_load_cases:
             # Convert UDL to mass
-            for uid, udl in source_load_case.load_registry.element_udl.items():
+            for uid, udl in source_load_case.load_registry.component_udl.items():
                 component = components[uid]
                 length = component.clear_length()
                 weight = np.abs(udl[-1] * length)
-                num_nodes = len(component.internal_nodes)
+                num_nodes = len(component.external_nodes)
+                assert num_nodes > 0, 'Invalid component: no external nodes.'
                 mass = weight * factor / g_constant / num_nodes
                 # TODO(JVM): separate cases for other ndm/ndf
                 # configurations.

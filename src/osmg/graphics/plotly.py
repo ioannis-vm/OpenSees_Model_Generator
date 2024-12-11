@@ -24,6 +24,7 @@ from osmg.model_objects.element import (
     DispBeamColumn,
     ElasticBeamColumn,
     TwoNodeLink,
+    ZeroLength,
 )
 
 if TYPE_CHECKING:
@@ -225,6 +226,7 @@ class Figure3D:
         disp_beamcolumn_elements: list[DispBeamColumn] = []
         bar_elements: list[Bar] = []
         two_node_link_elements: list[TwoNodeLink] = []
+        zerolength_elements: list[ZeroLength] = []
         unknown_types: set[str] = set()
         for element in elements:
             if isinstance(element, ElasticBeamColumn):
@@ -235,6 +237,8 @@ class Figure3D:
                 bar_elements.append(element)
             elif isinstance(element, TwoNodeLink):
                 two_node_link_elements.append(element)
+            elif isinstance(element, ZeroLength):
+                zerolength_elements.append(element)
             elif element.__class__.__name__ not in unknown_types:
                 unknown_types = unknown_types.union({element.__class__.__name__})
         if unknown_types:
