@@ -164,14 +164,10 @@ class LoadRegistry:
 
 
 @dataclass(repr=False)
-class LoadCase:
-    """Load case."""
+class HasModel:
+    """Has a model object."""
 
     model: Model | None = field(default=None)
-    fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
-    elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
-    analysis: Analysis = field(default_factory=Analysis)
-    rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """
@@ -184,6 +180,21 @@ class LoadCase:
         if self.model is None:
             msg = 'Model is a required attribute.'
             raise ValueError(msg)
+
+
+@dataclass(repr=False)
+class LoadCase(HasModel):
+    """Load case."""
+
+    model: Model | None = field(default=None)
+    fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
+    elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
+    analysis: Analysis = field(default_factory=Analysis)
+    rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        super().__init__()
         self._case_type = 'Undefined'
 
     def get_load_case_type(self) -> str:
@@ -583,9 +594,9 @@ class LoadCase:
 
         return axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df
 
-    def run(self, model: Model) -> None:
+    def run(self) -> None:
         """Run the analysis corresponding to the load case."""
-        self.analysis.run(model, self)
+        self.analysis.run(self.model, self)
 
 
 @dataclass(repr=False)
@@ -778,17 +789,47 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads, SpectrumLoadCase):
         return self._metadata
 
 
+@dataclass
+class SeismicRSAnalysisResults:
+    """Stores Seismic RS related results."""
+
+    gamma_n: tuple[float, ...]
+    m_star: tuple[float, ...]
+    vb_modal: tuple[float, ...]
+    modal_q: tuple[float, ...]
+    total_mass: float
+
+
 @dataclass(repr=False)
-class SeismicRSLoadCase(SpectrumLoadCase):
+class SeismicRSLoadCase(SeismicLoadCase, SpectrumLoadCase):
     """Seismic response spectrum load case."""
 
+    _direction: int | None = field(default=None)
+    _g_constant: float | None = field(default=None)
     _linked_modal_load_case: ModalLoadCase | None = field(default=None)
-    _effective_modal_mass: tuple[float, ...] | None = field(default=None)
-    _mass_participation: tuple[float, ...] | None = field(default=None)
-    _gamma: tuple[float, ...] | None = field(default=None)
+    _results: SeismicRSAnalysisResults | None = field(default=None)
 
-    def link_modal_loadcase(self, modal_load_case: ModalLoadCase) -> None:
+    def configure(
+        self,
+        *,
+        direction: Literal[0, 1, 2],
+        g_constant: float,
+        linked_modal_load_case: ModalLoadCase,
+    ) -> None:
+        """Define the excitation direction."""
+        assert direction in {0, 1, 2}, f'Invalid direction: {direction}.'
+        self._direction = direction
+        self._g_constant = g_constant
+        self._link_modal_load_case(linked_modal_load_case)
+
+    def _link_modal_load_case(self, modal_load_case: ModalLoadCase) -> None:
         """Link a modal load case."""
+        self.analysis = modal_load_case.analysis
+        self.fixed_supports = modal_load_case.fixed_supports
+        self.elastic_supports = modal_load_case.elastic_supports
+        self.analysis = modal_load_case.analysis
+        self.rigid_diaphragm = modal_load_case.rigid_diaphragm
+        self.mass_registry = modal_load_case.mass_registry
         self._linked_modal_load_case = modal_load_case
 
     def calculate_modal_participation_factors(self) -> None:
@@ -800,9 +841,29 @@ class SeismicRSLoadCase(SpectrumLoadCase):
         - Thanks
 
         Raises:
-          ValueError: If the modal analysis has not been executed yet.
+          ValueError: If the modal analysis does not exist or has not
+            been executed yet.
+          ValueError: If no spectrum is set.
+          ValueError: If no direction is set.
         """
-        assert self._linked_modal_load_case is not None
+        if self._linked_modal_load_case is None:
+            msg = (
+                'Seismic RS analysis requires linking '
+                'to an existing modal load case.'
+            )
+            raise ValueError(msg)
+
+        if self._design_spectrum is None:
+            msg = 'Seismic RS analysis requires a spectrum.'
+            raise ValueError(msg)
+
+        if self._direction is None:
+            msg = 'Seismic RS analysis requires an excitation direction to be set.'
+            raise ValueError(msg)
+
+        if self._g_constant is None:
+            msg = 'Seismic RS analysis requires G to be set (`g_constant`).'
+            raise ValueError(msg)
 
         periods = self._linked_modal_load_case.analysis.periods
         num_modes = len(periods)
@@ -810,25 +871,66 @@ class SeismicRSLoadCase(SpectrumLoadCase):
             msg = 'Modal analysis has not been executed yet.'
             raise ValueError(msg)
         nodes = self._linked_modal_load_case.model.get_all_nodes()
+        node_displacements = self.analysis.recorders['default_node'].get_data()
         ndf = NDF[self._linked_modal_load_case.model.dimensionality]
 
-        breakpoint()
-        # ~~~ in progress ~~~
-        # Objective: adapt the following code, use Pandas and
-        # vectorized operations instead of nested loops.
+        node_displacements_ordered = node_displacements[nodes.keys()]
+        displacements = node_displacements_ordered.to_numpy()
 
-        # for n_mode in range(num_modes):
-        #     m_n = 0.0
-        #     l_n = 0.0
-        #     for nd in ops.getNodeTags():
-        #         ndMass = ops.nodeMass(nd)
-        #         ndEigen = ops.nodeEigenvector(nd, n_mode + 1)
-        #         l_n += ndEigen[0] * ndMass[0]  # 0 for X, 1 for Y, 2 for Z excitation
-        #         for dof in range(ndf):
-        #             m_n += (ndEigen[dof] ** 2) * ndMass[dof]
-        #     Gamman = l_n / m_n
-        #     Tn = periods[n_mode]
-        #     print(f'Mode {n_mode+1}, Tn = {Tn}, Mn = {m_n}, Gamma = {Gamman}')
+        num_nodes = len(nodes)
+        mass_matrix = np.zeros((num_nodes, ndf))
+
+        for i, node_uid in enumerate(nodes):
+            node_mass = self.mass_registry.get(node_uid)
+            if node_mass:
+                mass_matrix[i, :] = node_mass
+
+        total_mass = mass_matrix[:, self._direction].sum()
+
+        displacements = displacements.reshape(
+            (displacements.shape[0], num_nodes, ndf)
+        )
+
+        g_constant = self._g_constant
+        m_stars = []
+        gamma_ns = []
+        vb_modal = []
+        modal_q = []
+
+        for n_mode in range(num_modes):
+            mode_displacements = displacements[n_mode]
+            l_n = (
+                mode_displacements[:, self._direction]
+                * mass_matrix[:, self._direction]
+            ).sum()
+            m_n = (mode_displacements**2 * mass_matrix).sum()
+
+            gamma_n = l_n / m_n
+            m_star = l_n**2 / m_n
+            gamma_ns.append(float(gamma_n))
+            m_stars.append(float(m_star))
+            sa_t = self.interpolate_spectrum(periods[n_mode])
+            vb_modal.append(float(sa_t * m_star * g_constant))
+            modal_q.append(
+                float(
+                    gamma_n
+                    * sa_t
+                    / (2.0 * np.pi / periods[n_mode]) ** 2
+                    * g_constant
+                )
+            )
+
+        self._results = SeismicRSAnalysisResults(
+            gamma_n=tuple(gamma_ns),
+            m_star=tuple(m_stars),
+            vb_modal=tuple(vb_modal),
+            modal_q=tuple(modal_q),
+            total_mass=total_mass,
+        )
+
+    def run(self) -> None:
+        """Run associated analysis."""
+        self.calculate_modal_participation_factors()
 
 
 @dataclass(repr=False)
@@ -981,6 +1083,7 @@ class LoadCaseRegistry:
             | self.live
             | self.modal
             | self.seismic_elf
+            | self.seismic_rs
             | self.seismic_transient
             | self.other
         )
@@ -1028,7 +1131,7 @@ class LoadCaseRegistry:
             case_dir.mkdir(parents=True, exist_ok=True)
             load_case.analysis.settings.result_directory = str(case_dir)
 
-            load_case.run(self.model)
+            load_case.run()
 
             progress_bar.update(1)
         progress_bar.close()
