@@ -406,6 +406,17 @@ class Analysis:
             output_time=True,
         )
         self.recorders['default_node'] = node_recorder
+        node_reaction_recorder = NodeRecorder(
+            uid_generator=model.uid_generator,
+            file_name='node_reactions',
+            recorder_type='Node',
+            nodes=tuple(model.get_all_nodes().keys()),
+            dofs=tuple(v + 1 for v in range(ndf)),
+            response_type='reaction',
+            number_of_significant_digits=6,
+            output_time=True,
+        )
+        self.recorders['default_node_reaction'] = node_reaction_recorder
 
         applicable_elements = []
         components = model.components.values()

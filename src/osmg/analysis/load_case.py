@@ -10,24 +10,22 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
-import scipy as sp
 import pandas as pd
+import scipy as sp
+from tqdm import tqdm
 
-from osmg.analysis.common import UDL, PointMass
+from osmg.analysis.common import UDL, PointLoad, PointMass
 from osmg.analysis.recorders import ElementRecorder
 from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
-from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL
-from osmg.core.osmg_collections import BeamColumnAssembly, BarAssembly
-from osmg.model_objects.element import BeamColumnElement, Bar
-from osmg.analysis.common import PointLoad
-
-from tqdm import tqdm
+from osmg.core.common import EPSILON, NDF, THREE_DIMENSIONAL, TWO_DIMENSIONAL
+from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
+from osmg.model_objects.element import Bar, BeamColumnElement
 
 if TYPE_CHECKING:
     from osmg.core.model import Model, Model2D, Model3D
-    from osmg.model_objects.node import Node
     from osmg.core.osmg_collections import ComponentAssembly
+    from osmg.model_objects.node import Node
 
 
 def ensure_minmax_level_exists_or_add(data: pd.DataFrame) -> pd.DataFrame:
@@ -169,10 +167,33 @@ class LoadRegistry:
 class LoadCase:
     """Load case."""
 
+    model: Model | None = field(default=None)
     fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
     analysis: Analysis = field(default_factory=Analysis)
     rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """
+        Post-initialization.
+
+        Raises:
+          ValueError: If the `model` attribute is set to None after
+          initialization.
+        """
+        if self.model is None:
+            msg = 'Model is a required attribute.'
+            raise ValueError(msg)
+        self._case_type = 'Undefined'
+
+    def get_load_case_type(self) -> str:
+        """
+        Get the case type.
+
+        Returns:
+          The case type.
+        """
+        return self._case_type
 
     def add_supports_at_level(
         self,
@@ -562,6 +583,10 @@ class LoadCase:
 
         return axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df
 
+    def run(self, model: Model) -> None:
+        """Run the analysis corresponding to the load case."""
+        self.analysis.run(model, self)
+
 
 @dataclass(repr=False)
 class HasMass:
@@ -583,12 +608,20 @@ class DeadLoadCase(LoadCase, HasLoads):
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        self._case_type = 'Dead'
+
 
 @dataclass(repr=False)
 class LiveLoadCase(LoadCase, HasLoads):
     """Live load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
+
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        self._case_type = 'Live'
 
 
 @dataclass(repr=False)
@@ -597,18 +630,24 @@ class ModalLoadCase(LoadCase, HasMass):
 
     analysis: ModalAnalysis = field(default_factory=ModalAnalysis)
 
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        self._case_type = 'Modal'
+
 
 @dataclass(repr=False)
 class SeismicLoadCase(LoadCase, HasLoads):
     """Seismic load case base class."""
 
+    def __post_init__(self) -> None:
+        """Post-initialization."""
+        self._case_type = 'Seismic'
+
 
 @dataclass(repr=False)
-class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
-    """Seismic ELF load case."""
+class SpectrumLoadCase:
+    """Involves a response spectrum."""
 
-    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
-    _seismic_weight: dict[int, float] = field(default_factory=dict)
     _design_spectrum: pd.DataFrame | None = field(default=None)
 
     def define_design_spectrum_from_csv(self, filepath: str) -> None:
@@ -635,6 +674,15 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
 
         return float(np.interp(period, periods, spectral_accelerations))
 
+
+@dataclass(repr=False)
+class SeismicELFLoadCase(SeismicLoadCase, HasLoads, SpectrumLoadCase):
+    """Seismic ELF load case."""
+
+    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
+    _seismic_weight: dict[int, float] = field(default_factory=dict)
+    _metadata: list[str] = field(default_factory=list)
+
     def extract_seismic_weight(
         self, modal_load_case: ModalLoadCase, g_constant: float
     ) -> None:
@@ -646,7 +694,6 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
 
     def define_loads(
         self,
-        all_nodes: dict[int, Node],
         response_modification_factor: float,
         importance_factor: float,
         first_mode_period: float,
@@ -661,7 +708,6 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
         Calculate and distribute equivalent lateral forces.
 
         Params:
-            all_nodes: Dictionary containing all nodes in the model.
             response_modification_factor: $R$, Table 12.2-1.
             overstrength_factor: $Omega_0$, Table 12.2-1.
             deflection_amplification_factor: $C_d$, Table 12.2-1.
@@ -677,9 +723,11 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
             length_to_feet_factor: What to multiply to convert length
               unit used by model to feet.
         """
+        all_nodes = self.model.get_all_nodes()
         c_t, x_param = approximate_period_parameters
         # Equation 12.8-8
         approximate_period = c_t * structural_height**x_param
+        self._metadata.append(f'Approx. period = {approximate_period:.2f} s.')
 
         cu_ifun = sp.interpolate.interp1d(
             np.array((0.4, 0.3, 0.2, 0.15, 0.1)),
@@ -688,12 +736,18 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
             fill_value='extrapolate',
         )
         cu_value = float(cu_ifun(sd1))
+        self._metadata.append(f'Cu = {cu_value:.2f}.')
         max_period = cu_value * approximate_period
+        self._metadata.append(f'Tmax = {max_period:.2f} s.')
+        self._metadata.append(f'T1 = {first_mode_period:.2f} s.')
         controling_period = np.minimum(first_mode_period, max_period)
         s_a = self.interpolate_spectrum(controling_period)
+        self._metadata.append(f'Sa(T) = {s_a:.2f} g.')
         c_s = s_a / (response_modification_factor / importance_factor)
-        weight = np.sum([x for x in self._seismic_weight.values()])
+        weight = np.sum(list(self._seismic_weight.values()))
+        self._metadata.append(f'W = {weight:.0f}.')
         v_b = c_s * weight
+        self._metadata.append(f'Vb = {v_b:.0f}.')
         exponent_ifun = sp.interpolate.interp1d(
             np.array((0.5, 2.5)),
             np.array((1.0, 2.0)),
@@ -710,19 +764,71 @@ class SeismicELFLoadCase(SeismicLoadCase, HasLoads):
                 weight_value
                 * (node_elevation * length_to_feet_factor) ** exponent_value
             )
-        total_cvx = np.sum([x for x in nodal_cvx_value.values()])
+        total_cvx = np.sum(list(nodal_cvx_value.values()))
         for key in nodal_cvx_value:
             nodal_cvx_value[key] *= v_b / total_cvx
-        # Now nodal_cvx hold the absolute nodal forces.
+        # Now nodal_cvx holds the absolute nodal forces.
         for node_uid, nodal_force in nodal_cvx_value.items():
             self.load_registry.nodal_loads[node_uid] = PointLoad(
                 v * nodal_force for v in direction
             )
 
+    def get_metadata(self) -> None:
+        """Get the metadata."""
+        return self._metadata
+
 
 @dataclass(repr=False)
-class SeismicRSLoadCase(SeismicLoadCase, HasLoads, HasMass):
-    """Seismic RS load case."""
+class SeismicRSLoadCase(SpectrumLoadCase):
+    """Seismic response spectrum load case."""
+
+    _linked_modal_load_case: ModalLoadCase | None = field(default=None)
+    _effective_modal_mass: tuple[float, ...] | None = field(default=None)
+    _mass_participation: tuple[float, ...] | None = field(default=None)
+    _gamma: tuple[float, ...] | None = field(default=None)
+
+    def link_modal_loadcase(self, modal_load_case: ModalLoadCase) -> None:
+        """Link a modal load case."""
+        self._linked_modal_load_case = modal_load_case
+
+    def calculate_modal_participation_factors(self) -> None:
+        """
+        Calculate modal participation factors.
+
+        Code adapted from - https://portwooddigital.com/
+          2020/11/01/modal-participation-factors/
+        - Thanks
+
+        Raises:
+          ValueError: If the modal analysis has not been executed yet.
+        """
+        assert self._linked_modal_load_case is not None
+
+        periods = self._linked_modal_load_case.analysis.periods
+        num_modes = len(periods)
+        if num_modes == 0:
+            msg = 'Modal analysis has not been executed yet.'
+            raise ValueError(msg)
+        nodes = self._linked_modal_load_case.model.get_all_nodes()
+        ndf = NDF[self._linked_modal_load_case.model.dimensionality]
+
+        breakpoint()
+        # ~~~ in progress ~~~
+        # Objective: adapt the following code, use Pandas and
+        # vectorized operations instead of nested loops.
+
+        # for n_mode in range(num_modes):
+        #     m_n = 0.0
+        #     l_n = 0.0
+        #     for nd in ops.getNodeTags():
+        #         ndMass = ops.nodeMass(nd)
+        #         ndEigen = ops.nodeEigenvector(nd, n_mode + 1)
+        #         l_n += ndEigen[0] * ndMass[0]  # 0 for X, 1 for Y, 2 for Z excitation
+        #         for dof in range(ndf):
+        #             m_n += (ndEigen[dof] ** 2) * ndMass[dof]
+        #     Gamman = l_n / m_n
+        #     Tn = periods[n_mode]
+        #     print(f'Mode {n_mode+1}, Tn = {Tn}, Mn = {m_n}, Gamma = {Gamman}')
 
 
 @dataclass(repr=False)
@@ -746,7 +852,6 @@ class AnalysisResultSetup:
     directory: str | None = field(default=None)
 
 
-@dataclass(repr=False)
 class LoadCaseRegistry:
     """
     Load case registry.
@@ -761,53 +866,25 @@ class LoadCaseRegistry:
 
     The load case registry can be used to orchestrate all analyses,
     retrieve, and post-process results.
-
     """
 
-    model: Model
-    result_setup: AnalysisResultSetup = field(default_factory=AnalysisResultSetup)
-    dead: defaultdict[str, DeadLoadCase] = field(
-        default_factory=lambda: defaultdict(DeadLoadCase)
-    )
-    live: defaultdict[str, LiveLoadCase] = field(
-        default_factory=lambda: defaultdict(LiveLoadCase)
-    )
-    modal: defaultdict[str, ModalLoadCase] = field(
-        default_factory=lambda: defaultdict(ModalLoadCase)
-    )
-    seismic_elf: defaultdict[str, SeismicELFLoadCase] = field(
-        default_factory=lambda: defaultdict(SeismicELFLoadCase)
-    )
-    seismic_rs: defaultdict[str, SeismicRSLoadCase] = field(
-        default_factory=lambda: defaultdict(SeismicRSLoadCase)
-    )
-    seismic_transient: defaultdict[str, SeismicTransientLoadCase] = field(
-        default_factory=lambda: defaultdict(SeismicTransientLoadCase)
-    )
-    other: defaultdict[str, OtherLoadCase] = field(
-        default_factory=lambda: defaultdict(OtherLoadCase)
-    )
+    def __init__(
+        self, model: Model, result_setup: AnalysisResultSetup = None
+    ) -> None:
+        """Instantiate a LoadCaseRegistry."""
+        self.model = model
+        self.result_setup = result_setup or AnalysisResultSetup()
 
-    def get_cases_list(self) -> list[tuple[str, defaultdict[str, LoadCase]]]:
-        """
-        Get a list of load case types.
-
-        Returns:
-          List of load case types
-        """
-        # Iterate over each category of load cases
-        return [
-            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
-            ('live', cast(defaultdict[str, LoadCase], self.live)),
-            ('modal', cast(defaultdict[str, LoadCase], self.modal)),
-            ('seismic_elf', cast(defaultdict[str, LoadCase], self.seismic_elf)),
-            ('seismic_rs', cast(defaultdict[str, LoadCase], self.seismic_rs)),
-            (
-                'seismic_transient',
-                cast(defaultdict[str, LoadCase], self.seismic_transient),
-            ),
-            ('other', cast(defaultdict[str, LoadCase], self.other)),
-        ]
+        # Initialize defaultdicts with factory functions that include the model
+        self.dead = defaultdict(lambda: DeadLoadCase(model=self.model))
+        self.live = defaultdict(lambda: LiveLoadCase(model=self.model))
+        self.modal = defaultdict(lambda: ModalLoadCase(model=self.model))
+        self.seismic_elf = defaultdict(lambda: SeismicELFLoadCase(model=self.model))
+        self.seismic_rs = defaultdict(lambda: SeismicRSLoadCase(model=self.model))
+        self.seismic_transient = defaultdict(
+            lambda: SeismicTransientLoadCase(model=self.model)
+        )
+        self.other = defaultdict(lambda: OtherLoadCase(model=self.model))
 
     def self_weight(self, case_name: str, scaling_factor: float = 1.0) -> None:
         """
@@ -892,6 +969,31 @@ class LoadCaseRegistry:
                         (*(e + p for e, p in zip(existing_mass, point_mass)),)
                     )
 
+    def get_load_cases(self) -> dict[LoadCase]:
+        """
+        Get a dictionary of load cases.
+
+        Returns:
+          Dictionary of load cases.
+        """
+        return (
+            self.dead
+            | self.live
+            | self.modal
+            | self.seismic_elf
+            | self.seismic_transient
+            | self.other
+        )
+
+    def get_load_case_list(self) -> list[LoadCase]:
+        """
+        Get a list of load cases.
+
+        Returns:
+          List of load cases.
+        """
+        return list(self.get_load_cases().values())
+
     def run(self) -> None:
         """
         Run all analyses.
@@ -909,10 +1011,8 @@ class LoadCaseRegistry:
         base_dir.mkdir(parents=True, exist_ok=True)
         self.result_setup.directory = str(base_dir.resolve())
 
-        cases_list = self.get_cases_list()
-        num_cases = 0
-        for _, cases in cases_list:
-            num_cases += len(cases)
+        cases_dict = self.get_load_cases()
+        num_cases = len(cases_dict)
         progress_bar = tqdm(
             total=num_cases,
             ncols=80,
@@ -920,17 +1020,17 @@ class LoadCaseRegistry:
             unit='case',
             leave=False,
         )
-        for case_type, cases in cases_list:
-            for key, load_case in cases.items():
-                progress_bar.set_description(f'Processing {case_type}: {key}')
-                # Create a subdirectory for each load case
-                case_dir = base_dir / f'{case_type}_{key}'
-                case_dir.mkdir(parents=True, exist_ok=True)
+        for load_case_name, load_case in cases_dict.items():
+            case_type = load_case.get_load_case_type()
+            progress_bar.set_description(f'Processing {case_type}: {load_case_name}')
+            # Create a subdirectory for each load case
+            case_dir = base_dir / f'{case_type}_{load_case_name}'
+            case_dir.mkdir(parents=True, exist_ok=True)
+            load_case.analysis.settings.result_directory = str(case_dir)
 
-                load_case.analysis.settings.result_directory = str(case_dir)
-                load_case.analysis.run(self.model, load_case)
+            load_case.run(self.model)
 
-                progress_bar.update(1)
+            progress_bar.update(1)
         progress_bar.close()
 
     def combine_recorder(self, recorder_name: str) -> pd.DataFrame:
