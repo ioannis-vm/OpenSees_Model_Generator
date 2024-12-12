@@ -614,25 +614,14 @@ class HasLoads:
 
 
 @dataclass(repr=False)
-class DeadLoadCase(LoadCase, HasLoads):
-    """Dead load case."""
+class StaticLoadCase(LoadCase, HasLoads):
+    """Static load case."""
 
     analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
-        self._case_type = 'Dead'
-
-
-@dataclass(repr=False)
-class LiveLoadCase(LoadCase, HasLoads):
-    """Live load case."""
-
-    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
-
-    def __post_init__(self) -> None:
-        """Post-initialization."""
-        self._case_type = 'Live'
+        self._case_type = 'Static'
 
 
 @dataclass(repr=False)
@@ -959,15 +948,9 @@ class LoadCaseRegistry:
     Load case registry.
 
     A load case registry is an organized collection of load cases.
-    Load cases are categorized based on the nature of the loads, such
-    as `dead`, `live`, or `seismic_elf`. Each type of loading
-    necessitates a specific type of analysis needed to estimate the
-    structural response, with most being static. Custom analyses which
-    don't need to conform to load type classification can use the
-    `other` load case.
-
-    The load case registry can be used to orchestrate all analyses,
-    retrieve, and post-process results.
+    Load cases are categorized based on the type of analysis required,
+    such as `static`, or `modal`. Custom analyses which don't need to
+    conform to load type classification can use the `other` load case.
     """
 
     def __init__(
@@ -978,8 +961,7 @@ class LoadCaseRegistry:
         self.result_setup = result_setup or AnalysisResultSetup()
 
         # Initialize defaultdicts with factory functions that include the model
-        self.dead = defaultdict(lambda: DeadLoadCase(model=self.model))
-        self.live = defaultdict(lambda: LiveLoadCase(model=self.model))
+        self.static = defaultdict(lambda: StaticLoadCase(model=self.model))
         self.modal = defaultdict(lambda: ModalLoadCase(model=self.model))
         self.seismic_elf = defaultdict(lambda: SeismicELFLoadCase(model=self.model))
         self.seismic_rs = defaultdict(lambda: SeismicRSLoadCase(model=self.model))
@@ -1008,7 +990,7 @@ class LoadCaseRegistry:
         for component in components:
             weight_per_length = component.get_section().sec_w * scaling_factor
             udl = UDL((0.00, 0.00, -weight_per_length))
-            self.dead[case_name].load_registry.component_udl[component.uid] = udl
+            self.static[case_name].load_registry.component_udl[component.uid] = udl
 
     def self_mass(
         self,
@@ -1079,8 +1061,7 @@ class LoadCaseRegistry:
           Dictionary of load cases.
         """
         return (
-            self.dead
-            | self.live
+            self.static
             | self.modal
             | self.seismic_elf
             | self.seismic_rs
@@ -1149,8 +1130,7 @@ class LoadCaseRegistry:
         """
         # TODO(JVM): in progress.
         cases_list = [
-            ('dead', cast(defaultdict[str, LoadCase], self.dead)),
-            ('live', cast(defaultdict[str, LoadCase], self.live)),
+            ('dead', cast(defaultdict[str, LoadCase], self.static)),
         ]
         all_data: dict[str, dict[str, pd.DataFrame]] = defaultdict(dict)
         case_type_data = {}
