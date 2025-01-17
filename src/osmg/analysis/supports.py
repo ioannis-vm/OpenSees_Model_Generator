@@ -9,7 +9,7 @@ class FixedSupport(tuple[bool, ...]):
     __slots__: list[str] = []
 
 
-class ElasticSupport(tuple[float, ...]):
+class ElasticSupport(tuple[float | bool, ...]):
     """Flexible support."""
 
     __slots__: list[str] = []

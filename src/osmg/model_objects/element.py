@@ -134,7 +134,7 @@ class TwoNodeLink(Element):
             '-dir',
             *self.directions,
         ]
-        if self.vecyp:
+        if self.vecyp is not None:
             args.extend(
                 [
                     '-orient',

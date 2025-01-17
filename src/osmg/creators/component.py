@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Literal
 import numpy as np
 
 from osmg.core.common import EPSILON, STIFF, STIFF_ROT
-from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
+from osmg.core.osmg_collections import (
+    BarAssembly,
+    BeamColumnAssembly,
+    ComponentAssembly,
+)
 from osmg.creators.material import ElasticMaterialCreator
 from osmg.creators.zerolength import ZeroLengthCreator
 from osmg.geometry.transformations import (
@@ -88,6 +92,51 @@ class BaseCreator:
 
 
 @dataclass(repr=False)
+class LinkCreator(BaseCreator):
+    """Defines TwoNodeLink element components."""
+
+    def add(
+        self,
+        tags: set[str],
+        node_i: Node,
+        node_j: Node,
+        materials: list[UniaxialMaterial],
+        directions: list[int],
+        angle=0.00,
+    ) -> ComponentAssembly:
+        """
+        Add a TwoNodeLink component.
+
+        Returns:
+          The added component.
+        """
+        assert node_i.uid != node_j.uid, 'Nodes need to be different.'
+        component = ComponentAssembly(
+            uid_generator=self.model.uid_generator,
+            tags=tags,
+        )
+        p_i = np.array(node_i.coordinates)
+        p_j = np.array(node_j.coordinates)
+        axes = local_axes_from_points_and_angle(p_i, p_j, angle)  # type: ignore
+        component.elements.add(
+            TwoNodeLink(
+                uid_generator=self.model.uid_generator,
+                nodes=[node_i, node_j],
+                materials=materials,
+                directions=directions,
+                vecyp=axes[1],
+            )
+        )
+        component.external_nodes.add(node_i)
+        component.external_nodes.add(node_j)
+
+        # Adding the component in the end. (It needs to have external
+        # nodes before adding to the collection).
+        self.model.components.add(component)
+        return component
+
+
+@dataclass(repr=False)
 class BarCreator(BaseCreator):
     """
     Bar creator object.
@@ -110,7 +159,7 @@ class BarCreator(BaseCreator):
         weight_per_length: float = 0.00,
     ) -> BarAssembly:
         """
-        Add a bar element.
+        Add a bar component.
 
         If offsets are required, they are implemented through the
         addition of RigidLink elements.

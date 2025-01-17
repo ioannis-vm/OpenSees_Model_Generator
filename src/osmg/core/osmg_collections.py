@@ -303,6 +303,22 @@ class BarAssembly(ComponentAssembly):
     """Component assembly for bar elements."""
 
 
+    def __hash__(self) -> int:
+        """Return the hash of the object based on its UID."""
+        return hash(self.uid)
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality based on the UID.
+
+        Returns:
+          True if it is equal, False otherwise.
+        """
+        if not isinstance(other, UIDObject):
+            return False
+        return self.uid == other.uid
+
+
 @dataclass
 class BeamColumnAssembly(ComponentAssembly):
     """

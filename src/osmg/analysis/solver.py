@@ -258,16 +258,8 @@ class Analysis:
     def opensees_define_node_restraints(
         self, model: Model, load_case: LoadCase
     ) -> None:
-        """
-        Define node restraints.
-
-        Raises:
-          NotImplementedError: If elastic supports exist.
-        """
+        """Define node restraints."""
         ndf = NDF[model.dimensionality]
-        if load_case.elastic_supports:
-            msg = 'Elastic supports not implemented yet.'
-            raise NotImplementedError(msg)
 
         for uid, support in load_case.fixed_supports.items():
             fix = []
@@ -281,6 +273,39 @@ class Analysis:
                     fix.append(False)
             if True in fix:
                 ops.fix(uid, *[int(x) for x in fix])
+
+        nodes = model.get_all_nodes()
+        elastic_materials = {}
+        for uid, support in load_case.elastic_supports.items():
+            assert len(support) == ndf
+            node = nodes[uid]
+            # for each direction.
+            material_uids_for_this_support = []
+            for value in support:
+                # define material if needed.
+                if value not in elastic_materials:
+                    material_uid = next(model.uid_generator.MATERIAL)
+                    elastic_materials[value] = material_uid
+                    ops.uniaxialMaterial('Elastic', material_uid, value)
+                else:
+                    material_uid = elastic_materials[value]
+                material_uids_for_this_support.append(material_uid)
+            # define a node at the same location.
+            new_node_uid = next(model.uid_generator.NODE)
+            ops.node(new_node_uid, *node.coordinates)
+            # fix that node.
+            ops.fix(new_node_uid, *([1] * ndf))
+            # define a zerolength element connecting the two nodes.
+            ops.element(
+                'zeroLength',
+                next(model.uid_generator.ELEMENT),
+                uid,
+                new_node_uid,
+                '-mat',
+                *material_uids_for_this_support,
+                '-dir',
+                *range(1, ndf + 1),
+            )
 
     @staticmethod
     def opensees_define_node_constraints(model: Model, load_case: LoadCase) -> None:
@@ -503,7 +528,7 @@ class StaticAnalysis(Analysis):
 class ModalAnalysisSettings(AnalysisSettings):
     """Modal analysis settings."""
 
-    num_modes: int = field(default=1)
+    num_modes: int = field(default=3)
 
 
 @dataclass(repr=False)

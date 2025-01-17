@@ -18,7 +18,7 @@ from osmg.analysis.common import UDL, PointLoad, PointMass
 from osmg.analysis.recorders import ElementRecorder
 from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
-from osmg.core.common import EPSILON, NDF, THREE_DIMENSIONAL, TWO_DIMENSIONAL
+from osmg.core.common import EPSILON, NDF, NDM, THREE_DIMENSIONAL, TWO_DIMENSIONAL
 from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
 from osmg.model_objects.element import Bar, BeamColumnElement
 
@@ -66,7 +66,7 @@ def combine_single(
         df1: First DataFrame.
         df2: Second DataFrame.
         action: Action to perform:
-            - 'add': Element-wise addition of the DataFrames.
+            - 'add': Element-wise addition of the DataFrames. Missing values are treated as 0.
             - 'envelope': Take the largest of the maxes and the
               smallest of the mins.
 
@@ -76,16 +76,12 @@ def combine_single(
     Raises:
       ValueError: If an unknown action is specified.
     """
-    # Validate column compatibility
+    # Reindex to ensure alignment and fill missing data with 0
+    df1_aligned = df1.reindex(columns=df2.columns.union(df1.columns), fill_value=0)
+    df2_aligned = df2.reindex(columns=df2.columns.union(df1.columns), fill_value=0)
+
     if action == 'add':
-        if not np.all(
-            df1.columns.names == df2.columns.names
-        ) or not df1.columns.equals(df2.columns):
-            msg = 'Cannot align DataFrames with different columns'
-            raise ValueError(msg)
-
-        combined = df1 + df2
-
+        combined = df1_aligned + df2_aligned
     elif action == 'envelope':
         df1 = ensure_minmax_level_exists_or_add(df1)
         df2 = ensure_minmax_level_exists_or_add(df2)
@@ -191,6 +187,7 @@ class LoadCase(HasModel):
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
     analysis: Analysis = field(default_factory=Analysis)
     rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
+    _basic_force_cache: dict = field(default_factory=dict, init=False)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -325,6 +322,12 @@ class LoadCase(HasModel):
             ValueError: If element length information is missing for
               any element.
         """
+        cache_key = (recorder_name, tuple(components.keys()), ndm, num_stations)
+
+        # Check if the result is already cached
+        if cache_key in self._basic_force_cache:
+            return self._basic_force_cache[cache_key]
+
         recorder = self.analysis.recorders.get(recorder_name)
         if recorder is None:
             msg = f'Specified recorder not available: {recorder_name}.'
@@ -592,7 +595,17 @@ class LoadCase(HasModel):
         #     atol=1e-6,
         # )
 
-        return axial_df, shear_y_df, shear_z_df, torsion_df, moment_y_df, moment_z_df
+        result = (
+            axial_df,
+            shear_y_df,
+            shear_z_df,
+            torsion_df,
+            moment_y_df,
+            moment_z_df,
+        )
+        self._basic_force_cache[cache_key] = result
+
+        return result
 
     def run(self) -> None:
         """Run the analysis corresponding to the load case."""
@@ -1053,7 +1066,7 @@ class LoadCaseRegistry:
                         (*(e + p for e, p in zip(existing_mass, point_mass)),)
                     )
 
-    def get_load_cases(self) -> dict[LoadCase]:
+    def get_load_cases(self) -> dict[str, LoadCase]:
         """
         Get a dictionary of load cases.
 
@@ -1105,6 +1118,7 @@ class LoadCaseRegistry:
             leave=False,
         )
         for load_case_name, load_case in cases_dict.items():
+            print(load_case_name)
             case_type = load_case.get_load_case_type()
             progress_bar.set_description(f'Processing {case_type}: {load_case_name}')
             # Create a subdirectory for each load case
@@ -1117,36 +1131,98 @@ class LoadCaseRegistry:
             progress_bar.update(1)
         progress_bar.close()
 
-    def combine_recorder(self, recorder_name: str) -> pd.DataFrame:
+    def find_load_case_by_name(self, load_case: str) -> LoadCase | SeismicRSLoadCase:
         """
-        Combine results of a recorder across cases.
+        Find a load case by name.
 
         Returns:
-          Combined results.
+          The load case.
 
         Raises:
-          ValueError: If the specified recorder does not exist in some
-            load case.
+          ValueError: If the load case is not found.
         """
-        # TODO(JVM): in progress.
-        cases_list = [
-            ('dead', cast(defaultdict[str, LoadCase], self.static)),
-        ]
-        all_data: dict[str, dict[str, pd.DataFrame]] = defaultdict(dict)
-        case_type_data = {}
-        for case_type, cases in cases_list:
-            for key, load_case in cases.items():
-                if recorder_name not in load_case.analysis.recorders:
-                    msg = (
-                        f'Recorder `{recorder_name}` not '
-                        f'found in `{case_type}` `{key}`.'
-                    )
-                    raise ValueError(msg)
-                all_data[case_type][key] = load_case.analysis.recorders[
-                    recorder_name
-                ].get_data()
-        # we have all data here.
-        for case_type, dataframes in all_data.items():
-            case_type_data[case_type] = combine(list(dataframes.values()), 'add')
-        # Hard-coded factors for now.
-        return case_type_data['dead']
+        load_cases = self.get_load_cases()
+        if load_case not in load_cases:
+            msg = f'Load case not found: {load_case}.'
+            raise ValueError(msg)
+        return (load_cases | self.seismic_rs)[load_case]
+
+    def get_combined_results(
+        self, recorder_name: str, combination: dict[str, float]
+    ) -> pd.DataFrame:
+        """
+        Get results for a specific load combination.
+
+        Raises:
+          ValueError: If the recorder is not found for some load case.
+
+        Returns:
+          The results.
+        """
+        associated_load_cases = set(combination.keys())
+        load_case_objects = {
+            load_case: self.find_load_case_by_name(load_case)
+            for load_case in associated_load_cases
+        }
+        all_data = []
+        for load_case_name, scale_factor in combination.items():
+            load_case = load_case_objects[load_case_name]
+            if recorder_name not in load_case.analysis.recorders:
+                msg = (
+                    f'Recorder not found: {recorder_name} '
+                    f'for load case {load_case}.'
+                )
+                raise ValueError(msg)
+            data = load_case.analysis.recorders[recorder_name].get_data()
+            if isinstance(data, list):
+                scaled_data = []
+                for element in data:
+                    assert isinstance(element, pd.DataFrame)
+                    scaled_data.append(element * scale_factor)
+                all_data.append(scaled_data)
+                lists = True
+            else:
+                all_data.append(data * scale_factor)
+                lists = False
+        if lists:
+            return [combine(item, action='add') for item in all_data]
+        return combine(all_data, action='add')
+
+    def get_combined_basic_forces(
+        self, recorder_name: str, combination: dict[str, float]
+    ) -> pd.DataFrame:
+        """
+        Get combined basic forces for a specific load combination.
+
+        Raises:
+          ValueError: If the recorder is not found for some load case.
+
+        Returns:
+          The results.
+        """
+        associated_load_cases = set(combination.keys())
+        load_case_objects = {
+            load_case: self.find_load_case_by_name(load_case)
+            for load_case in associated_load_cases
+        }
+        all_data = []
+        for load_case_name, scale_factor in combination.items():
+            load_case = load_case_objects[load_case_name]
+            if recorder_name not in load_case.analysis.recorders:
+                msg = (
+                    f'Recorder not found: {recorder_name} '
+                    f'for load case {load_case}.'
+                )
+                raise ValueError(msg)
+            data = load_case.calculate_basic_forces(
+                recorder_name,
+                self.model.components,
+                ndm=NDM[self.model.dimensionality],
+                num_stations=12,
+            )
+            scaled_data = []
+            for element in data:
+                assert isinstance(element, pd.DataFrame)
+                scaled_data.append(element * scale_factor)
+            all_data.append(scaled_data)
+        return [combine([x[i] for x in all_data], action='add') for i in range(6)]
