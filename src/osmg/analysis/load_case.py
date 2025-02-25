@@ -1047,7 +1047,7 @@ class LoadCaseRegistry:
                 # TODO(JVM): separate cases for other ndm/ndf
                 # configurations.
                 point_mass = PointMass((mass, mass, mass, 0.00, 0.00, 0.00))
-                for node_uid in component.internal_nodes:
+                for node_uid in component.external_nodes:
                     if node_uid not in target_load_case.mass_registry:
                         target_load_case.mass_registry[node_uid] = point_mass
                     else:
