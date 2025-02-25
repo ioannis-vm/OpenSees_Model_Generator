@@ -335,7 +335,6 @@ class Analysis:
         self.opensees_define_elements(model)
         self.opensees_define_node_restraints(model, load_case)
         self.opensees_define_node_constraints(model, load_case)
-        self.opensees_define_node_constraints(model, load_case)
         if not self.settings.disable_default_recorders:
             self.define_default_recorders(model)
         self.opensees_define_recorders()
