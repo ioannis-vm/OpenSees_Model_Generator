@@ -188,6 +188,7 @@ class LoadCase(HasModel):
     analysis: Analysis = field(default_factory=Analysis)
     rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
     _basic_force_cache: dict = field(default_factory=dict, init=False)
+    _is_executed: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -609,7 +610,9 @@ class LoadCase(HasModel):
 
     def run(self) -> None:
         """Run the analysis corresponding to the load case."""
-        self.analysis.run(self.model, self)
+        if not self._is_executed:
+            self.analysis.run(self.model, self)
+            self._is_executed = True
 
 
 @dataclass(repr=False)
@@ -932,7 +935,9 @@ class SeismicRSLoadCase(SeismicLoadCase, SpectrumLoadCase):
 
     def run(self) -> None:
         """Run associated analysis."""
-        self.calculate_modal_participation_factors()
+        if not self._is_executed:
+            self.calculate_modal_participation_factors()
+            self._is_executed = True
 
 
 @dataclass(repr=False)
