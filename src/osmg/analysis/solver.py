@@ -483,6 +483,35 @@ class Analysis:
             )
             ops.recorder(*recorder.ops_args())
 
+    def opensees_mck(self) -> None:
+        """Get the mass, damping, and stiffness matrices."""
+        ops.wipeAnalysis()
+        ops.system('FullGeneral')
+        ops.numberer(self.settings.numberer)
+        ops.constraints(*self.settings.constraints)
+        ops.analysis('Transient')
+        # Mass
+        ops.integrator('GimmeMCK', 1.0, 0.0, 0.0)
+        ops.analyze(1, 0.0)
+        # Number of equations in the model
+        num = ops.systemSize()  # Has to be done after analyze
+        # Convert to np array and reshape to NxN matrix
+        mass_mat = np.array(ops.printA('-ret')).reshape((num, num))
+        # Damping
+        ops.integrator('GimmeMCK', 0.0, 1.0, 0.0)
+        ops.analyze(1, 0.0)
+        damping_mat = np.array(ops.printA('-ret')).reshape((num, num))
+        # Stiffness
+        ops.integrator('GimmeMCK', 0.0, 0.0, 1.0)
+        ops.analyze(1, 0.0)
+        stiffness_mat = np.array(ops.printA('-ret')).reshape((num, num))
+        return {
+            'number_of_equations': num,
+            'stiffness_matrix': stiffness_mat,
+            'damping_matrix': damping_mat,
+            'mass_matrix': mass_mat
+        }
+
     def run(self, model: Model, load_case: LoadCase) -> None:  # noqa: PLR6301
         """Run the analysis."""
         msg = 'Subclasses should implement this.'
@@ -503,6 +532,7 @@ class StaticAnalysis(Analysis):
 
         self.log('Defining model in OpenSees.')
         self.opensees_define_model(model, load_case)
+
         self.log('Defining loads in OpenSees.')
         self.opensees_define_loads(model, load_case)
 
