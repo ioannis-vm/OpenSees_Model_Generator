@@ -1194,7 +1194,10 @@ class LoadCaseRegistry:
         return combine(all_data, action='add')
 
     def get_combined_basic_forces(
-        self, recorder_name: str, combination: dict[str, float]
+        self,
+        recorder_name: str,
+        combination: dict[str, float],
+        live_load_reduction_factors: pd.Series | None = None,
     ) -> pd.DataFrame:
         """
         Get combined basic forces for a specific load combination.
@@ -1228,6 +1231,16 @@ class LoadCaseRegistry:
             scaled_data = []
             for element in data:
                 assert isinstance(element, pd.DataFrame)
-                scaled_data.append(element * scale_factor)
+                if (
+                    '_live' in load_case_name
+                    and live_load_reduction_factors is not None
+                ):
+                    element_names = element.columns.get_level_values(0)
+                    reduction_factors = element_names.map(
+                        live_load_reduction_factors.to_dict()
+                    ).fillna(1.0)
+                    scaled_data.append(element * scale_factor * reduction_factors)
+                else:
+                    scaled_data.append(element * scale_factor)
             all_data.append(scaled_data)
         return [combine([x[i] for x in all_data], action='add') for i in range(6)]
