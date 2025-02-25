@@ -637,18 +637,9 @@ class BeamColumnCreator(BaseCreator):
             location = p_i if not is_end else p_j
             direction = x_axis if not is_end else -x_axis
 
-            if isinstance(hinge_config, HingeConfig):
-                if np.linalg.norm(offset) > EPSILON:
-                    msg = "Can't have offset with `HingeConfig`. Use `HingeConfigWithElement`."
-                    raise ValueError(msg)
-                hinge_location = location
-                nh_out = node
-                nh_in = Node(
-                    uid_generator=self.model.uid_generator,
-                    coordinates=tuple(hinge_location),
-                )
-                component.internal_nodes.add(nh_in)
-            elif isinstance(hinge_config, HingeConfigWithBeamColumnElement):
+            nh_out, nh_in = node, None
+
+            if isinstance(hinge_config, HingeConfigWithBeamColumnElement):
                 hinge_location = location + direction * hinge_config.distance
                 nh_out = Node(
                     uid_generator=self.model.uid_generator,
@@ -670,12 +661,10 @@ class BeamColumnCreator(BaseCreator):
                     n_sub=hinge_config.n_sub,
                     transf_type=transf_type,
                     section=section,
-                    element_type=self.element_type,
                     angle=angle,
-                    deformation_factor=0.00,
-                    force_to_length_factor=0.00,
                 )
-                return nh_in, np.zeros(3)
+                offset = np.zeros(3)
+
             elif isinstance(hinge_config, HingeConfigWithLink):
                 hinge_location = location + direction * hinge_config.distance
                 nh_out = Node(
@@ -703,7 +692,19 @@ class BeamColumnCreator(BaseCreator):
                         directions=directions,
                     )
                 )
-                return nh_out, np.zeros(3)
+                offset = np.zeros(3)
+
+            elif isinstance(hinge_config, HingeConfig):
+                if np.linalg.norm(offset) > EPSILON:
+                    msg = "Can't have offset with `HingeConfig`. Use `HingeConfigWithElement`."
+                    raise ValueError(msg)
+                hinge_location = location
+                nh_out = node
+                nh_in = Node(
+                    uid_generator=self.model.uid_generator,
+                    coordinates=tuple(hinge_location),
+                )
+                component.internal_nodes.add(nh_in)
             else:
                 msg = f'Invalid hinge_config type: {type(hinge_config)}'
                 raise TypeError(msg)
@@ -716,7 +717,13 @@ class BeamColumnCreator(BaseCreator):
                     y_axis=y_axis,
                 )
             )
-            return nh_in, offset
+
+            if nh_in is not None:
+                nh_return = nh_in
+            else:
+                nh_return = nh_out
+
+            return nh_return, offset
 
         # Process hinge configurations for node_i and node_j
         conn_node_i, conn_eo_i = process_hinge_config(
