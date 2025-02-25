@@ -1123,7 +1123,6 @@ class LoadCaseRegistry:
             leave=False,
         )
         for load_case_name, load_case in cases_dict.items():
-            print(load_case_name)
             case_type = load_case.get_load_case_type()
             progress_bar.set_description(f'Processing {case_type}: {load_case_name}')
             # Create a subdirectory for each load case
