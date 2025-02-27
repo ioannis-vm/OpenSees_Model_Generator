@@ -2,153 +2,22 @@
 
 from __future__ import annotations
 
-import tempfile
 from collections import defaultdict
 from dataclasses import dataclass, field
-from itertools import product
-from pathlib import Path
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import pandas as pd
 import scipy as sp
-from tqdm import tqdm
 
 from osmg.analysis.common import UDL, PointLoad, PointMass
-from osmg.analysis.recorders import ElementRecorder
-from osmg.analysis.solver import Analysis, ModalAnalysis, StaticAnalysis
 from osmg.analysis.supports import ElasticSupport, FixedSupport
-from osmg.core.common import EPSILON, NDF, NDM, THREE_DIMENSIONAL, TWO_DIMENSIONAL
-from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
-from osmg.model_objects.element import Bar, BeamColumnElement
+from osmg.core.common import EPSILON, NDF
+from osmg.core.osmg_collections import BeamColumnAssembly
 
 if TYPE_CHECKING:
     from osmg.core.model import Model, Model2D, Model3D
-    from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.node import Node
-
-
-def ensure_minmax_level_exists_or_add(data: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add a 'min/max' column level if it doesn't exist.
-
-    Assigns everything to 'max', and duplicates columns for 'min'.
-
-    Args:
-        data: Input DataFrame with MultiIndex columns.
-
-    Returns:
-        Updated DataFrame with 'min/max' as the outermost column
-        level.
-    """
-    columns = data.columns
-
-    if 'min/max' not in columns.names:
-        new_columns = pd.MultiIndex.from_tuples(
-            [(*col, minmax) for col in columns for minmax in ('max', 'min')],
-            names=[*list(columns.names), 'min/max'],
-        )
-        # Repeat the data for 'max' and 'min'
-        repeated_data = pd.concat([data, data], axis=1)
-        repeated_data.columns = new_columns
-        return repeated_data
-
-    return data
-
-
-def combine_single(
-    df1: pd.DataFrame, df2: pd.DataFrame, action: Literal['add', 'envelope']
-) -> pd.DataFrame:
-    """
-    Combine two DataFrames based on the specified action.
-
-    Args:
-        df1: First DataFrame.
-        df2: Second DataFrame.
-        action: Action to perform:
-            - 'add': Element-wise addition of the DataFrames. Missing values are treated as 0.
-            - 'envelope': Take the largest of the maxes and the
-              smallest of the mins.
-
-    Returns:
-        Combined DataFrame based on the action.
-
-    Raises:
-      ValueError: If an unknown action is specified.
-    """
-    # Reindex to ensure alignment and fill missing data with 0
-    df1_aligned = df1.reindex(columns=df2.columns.union(df1.columns), fill_value=0)
-    df2_aligned = df2.reindex(columns=df2.columns.union(df1.columns), fill_value=0)
-
-    if action == 'add':
-        combined = df1_aligned + df2_aligned
-    elif action == 'envelope':
-        df1 = ensure_minmax_level_exists_or_add(df1)
-        df2 = ensure_minmax_level_exists_or_add(df2)
-        if not np.all(
-            df1.columns.names == df2.columns.names
-        ) or not df1.columns.equals(df2.columns):
-            msg = 'Cannot align DataFrames with different columns'
-            raise ValueError(msg)
-        max_df = pd.DataFrame(
-            np.maximum(
-                df1.xs('max', level='min/max', axis=1),
-                df2.xs('max', level='min/max', axis=1),
-            ),
-            index=df1.index,
-            columns=df1.xs('max', level='min/max', axis=1).columns,
-        )
-        min_df = pd.DataFrame(
-            np.minimum(
-                df1.xs('min', level='min/max', axis=1),
-                df2.xs('min', level='min/max', axis=1),
-            ),
-            index=df1.index,
-            columns=df1.xs('min', level='min/max', axis=1).columns,
-        )
-        combined = pd.concat([max_df, min_df], axis=1)
-        combined.columns = pd.MultiIndex.from_product(
-            [max_df.columns.levels[0], max_df.columns.levels[1], ['max', 'min']],
-            names=[*max_df.columns.names, 'min/max'],
-        )
-
-    else:
-        msg = 'Action must be one of `add` or `envelope`.'
-        raise ValueError(msg)
-
-    return combined
-
-
-def combine(
-    dfs: list[pd.DataFrame], action: Literal['add', 'envelope']
-) -> pd.DataFrame:
-    """
-    Combine multiple DataFrames sequentially based on the specified action.
-
-    Args:
-        dfs: List of DataFrames to combine.
-        action: Action to perform:
-            - 'add': Element-wise addition of the DataFrames.
-            - 'envelope': Take the largest of the maxes and the
-              smallest of the mins.
-
-    Returns:
-        Combined DataFrame based on the action.
-
-    Raises:
-        ValueError: If less than two DataFrames are provided.
-    """
-    min_df_count = 2
-    if len(dfs) < min_df_count:
-        msg = 'At least two DataFrames are required to combine.'
-        raise ValueError(msg)
-
-    # Combine DataFrames sequentially
-    combined_df = dfs[0]
-    for df in dfs[1:]:
-        combined_df = combine_single(combined_df, df, action)
-
-    return combined_df
 
 
 @dataclass(repr=False)
@@ -185,10 +54,7 @@ class LoadCase(HasModel):
     model: Model | None = field(default=None)
     fixed_supports: dict[int, FixedSupport] = field(default_factory=dict)
     elastic_supports: dict[int, ElasticSupport] = field(default_factory=dict)
-    analysis: Analysis = field(default_factory=Analysis)
     rigid_diaphragm: dict[int, tuple[int, ...]] = field(default_factory=dict)
-    _basic_force_cache: dict = field(default_factory=dict, init=False)
-    _is_executed: bool = field(default=False, init=False)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -270,350 +136,6 @@ class LoadCase(HasModel):
             msg = 'Unsupported model dimensionality: {model.dimensionality}'
             raise ValueError(msg)
 
-    def calculate_basic_forces(  # noqa: C901
-        self,
-        recorder_name: str,
-        components: dict[int, ComponentAssembly],
-        *,
-        ndm: int,
-        num_stations: int = 12,
-    ) -> tuple[
-        pd.DataFrame,  # Axial forces
-        pd.DataFrame,  # Shear forces (Y)
-        pd.DataFrame,  # Shear forces (Z)
-        pd.DataFrame,  # Torsion
-        pd.DataFrame,  # Bending moments (Y)
-        pd.DataFrame,  # Bending moments (Z)
-    ]:
-        """
-        Calculate basic forces at intermediate locations.
-
-        This function calculates axial forces, shear forces (in Y and
-        Z directions), torsion, and bending moments (in Y and Z
-        directions) at multiple stations along each element based on
-        the provided recorder data and element lengths.  The results
-        are computed for either 2D or 3D elements and returned as a
-        tuple of Pandas DataFrames.
-
-        Returns:
-            Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
-            pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-                A tuple containing six DataFrames in the following
-                order:
-                - Axial forces (`axial_df`)
-                - Shear forces in the Y direction (`shear_y_df`)
-                - Shear forces in the Z direction (`shear_z_df`) or
-                  zeros for 2D
-                - Torsion (`torsion_df`) or zeros for 2D
-                - Bending moments in the Y direction (`moment_y_df`)
-                  or zeros for 2D
-                - Bending moments in the Z direction (`moment_z_df`)
-                Each DataFrame is multi-indexed by 'element' and
-                'station', with forces computed at evenly spaced
-                stations along each element.
-
-        Raises:
-            ValueError: If the specified recorder is not found.
-            TypeError: If the specified recorder is not an Element
-              recorder.
-            ValueError: If `ndf` (number of degrees of freedom) is not
-              2 or 3.
-            ValueError: If the recorder data do not have required
-              column levels 'dof' or 'station'.
-            ValueError: If element length information is missing for
-              any element.
-        """
-        cache_key = (recorder_name, tuple(components.keys()), ndm, num_stations)
-
-        # Check if the result is already cached
-        if cache_key in self._basic_force_cache:
-            return self._basic_force_cache[cache_key]
-
-        recorder = self.analysis.recorders.get(recorder_name)
-        if recorder is None:
-            msg = f'Specified recorder not available: {recorder_name}.'
-            raise ValueError(msg)
-        if not isinstance(recorder, ElementRecorder):
-            msg = f'The specified recorder (`{recorder_name}`) is not an Element recorder.'
-            raise TypeError(msg)
-
-        if isinstance(self, HasLoads):
-            udls_global = self.load_registry.component_udl
-        else:
-            udls_global = {}
-
-        udls_local = {}
-        elements = {}
-        for component_uid, component in components.items():
-            if not isinstance(component, BeamColumnAssembly):
-                if isinstance(component, BarAssembly):
-                    elements.update(component.elements)
-                continue
-            for element in component.elements.values():
-                if isinstance(element, (BeamColumnElement, Bar)):
-                    elements[element.uid] = element
-            elements.update(component.elements)
-            component_global_udl = udls_global.get(component_uid)
-            if component_global_udl:
-                component_local_udls = component.calculate_element_udl(
-                    component_global_udl
-                )
-                udls_local.update(component_local_udls)
-
-        data = recorder.get_data()
-
-        required_levels = {'dof', 'station'}
-        if not required_levels.issubset(data.columns.names):
-            msg = f'Data must have levels: {required_levels}'
-            raise ValueError(msg)
-
-        ndf = data.columns.get_level_values('dof').max()
-        if ndf not in {3, 6}:
-            msg = 'Must be either 2D or 3D Frame.'
-            raise ValueError(msg)
-        dof_data = {
-            dof: data.xs(dof, level='dof', axis=1)
-            for dof in data.columns.get_level_values('dof').unique()
-        }
-        dof_data_i = {
-            dof: df.xs(0.0, level='station', axis=1) for dof, df in dof_data.items()
-        }
-
-        # dof_data_j = {
-        #     dof: df.xs(1.0, level='station', axis=1) for dof, df in dof_data.items()
-        # }
-
-        missing_elements = [e for e in recorder.elements if e not in elements]
-        if missing_elements:
-            msg = f'Missing elements: {missing_elements}'
-            raise ValueError(msg)
-
-        element_lengths: dict[int, float] = {
-            element.uid: element.clear_length()
-            for element in elements.values()
-            if isinstance(element, (BeamColumnElement, Bar))
-        }
-
-        locations = np.array(
-            [
-                np.linspace(0.00, element_lengths[element], num=num_stations)
-                for element in recorder.elements
-            ]
-        )
-        locations_expanded = locations[np.newaxis, :, :]
-
-        columns = pd.MultiIndex.from_tuples(
-            [  # noqa: C416
-                (element, loc)
-                for element, loc in product(
-                    recorder.elements,
-                    [
-                        float(f'{v:.2f}')
-                        for v in np.linspace(0.00, 1.00, num=num_stations)
-                    ],
-                )
-            ],
-            names=['element', 'station'],
-        )
-
-        # ~~~ Local X axis axial force ~~~
-
-        data_i_axial = dof_data_i[1].to_numpy()[:, :, np.newaxis]
-        # data_j_axial = dof_data_j[1]
-        w_data_axial = np.array(
-            [
-                udls_local[element_uid][0]
-                if udls_local.get(element_uid) is not None
-                else 0.00
-                for element_uid in recorder.elements
-            ]
-        )[np.newaxis, :, np.newaxis]
-
-        result_axial = -(data_i_axial + w_data_axial * locations_expanded)
-        result_axial_flattened = result_axial.reshape(result_axial.shape[0], -1)
-        axial_df = pd.DataFrame(
-            result_axial_flattened, index=dof_data_i[1].index, columns=columns
-        )
-
-        # # check: results at station '1.00' should be equal to `data_j`.
-        # pd.testing.assert_frame_equal(
-        #     axial_df.xs(1.0, level='station', axis=1),
-        #     data_j_axial,
-        #     check_exact=False,
-        #     atol=1e-6,
-        # )
-
-        # ~~~ Local Y axis shear force ~~~
-
-        data_i_shear_y = dof_data_i[2].to_numpy()[:, :, np.newaxis]
-        # data_j_shear_y = dof_data_j[2]
-        w_data_shear_y = np.array(
-            [
-                udls_local[element_uid][1]
-                if udls_local.get(element_uid) is not None
-                else 0.00
-                for element_uid in recorder.elements
-            ]
-        )[np.newaxis, :, np.newaxis]
-
-        result_shear_y = data_i_shear_y + w_data_shear_y * locations_expanded
-        result_shear_y_flattened = result_shear_y.reshape(
-            result_shear_y.shape[0], -1
-        )
-        shear_y_df = pd.DataFrame(
-            result_shear_y_flattened, index=dof_data_i[1].index, columns=columns
-        )
-
-        # # check: results at station '1.00' should be equal to `data_j`.
-        # pd.testing.assert_frame_equal(
-        #     shear_y_df.xs(1.0, level='station', axis=1),
-        #     - data_j_shear_y,
-        #     check_exact=False,
-        #     atol=1e-6,
-        # )
-
-        # ~~~ Local Z axis shear force ~~~
-
-        # In 2D this is zero.
-        if ndm == TWO_DIMENSIONAL:
-            shear_z_df = pd.DataFrame(
-                0.00, index=axial_df.index, columns=shear_y_df.columns
-            )
-        elif ndm == THREE_DIMENSIONAL:
-            data_i_shear_z = dof_data_i[3].to_numpy()[:, :, np.newaxis]
-            # data_j_shear_z = dof_data_j[3]
-            w_data_shear_z = np.array(
-                [
-                    udls_local[element_uid][2]
-                    if udls_local.get(element_uid) is not None
-                    else 0.00
-                    for element_uid in recorder.elements
-                ]
-            )[np.newaxis, :, np.newaxis]
-
-            result_shear_z = data_i_shear_z + w_data_shear_z * locations_expanded
-            result_shear_z_flattened = result_shear_z.reshape(
-                result_shear_z.shape[0], -1
-            )
-            shear_z_df = pd.DataFrame(
-                result_shear_z_flattened, index=dof_data_i[1].index, columns=columns
-            )
-
-            # # check: results at station '1.00' should be equal to `data_j`.
-            # pd.testing.assert_frame_equal(
-            #     shear_z_df.xs(1.0, level='station', axis=1),
-            #     data_j_shear_z,
-            #     check_exact=False,
-            #     atol=1e-6,
-            # )
-
-        # ~~~ Local X axis torsional moment ~~~
-
-        # In 2D this is zero.
-        if ndm == TWO_DIMENSIONAL:
-            torsion_df = pd.DataFrame(
-                0.00, index=axial_df.index, columns=shear_y_df.columns
-            )
-        elif ndm == THREE_DIMENSIONAL:
-            data_i_torsion = dof_data_i[4].to_numpy()[:, :, np.newaxis]
-            # data_j_torsion = dof_data_j[4]
-
-            result_torsion = -data_i_torsion * np.ones_like(locations_expanded)
-            result_torsion_flattened = result_torsion.reshape(
-                result_torsion.shape[0], -1
-            )
-            torsion_df = pd.DataFrame(
-                result_torsion_flattened, index=dof_data_i[1].index, columns=columns
-            )
-
-            # # check: results at station '1.00' should be equal to `data_j`.
-            # pd.testing.assert_frame_equal(
-            #     torsion_df.xs(1.0, level='station', axis=1),
-            #     data_j_torsion,
-            #     check_exact=False,
-            #     atol=1e-6,
-            # )
-
-        # ~~~ Local Y axis bending moment (typically the weak axis) ~~~
-        if ndm == TWO_DIMENSIONAL:
-            moment_y_df = pd.DataFrame(
-                0.00, index=axial_df.index, columns=shear_y_df.columns
-            )
-        elif ndm == THREE_DIMENSIONAL:
-            data_i_moment_y = dof_data_i[5].to_numpy()[:, :, np.newaxis]
-            # data_j_moment_y = dof_data_j[5]
-
-            # Already obtained: {w_data_shear_z, data_i_shear_z, data_j_shear_z}
-
-            result_moment_y = (
-                locations_expanded**2 * 0.50 * w_data_shear_z
-                + locations_expanded * data_i_shear_z
-                + data_i_moment_y
-            )
-            result_moment_y_flattened = result_moment_y.reshape(
-                result_moment_y.shape[0], -1
-            )
-            moment_y_df = pd.DataFrame(
-                result_moment_y_flattened, index=dof_data_i[1].index, columns=columns
-            )
-
-            # # check: results at station '1.00' should be equal to `data_j`.
-            # pd.testing.assert_frame_equal(
-            #     moment_y_df.xs(1.0, level='station', axis=1),
-            #     data_j_moment_y,
-            #     check_exact=False,
-            #     atol=1e-6,
-            # )
-
-        # ~~~ Local Z axis bending moment (typically the strong axis) ~~~
-        if ndm == TWO_DIMENSIONAL:
-            data_i_moment_z = dof_data_i[3].to_numpy()[:, :, np.newaxis]
-            # data_j_moment_z = dof_data_j[3]
-
-        elif ndm == THREE_DIMENSIONAL:
-            data_i_moment_z = dof_data_i[6].to_numpy()[:, :, np.newaxis]
-            # data_j_moment_z = dof_data_j[6]
-
-        # Already obtained: {w_data_shear_y, data_i_shear_y, data_j_shear_y}
-
-        result_moment_z = (
-            locations_expanded**2 * 0.50 * w_data_shear_y
-            + locations_expanded * data_i_shear_y
-            - data_i_moment_z
-        )
-        result_moment_z_flattened = result_moment_z.reshape(
-            result_moment_z.shape[0], -1
-        )
-        moment_z_df = pd.DataFrame(
-            result_moment_z_flattened, index=dof_data_i[1].index, columns=columns
-        )
-
-        # # check: results at station '1.00' should be equal to `data_j`.
-        # pd.testing.assert_frame_equal(
-        #     moment_z_df.xs(1.0, level='station', axis=1),
-        #     data_j_moment_z,
-        #     check_exact=False,
-        #     atol=1e-6,
-        # )
-
-        result = (
-            axial_df,
-            shear_y_df,
-            shear_z_df,
-            torsion_df,
-            moment_y_df,
-            moment_z_df,
-        )
-        self._basic_force_cache[cache_key] = result
-
-        return result
-
-    def run(self) -> None:
-        """Run the analysis corresponding to the load case."""
-        if not self._is_executed:
-            self.analysis.run(self.model, self)
-            self._is_executed = True
-
 
 @dataclass(repr=False)
 class HasMass:
@@ -633,8 +155,6 @@ class HasLoads:
 class StaticLoadCase(LoadCase, HasLoads):
     """Static load case."""
 
-    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
-
     def __post_init__(self) -> None:
         """Post-initialization."""
         self._case_type = 'Static'
@@ -643,8 +163,6 @@ class StaticLoadCase(LoadCase, HasLoads):
 @dataclass(repr=False)
 class ModalLoadCase(LoadCase, HasMass):
     """Modal load case."""
-
-    analysis: ModalAnalysis = field(default_factory=ModalAnalysis)
 
     def __post_init__(self) -> None:
         """Post-initialization."""
@@ -695,7 +213,6 @@ class SpectrumLoadCase:
 class SeismicELFLoadCase(SeismicLoadCase, HasLoads, SpectrumLoadCase):
     """Seismic ELF load case."""
 
-    analysis: StaticAnalysis = field(default_factory=StaticAnalysis)
     _seismic_weight: dict[int, float] = field(default_factory=dict)
     _metadata: list[str] = field(default_factory=list)
 
@@ -1096,45 +613,6 @@ class LoadCaseRegistry:
         """
         return list(self.get_load_cases().values())
 
-    def run(self) -> None:
-        """
-        Run all analyses.
-
-        This function organizes analyses by load case type and assigns
-        a results directory for each load case. If no results directory
-        is specified, a temporary directory is created.
-        """
-        # Determine the base directory for results
-        base_dir = (
-            Path(self.result_setup.directory)
-            if self.result_setup.directory
-            else Path(tempfile.mkdtemp())
-        )
-        base_dir.mkdir(parents=True, exist_ok=True)
-        self.result_setup.directory = str(base_dir.resolve())
-
-        cases_dict = self.get_load_cases()
-        num_cases = len(cases_dict)
-        progress_bar = tqdm(
-            total=num_cases,
-            ncols=80,
-            desc='Processing cases',
-            unit='case',
-            leave=False,
-        )
-        for load_case_name, load_case in cases_dict.items():
-            case_type = load_case.get_load_case_type()
-            progress_bar.set_description(f'Processing {case_type}: {load_case_name}')
-            # Create a subdirectory for each load case
-            case_dir = base_dir / f'{case_type}_{load_case_name}'
-            case_dir.mkdir(parents=True, exist_ok=True)
-            load_case.analysis.settings.result_directory = str(case_dir)
-
-            load_case.run()
-
-            progress_bar.update(1)
-        progress_bar.close()
-
     def find_load_case_by_name(self, load_case: str) -> LoadCase | SeismicRSLoadCase:
         """
         Find a load case by name.
@@ -1150,96 +628,3 @@ class LoadCaseRegistry:
             msg = f'Load case not found: {load_case}.'
             raise ValueError(msg)
         return (load_cases | self.seismic_rs)[load_case]
-
-    def get_combined_results(
-        self, recorder_name: str, combination: dict[str, float]
-    ) -> pd.DataFrame:
-        """
-        Get results for a specific load combination.
-
-        Raises:
-          ValueError: If the recorder is not found for some load case.
-
-        Returns:
-          The results.
-        """
-        associated_load_cases = set(combination.keys())
-        load_case_objects = {
-            load_case: self.find_load_case_by_name(load_case)
-            for load_case in associated_load_cases
-        }
-        all_data = []
-        for load_case_name, scale_factor in combination.items():
-            load_case = load_case_objects[load_case_name]
-            if recorder_name not in load_case.analysis.recorders:
-                msg = (
-                    f'Recorder not found: {recorder_name} '
-                    f'for load case {load_case}.'
-                )
-                raise ValueError(msg)
-            data = load_case.analysis.recorders[recorder_name].get_data()
-            if isinstance(data, list):
-                scaled_data = []
-                for element in data:
-                    assert isinstance(element, pd.DataFrame)
-                    scaled_data.append(element * scale_factor)
-                all_data.append(scaled_data)
-                lists = True
-            else:
-                all_data.append(data * scale_factor)
-                lists = False
-        if lists:
-            return [combine(item, action='add') for item in all_data]
-        return combine(all_data, action='add')
-
-    def get_combined_basic_forces(
-        self,
-        recorder_name: str,
-        combination: dict[str, float],
-        live_load_reduction_factors: pd.Series | None = None,
-    ) -> pd.DataFrame:
-        """
-        Get combined basic forces for a specific load combination.
-
-        Raises:
-          ValueError: If the recorder is not found for some load case.
-
-        Returns:
-          The results.
-        """
-        associated_load_cases = set(combination.keys())
-        load_case_objects = {
-            load_case: self.find_load_case_by_name(load_case)
-            for load_case in associated_load_cases
-        }
-        all_data = []
-        for load_case_name, scale_factor in combination.items():
-            load_case = load_case_objects[load_case_name]
-            if recorder_name not in load_case.analysis.recorders:
-                msg = (
-                    f'Recorder not found: {recorder_name} '
-                    f'for load case {load_case}.'
-                )
-                raise ValueError(msg)
-            data = load_case.calculate_basic_forces(
-                recorder_name,
-                self.model.components,
-                ndm=NDM[self.model.dimensionality],
-                num_stations=12,
-            )
-            scaled_data = []
-            for element in data:
-                assert isinstance(element, pd.DataFrame)
-                if (
-                    '_live' in load_case_name
-                    and live_load_reduction_factors is not None
-                ):
-                    element_names = element.columns.get_level_values(0)
-                    reduction_factors = element_names.map(
-                        live_load_reduction_factors.to_dict()
-                    ).fillna(1.0)
-                    scaled_data.append(element * scale_factor * reduction_factors)
-                else:
-                    scaled_data.append(element * scale_factor)
-            all_data.append(scaled_data)
-        return [combine([x[i] for x in all_data], action='add') for i in range(6)]

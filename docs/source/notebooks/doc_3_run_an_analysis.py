@@ -169,7 +169,7 @@ static_anl = solver.StaticAnalysis(mdl, {testcase.name: testcase})
 
 
 # %%
-static_anl.run()
+static_anl.run_static()
 
 
 # %% [markdown]
@@ -258,7 +258,7 @@ modalcase.rigid_diaphragms([1, 2])
 
 # %%
 modal_analysis = solver.ModalAnalysis(mdl, {modalcase.name: modalcase}, num_modes=4)
-modal_analysis.run()
+modal_analysis.run_modal()
 
 
 # %%
