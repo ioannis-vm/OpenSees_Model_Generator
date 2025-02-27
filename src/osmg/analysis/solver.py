@@ -58,13 +58,6 @@ class AnalysisSettings:
     ignore_by_tag: set[str] = field(default_factory=set)
 
 
-@dataclass()
-class StaticAnalysisSettings(AnalysisSettings):
-    """Static analysis settings."""
-
-    num_steps: int = field(default=1)
-
-
 @dataclass(repr=False)
 class Analysis:
     """Parent analysis class."""
@@ -847,31 +840,14 @@ class Analysis:
 
         return result
 
-    def run(self) -> None:
-        """Run the analysis corresponding to the load case."""
-        if not self._is_executed:
-            self.run(self.model, self)
-            self._is_executed = True
-
-
-@dataclass(repr=False)
-class StaticAnalysis(Analysis):
-    """Static analysis."""
-
-    settings: StaticAnalysisSettings = field(default_factory=StaticAnalysisSettings)
-
-    def run_static(self, *, wipe: bool = True) -> None:
+    def run_static(self, num_steps: int = 1, *, wipe: bool = True) -> None:
         """Run the analysis."""
         self.initialize_logger()
-
         self.log('Running a static analysis.')
-
         self.log('Defining model in OpenSees.')
         self.opensees_define_model()
-
         self.log('Defining loads in OpenSees.')
         self.opensees_define_loads()
-
         self.log('Setting up analysis.')
         self.log(f'Setting system solver to {self.settings.system}')
         ops.system(self.settings.system)
@@ -883,20 +859,15 @@ class StaticAnalysis(Analysis):
         ops.test('EnergyIncr', 1.0e-8, 20, 3)
         self.log('Setting algorithm to KrylovNewton')
         ops.algorithm('KrylovNewton')
-        self.log(
-            f'Setting integrator to LoadControl with {self.settings.num_steps} steps'
-        )
-        ops.integrator('LoadControl', 1.00 / self.settings.num_steps)
-        self.log('G: Setting analysis to Static')
+        self.log(f'Setting integrator to LoadControl with {num_steps} steps')
+        ops.integrator('LoadControl', 1.00 / num_steps)
+        self.log('Setting analysis to Static')
         ops.analysis('Static')
-
         self.log('Analyzing.')
-        out = ops.analyze(self.settings.num_steps)
+        out = ops.analyze(num_steps)
         assert out == 0, 'Analysis failed.'
-
         if wipe:
             ops.wipe()
-
         self.log('Analysis finished.')
 
 
@@ -1269,7 +1240,11 @@ class AnalysisRegistry:
                     f'for load case {load_case}.'
                 )
                 raise ValueError(msg)
-            data = self.analysis_objects[load_case_name].recorders[recorder_name].get_data()
+            data = (
+                self.analysis_objects[load_case_name]
+                .recorders[recorder_name]
+                .get_data()
+            )
             if isinstance(data, list):
                 scaled_data = []
                 for element in data:
