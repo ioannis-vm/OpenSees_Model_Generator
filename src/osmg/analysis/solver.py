@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import contextlib
 import platform
 import socket
 import sys
@@ -16,9 +17,10 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from osmg.analysis.load_case import HasLoads
+from osmg.analysis.load_case import HasLoads, ModalLoadCase, StaticLoadCase
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
 from osmg.core.common import NDF, NDM, THREE_DIMENSIONAL, TWO_DIMENSIONAL
+from osmg.core.model import Model
 from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
 from osmg.model_objects.element import (
     Bar,
@@ -35,8 +37,10 @@ except (ImportError, ModuleNotFoundError):
     import openseespy.opensees as ops
 
 if TYPE_CHECKING:
-    from osmg.analysis.load_case import LoadCase, LoadCaseRegistry
+    from osmg.analysis.common import UDL, PointLoad, PointMass
+    from osmg.analysis.load_case import LoadCaseRegistry
     from osmg.analysis.recorders import Recorder
+    from osmg.analysis.supports import ElasticSupport, FixedSupport
     from osmg.core.model import Model
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
@@ -62,13 +66,13 @@ class AnalysisSettings:
 class Analysis:
     """Parent analysis class."""
 
-    model: Model = field()
-    load_case: LoadCase = field()
+    model: Model = field(default_factory=Model)
     settings: AnalysisSettings = field(default_factory=AnalysisSettings)
     _logger: logging.Logger = field(init=False)
     recorders: dict[str, Recorder] = field(default_factory=dict)
     _defined_materials: list[int] = field(default_factory=list)
     _basic_force_cache: dict = field(default_factory=dict, init=False)
+    _time_series_tags: list = field(default_factory=list)
 
     def initialize_logger(self) -> None:
         """
@@ -250,11 +254,15 @@ class Analysis:
                 self.opensees_define_material(material)
             ops.element(*element.ops_args())
 
-    def opensees_define_node_restraints(self) -> None:
+    def opensees_define_node_restraints(
+        self,
+        fixed_supports: dict[int, FixedSupport],
+        elastic_supports: dict[int, ElasticSupport],
+    ) -> None:
         """Define node restraints."""
         ndf = NDF[self.model.dimensionality]
 
-        for uid, support in self.load_case.fixed_supports.items():
+        for uid, support in fixed_supports.items():
             fix = []
             for i in range(ndf):
                 if support[i] is True or (
@@ -269,7 +277,7 @@ class Analysis:
 
         nodes = self.model.get_all_nodes()
         elastic_materials = {}
-        for uid, support in self.load_case.elastic_supports.items():
+        for uid, support in elastic_supports.items():
             assert len(support) == ndf
             node = nodes[uid]
             # for each direction.
@@ -300,20 +308,22 @@ class Analysis:
                 *range(1, ndf + 1),
             )
 
-    def opensees_define_node_constraints(self) -> None:
+    def opensees_define_node_constraints(
+        self, rigid_diaphragm: dict[int, tuple[int, ...]]
+    ) -> None:
         """
         Define node constraints.
 
         Raises:
           ValueError: If the model dimensionality is not supported.
         """
-        if not self.load_case.rigid_diaphragm:
+        if not rigid_diaphragm:
             return
 
         for (
             parent_node_uid,
             children_node_uids,
-        ) in self.load_case.rigid_diaphragm.items():
+        ) in rigid_diaphragm.items():
             if self.model.dimensionality in {'3D Frame', '3D Truss'}:
                 ops.rigidDiaphragm(3, parent_node_uid, *children_node_uids)
             elif self.model.dimensionality in {'2D Frame', '2D Truss'}:
@@ -328,14 +338,14 @@ class Analysis:
         self.opensees_instantiate()
         self.opensees_define_nodes()
         self.opensees_define_elements()
-        self.opensees_define_node_restraints()
-        self.opensees_define_node_constraints()
         if not self.settings.disable_default_recorders:
             self.define_default_recorders()
         self.opensees_define_recorders()
 
     def opensees_define_loads(
         self,
+        nodal_loads: dict[int, PointLoad],
+        component_udl: dict[int, UDL],
         amplification_factor: float = 1.00,
         time_series_tag: int = 1,
         pattern_tag: int = 1,
@@ -349,18 +359,18 @@ class Analysis:
         Raises:
           TypeError: If the model type is invalid.
         """
-        ops.timeSeries('Linear', time_series_tag)
+        if time_series_tag not in self._time_series_tags:
+            ops.timeSeries('Linear', time_series_tag)
+            self._time_series_tags.append(time_series_tag)
+
         ops.pattern('Plain', pattern_tag, time_series_tag)
 
         # Point load on nodes
-        for node_uid, point_load in self.load_case.load_registry.nodal_loads.items():  # type: ignore
+        for node_uid, point_load in nodal_loads.items():  # type: ignore
             ops.load(node_uid, *(v * amplification_factor for v in point_load))
 
         # UDL on components
-        for (
-            component_uid,
-            global_udl,
-        ) in self.load_case.load_registry.component_udl.items():  # type: ignore
+        for component_uid, global_udl in component_udl.items():  # type: ignore
             component = self.model.components[component_uid]
             if component.tags & self.settings.ignore_by_tag:
                 continue
@@ -390,9 +400,12 @@ class Analysis:
                     msg = f'Invalid model dimensionality: `{self.model.dimensionality}`.'
                     raise TypeError(msg)
 
-    def opensees_define_mass(self, amplification_factor: float = 1.00) -> None:
+    @staticmethod
+    def opensees_define_mass(
+        mass_registry: dict[int, PointMass], amplification_factor: float = 1.00
+    ) -> None:
         """Define mass in OpenSees."""
-        for node_uid, point_mass in self.load_case.mass_registry.items():  # type: ignore
+        for node_uid, point_mass in mass_registry.items():  # type: ignore
             ops.mass(node_uid, *(v * amplification_factor for v in point_mass))
 
     def define_default_recorders(self) -> None:
@@ -840,14 +853,23 @@ class Analysis:
 
         return result
 
-    def run_static(self, num_steps: int = 1, *, wipe: bool = True) -> None:
-        """Run the analysis."""
+    def run_static(
+        self, load_case: StaticLoadCase, num_steps: int = 1, *, wipe: bool = True
+    ) -> None:
+        """Run a static analysis."""
         self.initialize_logger()
         self.log('Running a static analysis.')
         self.log('Defining model in OpenSees.')
         self.opensees_define_model()
+        self.opensees_define_node_restraints(
+            load_case.fixed_supports, load_case.elastic_supports
+        )
+        self.opensees_define_node_constraints(load_case.rigid_diaphragm)
         self.log('Defining loads in OpenSees.')
-        self.opensees_define_loads()
+        self.opensees_define_loads(
+            load_case.load_registry.nodal_loads,
+            load_case.load_registry.component_udl,
+        )
         self.log('Setting up analysis.')
         self.log(f'Setting system solver to {self.settings.system}')
         ops.system(self.settings.system)
@@ -870,6 +892,134 @@ class Analysis:
             ops.wipe()
         self.log('Analysis finished.')
 
+    def run_pushover(
+        self,
+        target_displacements: list[float | None],
+        control_node_uid: int,
+        dof: int,
+        displ_incr: float,
+        *,
+        pattern_tag: int,
+    ) -> None:
+        """
+        Run a pushover analysis.
+
+        Raises:
+          ValueError: If it fails to unload.
+        """
+        curr_displ = ops.nodeDisp(control_node_uid, dof)
+
+        self.log('Starting pushover analysis')
+        ops.system(self.settings.system)
+        ops.numberer(self.settings.numberer)
+        ops.constraints(*self.settings.constraints)
+
+        total_fail = False
+        num_subdiv = 0
+        num_times = 0
+        algorithm_idx = 0
+
+        scale = [1.0, 1.0e-1, 1.0e-2, 1.0e-3]
+        steps = [50] * 4
+        norm = [1.0e-8] * 4
+        algorithms = [('KrylovNewton',), ('KrylovNewton', 'initial')]
+
+        for i_loop, target_displacement in enumerate(target_displacements):
+            if total_fail:
+                break
+            if target_displacement is not None:
+                # determine push direction
+                if curr_displ < target_displacement:
+                    displ_incr = abs(displ_incr)
+                    sign = +1.00
+                else:
+                    displ_incr = -abs(displ_incr)
+                    sign = -1.00
+
+                while curr_displ * sign < target_displacement * sign:
+                    # determine increment
+                    if (
+                        abs(curr_displ - target_displacement)
+                        < abs(displ_incr) * scale[num_subdiv]
+                    ):
+                        incr = sign * abs(curr_displ - target_displacement)
+                    else:
+                        incr = displ_incr * scale[num_subdiv]
+
+                    ops.test(
+                        'NormDispIncr',
+                        norm[num_subdiv],
+                        steps[num_subdiv],
+                        0,
+                    )
+                    ops.algorithm(*algorithms[algorithm_idx])
+                    ops.system(self.settings.solver)
+                    ops.integrator(
+                        'DisplacementControl', control_node_uid, dof, incr
+                    )
+                    ops.analysis('Static')
+                    flag = ops.analyze(1)
+                    if flag != 0:
+                        if num_subdiv == len(scale) - 1:
+                            # can't refine further
+                            print('Analysis failed to converge')
+                            self.log(f'Analysis failed at disp {curr_displ:.5f}')
+                            total_fail = True
+                            break
+                        # can still reduce step size
+                        if algorithm_idx != len(algorithms) - 1:
+                            algorithm_idx += 1
+                        else:
+                            algorithm_idx = 0
+                            num_subdiv += 1
+                            # how many times to run with reduced step size
+                            num_times = 50
+                    else:
+                        # analysis was successful
+                        if num_times != 0:
+                            num_times -= 1
+
+                        curr_displ = ops.nodeDisp(control_node_uid, dof)
+                        print(
+                            f'Loop ({i_loop + 1}/'
+                            f'{len(target_displacements)}) | '
+                            'Target displacement: '
+                            f'{target_displacement:.2f}'
+                            f' | Current: {curr_displ:.4f}',
+                            end='\r',
+                        )
+                        algorithm_idx = 0
+                        if num_subdiv != 0:
+                            if num_times == 0:
+                                num_subdiv -= 1
+                                num_times = 10
+
+            else:
+                # Need to unload
+                ops.test('NormDispIncr', norm[num_subdiv], steps[num_subdiv], 0)
+                ops.algorithm(*algorithms[algorithm_idx])
+                current_load = ops.getLoadFactor(pattern_tag)
+                load_threshold = 1e-4
+                while current_load > load_threshold:
+                    increment = -current_load / 10.00
+                    ops.integrator('LoadControl', increment)
+                    flag = ops.analyze(1)
+                    if flag != 0:
+                        msg = 'Failed to unload.'
+                        raise ValueError(msg)
+                    current_load = ops.getLoadFactor(pattern_tag)
+                    curr_displ = ops.nodeDisp(control_node_uid, dof)
+                    print(
+                        f'Loop ({i_loop + 1}/'
+                        f'{len(target_displacements)}) | '
+                        'Target displacement: '
+                        f'(Unloading)'
+                        f' | Current: {curr_displ:.4f}',
+                        end='\r',
+                    )
+
+        print('Analysis finished.')
+
 
 @dataclass()
 class ModalAnalysisSettings(AnalysisSettings):
@@ -882,6 +1032,7 @@ class ModalAnalysisSettings(AnalysisSettings):
 class ModalAnalysis(Analysis):
     """Modal analysis."""
 
+    load_case: ModalLoadCase = field(default_factory=ModalLoadCase)
     settings: ModalAnalysisSettings = field(default_factory=ModalAnalysisSettings)
     periods: list[float] = field(default_factory=list)
     _is_executed: bool = field(default=False, init=False)
@@ -911,8 +1062,12 @@ class ModalAnalysis(Analysis):
 
         self.log('Defining model in OpenSees.')
         self.opensees_define_model()
+        self.opensees_define_node_restraints(
+            self.load_case.fixed_supports, self.load_case.elastic_supports
+        )
+        self.opensees_define_node_constraints(self.load_case.rigid_diaphragm)
         self.log('Defining mass in OpenSees.')
-        self.opensees_define_mass()
+        self.opensees_define_mass(self.load_case.mass_registry)
 
         self.log('Setting up analysis.')
         if self.settings.system.lower() in {'sparsesym', 'sparsespd'}:
@@ -977,6 +1132,10 @@ class ModalAnalysis(Analysis):
             self.log(f'  Working on mode {mode}.')
             self.log('  Defining model in OpenSees.')
             self.opensees_define_model()
+            self.opensees_define_node_restraints(
+                self.load_case.fixed_supports, self.load_case.elastic_supports
+            )
+            self.opensees_define_node_constraints(self.load_case.rigid_diaphragm)
             mode_eigenvectors = eigenvectors.loc[mode, :].copy()
             # ignore the node-dof pairs with a fixed constraint.
             to_drop = []
@@ -1204,12 +1363,11 @@ class AnalysisRegistry:
             # Create a subdirectory for each load case
             case_dir = base_dir / f'{case_type}_{load_case_name}'
             case_dir.mkdir(parents=True, exist_ok=True)
-            analysis = StaticAnalysis(
+            analysis = Analysis(
                 self.load_case_registry.model,
-                self.load_case,
-                StaticAnalysisSettings(num_steps=1, result_directory=str(case_dir)),
+                AnalysisSettings(num_steps=1, result_directory=str(case_dir)),
             )
-            analysis.run_static()
+            analysis.run_static(self.load_case)
             self.analysis_objects[load_case_name] = analysis
             progress_bar.update(1)
         progress_bar.close()
