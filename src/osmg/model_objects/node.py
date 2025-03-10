@@ -49,3 +49,7 @@ class Node(UIDObject):
         res += f'  uid: {self.uid}\n'
         res += f'  coordinates: {self.coordinates}\n'
         return res
+
+    def __hash__(self) -> int:
+        """Return the hash of the object based on its UID."""
+        return hash(self.uid)

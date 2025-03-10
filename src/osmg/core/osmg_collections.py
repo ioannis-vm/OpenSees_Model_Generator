@@ -260,6 +260,10 @@ class ComponentAssembly(UIDObject):
     internal_nodes: NodeCollection = field(default_factory=NodeCollection)
     elements: ElementCollection = field(default_factory=ElementCollection)
 
+    def __hash__(self) -> int:
+        """Return the hash of the object based on its UID."""
+        return hash(self.uid)
+
     def __repr__(self) -> str:
         """
         Get string representation.
