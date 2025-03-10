@@ -57,7 +57,7 @@ class NodeRecorder(Recorder):
         'disp', 'vel', 'accel', 'incrDisp', 'reaction', 'rayleighForces'
     ]
     number_of_significant_digits: int
-    output_time: bool
+    output_time: bool | None
     delta_t: float | None = field(default=None)
     time_series_tag: int | None = field(default=None)
 
@@ -100,11 +100,13 @@ class NodeRecorder(Recorder):
         """
         if self.recorder_type == 'EnvelopeNode':
             raise NotImplementedError
+
         if self._data is None:
+            index_col = 0 if self.output_time else None
             data = pd.read_csv(
                 self.file_name,
                 sep=' ',
-                index_col=0,
+                index_col=index_col,
                 header=None,
                 engine='pyarrow',
             )
@@ -113,7 +115,7 @@ class NodeRecorder(Recorder):
             data.columns = pd.MultiIndex.from_tuples(
                 header_data, names=('node', 'dof')
             )
-            data.index.name = 'time'
+            data.index.name = 'time' if self.output_time else None
             self._data = data
         return self._data
 
@@ -207,7 +209,7 @@ class ElementRecorder(Recorder):
         output.extend([*self.element_arguments])
         return output
 
-    def get_data(self) -> pd.DataFrame:
+    def get_data(self, *, update_index: bool = True) -> pd.DataFrame:
         """
         Retrieve the data.
 
@@ -216,27 +218,30 @@ class ElementRecorder(Recorder):
         """
         if self.recorder_type == 'EnvelopeElement':
             raise NotImplementedError
+
         if self._data is None:
+            index_col = 0 if self.output_time else None
             data = pd.read_csv(
                 self.file_name,
                 sep=' ',
-                index_col=0,
+                index_col=index_col,
                 header=None,
                 engine='pyarrow',
             )
             data = data.astype(float)
-            # get number of dofs
-            num_dof = int(data.shape[1] / len(self.elements) / 2.0)
-            # construct header
-            header_data = [
-                (element, station, dof)
-                for element in self.elements
-                for station in (0.00, 1.00)
-                for dof in range(1, num_dof + 1)
-            ]
-            data.columns = pd.MultiIndex.from_tuples(
-                header_data, names=('element', 'station', 'dof')
-            )
-            data.index.name = 'time'
+            if update_index:
+                # get number of dofs
+                num_dof = int(data.shape[1] / len(self.elements) / 2.0)
+                # construct header
+                header_data = [
+                    (element, station, dof)
+                    for element in self.elements
+                    for station in (0.00, 1.00)
+                    for dof in range(1, num_dof + 1)
+                ]
+                data.columns = pd.MultiIndex.from_tuples(
+                    header_data, names=('element', 'station', 'dof')
+                )
+                data.index.name = 'time' if self.output_time else None
             self._data = data
         return self._data
