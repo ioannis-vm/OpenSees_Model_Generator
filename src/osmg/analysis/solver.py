@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from time import perf_counter
+from osmg.core import common
 import logging
 import contextlib
 import platform
@@ -29,6 +31,7 @@ from osmg.model_objects.element import (
     ElasticBeamColumn,
     TwoNodeLink,
     ZeroLength,
+    LeadRubberX,
 )
 
 try:
@@ -62,7 +65,16 @@ class AnalysisSettings:
     ignore_by_tag: set[str] = field(default_factory=set)
 
 
-@dataclass(repr=False)
+@dataclass()
+class TransientDriftCheckSetup:
+    """Transient analysis drift check setup."""
+
+    node_uids: list[int]
+    drift_limit: float
+    elevation_dof: int = field(default=3)
+
+
+@dataclass(repr=False)  # noqa: PLR0904
 class Analysis:
     """Parent analysis class."""
 
@@ -73,6 +85,7 @@ class Analysis:
     _defined_materials: list[int] = field(default_factory=list)
     _basic_force_cache: dict = field(default_factory=dict, init=False)
     _time_series_tags: list = field(default_factory=list)
+    _yielded_elements: list = field(default_factory=list)
 
     def initialize_logger(self) -> None:
         """
@@ -94,11 +107,13 @@ class Analysis:
             msg = 'Analysis log file is required.'
             raise ValueError(msg)
         logging.basicConfig(
-            filename=Path(self.settings.result_directory)
-            / self.settings.log_file_name,
+            filename=(
+                Path(self.settings.result_directory) / self.settings.log_file_name
+            ),
             filemode='w',
-            format='%(asctime)s %(message)s',
+            format='%(asctime)s [%(levelname)s] %(message)s',
             datefmt='%m/%d/%Y %I:%M:%S %p',
+            force=True,
         )
         self._logger: logging.Logger = logging.getLogger('OpenSees_Model_Generator')
         self._logger.setLevel(self.settings.log_level)
@@ -171,6 +186,7 @@ class Analysis:
         bar_elements: list[Bar] = []
         two_node_link_elements: list[TwoNodeLink] = []
         zerolength_elements: list[ZeroLength] = []
+        lead_rubber_x_elements: list[ZeroLength] = []
         unsupported_element_types: list[str] = []
 
         # Note: Materials are defined on an as-needed basis.  We keep
@@ -193,6 +209,8 @@ class Analysis:
                     two_node_link_elements.append(element)
                 elif isinstance(element, ZeroLength):
                     zerolength_elements.append(element)
+                elif isinstance(element, LeadRubberX):
+                    lead_rubber_x_elements.append(element)
                 else:
                     unsupported_element_types.append(element.__class__.__name__)
 
@@ -205,9 +223,27 @@ class Analysis:
         self.opensees_define_bar_elements(bar_elements)
         self.opensees_define_two_node_link_elements(two_node_link_elements)
         self.opensees_define_zerolength_elements(zerolength_elements)
+        self.opensees_define_lead_rubber_x_elements(lead_rubber_x_elements)
 
         # clear defined materials
         self._defined_materials = []
+
+    def opensees_define_lead_rubber_x_elements(
+        self, elements: list[LeadRubberX]
+    ) -> None:
+        """
+        Define LeadRubberX elements.
+
+        Raises:
+          ValueError: If the analysis is not 3D.
+        """
+        ndm = NDM[self.model.dimensionality]
+        ndf = NDF[self.model.dimensionality]
+        if not (ndm == 3 and ndf == 6):
+            msg = 'LeadRubberX elements only work with ndm=3 and ndf=6.'
+            raise ValueError(msg)
+        for element in elements:
+            ops.element(*element.ops_args())
 
     def opensees_define_elastic_beamcolumn_elements(
         self, elements: list[ElasticBeamColumn]
@@ -340,7 +376,6 @@ class Analysis:
         self.opensees_define_elements()
         if not self.settings.disable_default_recorders:
             self.define_default_recorders()
-        self.opensees_define_recorders()
 
     def opensees_define_loads(
         self,
@@ -861,6 +896,7 @@ class Analysis:
         self.log('Running a static analysis.')
         self.log('Defining model in OpenSees.')
         self.opensees_define_model()
+        self.opensees_define_recorders()
         self.opensees_define_node_restraints(
             load_case.fixed_supports, load_case.elastic_supports
         )
@@ -900,6 +936,8 @@ class Analysis:
         displ_incr: float,
         *,
         pattern_tag: int,
+        max_steps: int = 50,
+        norm: float = 1e-8,
     ) -> None:
         """
         Run a pushover analysis.
@@ -920,8 +958,6 @@ class Analysis:
         algorithm_idx = 0
 
         scale = [1.0, 1.0e-1, 1.0e-2, 1.0e-3]
-        steps = [50] * 4
-        norm = [1.0e-8] * 4
         algorithms = [('KrylovNewton',), ('KrylovNewton', 'initial')]
 
         for i_loop, target_displacement in enumerate(target_displacements):
@@ -946,12 +982,7 @@ class Analysis:
                     else:
                         incr = displ_incr * scale[num_subdiv]
 
-                    ops.test(
-                        'NormDispIncr',
-                        norm[num_subdiv],
-                        steps[num_subdiv],
-                        0,
-                    )
+                    ops.test('NormDispIncr', norm, max_steps, 0)
                     ops.algorithm(*algorithms[algorithm_idx])
                     ops.system(self.settings.solver)
                     ops.integrator(
@@ -996,7 +1027,7 @@ class Analysis:
 
             else:
                 # Need to unload
-                ops.test('NormDispIncr', norm[num_subdiv], steps[num_subdiv], 0)
+                ops.test('NormDispIncr', norm[num_subdiv], max_steps, 0)
                 ops.algorithm(*algorithms[algorithm_idx])
                 current_load = ops.getLoadFactor(pattern_tag)
                 load_threshold = 1e-4
@@ -1020,12 +1051,405 @@ class Analysis:
 
         print('Analysis finished.')
 
+    @staticmethod
+    def opensees_define_transient_time_series_and_pattern(
+        direction: int,
+        ag_vec: np.ndarray,
+        dt: float,
+        factor: float,
+        time_series_tag: int,
+        pattern_tag: int,
+    ) -> None:
+        """Define a time series and pattern for a transient analysis."""
+        if ops.__name__ == 'openseespy.opensees':
+            ops.timeSeries(
+                'Path',
+                time_series_tag,
+                '-dt',
+                dt,
+                '-values',
+                *ag_vec,
+                '-factor',
+                factor,
+            )
+        else:  # ops.__name__ == 'opensees.openseespy'
+            ops.timeSeries(
+                'Path',
+                time_series_tag,
+                '-dt',
+                dt,
+                '-values',
+                ' '.join([str(val * factor) for val in ag_vec]),
+            )
+        ops.pattern(
+            'UniformExcitation', pattern_tag, direction, '-accel', time_series_tag
+        )
+
+    @staticmethod
+    def opensees_define_viscous_damping_rayleigh(
+        period_1: float, period_2: float, ratio: float
+    ) -> None:
+        """
+        Assign Rayleigh damping.
+
+        Assigns Rayleigh damping given two periods and the damping
+        ratio.
+        """
+        w_i = 2 * np.pi / period_1
+        w_j = 2 * np.pi / period_2
+        zeta_i = ratio
+        zeta_j = ratio
+        a_mat = np.array([[1 / w_i, w_i], [1 / w_j, w_j]])
+        b_vec = np.array([zeta_i, zeta_j])
+        x_sol = np.linalg.solve(a_mat, 2 * b_vec)
+        ops.rayleigh(x_sol[0], 0.0, 0.0, x_sol[1])
+        # https://portwooddigital.com/2020/11/08/rayleigh-damping-coefficients/
+        # --thanks, prof. Scott
+
+    @staticmethod
+    def opensees_define_viscous_damping_stiffness(
+        period: float, ratio: float
+    ) -> None:
+        """Assign stiffness-proportional damping."""
+        ops.rayleigh(0.00, 0.0, 0.0, ratio * period / np.pi)
+
+    @staticmethod
+    def opensees_define_viscous_damping_modal(num_modes: int, ratio: float) -> None:
+        """Assign modal damping."""
+        ops.eigen(num_modes)
+        ops.modalDampingQ(ratio)
+
+    @staticmethod
+    def opensees_define_viscious_damping_modal_and_stiffness(
+        ratio_stiffness: float, period: float, ratio_modal: float, num_modes: int
+    ) -> None:
+        """
+        Assign modal + stiffness-proportional damping.
+
+        Assigns modal combined with stiffness proportional damping.
+        """
+        alpha_1 = ratio_stiffness * period / np.pi
+        ops.rayleigh(
+            0.00,
+            0.0,
+            0.0,
+            alpha_1,
+        )
+        omega_squareds = np.array(ops.eigen(num_modes))
+        damping_vals = ratio_modal - alpha_1 * np.sqrt(omega_squareds) / 2.00
+        assert np.min(damping_vals) > 0.00
+        ops.modalDampingQ(*damping_vals)
+
+    def run_transient(
+        self,
+        *,
+        analysis_time_increment: float,
+        finish_time: float,
+        print_progress: bool = True,
+        time_limit: float | None = None,
+        transient_drift_check_setup: TransientDriftCheckSetup | None = None,
+    ) -> None:
+        """
+        Run a transient analysis.
+
+        Arguments:
+          analysis_time_increment: Time increment.
+          finish_time: Specify a target time (s) to stop the analysis.
+          print_progress: Controls whether the current time is printed out.
+          time_limit: Maximum analysis time allowed, in hours.
+          When reached, the analysis is interrupted.
+
+        Raises:
+          ValueError: If no mass is assigned.
+        """
+        # Check if there is any mass
+        total_mass = 0.00
+        node_tags = ops.getNodeTags()
+        for node in node_tags:
+            total_mass += np.sum(ops.nodeMass(node))
+        if total_mass == 0.00:
+            msg = 'No mass!'
+            raise ValueError(msg)
+
+        # Constants
+        tolerance: float = 1e-9
+        max_iterations: int = 100
+        time_limit_seconds: float | None = (
+            time_limit * 3600.0 if time_limit else None
+        )
+
+        self.log('Starting transient analysis')
+
+        # Set up OpenSees parameters
+        ops.numberer(self.settings.numberer)
+        ops.constraints(*self.settings.constraints)
+        ops.system(self.settings.solver)
+        ops.test('EnergyIncr', tolerance, max_iterations, 0)
+        ops.integrator('Newmark', 0.5, 0.25)
+        ops.algorithm('KrylovNewton')
+        ops.analysis('Transient')
+
+        # Progress bar
+        pbar = self._initialize_progress_bar(
+            print_progress=print_progress, finish_time=finish_time
+        )
+
+        start_time: float = perf_counter()
+        last_log_time: float = start_time
+        curr_time: float = 0.0
+
+        self.log('Initiating time traversal')
+        self.log(f'Max time step: {analysis_time_increment}')
+
+        try:
+            self._perform_analysis_loop(
+                curr_time,
+                finish_time,
+                analysis_time_increment,
+                start_time,
+                last_log_time,
+                pbar,
+                time_limit_seconds,
+                transient_drift_check_setup,
+            )
+        except KeyboardInterrupt:
+            self.log('Analysis interrupted')
+            self._logger.warning('Analysis interrupted')
+
+        if pbar is not None:
+            pbar.close()
+
+    def run_transient_dampen_residual_response(
+        self,
+        prior_load_patterns: list,
+        analysis_time_increment: float,
+        *,
+        print_norm: bool = True,
+        velocity_threshold: float = 1e-2,
+        rayleigh_factor: float = 1.00,
+    ) -> None:
+        """Dampen out any residual motion."""
+        for load_pattern in prior_load_patterns:
+            ops.remove('loadPattern', load_pattern)
+
+        ops.rayleigh(rayleigh_factor, 0.00, 0.0, 0.00)
+
+        vel_norm = np.inf
+        while vel_norm > velocity_threshold:
+            check = ops.analyze(1, analysis_time_increment)
+
+            if check != 0:
+                self.log('Failed to dampen out residual motion.')
+                break
+
+            vel = np.zeros(6)
+            node_tags = ops.getNodeTags()
+            num_nodes = len(node_tags)
+            for ntag in node_tags:
+                vel += [x / num_nodes for x in ops.nodeVel(ntag)]
+            vel_norm = np.sqrt(vel @ vel)
+
+            if print_norm:
+                print(f'{vel_norm:5.3e} > {velocity_threshold:5.3e}', end='\r')
+
+        print()
+
+    @staticmethod
+    def _initialize_progress_bar(
+        *, print_progress: bool, finish_time: float
+    ) -> tqdm.std.tqdm | None:
+        """Initialize a progress bar if requested."""
+        if not print_progress:
+            return None
+
+        pbar: tqdm.std.tqdm = tqdm(
+            total=finish_time,
+            bar_format='{percentage:3.0f}%|{bar:25}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]',
+        )
+        return pbar
+
+    def _perform_analysis_loop(
+        self,
+        curr_time: float,
+        finish_time: float,
+        analysis_time_increment: float,
+        start_time: float,
+        last_log_time: float,
+        pbar: tqdm.std.tqdm | None,
+        time_limit_seconds: float | None,
+        transient_drift_check_setup: TransientDriftCheckSetup | None,
+    ) -> None:
+        """Perform the main loop of a transient analysis."""
+        scale: tuple[float, float, float, float] = (1.0, 1.0e-1, 1.0e-2, 1.0e-3)
+        algorithms: tuple[tuple[str], tuple[str, str, str], tuple[str]] = (
+            ('KrylovNewton',),
+            ('KrylovNewton', 'initial', 'initial'),
+            ('NewtonLineSearch',),
+        )
+        num_subdiv: int = 0
+        num_times: int = 0
+        algorithm_idx: int = 0
+        analysis_failed: bool = False
+
+        while curr_time + common.EPSILON < finish_time:
+            if analysis_failed:
+                break
+
+            ops.test('EnergyIncr', 1e-9, 100, 0)
+            ops.algorithm(*algorithms[algorithm_idx])
+            check: int = ops.analyze(1, analysis_time_increment * scale[num_subdiv])
+
+            if check != 0:
+                num_subdiv, num_times, algorithm_idx, should_stop = (
+                    self._handle_analysis_failure(
+                        curr_time,
+                        num_subdiv,
+                        algorithm_idx,
+                        num_times,
+                        scale,
+                        algorithms,
+                    )
+                )
+                if should_stop:
+                    break
+            else:
+                curr_time, last_log_time, should_stop = (
+                    self._handle_successful_analysis(
+                        curr_time,
+                        finish_time,
+                        pbar,
+                        start_time,
+                        last_log_time,
+                        num_subdiv,
+                        num_times,
+                        time_limit_seconds,
+                        transient_drift_check_setup,
+                    )
+                )
+                if should_stop:
+                    break  # Stop the loop if the time limit is reached
+
+    def _handle_analysis_failure(
+        self,
+        curr_time: float,
+        num_subdiv: int,
+        algorithm_idx: int,
+        num_times: int,
+        scale: tuple[float, float, float, float],
+        algorithms: tuple[tuple[str], tuple[str, str, str], tuple[str]],
+    ) -> bool:
+        """Handle an analysis failure by adjusting parameters or logging failure."""
+        if num_subdiv == len(scale) - 1:
+            self.log('Analysis failed to converge.')
+            self._logger.warning(
+                f'Analysis failed at time {curr_time:.5f} and cannot continue.'
+            )
+            return num_subdiv, num_times, algorithm_idx, True  # Analysis failed
+
+        if algorithm_idx < len(algorithms) - 1:
+            return (
+                num_subdiv,
+                num_times,
+                algorithm_idx,
+                False,
+            )  # Try the next algorithm
+
+        # Increase subdivisions if all algorithms have been attempted
+        num_subdiv += 1
+        num_times = 50  # Reset retries
+        algorithm_idx = 0
+
+        return num_subdiv, num_times, algorithm_idx, False
+
+    def _handle_successful_analysis(
+        self,
+        curr_time: float,
+        finish_time: float,
+        pbar: tqdm.std.tqdm | None,
+        start_time: float,
+        last_log_time: float,
+        num_subdiv: int,
+        num_times: int,
+        time_limit_seconds: float | None,
+        transient_drift_check_setup: TransientDriftCheckSetup | None,
+    ) -> tuple[float, float, bool]:
+        """Handle successful analysis updates."""
+        prev_time: float = curr_time
+        curr_time = float(ops.getTime())
+        test_iter: int = ops.testIter()
+
+        # Update progress bar
+        if pbar is not None:
+            pbar.set_postfix(
+                {'time': f'{curr_time:.4f}/{finish_time:.2f} [{test_iter}]'}
+            )
+            pbar.update(curr_time - prev_time)
+
+        # Periodic logging
+        if perf_counter() - last_log_time > 5.00 * 60.00:  # 5 min
+            last_log_time = perf_counter()
+            running_time: float = last_log_time - start_time
+            remaining_time: float = finish_time - curr_time
+            average_speed: float = curr_time / running_time
+            est_remaining_dur: float = remaining_time / average_speed
+            self.log(
+                f'Analysis status: {{curr: {curr_time:.2f}, target: {finish_time:.2f}, '
+                f'num_subdiv: {num_subdiv}, ~ {est_remaining_dur:.0f} s to finish}}'
+            )
+
+        # Time limit check
+        if time_limit_seconds and (perf_counter() - start_time) > time_limit_seconds:
+            self._logger.warning(
+                f'Analysis interrupted at time {curr_time:.5f} because the time limit was reached.'
+            )
+            return curr_time, last_log_time, True  # Return flag to stop the loop
+
+        # Maximum drift check
+        if transient_drift_check_setup is not None:
+            node_uids = transient_drift_check_setup.node_uids
+            drift_limit = transient_drift_check_setup.drift_limit
+            elevation_dof = transient_drift_check_setup.elevation_dof
+            # We need at least two nodes
+            min_nodes_required = 2
+            assert len(node_uids) > min_nodes_required
+            assert elevation_dof in {1, 2, 3}
+            if elevation_dof == 1:
+                other_dofs = (2, 3)
+            elif elevation_dof == 2:  # noqa: PLR2004
+                other_dofs = (1, 3)
+            else:
+                other_dofs = (1, 2)
+            node_pairs = list(zip(node_uids, node_uids[1:]))
+            for bottom_node, top_node in node_pairs:
+                bottom_elev = ops.nodeCoord(bottom_node)[elevation_dof - 1]
+                top_elev = ops.nodeCoord(top_node)[elevation_dof - 1]
+                for other_dof in other_dofs:
+                    top_disp = ops.nodeDisp(top_node, other_dof)
+                    bottom_disp = ops.nodeDisp(bottom_node, other_dof)
+                    drift = (top_disp - bottom_disp) / (top_elev - bottom_elev)
+                    if drift > drift_limit:
+                        self.log(
+                            f'Drift limit reached: {drift * 100:.2}% at dofs ({top_node}, {bottom_node}). '
+                            f'Time: {curr_time:.3f} s.'
+                            f'Stopping analysis.'
+                        )
+                        return curr_time, last_log_time, True  # Stop
+
+        if num_times != 0:
+            num_times -= 1
+        elif num_subdiv != 0:
+            num_subdiv -= 1
+            num_times = 50
+
+        return curr_time, last_log_time, False  # Continue analysis
+
 
 @dataclass()
 class ModalAnalysisSettings(AnalysisSettings):
     """Modal analysis settings."""
 
     num_modes: int = field(default=3)
+    retrieve_basic_forces: bool = field(default=True)
 
 
 @dataclass(repr=False)
@@ -1057,11 +1481,12 @@ class ModalAnalysis(Analysis):
                 'modal analysis and were force-enabled.'
             )
             self.log(msg)
-            print(msg)  # noqa: T201
+            print(msg)
             # TODO(JVM): turn into a warning.
 
         self.log('Defining model in OpenSees.')
         self.opensees_define_model()
+        self.opensees_define_recorders()
         self.opensees_define_node_restraints(
             self.load_case.fixed_supports, self.load_case.elastic_supports
         )
@@ -1112,98 +1537,104 @@ class ModalAnalysis(Analysis):
         eigenvectors.columns = eigenvectors.columns.reorder_levels(['node', 'dof'])
         node_order = eigenvectors.columns.get_level_values('node').unique()
         eigenvectors = eigenvectors.loc[:, node_order]
+        self.recorders['default_node'].set_data(eigenvectors)
         self.log('Retrieved node eigenvectors.')
 
         basic_force_data = {}
 
-        self.log('Obtaining basic forces for each mode.')
-        # Recover basic forces
-        self.log('   Wiping OpenSees domain.')
-        ops.wipe()
-        progress_bar = tqdm(
-            range(1, self.settings.num_modes + 1),
-            ncols=80,
-            desc='Processing modes',
-            unit='mode',
-            position=0,
-            leave=False,
-        )
-        for mode in range(1, self.settings.num_modes + 1):
-            self.log(f'  Working on mode {mode}.')
-            self.log('  Defining model in OpenSees.')
-            self.opensees_define_model()
-            self.opensees_define_node_restraints(
-                self.load_case.fixed_supports, self.load_case.elastic_supports
-            )
-            self.opensees_define_node_constraints(self.load_case.rigid_diaphragm)
-            mode_eigenvectors = eigenvectors.loc[mode, :].copy()
-            # ignore the node-dof pairs with a fixed constraint.
-            to_drop = []
-            for uid, support in self.load_case.fixed_supports.items():
-                for i, dof in enumerate(support):
-                    if dof:
-                        to_drop.append((uid, i + 1))
-            mode_eigenvectors = mode_eigenvectors.drop(to_drop)
-            if (
-                bool((mode_eigenvectors.isna() | np.isinf(mode_eigenvectors)).any())
-                is True
-            ):
-                self.log(
-                    f'  NaNs or infs present in displacement data, skipping mode {mode}.'
-                )
-                continue
-
-            self.log('  Setting up Sp constraints.')
-            ops.timeSeries('Constant', 1)
-            ops.pattern('Plain', 1, 1)
-
-            for key, displacement in mode_eigenvectors.items():
-                node, dof = key
-                ops.sp(node, dof, displacement)
-
-            self.log('  Setting up analysis.')
-            ops.integrator('LoadControl', 0.0)
-            ops.constraints('Transformation')
-            ops.algorithm('Linear')
-            ops.numberer(self.settings.numberer)
-            ops.system(self.settings.system)
-            ops.analysis('Static')
-
-            self.log('  Analyzing.')
-            out = ops.analyze(1)
-            assert out == 0, 'Analysis failed.'
-            # The recorders should have captured the results here.
-            self.log('  Retrieving data from recorder output.')
-            # TODO(JVM): read basic_force_data from the recorder, add
-            # in the dict.
-
-            # Verifying displacements are correct.
-            for key, value in mode_eigenvectors.items():
-                node_uid, dof = key
-                assert np.allclose(ops.nodeDisp(node_uid, dof), value)
-
+        if self.settings.retrieve_basic_forces:
+            self.log('Obtaining basic forces for each mode.')
+            # Recover basic forces
             self.log('   Wiping OpenSees domain.')
-            # Doing this before reading the basic force recorder data
-            # ensures the recorder's buffer will have been flushed.
             ops.wipe()
+            progress_bar = tqdm(
+                range(1, self.settings.num_modes + 1),
+                ncols=80,
+                desc='Processing modes',
+                unit='mode',
+                position=0,
+                leave=False,
+            )
+            for mode in range(1, self.settings.num_modes + 1):
+                self.log(f'  Working on mode {mode}.')
+                self.log('  Defining model in OpenSees.')
+                self.opensees_define_model()
+                self.opensees_define_recorders()
+                self.opensees_define_node_restraints(
+                    self.load_case.fixed_supports, self.load_case.elastic_supports
+                )
+                self.opensees_define_node_constraints(self.load_case.rigid_diaphragm)
+                mode_eigenvectors = eigenvectors.loc[mode, :].copy()
+                # ignore the node-dof pairs with a fixed constraint.
+                to_drop = []
+                for uid, support in self.load_case.fixed_supports.items():
+                    for i, dof in enumerate(support):
+                        if dof:
+                            to_drop.append((uid, i + 1))
+                mode_eigenvectors = mode_eigenvectors.drop(to_drop)
+                if (
+                    bool(
+                        (
+                            mode_eigenvectors.isna() | np.isinf(mode_eigenvectors)
+                        ).any()
+                    )
+                    is True
+                ):
+                    self.log(
+                        f'  NaNs or infs present in displacement data, skipping mode {mode}.'
+                    )
+                    continue
 
-            basic_force_data[mode] = self.recorders['default_basic_force'].get_data()
-            basic_force_data[mode].index.name = 'mode'
-            basic_force_data[mode].index = [mode]
+                self.log('  Setting up Sp constraints.')
+                ops.timeSeries('Constant', 1)
+                ops.pattern('Plain', 1, 1)
 
-            progress_bar.update(1)
+                for key, displacement in mode_eigenvectors.items():
+                    node, dof = key
+                    ops.sp(node, dof, displacement)
 
-        progress_bar.close()
+                self.log('  Setting up analysis.')
+                ops.integrator('LoadControl', 0.0)
+                ops.constraints('Transformation')
+                ops.algorithm('Linear')
+                ops.numberer(self.settings.numberer)
+                ops.system(self.settings.system)
+                ops.analysis('Static')
 
-        self.log('Obtained basic forces for each mode.')
-        self.log('Wiping OpenSees domain for the last time.')
-        ops.wipe()
-        self.log('Storing data.')
-        self.recorders['default_node'].set_data(eigenvectors)
-        self.recorders['default_basic_force'].set_data(
-            pd.concat(basic_force_data.values(), axis=0)
-        )
+                self.log('  Analyzing.')
+                out = ops.analyze(1)
+                assert out == 0, 'Analysis failed.'
+                # The recorders should have captured the results here.
+                self.log('  Retrieving data from recorder output.')
+                # TODO(JVM): read basic_force_data from the recorder, add
+                # in the dict.
+
+                # Verifying displacements are correct.
+                for key, value in mode_eigenvectors.items():
+                    node_uid, dof = key
+                    assert np.allclose(ops.nodeDisp(node_uid, dof), value)
+
+                self.log('   Wiping OpenSees domain.')
+                # Doing this before reading the basic force recorder data
+                # ensures the recorder's buffer will have been flushed.
+                ops.wipe()
+
+                basic_force_data[mode] = self.recorders[
+                    'default_basic_force'
+                ].get_data()
+                basic_force_data[mode].index.name = 'mode'
+                basic_force_data[mode].index = [mode]
+
+                progress_bar.update(1)
+
+            progress_bar.close()
+            self.log('Obtained basic forces for each mode.')
+            self.recorders['default_basic_force'].set_data(
+                pd.concat(basic_force_data.values(), axis=0)
+            )
+
         self.log('Analysis finished.')
+        ops.wipe()
         self._is_executed = True
 
 

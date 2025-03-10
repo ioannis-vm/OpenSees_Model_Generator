@@ -887,7 +887,7 @@ class Figure3D:
         all_node_deformations = deformation_configuration.data
         for node in nodes:
             if node.uid not in all_node_deformations.columns:
-                msg = 'Results not available for node: {node.uid}.'
+                msg = f'Results not available for node: {node.uid}.'
                 raise ValueError(msg)
             if self.configuration.ndm == THREE_DIMENSIONAL:
                 node_deformations = (

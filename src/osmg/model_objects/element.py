@@ -55,6 +55,7 @@ class ZeroLength(Element):
     directions: list[int]
     vecx: numpy_array | None
     vecyp: numpy_array | None
+    enable_rayleigh: bool = field(default=True)
 
     def ops_args(self) -> list[object]:
         """
@@ -71,9 +72,21 @@ class ZeroLength(Element):
             *[m.uid for m in self.materials],
             '-dir',
             *self.directions,
-            '-doRayleigh',
-            1,
         ]
+        if self.enable_rayleigh:
+            output.extend(
+                [
+                    '-doRayleigh',
+                    1,
+                ]
+            )
+        else:
+            output.extend(
+                [
+                    '-doRayleigh',
+                    0,
+                ]
+            )
         if self.vecx is not None or self.vecyp is not None:
             assert self.vecx is not None
             assert self.vecyp is not None
@@ -541,3 +554,187 @@ class DispBeamColumn(BeamColumnElement):
         res += f'z_axis: {self.geomtransf.z_axis}\n'
         res += f'section.name: {self.section.name}\n'
         return res
+
+
+@dataclass(repr=False)
+class LeadRubberX(Element):
+    """
+    OpenSees LeadRubberX element.
+
+    https://openseespydoc.readthedocs.io/en/latest/src/LeadRubberX.html
+    """
+
+    f_y: float  # yield strength
+    alpha: float  # post-yield stiffness ratio
+    g_r: float  # shear modulus of bearing
+    k_bulk: float  # bulk modulus of rubber
+    d_1: float  # internal diameter
+    d_2: float  # outer diameter
+    t_s: float  # single steel shim layer thickness
+    t_r: float  # single rubber layer thickness
+    n_layers: int  # number of rubber layers
+    x_1: float  # x component of local x-axis
+    x_2: float  # y component of local x-axis
+    x_3: float  # z component of local x-axis
+    y_1: float  # x component of local y-axis
+    y_2: float  # y component of local y-axis
+    y_3: float  # z component of local y-axis
+    k_c: float = field(default=10.0)  # cavitation parameter
+    phi_m: float = field(default=0.5)  # damage parameter
+    a_c: float = field(default=1.0)  # strength reduction parameter
+    s_d_ratio: float = field(default=0.5)  # shear distance
+    mass: float = field(default=0.00)  # element mass
+    c_d: float = field(default=0.00)  # viscous damping coefficient
+    t_c: float = field(default=0.00)  # cover thickness
+    q_l: float = field(default=11200.00)  # density of lead (units: kg/m3)
+    c_l: float = field(default=130.00)  # specific heat of lead (units: N-m/kg oC)
+    k_s: float = field(
+        default=50.00
+    )  # thermal conductivity of steel (units: 50W/m oC)
+    a_s: float = field(
+        default=1.41e-5
+    )  # thermal diffusivity of steel (units: 1.41e-5m2/s)
+    tag_1: int = field(default=0)  # Include cavitation and post-cavitation
+    tag_2: int = field(default=0)  # Include buckling load variation
+    tag_3: int = field(default=0)  # Include horizontal stiffness variation
+    tag_4: int = field(default=0)  # Include vertical stiffness variation
+    tag_5: int = field(
+        default=0
+    )  # Include strength degradation in shear due to heating of lead core
+
+    def ops_args(self) -> list[object]:
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
+        return [
+            'LeadRubberX',
+            self.uid,
+            self.nodes[0].uid,
+            self.nodes[1].uid,
+            self.f_y,
+            self.alpha,
+            self.g_r,
+            self.k_bulk,
+            self.d_1,
+            self.d_2,
+            self.t_s,
+            self.t_r,
+            self.n_layers,
+            self.x_1,
+            self.x_2,
+            self.x_3,
+            self.y_1,
+            self.y_2,
+            self.y_3,
+            self.k_c,
+            self.phi_m,
+            self.a_c,
+            self.s_d_ratio,
+            self.mass,
+            self.c_d,
+            self.t_c,
+            self.q_l,
+            self.c_l,
+            self.k_s,
+            self.a_s,
+            self.tag_1,
+            self.tag_2,
+            self.tag_3,
+            self.tag_4,
+            self.tag_5,
+        ]
+
+
+@dataclass(repr=False)
+class ElastomericX(Element):
+    """
+    OpenSees LeadRubberX element.
+
+    https://openseespydoc.readthedocs.io/en/latest/src/LeadRubberX.html
+    """
+
+    f_y: float  # yield strength
+    alpha: float  # post-yield stiffness ratio
+    g_r: float  # shear modulus of bearing
+    k_bulk: float  # bulk modulus of rubber
+    d_1: float  # internal diameter
+    d_2: float  # outer diameter
+    t_s: float  # single steel shim layer thickness
+    t_r: float  # single rubber layer thickness
+    n_layers: int  # number of rubber layers
+    x_1: float  # x component of local x-axis
+    x_2: float  # y component of local x-axis
+    x_3: float  # z component of local x-axis
+    y_1: float  # x component of local y-axis
+    y_2: float  # y component of local y-axis
+    y_3: float  # z component of local y-axis
+    k_c: float = field(default=10.0)  # cavitation parameter
+    phi_m: float = field(default=0.5)  # damage parameter
+    a_c: float = field(default=1.0)  # strength reduction parameter
+    s_d_ratio: float = field(default=0.5)  # shear distance
+    mass: float = field(default=0.00)  # element mass
+    c_d: float = field(default=0.00)  # viscous damping coefficient
+    t_c: float = field(default=0.00)  # cover thickness
+    q_l: float = field(default=11200.00)  # density of lead (units: kg/m3)
+    c_l: float = field(default=130.00)  # specific heat of lead (units: N-m/kg oC)
+    k_s: float = field(
+        default=50.00
+    )  # thermal conductivity of steel (units: 50W/m oC)
+    a_s: float = field(
+        default=1.41e-5
+    )  # thermal diffusivity of steel (units: 1.41e-5m2/s)
+    tag_1: int = field(default=0)  # Include cavitation and post-cavitation
+    tag_2: int = field(default=0)  # Include buckling load variation
+    tag_3: int = field(default=0)  # Include horizontal stiffness variation
+    tag_4: int = field(default=0)  # Include vertical stiffness variation
+    tag_5: int = field(
+        default=0
+    )  # Include strength degradation in shear due to heating of lead core
+
+    def ops_args(self) -> list[object]:
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
+        return [
+            'LeadRubberX',
+            self.uid,
+            self.nodes[0].uid,
+            self.nodes[1].uid,
+            self.f_y,
+            self.alpha,
+            self.g_r,
+            self.k_bulk,
+            self.d_1,
+            self.d_2,
+            self.t_s,
+            self.t_r,
+            self.n_layers,
+            self.x_1,
+            self.x_2,
+            self.x_3,
+            self.y_1,
+            self.y_2,
+            self.y_3,
+            self.k_c,
+            self.phi_m,
+            self.a_c,
+            self.s_d_ratio,
+            self.mass,
+            self.c_d,
+            self.t_c,
+            self.q_l,
+            self.c_l,
+            self.k_s,
+            self.a_s,
+            self.tag_1,
+            self.tag_2,
+            self.tag_3,
+            self.tag_4,
+            self.tag_5,
+        ]

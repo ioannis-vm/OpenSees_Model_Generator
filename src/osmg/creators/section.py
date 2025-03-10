@@ -37,6 +37,10 @@ class WSectionData(BaseSectionData):
     d: float
     tw: float
     tf: float
+    Zx: float
+    Zy: float
+    rx: float
+    ry: float
 
 
 # HSS Section model
@@ -166,6 +170,7 @@ class AISC_Database_Section_Creator:
                 section_data.W / 12.00,  # lb/in
                 outside_shape,
                 snap_points,
+                properties=section_data,
             )
         msg = f'Section type is unsupported: {section_data.Type}'
         raise NotImplementedError(msg)

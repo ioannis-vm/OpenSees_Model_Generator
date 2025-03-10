@@ -40,6 +40,11 @@ class UIDGenerator:
             'ElementRecorder': 'RECORDER',
             '_TestChild': 'TESTING',
             'Elastic': 'MATERIAL',
+            'Steel4': 'MATERIAL',
+            'Fatigue': 'MATERIAL',
+            'IMKBilin': 'MATERIAL',
+            'Pinching4': 'MATERIAL',
+            'LeadRubberX': 'ELEMENT',
         }
 
         if object_type not in valid_types:

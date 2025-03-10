@@ -82,10 +82,10 @@ class SteelHSSRectBraceMaxStrainRangeMaterialCreator(MaterialCreator):
         param_c_r2 = 0.15
 
         assert self.section.properties is not None
-        sec_b = self.section.properties['B']
-        sec_t = self.section.properties['tdes']
+        sec_b = self.section.properties.B
+        sec_t = self.section.properties.tdes
         var_lc = self.brace_length
-        sec_r = min(self.section.properties['rx'], self.section.properties['ry'])
+        sec_r = min(self.section.properties.rx, self.section.properties.ry)
         mat_e = self.e_mod
         mat_g = self.g_mod
         mat_fy = self.f_y
@@ -151,10 +151,10 @@ class SteelHSSCircBraceFatigueMaterialCreator(MaterialCreator):
         param_c_r2 = 0.25
 
         assert self.section.properties is not None
-        sec_d = self.section.properties['OD']
-        sec_t = self.section.properties['tdes']
+        sec_d = self.section.properties.OD
+        sec_t = self.section.properties.tdes
         var_lc = self.brace_length
-        sec_r = min(self.section.properties['rx'], self.section.properties['ry'])
+        sec_r = min(self.section.properties.rx, self.section.properties.ry)
         mat_e = self.e_mod
         mat_g = self.g_mod
         mat_fy = self.f_y
@@ -235,26 +235,26 @@ class SteelWIMKMaterialCreator(MaterialCreator):
         assert isinstance(self.section, ElasticSection)
         assert self.section.properties
         # Yield stress
-        mat_fy = self.f_y / 1.0e3
+        mat_fy = self.f_y
         # Moment of inertia - strong axis - original section
         if self.direction == 'strong':
-            sec_i = self.section.properties['Ix']
+            sec_i = self.section.properties.Ix
         else:
-            sec_i = self.section.properties['Iy']
+            sec_i = self.section.properties.Iy
         # Section depth
-        sec_d = self.section.properties['d']
+        sec_d = self.section.properties.d
         # Flange width
-        sec_bf = self.section.properties['bf']
+        sec_bf = self.section.properties.bf
         # Flange and web thicknesses
-        sec_tf = self.section.properties['tf']
-        sec_tw = self.section.properties['tw']
+        sec_tf = self.section.properties.tf
+        sec_tw = self.section.properties.tw
         # Plastic modulus (unreduced)
         if self.direction == 'strong':
-            sec_z = self.section.properties['Zx']
+            sec_z = self.section.properties.Zx
         else:
-            sec_z = self.section.properties['Zy']
+            sec_z = self.section.properties.Zy
         # Radius of gyration
-        sec_ry = self.section.properties['ry']
+        sec_ry = self.section.properties.ry
         # Clear length
         elm_h = self.element_length
         # Shear span
@@ -264,41 +264,41 @@ class SteelWIMKMaterialCreator(MaterialCreator):
 
         # consider cases
 
+        # checks ~ acceptable range
+        if not 20.00 < sec_d / sec_tw < 55.00:  # noqa: PLR2004
+            print(
+                f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
+                ' outside regression range'
+            )
+            print('20.00 < sec_d/sec_tw < 55.00')
+            print(self.section.name, '\n')
+        if not 20.00 < lbry < 80.00:  # noqa: PLR2004
+            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
+            print('20.00 < lbry < 80.00')
+            print(self.section.name, '\n')
+        if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:  # noqa: PLR2004
+            print(
+                f'Warning: bf/(2 tf)={sec_bf / (2. * sec_tf):.2f}'
+                ' outside regression range'
+            )
+            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
+            print(self.section.name, '\n')
+        if not 2.5 < elm_l / sec_d < 7.0:  # noqa: PLR2004
+            print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')
+            print('2.5 < elm_l/sec_d < 7.0')
+            print(self.section.name, '\n')
+        if not 4.00 < sec_d < 36.00:  # noqa: PLR2004
+            print(f'Warning: Section d={sec_d:.2f} outside regression range')
+            print('4.00 < sec_d < 36.00')
+            print(self.section.name, '\n')
+        if not 35.00 < mat_fy < 65.00:  # noqa: PLR2004
+            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
+            print('35.00 < mat_fy < 65.00')
+            print(self.section.name, '\n')
         if self.rbs_factor:
             # RBS case
             assert self.direction == 'strong'
             assert self.rbs_factor <= 1.00, 'rbs_factor must be <= 1.00'
-            # checks ~ acceptable range
-            if not 20.00 < sec_d / sec_tw < 55.00:  # noqa: PLR2004
-                print(  # noqa: T201
-                    f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
-                    ' outside regression range'
-                )
-                print('20.00 < sec_d/sec_tw < 55.00')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
-            if not 20.00 < lbry < 80.00:  # noqa: PLR2004
-                print(f'Warning: Lb/ry={lbry:.2f} outside regression range')  # noqa: T201
-                print('20.00 < lbry < 80.00')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
-            if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:  # noqa: PLR2004
-                print(  # noqa: T201
-                    f'Warning: bf/(2 tf)={sec_bf / (2. * sec_tf):.2f}'
-                    ' outside regression range'
-                )
-                print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
-            if not 2.5 < elm_l / sec_d < 7.0:  # noqa: PLR2004
-                print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')  # noqa: T201
-                print('2.5 < elm_l/sec_d < 7.0')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
-            if not 4.00 < sec_d < 36.00:  # noqa: PLR2004
-                print(f'Warning: Section d={sec_d:.2f} outside regression range')  # noqa: T201
-                print('4.00 < sec_d < 36.00')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
-            if not 35.00 < mat_fy < 65.00:  # noqa: PLR2004
-                print(f'Warning: Fy={mat_fy:.2f} outside regression range')  # noqa: T201
-                print('35.00 < mat_fy < 65.00')  # noqa: T201
-                print(self.section.name, '\n')  # noqa: T201
             # calculate parameters
             theta_p = (
                 0.19
@@ -325,7 +325,7 @@ class SteelWIMKMaterialCreator(MaterialCreator):
             )
             rbs_c = sec_bf * (1.0 - self.rbs_factor) / 2.0
             z_rbs = sec_z - 2.0 * rbs_c * sec_tf * (sec_d - sec_tf)
-            sec_m = 1.06 * z_rbs * mat_fy * 1.0e3
+            sec_m = 1.06 * z_rbs * mat_fy
             mcmy_plus = 1.10
             mcmy_minus = 1.10
 
@@ -365,7 +365,6 @@ class SteelWIMKMaterialCreator(MaterialCreator):
                     1.15
                     / 1.10
                     * (sec_z * mat_fy)
-                    * 1.0e3
                     * (1.00 - self.axial_load_ratio / 2.00)
                 )
             else:
@@ -373,7 +372,6 @@ class SteelWIMKMaterialCreator(MaterialCreator):
                     1.15
                     / 1.10
                     * (sec_z * mat_fy)
-                    * 1.0e3
                     * 9.0
                     / 8.0
                     * (1.00 - self.axial_load_ratio)
@@ -412,7 +410,7 @@ class SteelWIMKMaterialCreator(MaterialCreator):
                 * (sec_bf / (2.0 * sec_tf)) ** (-0.595)
                 * (6.895 * mat_fy / 355.0) ** (-0.36)
             )
-            sec_m = 1.17 * sec_z * mat_fy * 1.0e3
+            sec_m = 1.17 * sec_z * mat_fy
             mcmy_plus = 1.10
             mcmy_minus = 1.10
 
@@ -526,11 +524,11 @@ class SteelGravityShearTabCreator(MaterialCreator):
 
         # Yield stress
         assert isinstance(self.moment_modifier, float)
-        mat_fy = self.f_y / 1.0e3
+        mat_fy = self.f_y
         # Plastic modulus (unreduced)
-        sec_zx = self.section.properties['Zx']
+        sec_zx = self.section.properties.Zx
         # Plastic moment of the section
-        sec_mp = sec_zx * mat_fy * 1.0e3 * self.moment_modifier
+        sec_mp = sec_zx * mat_fy * self.moment_modifier
 
         if not self.consider_composite:
             m_max_pos = 0.121 * sec_mp
@@ -670,10 +668,10 @@ class SteelWColumnPanelZoneCreator(MaterialCreator):
         assert self.section.properties
         f_y = self.f_y
         hardening = self.pz_hardening
-        d_c = self.section.properties['d']
-        bfc = self.section.properties['bf']
-        t_p = self.section.properties['tw'] + self.pz_doubler_plate_thickness
-        t_f = self.section.properties['tf']
+        d_c = self.section.properties.d
+        bfc = self.section.properties.bf
+        t_p = self.section.properties.tw + self.pz_doubler_plate_thickness
+        t_f = self.section.properties.tf
         v_y = 0.55 * f_y * d_c * t_p
         g_mod = self.g_mod
         k_e = 0.95 * g_mod * t_p * d_c
@@ -749,13 +747,13 @@ class SteelWColumnPanelZoneUpdatedCreator(MaterialCreator):
         f_y = self.f_y
         e_mod = self.e_mod
         g_mod = self.g_mod
-        tw_Col = self.section.properties['tw']  # noqa: N806
+        tw_Col = self.section.properties.tw  # noqa: N806
         tdp = self.pz_doubler_plate_thickness
-        d_Col = self.section.properties['d']  # noqa: N806
+        d_Col = self.section.properties.d  # noqa: N806
         d_Beam = self.pz_length  # noqa: N806
-        tf_Col = self.section.properties['tf']  # noqa: N806
-        bf_Col = self.section.properties['bf']  # noqa: N806
-        Ix_Col = self.section.properties['Ix']  # noqa: N806
+        tf_Col = self.section.properties.tf  # noqa: N806
+        bf_Col = self.section.properties.bf  # noqa: N806
+        Ix_Col = self.section.properties.Ix  # noqa: N806
         ts = self.slab_depth
         n = self.axial_load_ratio
         trib = self.slab_depth
