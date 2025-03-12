@@ -1,5 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "osmg"
+version = "1.0.4"
+description = "OpenSees Model Generator"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "John Vouvakis Manousakis" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "descartes>=1.1.0",
+    "dill>=0.3.7",
+    "json-tricks>=3.17.3",
+    "matplotlib>=3.4.1",
+    "numpy>=1.20.2",
+    "openpyxl>=3.0.7",
+    "pandas>=1.2.4",
+    "plotly>=4.14.3",
+    "scipy>=1.9.0",
+    "shapely>=1.7.1",
+    "tqdm>=2.0.0",
+    "xlrd>=2.0.1",
+    "pydantic",
+    "pyarrow"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["seismic", "structural engineering", "OpenSees", "modeling"]
+
+[project.optional-dependencies]
+dev = [
+    "codespell",
+    "coverage",
+    "jupyter",
+    "jupytext",
+    "mypy",
+    "types-requests",
+    "nbsphinx",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "ruff",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-rtd-theme",
+    "sphinx_autodoc_typehints",
+    "xdoctest"
+]
+
+[tool.setuptools]
+packages = ["osmg"]
+package-dir = { "" = "src" }
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+osmg = ["**/*.json"]
+
 [tool.mypy]
-python_version = '3.12'
+python_version = "3.12"
 mypy_path = "src"
 check_untyped_defs = true
 disallow_any_generics = true
@@ -21,8 +87,14 @@ line-length = 85
 [tool.ruff.lint]
 # Enable all known categories
 select = ["ALL"]
-ignore = ["ANN101", "CPY001", "D211", "D212", "Q000", "Q003", "COM812", "D203", "ISC001", "E501", "ERA001", "PGH003", "FIX002", "TD003", "S101", "N801", "S311", "G004", "SIM102", "SIM108", "NPY002", "E501", "T201", "DOC201"]
+ignore = [
+    "ANN101", "CPY001", "D211", "D212", "Q000", "Q003", "COM812", "D203",
+    "ISC001", "E501", "ERA001", "PGH003", "FIX002", "TD003", "S101",
+    "N801", "S311", "G004", "SIM102", "SIM108", "NPY002", "E501",
+    "T201", "DOC201"
+]
 preview = true
+
 [tool.ruff.lint.per-file-ignores]
 "docs/source/notebooks/*" = ["E402"]
 "docs/source/*" = ["INP001"]
@@ -32,12 +104,12 @@ preview = true
 convention = "google"
 
 [tool.ruff.lint.pylint]
-max-args=15
-max-locals=50
-max-returns=11
-max-branches=50
-max-statements=150
-max-bool-expr=5
+max-args = 15
+max-locals = 50
+max-returns = 11
+max-branches = 50
+max-statements = 150
+max-bool-expr = 5
 
 [tool.ruff.format]
 quote-style = "single"

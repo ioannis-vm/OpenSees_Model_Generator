@@ -1,4 +1,0 @@
-include *.toml
-include src/osmg/py.typed
-include src/osmg/**/*.json
-include src/osmg/**/*.py
