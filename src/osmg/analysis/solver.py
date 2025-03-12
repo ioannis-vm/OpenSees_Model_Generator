@@ -1216,6 +1216,7 @@ class Analysis:
             self.log('Analysis interrupted')
             self._logger.warning('Analysis interrupted')
 
+        self.log('Analysis finished.')
         if pbar is not None:
             pbar.close()
 
