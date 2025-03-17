@@ -50,6 +50,8 @@ class ZeroLengthCreator:
         node_j: Node,
         x_axis: numpy_array,
         y_axis: numpy_array | None,
+        *,
+        enable_rayleigh: bool = False,
     ) -> ZeroLength:
         """
         Define a zerolength element.
@@ -65,4 +67,5 @@ class ZeroLengthCreator:
             directions=directions,
             vecx=x_axis,
             vecyp=y_axis,
+            enable_rayleigh=enable_rayleigh,
         )
