@@ -441,7 +441,9 @@ class Analysis:
     ) -> None:
         """Define mass in OpenSees."""
         for node_uid, point_mass in mass_registry.items():  # type: ignore
-            ops.mass(node_uid, *(v * amplification_factor for v in point_mass))
+            amplified_mass = [float(v) * amplification_factor for v in point_mass]
+            if any(amplified_mass):  # Skip if all elements are zero
+                ops.mass(node_uid, *amplified_mass)
 
     def define_default_recorders(self) -> None:
         """
@@ -1186,7 +1188,7 @@ class Analysis:
         ops.system(self.settings.solver)
         ops.test('EnergyIncr', tolerance, max_iterations, 0)
         ops.integrator('Newmark', 0.5, 0.25)
-        ops.algorithm('KrylovNewton')
+        ops.algorithm('Newton')
         ops.analysis('Transient')
 
         # Progress bar
