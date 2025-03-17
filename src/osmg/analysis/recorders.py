@@ -183,7 +183,7 @@ class ElementRecorder(Recorder):
     elements: tuple[int, ...]
     element_arguments: tuple[str, ...]
     file_name: str
-    number_of_significant_digits: int
+    number_of_significant_digits: int | None
     output_time: bool
     delta_t: float | None = field(default=None)
 
@@ -198,9 +198,14 @@ class ElementRecorder(Recorder):
             self.recorder_type,
             '-file',
             self.file_name,
-            '-precision',
-            self.number_of_significant_digits,
         ]
+        if self.number_of_significant_digits:
+            output.extend(
+                [
+                    '-precision',
+                    self.number_of_significant_digits,
+                ]
+            )
         if self.output_time:
             output.extend(['-time'])
         if self.delta_t:
