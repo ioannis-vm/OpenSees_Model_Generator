@@ -1230,6 +1230,7 @@ class Analysis:
         print_norm: bool = True,
         velocity_threshold: float = 1e-2,
         rayleigh_factor: float = 1.00,
+        absolute_tolerance: float = 1e-4,
     ) -> None:
         """Dampen out any residual motion."""
         for load_pattern in prior_load_patterns:
@@ -1242,7 +1243,7 @@ class Analysis:
             check = ops.analyze(1, analysis_time_increment)
 
             if check != 0:
-                self.log('Failed to dampen out residual motion.')
+                self.log('Failed to dampen out residual motion: Analysis fails.')
                 break
 
             vel = np.zeros(6)
@@ -1250,10 +1251,18 @@ class Analysis:
             num_nodes = len(node_tags)
             for ntag in node_tags:
                 vel += [x / num_nodes for x in ops.nodeVel(ntag)]
+            previous_norm = vel_norm
             vel_norm = np.sqrt(vel @ vel)
 
             if print_norm:
                 print(f'{vel_norm:5.3e} > {velocity_threshold:5.3e}', end='\r')
+
+            if np.abs(vel_norm - previous_norm) < absolute_tolerance:
+                self.log(
+                    'Failed to dampen out residual motion: '
+                    'Velocity norm stopped decreasing.'
+                )
+                break
 
         print()
 
