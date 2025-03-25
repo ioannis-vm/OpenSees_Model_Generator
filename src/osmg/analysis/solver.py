@@ -1063,26 +1063,16 @@ class Analysis:
         pattern_tag: int,
     ) -> None:
         """Define a time series and pattern for a transient analysis."""
-        if ops.__name__ == 'openseespy.opensees':
-            ops.timeSeries(
-                'Path',
-                time_series_tag,
-                '-dt',
-                dt,
-                '-values',
-                *ag_vec,
-                '-factor',
-                factor,
-            )
-        else:  # ops.__name__ == 'opensees.openseespy'
-            ops.timeSeries(
-                'Path',
-                time_series_tag,
-                '-dt',
-                dt,
-                '-values',
-                ' '.join([str(val * factor) for val in ag_vec]),
-            )
+        ops.timeSeries(
+            'Path',
+            time_series_tag,
+            '-dt',
+            dt,
+            '-values',
+            *ag_vec,
+            '-factor',
+            factor,
+        )
         ops.pattern(
             'UniformExcitation', pattern_tag, direction, '-accel', time_series_tag
         )
@@ -1167,8 +1157,9 @@ class Analysis:
         # Check if there is any mass
         total_mass = 0.00
         node_tags = ops.getNodeTags()
+        ndf = NDF[self.model.dimensionality]
         for node in node_tags:
-            total_mass += np.sum(ops.nodeMass(node))
+            total_mass += np.sum([ops.nodeMass(node, i + 1) for i in range(ndf)])
         if total_mass == 0.00:
             msg = 'No mass!'
             raise ValueError(msg)
