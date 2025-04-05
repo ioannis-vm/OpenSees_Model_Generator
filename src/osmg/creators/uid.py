@@ -40,6 +40,7 @@ class UIDGenerator:
             'ElementRecorder': 'RECORDER',
             '_TestChild': 'TESTING',
             'Elastic': 'MATERIAL',
+            'ElasticPPGap': 'MATERIAL',
             'Steel4': 'MATERIAL',
             'Fatigue': 'MATERIAL',
             'IMKBilin': 'MATERIAL',

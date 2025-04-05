@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 from osmg.core.uid_object import UIDObject
 
@@ -43,6 +44,39 @@ class Elastic(UniaxialMaterial):
           The OpenSees arguments.
         """
         return ['Elastic', self.uid, self.e_mod]
+
+
+@dataclass
+class ElasticPPGap(UniaxialMaterial):
+    """
+    OpenSees ElasticPPGap.
+
+    https://opensees.berkeley.edu/wiki/index.php/Elastic-Perfectly_Plastic_Gap_Material
+
+    """
+
+    e_mod: float
+    fy: float
+    gap: float
+    eta: float = field(default=0.0)
+    damage: Literal['noDamage', 'damage'] = field(default='noDamage')
+
+    def ops_args(self) -> list[object]:
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
+        return [
+            'ElasticPPGap',
+            self.uid,
+            self.e_mod,
+            self.fy,
+            self.gap,
+            self.eta,
+            self.damage,
+        ]
 
 
 @dataclass
