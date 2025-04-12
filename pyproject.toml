@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "osmg"
-version = "1.0.9"
+version = "1.0.10"
 description = "OpenSees Model Generator"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -56,10 +56,12 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["osmg"]
 package-dir = { "" = "src" }
 include-package-data = true
 zip-safe = false
+
+[tool.setuptools.packages]
+find = { where = ["src"] }
 
 [tool.setuptools.package-data]
 osmg = ["**/*.json"]
