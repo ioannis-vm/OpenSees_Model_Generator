@@ -46,6 +46,8 @@ class UIDGenerator:
             'IMKBilin': 'MATERIAL',
             'Pinching4': 'MATERIAL',
             'LeadRubberX': 'ELEMENT',
+            'TripleFrictionPendulum': 'ELEMENT',
+            'Coulomb': 'FRICTIONMODEL',
         }
 
         if object_type not in valid_types:

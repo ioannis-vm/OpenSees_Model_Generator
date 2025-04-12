@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from osmg.model_objects.node import Node
     from osmg.model_objects.section import ElasticSection, FiberSection
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
+    from osmg.model_objects.friction_model import Coulomb
 
 
 @dataclass(repr=False)
@@ -645,6 +646,66 @@ class LeadRubberX(Element):
             self.tag_3,
             self.tag_4,
             self.tag_5,
+        ]
+
+
+@dataclass(repr=False)
+class TripleFrictionPendulum(Element):
+    """
+    OpenSees TripleFrictionPendulum element.
+
+    https://openseespydoc.readthedocs.io/en/latest/src/TripleFrictionPendulum.html
+    """
+
+    friction_model_1: FrictionModel
+    friction_model_2: FrictionModel
+    friction_model_3: FrictionModel
+    vertical_material: UniaxialMaterial
+    rot_z_material: UniaxialMaterial
+    rot_x_material: UniaxialMaterial
+    rot_y_material: UniaxialMaterial
+    r_1_eff: float
+    r_2_eff: float
+    r_3_eff: float
+    d_1_eff: float
+    d_2_eff: float
+    d_3_eff: float
+    initial_axial_force: float
+    u_y: float
+    tension_stiffness: float
+    minimum_vertical_compression_force: float
+    tolerance: float
+
+    def ops_args(self) -> list[object]:
+        """
+        Obtain the OpenSees arguments.
+
+        Returns:
+          The OpenSees arguments.
+        """
+        return [
+            'TripleFrictionPendulum',
+            self.uid,
+            self.nodes[0].uid,
+            self.nodes[1].uid,
+            self.friction_model_1.uid,
+            self.friction_model_2.uid,
+            self.friction_model_3.uid,
+            self.vertical_material.uid,
+            self.rot_z_material.uid,
+            self.rot_x_material.uid,
+            self.rot_y_material.uid,
+            self.r_1_eff,
+            self.r_2_eff,
+            self.r_3_eff,
+            self.d_1_eff,
+            self.d_2_eff,
+            self.d_3_eff,
+            self.initial_axial_force,
+            self.u_y,
+            self.tension_stiffness,
+            self.minimum_vertical_compression_force,
+            self.tolerance,
         ]
 
 

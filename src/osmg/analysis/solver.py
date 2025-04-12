@@ -32,6 +32,7 @@ from osmg.model_objects.element import (
     TwoNodeLink,
     ZeroLength,
     LeadRubberX,
+    TripleFrictionPendulum,
 )
 
 try:
@@ -47,6 +48,7 @@ if TYPE_CHECKING:
     from osmg.core.model import Model
     from osmg.core.osmg_collections import ComponentAssembly
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
+    from osmg.model_objects.friction_model import FrictionModel
 
 
 @dataclass()
@@ -83,6 +85,7 @@ class Analysis:
     _logger: logging.Logger = field(init=False)
     recorders: dict[str, Recorder] = field(default_factory=dict)
     _defined_materials: list[int] = field(default_factory=list)
+    _defined_friction_models: list[int] = field(default_factory=list)
     _basic_force_cache: dict = field(default_factory=dict, init=False)
     _time_series_tags: list = field(default_factory=list)
     _yielded_elements: list = field(default_factory=list)
@@ -173,6 +176,12 @@ class Analysis:
             ops.uniaxialMaterial(*material.ops_args())
             self._defined_materials.append(material.uid)
 
+    def opensees_define_friction_model(self, friction_model: FrictionModel) -> None:
+        """Define friction models."""
+        if friction_model.uid not in self._defined_friction_models:
+            ops.frictionModel(*friction_model.ops_args())
+            self._defined_friction_models.append(friction_model.uid)
+
     def opensees_define_nodes(self) -> None:
         """Define the nodes of the model in OpenSees."""
         for uid, node in self.model.get_all_nodes(
@@ -186,7 +195,8 @@ class Analysis:
         bar_elements: list[Bar] = []
         two_node_link_elements: list[TwoNodeLink] = []
         zerolength_elements: list[ZeroLength] = []
-        lead_rubber_x_elements: list[ZeroLength] = []
+        lead_rubber_x_elements: list[LeadRubberX] = []
+        triple_friction_pendulum_elements: list[TripleFrictionPendulum] = []
         unsupported_element_types: list[str] = []
 
         # Note: Materials are defined on an as-needed basis.  We keep
@@ -211,6 +221,8 @@ class Analysis:
                     zerolength_elements.append(element)
                 elif isinstance(element, LeadRubberX):
                     lead_rubber_x_elements.append(element)
+                elif isinstance(element, TripleFrictionPendulum):
+                    triple_friction_pendulum_elements.append(element)
                 else:
                     unsupported_element_types.append(element.__class__.__name__)
 
@@ -224,9 +236,13 @@ class Analysis:
         self.opensees_define_two_node_link_elements(two_node_link_elements)
         self.opensees_define_zerolength_elements(zerolength_elements)
         self.opensees_define_lead_rubber_x_elements(lead_rubber_x_elements)
+        self.opensees_define_triple_friction_pendulum_elements(
+            triple_friction_pendulum_elements
+        )
 
         # clear defined materials
         self._defined_materials = []
+        self._defined_friction_models = []
 
     def opensees_define_lead_rubber_x_elements(
         self, elements: list[LeadRubberX]
@@ -243,6 +259,36 @@ class Analysis:
             msg = 'LeadRubberX elements only work with ndm=3 and ndf=6.'
             raise ValueError(msg)
         for element in elements:
+            ops.element(*element.ops_args())
+
+    def opensees_define_triple_friction_pendulum_elements(
+        self, elements: list[TripleFrictionPendulum]
+    ) -> None:
+        """
+        Define TripleFrictionPendulum elements.
+
+        Raises:
+          ValueError: If the analysis is not 3D.
+        """
+        ndm = NDM[self.model.dimensionality]
+        ndf = NDF[self.model.dimensionality]
+        if not (ndm == 3 and ndf == 6):
+            msg = 'LeadRubberX elements only work with ndm=3 and ndf=6.'
+            raise ValueError(msg)
+        for element in elements:
+            for friction_model in (
+                element.friction_model_1,
+                element.friction_model_2,
+                element.friction_model_3,
+            ):
+                self.opensees_define_friction_model(friction_model)
+            for material in (
+                element.vertical_material,
+                element.rot_z_material,
+                element.rot_x_material,
+                element.rot_y_material,
+            ):
+                self.opensees_define_material(material)
             ops.element(*element.ops_args())
 
     def opensees_define_elastic_beamcolumn_elements(
