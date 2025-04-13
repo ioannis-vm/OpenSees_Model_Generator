@@ -1396,17 +1396,20 @@ class Analysis:
             return num_subdiv, num_times, algorithm_idx, True  # Analysis failed
 
         if algorithm_idx < len(algorithms) - 1:
+            # Try another algorithm.
+            algorithm_idx += 1
+            print(f'{num_subdiv=}\t{num_times=}\t{algorithm_idx=}')
             return (
                 num_subdiv,
                 num_times,
                 algorithm_idx,
                 False,
-            )  # Try the next algorithm
+            )
 
         # Increase subdivisions if all algorithms have been attempted
+        algorithm_idx = 0
         num_subdiv += 1
         num_times = 50  # Reset retries
-        algorithm_idx = 0
 
         return num_subdiv, num_times, algorithm_idx, False
 
