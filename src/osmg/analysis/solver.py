@@ -1052,7 +1052,7 @@ class Analysis:
                             algorithm_idx = 0
                             num_subdiv += 1
                             # how many times to run with reduced step size
-                            num_times = 50
+                            num_times = 5
                     else:
                         # analysis was successful
                         if num_times != 0:
@@ -1071,7 +1071,7 @@ class Analysis:
                         if num_subdiv != 0:
                             if num_times == 0:
                                 num_subdiv -= 1
-                                num_times = 10
+                                num_times = 5
 
             else:
                 # Need to unload
@@ -1347,7 +1347,6 @@ class Analysis:
             ops.test('EnergyIncr', 1e-9, 100, 0)
             ops.algorithm(*algorithms[algorithm_idx])
             check: int = ops.analyze(1, analysis_time_increment * scale[num_subdiv])
-
             if check != 0:
                 num_subdiv, num_times, algorithm_idx, should_stop = (
                     self._handle_analysis_failure(
@@ -1362,7 +1361,7 @@ class Analysis:
                 if should_stop:
                     break
             else:
-                curr_time, last_log_time, should_stop = (
+                curr_time, num_times, last_log_time, should_stop = (
                     self._handle_successful_analysis(
                         curr_time,
                         finish_time,
@@ -1409,7 +1408,7 @@ class Analysis:
         # Increase subdivisions if all algorithms have been attempted
         algorithm_idx = 0
         num_subdiv += 1
-        num_times = 50  # Reset retries
+        num_times = 5  # Reset retries
 
         return num_subdiv, num_times, algorithm_idx, False
 
@@ -1491,9 +1490,9 @@ class Analysis:
             num_times -= 1
         elif num_subdiv != 0:
             num_subdiv -= 1
-            num_times = 50
+            num_times = 5
 
-        return curr_time, last_log_time, False  # Continue analysis
+        return curr_time, num_times, last_log_time, False  # Continue analysis
 
 
 @dataclass()
