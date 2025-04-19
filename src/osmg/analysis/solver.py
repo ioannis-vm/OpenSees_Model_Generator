@@ -1343,7 +1343,6 @@ class Analysis:
         while curr_time + common.EPSILON < finish_time:
             if analysis_failed:
                 break
-
             ops.test('EnergyIncr', 1e-9, 100, 0)
             ops.algorithm(*algorithms[algorithm_idx])
             check: int = ops.analyze(1, analysis_time_increment * scale[num_subdiv])
@@ -1361,7 +1360,8 @@ class Analysis:
                 if should_stop:
                     break
             else:
-                curr_time, num_times, last_log_time, should_stop = (
+                algorithm_idx = 0
+                curr_time, num_times, num_subdiv, last_log_time, should_stop = (
                     self._handle_successful_analysis(
                         curr_time,
                         finish_time,
@@ -1453,7 +1453,7 @@ class Analysis:
             self._logger.warning(
                 f'Analysis interrupted at time {curr_time:.5f} because the time limit was reached.'
             )
-            return curr_time, last_log_time, True  # Return flag to stop the loop
+            return curr_time, num_times, num_subdiv, last_log_time, True  # Return flag to stop the loop
 
         # Maximum drift check
         if transient_drift_check_setup is not None:
@@ -1484,15 +1484,15 @@ class Analysis:
                             f'Time: {curr_time:.3f} s.'
                             f'Stopping analysis.'
                         )
-                        return curr_time, last_log_time, True  # Stop
+                        return curr_time, num_times, num_subdiv, last_log_time, True  # Stop
 
         if num_times != 0:
             num_times -= 1
         elif num_subdiv != 0:
             num_subdiv -= 1
             num_times = 5
-
-        return curr_time, num_times, last_log_time, False  # Continue analysis
+        
+        return curr_time, num_times, num_subdiv, last_log_time, False  # Continue analysis
 
 
 @dataclass()
