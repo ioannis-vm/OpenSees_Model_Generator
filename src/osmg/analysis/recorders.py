@@ -36,6 +36,10 @@ class Recorder(UIDObject):
         """Overwrite the data."""
         self._data = data
 
+    def clear_data(self) -> None:
+        """Clear data."""
+        self._data = None
+
 
 @dataclass
 class NodeRecorder(Recorder):

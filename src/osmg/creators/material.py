@@ -222,8 +222,9 @@ class SteelWIMKMaterialCreator(MaterialCreator):
     direction: str = 'strong'
     moment_modifier: float = 1.00
     n_parameter: float = 0.00
+    warn: bool = False
 
-    def generate(self) -> IMKBilin:  # noqa: C901
+    def generate(self) -> IMKBilin:
         """
         Generate a material.
 
@@ -265,36 +266,8 @@ class SteelWIMKMaterialCreator(MaterialCreator):
         # consider cases
 
         # checks ~ acceptable range
-        if not 20.00 < sec_d / sec_tw < 55.00:  # noqa: PLR2004
-            print(
-                f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
-                ' outside regression range'
-            )
-            print('20.00 < sec_d/sec_tw < 55.00')
-            print(self.section.name, '\n')
-        if not 20.00 < lbry < 80.00:  # noqa: PLR2004
-            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
-            print('20.00 < lbry < 80.00')
-            print(self.section.name, '\n')
-        if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:  # noqa: PLR2004
-            print(
-                f'Warning: bf/(2 tf)={sec_bf / (2. * sec_tf):.2f}'
-                ' outside regression range'
-            )
-            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
-            print(self.section.name, '\n')
-        if not 2.5 < elm_l / sec_d < 7.0:  # noqa: PLR2004
-            print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')
-            print('2.5 < elm_l/sec_d < 7.0')
-            print(self.section.name, '\n')
-        if not 4.00 < sec_d < 36.00:  # noqa: PLR2004
-            print(f'Warning: Section d={sec_d:.2f} outside regression range')
-            print('4.00 < sec_d < 36.00')
-            print(self.section.name, '\n')
-        if not 35.00 < mat_fy < 65.00:  # noqa: PLR2004
-            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
-            print('35.00 < mat_fy < 65.00')
-            print(self.section.name, '\n')
+        self.print_warnings()
+
         if self.rbs_factor:
             # RBS case
             assert self.direction == 'strong'
@@ -434,12 +407,12 @@ class SteelWIMKMaterialCreator(MaterialCreator):
             # frames. Earthquake Engineering & Structural Dynamics,
             # 43(13), 1935-1954.  Table II
 
-            assert (
-                self.axial_load_ratio == 0.00
-            ), "Can't consider composite action for columns"
-            assert (
-                self.direction == 'strong'
-            ), 'Composite action affects the behavior in strong-axis bending'
+            assert self.axial_load_ratio == 0.00, (
+                "Can't consider composite action for columns"
+            )
+            assert self.direction == 'strong', (
+                'Composite action affects the behavior in strong-axis bending'
+            )
 
             theta_p_plus *= 1.80
             theta_p_minus *= 0.95
@@ -491,6 +464,60 @@ class SteelWIMKMaterialCreator(MaterialCreator):
             d_plus,
             d_minus,
         )
+
+    def print_warnings(self) -> None:
+        """Print warnings."""
+        # Yield stress
+        mat_fy = self.f_y
+        # Section depth
+        sec_d = self.section.properties.d
+        # Flange width
+        sec_bf = self.section.properties.bf
+        # Flange and web thicknesses
+        sec_tf = self.section.properties.tf
+        sec_tw = self.section.properties.tw
+        # Radius of gyration
+        sec_ry = self.section.properties.ry
+        # Clear length
+        elm_h = self.element_length
+        # Shear span
+        elm_l = self.loverh * elm_h
+        elm_lb = self.lboverl * elm_l
+        lbry = elm_lb / sec_ry
+
+        if not self.warn:
+            return
+
+        if not 20.00 < sec_d / sec_tw < 55.00:  # noqa: PLR2004
+            print(
+                f'Warning: sec_d/sec_tw={sec_d / sec_tw:.2f}'
+                ' outside regression range'
+            )
+            print('20.00 < sec_d/sec_tw < 55.00')
+            print(self.section.name, '\n')
+        if not 20.00 < lbry < 80.00:  # noqa: PLR2004
+            print(f'Warning: Lb/ry={lbry:.2f} outside regression range')
+            print('20.00 < lbry < 80.00')
+            print(self.section.name, '\n')
+        if not 4.00 < (sec_bf / (2.0 * sec_tf)) < 8.00:  # noqa: PLR2004
+            print(
+                f'Warning: bf/(2 tf)={sec_bf / (2.0 * sec_tf):.2f}'
+                ' outside regression range'
+            )
+            print('4.00 < (sec_bf/(2.*sec_tf)) < 8.00')
+            print(self.section.name, '\n')
+        if not 2.5 < elm_l / sec_d < 7.0:  # noqa: PLR2004
+            print(f'Warning: L/d={elm_l / sec_d:.2f}  outside regression range')
+            print('2.5 < elm_l/sec_d < 7.0')
+            print(self.section.name, '\n')
+        if not 4.00 < sec_d < 36.00:  # noqa: PLR2004
+            print(f'Warning: Section d={sec_d:.2f} outside regression range')
+            print('4.00 < sec_d < 36.00')
+            print(self.section.name, '\n')
+        if not 35.00 < mat_fy < 65.00:  # noqa: PLR2004
+            print(f'Warning: Fy={mat_fy:.2f} outside regression range')
+            print('35.00 < mat_fy < 65.00')
+            print(self.section.name, '\n')
 
 
 @dataclass(repr=False)

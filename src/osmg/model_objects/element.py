@@ -54,8 +54,8 @@ class ZeroLength(Element):
 
     materials: list[UniaxialMaterial]
     directions: list[int]
-    vecx: numpy_array | None
-    vecyp: numpy_array | None
+    vecx: numpy_array | None = field(default=None)
+    vecyp: numpy_array | None = field(default=None)
     enable_rayleigh: bool = field(default=True)
 
     def ops_args(self) -> list[object]:
@@ -312,8 +312,8 @@ class GeomTransf(UIDObject):
 class ModifiedStiffnessParameterConfig:
     """Configuration parameters for ModifiedElasticBeam elements."""
 
-    n_x: float | None
-    n_y: float | None
+    n_x: float | None = field(default=None)
+    n_y: float | None = field(default=None)
 
 
 @dataclass(repr=False)
@@ -433,8 +433,25 @@ class ElasticBeamColumn(BeamColumnElement):
         """
         mod_params = self.modified_stiffness_config
         if mod_params:
-            msg = 'Not implemented yet.'
-            raise NotImplementedError(msg)
+            if mod_params.n_y is not None:
+                msg = 'Only `n_x` is needed for 2D.'
+                raise ValueError(msg)
+            stiffness_x = (
+                self._calculate_stiffness(mod_params.n_x)
+                if mod_params.n_x is not None
+                else None
+            )
+            return [
+                'ModElasticBeam2d',
+                self.uid,
+                self.nodes[0].uid,
+                self.nodes[1].uid,
+                self.section.area,
+                self.section.e_mod,
+                self.section.i_x,
+                *stiffness_x,
+                self.geomtransf.uid,
+            ]
 
         # Default elastic beam column configuration if no modified stiffness
         return [

@@ -253,6 +253,8 @@ class Analysis:
         Raises:
           ValueError: If the analysis is not 3D.
         """
+        if not elements:
+            return
         ndm = NDM[self.model.dimensionality]
         ndf = NDF[self.model.dimensionality]
         if not (ndm == 3 and ndf == 6):
@@ -270,6 +272,8 @@ class Analysis:
         Raises:
           ValueError: If the analysis is not 3D.
         """
+        if not elements:
+            return
         ndm = NDM[self.model.dimensionality]
         ndf = NDF[self.model.dimensionality]
         if not (ndm == 3 and ndf == 6):
@@ -302,7 +306,7 @@ class Analysis:
         """
         for element in elements:
             if element.visibility.skip_opensees_definition:
-                continue
+                return
             ops.geomTransf(*element.geomtransf.ops_args())
             if self.model.dimensionality == '2D Frame':
                 ops.element(*element.ops_args_2d())
@@ -1186,7 +1190,7 @@ class Analysis:
         print_progress: bool = True,
         time_limit: float | None = None,
         transient_drift_check_setup: TransientDriftCheckSetup | None = None,
-    ) -> None:
+    ) -> str | None:
         """
         Run a transient analysis.
 
@@ -1241,7 +1245,7 @@ class Analysis:
         self.log(f'Max time step: {analysis_time_increment}')
 
         try:
-            self._perform_analysis_loop(
+            termination_flag = self._perform_analysis_loop(
                 curr_time,
                 finish_time,
                 analysis_time_increment,
@@ -1259,6 +1263,11 @@ class Analysis:
         if pbar is not None:
             pbar.close()
 
+        if termination_flag is not None:
+            return termination_flag
+
+        return 'converged_to_last_time_step'
+
     def run_transient_dampen_residual_response(
         self,
         prior_load_patterns: list,
@@ -1270,6 +1279,7 @@ class Analysis:
         absolute_tolerance: float = 1e-4,
     ) -> None:
         """Dampen out any residual motion."""
+        ndf = NDF[self.model.dimensionality]
         for load_pattern in prior_load_patterns:
             ops.remove('loadPattern', load_pattern)
 
@@ -1283,7 +1293,7 @@ class Analysis:
                 self.log('Failed to dampen out residual motion: Analysis fails.')
                 break
 
-            vel = np.zeros(6)
+            vel = np.zeros(ndf)
             node_tags = ops.getNodeTags()
             num_nodes = len(node_tags)
             for ntag in node_tags:
@@ -1377,6 +1387,8 @@ class Analysis:
                 if should_stop:
                     break  # Stop the loop if the time limit is reached
 
+        return should_stop
+
     def _handle_analysis_failure(
         self,
         curr_time: float,
@@ -1385,14 +1397,19 @@ class Analysis:
         num_times: int,
         scale: tuple[float, float, float, float],
         algorithms: tuple[tuple[str], tuple[str, str, str], tuple[str]],
-    ) -> bool:
+    ) -> str | None:
         """Handle an analysis failure by adjusting parameters or logging failure."""
         if num_subdiv == len(scale) - 1:
             self.log('Analysis failed to converge.')
             self._logger.warning(
                 f'Analysis failed at time {curr_time:.5f} and cannot continue.'
             )
-            return num_subdiv, num_times, algorithm_idx, True  # Analysis failed
+            return (
+                num_subdiv,
+                num_times,
+                algorithm_idx,
+                'no_convergance',
+            )  # Analysis failed
 
         if algorithm_idx < len(algorithms) - 1:
             # Try another algorithm.
@@ -1402,7 +1419,7 @@ class Analysis:
                 num_subdiv,
                 num_times,
                 algorithm_idx,
-                False,
+                None,
             )
 
         # Increase subdivisions if all algorithms have been attempted
@@ -1410,7 +1427,7 @@ class Analysis:
         num_subdiv += 1
         num_times = 5  # Reset retries
 
-        return num_subdiv, num_times, algorithm_idx, False
+        return num_subdiv, num_times, algorithm_idx, None
 
     def _handle_successful_analysis(
         self,
@@ -1453,9 +1470,16 @@ class Analysis:
             self._logger.warning(
                 f'Analysis interrupted at time {curr_time:.5f} because the time limit was reached.'
             )
-            return curr_time, num_times, num_subdiv, last_log_time, True  # Return flag to stop the loop
+            return (
+                curr_time,
+                num_times,
+                num_subdiv,
+                last_log_time,
+                'time_limit',
+            )  # Return flag to stop the loop
 
         # Maximum drift check
+        ndm = NDM[self.model.dimensionality]
         if transient_drift_check_setup is not None:
             node_uids = transient_drift_check_setup.node_uids
             drift_limit = transient_drift_check_setup.drift_limit
@@ -1464,12 +1488,20 @@ class Analysis:
             min_nodes_required = 2
             assert len(node_uids) > min_nodes_required
             assert elevation_dof in {1, 2, 3}
-            if elevation_dof == 1:
-                other_dofs = (2, 3)
-            elif elevation_dof == 2:  # noqa: PLR2004
-                other_dofs = (1, 3)
-            else:
-                other_dofs = (1, 2)
+            if ndm == 3:  # noqa: PLR2004
+                if elevation_dof == 1:
+                    other_dofs = (2, 3)
+                elif elevation_dof == 2:  # noqa: PLR2004
+                    other_dofs = (1, 3)
+                else:
+                    other_dofs = (1, 2)
+            elif ndm == 2:  # noqa: PLR2004
+                if elevation_dof == 1:
+                    other_dofs = (2,)
+                elif elevation_dof == 2:  # noqa: PLR2004
+                    other_dofs = (1,)
+                else:
+                    other_dofs = (1, 2)
             node_pairs = list(zip(node_uids, node_uids[1:]))
             for bottom_node, top_node in node_pairs:
                 bottom_elev = ops.nodeCoord(bottom_node)[elevation_dof - 1]
@@ -1477,22 +1509,36 @@ class Analysis:
                 for other_dof in other_dofs:
                     top_disp = ops.nodeDisp(top_node, other_dof)
                     bottom_disp = ops.nodeDisp(bottom_node, other_dof)
-                    drift = (top_disp - bottom_disp) / (top_elev - bottom_elev)
+                    drift = np.abs(
+                        (top_disp - bottom_disp) / (top_elev - bottom_elev)
+                    )
                     if drift > drift_limit:
                         self.log(
                             f'Drift limit reached: {drift * 100:.2}% at dofs ({top_node}, {bottom_node}). '
                             f'Time: {curr_time:.3f} s.'
                             f'Stopping analysis.'
                         )
-                        return curr_time, num_times, num_subdiv, last_log_time, True  # Stop
+                        return (
+                            curr_time,
+                            num_times,
+                            num_subdiv,
+                            last_log_time,
+                            'drift',
+                        )  # Stop
 
         if num_times != 0:
             num_times -= 1
         elif num_subdiv != 0:
             num_subdiv -= 1
             num_times = 5
-        
-        return curr_time, num_times, num_subdiv, last_log_time, False  # Continue analysis
+
+        return (
+            curr_time,
+            num_times,
+            num_subdiv,
+            last_log_time,
+            None,
+        )  # Continue analysis
 
 
 @dataclass()
@@ -1588,7 +1634,7 @@ class ModalAnalysis(Analysis):
         eigenvectors.columns = eigenvectors.columns.reorder_levels(['node', 'dof'])
         node_order = eigenvectors.columns.get_level_values('node').unique()
         eigenvectors = eigenvectors.loc[:, node_order]
-        self.recorders['default_node'].set_data(eigenvectors)
+        self.recorders['default_node'].set_data(eigenvectors.copy())
         self.log('Retrieved node eigenvectors.')
 
         basic_force_data = {}
@@ -1683,6 +1729,7 @@ class ModalAnalysis(Analysis):
             self.recorders['default_basic_force'].set_data(
                 pd.concat(basic_force_data.values(), axis=0)
             )
+            self.recorders['default_node']._data = eigenvectors
 
         self.log('Analysis finished.')
         ops.wipe()
@@ -1876,8 +1923,7 @@ class AnalysisRegistry:
             load_case = load_case_objects[load_case_name]
             if recorder_name not in self.analysis_objects[load_case_name].recorders:
                 msg = (
-                    f'Recorder not found: {recorder_name} '
-                    f'for load case {load_case}.'
+                    f'Recorder not found: {recorder_name} for load case {load_case}.'
                 )
                 raise ValueError(msg)
             data = (
@@ -1924,8 +1970,7 @@ class AnalysisRegistry:
             load_case = load_case_objects[load_case_name]
             if recorder_name not in self.analysis_objects[load_case_name].recorders:
                 msg = (
-                    f'Recorder not found: {recorder_name} '
-                    f'for load case {load_case}.'
+                    f'Recorder not found: {recorder_name} for load case {load_case}.'
                 )
                 raise ValueError(msg)
             data = self.analysis_objects[load_case_name].calculate_basic_forces(

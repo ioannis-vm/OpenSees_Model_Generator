@@ -51,7 +51,9 @@ def import_PEER(filename: str) -> numpy_array:  # noqa: N802
                 tmp = re.sub(r'DT=\s+', '', line.split(sep=', ')[1])
                 tmp = re.sub(r'\s* SEC', '', tmp)
                 tmp = tmp.replace('SEC', '')  # some files have no space
-                d_t = float(tmp)
+                tmp = tmp.replace('SE', '')
+                tmp = tmp.replace('dt=', '')
+                d_t = float(tmp.strip())
             elif i > line_containing_number_of_points:
                 break
 

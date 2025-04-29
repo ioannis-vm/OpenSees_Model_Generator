@@ -199,7 +199,7 @@ class Figure3D:
         deformation_configuration: DeformationConfiguration | None = None,
         *,
         overlay: bool = False,
-        random_length: float = 0.00
+        random_length: float = 0.00,
     ) -> None:
         """Add components to the figure."""
         for component in components:
@@ -209,7 +209,7 @@ class Figure3D:
                 'internal',
                 deformation_configuration,
                 overlay=overlay,
-               random_length=random_length,
+                random_length=random_length,
             )
             elements = list(component.elements.values())
             self.add_elements(elements, deformation_configuration, overlay=overlay)
@@ -337,10 +337,23 @@ class Figure3D:
                 * deformation_configuration.amplification_factor
             )
 
-        # Cast to 3D for plotting.
-        if coordinates_i_array.shape[1] == TWO_DIMENSIONAL:
-            coordinates_i_array = np.insert(coordinates_i_array, 1, 0.00, axis=1)
-            coordinates_j_array = np.insert(coordinates_j_array, 1, 0.00, axis=1)
+        two_dimensional = 2
+        if coordinates_i_array.shape[1] == two_dimensional:
+            coordinates_i_array = np.column_stack(
+                (
+                    coordinates_i_array[:, 0],
+                    np.zeros(len(coordinates_i_array)),
+                    coordinates_i_array[:, 1],
+                )
+            )
+        if coordinates_j_array.shape[1] == two_dimensional:
+            coordinates_j_array = np.column_stack(
+                (
+                    coordinates_j_array[:, 0],
+                    np.zeros(len(coordinates_j_array)),
+                    coordinates_j_array[:, 1],
+                )
+            )
 
         if deformation_configuration is not None:
             name = 'Bar Elements (Deformed)'
@@ -806,23 +819,28 @@ class Figure3D:
         for node in nodes:
             if self.configuration.ndm == THREE_DIMENSIONAL:
                 data['x'].append(
-                    node.coordinates[0] + random.uniform(-random_length/2.0, random_length/2.0)
+                    node.coordinates[0]
+                    + random.uniform(-random_length / 2.0, random_length / 2.0)
                 )  # type: ignore
                 data['y'].append(
-                    node.coordinates[1] + random.uniform(-random_length/2.0, random_length/2.0)
+                    node.coordinates[1]
+                    + random.uniform(-random_length / 2.0, random_length / 2.0)
                 )  # type: ignore
                 data['z'].append(
-                    node.coordinates[2] + random.uniform(-random_length/2.0, random_length/2.0)
+                    node.coordinates[2]
+                    + random.uniform(-random_length / 2.0, random_length / 2.0)
                 )  # type: ignore
                 data['customdata'].append([node.uid, None])  # type: ignore
             else:
                 assert self.configuration.ndm == TWO_DIMENSIONAL
                 data['x'].append(
-                    node.coordinates[0] + random.uniform(-random_length/2.0, random_length/2.0)
+                    node.coordinates[0]
+                    + random.uniform(-random_length / 2.0, random_length / 2.0)
                 )  # type: ignore
                 data['y'].append(0.00)  # type: ignore
                 data['z'].append(
-                    node.coordinates[1] + random.uniform(-random_length/2.0, random_length/2.0)
+                    node.coordinates[1]
+                    + random.uniform(-random_length / 2.0, random_length / 2.0)
                 )  # type: ignore
                 data['customdata'].append([node.uid, None])  # type: ignore
 
@@ -1731,7 +1749,7 @@ class Figure3D:
                 'j': [],
                 'k': [],
                 'text': [],  # For custom hover information
-                'hovertemplate': ('Value: %{text}<br>' '<extra></extra>'),
+                'hovertemplate': ('Value: %{text}<br><extra></extra>'),
                 'color': '#7ac4b7',
                 'opacity': 0.5,
                 'showlegend': True,
