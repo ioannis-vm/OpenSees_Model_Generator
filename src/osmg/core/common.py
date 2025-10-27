@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from collections import OrderedDict
+from collections import OrderedDict  # noqa: TC003
 from collections.abc import Hashable
 from pprint import pprint
 from typing import TypeVar

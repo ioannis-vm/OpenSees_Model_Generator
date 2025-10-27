@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import UserDict
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(repr=False)
-class Collection(dict[int, TV]):
+class Collection(UserDict[int, TV]):
     """Collection of objects."""
 
     def add(self, obj: TV) -> None:

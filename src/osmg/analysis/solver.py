@@ -8,7 +8,7 @@ import socket
 import sys
 import tempfile
 from dataclasses import dataclass, field
-from itertools import product
+from itertools import pairwise, product
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING, Literal
@@ -1017,7 +1017,7 @@ class Analysis:
         scale = [1.0, 1.0e-1, 1.0e-2, 1.0e-3]
         algorithms = [('KrylovNewton',), ('KrylovNewton', 'initial')]
 
-        for i_loop, target_displacement in enumerate(target_displacements):
+        for i_loop, target_displacement in enumerate(target_displacements):  # noqa: PLR1702
             if total_fail:
                 break
             if target_displacement is not None:
@@ -1205,6 +1205,7 @@ class Analysis:
           print_progress: Controls whether the current time is printed out.
           time_limit: Maximum analysis time allowed, in hours.
           When reached, the analysis is interrupted.
+          transient_drift_check_setup: Drift check setup object for limiting drift during analysis.
 
         Raises:
           ValueError: If no mass is assigned.
@@ -1434,7 +1435,7 @@ class Analysis:
 
         return num_subdiv, num_times, algorithm_idx, None
 
-    def _handle_successful_analysis(
+    def _handle_successful_analysis(  # noqa: C901
         self,
         curr_time: float,
         finish_time: float,
@@ -1507,7 +1508,7 @@ class Analysis:
                     other_dofs = (1,)
                 else:
                     other_dofs = (1, 2)
-            node_pairs = list(zip(node_uids, node_uids[1:], strict=False))
+            node_pairs = list(pairwise(node_uids))
             for bottom_node, top_node in node_pairs:
                 bottom_elev = ops.nodeCoord(bottom_node)[elevation_dof - 1]
                 top_elev = ops.nodeCoord(top_node)[elevation_dof - 1]
@@ -1734,7 +1735,7 @@ class ModalAnalysis(Analysis):
             self.recorders['default_basic_force'].set_data(
                 pd.concat(basic_force_data.values(), axis=0)
             )
-            self.recorders['default_node']._data = eigenvectors
+            self.recorders['default_node'].set_data(eigenvectors)
 
         self.log('Analysis finished.')
         ops.wipe()

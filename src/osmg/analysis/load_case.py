@@ -570,7 +570,14 @@ class LoadCaseRegistry:
                     else:
                         existing_mass = target_load_case.mass_registry[node_uid]
                         target_load_case.mass_registry[node_uid] = PointMass(
-                            (*(e + p for e, p in zip(existing_mass, point_mass, strict=False)),)
+                            (
+                                *(
+                                    e + p
+                                    for e, p in zip(
+                                        existing_mass, point_mass, strict=False
+                                    )
+                                ),
+                            )
                         )
 
             # Convert point loads to mass
@@ -585,7 +592,14 @@ class LoadCaseRegistry:
                 else:
                     existing_mass = target_load_case.mass_registry[uid]
                     target_load_case.mass_registry[uid] = PointMass(
-                        (*(e + p for e, p in zip(existing_mass, point_mass, strict=False)),)
+                        (
+                            *(
+                                e + p
+                                for e, p in zip(
+                                    existing_mass, point_mass, strict=False
+                                )
+                            ),
+                        )
                     )
 
     def get_load_cases(self) -> dict[str, LoadCase]:

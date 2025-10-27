@@ -13,6 +13,7 @@ from osmg.graphics.visibility import ElementVisibility
 if TYPE_CHECKING:
     from osmg.core.common import numpy_array
     from osmg.mesh import Mesh
+    from osmg.model_objects.friction_model import FrictionModel
     from osmg.model_objects.node import Node
     from osmg.model_objects.section import ElasticSection, FiberSection
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
@@ -429,6 +430,9 @@ class ElasticBeamColumn(BeamColumnElement):
 
         Returns:
             The OpenSees arguments.
+
+        Raises:
+            ValueError: If `n_y` is not None.
         """
         mod_params = self.modified_stiffness_config
         if mod_params:

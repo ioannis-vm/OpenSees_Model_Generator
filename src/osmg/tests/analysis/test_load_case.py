@@ -99,7 +99,7 @@ class TestCombineSingle:
     def test_combine_invalid_action(self) -> None:
         """An invalid action raises a ValueError."""
         with pytest.raises(
-            ValueError, match='Action must be one of `add` or `envelope`.'
+            ValueError, match=r'Action must be one of `add` or `envelope`.'
         ):
             combine_single(self.df1, self.df2, 'invalid')  # type: ignore
 
@@ -173,7 +173,7 @@ class TestCombine:
     def test_combine_insufficient_dataframes(self) -> None:
         """Test that combining fewer than two DataFrames raises a ValueError."""
         with pytest.raises(
-            ValueError, match='At least two DataFrames are required to combine.'
+            ValueError, match=r'At least two DataFrames are required to combine.'
         ):
             combine([self.df1], 'add')
 
@@ -193,6 +193,6 @@ class TestCombine:
     def test_combine_invalid_action(self) -> None:
         """Test that an invalid action raises a ValueError."""
         with pytest.raises(
-            ValueError, match='Action must be one of `add` or `envelope`.'
+            ValueError, match=r'Action must be one of `add` or `envelope`.'
         ):
             combine([self.df1, self.df2], 'invalid')  # type: ignore

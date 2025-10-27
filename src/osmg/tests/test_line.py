@@ -44,7 +44,7 @@ class TestLine:
     def test_intersects_pt_zero_length(self) -> None:
         """Test whether intersects_pt raises an error for zero-length line."""
         line = Line('l1', np.array([0, 0]), np.array([0, 0]))
-        with pytest.raises(ValueError, match='Line has zero length.'):
+        with pytest.raises(ValueError, match=r'Line has zero length.'):
             line.intersects_pt(np.array([0, 0]))
 
     def test_point_distance(self) -> None:

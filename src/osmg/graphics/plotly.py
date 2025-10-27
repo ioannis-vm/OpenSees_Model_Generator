@@ -277,7 +277,7 @@ class Figure3D:
         #     overlay=overlay,
         # )
 
-    def add_bar_elements(
+    def add_bar_elements(  # noqa: C901
         self,
         elements: list[Bar],
         deformation_configuration: DeformationConfiguration | None = None,

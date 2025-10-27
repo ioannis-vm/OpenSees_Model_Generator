@@ -19,7 +19,7 @@ class TestBaseGridSystem:
     def test_retrieve_nonexistent_level(self) -> None:
         """Test retrieving a nonexistent level raises ValueError."""
         grid_system = BaseGridSystem[str]()
-        with pytest.raises(ValueError, match="Level 'Basement' does not exist."):
+        with pytest.raises(ValueError, match=r"Level 'Basement' does not exist."):
             grid_system.get_level('Basement').elevation()  # type: ignore
 
 
@@ -50,7 +50,7 @@ class TestGridSystem:
         grid_system = GridSystem()
         grid_system.add_grid('Grid A', np.array([0.0, 0.0]), np.array([10.0, 0.0]))
         with pytest.raises(
-            ValueError, match="Grids 'Grid A' and 'Grid C' must exist."
+            ValueError, match=r"Grids 'Grid A' and 'Grid C' must exist."
         ):
             grid_system.get_intersection_coordinates('Grid A', 'Grid C')
 
@@ -67,7 +67,7 @@ class TestGridSystem2D:
     def test_retrieve_nonexistent_grid(self) -> None:
         """Test retrieving a nonexistent grid raises ValueError."""
         grid_system = GridSystem2D()
-        with pytest.raises(ValueError, match="Grid 'Grid Y' does not exist."):
+        with pytest.raises(ValueError, match=r"Grid 'Grid Y' does not exist."):
             grid_system.get_grid_location('Grid Y')
 
     def test_add_and_retrieve_level(self) -> None:
@@ -79,5 +79,5 @@ class TestGridSystem2D:
     def test_retrieve_nonexistent_level(self) -> None:
         """Test retrieving a nonexistent level raises ValueError."""
         grid_system = GridSystem2D()
-        with pytest.raises(ValueError, match="Level 'Roof' does not exist."):
+        with pytest.raises(ValueError, match=r"Level 'Roof' does not exist."):
             grid_system.get_level('Roof').elevation()  # type: ignore

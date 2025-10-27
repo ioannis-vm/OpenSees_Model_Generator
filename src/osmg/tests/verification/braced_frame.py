@@ -154,7 +154,8 @@ for level_top, level_bottom, grid_top, grid_bottom in zip(
     ('1', '1', '1', '1', '2', '2', '3', '4'),
     ('0', '0', '0', '0', '1', '1', '2', '3'),
     ('C', 'C', 'E', 'E', 'D', 'D', 'C', 'D'),
-    ('B', 'D', 'D', 'F', 'C', 'E', 'D', 'C'), strict=False,
+    ('B', 'D', 'D', 'F', 'C', 'E', 'D', 'C'),
+    strict=False,
 ):
     brg.add(
         tags={'Brace'},

@@ -23,7 +23,7 @@ class TestRotationMatrix2D:
 
     def test_rotation_matrix_2d_invalid_input(self) -> None:
         """Test that a TypeError is raised for invalid input."""
-        with pytest.raises(TypeError, match='ang parameter should be a float.'):
+        with pytest.raises(TypeError, match=r'ang parameter should be a float.'):
             rotation_matrix_2d('90')  # type: ignore  # Invalid input type
 
 

@@ -139,3 +139,4 @@ notes
 *_autosummary/*
 /docs/source/_autosummary/
 /docs/source/notebooks/*.ipynb
+.aider*

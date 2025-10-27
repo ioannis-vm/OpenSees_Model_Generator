@@ -1030,11 +1030,13 @@ def subdivide_hss_rect(
     pieces = []
     for ylow, yhigh in zip(
         (y_min, y_min + sec_t, y_max - sec_t),
-        (y_min + sec_t, y_max - sec_t, y_max), strict=False,
+        (y_min + sec_t, y_max - sec_t, y_max),
+        strict=False,
     ):
         for xlow, xhigh in zip(
             (x_min, x_min + sec_t, x_max - sec_t),
-            (x_min + sec_t, x_max - sec_t, x_max), strict=False,
+            (x_min + sec_t, x_max - sec_t, x_max),
+            strict=False,
         ):
             x_array = np.linspace(xlow, xhigh, num=5, endpoint=True)
             y_array = np.linspace(ylow, yhigh, num=5, endpoint=True)
