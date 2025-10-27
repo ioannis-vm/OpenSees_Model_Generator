@@ -15,7 +15,7 @@ class ConcentratedValue(tuple[float, ...]):
         Returns:
           A simple string representation of the object.
         """
-        return f"{self.__class__.__name__}({', '.join(map(str, self))})"
+        return f'{self.__class__.__name__}({", ".join(map(str, self))})'
 
     def __add__(self, other: ConcentratedValue) -> ConcentratedValue:
         """
@@ -29,7 +29,7 @@ class ConcentratedValue(tuple[float, ...]):
         """
         if not isinstance(other, ConcentratedValue):
             return NotImplemented
-        return ConcentratedValue(a + b for a, b in zip(self, other))
+        return ConcentratedValue(a + b for a, b in zip(self, other, strict=False))
 
     def __mul__(self, scalar: float) -> ConcentratedValue:
         """
@@ -71,7 +71,7 @@ class UDL(tuple[float, ...]):
         Returns:
           A simple string representation of the object.
         """
-        return f"{self.__class__.__name__}({', '.join(map(str, self))})"
+        return f'{self.__class__.__name__}({", ".join(map(str, self))})'
 
     def __add__(self, other: UDL) -> UDL:
         """
@@ -85,7 +85,7 @@ class UDL(tuple[float, ...]):
         """
         if not isinstance(other, UDL):
             return NotImplemented
-        return UDL(a + b for a, b in zip(self, other))
+        return UDL(a + b for a, b in zip(self, other, strict=False))
 
     def __mul__(self, scalar: float) -> UDL:
         """

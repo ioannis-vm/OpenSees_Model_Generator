@@ -90,9 +90,9 @@ class TestPrintFunctions:
         obj = TestClass()
         print_dir(obj)
         captured = capsys.readouterr()
-        assert (
-            '__class__' in captured.out
-        ), 'Output did not include expected attributes'
+        assert '__class__' in captured.out, (
+            'Output did not include expected attributes'
+        )
 
 
 class TestPreviousElementFunction:
@@ -105,12 +105,12 @@ class TestPreviousElementFunction:
         Verifies correct value is returned for a valid key.
         """
         dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
-        assert (
-            previous_element(dct, 2) == 'a'
-        ), 'Incorrect previous element for key 2'
-        assert (
-            previous_element(dct, 3) == 'b'
-        ), 'Incorrect previous element for key 3'
+        assert previous_element(dct, 2) == 'a', (
+            'Incorrect previous element for key 2'
+        )
+        assert previous_element(dct, 3) == 'b', (
+            'Incorrect previous element for key 3'
+        )
 
     def test_previous_element_not_found(self) -> None:
         """
@@ -120,6 +120,6 @@ class TestPreviousElementFunction:
         """
         dct = OrderedDict([(1, 'a'), (2, 'b'), (3, 'c')])
         assert previous_element(dct, 1) is None, 'Expected None for the first key'
-        assert (
-            previous_element(dct, 4) is None
-        ), 'Expected None for a non-existent key'
+        assert previous_element(dct, 4) is None, (
+            'Expected None for a non-existent key'
+        )

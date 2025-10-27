@@ -58,9 +58,9 @@ def import_PEER(filename: str) -> numpy_array:  # noqa: N802
                 break
 
     # Assert correct number of points and units
-    assert npts == len(
-        a_g
-    ), 'Number of points reported in file does not match recovered points'
+    assert npts == len(a_g), (
+        'Number of points reported in file does not match recovered points'
+    )
     assert units == 'G', "Expected file to be in G units, but it isn't"
 
     # Obtain the corresponding time values

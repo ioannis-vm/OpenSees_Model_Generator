@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from time import perf_counter
-from osmg.core import common
 import logging
-import contextlib
 import platform
 import socket
 import sys
@@ -13,6 +10,7 @@ import tempfile
 from dataclasses import dataclass, field
 from itertools import product
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
@@ -21,7 +19,15 @@ from tqdm import tqdm
 
 from osmg.analysis.load_case import HasLoads, ModalLoadCase, StaticLoadCase
 from osmg.analysis.recorders import ElementRecorder, NodeRecorder
-from osmg.core.common import NDF, NDM, THREE_DIMENSIONAL, TWO_DIMENSIONAL
+from osmg.core import common
+from osmg.core.common import (
+    NDF,
+    NDM,
+    SIX_DOF,
+    THREE_DIMENSIONAL,
+    THREE_DOF,
+    TWO_DIMENSIONAL,
+)
 from osmg.core.model import Model
 from osmg.core.osmg_collections import BarAssembly, BeamColumnAssembly
 from osmg.model_objects.element import (
@@ -29,10 +35,10 @@ from osmg.model_objects.element import (
     BeamColumnElement,
     DispBeamColumn,
     ElasticBeamColumn,
-    TwoNodeLink,
-    ZeroLength,
     LeadRubberX,
     TripleFrictionPendulum,
+    TwoNodeLink,
+    ZeroLength,
 )
 
 try:
@@ -45,10 +51,9 @@ if TYPE_CHECKING:
     from osmg.analysis.load_case import LoadCaseRegistry
     from osmg.analysis.recorders import Recorder
     from osmg.analysis.supports import ElasticSupport, FixedSupport
-    from osmg.core.model import Model
     from osmg.core.osmg_collections import ComponentAssembly
-    from osmg.model_objects.uniaxial_material import UniaxialMaterial
     from osmg.model_objects.friction_model import FrictionModel
+    from osmg.model_objects.uniaxial_material import UniaxialMaterial
 
 
 @dataclass()
@@ -189,7 +194,7 @@ class Analysis:
         ).items():
             ops.node(uid, *node.coordinates)
 
-    def opensees_define_elements(self) -> None:
+    def opensees_define_elements(self) -> None:  # noqa: C901
         """Define elements."""
         elastic_beamcolumn_elements: list[ElasticBeamColumn] = []
         bar_elements: list[Bar] = []
@@ -227,7 +232,7 @@ class Analysis:
                     unsupported_element_types.append(element.__class__.__name__)
 
         if unsupported_element_types:
-            print(  # noqa: T201
+            print(
                 f'WARNING: Unsupported element types found: {set(unsupported_element_types)}'
             )
 
@@ -257,7 +262,7 @@ class Analysis:
             return
         ndm = NDM[self.model.dimensionality]
         ndf = NDF[self.model.dimensionality]
-        if not (ndm == 3 and ndf == 6):
+        if not (ndm == THREE_DOF and ndf == SIX_DOF):
             msg = 'LeadRubberX elements only work with ndm=3 and ndf=6.'
             raise ValueError(msg)
         for element in elements:
@@ -276,7 +281,7 @@ class Analysis:
             return
         ndm = NDM[self.model.dimensionality]
         ndf = NDF[self.model.dimensionality]
-        if not (ndm == 3 and ndf == 6):
+        if not (ndm == THREE_DOF and ndf == SIX_DOF):
             msg = 'LeadRubberX elements only work with ndm=3 and ndf=6.'
             raise ValueError(msg)
         for element in elements:
@@ -735,7 +740,7 @@ class Analysis:
         locations_expanded = locations[np.newaxis, :, :]
 
         columns = pd.MultiIndex.from_tuples(
-            [  # noqa: C416
+            [
                 (element, loc)
                 for element, loc in product(
                     recorder.elements,
@@ -980,7 +985,7 @@ class Analysis:
             ops.wipe()
         self.log('Analysis finished.')
 
-    def run_pushover(
+    def run_pushover(  # noqa: C901
         self,
         target_displacements: list[float | None],
         control_node_uid: int,
@@ -1502,7 +1507,7 @@ class Analysis:
                     other_dofs = (1,)
                 else:
                     other_dofs = (1, 2)
-            node_pairs = list(zip(node_uids, node_uids[1:]))
+            node_pairs = list(zip(node_uids, node_uids[1:], strict=False))
             for bottom_node, top_node in node_pairs:
                 bottom_elev = ops.nodeCoord(bottom_node)[elevation_dof - 1]
                 top_elev = ops.nodeCoord(top_node)[elevation_dof - 1]

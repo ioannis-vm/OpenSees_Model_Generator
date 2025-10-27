@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Literal
+from dataclasses import dataclass
 
 from osmg.core.uid_object import UIDObject
 
@@ -19,7 +18,7 @@ class FrictionModel(UIDObject):
 
     name: str
 
-    def ops_args(self) -> list[object]:  # noqa: PLR6301
+    def ops_args(self) -> list[object]:
         """Obtain the OpenSees arguments."""
         msg = 'Subclasses should implement this.'
         raise NotImplementedError(msg)

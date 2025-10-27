@@ -19,7 +19,7 @@ class UniaxialMaterial(UIDObject):
 
     name: str
 
-    def ops_args(self) -> list[object]:  # noqa: PLR6301
+    def ops_args(self) -> list[object]:
         """Obtain the OpenSees arguments."""
         msg = 'Subclasses should implement this.'
         raise NotImplementedError(msg)

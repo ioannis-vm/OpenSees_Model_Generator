@@ -1030,11 +1030,11 @@ def subdivide_hss_rect(
     pieces = []
     for ylow, yhigh in zip(
         (y_min, y_min + sec_t, y_max - sec_t),
-        (y_min + sec_t, y_max - sec_t, y_max),
+        (y_min + sec_t, y_max - sec_t, y_max), strict=False,
     ):
         for xlow, xhigh in zip(
             (x_min, x_min + sec_t, x_max - sec_t),
-            (x_min + sec_t, x_max - sec_t, x_max),
+            (x_min + sec_t, x_max - sec_t, x_max), strict=False,
         ):
             x_array = np.linspace(xlow, xhigh, num=5, endpoint=True)
             y_array = np.linspace(ylow, yhigh, num=5, endpoint=True)
@@ -1146,7 +1146,7 @@ def print_halfedge_results(halfedges: list[Halfedge]) -> None:
         results['edge'].append(halfedge.edge)
         results['next'].append(halfedge.nxt)
 
-    print(results)  # noqa: T201
+    print(results)
 
 
 def plot_loop(halfedge_loop: list[Halfedge]) -> None:
@@ -1179,18 +1179,18 @@ def sanity_checks(
     """Perform some checks to make sure assumptions are not violated."""
     #   We expect no trivial loops
     if trivial:
-        print('Warning: Found trivial loop')  # noqa: T201
+        print('Warning: Found trivial loop')
         for trv in trivial:
             for halfedge in trv:
-                print(halfedge.vertex.coordinates)  # noqa: T201
+                print(halfedge.vertex.coordinates)
             plot_loop(trv)
     #   We expect a single external loop
     if len(external) > 1:
-        print('Warning: Found multiple external loops')  # noqa: T201
+        print('Warning: Found multiple external loops')
         for i, ext in enumerate(external):
-            print(i + 1)  # noqa: T201
+            print(i + 1)
             for halfedge in ext:
-                print(halfedge.vertex.coordinates)  # noqa: T201
+                print(halfedge.vertex.coordinates)
             plot_loop(ext)
 
 

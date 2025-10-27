@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Literal
 
 import pandas as pd
@@ -22,12 +21,12 @@ class Recorder(UIDObject):
         """Post-initialization."""
         self._data = None
 
-    def ops_args(self) -> list[object]:  # noqa: PLR6301
+    def ops_args(self) -> list[object]:
         """Obtain the OpenSees arguments."""
         msg = 'Child classes should implement this.'
         raise NotImplementedError(msg)
 
-    def get_data(self) -> pd.DataFrame:  # noqa: PLR6301
+    def get_data(self) -> pd.DataFrame:
         """Retrieve the data."""
         msg = 'Child classes should implement this.'
         raise NotImplementedError(msg)

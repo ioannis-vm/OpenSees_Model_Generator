@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import plotly.graph_objects as go  # type: ignore
-import random
 
 from osmg.core.common import EPSILON, THREE_DIMENSIONAL, TWO_DIMENSIONAL, numpy_array
 from osmg.core.osmg_collections import BeamColumnAssembly
@@ -119,7 +119,7 @@ class DeformationConfiguration(PlotConfiguration):
             raise ValueError(msg)
         # 10% of reference length, or at most an approx. 30 degree rotation angle.
         if np.abs(max_displacement + max_rotation) < EPSILON:
-            print('No deformations.')  # noqa: T201
+            print('No deformations.')
             # TODO(JVM): change to a warning
             self.amplification_factor = 1.0
         elif np.abs(max_rotation) < EPSILON:
@@ -242,7 +242,7 @@ class Figure3D:
             elif element.__class__.__name__ not in unknown_types:
                 unknown_types = unknown_types.union({element.__class__.__name__})
         if unknown_types:
-            print(  # noqa: T201
+            print(
                 f'WARNING: Skipped the following unknown element types: {unknown_types}.'
             )
             # TODO(JVM): implement warning
@@ -376,7 +376,7 @@ class Figure3D:
             self.data.append(data)
 
         for coordinates_i, coordinates_j in zip(
-            coordinates_i_array, coordinates_j_array
+            coordinates_i_array, coordinates_j_array, strict=False
         ):
             data['x'].extend((coordinates_i[0], coordinates_j[0], None))  # type: ignore
             data['y'].extend((coordinates_i[1], coordinates_j[1], None))  # type: ignore
@@ -760,7 +760,7 @@ class Figure3D:
                         start_hidden=True,
                     )
         if ignored_uids:
-            print(  # noqa: T201
+            print(
                 f'Ignored the following elements with missing data: {set(ignored_uids)}'
             )
 
@@ -1734,7 +1734,7 @@ class Figure3D:
             head_width,
             base_width,
         )
-        x, y, z = zip(*vertices)
+        x, y, z = zip(*vertices, strict=False)
 
         data = self.find_data_by_name(name)
         if not data:
@@ -1768,7 +1768,7 @@ class Figure3D:
         # Faces are defined by indices of vertices in the mesh
         index_offset = len(data['x']) - 13  # type: ignore
         faces = tuple(np.array(faces) + index_offset)
-        i, j, k = zip(*faces)
+        i, j, k = zip(*faces, strict=False)
         data['i'].extend(i)  # type: ignore
         data['j'].extend(j)  # type: ignore
         data['k'].extend(k)  # type: ignore

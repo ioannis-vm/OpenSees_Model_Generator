@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import re
+from collections import OrderedDict
+from collections.abc import Hashable
 from pprint import pprint
-from typing import Hashable, OrderedDict, TypeVar
+from typing import TypeVar
 
 import numpy as np
 import numpy.typing as npt
@@ -40,6 +42,8 @@ NDF: dict[str, int] = {
 
 TWO_DIMENSIONAL = 2
 THREE_DIMENSIONAL = 3
+THREE_DOF = 3
+SIX_DOF = 6
 
 numpy_array = npt.NDArray[np.float64]
 

@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from osmg.model_objects.node import Node
     from osmg.model_objects.section import ElasticSection, FiberSection
     from osmg.model_objects.uniaxial_material import UniaxialMaterial
-    from osmg.model_objects.friction_model import Coulomb
 
 
 @dataclass(repr=False)
@@ -112,7 +111,7 @@ class ZeroLength(Element):
         res += 'ZeroLength element object\n'
         res += f'uid: {self.uid}'
         res += 'Materials:'
-        for mat, direction in zip(self.materials, self.directions):
+        for mat, direction in zip(self.materials, self.directions, strict=False):
             res += f'  {direction}: {mat.name}\n'
         res += f'vecx: {self.vecx}\n'
         res += f'vecyp: {self.vecyp}\n'
@@ -168,7 +167,7 @@ class TwoNodeLink(Element):
         res += 'TwoNodeLink element object\n'
         res += f'uid: {self.uid}'
         res += 'Materials:'
-        for mat, direction in zip(self.materials, self.directions):
+        for mat, direction in zip(self.materials, self.directions, strict=False):
             res += f'  {direction}: {mat.name}\n'
         if self.vecyp:
             res += f'vecyp: {self.vecyp}\n'

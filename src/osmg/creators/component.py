@@ -224,7 +224,7 @@ class BarCreator(BaseCreator):
         # '2D Truss', '2D Frame', '3D Truss', '3D Frame'
         n_x = Node(
             uid_generator=self.model.uid_generator,
-            coordinates=tuple(x1 + x2 for x1, x2 in zip(node_x.coordinates, eo_x)),
+            coordinates=tuple(x1 + x2 for x1, x2 in zip(node_x.coordinates, eo_x, strict=False)),
         )
         component.internal_nodes.add(n_x)
 

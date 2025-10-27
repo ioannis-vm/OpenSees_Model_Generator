@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Generic, TypeVar, Literal
+from typing import TYPE_CHECKING, Generic, Literal, TypeVar
 
 import numpy as np
 
@@ -14,7 +14,7 @@ from osmg.geometry.transformations import (
     transformation_matrix,
     transformation_matrix_2d,
 )
-from osmg.model_objects.element import Bar, BeamColumnElement, Element
+from osmg.model_objects.element import BeamColumnElement, Element
 from osmg.model_objects.node import Node
 
 TV = TypeVar('TV')
@@ -306,7 +306,6 @@ class ComponentAssembly(UIDObject):
 class BarAssembly(ComponentAssembly):
     """Component assembly for bar elements."""
 
-
     def __hash__(self) -> int:
         """Return the hash of the object based on its UID."""
         return hash(self.uid)
@@ -553,7 +552,7 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
           bounding_box: A tuple defining the bounding box in the form:
                         ((xmin, xmax), (ymin, ymax), optionally (zmin,
                         zmax)).
-          offset: Expand the boudning box to combat numerical
+          offset: Expand the bounding box to combat numerical
                   precision issues.
           exclusive: Whether to return only components connecting
                      exclusively to the selected nodes (default:
@@ -625,7 +624,7 @@ class ComponentAssemblyCollection(Collection[ComponentAssembly]):
 
         Arguments:
           bounding_box: A tuple defining the bounding box.
-          offset: Expand the boudning box to combat numerical
+          offset: Expand the bounding box to combat numerical
                   precision issues.
 
         Returns:

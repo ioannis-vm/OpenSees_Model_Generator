@@ -98,7 +98,7 @@ class AISC_Database_Section_Creator:
             else:
                 unsupported_types.append(section_type)
         if unsupported_types:
-            print(f'Skipping unsupported section types: {set(unsupported_types)}')  # noqa: T201
+            print(f'Skipping unsupported section types: {set(unsupported_types)}')
 
         self.section_database = SectionDatabase(sections=valid_sections)
 

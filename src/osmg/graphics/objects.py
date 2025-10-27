@@ -145,8 +145,8 @@ def main() -> None:
         base_width=0.05,
     )
 
-    x, y, z = zip(*vertices)
-    i, j, k = zip(*faces)
+    x, y, z = zip(*vertices, strict=False)
+    i, j, k = zip(*faces, strict=False)
 
     # Create a 3D mesh
     mesh = go.Mesh3d(x=x, y=y, z=z, i=i, j=j, k=k, opacity=0.5, color='lightblue')

@@ -83,7 +83,7 @@ for paths in files.values():
                     continue
                 match = re.search(pattern, line)
                 if match:
-                    print('~~~')  # noqa: T201
-                    print(line)  # noqa: T201
-                    print('~~~')  # noqa: T201
-                    print()  # noqa: T201
+                    print('~~~')
+                    print(line)
+                    print('~~~')
+                    print()

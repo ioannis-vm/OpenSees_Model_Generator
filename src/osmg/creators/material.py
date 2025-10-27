@@ -24,7 +24,7 @@ class MaterialCreator:
 
     model: Model
 
-    def generate(self) -> UniaxialMaterial:  # noqa: D102, PLR6301
+    def generate(self) -> UniaxialMaterial:  # noqa: D102
         msg = 'Subclasses must implement this method.'
         raise NotImplementedError(msg)
 
